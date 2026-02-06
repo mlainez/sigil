@@ -17,6 +17,7 @@ statement ::= (set <var> <type> <expr>)
             | (call <function> <arg>*)
             | (label <name>)
             | (goto <label>)
+            | (ifnot <bool_var> <label>)
             | (ret <expr>)
             | (ret <value>)
 
@@ -59,19 +60,21 @@ Variables must be explicitly typed:
 
 ## Control Flow
 
-AISL uses **labels and goto** for control flow:
+AISL uses **labels and goto** for control flow. Use `ifnot` to conditionally jump.
 
 ```scheme
 (fn countdown ((n i32)) -> i32
   (label loop)
   (set done bool (call op_le_i32 n 0))
-  (if done end_label)
+  (ifnot done continue)
+  (ret 0)
+  (label continue)
   (call print_i32 n)
   (set n i32 (call op_sub_i32 n 1))
-  (goto loop)
-  (label end_label)
-  (ret 0))
+  (goto loop))
 ```
+
+**Statement**: `(ifnot <bool_var> <label>)` - Jump to label if variable is false
 
 ### Conditional Branching
 
@@ -300,10 +303,14 @@ AISL provides 180+ built-in functions. All functions use explicit `call` syntax.
 (mod sinatra
   (fn handle_connection ((client_sock string)) -> i32
     (set request string (call tcp_receive client_sock 4096))
-    (set has_json bool (call string_contains request "/hello.json"))
+    (set has_get_hello_json bool (call string_contains request "GET /hello.json "))
+    (set has_get_hello bool (call string_contains request "GET /hello "))
     (set json_resp string "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: 30\r\n\r\n{\"message\": \"Hello from AISL\"}")
     (set html_resp string "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nContent-Length: 41\r\n\r\n<html><body>Hello from AISL</body></html>")
-    (set response string (call if_string has_json json_resp html_resp))
+    (set notfound_resp string "HTTP/1.1 404 Not Found\r\nContent-Type: text/plain\r\nContent-Length: 9\r\n\r\nNot Found")
+    (set response string notfound_resp)
+    (set response string (call if_string has_get_hello html_resp response))
+    (set response string (call if_string has_get_hello_json json_resp response))
     (call tcp_send client_sock response)
     (call tcp_close client_sock)
     (ret 0))
@@ -324,6 +331,13 @@ AISL provides 180+ built-in functions. All functions use explicit `call` syntax.
     (call start_server 8080)
     (ret 0)))
 ```
+
+This server:
+- Listens on port 8080
+- Routes `GET /hello` to HTML response (200 OK)
+- Routes `GET /hello.json` to JSON response (200 OK)
+- Returns 404 Not Found for all other paths
+- Uses recursive accept loop to handle multiple connections
 
 ## Key Design Principles
 
