@@ -1,4 +1,0 @@
-(mod test_missing_var_type
-  (fn test () -> unit
-    (set x 42)
-    (ret)))

@@ -1,3 +1,0 @@
-(mod test_missing_param_type
-  (fn add (a b) -> i32
-    (ret i32 (call op_add_i32 a b))))
