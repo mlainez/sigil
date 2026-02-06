@@ -1,0 +1,31 @@
+(mod test_desugar_while
+  (fn count_to_five () -> i32
+    (set n i32 0)
+    (while (call lt n 5)
+      (set n i32 (call add n 1)))
+    (ret n))
+  
+  (test-spec count_to_five
+    (case "while loop desugars to label/goto/ifnot"
+      (input)
+      (expect 5)))
+  
+  (fn count_to_target ((target i32)) -> i32
+    (set n i32 0)
+    (while (call lt n target)
+      (set n i32 (call add n 1)))
+    (ret n))
+  
+  (test-spec count_to_target
+    (case "count to 10"
+      (input 10)
+      (expect 10))
+    (case "count to 0 (no iterations)"
+      (input 0)
+      (expect 0))
+    (case "count to 1"
+      (input 1)
+      (expect 1)))
+  
+  (meta-note "Tests Core/Agent split: while loops desugar to label/goto/ifnot during compilation
+              Verifies that desugared control flow executes correctly"))

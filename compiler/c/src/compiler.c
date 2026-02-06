@@ -3,6 +3,7 @@
 #include "parser.h"
 #include "lexer.h"
 #include "ast_export.h"
+#include "desugar.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -24,8 +25,15 @@ typedef struct FunctionInfo {
 
 typedef struct PendingJump {
     uint32_t instruction_offset;
+    char* target_label;  // Name of the label this jump targets
     struct PendingJump* next;
 } PendingJump;
+
+typedef struct LabelInfo {
+    char* name;
+    uint32_t position;  // Instruction offset
+    struct LabelInfo* next;
+} LabelInfo;
 
 typedef struct LoopContext {
     uint32_t start_label;  // Label for continue (loop start)
@@ -42,6 +50,8 @@ typedef struct {
     uint32_t max_local_count;
     FunctionInfo* functions;
     LoopContext* loop_stack;  // Stack of enclosing loops
+    LabelInfo* labels;  // Map of label names to positions
+    PendingJump* pending_jumps;  // Jumps that need patching
 } Compiler;
 
 void compile_expr(Compiler* comp, Expr* expr);
@@ -54,6 +64,8 @@ void compiler_init(Compiler* comp) {
     comp->max_local_count = 0;
     comp->functions = NULL;
     comp->loop_stack = NULL;  // Initialize loop stack
+    comp->labels = NULL;  // Initialize label map
+    comp->pending_jumps = NULL;  // Initialize pending jumps
 }
 
 static void compiler_add_function(Compiler* comp, const char* name, uint32_t index, uint32_t param_count) {
@@ -328,6 +340,111 @@ void compile_apply(Compiler* comp, Expr* expr) {
         
         // Replace name with typed version and continue with normal compilation
         name = typed_name;
+    }
+
+    // AISL-Core: label, goto, ifnot (desugared from Agent constructs)
+    // (label name) - Create a jump target
+    if (strcmp(name, "label") == 0) {
+        // Get label name from argument
+        if (!expr->data.apply.args || expr->data.apply.args->next) {
+            fprintf(stderr, "label expects exactly 1 argument\n");
+            exit(1);
+        }
+        
+        // Extract label name (it's a variable reference)
+        Expr* label_arg = expr->data.apply.args->expr;
+        if (label_arg->kind != EXPR_VAR) {
+            fprintf(stderr, "label argument must be a name\n");
+            exit(1);
+        }
+        
+        char* label_name = label_arg->data.var.name;
+        uint32_t position = comp->program->instruction_count;
+        
+        // Add to label map
+        LabelInfo* info = malloc(sizeof(LabelInfo));
+        info->name = strdup(label_name);
+        info->position = position;
+        info->next = comp->labels;
+        comp->labels = info;
+        
+        // Labels don't emit bytecode - they just mark positions
+        // But we need to push unit for expression evaluation
+        Instruction unit = {.opcode = OP_PUSH_UNIT};
+        bytecode_emit(comp->program, unit);
+        return;
+    }
+    
+    // (goto target) - Unconditional jump
+    if (strcmp(name, "goto") == 0) {
+        // Get target label name
+        if (!expr->data.apply.args || expr->data.apply.args->next) {
+            fprintf(stderr, "goto expects exactly 1 argument (label name)\n");
+            exit(1);
+        }
+        
+        Expr* target_arg = expr->data.apply.args->expr;
+        if (target_arg->kind != EXPR_VAR) {
+            fprintf(stderr, "goto target must be a label name\n");
+            exit(1);
+        }
+        
+        char* target_name = target_arg->data.var.name;
+        
+        // Emit jump with placeholder offset
+        Instruction jump = {.opcode = OP_JUMP, .operand.jump.target = 0xFFFFFFFF};
+        uint32_t offset = bytecode_emit(comp->program, jump);
+        
+        // Add to pending jumps
+        PendingJump* pending = malloc(sizeof(PendingJump));
+        pending->instruction_offset = offset;
+        pending->target_label = strdup(target_name);
+        pending->next = comp->pending_jumps;
+        comp->pending_jumps = pending;
+        
+        // Push unit for expression evaluation
+        Instruction unit = {.opcode = OP_PUSH_UNIT};
+        bytecode_emit(comp->program, unit);
+        
+        return;
+    }
+    
+    // (ifnot cond target) - Conditional jump
+    if (strcmp(name, "ifnot") == 0) {
+        if (!expr->data.apply.args || !expr->data.apply.args->next || expr->data.apply.args->next->next) {
+            fprintf(stderr, "ifnot expects exactly 2 arguments (condition, label)\n");
+            exit(1);
+        }
+        
+        // Compile condition
+        Expr* cond = expr->data.apply.args->expr;
+        compile_expr(comp, cond);
+        
+        // Get target label
+        Expr* target_arg = expr->data.apply.args->next->expr;
+        if (target_arg->kind != EXPR_VAR) {
+            fprintf(stderr, "ifnot target must be a label name\n");
+            exit(1);
+        }
+        
+        char* target_name = target_arg->data.var.name;
+        
+        // Emit conditional jump (jump if false/zero)
+        Instruction jfalse = {.opcode = OP_JUMP_IF_FALSE, .operand.jump.target = 0xFFFFFFFF};
+        uint32_t offset = bytecode_emit(comp->program, jfalse);
+        
+        // Add to pending jumps
+        PendingJump* pending = malloc(sizeof(PendingJump));
+        pending->instruction_offset = offset;
+        pending->target_label = strdup(target_name);
+        pending->next = comp->pending_jumps;
+        comp->pending_jumps = pending;
+        
+        // Push unit for expression evaluation
+        Instruction unit = {.opcode = OP_PUSH_UNIT};
+        bytecode_emit(comp->program, unit);
+        
+        return;
     }
 
     // V4.0 Variable declarations: (set varname value) becomes set_varname(value)
@@ -2466,6 +2583,44 @@ void compile_function(Compiler* comp, Definition* def) {
 
     compile_expr(comp, def->data.func.body);
 
+    // Patch all pending jumps with actual label positions
+    PendingJump* jump = comp->pending_jumps;
+    while (jump) {
+        // Find target label
+        LabelInfo* label = comp->labels;
+        bool found = false;
+        while (label) {
+            if (strcmp(label->name, jump->target_label) == 0) {
+                // Patch the jump instruction
+                comp->program->instructions[jump->instruction_offset].operand.jump.target = label->position;
+                found = true;
+                break;
+            }
+            label = label->next;
+        }
+        
+        if (!found) {
+            fprintf(stderr, "Error: Undefined label '%s' in function '%s'\n", jump->target_label, def->name);
+            exit(1);
+        }
+        
+        PendingJump* next = jump->next;
+        free(jump->target_label);
+        free(jump);
+        jump = next;
+    }
+    
+    // Clear labels for next function
+    LabelInfo* label = comp->labels;
+    while (label) {
+        LabelInfo* next = label->next;
+        free(label->name);
+        free(label);
+        label = next;
+    }
+    comp->labels = NULL;
+    comp->pending_jumps = NULL;
+
     Instruction ret = {.opcode = OP_RETURN};
     bytecode_emit(comp->program, ret);
 
@@ -2567,6 +2722,9 @@ int main(int argc, char** argv) {
         free(source);
         return 1;
     }
+    
+    // Desugar Agent constructs (while, loop, break, continue) to Core (label, goto, ifnot, set, call, ret)
+    module = desugar_module(module);
     
     // Export AST if requested
     if (export_ast) {

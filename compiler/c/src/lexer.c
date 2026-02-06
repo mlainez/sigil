@@ -185,11 +185,13 @@ static Token read_identifier(Lexer* lexer) {
     else if (strcmp(str, "fn") == 0) kind = TOK_FN;
     else if (strcmp(str, "call") == 0) kind = TOK_CALL;
     else if (strcmp(str, "set") == 0) kind = TOK_SET;
-    else if (strcmp(str, "goto") == 0) kind = TOK_GOTO;
-    else if (strcmp(str, "label") == 0) kind = TOK_LABEL;
+    // Core IR constructs are now handled as regular function calls, not keywords
+    // else if (strcmp(str, "goto") == 0) kind = TOK_GOTO;
+    // else if (strcmp(str, "label") == 0) kind = TOK_LABEL;
+    // else if (strcmp(str, "ifnot") == 0) kind = TOK_IF;
     else if (strcmp(str, "ret") == 0) kind = TOK_RET;
     else if (strcmp(str, "op") == 0) kind = TOK_OP;
-    else if (strcmp(str, "ifnot") == 0) kind = TOK_IF;
+    // else if (strcmp(str, "ifnot") == 0) kind = TOK_IF;  // Treat as identifier now
     else if (strcmp(str, "print") == 0) kind = TOK_IDENTIFIER;
     else if (strcmp(str, "print_int") == 0) kind = TOK_IDENTIFIER;
     else if (strcmp(str, "read_file") == 0) kind = TOK_IDENTIFIER;
