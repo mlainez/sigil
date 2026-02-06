@@ -1,0 +1,4 @@
+(mod security_test2
+  (fn test () -> unit
+    (set password = "my_secret_key")
+    (ret)))

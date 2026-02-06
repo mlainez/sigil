@@ -1,0 +1,35 @@
+(mod test_extract2
+  (fn extract_path ((request string)) -> string
+    (set lines array (call string_split request "\n"))
+    (set line_count i32 (call array_length lines))
+    (call print "Line count:")
+    (set lc_str string (call string_from_i32 line_count))
+    (call print lc_str)
+    (if (call op_gt_i32 line_count 0)
+      (then
+        (set first_line string (call array_get lines 0))
+        (call print "First line OK")
+        (set parts array (call string_split first_line " "))
+        (set part_count i32 (call array_length parts))
+        (call print "Part count:")
+        (set pc_str string (call string_from_i32 part_count))
+        (call print pc_str)
+        (if (call op_gt_i32 part_count 1)
+          (then
+            (call print "Getting part 1")
+            (ret (call array_get parts 1)))
+          (else
+            (call print "Not enough parts")
+            (ret "/"))))
+      (else
+        (call print "No lines")
+        (ret "/"))))
+
+  (fn main () -> i32
+    (set test_request string "GET /hello HTTP/1.1\nHost: localhost\n\n")
+    (call print "Calling extract_path")
+    (set path string (call extract_path test_request))
+    (call print "Got path:")
+    (call print path)
+    (call print "Done")
+    (ret 0)))

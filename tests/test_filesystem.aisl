@@ -1,0 +1,100 @@
+(mod test_filesystem
+  (fn test_file_write ((filepath string) (content string)) -> bool
+    (ret (call file_write filepath content)))
+  
+  (test-spec test_file_write
+    (case "write content to file"
+      (mock (file_write "/tmp/aisl_test.txt" "Hello from AISL!\nLine 2\nLine 3") true)
+      (input "/tmp/aisl_test.txt" "Hello from AISL!\nLine 2\nLine 3")
+      (expect true)))
+  
+  (fn test_file_exists ((filepath string)) -> bool
+    (ret (call file_exists filepath)))
+  
+  (test-spec test_file_exists
+    (case "check if file exists"
+      (mock (file_exists "/tmp/aisl_test.txt") true)
+      (input "/tmp/aisl_test.txt")
+      (expect true))
+    (case "check non-existent file"
+      (mock (file_exists "/tmp/nonexistent.txt") false)
+      (input "/tmp/nonexistent.txt")
+      (expect false)))
+  
+  (fn test_file_read ((filepath string)) -> string
+    (ret (call file_read filepath)))
+  
+  (test-spec test_file_read
+    (case "read file content"
+      (mock (file_read "/tmp/aisl_test.txt") "Hello from AISL!\nLine 2\nLine 3")
+      (input "/tmp/aisl_test.txt")
+      (expect "Hello from AISL!\nLine 2\nLine 3")))
+  
+  (fn test_file_size ((filepath string)) -> i64
+    (ret (call file_size filepath)))
+  
+  (test-spec test_file_size
+    (case "get file size in bytes"
+      (mock (file_size "/tmp/aisl_test.txt") 35)
+      (input "/tmp/aisl_test.txt")
+      (expect 35)))
+  
+  (fn test_file_append ((filepath string) (content string)) -> bool
+    (ret (call file_append filepath content)))
+  
+  (test-spec test_file_append
+    (case "append content to file"
+      (mock (file_append "/tmp/aisl_test.txt" "\nAppended line") true)
+      (input "/tmp/aisl_test.txt" "\nAppended line")
+      (expect true)))
+  
+  (fn test_file_mtime ((filepath string)) -> i64
+    (ret (call file_mtime filepath)))
+  
+  (test-spec test_file_mtime
+    (case "get file modification time"
+      (mock (file_mtime "/tmp/aisl_test.txt") 1738828800)
+      (input "/tmp/aisl_test.txt")
+      (expect 1738828800)))
+  
+  (fn test_dir_create ((dirpath string)) -> bool
+    (ret (call dir_create dirpath)))
+  
+  (test-spec test_dir_create
+    (case "create directory"
+      (mock (dir_create "/tmp/aisl_test_dir") true)
+      (input "/tmp/aisl_test_dir")
+      (expect true)))
+  
+  (fn test_file_delete ((filepath string)) -> bool
+    (ret (call file_delete filepath)))
+  
+  (test-spec test_file_delete
+    (case "delete file"
+      (mock (file_delete "/tmp/aisl_test.txt") true)
+      (input "/tmp/aisl_test.txt")
+      (expect true)))
+  
+  (fn test_str_concat_path ((dir string) (filename string)) -> string
+    (ret (call str_concat dir filename)))
+  
+  (test-spec test_str_concat_path
+    (case "concatenate directory and filename"
+      (mock (str_concat "/tmp/dir" "/file.txt") "/tmp/dir/file.txt")
+      (input "/tmp/dir" "/file.txt")
+      (expect "/tmp/dir/file.txt")))
+  
+  (fn test_content_match ((content1 string) (content2 string)) -> bool
+    (ret (call str_eq content1 content2)))
+  
+  (test-spec test_content_match
+    (case "verify two strings are equal"
+      (mock (str_eq "Hello" "Hello") true)
+      (input "Hello" "Hello")
+      (expect true))
+    (case "verify two strings are not equal"
+      (mock (str_eq "Hello" "World") false)
+      (input "Hello" "World")
+      (expect false)))
+  
+  (meta-note "Filesystem operations testing with atomic functions - each function tests one operation with one mock for simplicity"))

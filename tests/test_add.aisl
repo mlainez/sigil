@@ -1,0 +1,19 @@
+(mod math
+  (fn add ((a i32) (b i32)) -> i32
+    (ret (call op_add_i32 a b)))
+  
+  (test-spec add
+    (case "basic addition"
+      (input 10 32)
+      (expect 42))
+    (case "zero addition"
+      (input 0 5)
+      (expect 5))
+    (case "negative addition"
+      (input -10 5)
+      (expect -5))
+    (case "both negative"
+      (input -10 -5)
+      (expect -15)))
+  
+  (meta-note "Tests basic i32 addition operation using op_add_i32 builtin"))

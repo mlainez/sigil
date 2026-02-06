@@ -1,0 +1,30 @@
+(mod math
+  (fn multiply_f64 ((a f64) (b f64)) -> f64
+    (ret (call op_mul_f64 a b)))
+  
+  (test-spec multiply_f64
+    (case "multiply pi by 2"
+      (input 3.14 2.0)
+      (expect 6.28))
+    (case "multiply by zero"
+      (input 5.5 0.0)
+      (expect 0.0))
+    (case "multiply by one"
+      (input 7.5 1.0)
+      (expect 7.5)))
+  
+  (fn add_f64 ((a f64) (b f64)) -> f64
+    (ret (call op_add_f64 a b)))
+  
+  (test-spec add_f64
+    (case "add decimals"
+      (input 1.5 2.5)
+      (expect 4.0))
+    (case "add negative"
+      (input -1.5 3.0)
+      (expect 1.5))
+    (case "add zero"
+      (input 2.5 0.0)
+      (expect 2.5)))
+  
+  (meta-note "Tests f64 floating-point arithmetic operations"))

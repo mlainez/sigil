@@ -1,0 +1,24 @@
+(mod test_str_var
+  (fn return_hello () -> string
+    (ret "hello"))
+  
+  (test-spec return_hello
+    (case "returns hello"
+      (input)
+      (expect "hello")))
+  
+  (fn identity_string ((s string)) -> string
+    (ret s))
+  
+  (test-spec identity_string
+    (case "identity hello"
+      (input "hello")
+      (expect "hello"))
+    (case "identity empty"
+      (input "")
+      (expect ""))
+    (case "identity world"
+      (input "world")
+      (expect "world")))
+  
+  (meta-note "Tests string variable assignment and identity function"))

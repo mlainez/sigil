@@ -1,0 +1,22 @@
+(mod test
+  (fn count_up_to ((limit i32)) -> i32
+    (set counter i32 0)
+    (set counter i32 (call if_i32 (call op_lt_i32 counter limit) (call op_add_i32 counter 1) counter))
+    (set counter i32 (call if_i32 (call op_lt_i32 counter limit) (call op_add_i32 counter 1) counter))
+    (set counter i32 (call if_i32 (call op_lt_i32 counter limit) (call op_add_i32 counter 1) counter))
+    (set counter i32 (call if_i32 (call op_lt_i32 counter limit) (call op_add_i32 counter 1) counter))
+    (set counter i32 (call if_i32 (call op_lt_i32 counter limit) (call op_add_i32 counter 1) counter))
+    (ret counter))
+  
+  (test-spec count_up_to
+    (case "count to 5"
+      (input 5)
+      (expect 5))
+    (case "count to 3"
+      (input 3)
+      (expect 3))
+    (case "count to 0"
+      (input 0)
+      (expect 0)))
+  
+  (meta-note "Tests iterative counting using conditional increment pattern"))

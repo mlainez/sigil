@@ -1,0 +1,279 @@
+#!/usr/bin/env python3
+"""
+AISL to Python Translator
+
+Translates AISL intermediate representation to Python code.
+Usage: aisl-to-python input.aisl output.py
+"""
+
+import sys
+import re
+from pathlib import Path
+
+# Type mapping: AISL -> Python
+TYPE_MAP = {
+    'i8': 'int', 'i16': 'int', 'i32': 'int', 'i64': 'int',
+    'u8': 'int', 'u16': 'int', 'u32': 'int', 'u64': 'int',
+    'f32': 'float', 'f64': 'float',
+    'string': 'str',
+    'bool': 'bool',
+    'unit': 'None',
+    'array': 'list',
+    'map': 'dict',
+    'json': 'dict',
+}
+
+# Operation mapping: AISL builtins -> Python
+OP_MAP = {
+    'op_add_i32': '+',
+    'op_sub_i32': '-',
+    'op_mul_i32': '*',
+    'op_div_i32': '//',
+    'op_mod_i32': '%',
+    
+    'op_add_i64': '+',
+    'op_sub_i64': '-',
+    'op_mul_i64': '*',
+    'op_div_i64': '//',
+    
+    'op_add_f32': '+',
+    'op_sub_f32': '-',
+    'op_mul_f32': '*',
+    'op_div_f32': '/',
+    
+    'op_add_f64': '+',
+    'op_sub_f64': '-',
+    'op_mul_f64': '*',
+    'op_div_f64': '/',
+    
+    'op_eq_i32': '==',
+    'op_ne_i32': '!=',
+    'op_lt_i32': '<',
+    'op_gt_i32': '>',
+    'op_le_i32': '<=',
+    'op_ge_i32': '>=',
+    
+    'str_concat': '+',
+    'str_length': 'len',
+    
+    'io_print_i32': 'print',
+    'io_print_i64': 'print',
+    'io_print_f32': 'print',
+    'io_print_f64': 'print',
+    'io_print_str': 'print',
+    'io_print_bool': 'print',
+    
+    'array_new': 'list',
+    'array_push': 'list.append',
+    'array_get': 'list.__getitem__',
+    'array_len': 'len',
+    
+    'map_new': 'dict',
+    'map_set': 'dict.__setitem__',
+    'map_get': 'dict.get',
+}
+
+class PythonTranslator:
+    def __init__(self):
+        self.indent_level = 0
+        self.output = []
+        
+    def indent(self):
+        return '    ' * self.indent_level
+        
+    def emit(self, code):
+        self.output.append(self.indent() + code)
+        
+    def translate_type(self, aisl_type):
+        """Convert AISL type to Python type annotation"""
+        return TYPE_MAP.get(aisl_type, 'Any')
+        
+    def translate_call(self, func_name, args):
+        """Translate function call"""
+        # Check if it's a builtin operation
+        if func_name in OP_MAP:
+            op = OP_MAP[func_name]
+            
+            # Binary operators
+            if op in ['+', '-', '*', '/', '//', '%', '==', '!=', '<', '>', '<=', '>=']:
+                if len(args) == 2:
+                    return f"({args[0]} {op} {args[1]})"
+                    
+            # Unary/special functions
+            if op == 'len' and len(args) == 1:
+                return f"len({args[0]})"
+            if op == 'print':
+                return f"print({', '.join(args)})"
+            if op == 'list' and len(args) == 0:
+                return "[]"
+            if op == 'dict' and len(args) == 0:
+                return "{}"
+                
+        # Regular function call
+        return f"{func_name}({', '.join(args)})"
+        
+    def parse_sexpr(self, code):
+        """Very simple S-expression parser"""
+        # This is a simplified version - in production, use a proper parser
+        tokens = re.findall(r'\(|\)|[^\s()]+', code)
+        
+        def parse_tokens(i):
+            if i >= len(tokens):
+                return None, i
+                
+            if tokens[i] == '(':
+                result = []
+                i += 1
+                while i < len(tokens) and tokens[i] != ')':
+                    item, i = parse_tokens(i)
+                    if item is not None:
+                        result.append(item)
+                return result, i + 1
+            else:
+                return tokens[i], i + 1
+                
+        ast, _ = parse_tokens(0)
+        return ast
+        
+    def translate_expr(self, expr):
+        """Translate an expression"""
+        if isinstance(expr, str):
+            # Literal or variable
+            if expr.startswith('"') and expr.endswith('"'):
+                return expr  # String literal
+            if expr.isdigit() or (expr[0] == '-' and expr[1:].isdigit()):
+                return expr  # Number literal
+            if expr in ['true', 'false']:
+                return expr.capitalize()  # Boolean
+            return expr  # Variable name
+            
+        if isinstance(expr, list) and len(expr) > 0:
+            op = expr[0]
+            
+            if op == 'call':
+                func = expr[1] if len(expr) > 1 else 'unknown'
+                args = [self.translate_expr(e) for e in expr[2:]]
+                if isinstance(func, list):
+                    func = self.translate_expr(func)
+                return self.translate_call(func, args)
+                
+            if op == 'set':
+                var_name = expr[1]
+                var_type = expr[2]
+                value = self.translate_expr(expr[3]) if len(expr) > 3 else 'None'
+                self.emit(f"{var_name} = {value}")
+                return None
+                
+            if op == 'ret':
+                if len(expr) > 1:
+                    value = self.translate_expr(expr[1])
+                    self.emit(f"return {value}")
+                else:
+                    self.emit("return")
+                return None
+                
+            if op == 'if':
+                cond = self.translate_expr(expr[1])
+                self.emit(f"if {cond}:")
+                self.indent_level += 1
+                then_expr = expr[2]
+                self.translate_expr(then_expr)
+                self.indent_level -= 1
+                if len(expr) > 3:
+                    self.emit("else:")
+                    self.indent_level += 1
+                    else_expr = expr[3]
+                    self.translate_expr(else_expr)
+                    self.indent_level -= 1
+                return None
+                
+        return "None"
+        
+    def translate_function(self, func_def):
+        """Translate a function definition"""
+        # (fn name ((param1 type1) (param2 type2)) -> return_type body)
+        func_name = func_def[1]
+        params = func_def[2] if len(func_def) > 2 else []
+        return_type = 'None'
+        body_start = 3
+        
+        # Check for return type (-> type)
+        if len(func_def) > body_start and func_def[body_start] == '->':
+            return_type = func_def[body_start + 1]
+            body_start = body_start + 2
+            
+        # Build parameter list
+        py_params = []
+        if isinstance(params, list):
+            for param in params:
+                if isinstance(param, list) and len(param) >= 2:
+                    param_name = param[0]
+                    param_type = self.translate_type(param[1])
+                    py_params.append(f"{param_name}: {param_type}")
+                    
+        # Generate function signature
+        py_return = self.translate_type(return_type)
+        params_str = ', '.join(py_params)
+        self.emit(f"def {func_name}({params_str}) -> {py_return}:")
+        self.indent_level += 1
+        
+        # Translate body
+        for i in range(body_start, len(func_def)):
+            self.translate_expr(func_def[i])
+            
+        self.indent_level -= 1
+        self.emit("")  # Blank line after function
+        
+    def translate_module(self, module):
+        """Translate a module"""
+        # Add header
+        self.emit("# Generated by AISL to Python translator")
+        self.emit("from typing import Any, List, Dict")
+        self.emit("")
+        
+        # (mod name definitions...)
+        for i in range(2, len(module)):
+            item = module[i]
+            if isinstance(item, list) and len(item) > 0:
+                if item[0] == 'fn':
+                    self.translate_function(item)
+                    
+        return '\n'.join(self.output)
+
+def main():
+    if len(sys.argv) != 3:
+        print("Usage: aisl-to-python input.aisl output.py")
+        sys.exit(1)
+        
+    input_file = sys.argv[1]
+    output_file = sys.argv[2]
+    
+    # Read AISL code
+    try:
+        with open(input_file, 'r') as f:
+            aisl_code = f.read()
+    except Exception as e:
+        print(f"Error reading {input_file}: {e}")
+        sys.exit(1)
+        
+    # Parse and translate
+    translator = PythonTranslator()
+    ast = translator.parse_sexpr(aisl_code)
+    
+    if ast and isinstance(ast, list) and ast[0] == 'mod':
+        python_code = translator.translate_module(ast)
+        
+        # Write Python code
+        try:
+            with open(output_file, 'w') as f:
+                f.write(python_code)
+            print(f"Translated {input_file} -> {output_file}")
+        except Exception as e:
+            print(f"Error writing {output_file}: {e}")
+            sys.exit(1)
+    else:
+        print("Error: Invalid AISL module format")
+        sys.exit(1)
+
+if __name__ == '__main__':
+    main()

@@ -1,0 +1,29 @@
+(mod test_bool
+  (fn return_true () -> bool
+    (ret 1))
+  
+  (test-spec return_true
+    (case "returns true"
+      (input)
+      (expect 1)))
+  
+  (fn return_false () -> bool
+    (ret 0))
+  
+  (test-spec return_false
+    (case "returns false"
+      (input)
+      (expect 0)))
+  
+  (fn identity_bool ((x bool)) -> bool
+    (ret x))
+  
+  (test-spec identity_bool
+    (case "identity true"
+      (input 1)
+      (expect 1))
+    (case "identity false"
+      (input 0)
+      (expect 0)))
+  
+  (meta-note "Tests boolean values and boolean type handling"))

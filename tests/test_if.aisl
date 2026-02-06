@@ -1,0 +1,22 @@
+(mod test
+  (fn max_i32 ((x i32) (y i32)) -> i32
+    (ret (call if_i32 (call op_gt_i32 x y) x y)))
+  
+  (test-spec max_i32
+    (case "first larger"
+      (input 20 10)
+      (expect 20))
+    (case "second larger"
+      (input 10 20)
+      (expect 20))
+    (case "equal values"
+      (input 15 15)
+      (expect 15))
+    (case "both large"
+      (input 100 50)
+      (expect 100))
+    (case "negative values"
+      (input -5 -10)
+      (expect -5)))
+  
+  (meta-note "Tests if_i32 conditional for finding maximum value"))

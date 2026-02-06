@@ -1,0 +1,60 @@
+(mod test_string_conversion
+  (fn i32_to_string ((x i32)) -> string
+    (ret (call string_from_i32 x)))
+  
+  (test-spec i32_to_string
+    (case "convert 42 to string"
+      (input 42)
+      (expect "42"))
+    (case "convert 0 to string"
+      (input 0)
+      (expect "0"))
+    (case "convert -100 to string"
+      (input -100)
+      (expect "-100")))
+  
+  (fn i64_to_string ((x i64)) -> string
+    (ret (call string_from_i64 x)))
+  
+  (test-spec i64_to_string
+    (case "convert large i64 to string"
+      (input 9999999999)
+      (expect "9999999999"))
+    (case "convert 0 to string"
+      (input 0)
+      (expect "0")))
+  
+  (fn f32_to_string ((x f32)) -> string
+    (ret (call string_from_f32 x)))
+  
+  (test-spec f32_to_string
+    (case "convert 3.14 to string"
+      (input 3.14)
+      (expect "3.14"))
+    (case "convert 0.0 to string"
+      (input 0.0)
+      (expect "0.0")))
+  
+  (fn f64_to_string ((x f64)) -> string
+    (ret (call string_from_f64 x)))
+  
+  (test-spec f64_to_string
+    (case "convert 2.71828 to string"
+      (input 2.71828)
+      (expect "2.71828"))
+    (case "convert 0.0 to string"
+      (input 0.0)
+      (expect "0.0")))
+  
+  (fn concat_i32_string ((prefix string) (num i32)) -> string
+    (ret (call string_concat prefix (call string_from_i32 num))))
+  
+  (test-spec concat_i32_string
+    (case "concat with 100"
+      (input "I have " 100)
+      (expect "I have 100"))
+    (case "concat with 50"
+      (input " apples and " 50)
+      (expect " apples and 50")))
+  
+  (meta-note "Tests string conversion from numeric types to strings"))

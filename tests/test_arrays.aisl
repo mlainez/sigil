@@ -1,0 +1,24 @@
+(mod test
+  (fn array_ops_length () -> i32
+    (ret (call array_length (call array_push (call array_push (call array_push (call array_new 10) 42) 100) 7))))
+  
+  (test-spec array_ops_length
+    (case "three elements"
+      (input)
+      (expect 3)))
+  
+  (fn array_get_after_set ((idx i32)) -> i32
+    (ret (call array_get (call array_set (call array_push (call array_push (call array_push (call array_new 10) 42) 100) 7) 1 999) idx)))
+  
+  (test-spec array_get_after_set
+    (case "get index 0 unchanged"
+      (input 0)
+      (expect 42))
+    (case "get index 1 changed to 999"
+      (input 1)
+      (expect 999))
+    (case "get index 2 unchanged"
+      (input 2)
+      (expect 7)))
+  
+  (meta-note "Tests array operations: new, push, get, set, length"))

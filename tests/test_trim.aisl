@@ -1,0 +1,19 @@
+(mod test_trim
+  (fn trim ((text string)) -> string
+    (ret (call string_trim text)))
+  
+  (test-spec trim
+    (case "trim spaces both sides"
+      (input "  hello  ")
+      (expect "hello"))
+    (case "trim leading only"
+      (input "  world")
+      (expect "world"))
+    (case "trim trailing only"
+      (input "test  ")
+      (expect "test"))
+    (case "no trim needed"
+      (input "clean")
+      (expect "clean")))
+  
+  (meta-note "Tests string_trim function"))

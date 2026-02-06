@@ -1,0 +1,19 @@
+(mod test_string_simple
+  (fn i32_to_str ((x i32)) -> string
+    (ret (call string_from_i32 x)))
+  
+  (test-spec i32_to_str
+    (case "convert 42"
+      (input 42)
+      (expect "42"))
+    (case "convert 100"
+      (input 100)
+      (expect "100"))
+    (case "convert 0"
+      (input 0)
+      (expect "0"))
+    (case "convert negative"
+      (input -10)
+      (expect "-10")))
+  
+  (meta-note "Tests string_from_i32 conversion"))

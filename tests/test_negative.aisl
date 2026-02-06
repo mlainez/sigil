@@ -1,0 +1,24 @@
+(mod test_negative
+  (fn test_neg () -> i32
+    (ret -5))
+  
+  (test-spec test_neg
+    (case "returns negative 5"
+      (input)
+      (expect -5)))
+  
+  (fn negate ((x i32)) -> i32
+    (ret (call op_sub_i32 0 x)))
+  
+  (test-spec negate
+    (case "negate 10"
+      (input 10)
+      (expect -10))
+    (case "negate -5"
+      (input -5)
+      (expect 5))
+    (case "negate 0"
+      (input 0)
+      (expect 0)))
+  
+  (meta-note "Tests negative number literals and negation operation"))

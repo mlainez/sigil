@@ -1,0 +1,72 @@
+(mod test_math
+  (fn sqrt_wrapper ((x f64)) -> f64
+    (ret (call math_sqrt x)))
+  
+  (test-spec sqrt_wrapper
+    (case "perfect square"
+      (input 16.0)
+      (expect 4.0))
+    (case "square root of 9"
+      (input 9.0)
+      (expect 3.0))
+    (case "square root of 1"
+      (input 1.0)
+      (expect 1.0)))
+  
+  (fn pow_wrapper ((base f64) (exp f64)) -> f64
+    (ret (call math_pow base exp)))
+  
+  (test-spec pow_wrapper
+    (case "power of 10"
+      (input 2.0 10.0)
+      (expect 1024.0))
+    (case "power of 2"
+      (input 3.0 2.0)
+      (expect 9.0))
+    (case "power of 0"
+      (input 5.0 0.0)
+      (expect 1.0)))
+  
+  (fn abs_i32 ((x i32)) -> i32
+    (ret (call math_abs_i32 x)))
+  
+  (test-spec abs_i32
+    (case "absolute of negative"
+      (input -42)
+      (expect 42))
+    (case "absolute of positive"
+      (input 42)
+      (expect 42))
+    (case "absolute of zero"
+      (input 0)
+      (expect 0)))
+  
+  (fn min_i32 ((a i32) (b i32)) -> i32
+    (ret (call math_min_i32 a b)))
+  
+  (test-spec min_i32
+    (case "first smaller"
+      (input 10 20)
+      (expect 10))
+    (case "second smaller"
+      (input 20 10)
+      (expect 10))
+    (case "equal values"
+      (input 15 15)
+      (expect 15)))
+  
+  (fn max_i32 ((a i32) (b i32)) -> i32
+    (ret (call math_max_i32 a b)))
+  
+  (test-spec max_i32
+    (case "first larger"
+      (input 20 10)
+      (expect 20))
+    (case "second larger"
+      (input 10 20)
+      (expect 20))
+    (case "equal values"
+      (input 15 15)
+      (expect 15)))
+  
+  (meta-note "Tests mathematical functions: sqrt, pow, abs, min, max for i32 and f64 types"))

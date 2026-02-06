@@ -1,0 +1,19 @@
+(mod simple_json_server
+  (fn handle_connection ((client_sock string)) -> i32
+    (set response string "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: 33\r\n\r\n{\"message\": \"Hello from AISL\"}")
+    (set sent i32 (call tcp_send client_sock response))
+    (call tcp_close client_sock)
+    (ret 0))
+
+  (fn start_server ((port i32)) -> i32
+    (call print "AISL JSON Server - port 8080")
+    (set server_sock string (call tcp_listen port))
+    (label accept_loop)
+    (set client_sock string (call tcp_accept server_sock))
+    (call handle_connection client_sock)
+    (goto accept_loop)
+    (ret 0))
+
+  (fn main () -> i32
+    (call start_server 8080)
+    (ret 0)))

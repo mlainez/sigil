@@ -1,0 +1,16 @@
+(mod simple_tests
+
+  (fn add ((a i32) (b i32)) -> i32
+    (ret (call op_add_i32 a b)))
+  
+  (test-spec add
+    (case "simple addition"
+      (input 2 3)
+      (expect 5))
+    
+    (case "zero addition"
+      (input 0 5)
+      (expect 5)))
+  
+  (meta-note "This is a simple test example")
+)

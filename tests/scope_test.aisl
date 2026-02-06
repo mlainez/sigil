@@ -1,0 +1,17 @@
+(mod scope_test
+  (fn test_scope () -> string
+    (set result string "initial")
+    (call print result)
+    (if (call op_gt_i32 5 3)
+      (then
+        (set result string "inside_if"))
+      (else
+        (set result string "else")))
+    (call print result)
+    (ret result))
+
+  (fn main () -> i32
+    (set final string (call test_scope))
+    (call print "Final:")
+    (call print final)
+    (ret 0)))

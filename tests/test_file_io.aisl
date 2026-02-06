@@ -1,0 +1,31 @@
+(mod test_file_io
+  (fn write_three_lines ((filepath string)) -> i32
+    (set fd i32 (call io_file_open filepath 1))
+    (call io_file_write fd "Hello from AISL!\n")
+    (call io_file_write fd "This is line 2.\n")
+    (call io_file_write fd "And line 3.\n")
+    (call io_file_close fd)
+    (ret 0))
+  
+  (test-spec write_three_lines
+    (case "write to temp file"
+      (mock (io_file_open "/tmp/test_aisl.txt" 1) 3)
+      (input "/tmp/test_aisl.txt")
+      (expect 0)))
+  
+  (fn read_after_write ((filepath string)) -> string
+    (set fd_write i32 (call io_file_open filepath 1))
+    (call io_file_write fd_write "Test content")
+    (call io_file_close fd_write)
+    (set fd_read i32 (call io_file_open filepath 0))
+    (set content string (call io_file_read fd_read))
+    (call io_file_close fd_read)
+    (ret content))
+  
+  (test-spec read_after_write
+    (case "write and read back"
+      (mock (io_file_open "/tmp/test_aisl.txt" 1) 3)
+      (input "/tmp/test_aisl.txt")
+      (expect "")))
+  
+  (meta-note "Tests file I/O operations with write and read cycles using mocks"))

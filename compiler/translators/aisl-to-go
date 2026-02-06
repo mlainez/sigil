@@ -1,0 +1,150 @@
+#!/usr/bin/env python3
+"""
+AISL to Go Translator
+Usage: aisl-to-go input.aisl output.go
+"""
+import sys, re
+
+TYPE_MAP = {
+    'i8': 'int8', 'i16': 'int16', 'i32': 'int32', 'i64': 'int64',
+    'u8': 'uint8', 'u16': 'uint16', 'u32': 'uint32', 'u64': 'uint64',
+    'f32': 'float32', 'f64': 'float64',
+    'string': 'string', 'bool': 'bool', 'unit': '',
+    'array': '[]', 'map': 'map', 'json': 'interface{}',
+}
+
+OP_MAP = {
+    'op_add_i32': '+', 'op_sub_i32': '-', 'op_mul_i32': '*', 'op_div_i32': '/',
+    'str_concat': '+',
+    'io_print_i32': 'fmt.Println', 'io_print_str': 'fmt.Println',
+}
+
+class GoTranslator:
+    def __init__(self):
+        self.indent_level, self.output = 0, []
+    
+    def indent(self):
+        return '\t' * self.indent_level
+    
+    def emit(self, code):
+        self.output.append(self.indent() + code)
+    
+    def translate_type(self, t):
+        return TYPE_MAP.get(t, 'interface{}')
+    
+    def translate_call(self, func, args):
+        if func in OP_MAP:
+            op = OP_MAP[func]
+            if op in ['+', '-', '*', '/'] and len(args) == 2:
+                return f"({args[0]} {op} {args[1]})"
+            if func.startswith('io_print'):
+                return f"fmt.Println({', '.join(args)})"
+        return f"{func}({', '.join(args)})"
+    
+    def parse_sexpr(self, code):
+        tokens = re.findall(r'\(|\)|[^\s()]+', code)
+        def parse(i):
+            if i >= len(tokens): return None, i
+            if tokens[i] == '(':
+                result, i = [], i + 1
+                while i < len(tokens) and tokens[i] != ')':
+                    item, i = parse(i)
+                    if item is not None: result.append(item)
+                return result, i + 1
+            return tokens[i], i + 1
+        ast, _ = parse(0)
+        return ast
+    
+    def translate_expr(self, expr):
+        if isinstance(expr, str):
+            return expr
+        if isinstance(expr, list) and len(expr) > 0:
+            op = expr[0]
+            if op == 'call':
+                func = expr[1] if len(expr) > 1 else 'unknown'
+                args = [self.translate_expr(e) for e in expr[2:]]
+                if isinstance(func, list): func = self.translate_expr(func)
+                result = self.translate_call(func, args)
+                # If it's an IO call, add as statement
+                if func.startswith('io_'):
+                    self.emit(result)
+                    return None
+                return result
+            if op == 'set':
+                var_name, var_type = expr[1], expr[2]
+                value = self.translate_expr(expr[3]) if len(expr) > 3 else '0'
+                go_type = self.translate_type(var_type)
+                self.emit(f"{var_name} := {go_type}({value})")
+                return None
+            if op == 'ret':
+                if len(expr) > 1:
+                    value = self.translate_expr(expr[1])
+                    self.emit(f"return {value}")
+                else:
+                    self.emit("return")
+                return None
+        return "nil"
+    
+    def translate_function(self, func_def):
+        func_name, params = func_def[1], func_def[2] if len(func_def) > 2 else []
+        return_type, body_start = '', 3
+        if len(func_def) > body_start and func_def[body_start] == '->':
+            return_type, body_start = func_def[body_start + 1], body_start + 2
+        
+        go_params = []
+        if isinstance(params, list):
+            for p in params:
+                if isinstance(p, list) and len(p) >= 2:
+                    go_params.append(f"{p[0]} {self.translate_type(p[1])}")
+        
+        go_return = self.translate_type(return_type)
+        ret_str = f" {go_return}" if go_return else ""
+        self.emit(f"func {func_name}({', '.join(go_params)}){ret_str} {{")
+        self.indent_level += 1
+        for i in range(body_start, len(func_def)):
+            self.translate_expr(func_def[i])
+        self.indent_level -= 1
+        self.emit("}\n")
+    
+    def translate_module(self, module):
+        pkg_name = module[1] if len(module) > 1 else 'main'
+        self.emit(f"package {pkg_name}\n")
+        self.emit("import \"fmt\"\n")
+        
+        for i in range(2, len(module)):
+            item = module[i]
+            if isinstance(item, list) and len(item) > 0 and item[0] == 'fn':
+                self.translate_function(item)
+        return '\n'.join(self.output)
+
+def main():
+    if len(sys.argv) != 3:
+        print("Usage: aisl-to-go input.aisl output.go")
+        sys.exit(1)
+    
+    input_file, output_file = sys.argv[1], sys.argv[2]
+    try:
+        with open(input_file, 'r') as f:
+            aisl_code = f.read()
+    except Exception as e:
+        print(f"Error reading {input_file}: {e}")
+        sys.exit(1)
+    
+    translator = GoTranslator()
+    ast = translator.parse_sexpr(aisl_code)
+    
+    if ast and isinstance(ast, list) and ast[0] == 'mod':
+        go_code = translator.translate_module(ast)
+        try:
+            with open(output_file, 'w') as f:
+                f.write(go_code)
+            print(f"Translated {input_file} -> {output_file}")
+        except Exception as e:
+            print(f"Error writing {output_file}: {e}")
+            sys.exit(1)
+    else:
+        print("Error: Invalid AISL module format")
+        sys.exit(1)
+
+if __name__ == '__main__':
+    main()

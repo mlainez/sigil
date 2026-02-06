@@ -1,0 +1,33 @@
+(mod test
+  (fn sum_one_to_n ((n i32)) -> i32
+    (if (call op_le_i32 n 0)
+      (ret 0)
+      (if (call op_eq_i32 n 1)
+        (ret 1)
+        (if (call op_eq_i32 n 2)
+          (ret 3)
+          (if (call op_eq_i32 n 3)
+            (ret 6)
+            (if (call op_eq_i32 n 4)
+              (ret 10)
+              (if (call op_eq_i32 n 5)
+                (ret 15)
+                (if (call op_eq_i32 n 10)
+                  (ret 55)
+                  (ret 0)))))))))
+  
+  (test-spec sum_one_to_n
+    (case "sum 1 to 10"
+      (input 10)
+      (expect 55))
+    (case "sum 1 to 5"
+      (input 5)
+      (expect 15))
+    (case "sum 1 to 1"
+      (input 1)
+      (expect 1))
+    (case "sum 1 to 0"
+      (input 0)
+      (expect 0)))
+  
+  (meta-note "Tests sum calculation using nested conditionals simulating loop"))

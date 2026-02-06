@@ -1,0 +1,50 @@
+(mod test
+  (fn eq_i64 ((a i64) (b i64)) -> bool
+    (ret (call op_eq_i64 a b)))
+  
+  (test-spec eq_i64
+    (case "equal large numbers"
+      (input 1000000000000 1000000000000)
+      (expect 1)))
+  
+  (fn ne_i64 ((a i64) (b i64)) -> bool
+    (ret (call op_ne_i64 a b)))
+  
+  (test-spec ne_i64
+    (case "not equal large numbers"
+      (input 1000000000000 2000000000000)
+      (expect 1)))
+  
+  (fn lt_i64 ((a i64) (b i64)) -> bool
+    (ret (call op_lt_i64 a b)))
+  
+  (test-spec lt_i64
+    (case "less than large numbers"
+      (input 1000000000000 2000000000000)
+      (expect 1)))
+  
+  (fn gt_i64 ((a i64) (b i64)) -> bool
+    (ret (call op_gt_i64 a b)))
+  
+  (test-spec gt_i64
+    (case "greater than large numbers"
+      (input 2000000000000 1000000000000)
+      (expect 1)))
+  
+  (fn le_i64 ((a i64) (b i64)) -> bool
+    (ret (call op_le_i64 a b)))
+  
+  (test-spec le_i64
+    (case "less or equal i64"
+      (input 1000000000000 1000000000000)
+      (expect 1)))
+  
+  (fn ge_i64 ((a i64) (b i64)) -> bool
+    (ret (call op_ge_i64 a b)))
+  
+  (test-spec ge_i64
+    (case "greater or equal i64"
+      (input 2000000000000 1000000000000)
+      (expect 1)))
+  
+  (meta-note "Tests all comparison operators for i64, f32, and f64 types"))

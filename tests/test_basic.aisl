@@ -1,0 +1,24 @@
+(mod test_basic
+  (fn return_constant () -> i32
+    (ret 42))
+  
+  (test-spec return_constant
+    (case "returns 42"
+      (input)
+      (expect 42)))
+  
+  (fn identity_i32 ((x i32)) -> i32
+    (ret x))
+  
+  (test-spec identity_i32
+    (case "identity 42"
+      (input 42)
+      (expect 42))
+    (case "identity 0"
+      (input 0)
+      (expect 0))
+    (case "identity negative"
+      (input -10)
+      (expect -10)))
+  
+  (meta-note "Tests basic variable assignment and function returns"))

@@ -1,0 +1,305 @@
+#!/usr/bin/env python3
+"""
+AISL Validator and Security Scanner
+
+Validates AISL code by:
+1. Compiling to bytecode
+2. Executing bytecode to verify correctness
+3. Scanning for security issues
+
+Usage: aisl-validate input.aisl [--execute] [--security]
+"""
+
+import sys
+import subprocess
+import re
+import os
+from pathlib import Path
+
+class SecurityIssue:
+    def __init__(self, severity, code, message, line=0):
+        self.severity = severity  # CRITICAL, HIGH, MEDIUM, LOW
+        self.code = code
+        self.message = message
+        self.line = line
+    
+    def __str__(self):
+        return f"{self.severity}:{self.code}:{self.line}:{self.message}"
+
+class AIISLValidator:
+    def __init__(self, aisl_path="/var/home/marc/Projects/aisl"):
+        self.aisl_path = aisl_path
+        self.compiler = f"{aisl_path}/compiler/c/bin/aislc"
+        self.runner = f"{aisl_path}/compiler/c/bin/aisl-run"
+        
+    def compile(self, input_file, output_file):
+        """Compile AISL to bytecode"""
+        try:
+            result = subprocess.run(
+                [self.compiler, input_file, output_file],
+                capture_output=True,
+                text=True,
+                timeout=30
+            )
+            return result.returncode == 0, result.stdout, result.stderr
+        except Exception as e:
+            return False, "", str(e)
+    
+    def execute(self, bytecode_file, timeout=10):
+        """Execute AISL bytecode"""
+        try:
+            result = subprocess.run(
+                [self.runner, bytecode_file],
+                capture_output=True,
+                text=True,
+                timeout=timeout
+            )
+            return result.returncode == 0, result.stdout, result.stderr
+        except subprocess.TimeoutExpired:
+            return False, "", "TIMEOUT: Execution exceeded time limit"
+        except Exception as e:
+            return False, "", str(e)
+    
+    def scan_security(self, input_file):
+        """Scan for security vulnerabilities using advanced scanner"""
+        scanner_path = f"{self.aisl_path}/compiler/tools/aisl-security-scan"
+        
+        # Check if advanced scanner exists
+        if not os.path.exists(scanner_path):
+            # Fallback to basic scanning
+            return self._basic_security_scan(input_file)
+        
+        try:
+            # Use advanced scanner with machine-readable S-expression output
+            result = subprocess.run(
+                [scanner_path, input_file, '--machine'],
+                capture_output=True,
+                text=True,
+                timeout=30
+            )
+            
+            if result.returncode != 0 and result.returncode != 1:
+                # If scanner fails (not just finding issues), use basic scan
+                return self._basic_security_scan(input_file)
+            
+            # Parse S-expression output
+            # Format: (security-scan (file "...") (issues (issue ...) ...) (summary ...))
+            output = result.stdout.strip()
+            if not output or not output.startswith('(security-scan'):
+                return self._basic_security_scan(input_file)
+            
+            issues = []
+            # Simple parsing: extract issue lines
+            for line in output.split('\n'):
+                if '(issue ' in line:
+                    # Extract severity, code, message, line number
+                    severity_match = re.search(r'\(severity (\w+)\)', line)
+                    code_match = re.search(r'\(code (\w+)\)', line)
+                    message_match = re.search(r'\(message "([^"]+)"\)', line)
+                    line_match = re.search(r'\(line (\d+)\)', line)
+                    
+                    if severity_match and code_match and message_match:
+                        issues.append(SecurityIssue(
+                            severity_match.group(1),
+                            code_match.group(1),
+                            message_match.group(1),
+                            int(line_match.group(1)) if line_match else 0
+                        ))
+            
+            return issues if issues else []
+                
+        except Exception as e:
+            # If anything fails, use basic scan
+            return self._basic_security_scan(input_file)
+    
+    def _basic_security_scan(self, input_file):
+        """Basic security scan (fallback)"""
+        issues = []
+        
+        try:
+            with open(input_file, 'r') as f:
+                lines = f.readlines()
+        except Exception as e:
+            return [SecurityIssue("HIGH", "FILE_ERROR", f"Cannot read file: {e}")]
+        
+        for i, line in enumerate(lines, 1):
+            # SQL Injection patterns
+            if re.search(r'sql.*\+.*\(', line, re.IGNORECASE):
+                issues.append(SecurityIssue(
+                    "CRITICAL", "SQL_INJECTION",
+                    "Possible SQL injection: string concatenation in SQL query", i
+                ))
+            
+            if re.search(r'(query|execute).*str_concat', line, re.IGNORECASE):
+                issues.append(SecurityIssue(
+                    "HIGH", "SQL_INJECTION",
+                    "SQL query with string concatenation detected", i
+                ))
+            
+            # Command Injection patterns
+            if re.search(r'process_spawn.*\+|process_spawn.*str_concat', line):
+                issues.append(SecurityIssue(
+                    "CRITICAL", "COMMAND_INJECTION",
+                    "Command injection: unsanitized input in process_spawn", i
+                ))
+            
+            if re.search(r'exec.*\+|system.*\+', line):
+                issues.append(SecurityIssue(
+                    "CRITICAL", "COMMAND_INJECTION",
+                    "Command injection: string concatenation in system call", i
+                ))
+            
+            # Path Traversal patterns
+            if re.search(r'\.\./', line):
+                issues.append(SecurityIssue(
+                    "MEDIUM", "PATH_TRAVERSAL",
+                    "Potential path traversal: ../ detected", i
+                ))
+            
+            if re.search(r'file_(read|write|open).*\+', line):
+                issues.append(SecurityIssue(
+                    "HIGH", "PATH_TRAVERSAL",
+                    "File operation with string concatenation", i
+                ))
+            
+            # Hardcoded secrets patterns
+            if re.search(r'(password|secret|api_?key|token)\s*=\s*"[^"]+"', line, re.IGNORECASE):
+                issues.append(SecurityIssue(
+                    "HIGH", "HARDCODED_SECRET",
+                    "Hardcoded credential detected", i
+                ))
+            
+            # Unsafe deserialization
+            if re.search(r'json_parse.*http_', line):
+                issues.append(SecurityIssue(
+                    "MEDIUM", "UNSAFE_DESERIALIZATION",
+                    "Parsing JSON from external source without validation", i
+                ))
+            
+            # Insecure network operations
+            if re.search(r'tcp_connect.*"http:', line):
+                issues.append(SecurityIssue(
+                    "LOW", "INSECURE_PROTOCOL",
+                    "Using HTTP instead of HTTPS", i
+                ))
+        
+        return issues
+    
+    def validate(self, input_file, execute=True, security=True):
+        """Full validation pipeline"""
+        results = {
+            'compile': {'success': False, 'output': '', 'errors': ''},
+            'execute': {'success': False, 'output': '', 'errors': ''},
+            'security': {'issues': [], 'clean': True}
+        }
+        
+        # Step 1: Compile
+        print(f"[1/3] Compiling {input_file}...")
+        bytecode_file = "/tmp/aisl_validate.aislc"
+        success, stdout, stderr = self.compile(input_file, bytecode_file)
+        results['compile'] = {'success': success, 'output': stdout, 'errors': stderr}
+        
+        if not success:
+            print(f"✗ Compilation failed:")
+            print(stderr)
+            return results
+        
+        print("✓ Compilation successful")
+        
+        # Step 2: Execute (if requested)
+        if execute:
+            print(f"[2/3] Executing bytecode...")
+            success, stdout, stderr = self.execute(bytecode_file)
+            results['execute'] = {'success': success, 'output': stdout, 'errors': stderr}
+            
+            if not success:
+                print(f"✗ Execution failed:")
+                print(stderr)
+                return results
+            
+            print("✓ Execution successful")
+            if stdout:
+                print("Output:", stdout.strip())
+        else:
+            results['execute'] = {'success': True, 'output': 'skipped', 'errors': ''}
+        
+        # Step 3: Security scan (if requested)
+        if security:
+            print(f"[3/3] Security scan...")
+            issues = self.scan_security(input_file)
+            results['security'] = {
+                'issues': issues,
+                'clean': len(issues) == 0
+            }
+            
+            if issues:
+                print(f"⚠ Found {len(issues)} security issue(s):")
+                for issue in issues:
+                    print(f"  {issue}")
+            else:
+                print("✓ No security issues found")
+        else:
+            results['security'] = {'issues': [], 'clean': True}
+        
+        # Cleanup
+        if os.path.exists(bytecode_file):
+            os.remove(bytecode_file)
+        
+        return results
+
+def main():
+    import argparse
+    
+    parser = argparse.ArgumentParser(description='AISL Validator and Security Scanner')
+    parser.add_argument('input', help='Input AISL file')
+    parser.add_argument('--no-execute', action='store_true', help='Skip execution validation')
+    parser.add_argument('--no-security', action='store_true', help='Skip security scan')
+    parser.add_argument('--machine', action='store_true', help='Machine-readable output')
+    
+    args = parser.parse_args()
+    
+    validator = AIISLValidator()
+    results = validator.validate(
+        args.input,
+        execute=not args.no_execute,
+        security=not args.no_security
+    )
+    
+    # Determine overall success
+    all_success = (
+        results['compile']['success'] and
+        results['execute']['success'] and
+        results['security']['clean']
+    )
+    
+    if args.machine:
+        # Machine-readable output
+        if not results['compile']['success']:
+            print(f"ERROR:COMPILE_FAILED:0:0:{results['compile']['errors']}")
+        elif not results['execute']['success']:
+            print(f"ERROR:EXECUTION_FAILED:0:0:{results['execute']['errors']}")
+        elif not results['security']['clean']:
+            for issue in results['security']['issues']:
+                print(f"SECURITY:{issue}")
+        else:
+            print("SUCCESS:VALIDATION_PASSED:0:0:All checks passed")
+    else:
+        # Human-readable summary
+        print("\n" + "="*50)
+        if all_success:
+            print("✓ VALIDATION PASSED")
+            print("  All checks passed successfully")
+        else:
+            print("✗ VALIDATION FAILED")
+            if not results['compile']['success']:
+                print("  - Compilation failed")
+            if not results['execute']['success']:
+                print("  - Execution failed")
+            if not results['security']['clean']:
+                print(f"  - Security issues found: {len(results['security']['issues'])}")
+        print("="*50)
+    
+    sys.exit(0 if all_success else 1)
+
+if __name__ == '__main__':
+    main()

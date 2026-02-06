@@ -1,0 +1,17 @@
+(mod test
+  (fn increment_and_return ((counter i32)) -> i32
+    (set new_counter i32 (call op_add_i32 counter 1))
+    (ret new_counter))
+  
+  (test-spec increment_and_return
+    (case "increment 0"
+      (input 0)
+      (expect 1))
+    (case "increment 5"
+      (input 5)
+      (expect 6))
+    (case "increment 100"
+      (input 100)
+      (expect 101)))
+  
+  (meta-note "Tests sequence with variable assignment and return"))

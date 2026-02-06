@@ -1,0 +1,24 @@
+(mod test_array
+  (fn json_array_push_length ((val i32)) -> i32
+    (ret (call json_length (call json_push (call json_new_array) val))))
+  
+  (test-spec json_array_push_length
+    (case "push one element"
+      (input 42)
+      (expect 1))
+    (case "push different value"
+      (input 100)
+      (expect 1)))
+  
+  (fn json_array_stringify ((val i32)) -> string
+    (ret (call json_stringify (call json_push (call json_new_array) val))))
+  
+  (test-spec json_array_stringify
+    (case "stringify array with 42"
+      (input 42)
+      (expect "[42]"))
+    (case "stringify array with 100"
+      (input 100)
+      (expect "[100]")))
+  
+  (meta-note "Tests JSON array creation, push, length, and stringify"))

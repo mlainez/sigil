@@ -1,0 +1,36 @@
+(mod fibonacci
+  (fn fib_nth ((n i32)) -> i32
+    (ret (call if_i32 
+      (call op_eq_i32 n 0)
+      0
+      (call if_i32 
+        (call op_eq_i32 n 1)
+        1
+        (call op_add_i32 
+          (call fib_nth (call op_sub_i32 n 1))
+          (call fib_nth (call op_sub_i32 n 2)))))))
+  
+  (test-spec fib_nth
+    (case "fibonacci 0"
+      (input 0)
+      (expect 0))
+    (case "fibonacci 1"
+      (input 1)
+      (expect 1))
+    (case "fibonacci 2"
+      (input 2)
+      (expect 1))
+    (case "fibonacci 3"
+      (input 3)
+      (expect 2))
+    (case "fibonacci 4"
+      (input 4)
+      (expect 3))
+    (case "fibonacci 5"
+      (input 5)
+      (expect 5))
+    (case "fibonacci 6"
+      (input 6)
+      (expect 8)))
+  
+  (meta-note "Tests recursive fibonacci sequence calculation"))

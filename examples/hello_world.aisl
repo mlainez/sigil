@@ -1,0 +1,4 @@
+(mod hello
+  (fn main ()
+    (call print "Hello from AISL bytecode!\n")
+    (ret)))

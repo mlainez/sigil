@@ -1,0 +1,24 @@
+(mod test
+  (fn get_first ((size i32) (val1 i32) (val2 i32)) -> i32
+    (ret (call array_get (call array_push (call array_push (call array_new size) val1) val2) 0)))
+  
+  (test-spec get_first
+    (case "get first element"
+      (input 10 42 100)
+      (expect 42))
+    (case "get first different values"
+      (input 5 99 77)
+      (expect 99)))
+  
+  (fn get_second ((size i32) (val1 i32) (val2 i32)) -> i32
+    (ret (call array_get (call array_push (call array_push (call array_new size) val1) val2) 1)))
+  
+  (test-spec get_second
+    (case "get second element"
+      (input 10 42 100)
+      (expect 100))
+    (case "get second different values"
+      (input 5 99 77)
+      (expect 77)))
+  
+  (meta-note "Tests array_get retrieves elements at specified indices"))

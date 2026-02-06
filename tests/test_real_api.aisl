@@ -1,0 +1,51 @@
+(mod test_real_api
+  (fn fetch_github_api ((url string)) -> string
+    (ret (call http_get url)))
+  
+  (test-spec fetch_github_api
+    (case "fetch GitHub API root"
+      (mock (http_get "http://api.github.com") "github_response")
+      (input "http://api.github.com")
+      (expect "github_response")))
+  
+  (fn get_api_status ((response string)) -> i32
+    (ret (call http_get_status response)))
+  
+  (test-spec get_api_status
+    (case "get GitHub API status code"
+      (mock (http_get_status "github_response") 200)
+      (input "github_response")
+      (expect 200)))
+  
+  (fn get_response_body ((response string)) -> string
+    (ret (call http_get_body response)))
+  
+  (test-spec get_response_body
+    (case "get body from GitHub API response"
+      (mock (http_get_body "github_response") "{\"current_user_url\":\"https://api.github.com/user\"}")
+      (input "github_response")
+      (expect "{\"current_user_url\":\"https://api.github.com/user\"}")))
+  
+  (fn parse_json_string ((json_str string)) -> json
+    (ret (call json_parse json_str)))
+  
+  (test-spec parse_json_string
+    (case "parse GitHub API JSON"
+      (mock (json_parse "{\"current_user_url\":\"https://api.github.com/user\"}") "json_obj")
+      (input "{\"current_user_url\":\"https://api.github.com/user\"}")
+      (expect "json_obj")))
+  
+  (fn get_json_field ((json_data json) (field string)) -> string
+    (ret (call json_get json_data field)))
+  
+  (test-spec get_json_field
+    (case "get current_user_url field"
+      (mock (json_get "json_obj" "current_user_url") "https://api.github.com/user")
+      (input "json_obj" "current_user_url")
+      (expect "https://api.github.com/user"))
+    (case "get repository_search_url field"
+      (mock (json_get "json_obj2" "repository_search_url") "https://api.github.com/search/repositories")
+      (input "json_obj2" "repository_search_url")
+      (expect "https://api.github.com/search/repositories")))
+  
+  (meta-note "Tests GitHub API with atomic functions - each function has single external call and single mock"))

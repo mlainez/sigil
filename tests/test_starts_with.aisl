@@ -1,0 +1,10 @@
+(mod test_starts_with
+  (fn main () -> i32
+    (set text string "GET /hello HTTP/1.1")
+    (call print "Testing string_starts_with")
+    (if (call string_starts_with text "GET /hello ")
+      (then
+        (call print "YES: Starts with GET /hello"))
+      (else
+        (call print "NO: Does not start with GET /hello")))
+    (ret 0)))

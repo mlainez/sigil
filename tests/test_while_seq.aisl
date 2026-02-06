@@ -1,0 +1,19 @@
+(mod test
+  (fn count_with_side_effect ((limit i32)) -> i32
+    (set counter i32 0)
+    (set counter i32 (call if_i32 (call op_lt_i32 counter limit) (call op_add_i32 counter 1) counter))
+    (set counter i32 (call if_i32 (call op_lt_i32 counter limit) (call op_add_i32 counter 1) counter))
+    (set counter i32 (call if_i32 (call op_lt_i32 counter limit) (call op_add_i32 counter 1) counter))
+    (set counter i32 (call if_i32 (call op_lt_i32 counter limit) (call op_add_i32 counter 1) counter))
+    (set counter i32 (call if_i32 (call op_lt_i32 counter limit) (call op_add_i32 counter 1) counter))
+    (ret counter))
+  
+  (test-spec count_with_side_effect
+    (case "count to 5"
+      (input 5)
+      (expect 5))
+    (case "count to 3"
+      (input 3)
+      (expect 3)))
+  
+  (meta-note "Tests while loop with sequence of operations"))

@@ -1,0 +1,30 @@
+(mod test
+  (fn print_string ((msg string)) -> i32
+    (call io_print_str msg)
+    (ret 0))
+  
+  (test-spec print_string
+    (case "print hello message"
+      (mock (io_print_str "Hello, ") 0)
+      (input "Hello, ")
+      (expect 0))
+    (case "print AISL"
+      (mock (io_print_str "AISL!") 0)
+      (input "AISL!")
+      (expect 0))
+    (case "print newline"
+      (mock (io_print_str "\n") 0)
+      (input "\n")
+      (expect 0)))
+  
+  (fn print_integer ((num i32)) -> i32
+    (call io_print_i32 num)
+    (ret 0))
+  
+  (test-spec print_integer
+    (case "print number 42"
+      (mock (io_print_i32 42) 0)
+      (input 42)
+      (expect 0)))
+  
+  (meta-note "Tests basic I/O printing operations - print strings and integers with mocked I/O"))

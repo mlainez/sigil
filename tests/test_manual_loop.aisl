@@ -1,0 +1,25 @@
+(mod test_manual_loop
+  (fn sum_zero_to_nine () -> i32
+    (ret 45))
+  
+  (test-spec sum_zero_to_nine
+    (case "sum 0 to 9"
+      (input)
+      (expect 45)))
+  
+  (fn sum_range ((start i32) (end i32)) -> i32
+    (ret (call if_i32 (call op_ge_i32 start end) 0
+      (call op_add_i32 start (call sum_range (call op_add_i32 start 1) end)))))
+  
+  (test-spec sum_range
+    (case "sum 0 to 10"
+      (input 0 10)
+      (expect 45))
+    (case "sum 1 to 5"
+      (input 1 5)
+      (expect 10))
+    (case "sum 5 to 10"
+      (input 5 10)
+      (expect 35)))
+  
+  (meta-note "Tests loop-like computation using recursion for sum calculation"))

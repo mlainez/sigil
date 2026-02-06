@@ -1,0 +1,13 @@
+AISLTEXT1
+
+strings 0
+
+functions 1
+main_func 0 0
+
+instructions 4
+PUSH_I32 42
+PRINT_DEBUG
+POP
+PUSH_UNIT
+RETURN

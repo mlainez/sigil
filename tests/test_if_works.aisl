@@ -1,0 +1,13 @@
+(mod test_if_works
+  (fn main () -> i32
+    (call print "Testing if_i32 with true (should be 42):")
+    (set result1 i32 (call if_i32 true 42 99))
+    (set str1 string (call string_from_i32 result1))
+    (call print str1)
+    
+    (call print "Testing if_i32 with false (should be 99):")
+    (set result2 i32 (call if_i32 false 42 99))
+    (set str2 string (call string_from_i32 result2))
+    (call print str2)
+    
+    (ret 0)))

@@ -1,0 +1,22 @@
+(mod test_string_replace
+  (fn replace ((text string) (old string) (new string)) -> string
+    (ret (call string_replace text old new)))
+  
+  (test-spec replace
+    (case "replace world with AISL"
+      (input "hello world" "world" "AISL")
+      (expect "hello AISL"))
+    (case "replace all foo with X"
+      (input "foo bar foo baz foo" "foo" "X")
+      (expect "X bar X baz X"))
+    (case "replace spaces with dashes"
+      (input "a b c" " " " - ")
+      (expect "a - b - c"))
+    (case "remove all dashes"
+      (input "remove-all-dashes" "-" "")
+      (expect "removealldashes"))
+    (case "no match returns original"
+      (input "hello" "xyz" "ABC")
+      (expect "hello")))
+  
+  (meta-note "Tests string_replace for pattern replacement"))

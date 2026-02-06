@@ -1,0 +1,18 @@
+(mod test_contains
+  (fn main () -> i32
+    (set request string "GET /hello HTTP/1.1")
+    (call print "Testing string_contains")
+    (set result bool (call string_contains request "GET /hello.json"))
+    (if result
+      (then
+        (call print "Contains hello.json"))
+      (else
+        (call print "Does not contain hello.json")))
+    (set result2 bool (call string_contains request "GET /hello"))
+    (if result2
+      (then
+        (call print "Contains hello"))
+      (else
+        (call print "Does not contain hello")))
+    (call print "Done")
+    (ret 0)))

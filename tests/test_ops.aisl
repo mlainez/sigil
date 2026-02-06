@@ -1,0 +1,48 @@
+(mod test_ops
+  (fn split_get_first ((text string) (delim string)) -> string
+    (ret (call array_get (call string_split text delim) 0)))
+  
+  (test-spec split_get_first
+    (case "split by dash first"
+      (input "one-two-three" "-")
+      (expect "one")))
+  
+  (fn split_get_second ((text string) (delim string)) -> string
+    (ret (call array_get (call string_split text delim) 1)))
+  
+  (test-spec split_get_second
+    (case "split by dash second"
+      (input "one-two-three" "-")
+      (expect "two")))
+  
+  (fn trim ((dirty string)) -> string
+    (ret (call string_trim dirty)))
+  
+  (test-spec trim
+    (case "trim spaces"
+      (input "  hello  ")
+      (expect "hello")))
+  
+  (fn contains ((haystack string) (needle string)) -> bool
+    (ret (call string_contains haystack needle)))
+  
+  (test-spec contains
+    (case "contains world"
+      (input "hello world" "world")
+      (expect 1))
+    (case "does not contain foo"
+      (input "hello world" "foo")
+      (expect 0)))
+  
+  (fn replace ((original string) (from string) (to string)) -> string
+    (ret (call string_replace original from to)))
+  
+  (test-spec replace
+    (case "replace foo with X"
+      (input "foo bar foo" "foo" "X")
+      (expect "X bar X"))
+    (case "replace missing pattern"
+      (input "hello world" "xyz" "ABC")
+      (expect "hello world")))
+  
+  (meta-note "Tests various string operations: split, trim, contains, replace"))

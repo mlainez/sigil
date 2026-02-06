@@ -1,0 +1,36 @@
+(mod test_string_split
+  (fn split ((input string) (delim string)) -> array
+    (ret (call string_split input delim)))
+  
+  (fn get_first_element ((input string) (delim string)) -> string
+    (ret (call array_get (call string_split input delim) 0)))
+  
+  (test-spec get_first_element
+    (case "split by comma first element"
+      (input "apple,banana,cherry" ",")
+      (expect "apple"))
+    (case "split by space first element"
+      (input "hello world from AISL" " ")
+      (expect "hello"))
+    (case "split by double colon first element"
+      (input "one::two::three" "::")
+      (expect "one")))
+  
+  (fn count_split_parts ((input string) (delim string)) -> i32
+    (ret (call array_length (call string_split input delim))))
+  
+  (test-spec count_split_parts
+    (case "split by comma count"
+      (input "apple,banana,cherry" ",")
+      (expect 3))
+    (case "split by space count"
+      (input "hello world from AISL" " ")
+      (expect 4))
+    (case "split by double colon count"
+      (input "one::two::three" "::")
+      (expect 3))
+    (case "no delimiter found"
+      (input "nodelimiter" ",")
+      (expect 1)))
+  
+  (meta-note "Tests string_split for splitting strings by various delimiters"))

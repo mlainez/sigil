@@ -1,0 +1,25 @@
+(mod test_string_trim
+  (fn trim ((input string)) -> string
+    (ret (call string_trim input)))
+  
+  (test-spec trim
+    (case "trim both sides"
+      (input "   hello world   ")
+      (expect "hello world"))
+    (case "trim leading only"
+      (input "   leading")
+      (expect "leading"))
+    (case "trim trailing only"
+      (input "trailing   ")
+      (expect "trailing"))
+    (case "no spaces to trim"
+      (input "no-spaces")
+      (expect "no-spaces"))
+    (case "trim only spaces"
+      (input "   ")
+      (expect ""))
+    (case "empty string"
+      (input "")
+      (expect "")))
+  
+  (meta-note "Tests string_trim for removing leading and trailing whitespace"))

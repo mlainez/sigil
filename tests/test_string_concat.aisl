@@ -1,0 +1,19 @@
+(mod test
+  (fn concat_and_length ((a string) (b string)) -> i32
+    (ret (call string_length (call string_concat a b))))
+  
+  (test-spec concat_and_length
+    (case "concatenate two strings"
+      (input "Hello" "World")
+      (expect 10))
+    (case "concatenate with empty"
+      (input "Hello" "")
+      (expect 5))
+    (case "concatenate empty strings"
+      (input "" "")
+      (expect 0))
+    (case "concatenate with space"
+      (input "Hello " "World")
+      (expect 11)))
+  
+  (meta-note "Tests string_concat and string_length operations"))

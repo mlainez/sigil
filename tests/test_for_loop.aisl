@@ -1,0 +1,17 @@
+(mod test_for_loop
+  (fn sum_recursive ((start i32) (end i32)) -> i32
+    (ret (call if_i32 (call op_ge_i32 start end) 0
+      (call op_add_i32 start (call sum_recursive (call op_add_i32 start 1) end)))))
+  
+  (test-spec sum_recursive
+    (case "sum 0 to 10"
+      (input 0 10)
+      (expect 45))
+    (case "sum 1 to 5"
+      (input 1 5)
+      (expect 10))
+    (case "sum 0 to 0"
+      (input 0 0)
+      (expect 0)))
+  
+  (meta-note "Tests for-loop-like behavior using recursive summation"))

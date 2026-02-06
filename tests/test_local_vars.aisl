@@ -1,0 +1,16 @@
+(mod test
+  (fn add_two_numbers ((x i32) (y i32)) -> i32
+    (ret (call op_add_i32 x y)))
+  
+  (test-spec add_two_numbers
+    (case "add 42 and 100"
+      (input 42 100)
+      (expect 142))
+    (case "add 0 and 5"
+      (input 0 5)
+      (expect 5))
+    (case "add negatives"
+      (input -10 -20)
+      (expect -30)))
+  
+  (meta-note "Tests local variable usage with addition"))

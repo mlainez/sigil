@@ -1,0 +1,14 @@
+(mod simple_debug
+  (fn main () -> i32
+    (call print "Step 1")
+    (set test_str string "GET /hello HTTP/1.1")
+    (call print "Step 2")
+    (set parts array (call string_split test_str " "))
+    (call print "Step 3")
+    (set part_count i32 (call array_length parts))
+    (call print "Step 4")
+    (set part0 string (call array_get parts 0))
+    (call print "Step 5")
+    (call print part0)
+    (call print "Done")
+    (ret 0)))

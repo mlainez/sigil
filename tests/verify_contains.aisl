@@ -1,0 +1,6 @@
+(mod verify_contains
+  (fn main () -> i32
+    (call print "Before call")
+    (set result bool (call string_contains "hello world" "world"))
+    (call print "After call, result stored")
+    (ret 0)))

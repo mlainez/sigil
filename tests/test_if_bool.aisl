@@ -1,0 +1,15 @@
+(mod test_if_bool
+  (fn main () -> i32
+    (call print "Testing with op_eq_i32 true case:")
+    (set cond1 bool (call op_eq_i32 1 1))
+    (set result1 i32 (call if_i32 cond1 42 99))
+    (set str1 string (call string_from_i32 result1))
+    (call print str1)
+    
+    (call print "Testing with op_eq_i32 false case:")
+    (set cond2 bool (call op_eq_i32 1 2))
+    (set result2 i32 (call if_i32 cond2 42 99))
+    (set str2 string (call string_from_i32 result2))
+    (call print str2)
+    
+    (ret 0)))

@@ -1,0 +1,16 @@
+(mod test_split
+  (fn split_get ((text string) (delim string) (idx i32)) -> string
+    (ret (call array_get (call string_split text delim) idx)))
+  
+  (test-spec split_get
+    (case "get first element"
+      (input "one,two,three" "," 0)
+      (expect "one"))
+    (case "get second element"
+      (input "one,two,three" "," 1)
+      (expect "two"))
+    (case "get third element"
+      (input "one,two,three" "," 2)
+      (expect "three")))
+  
+  (meta-note "Tests string_split and array_get"))

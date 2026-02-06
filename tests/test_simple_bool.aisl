@@ -1,0 +1,9 @@
+(mod test_simple_bool
+  (fn main () -> i32
+    (set flag bool true)
+    (if flag
+      (then
+        (call print "TRUE"))
+      (else
+        (call print "FALSE")))
+    (ret 0)))

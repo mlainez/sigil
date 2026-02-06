@@ -1,0 +1,38 @@
+(mod test
+  (fn map_length_after_sets ((k1 string) (v1 i32) (k2 string) (v2 i32) (k3 string) (v3 i32)) -> i32
+    (ret (call map_length (call map_set (call map_set (call map_set (call map_new) k1 v1) k2 v2) k3 v3))))
+  
+  (test-spec map_length_after_sets
+    (case "three entries"
+      (input "x" 10 "y" 20 "z" 30)
+      (expect 3))
+    (case "one entry"
+      (input "a" 1 "a" 2 "a" 3)
+      (expect 1))
+    (case "two unique entries"
+      (input "a" 5 "b" 10 "a" 15)
+      (expect 2)))
+  
+  (fn map_get_first ((k1 string) (v1 i32)) -> i32
+    (ret (call map_get (call map_set (call map_new) k1 v1) k1)))
+  
+  (test-spec map_get_first
+    (case "get x"
+      (input "x" 10)
+      (expect 10))
+    (case "get foo"
+      (input "foo" 42)
+      (expect 42)))
+  
+  (fn map_get_after_multiple_sets ((k1 string) (v1 i32) (k2 string) (v2 i32) (key string)) -> i32
+    (ret (call map_get (call map_set (call map_set (call map_new) k1 v1) k2 v2) key)))
+  
+  (test-spec map_get_after_multiple_sets
+    (case "get x value"
+      (input "x" 10 "y" 20 "x")
+      (expect 10))
+    (case "get y value"
+      (input "x" 10 "y" 20 "y")
+      (expect 20)))
+  
+  (meta-note "Tests map operations: map_new, map_set, map_get, map_length"))

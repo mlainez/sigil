@@ -1,0 +1,22 @@
+(mod test
+  (fn increment_five_times ((start i32)) -> i32
+    (set i i32 start)
+    (set i i32 (call op_add_i32 i 1))
+    (set i i32 (call op_add_i32 i 1))
+    (set i i32 (call op_add_i32 i 1))
+    (set i i32 (call op_add_i32 i 1))
+    (set i i32 (call op_add_i32 i 1))
+    (ret i))
+  
+  (test-spec increment_five_times
+    (case "increment from 1"
+      (input 1)
+      (expect 6))
+    (case "increment from 0"
+      (input 0)
+      (expect 5))
+    (case "increment from 10"
+      (input 10)
+      (expect 15)))
+  
+  (meta-note "Tests repeated increment operations simulating while loop"))

@@ -1,0 +1,18 @@
+(mod test
+  (fn read_file ((filepath string) (mode i32)) -> string
+    (set fd i32 (call io_file_open filepath mode))
+    (set content string (call io_file_read fd))
+    (call io_file_close fd)
+    (ret content))
+  
+  (test-spec read_file
+    (case "read test file opens"
+      (mock (io_file_open "/tmp/test.txt" 0) 3)
+      (input "/tmp/test.txt" 0)
+      (expect ""))
+    (case "read empty file opens"
+      (mock (io_file_open "/tmp/empty.txt" 0) 5)
+      (input "/tmp/empty.txt" 0)
+      (expect "")))
+  
+  (meta-note "Tests file reading with mocked io_file_open operation"))

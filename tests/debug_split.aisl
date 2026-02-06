@@ -1,0 +1,27 @@
+(mod debug_split
+  (fn test_split () -> i32
+    (set test_str string "GET /hello HTTP/1.1")
+    (set parts array (call string_split test_str " "))
+    (set part_count i32 (call array_length parts))
+    (call print "Part count:")
+    (set count_str string (call string_from_i32 part_count))
+    (call print count_str)
+    (if (call op_gt_i32 part_count 0)
+      (then
+        (set part0 string (call array_get parts 0))
+        (call print "Part 0:")
+        (call print part0))
+      (else
+        (call print "No parts!")))
+    (if (call op_gt_i32 part_count 1)
+      (then
+        (set part1 string (call array_get parts 1))
+        (call print "Part 1:")
+        (call print part1))
+      (else
+        (call print "No part 1!")))
+    (ret 0))
+
+  (fn main () -> i32
+    (call test_split)
+    (ret 0)))

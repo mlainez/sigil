@@ -1,0 +1,42 @@
+(mod test
+  (fn multiply ((a i32) (b i32)) -> i32
+    (ret (call op_mul_i32 a b)))
+  
+  (test-spec multiply
+    (case "multiply positive numbers"
+      (input 6 7)
+      (expect 42))
+    (case "multiply by zero"
+      (input 5 0)
+      (expect 0))
+    (case "multiply by one"
+      (input 10 1)
+      (expect 10))
+    (case "multiply negative numbers"
+      (input -3 4)
+      (expect -12)))
+  
+  (fn factorial ((n i32)) -> i32
+    (ret (call if_i32 
+      (call op_le_i32 n 1)
+      1
+      (call op_mul_i32 n (call factorial (call op_sub_i32 n 1))))))
+  
+  (test-spec factorial
+    (case "factorial of 5"
+      (input 5)
+      (expect 120))
+    (case "factorial of 0"
+      (input 0)
+      (expect 1))
+    (case "factorial of 1"
+      (input 1)
+      (expect 1))
+    (case "factorial of 3"
+      (input 3)
+      (expect 6))
+    (case "factorial of 4"
+      (input 4)
+      (expect 24)))
+  
+  (meta-note "Tests recursive function factorial and multiply operation"))

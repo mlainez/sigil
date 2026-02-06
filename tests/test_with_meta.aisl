@@ -1,0 +1,7 @@
+(mod minimal
+
+  (fn add ((a i32) (b i32)) -> i32
+    (ret (call op_add_i32 a b)))
+  
+  (meta-note "Testing meta-note parsing")
+)

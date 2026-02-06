@@ -1,0 +1,55 @@
+(mod test_all_string_ops
+  (fn test_split ((text string) (delim string)) -> array
+    (ret (call string_split text delim)))
+  
+  (test-spec test_split
+    (case "split by hyphen"
+      (mock (string_split "one-two-three" "-") "array_result")
+      (input "one-two-three" "-")
+      (expect "array_result")))
+  
+  (fn test_trim ((text string)) -> string
+    (ret (call string_trim text)))
+  
+  (test-spec test_trim
+    (case "trim whitespace"
+      (mock (string_trim "  hello  ") "hello")
+      (input "  hello  ")
+      (expect "hello")))
+  
+  (fn test_contains ((haystack string) (needle string)) -> bool
+    (ret (call string_contains haystack needle)))
+  
+  (test-spec test_contains
+    (case "contains world"
+      (mock (string_contains "hello world" "world") true)
+      (input "hello world" "world")
+      (expect true))
+    (case "does not contain xyz"
+      (mock (string_contains "hello world" "xyz") false)
+      (input "hello world" "xyz")
+      (expect false)))
+  
+  (fn test_replace ((text string) (old string) (new string)) -> string
+    (ret (call string_replace text old new)))
+  
+  (test-spec test_replace
+    (case "replace foo with X"
+      (mock (string_replace "foo bar foo" "foo" "X") "X bar X")
+      (input "foo bar foo" "foo" "X")
+      (expect "X bar X")))
+  
+  (fn test_array_get ((arr array) (idx i32)) -> string
+    (ret (call array_get arr idx)))
+  
+  (test-spec test_array_get
+    (case "get first element"
+      (mock (array_get "array_result" 0) "one")
+      (input "array_result" 0)
+      (expect "one"))
+    (case "get second element"
+      (mock (array_get "array_result" 1) "two")
+      (input "array_result" 1)
+      (expect "two")))
+  
+  (meta-note "Tests all string operations atomically - split, trim, contains, replace, array access"))

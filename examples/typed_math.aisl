@@ -1,0 +1,6 @@
+(mod math
+  (fn main_func ()
+    (call io_print_i32 (call op_add_i32 10 32))
+    (call io_print_i32 (call op_mul_i32 6 7))
+    (call io_print_i32 (call op_sub_i32 100 42))
+    (ret)))

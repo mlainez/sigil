@@ -1,0 +1,16 @@
+(mod test_simple
+  (fn split_by_space ((s string)) -> string
+    (ret (call array_get (call string_split s " ") 0)))
+  
+  (test-spec split_by_space
+    (case "get first word"
+      (input "hello world")
+      (expect "hello"))
+    (case "single word"
+      (input "test")
+      (expect "test"))
+    (case "multiple words"
+      (input "one two three")
+      (expect "one")))
+  
+  (meta-note "Tests string_split by space delimiter"))

@@ -1,0 +1,18 @@
+(mod test_if_string
+  (fn main () -> i32
+    (call print "Testing if_string with true condition:")
+    (set cond_true bool (call string_contains "hello json" "json"))
+    (set result1 string (call if_string cond_true "FOUND_JSON" "NOT_JSON"))
+    (call print result1)
+    
+    (call print "Testing if_string with false condition:")
+    (set cond_false bool (call string_contains "hello html" "json"))
+    (set result2 string (call if_string cond_false "FOUND_JSON" "NOT_JSON"))
+    (call print result2)
+    
+    (call print "Testing with /hello.json path:")
+    (set has_json bool (call string_contains "GET /hello.json HTTP/1.1" "/hello.json"))
+    (set result3 string (call if_string has_json "JSON_RESPONSE" "HTML_RESPONSE"))
+    (call print result3)
+    
+    (ret 0)))

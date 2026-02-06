@@ -1,0 +1,533 @@
+#!/usr/bin/env python3
+"""
+AISL Advanced Security Scanner
+
+Comprehensive security analysis with:
+- OWASP Top 10 coverage
+- Data flow analysis
+- Taint tracking
+- CWE classification
+- Compliance checks (PCI-DSS, HIPAA indicators)
+
+Usage: aisl-security-scan input.aisl [--severity LEVEL] [--machine]
+Output: S-expression format (machine-readable for LLMs, NOT JSON!)
+"""
+
+import sys
+import re
+from pathlib import Path
+from dataclasses import dataclass
+from typing import List, Dict, Set, Optional
+from enum import Enum
+
+class Severity(Enum):
+    CRITICAL = 5
+    HIGH = 4
+    MEDIUM = 3
+    LOW = 2
+    INFO = 1
+
+@dataclass
+class SecurityIssue:
+    severity: str
+    code: str
+    cwe_id: Optional[str]
+    owasp_category: Optional[str]
+    line: int
+    column: int
+    message: str
+    recommendation: str
+    compliance_flags: List[str]
+    
+    def __str__(self):
+        flags = f" [{','.join(self.compliance_flags)}]" if self.compliance_flags else ""
+        cwe = f" CWE-{self.cwe_id}" if self.cwe_id else ""
+        return f"{self.severity}:{self.code}:{self.line}:{self.column}:{self.message}{cwe}{flags}"
+
+class SecurityScanner:
+    def __init__(self):
+        self.issues: List[SecurityIssue] = []
+        self.variables: Dict[str, Dict] = {}  # Track variable declarations
+        self.tainted_vars: Set[str] = set()  # Variables from user input
+        self.sanitized_vars: Set[str] = set()  # Variables that have been sanitized
+        
+    def scan_file(self, filepath: str) -> List[SecurityIssue]:
+        """Main scan entry point"""
+        try:
+            with open(filepath, 'r') as f:
+                lines = f.readlines()
+        except Exception as e:
+            return [SecurityIssue(
+                "HIGH", "FILE_ERROR", None, None, 0, 0,
+                f"Cannot read file: {e}",
+                "Ensure file exists and is readable",
+                []
+            )]
+        
+        # Multi-pass analysis
+        self._analyze_data_flow(lines)
+        self._scan_injection_vulnerabilities(lines)
+        self._scan_cryptographic_issues(lines)
+        self._scan_authentication_issues(lines)
+        self._scan_sensitive_data_exposure(lines)
+        self._scan_xml_xxe(lines)
+        self._scan_access_control(lines)
+        self._scan_security_misconfiguration(lines)
+        self._scan_xss(lines)
+        self._scan_deserialization(lines)
+        self._scan_vulnerable_components(lines)
+        self._scan_logging_monitoring(lines)
+        self._scan_resource_limits(lines)
+        self._scan_race_conditions(lines)
+        self._scan_business_logic(lines)
+        
+        return sorted(self.issues, key=lambda x: (
+            -Severity[x.severity].value,
+            x.line
+        ))
+    
+    def _analyze_data_flow(self, lines: List[str]):
+        """Track data flow to identify tainted variables"""
+        for i, line in enumerate(lines, 1):
+            # Track function parameters (potentially tainted)
+            if match := re.search(r'\(fn\s+\w+\s+\(\((\w+)\s+', line):
+                param_name = match.group(1)
+                self.tainted_vars.add(param_name)
+                self.variables[param_name] = {'line': i, 'tainted': True}
+            
+            # Track HTTP/network input (tainted)
+            if match := re.search(r'\(set\s+(\w+)\s+\w+\s+\(call\s+(http_get|http_post|tcp_recv|ws_recv|stdin_read)', line):
+                var_name = match.group(1)
+                self.tainted_vars.add(var_name)
+                self.variables[var_name] = {'line': i, 'tainted': True, 'source': match.group(2)}
+            
+            # Track sanitization functions
+            if match := re.search(r'\(set\s+(\w+)\s+\w+\s+\(call\s+(str_escape|sql_escape|html_escape|sanitize)', line):
+                var_name = match.group(1)
+                if var_name in self.tainted_vars:
+                    self.sanitized_vars.add(var_name)
+    
+    def _scan_injection_vulnerabilities(self, lines: List[str]):
+        """A01:2021 - Injection (SQL, Command, LDAP, etc.)"""
+        for i, line in enumerate(lines, 1):
+            # SQL Injection - CWE-89
+            if re.search(r'(sql_query|sql_exec|sqlite_query|db_execute)', line):
+                # Check if using string concatenation or interpolation
+                if re.search(r'str_concat|str_format|\+', line):
+                    self.issues.append(SecurityIssue(
+                        "CRITICAL", "SQL_INJECTION", "89",
+                        "A03:2021-Injection",
+                        i, 0,
+                        "SQL query built with string concatenation - vulnerable to SQL injection",
+                        "Use parameterized queries or prepared statements",
+                        ["PCI-DSS-6.5.1", "HIPAA-164.308"]
+                    ))
+                # Check if using tainted variables
+                for var in self.tainted_vars:
+                    if var not in self.sanitized_vars and var in line:
+                        self.issues.append(SecurityIssue(
+                            "CRITICAL", "SQL_INJECTION_TAINTED", "89",
+                            "A03:2021-Injection",
+                            i, 0,
+                            f"SQL query uses unsanitized user input: {var}",
+                            f"Sanitize variable '{var}' or use parameterized queries",
+                            ["PCI-DSS-6.5.1", "OWASP-Top10"]
+                        ))
+            
+            # Command Injection - CWE-78
+            if re.search(r'(process_spawn|exec|system|shell)', line):
+                if re.search(r'str_concat|str_format|\+', line):
+                    self.issues.append(SecurityIssue(
+                        "CRITICAL", "COMMAND_INJECTION", "78",
+                        "A03:2021-Injection",
+                        i, 0,
+                        "System command built with string operations - command injection risk",
+                        "Use exec with array arguments or whitelist allowed commands",
+                        ["CWE-78", "OWASP-Top10"]
+                    ))
+                for var in self.tainted_vars:
+                    if var not in self.sanitized_vars and var in line:
+                        self.issues.append(SecurityIssue(
+                            "CRITICAL", "COMMAND_INJECTION_TAINTED", "78",
+                            "A03:2021-Injection",
+                            i, 0,
+                            f"System command uses unsanitized input: {var}",
+                            "Validate and sanitize all inputs, use argument arrays",
+                            ["CWE-78"]
+                        ))
+            
+            # NoSQL Injection - CWE-943
+            if re.search(r'(mongo_query|nosql_find)', line):
+                if any(var in line for var in self.tainted_vars if var not in self.sanitized_vars):
+                    self.issues.append(SecurityIssue(
+                        "HIGH", "NOSQL_INJECTION", "943",
+                        "A03:2021-Injection",
+                        i, 0,
+                        "NoSQL query may be vulnerable to injection",
+                        "Validate input types and use query builders",
+                        []
+                    ))
+            
+            # LDAP Injection - CWE-90
+            if re.search(r'ldap_search|ldap_query', line):
+                if re.search(r'str_concat|\+', line):
+                    self.issues.append(SecurityIssue(
+                        "HIGH", "LDAP_INJECTION", "90",
+                        "A03:2021-Injection",
+                        i, 0,
+                        "LDAP query built with string concatenation",
+                        "Escape special LDAP characters or use parameterized queries",
+                        []
+                    ))
+            
+            # XPath Injection - CWE-643
+            if re.search(r'xpath_query|xml_select', line):
+                if re.search(r'str_concat|\+', line):
+                    self.issues.append(SecurityIssue(
+                        "MEDIUM", "XPATH_INJECTION", "643",
+                        "A03:2021-Injection",
+                        i, 0,
+                        "XPath query vulnerable to injection",
+                        "Use XPath parameterization or escape special characters",
+                        []
+                    ))
+    
+    def _scan_cryptographic_issues(self, lines: List[str]):
+        """A02:2021 - Cryptographic Failures"""
+        for i, line in enumerate(lines, 1):
+            # Weak encryption - CWE-326
+            if re.search(r'(des_encrypt|rc4_encrypt|md5|sha1)[\s(]', line, re.IGNORECASE):
+                self.issues.append(SecurityIssue(
+                    "HIGH", "WEAK_CRYPTO", "326",
+                    "A02:2021-Cryptographic-Failures",
+                    i, 0,
+                    "Weak cryptographic algorithm detected",
+                    "Use AES-256-GCM, ChaCha20-Poly1305, SHA-256 or SHA-3",
+                    ["PCI-DSS-3.4", "NIST"]
+                ))
+            
+            # Hardcoded secrets - CWE-798
+            patterns = [
+                (r'(password|pwd|passwd)\s*=\s*"[^"]+"', "password"),
+                (r'(api[_-]?key|apikey)\s*=\s*"[^"]+"', "API key"),
+                (r'(secret|token|auth[_-]?token)\s*=\s*"[^"]+"', "secret token"),
+                (r'(private[_-]?key|priv[_-]?key)\s*=\s*"[^"]+"', "private key"),
+                (r'(aws[_-]?secret|aws[_-]?access)', "AWS credential"),
+            ]
+            for pattern, cred_type in patterns:
+                if re.search(pattern, line, re.IGNORECASE):
+                    # Check if it's not a placeholder
+                    if not re.search(r'(example|placeholder|dummy|test|xxx|<.*>|\*\*\*)', line, re.IGNORECASE):
+                        self.issues.append(SecurityIssue(
+                            "CRITICAL", "HARDCODED_SECRET", "798",
+                            "A02:2021-Cryptographic-Failures",
+                            i, 0,
+                            f"Hardcoded {cred_type} detected",
+                            "Use environment variables or secret management service",
+                            ["PCI-DSS-3.5", "HIPAA-164.312"]
+                        ))
+            
+            # Insecure random - CWE-338
+            if re.search(r'(math_random|random\(\)|rand\(\))', line):
+                if re.search(r'(token|key|nonce|salt|session|password)', line, re.IGNORECASE):
+                    self.issues.append(SecurityIssue(
+                        "HIGH", "WEAK_RANDOM", "338",
+                        "A02:2021-Cryptographic-Failures",
+                        i, 0,
+                        "Cryptographically weak random number generator used for security",
+                        "Use crypto_random_bytes() for security-sensitive values",
+                        ["CWE-338"]
+                    ))
+            
+            # Insecure protocol - CWE-319
+            if re.search(r'["\'](http:|ftp:|telnet:)', line):
+                self.issues.append(SecurityIssue(
+                    "MEDIUM", "INSECURE_PROTOCOL", "319",
+                    "A02:2021-Cryptographic-Failures",
+                    i, 0,
+                    "Insecure protocol (HTTP/FTP/Telnet) detected",
+                    "Use HTTPS, SFTP, or SSH instead",
+                    ["PCI-DSS-4.1"]
+                ))
+    
+    def _scan_authentication_issues(self, lines: List[str]):
+        """A07:2021 - Identification and Authentication Failures"""
+        for i, line in enumerate(lines, 1):
+            # Weak password requirements
+            if re.search(r'password.*length.*[<<=]\s*[1-6]', line):
+                self.issues.append(SecurityIssue(
+                    "MEDIUM", "WEAK_PASSWORD_POLICY", "521",
+                    "A07:2021-Authentication",
+                    i, 0,
+                    "Weak password length requirement (< 8 characters)",
+                    "Require minimum 8 characters, ideally 12+",
+                    ["NIST-800-63B"]
+                ))
+            
+            # Session fixation - CWE-384
+            if re.search(r'session_create|create_session', line):
+                if not re.search(r'regenerate|rotate', ' '.join(lines[max(0,i-5):min(len(lines),i+5)])):
+                    self.issues.append(SecurityIssue(
+                        "MEDIUM", "SESSION_FIXATION_RISK", "384",
+                        "A07:2021-Authentication",
+                        i, 0,
+                        "Session created without regeneration after authentication",
+                        "Regenerate session ID after successful login",
+                        []
+                    ))
+    
+    def _scan_sensitive_data_exposure(self, lines: List[str]):
+        """A02:2021 - Sensitive Data Exposure"""
+        for i, line in enumerate(lines, 1):
+            # Sensitive data in logs - CWE-532
+            if re.search(r'(log|print|console|debug)', line):
+                sensitive_patterns = [
+                    'password', 'ssn', 'credit_card', 'cvv', 
+                    'social_security', 'api_key', 'secret', 'token'
+                ]
+                for pattern in sensitive_patterns:
+                    if re.search(pattern, line, re.IGNORECASE):
+                        self.issues.append(SecurityIssue(
+                            "HIGH", "SENSITIVE_DATA_LOGGED", "532",
+                            "A02:2021-Cryptographic-Failures",
+                            i, 0,
+                            f"Sensitive data ({pattern}) may be logged",
+                            "Redact or mask sensitive data before logging",
+                            ["PCI-DSS-3.3", "GDPR"]
+                        ))
+    
+    def _scan_xml_xxe(self, lines: List[str]):
+        """A05:2021 - XXE (XML External Entity)"""
+        for i, line in enumerate(lines, 1):
+            if re.search(r'(xml_parse|parse_xml|xml_load)', line):
+                self.issues.append(SecurityIssue(
+                    "HIGH", "XXE_VULNERABILITY", "611",
+                    "A05:2021-Security-Misconfiguration",
+                    i, 0,
+                    "XML parsing without disabling external entities",
+                    "Disable DTD processing and external entity resolution",
+                    ["CWE-611"]
+                ))
+    
+    def _scan_access_control(self, lines: List[str]):
+        """A01:2021 - Broken Access Control"""
+        for i, line in enumerate(lines, 1):
+            # Path traversal - CWE-22
+            if re.search(r'(file_read|file_write|file_open|readFile|writeFile)', line):
+                if re.search(r'\.\./|\.\.\\', line):
+                    self.issues.append(SecurityIssue(
+                        "HIGH", "PATH_TRAVERSAL", "22",
+                        "A01:2021-Broken-Access-Control",
+                        i, 0,
+                        "Path traversal pattern detected",
+                        "Validate and sanitize file paths, use allowlist",
+                        ["CWE-22", "OWASP-Top10"]
+                    ))
+                for var in self.tainted_vars:
+                    if var not in self.sanitized_vars and var in line:
+                        self.issues.append(SecurityIssue(
+                            "HIGH", "PATH_TRAVERSAL_TAINTED", "22",
+                            "A01:2021-Broken-Access-Control",
+                            i, 0,
+                            f"File operation uses unsanitized user input: {var}",
+                            "Validate file paths against allowlist, prevent directory traversal",
+                            ["CWE-22"]
+                        ))
+    
+    def _scan_security_misconfiguration(self, lines: List[str]):
+        """A05:2021 - Security Misconfiguration"""
+        for i, line in enumerate(lines, 1):
+            # Debug mode in production
+            if re.search(r'debug\s*=\s*true|DEBUG.*=.*true', line, re.IGNORECASE):
+                self.issues.append(SecurityIssue(
+                    "MEDIUM", "DEBUG_ENABLED", "489",
+                    "A05:2021-Security-Misconfiguration",
+                    i, 0,
+                    "Debug mode enabled - may expose sensitive information",
+                    "Disable debug mode in production",
+                    []
+                ))
+    
+    def _scan_xss(self, lines: List[str]):
+        """A03:2021 - XSS (Cross-Site Scripting)"""
+        for i, line in enumerate(lines, 1):
+            if re.search(r'(html|render|template|innerHTML)', line):
+                for var in self.tainted_vars:
+                    if var not in self.sanitized_vars and var in line:
+                        self.issues.append(SecurityIssue(
+                            "HIGH", "XSS_VULNERABILITY", "79",
+                            "A03:2021-Injection",
+                            i, 0,
+                            f"Potential XSS: unsanitized user input in HTML context: {var}",
+                            "HTML-escape user input or use safe templating",
+                            ["CWE-79", "OWASP-Top10"]
+                        ))
+    
+    def _scan_deserialization(self, lines: List[str]):
+        """A08:2021 - Software and Data Integrity Failures"""
+        for i, line in enumerate(lines, 1):
+            # Insecure deserialization - CWE-502
+            if re.search(r'(json_parse|yaml_parse|deserialize|unmarshal|pickle_load)', line):
+                for var in self.tainted_vars:
+                    if var not in self.sanitized_vars and var in line:
+                        self.issues.append(SecurityIssue(
+                            "HIGH", "INSECURE_DESERIALIZATION", "502",
+                            "A08:2021-Software-Data-Integrity",
+                            i, 0,
+                            f"Deserializing untrusted data: {var}",
+                            "Validate data structure, use safe parsers, implement integrity checks",
+                            ["CWE-502"]
+                        ))
+    
+    def _scan_vulnerable_components(self, lines: List[str]):
+        """A06:2021 - Vulnerable and Outdated Components"""
+        # This would integrate with CVE databases in production
+        pass
+    
+    def _scan_logging_monitoring(self, lines: List[str]):
+        """A09:2021 - Security Logging and Monitoring Failures"""
+        has_error_handling = any(re.search(r'(try|catch|error|exception)', line) for line in lines)
+        has_logging = any(re.search(r'(log|audit|monitor)', line) for line in lines)
+        
+        if has_error_handling and not has_logging:
+            self.issues.append(SecurityIssue(
+                "LOW", "INSUFFICIENT_LOGGING", "778",
+                "A09:2021-Logging-Monitoring",
+                0, 0,
+                "Error handling without security event logging",
+                "Log security-relevant events for monitoring and incident response",
+                ["PCI-DSS-10.1"]
+            ))
+    
+    def _scan_resource_limits(self, lines: List[str]):
+        """Resource exhaustion vulnerabilities"""
+        for i, line in enumerate(lines, 1):
+            # Unbounded loops with network/file operations
+            if re.search(r'(while\s+true|for.*in.*range\(9999)', line):
+                context = ' '.join(lines[i:min(len(lines), i+10)])
+                if re.search(r'(http_|file_|socket_)', context):
+                    self.issues.append(SecurityIssue(
+                        "MEDIUM", "RESOURCE_EXHAUSTION", "400",
+                        "A04:2021-Insecure-Design",
+                        i, 0,
+                        "Potentially unbounded loop with I/O operations",
+                        "Implement timeouts, rate limiting, and iteration limits",
+                        ["CWE-400"]
+                    ))
+    
+    def _scan_race_conditions(self, lines: List[str]):
+        """TOCTOU and race condition vulnerabilities"""
+        for i, line in enumerate(lines, 1):
+            # Time-of-check time-of-use - CWE-367
+            if re.search(r'file_exists', line):
+                context = ' '.join(lines[i:min(len(lines), i+5)])
+                if re.search(r'file_(open|write|delete)', context):
+                    self.issues.append(SecurityIssue(
+                        "MEDIUM", "TOCTOU_RACE_CONDITION", "367",
+                        "A04:2021-Insecure-Design",
+                        i, 0,
+                        "Potential TOCTOU race condition: file check before use",
+                        "Use atomic operations or file locking",
+                        ["CWE-367"]
+                    ))
+    
+    def _scan_business_logic(self, lines: List[str]):
+        """Business logic vulnerabilities"""
+        for i, line in enumerate(lines, 1):
+            # Integer overflow in financial operations - CWE-190
+            if re.search(r'(price|amount|balance|payment|total).*\+', line):
+                if not re.search(r'(overflow|check|validate|limit)', line):
+                    self.issues.append(SecurityIssue(
+                        "MEDIUM", "INTEGER_OVERFLOW_RISK", "190",
+                        "A04:2021-Insecure-Design",
+                        i, 0,
+                        "Arithmetic operation on financial data without overflow check",
+                        "Validate ranges and check for overflow before operations",
+                        ["PCI-DSS-6.5.8"]
+                    ))
+
+def main():
+    import argparse
+    
+    parser = argparse.ArgumentParser(description='AISL Advanced Security Scanner')
+    parser.add_argument('input', help='Input AISL file')
+    parser.add_argument('--severity', choices=['CRITICAL', 'HIGH', 'MEDIUM', 'LOW', 'INFO'],
+                       help='Minimum severity level to report')
+    parser.add_argument('--cwe', action='store_true', help='Show CWE IDs')
+    parser.add_argument('--machine', action='store_true', help='Machine-readable S-expression output (for LLMs)')
+    parser.add_argument('--owasp', action='store_true', help='Show OWASP categories')
+    parser.add_argument('--compliance', action='store_true', help='Show compliance flags')
+    
+    args = parser.parse_args()
+    
+    scanner = SecurityScanner()
+    issues = scanner.scan_file(args.input)
+    
+    # Filter by severity
+    if args.severity:
+        min_severity = Severity[args.severity].value
+        issues = [i for i in issues if Severity[i.severity].value >= min_severity]
+    
+    if args.machine:
+        # Compact machine-readable S-expression format (NOT human JSON!)
+        # Format: (security-scan (file "path") (issues ...) (summary ...))
+        print("(security-scan")
+        print(f'  (file "{args.input}")')
+        print("  (issues")
+        for issue in issues:
+            cwe_str = f' (cwe {issue.cwe_id})' if issue.cwe_id else ''
+            owasp_str = f' (owasp "{issue.owasp_category}")' if issue.owasp_category else ''
+            compliance_str = ''
+            if issue.compliance_flags:
+                flags = ' '.join(f'"{c}"' for c in issue.compliance_flags)
+                compliance_str = f' (compliance {flags})'
+            print(f'    (issue (severity {issue.severity}) (code {issue.code}){cwe_str}{owasp_str} '
+                  f'(line {issue.line}) (col {issue.column}) '
+                  f'(message "{issue.message}") (fix "{issue.recommendation}"){compliance_str})')
+        print("  )")
+        print("  (summary")
+        print(f'    (total {len(issues)})')
+        print(f'    (critical {sum(1 for i in issues if i.severity == "CRITICAL")})')
+        print(f'    (high {sum(1 for i in issues if i.severity == "HIGH")})')
+        print(f'    (medium {sum(1 for i in issues if i.severity == "MEDIUM")})')
+        print(f'    (low {sum(1 for i in issues if i.severity == "LOW")})')
+        print("  )")
+        print(")")
+    else:
+        # Human-readable output
+        if not issues:
+            print("✓ No security issues found")
+            sys.exit(0)
+        
+        print(f"Security Scan Results for: {args.input}")
+        print("="*70)
+        
+        for issue in issues:
+            print(f"\n[{issue.severity}] {issue.code}")
+            if args.cwe and issue.cwe_id:
+                print(f"  CWE: CWE-{issue.cwe_id}")
+            if args.owasp and issue.owasp_category:
+                print(f"  OWASP: {issue.owasp_category}")
+            print(f"  Line: {issue.line}")
+            print(f"  Issue: {issue.message}")
+            print(f"  Fix: {issue.recommendation}")
+            if args.compliance and issue.compliance_flags:
+                print(f"  Compliance: {', '.join(issue.compliance_flags)}")
+        
+        print("\n" + "="*70)
+        print(f"Total issues: {len(issues)}")
+        print(f"  CRITICAL: {sum(1 for i in issues if i.severity == 'CRITICAL')}")
+        print(f"  HIGH:     {sum(1 for i in issues if i.severity == 'HIGH')}")
+        print(f"  MEDIUM:   {sum(1 for i in issues if i.severity == 'MEDIUM')}")
+        print(f"  LOW:      {sum(1 for i in issues if i.severity == 'LOW')}")
+        
+        # Exit with error if critical or high issues found
+        critical_count = sum(1 for i in issues if i.severity == 'CRITICAL')
+        high_count = sum(1 for i in issues if i.severity == 'HIGH')
+        if critical_count > 0 or high_count > 0:
+            sys.exit(1)
+    
+    sys.exit(0)
+
+if __name__ == '__main__':
+    main()

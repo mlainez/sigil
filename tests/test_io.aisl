@@ -1,0 +1,12 @@
+(mod test_io
+  (fn print_message ((msg string)) -> i32
+    (call print msg)
+    (ret 0))
+  
+  (test-spec print_message
+    (case "print testing message"
+      (mock (print "Testing I/O\n") 0)
+      (input "Testing I/O\n")
+      (expect 0)))
+  
+  (meta-note "Tests basic I/O printing operation with mocked print function"))

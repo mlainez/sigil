@@ -1,0 +1,15 @@
+(mod test_bool_if
+  (fn main () -> i32
+    (call print "Test 1: true")
+    (set flag bool true)
+    (if flag
+      (call print "  Branch TRUE was taken")
+      (call print "  Branch FALSE was taken"))
+    
+    (call print "Test 2: false")
+    (set flag2 bool false)
+    (if flag2
+      (call print "  Branch TRUE was taken")
+      (call print "  Branch FALSE was taken"))
+    
+    (ret 0)))

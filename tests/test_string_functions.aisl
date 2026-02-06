@@ -1,0 +1,18 @@
+(mod test_string_functions
+  (defs
+    (fn main ()
+      (set msg string "Hello World")
+      
+      (set starts bool (call string_starts_with msg "Hello"))
+      (call print_bool starts)
+      
+      (set ends bool (call string_ends_with msg "World"))
+      (call print_bool ends)
+      
+      (set upper string (call string_to_upper msg))
+      (call print_string upper)
+      
+      (set lower string (call string_to_lower msg))
+      (call print_string lower)
+      
+      (ret))))

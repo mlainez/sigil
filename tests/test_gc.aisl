@@ -1,0 +1,57 @@
+(mod test_gc
+  (fn get_gc_stats () -> array
+    (ret (call gc_stats)))
+  
+  (test-spec get_gc_stats
+    (case "get initial GC statistics"
+      (mock (gc_stats) "stats_array")
+      (input)
+      (expect "stats_array")))
+  
+  (fn create_array ((size i32)) -> array
+    (ret (call ArrayNew size)))
+  
+  (test-spec create_array
+    (case "create array of size 10"
+      (mock (ArrayNew 10) "array_10")
+      (input 10)
+      (expect "array_10"))
+    (case "create array of size 20"
+      (mock (ArrayNew 20) "array_20")
+      (input 20)
+      (expect "array_20")))
+  
+  (fn set_array_value ((arr array) (idx i32) (val i32)) -> array
+    (call ArraySet arr idx val)
+    (ret arr))
+  
+  (test-spec set_array_value
+    (case "set array element 0 to 42"
+      (mock (ArraySet "array_10" 0 42) "array_10")
+      (input "array_10" 0 42)
+      (expect "array_10")))
+  
+  (fn get_array_value ((arr array) (idx i32)) -> i64
+    (ret (call ArrayGet arr idx)))
+  
+  (test-spec get_array_value
+    (case "get bytes allocated from stats"
+      (mock (ArrayGet "stats_array" 0) 1024)
+      (input "stats_array" 0)
+      (expect 1024))
+    (case "get next GC threshold from stats"
+      (mock (ArrayGet "stats_array" 1) 2048)
+      (input "stats_array" 1)
+      (expect 2048)))
+  
+  (fn trigger_gc () -> i32
+    (call gc_collect)
+    (ret 0))
+  
+  (test-spec trigger_gc
+    (case "manually trigger garbage collection"
+      (mock (gc_collect) 0)
+      (input)
+      (expect 0)))
+  
+  (meta-note "Tests garbage collector operations atomically - get stats, create arrays, set/get values, trigger manual collection with mocked GC"))

@@ -1,0 +1,47 @@
+(mod sinatra_recursive
+  (fn handle_connection ((client_sock string)) -> i32
+    (call print "")
+    (call print "=== NEW REQUEST ===")
+    (set request string (call tcp_receive client_sock 4096))
+    (call print "Request received:")
+    (call print request)
+    (set has_json bool (call string_contains request "/hello.json"))
+    (call print "Routing decision:")
+    (set json_resp string "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: 33\r\n\r\n{\"message\": \"Hello from AISL\"}")
+    (set html_resp string "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nContent-Length: 43\r\n\r\n<html><body>Hello from AISL</body></html>")
+    (set response string (call if_string has_json json_resp html_resp))
+    (call print "Sending response:")
+    (call print response)
+    (call tcp_send client_sock response)
+    (call tcp_close client_sock)
+    (call print "Connection closed")
+    (ret 0))
+
+  (fn accept_loop ((server_sock string)) -> i32
+    (call print "Waiting for connection...")
+    (set client_sock string (call tcp_accept server_sock))
+    (call print "Connection accepted!")
+    (call handle_connection client_sock)
+    (call print "Handler finished, calling accept_loop again...")
+    (call accept_loop server_sock)
+    (ret 0))
+
+  (fn start_server ((port i32)) -> i32
+    (call print "==================================")
+    (call print "  AISL Sinatra-style Web Server")
+    (call print "==================================")
+    (call print "")
+    (call print "Server running on http://localhost:8080")
+    (call print "")
+    (call print "Routes:")
+    (call print "  GET /hello        -> HTML response")
+    (call print "  GET /hello.json   -> JSON response")
+    (call print "")
+    (set server_sock string (call tcp_listen port))
+    (call print "Server socket created")
+    (call accept_loop server_sock)
+    (ret 0))
+
+  (fn main () -> i32
+    (call start_server 8080)
+    (ret 0)))

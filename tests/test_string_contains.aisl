@@ -1,0 +1,28 @@
+(mod test_string_contains
+  (fn contains ((text string) (search string)) -> bool
+    (ret (call string_contains text search)))
+  
+  (test-spec contains
+    (case "contains substring at end"
+      (input "hello world" "world")
+      (expect 1))
+    (case "does not contain substring"
+      (input "hello world" "foo")
+      (expect 0))
+    (case "contains substring at start"
+      (input "hello world" "hello")
+      (expect 1))
+    (case "contains empty string"
+      (input "test" "")
+      (expect 1))
+    (case "exact match"
+      (input "exact" "exact")
+      (expect 1))
+    (case "case sensitive no match"
+      (input "Hello" "hello")
+      (expect 0))
+    (case "substring in middle"
+      (input "hello world" "o w")
+      (expect 1)))
+  
+  (meta-note "Tests string_contains for various substring search cases"))

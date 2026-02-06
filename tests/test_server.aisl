@@ -1,0 +1,42 @@
+(mod test_server
+  (fn handle_connection ((client_sock string)) -> i32
+    (set request string (call tcp_receive client_sock 4096))
+    (set lines array (call string_split request "\n"))
+    (set line_count i32 (call array_length lines))
+    (if (call op_gt_i32 line_count 0)
+      (then
+        (set first_line string (call array_get lines 0))
+        (set parts array (call string_split first_line " "))
+        (set part_count i32 (call array_length parts))
+        (if (call op_gt_i32 part_count 1)
+          (then
+            (set path string (call array_get parts 1))
+            (set is_hello bool (call str_eq path "/hello"))
+            (if is_hello
+              (then
+                (set response string "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nContent-Length: 43\r\n\r\n<html><body>Hello from AISL</body></html>"))
+              (else
+                (set response string "HTTP/1.1 404 Not Found\r\nContent-Length: 9\r\n\r\nNot Found")))
+            (set sent i32 (call tcp_send client_sock response)))
+          (else
+            (set response string "HTTP/1.1 400 Bad Request\r\nContent-Length: 11\r\n\r\nBad Request")
+            (set sent i32 (call tcp_send client_sock response)))))
+      (else
+        (set response string "HTTP/1.1 400 Bad Request\r\nContent-Length: 11\r\n\r\nBad Request")
+        (set sent i32 (call tcp_send client_sock response))))
+    (call tcp_close client_sock)
+    (ret 0))
+
+  (fn start_server ((port i32)) -> i32
+    (call print "Starting test server...")
+    (set server_sock string (call tcp_listen port))
+    (call print "Listening on port 8080")
+    (label accept_loop)
+    (set client_sock string (call tcp_accept server_sock))
+    (call handle_connection client_sock)
+    (goto accept_loop)
+    (ret 0))
+
+  (fn main () -> i32
+    (call start_server 8080)
+    (ret 0)))

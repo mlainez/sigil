@@ -1,0 +1,24 @@
+(mod test_simple
+  (fn create_object_with_name ((name string)) -> string
+    (ret (call json_stringify (call json_set (call json_new_object) "name" name))))
+  
+  (test-spec create_object_with_name
+    (case "set name Alice"
+      (input "Alice")
+      (expect "{\"name\":\"Alice\"}"))
+    (case "set name Bob"
+      (input "Bob")
+      (expect "{\"name\":\"Bob\"}")))
+  
+  (fn create_array_with_value ((val i32)) -> string
+    (ret (call json_stringify (call json_push (call json_new_array) val))))
+  
+  (test-spec create_array_with_value
+    (case "push 42"
+      (input 42)
+      (expect "[42]"))
+    (case "push 100"
+      (input 100)
+      (expect "[100]")))
+  
+  (meta-note "Tests basic JSON object and array creation"))

@@ -1,0 +1,16 @@
+(mod test
+  (fn identity_str ((x string)) -> string
+    (ret x))
+  
+  (test-spec identity_str
+    (case "identity hello"
+      (input "hello")
+      (expect "hello"))
+    (case "identity empty"
+      (input "")
+      (expect ""))
+    (case "identity with spaces"
+      (input "hello world")
+      (expect "hello world")))
+  
+  (meta-note "Tests string type and identity function"))

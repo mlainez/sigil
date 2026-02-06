@@ -1,0 +1,93 @@
+(mod test_json
+  (fn parse_and_get_name ((json_str string)) -> string
+    (ret (call json_get (call json_parse json_str) "name")))
+  
+  (test-spec parse_and_get_name
+    (case "get Alice"
+      (input "{\"name\":\"Alice\",\"age\":30}")
+      (expect "Alice"))
+    (case "get Bob"
+      (input "{\"name\":\"Bob\",\"age\":25}")
+      (expect "Bob")))
+  
+  (fn parse_and_get_age ((json_str string)) -> i32
+    (ret (call json_get (call json_parse json_str) "age")))
+  
+  (test-spec parse_and_get_age
+    (case "get age 30"
+      (input "{\"name\":\"Alice\",\"age\":30}")
+      (expect 30))
+    (case "get age 25"
+      (input "{\"name\":\"Bob\",\"age\":25}")
+      (expect 25)))
+  
+  (fn parse_and_get_bool ((json_str string)) -> bool
+    (ret (call json_get (call json_parse json_str) "active")))
+  
+  (test-spec parse_and_get_bool
+    (case "get true"
+      (input "{\"active\":true}")
+      (expect 1))
+    (case "get false"
+      (input "{\"active\":false}")
+      (expect 0)))
+  
+  (fn create_object_and_stringify ((key1 string) (val1 string) (key2 string) (val2 i32)) -> string
+    (ret (call json_stringify (call json_set (call json_set (call json_new_object) key1 val1) key2 val2))))
+  
+  (test-spec create_object_and_stringify
+    (case "create city object"
+      (input "city" "NYC" "population" 8000000)
+      (expect "{\"city\":\"NYC\",\"population\":8000000}"))
+    (case "create name age object"
+      (input "name" "Alice" "age" 30)
+      (expect "{\"name\":\"Alice\",\"age\":30}")))
+  
+  (fn array_length ((v1 i32) (v2 i32) (v3 i32)) -> i32
+    (ret (call json_length (call json_push (call json_push (call json_push (call json_new_array) v1) v2) v3))))
+  
+  (test-spec array_length
+    (case "three elements"
+      (input 10 20 30)
+      (expect 3))
+    (case "same elements"
+      (input 5 5 5)
+      (expect 3)))
+  
+  (fn array_get_element ((v1 i32) (v2 i32) (v3 i32) (idx i32)) -> i32
+    (ret (call json_get (call json_push (call json_push (call json_push (call json_new_array) v1) v2) v3) idx)))
+  
+  (test-spec array_get_element
+    (case "get index 0"
+      (input 10 20 30 0)
+      (expect 10))
+    (case "get index 1"
+      (input 10 20 30 1)
+      (expect 20))
+    (case "get index 2"
+      (input 10 20 30 2)
+      (expect 30)))
+  
+  (fn array_stringify ((v1 i32) (v2 i32) (v3 i32)) -> string
+    (ret (call json_stringify (call json_push (call json_push (call json_push (call json_new_array) v1) v2) v3))))
+  
+  (test-spec array_stringify
+    (case "stringify array"
+      (input 10 20 30)
+      (expect "[10,20,30]"))
+    (case "stringify single digit array"
+      (input 1 2 3)
+      (expect "[1,2,3]")))
+  
+  (fn get_object_type ((json_str string)) -> string
+    (ret (call json_type (call json_parse json_str))))
+  
+  (test-spec get_object_type
+    (case "object type"
+      (input "{\"name\":\"Alice\"}")
+      (expect "object"))
+    (case "array type"
+      (input "[1,2,3]")
+      (expect "array")))
+  
+  (meta-note "Tests JSON operations: parse, get, set, new_object, new_array, push, length, stringify, type"))

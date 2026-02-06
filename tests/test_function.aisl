@@ -1,0 +1,19 @@
+(mod test
+  (fn add_two ((x i32)) -> i32
+    (ret (call op_add_i32 x 2)))
+  
+  (test-spec add_two
+    (case "add 2 to 10"
+      (input 10)
+      (expect 12))
+    (case "add 2 to 20"
+      (input 20)
+      (expect 22))
+    (case "add 2 to 0"
+      (input 0)
+      (expect 2))
+    (case "add 2 to negative"
+      (input -5)
+      (expect -3)))
+  
+  (meta-note "Tests simple function call with parameter"))

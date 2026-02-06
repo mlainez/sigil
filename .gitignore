@@ -1,0 +1,12 @@
+# AISL Compiled Bytecode
+*.aislc
+
+# Compiler Binaries
+compiler/c/bin/aislc
+compiler/c/bin/aisl-run
+compiler/c/bin/
+
+# C Object Files
+compiler/c/src/*.o
+compiler/c/*.o
+*.o

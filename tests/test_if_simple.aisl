@@ -1,0 +1,8 @@
+(mod test_if_simple
+  (fn test_with_bool ((flag bool)) -> string
+    (ret (if : string (var : bool flag) 
+           (then (LIT_STRING : string "YES")) 
+           (else (LIT_STRING : string "NO")))))
+  
+  (fn main () -> i32
+    (ret 0)))

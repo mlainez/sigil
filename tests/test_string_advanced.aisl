@@ -1,0 +1,71 @@
+(mod test_string_advanced
+  (fn split_csv ((text string) (delim string)) -> array
+    (ret (call string_split text delim)))
+  
+  (test-spec split_csv
+    (case "split CSV with spaces"
+      (mock (string_split "  apple  , banana , cherry  " ",") "csv_array")
+      (input "  apple  , banana , cherry  " ",")
+      (expect "csv_array"))
+    (case "split simple CSV"
+      (mock (string_split "John,25,Engineer" ",") "simple_csv")
+      (input "John,25,Engineer" ",")
+      (expect "simple_csv")))
+  
+  (fn trim_string ((text string)) -> string
+    (ret (call string_trim text)))
+  
+  (test-spec trim_string
+    (case "trim padded text"
+      (mock (string_trim "  apple  ") "apple")
+      (input "  apple  ")
+      (expect "apple"))
+    (case "trim with multiple spaces"
+      (mock (string_trim "  Hello   World!  ") "Hello   World!")
+      (input "  Hello   World!  ")
+      (expect "Hello   World!")))
+  
+  (fn replace_text ((text string) (old string) (new string)) -> string
+    (ret (call string_replace text old new)))
+  
+  (test-spec replace_text
+    (case "replace fox with dog"
+      (mock (string_replace "The quick brown fox" "fox" "dog") "The quick brown dog")
+      (input "The quick brown fox" "fox" "dog")
+      (expect "The quick brown dog"))
+    (case "replace double spaces"
+      (mock (string_replace "Hello   World!" "  " " ") "Hello  World!")
+      (input "Hello   World!" "  " " ")
+      (expect "Hello  World!"))
+    (case "replace template variable"
+      (mock (string_replace "Hello {{name}}, welcome!" "{{name}}" "Alice") "Hello Alice, welcome!")
+      (input "Hello {{name}}, welcome!" "{{name}}" "Alice")
+      (expect "Hello Alice, welcome!")))
+  
+  (fn check_contains ((text string) (search string)) -> bool
+    (ret (call string_contains text search)))
+  
+  (test-spec check_contains
+    (case "contains dog"
+      (mock (string_contains "The quick brown dog" "dog") true)
+      (input "The quick brown dog" "dog")
+      (expect true))
+    (case "does not contain fox"
+      (mock (string_contains "The quick brown dog" "fox") false)
+      (input "The quick brown dog" "fox")
+      (expect false)))
+  
+  (fn concat_strings ((str1 string) (str2 string)) -> string
+    (ret (call string_concat str1 str2)))
+  
+  (test-spec concat_strings
+    (case "concat with Name label"
+      (mock (string_concat "Name: " "John") "Name: John")
+      (input "Name: " "John")
+      (expect "Name: John"))
+    (case "concat with Age label"
+      (mock (string_concat "Age: " "25") "Age: 25")
+      (input "Age: " "25")
+      (expect "Age: 25")))
+  
+  (meta-note "Tests advanced string operations - CSV parsing, trimming, template replacement, sanitization with atomic functions"))

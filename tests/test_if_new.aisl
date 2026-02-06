@@ -1,0 +1,17 @@
+(mod test_if_new
+  (fn test_true () -> string
+    (ret (if : string true (then "TRUE") (else "FALSE"))))
+  
+  (fn test_false () -> string
+    (ret (if : string false (then "TRUE") (else "FALSE"))))
+  
+  (fn main () -> i32
+    (call print "Test 1: if with true condition")
+    (set result1 string (call test_true))
+    (call print result1)
+    
+    (call print "Test 2: if with false condition")
+    (set result2 string (call test_false))
+    (call print result2)
+    
+    (ret 0)))

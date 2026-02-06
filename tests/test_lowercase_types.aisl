@@ -1,0 +1,50 @@
+(mod test_lowercase_types
+  (fn return_i32 ((a i32)) -> i32
+    (ret a))
+  
+  (test-spec return_i32
+    (case "return 42"
+      (input 42)
+      (expect 42)))
+  
+  (fn return_i64 ((b i64)) -> i64
+    (ret b))
+  
+  (test-spec return_i64
+    (case "return large number"
+      (input 9999999999)
+      (expect 9999999999)))
+  
+  (fn return_f32 ((c f32)) -> f32
+    (ret c))
+  
+  (test-spec return_f32
+    (case "return pi"
+      (input 3.14)
+      (expect 3.14)))
+  
+  (fn return_f64 ((d f64)) -> f64
+    (ret d))
+  
+  (test-spec return_f64
+    (case "return e"
+      (input 2.71828)
+      (expect 2.71828)))
+  
+  (fn return_string ((e string)) -> string
+    (ret e))
+  
+  (test-spec return_string
+    (case "return hello"
+      (input "hello")
+      (expect "hello")))
+  
+  (fn return_bool ((f bool)) -> bool
+    (ret f))
+  
+  (test-spec return_bool
+    (case "return true"
+      (input 1)
+      (expect 1)))
+  
+  (meta-note "Tests all lowercase type names: i32 i64 f32 f64 string bool array map"))
