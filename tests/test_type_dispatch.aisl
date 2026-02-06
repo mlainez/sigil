@@ -36,4 +36,4 @@
       (expect 0)))
   
   (meta-note "Tests type-directed dispatch for polymorphic operations (add, sub, mul)
-              LLMs can write 'add' instead of 'op_add_i32' and compiler resolves based on argument types"))
+              LLMs can write 'add' instead of 'add' and compiler resolves based on argument types"))

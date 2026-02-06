@@ -47,7 +47,7 @@
       (expect "0.0")))
   
   (fn concat_i32_string ((prefix string) (num i32)) -> string
-    (ret (call string_concat prefix (call string_from_i32 num))))
+    (ret (call concat prefix (call string_from_i32 num))))
   
   (test-spec concat_i32_string
     (case "concat with 100"

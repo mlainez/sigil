@@ -1,6 +1,6 @@
 (mod test
   (fn eq_i32 ((a i32) (b i32)) -> bool
-    (ret (call op_eq_i32 a b)))
+    (ret (call eq a b)))
   
   (test-spec eq_i32
     (case "equal values"
@@ -11,7 +11,7 @@
       (expect 0)))
   
   (fn ne_i32 ((a i32) (b i32)) -> bool
-    (ret (call op_ne_i32 a b)))
+    (ret (call ne a b)))
   
   (test-spec ne_i32
     (case "different values"
@@ -22,7 +22,7 @@
       (expect 0)))
   
   (fn lt_i32 ((a i32) (b i32)) -> bool
-    (ret (call op_lt_i32 a b)))
+    (ret (call lt a b)))
   
   (test-spec lt_i32
     (case "less than"
@@ -36,7 +36,7 @@
       (expect 0)))
   
   (fn gt_i32 ((a i32) (b i32)) -> bool
-    (ret (call op_gt_i32 a b)))
+    (ret (call gt a b)))
   
   (test-spec gt_i32
     (case "greater than"
@@ -50,7 +50,7 @@
       (expect 0)))
   
   (fn le_i32 ((a i32) (b i32)) -> bool
-    (ret (call op_le_i32 a b)))
+    (ret (call le a b)))
   
   (test-spec le_i32
     (case "equal values"
@@ -64,7 +64,7 @@
       (expect 0)))
   
   (fn ge_i32 ((a i32) (b i32)) -> bool
-    (ret (call op_ge_i32 a b)))
+    (ret (call ge a b)))
   
   (test-spec ge_i32
     (case "equal values"

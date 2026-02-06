@@ -1,6 +1,6 @@
 (mod test
   (fn eq_i64 ((a i64) (b i64)) -> bool
-    (ret (call op_eq_i64 a b)))
+    (ret (call eq a b)))
   
   (test-spec eq_i64
     (case "equal large numbers"
@@ -8,7 +8,7 @@
       (expect 1)))
   
   (fn ne_i64 ((a i64) (b i64)) -> bool
-    (ret (call op_ne_i64 a b)))
+    (ret (call ne a b)))
   
   (test-spec ne_i64
     (case "not equal large numbers"
@@ -16,7 +16,7 @@
       (expect 1)))
   
   (fn lt_i64 ((a i64) (b i64)) -> bool
-    (ret (call op_lt_i64 a b)))
+    (ret (call lt a b)))
   
   (test-spec lt_i64
     (case "less than large numbers"
@@ -24,7 +24,7 @@
       (expect 1)))
   
   (fn gt_i64 ((a i64) (b i64)) -> bool
-    (ret (call op_gt_i64 a b)))
+    (ret (call gt a b)))
   
   (test-spec gt_i64
     (case "greater than large numbers"
@@ -32,7 +32,7 @@
       (expect 1)))
   
   (fn le_i64 ((a i64) (b i64)) -> bool
-    (ret (call op_le_i64 a b)))
+    (ret (call le a b)))
   
   (test-spec le_i64
     (case "less or equal i64"
@@ -40,7 +40,7 @@
       (expect 1)))
   
   (fn ge_i64 ((a i64) (b i64)) -> bool
-    (ret (call op_ge_i64 a b)))
+    (ret (call ge a b)))
   
   (test-spec ge_i64
     (case "greater or equal i64"

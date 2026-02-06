@@ -1,6 +1,6 @@
 (mod test
   (fn strlen ((s string)) -> i32
-    (ret (call string_length s)))
+    (ret (call len s)))
   
   (test-spec strlen
     (case "length of Hello"

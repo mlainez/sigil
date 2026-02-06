@@ -8,7 +8,7 @@
       (expect -5)))
   
   (fn negate ((x i32)) -> i32
-    (ret (call op_sub_i32 0 x)))
+    (ret (call sub 0 x)))
   
   (test-spec negate
     (case "negate 10"

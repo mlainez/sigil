@@ -27,7 +27,7 @@
       (expect "{\"current_condition\":[{\"temp_C\":\"15\"}]}")))
   
   (fn get_body_length ((body string)) -> i32
-    (ret (call string_length body)))
+    (ret (call len body)))
   
   (test-spec get_body_length
     (case "get length of response body"

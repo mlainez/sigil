@@ -1,0 +1,12 @@
+(mod test_simple_poly
+
+(fn test_add ((x i32) (y i32)) -> i32
+  (set result i32 (call add x y))
+  (ret result))
+
+(test-spec test_add
+  (case "basic polymorphic addition"
+    (input 10 5)
+    (expect 15)))
+
+)

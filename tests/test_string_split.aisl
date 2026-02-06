@@ -17,7 +17,7 @@
       (expect "one")))
   
   (fn count_split_parts ((input string) (delim string)) -> i32
-    (ret (call array_length (call string_split input delim))))
+    (ret (call len (call string_split input delim))))
   
   (test-spec count_split_parts
     (case "split by comma count"

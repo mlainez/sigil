@@ -2,27 +2,31 @@
   (fn test_break_in_while () -> i32
     (set i i32 0)
     (set sum i32 0)
-    (while (call op_lt_i32 i 100)
-      (set sum i32 (call op_add_i32 sum i))
-      (set i i32 (call op_add_i32 i 1))
-      (set should_break bool (call op_eq_i32 i 5))
+    (while (call lt i 100)
+      (set sum i32 (call add sum i))
+      (set i i32 (call add i 1))
+      (set should_break bool (call eq i 5))
       (ifnot should_break skip_break)
       (break)
       (label skip_break))
     (ret sum))
 
+  (test-spec test_break_in_while
+    (case "break at i=5, sum should be 0+1+2+3+4=10"
+      (input)
+      (expect 10)))
+
   (fn test_break_in_loop () -> i32
     (set count i32 0)
     (loop
-      (set count i32 (call op_add_i32 count 1))
-      (set should_break bool (call op_gt_i32 count 10))
+      (set count i32 (call add count 1))
+      (set should_break bool (call gt count 10))
       (ifnot should_break skip_break2)
       (break)
       (label skip_break2))
     (ret count))
 
-  (fn main () -> i32
-    (set result1 i32 (call test_break_in_while))
-    (set result2 i32 (call test_break_in_loop))
-    (call print "Break tests completed")
-    (ret 0)))
+  (test-spec test_break_in_loop
+    (case "break when count > 10"
+      (input)
+      (expect 11))))

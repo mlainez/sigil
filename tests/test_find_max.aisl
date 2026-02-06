@@ -1,10 +1,10 @@
 (mod demo
   (fn find_max_of_five ((v1 i32) (v2 i32) (v3 i32) (v4 i32) (v5 i32)) -> i32
     (set max i32 v1)
-    (set max i32 (call if_i32 (call op_gt_i32 v2 max) v2 max))
-    (set max i32 (call if_i32 (call op_gt_i32 v3 max) v3 max))
-    (set max i32 (call if_i32 (call op_gt_i32 v4 max) v4 max))
-    (set max i32 (call if_i32 (call op_gt_i32 v5 max) v5 max))
+    (set max i32 (call if_i32 (call gt v2 max) v2 max))
+    (set max i32 (call if_i32 (call gt v3 max) v3 max))
+    (set max i32 (call if_i32 (call gt v4 max) v4 max))
+    (set max i32 (call if_i32 (call gt v5 max) v5 max))
     (ret max))
   
   (test-spec find_max_of_five

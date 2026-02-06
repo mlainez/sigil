@@ -131,7 +131,27 @@ static const char* get_typed_operation(const char* short_name, TypeKind type) {
     // Map short names to typed operation names
     // For example: "add" + TYPE_I32 -> "op_add_i32"
     
-    static char buffer[64];
+    // Use multiple buffers to avoid overwrites during nested compilation
+    static char buffers[8][64];
+    static int buffer_index = 0;
+    char* buffer = buffers[buffer_index];
+    buffer_index = (buffer_index + 1) % 8;
+    
+    // String operations (handle these first before type_suffix check)
+    if (strcmp(short_name, "concat") == 0) return "string_concat";
+    if (strcmp(short_name, "slice") == 0) return "string_slice";
+    if (strcmp(short_name, "from_i32") == 0) return "string_from_i32";
+    if (strcmp(short_name, "from_i64") == 0) return "string_from_i64";
+    if (strcmp(short_name, "from_f32") == 0) return "string_from_f32";
+    if (strcmp(short_name, "from_f64") == 0) return "string_from_f64";
+    if (strcmp(short_name, "from_bool") == 0) return "string_from_bool";
+    
+    // Length operation - could be array or string, need context
+    if (strcmp(short_name, "len") == 0) {
+        if (type == TYPE_STRING) return "string_length";
+        return "array_length";
+    }
+    
     const char* type_suffix = "";
     
     switch (type) {
@@ -151,7 +171,7 @@ static const char* get_typed_operation(const char* short_name, TypeKind type) {
         strcmp(short_name, "div") == 0 ||
         strcmp(short_name, "mod") == 0 ||
         strcmp(short_name, "neg") == 0) {
-        snprintf(buffer, sizeof(buffer), "op_%s%s", short_name, type_suffix);
+        snprintf(buffer, 64, "op_%s%s", short_name, type_suffix);
         return buffer;
     }
     
@@ -161,16 +181,34 @@ static const char* get_typed_operation(const char* short_name, TypeKind type) {
         strcmp(short_name, "gt") == 0 ||
         strcmp(short_name, "le") == 0 ||
         strcmp(short_name, "ge") == 0) {
-        snprintf(buffer, sizeof(buffer), "op_%s%s", short_name, type_suffix);
+        snprintf(buffer, 64, "op_%s%s", short_name, type_suffix);
         return buffer;
     }
     
     if (strcmp(short_name, "abs") == 0 ||
         strcmp(short_name, "min") == 0 ||
         strcmp(short_name, "max") == 0) {
-        snprintf(buffer, sizeof(buffer), "math_%s%s", short_name, type_suffix);
+        snprintf(buffer, 64, "math_%s%s", short_name, type_suffix);
         return buffer;
     }
+    
+    // I/O operations - dispatch on argument type
+    if (strcmp(short_name, "print") == 0) {
+        switch (type) {
+            case TYPE_I32: return "io_print_i32";
+            case TYPE_I64: return "io_print_i64";
+            case TYPE_F32: return "io_print_f32";
+            case TYPE_F64: return "io_print_f64";
+            case TYPE_BOOL: return "io_print_bool";
+            case TYPE_STRING: return "io_print_str";
+            default: return "io_print_i32";
+        }
+    }
+    
+    // Array operations (type-agnostic in VM, but keep existing names)
+    if (strcmp(short_name, "push") == 0) return "array_push";
+    if (strcmp(short_name, "get") == 0) return "array_get";
+    if (strcmp(short_name, "set") == 0) return "array_set";
     
     // Not a polymorphic operation, return as-is
     return short_name;
@@ -311,7 +349,13 @@ void compile_apply(Compiler* comp, Expr* expr) {
         strcmp(name, "lt") == 0 || strcmp(name, "gt") == 0 ||
         strcmp(name, "le") == 0 || strcmp(name, "ge") == 0 ||
         strcmp(name, "abs") == 0 || strcmp(name, "min") == 0 ||
-        strcmp(name, "max") == 0) {
+        strcmp(name, "max") == 0 ||
+        strcmp(name, "print") == 0 || strcmp(name, "len") == 0 ||
+        strcmp(name, "push") == 0 || strcmp(name, "get") == 0 ||
+        strcmp(name, "set") == 0 || strcmp(name, "concat") == 0 ||
+        strcmp(name, "slice") == 0 || strcmp(name, "from_i32") == 0 ||
+        strcmp(name, "from_i64") == 0 || strcmp(name, "from_f32") == 0 ||
+        strcmp(name, "from_f64") == 0 || strcmp(name, "from_bool") == 0) {
         
         // Get type from first argument
         if (!expr->data.apply.args) {
@@ -321,7 +365,7 @@ void compile_apply(Compiler* comp, Expr* expr) {
         
         // Check if first argument is a variable reference
         Expr* first_arg = expr->data.apply.args->expr;
-        TypeKind arg_type = TYPE_UNIT;
+        TypeKind arg_type = TYPE_I32;  // Default to i32 if type can't be determined
         
         if (first_arg->kind == EXPR_VAR) {
             // Look up variable type
@@ -330,10 +374,25 @@ void compile_apply(Compiler* comp, Expr* expr) {
                 fprintf(stderr, "Undefined variable in operation: %s\n", first_arg->data.var.name);
                 exit(1);
             }
+        } else if (first_arg->kind == EXPR_LIT_INT) {
+            // Integer literal defaults to i32
+            arg_type = TYPE_I32;
+        } else if (first_arg->kind == EXPR_LIT_FLOAT) {
+            // Float literal defaults to f64
+            arg_type = TYPE_F64;
+        } else if (first_arg->kind == EXPR_LIT_STRING) {
+            // String literal
+            arg_type = TYPE_STRING;
         } else if (first_arg->type) {
             // Use type from expression
             arg_type = type_to_typekind(first_arg->type);
+            // If we got TYPE_UNIT (unknown type from nested expr), default to TYPE_I32
+            // But preserve TYPE_STRING and other known types
+            if (arg_type == TYPE_UNIT) {
+                arg_type = TYPE_I32;
+            }
         }
+        // Otherwise use default TYPE_I32
         
         // Map to typed operation
         const char* typed_name = get_typed_operation(name, arg_type);

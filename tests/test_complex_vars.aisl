@@ -1,6 +1,6 @@
 (mod test
   (fn mul_then_add ((x i32) (y i32) (z i32)) -> i32
-    (ret (call op_add_i32 (call op_mul_i32 x y) z)))
+    (ret (call add (call mul x y) z)))
   
   (test-spec mul_then_add
     (case "10 * 20 + 30"
@@ -14,7 +14,7 @@
       (expect 5)))
   
   (fn mul_f32 ((a f32) (b f32)) -> f32
-    (ret (call op_mul_f32 a b)))
+    (ret (call mul a b)))
   
   (test-spec mul_f32
     (case "pi * 2"

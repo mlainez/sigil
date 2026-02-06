@@ -1,6 +1,6 @@
 (mod test
   (fn print_string ((msg string)) -> i32
-    (call io_print_str msg)
+    (call print msg)
     (ret 0))
   
   (test-spec print_string
@@ -18,7 +18,7 @@
       (expect 0)))
   
   (fn print_integer ((num i32)) -> i32
-    (call io_print_i32 num)
+    (call print num)
     (ret 0))
   
   (test-spec print_integer

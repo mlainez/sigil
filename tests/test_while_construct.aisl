@@ -1,12 +1,13 @@
 (mod test_while
   (fn test_while () -> i32
     (set count i32 0)
-    (while (call op_lt_i32 count 3)
+    (while (call lt count 3)
       (call print "In while loop")
-      (set count i32 (call op_add_i32 count 1)))
+      (set count i32 (call add count 1)))
     (call print "Done")
     (ret count))
 
-  (fn main () -> i32
-    (set result i32 (call test_while))
-    (ret result)))
+  (test-spec test_while
+    (case "while loop 3 iterations"
+      (input)
+      (expect 3))))

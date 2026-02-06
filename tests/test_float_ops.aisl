@@ -1,6 +1,6 @@
 (mod math
   (fn multiply_f64 ((a f64) (b f64)) -> f64
-    (ret (call op_mul_f64 a b)))
+    (ret (call mul a b)))
   
   (test-spec multiply_f64
     (case "multiply pi by 2"
@@ -14,7 +14,7 @@
       (expect 7.5)))
   
   (fn add_f64 ((a f64) (b f64)) -> f64
-    (ret (call op_add_f64 a b)))
+    (ret (call add a b)))
   
   (test-spec add_f64
     (case "add decimals"

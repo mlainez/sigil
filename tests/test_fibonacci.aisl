@@ -1,14 +1,14 @@
 (mod fibonacci
   (fn fib_nth ((n i32)) -> i32
     (ret (call if_i32 
-      (call op_eq_i32 n 0)
+      (call eq n 0)
       0
       (call if_i32 
-        (call op_eq_i32 n 1)
+        (call eq n 1)
         1
-        (call op_add_i32 
-          (call fib_nth (call op_sub_i32 n 1))
-          (call fib_nth (call op_sub_i32 n 2)))))))
+        (call add 
+          (call fib_nth (call sub n 1))
+          (call fib_nth (call sub n 2)))))))
   
   (test-spec fib_nth
     (case "fibonacci 0"

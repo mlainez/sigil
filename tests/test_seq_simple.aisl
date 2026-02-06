@@ -11,7 +11,7 @@
       (expect 30)))
   
   (fn sum_three ((a i32) (b i32) (c i32)) -> i32
-    (ret (call op_add_i32 (call op_add_i32 a b) c)))
+    (ret (call add (call add a b) c)))
   
   (test-spec sum_three
     (case "sum 1 2 3"

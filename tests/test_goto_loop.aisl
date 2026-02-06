@@ -2,13 +2,13 @@
   (fn count_to_five () -> i32
     (set n i32 0)
     (label loop_start)
-    (set n i32 (call op_add_i32 n 1))
-    (ifnot (call op_lt_i32 n 5) loop_end)
+    (set n i32 (call add n 1))
+    (ifnot (call lt n 5) loop_end)
     (goto loop_start)
     (label loop_end)
     (ret n))
 
-  (fn main () -> i32
-    (set result i32 (call count_to_five))
-    (call print "Loop complete")
-    (ret 0)))
+  (test-spec count_to_five
+    (case "count using goto/label"
+      (input)
+      (expect 5))))

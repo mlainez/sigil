@@ -2,33 +2,37 @@
   (fn test_continue_in_while () -> i32
     (set i i32 0)
     (set sum i32 0)
-    (while (call op_lt_i32 i 10)
-      (set i i32 (call op_add_i32 i 1))
-      (set skip bool (call op_eq_i32 i 3))
+    (while (call lt i 10)
+      (set i i32 (call add i 1))
+      (set skip bool (call eq i 3))
       (ifnot skip no_cont)
       (continue)
       (label no_cont)
-      (set sum i32 (call op_add_i32 sum i)))
+      (set sum i32 (call add sum i)))
     (ret sum))
+
+  (test-spec test_continue_in_while
+    (case "sum 1 to 10 except 3"
+      (input)
+      (expect 52)))
 
   (fn test_continue_in_loop () -> i32
     (set i i32 0)
     (set count i32 0)
     (loop
-      (set i i32 (call op_add_i32 i 1))
-      (set should_break bool (call op_gt_i32 i 10))
+      (set i i32 (call add i 1))
+      (set should_break bool (call gt i 10))
       (ifnot should_break no_break)
       (break)
       (label no_break)
-      (set skip bool (call op_eq_i32 i 5))
+      (set skip bool (call eq i 5))
       (ifnot skip no_cont2)
       (continue)
       (label no_cont2)
-      (set count i32 (call op_add_i32 count 1)))
+      (set count i32 (call add count 1)))
     (ret count))
 
-  (fn main () -> i32
-    (set result1 i32 (call test_continue_in_while))
-    (set result2 i32 (call test_continue_in_loop))
-    (call print "Continue tests completed")
-    (ret 0)))
+  (test-spec test_continue_in_loop
+    (case "count iterations except when i=5"
+      (input)
+      (expect 9))))

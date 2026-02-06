@@ -3,11 +3,12 @@
     (set count i32 0)
     (loop
       (call print "In loop")
-      (set count i32 (call op_add_i32 count 1))
-      (ifnot (call op_lt_i32 count 3) done))
+      (set count i32 (call add count 1))
+      (ifnot (call lt count 3) done))
     (label done)
     (ret count))
 
-  (fn main () -> i32
-    (set result i32 (call test_loop))
-    (ret result)))
+  (test-spec test_loop
+    (case "infinite loop with manual exit"
+      (input)
+      (expect 3))))

@@ -1,6 +1,6 @@
 (mod test
   (fn eq_f32 ((a f32) (b f32)) -> bool
-    (ret (call op_eq_f32 a b)))
+    (ret (call eq a b)))
   
   (test-spec eq_f32
     (case "equal f32"
@@ -11,7 +11,7 @@
       (expect 0)))
   
   (fn lt_f32 ((a f32) (b f32)) -> bool
-    (ret (call op_lt_f32 a b)))
+    (ret (call lt a b)))
   
   (test-spec lt_f32
     (case "less than f32"
@@ -22,7 +22,7 @@
       (expect 0)))
   
   (fn gt_f32 ((a f32) (b f32)) -> bool
-    (ret (call op_gt_f32 a b)))
+    (ret (call gt a b)))
   
   (test-spec gt_f32
     (case "greater than f32"
@@ -33,7 +33,7 @@
       (expect 0)))
   
   (fn eq_f64 ((a f64) (b f64)) -> bool
-    (ret (call op_eq_f64 a b)))
+    (ret (call eq a b)))
   
   (test-spec eq_f64
     (case "equal f64 pi"
@@ -44,7 +44,7 @@
       (expect 0)))
   
   (fn lt_f64 ((a f64) (b f64)) -> bool
-    (ret (call op_lt_f64 a b)))
+    (ret (call lt a b)))
   
   (test-spec lt_f64
     (case "less than f64"
@@ -55,7 +55,7 @@
       (expect 0)))
   
   (fn gt_f64 ((a f64) (b f64)) -> bool
-    (ret (call op_gt_f64 a b)))
+    (ret (call gt a b)))
   
   (test-spec gt_f64
     (case "greater than f64"

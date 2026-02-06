@@ -1,6 +1,6 @@
 (mod test
   (fn multiply ((a i32) (b i32)) -> i32
-    (ret (call op_mul_i32 a b)))
+    (ret (call mul a b)))
   
   (test-spec multiply
     (case "multiply positive numbers"
@@ -18,9 +18,9 @@
   
   (fn factorial ((n i32)) -> i32
     (ret (call if_i32 
-      (call op_le_i32 n 1)
+      (call le n 1)
       1
-      (call op_mul_i32 n (call factorial (call op_sub_i32 n 1))))))
+      (call mul n (call factorial (call sub n 1))))))
   
   (test-spec factorial
     (case "factorial of 5"

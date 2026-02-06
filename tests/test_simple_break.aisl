@@ -2,14 +2,14 @@
   (fn test_simple () -> i32
     (set i i32 0)
     (loop
-      (set i i32 (call op_add_i32 i 1))
-      (set done bool (call op_eq_i32 i 3))
+      (set i i32 (call add i 1))
+      (set done bool (call eq i 3))
       (ifnot done skip)
       (break)
       (label skip))
     (ret i))
 
-  (fn main () -> i32
-    (set result i32 (call test_simple))
-    (call print "Done")
-    (ret 0)))
+  (test-spec test_simple
+    (case "break when i equals 3"
+      (input)
+      (expect 3))))
