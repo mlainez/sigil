@@ -2446,6 +2446,9 @@ void compile_module(Compiler* comp, Module* module) {
         uint32_t main_idx = bytecode_declare_function(comp->program, "main", 0);
         compiler_add_function(comp, "main", main_idx, 0);
         
+        // Set function start before emitting instructions
+        bytecode_set_function_start(comp->program, main_idx, comp->program->instruction_count);
+        
         // Generate main body: just return 0
         // (fn main -> int (ret 0))
         Instruction push_zero = {.opcode = OP_PUSH_INT, .operand.int_val = 0};
