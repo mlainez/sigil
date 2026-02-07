@@ -1,0 +1,343 @@
+@(phase-2-design core-stdlib-separation)
+
+@(objective
+  "Split 191 opcodes into 35 core ops + 156 stdlib ops across 11 modules.
+   Core = minimal VM primitives that cannot be library functions.
+   Stdlib = high-level operations that can be implemented as library functions.")
+
+@(core-opcodes 35
+  @(rationale "These operations MUST be in the VM because they manipulate
+              stack/locals/control flow or are type primitives.")
+  
+  @(stack 7
+    OP_PUSH_INT       ; Push integer literal
+    OP_PUSH_FLOAT     ; Push float literal
+    OP_PUSH_STRING    ; Push string literal
+    OP_PUSH_BOOL      ; Push boolean literal
+    OP_PUSH_UNIT      ; Push unit/void value
+    OP_POP            ; Pop stack top
+    OP_DUP)           ; Duplicate stack top
+  
+  @(variables 4
+    OP_LOAD_LOCAL     ; Load local variable
+    OP_STORE_LOCAL    ; Store local variable
+    OP_LOAD_GLOBAL    ; Load global variable
+    OP_STORE_GLOBAL)  ; Store global variable
+  
+  @(arithmetic-int 6
+    OP_ADD_INT        ; a + b
+    OP_SUB_INT        ; a - b
+    OP_MUL_INT        ; a * b
+    OP_DIV_INT        ; a / b
+    OP_MOD_INT        ; a % b
+    OP_NEG_INT)       ; -a
+  
+  @(arithmetic-float 5
+    OP_ADD_FLOAT      ; a + b
+    OP_SUB_FLOAT      ; a - b
+    OP_MUL_FLOAT      ; a * b
+    OP_DIV_FLOAT      ; a / b
+    OP_NEG_FLOAT)     ; -a
+  
+  @(comparison 6
+    OP_EQ_INT OP_NE_INT OP_LT_INT OP_GT_INT OP_LE_INT OP_GE_INT)
+  
+  @(comparison-float 6
+    OP_EQ_FLOAT OP_NE_FLOAT OP_LT_FLOAT OP_GT_FLOAT OP_LE_FLOAT OP_GE_FLOAT)
+  
+  @(logical 3
+    OP_AND_BOOL       ; a && b
+    OP_OR_BOOL        ; a || b
+    OP_NOT_BOOL)      ; !a
+  
+  @(control-flow 5
+    OP_JUMP           ; Unconditional jump
+    OP_JUMP_IF_FALSE  ; Conditional jump
+    OP_JUMP_IF_TRUE   ; Conditional jump
+    OP_CALL           ; Function call
+    OP_RETURN)        ; Return from function
+  
+  @(type-ops 2
+    OP_CAST_INT_FLOAT   ; Type conversion
+    OP_CAST_FLOAT_INT)  ; Type conversion
+  
+  @(io-minimal 1
+    OP_PRINT)         ; Polymorphic print for debugging
+  
+  @(total 35))
+
+@(stdlib-modules 11
+  @(rationale "These operations CAN be implemented as library functions.
+              They don't need special VM support.")
+  
+  @(module math 8
+    @(import "(import math)")
+    @(ops
+      OP_MATH_SQRT_FLOAT   ; sqrt(x)
+      OP_MATH_POW_FLOAT    ; pow(x, y)
+      OP_MATH_ABS_INT      ; abs(x)
+      OP_MATH_ABS_FLOAT    ; abs(x)
+      OP_MATH_MIN_INT      ; min(a, b)
+      OP_MATH_MIN_FLOAT    ; min(a, b)
+      OP_MATH_MAX_INT      ; max(a, b)
+      OP_MATH_MAX_FLOAT))  ; max(a, b)
+  
+  @(module string 14
+    @(import "(import string)")
+    @(ops
+      OP_STR_LEN           ; length(s)
+      OP_STR_CONCAT        ; concat(s1, s2)
+      OP_STR_SLICE         ; slice(s, start, end)
+      OP_STR_GET           ; get(s, index) -> char
+      OP_STR_FROM_INT      ; from_int(n)
+      OP_STR_FROM_FLOAT    ; from_float(f)
+      OP_STR_SPLIT         ; split(s, delim)
+      OP_STR_TRIM          ; trim(s)
+      OP_STR_CONTAINS      ; contains(s, needle)
+      OP_STR_REPLACE       ; replace(s, old, new)
+      OP_STR_STARTS_WITH   ; starts_with(s, prefix)
+      OP_STR_ENDS_WITH     ; ends_with(s, suffix)
+      OP_STR_TO_UPPER      ; to_upper(s)
+      OP_STR_TO_LOWER))    ; to_lower(s)
+  
+  @(module array 12
+    @(import "(import array)")
+    @(ops
+      OP_ARRAY_NEW         ; new() -> []
+      OP_ARRAY_PUSH        ; push(arr, val)
+      OP_ARRAY_POP         ; pop(arr) -> val
+      OP_ARRAY_GET         ; get(arr, idx) -> val
+      OP_ARRAY_SET         ; set(arr, idx, val)
+      OP_ARRAY_LEN         ; len(arr) -> int
+      OP_ARRAY_SLICE       ; slice(arr, start, end)
+      OP_ARRAY_SORT        ; sort(arr)
+      OP_ARRAY_REVERSE     ; reverse(arr)
+      OP_ARRAY_FILTER      ; filter(arr, fn)
+      OP_ARRAY_MAP         ; map(arr, fn)
+      OP_ARRAY_REDUCE))    ; reduce(arr, fn, init)
+  
+  @(module map 6
+    @(import "(import map)")
+    @(ops
+      OP_MAP_NEW           ; new() -> {}
+      OP_MAP_SET           ; set(m, key, val)
+      OP_MAP_GET           ; get(m, key) -> val
+      OP_MAP_HAS           ; has(m, key) -> bool
+      OP_MAP_DELETE        ; delete(m, key)
+      OP_MAP_LEN))         ; len(m) -> int
+  
+  @(module json 11
+    @(import "(import json)")
+    @(ops
+      OP_JSON_PARSE        ; parse(s) -> json
+      OP_JSON_STRINGIFY    ; stringify(j) -> string
+      OP_JSON_NEW_OBJECT   ; object() -> {}
+      OP_JSON_NEW_ARRAY    ; array() -> []
+      OP_JSON_GET          ; get(j, key) -> val
+      OP_JSON_SET          ; set(j, key, val)
+      OP_JSON_HAS          ; has(j, key) -> bool
+      OP_JSON_DELETE       ; delete(j, key)
+      OP_JSON_PUSH         ; push(j, val) - for arrays
+      OP_JSON_LENGTH       ; length(j) -> int
+      OP_JSON_TYPE))       ; type(j) -> string
+  
+  @(module result 8
+    @(import "(import result)")
+    @(ops
+      OP_RESULT_OK         ; ok(val) -> Result
+      OP_RESULT_ERR        ; err(msg) -> Result
+      OP_RESULT_IS_OK      ; is_ok(r) -> bool
+      OP_RESULT_IS_ERR     ; is_err(r) -> bool
+      OP_RESULT_UNWRAP     ; unwrap(r) -> val (panic if err)
+      OP_RESULT_UNWRAP_OR  ; unwrap_or(r, default) -> val
+      OP_RESULT_ERROR_CODE ; error_code(r) -> int
+      OP_RESULT_ERROR_MSG)); error_msg(r) -> string
+  
+  @(module file 12
+    @(import "(import file)")
+    @(ops
+      OP_FILE_READ         ; read(path) -> string
+      OP_FILE_WRITE        ; write(path, content)
+      OP_FILE_APPEND       ; append(path, content)
+      OP_FILE_EXISTS       ; exists(path) -> bool
+      OP_FILE_DELETE       ; delete(path)
+      OP_FILE_SIZE         ; size(path) -> int
+      OP_FILE_MTIME        ; mtime(path) -> int (timestamp)
+      OP_FILE_READ_RESULT  ; read_result(path) -> Result<string>
+      OP_FILE_WRITE_RESULT ; write_result(path, content) -> Result
+      OP_FILE_LIST_DIR     ; list_dir(path) -> array<string>
+      OP_FILE_CREATE_DIR   ; create_dir(path)
+      OP_FILE_DELETE_DIR)) ; delete_dir(path)
+  
+  @(module net 20
+    @(import "(import net)")
+    @(ops
+      OP_TCP_LISTEN        ; listen(port) -> socket
+      OP_TCP_ACCEPT        ; accept(socket) -> conn
+      OP_TCP_CONNECT       ; connect(host, port) -> conn
+      OP_TCP_SEND          ; send(conn, data)
+      OP_TCP_RECEIVE       ; receive(conn, max_bytes) -> string
+      OP_TCP_CLOSE         ; close(conn)
+      OP_HTTP_GET          ; get(url) -> response
+      OP_HTTP_POST         ; post(url, body) -> response
+      OP_HTTP_PUT          ; put(url, body) -> response
+      OP_HTTP_DELETE       ; delete(url) -> response
+      OP_HTTP_REQUEST      ; request(method, url, headers, body)
+      OP_HTTP_GET_STATUS   ; get_status(resp) -> int
+      OP_HTTP_GET_BODY     ; get_body(resp) -> string
+      OP_HTTP_GET_HEADER   ; get_header(resp, name) -> string
+      OP_WS_CONNECT        ; ws_connect(url) -> ws
+      OP_WS_SEND           ; ws_send(ws, msg)
+      OP_WS_RECEIVE        ; ws_receive(ws) -> string
+      OP_WS_CLOSE          ; ws_close(ws)
+      OP_TLS_CONNECT       ; tls_connect(host, port) -> conn
+      OP_TLS_HANDSHAKE))   ; tls_handshake(conn)
+  
+  @(module regex 7
+    @(import "(import regex)")
+    @(ops
+      OP_REGEX_COMPILE     ; compile(pattern) -> regex
+      OP_REGEX_MATCH       ; match(regex, s) -> bool
+      OP_REGEX_FIND        ; find(regex, s) -> string
+      OP_REGEX_FIND_ALL    ; find_all(regex, s) -> array
+      OP_REGEX_REPLACE     ; replace(regex, s, repl) -> string
+      OP_REGEX_SPLIT       ; split(regex, s) -> array
+      OP_REGEX_IS_VALID))  ; is_valid(pattern) -> bool
+  
+  @(module crypto 8
+    @(import "(import crypto)")
+    @(ops
+      OP_CRYPTO_SHA256     ; sha256(s) -> string
+      OP_CRYPTO_MD5        ; md5(s) -> string
+      OP_CRYPTO_HMAC       ; hmac_sha256(key, msg) -> string
+      OP_CRYPTO_BASE64_ENC ; base64_encode(s) -> string
+      OP_CRYPTO_BASE64_DEC ; base64_decode(s) -> string
+      OP_CRYPTO_RANDOM     ; random_bytes(n) -> string
+      OP_CRYPTO_UUID       ; uuid() -> string
+      OP_CRYPTO_HASH))     ; hash(algo, data) -> string
+  
+  @(module time 6
+    @(import "(import time)")
+    @(ops
+      OP_TIME_NOW          ; now() -> int (unix timestamp)
+      OP_TIME_FORMAT       ; format(ts, fmt) -> string
+      OP_TIME_PARSE        ; parse(s, fmt) -> int
+      OP_TIME_SLEEP        ; sleep(ms)
+      OP_TIME_YEAR         ; year(ts) -> int
+      OP_TIME_MONTH))      ; month(ts) -> int
+  
+  @(module io 5
+    @(import "(import io)")
+    @(ops
+      OP_IO_PRINTLN        ; println(val)
+      OP_IO_READ_LINE      ; read_line() -> string
+      OP_IO_WRITE          ; write(fd, data)
+      OP_IO_READ           ; read(fd, max) -> string
+      OP_IO_FLUSH))        ; flush()
+  
+  @(total-stdlib 117))
+
+@(import-syntax
+  @(full-module
+    "(import math)"
+    ; Makes all math.* functions available with qualified names
+    ; Example: (call math.sqrt 16.0))
+  
+  @(selective-import
+    "(import (string len concat trim))"
+    ; Makes only specific functions available with unqualified names
+    ; Example: (call len "hello"))
+  
+  @(aliased-import
+    "(import (math :as m))"
+    ; Makes functions available with custom prefix
+    ; Example: (call m.sqrt 16.0))
+  
+  @(multiple-imports
+    "(import math)
+     (import string)
+     (import array)"
+    ; Multiple import statements at module top))
+
+@(backward-compatibility
+  @(mode auto-import
+    @(trigger "No import statements in file")
+    @(behavior "Automatically import ALL stdlib modules")
+    @(performance "Higher initial load time, all 191 ops available")
+    @(use-case "Legacy code, quick scripts, REPL"))
+  
+  @(mode explicit-import
+    @(trigger "At least one import statement in file")
+    @(behavior "Only load imported modules")
+    @(performance "Fast load, minimal memory, only imported ops available")
+    @(use-case "Production code, token-efficient LLM generation")))
+
+@(implementation-steps
+  @(step-1 parser
+    @(file "compiler/c/src/parser.c")
+    @(changes
+      "Add parse_import_statement() function"
+      "Recognize (import ...) at module top"
+      "Store imports in AST node: Module.imports[]"
+      "Parse three forms: full, selective, aliased"))
+  
+  @(step-2 compiler
+    @(file "compiler/c/src/compiler.c")
+    @(changes
+      "Check if function call requires module"
+      "If function in stdlib, emit qualified call"
+      "If no imports, enable auto-import mode"
+      "Resolve module.function -> opcode"))
+  
+  @(step-3 bytecode
+    @(file "compiler/c/include/bytecode.h")
+    @(changes
+      "Keep all 191 opcodes (no removal yet)"
+      "Add module ID to bytecode program header"
+      "Add opcode -> module mapping table"))
+  
+  @(step-4 vm
+    @(file "compiler/c/src/vm.c")
+    @(changes
+      "Add module_loaded[] bitmap"
+      "Lazy-load module implementations"
+      "Check module loaded before executing opcode"
+      "Error if opcode used but module not imported"))
+  
+  @(step-5 tests
+    @(changes
+      "Update all 89 tests to add imports"
+      "Create test_imports.aisl for import syntax"
+      "Create test_auto_import.aisl for legacy mode"
+      "Test module not imported error")))
+
+@(example-migration
+  @(before
+    "; Old AISL (auto-import mode)
+     (mod example
+       (fn process text string -> string
+         (set trimmed string (call string_trim text))
+         (set upper string (call string_to_upper trimmed))
+         (ret upper)))")
+  
+  @(after
+    "; New AISL (explicit imports)
+     (import string)
+     
+     (mod example
+       (fn process text string -> string
+         (set trimmed string (call string.trim text))
+         (set upper string (call string.to_upper trimmed))
+         (ret upper)))"))
+
+@(benefits
+  (llm-token-efficiency "LLM only needs to know 35 core ops + imported modules")
+  (context-clarity "Imports document dependencies upfront")
+  (load-performance "Lazy loading = faster startup for small programs")
+  (namespace-hygiene "module.function prevents name collisions")
+  (gradual-migration "Auto-import mode preserves backward compat"))
+
+@(next-phase
+  "Phase 3: Implement module system in compiler and VM"
+  "Phase 4: Update all documentation"
+  "Phase 5: Migrate all 89 tests to use imports")
