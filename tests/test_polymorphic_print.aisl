@@ -1,31 +1,31 @@
 (mod test_polymorphic_print
-  (fn test_print_string () -> string
+  (fn test_print_string -> string
     (set s string "hello")
     (ret s))
   
-  (fn test_print_i32 () -> i32
-    (set x i32 42)
+  (fn test_print_i32 -> int
+    (set x int 42)
     (ret x))
   
-  (fn test_print_i64 () -> i64
-    (set x i64 9999999999)
+  (fn test_print_i64 -> int
+    (set x int 9999999999)
     (ret x))
   
-  (fn test_print_f32 () -> f32
-    (set x f32 3.14)
+  (fn test_print_f32 -> float
+    (set x float 3.14)
     (ret x))
   
-  (fn test_print_f64 () -> f64
-    (set x f64 2.718)
+  (fn test_print_f64 -> float
+    (set x float 2.718)
     (ret x))
   
-  (fn test_print_bool_true () -> bool
+  (fn test_print_bool_true -> bool
     (ret true))
   
-  (fn test_print_bool_false () -> bool
+  (fn test_print_bool_false -> bool
     (ret false))
   
-  (fn test_print_comparison () -> bool
+  (fn test_print_comparison -> bool
     (ret (call lt 5 10)))
   
   (test-spec test_print_string
@@ -34,22 +34,22 @@
       (expect "hello")))
   
   (test-spec test_print_i32
-    (case "returns i32 value"
+    (case "returns int value"
       (input)
       (expect 42)))
   
   (test-spec test_print_i64
-    (case "returns i64 value"
+    (case "returns int value"
       (input)
       (expect 9999999999)))
   
   (test-spec test_print_f32
-    (case "returns f32 value"
+    (case "returns float value"
       (input)
       (expect 3.14)))
   
   (test-spec test_print_f64
-    (case "returns f64 value"
+    (case "returns float value"
       (input)
       (expect 2.718)))
   
@@ -68,4 +68,4 @@
       (input)
       (expect true)))
   
-  (meta-note "Tests polymorphic print dispatch for all primitive types: string, i32, i64, f32, f64, bool, and nested comparison expressions"))
+  (meta-note "Tests polymorphic print dispatch for all primitive types: string, int, int, float, float, bool, and nested comparison expressions"))

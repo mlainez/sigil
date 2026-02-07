@@ -1,5 +1,5 @@
 (mod fibonacci
-  (fn fib_nth ((n i32)) -> i32
+  (fn fib_nth n int -> int
     (ret (call if_i32 
       (call eq n 0)
       0

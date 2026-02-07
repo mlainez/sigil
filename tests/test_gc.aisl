@@ -1,5 +1,5 @@
 (mod test_gc
-  (fn get_gc_stats () -> array
+  (fn get_gc_stats -> array
     (ret (call gc_stats)))
   
   (test-spec get_gc_stats
@@ -8,7 +8,7 @@
       (input)
       (expect "stats_array")))
   
-  (fn create_array ((size i32)) -> array
+  (fn create_array size int -> array
     (ret (call ArrayNew size)))
   
   (test-spec create_array
@@ -21,7 +21,7 @@
       (input 20)
       (expect "array_20")))
   
-  (fn set_array_value ((arr array) (idx i32) (val i32)) -> array
+  (fn set_array_value arr array idx int val int -> array
     (call ArraySet arr idx val)
     (ret arr))
   
@@ -31,7 +31,7 @@
       (input "array_10" 0 42)
       (expect "array_10")))
   
-  (fn get_array_value ((arr array) (idx i32)) -> i64
+  (fn get_array_value arr array idx int -> int
     (ret (call ArrayGet arr idx)))
   
   (test-spec get_array_value
@@ -44,7 +44,7 @@
       (input "stats_array" 1)
       (expect 2048)))
   
-  (fn trigger_gc () -> i32
+  (fn trigger_gc -> int
     (call gc_collect)
     (ret 0))
   

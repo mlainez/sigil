@@ -45,6 +45,12 @@ Type* parser_parse_type(Parser* parser) {
     Token tok = parser->current;
 
     switch (tok.kind) {
+        case TOK_TYPE_INT:
+            parser_advance(parser);
+            return type_i64();  // int maps to i64
+        case TOK_TYPE_FLOAT:
+            parser_advance(parser);
+            return type_f64();  // float maps to f64
         case TOK_TYPE_I8:
             parser_advance(parser);
             return type_i8();
@@ -725,49 +731,26 @@ static Definition* parser_parse_function_v3(Parser* parser) {
     parser_advance(parser);
 
     // Parse parameters - Accept both syntaxes:
-    // OLD: ((param_name type) (param_name type)) - double nested
-    // NEW: param_name type param_name type       - flat [RECOMMENDED for LLMs]
+    // FLAT SYNTAX ONLY: param_name type param_name type
+    // One canonical form - maximum explicitness, zero ambiguity
     ParamList* params = NULL;
     ParamList* params_tail = NULL;
     
-    // Check if using old syntax with parameter list paren
-    bool has_param_list_paren = false;
-    if (parser->current.kind == TOK_LPAREN) {
-        // Lookahead: is the next token also a paren? Then it's old syntax
-        // Otherwise treat first LPAREN as start of old-style param list
-        has_param_list_paren = true;
-        parser_advance(parser); // consume the opening (
-    }
-    
-    // Parse parameters until we hit -> or )
-    while (parser->current.kind != TOK_ARROW && parser->current.kind != TOK_RPAREN) {
+    // Parse parameters until we hit ->
+    while (parser->current.kind != TOK_ARROW) {
         char* param_name = NULL;
         Type* param_type = NULL;
         
-        if (parser->current.kind == TOK_LPAREN) {
-            // OLD syntax: each param wrapped in parens
-            parser_advance(parser); // consume (
-            // Accept identifiers, var, and test keywords like "input", "expect", "delim" etc.
-            if (parser->current.kind != TOK_IDENTIFIER && 
-                parser->current.kind != TOK_VAR &&
-                parser->current.kind != TOK_INPUT &&
-                parser->current.kind != TOK_EXPECT) {
-                parser_error(parser, "Expected parameter name in old syntax");
-            }
-            param_name = strdup(parser->current.value.string_val);
-            parser_advance(parser);
-            param_type = parser_parse_type(parser);
-            parser_expect(parser, TOK_RPAREN); // consume )
-        } else if (parser->current.kind == TOK_IDENTIFIER || 
-                   parser->current.kind == TOK_VAR ||
-                   parser->current.kind == TOK_INPUT ||
-                   parser->current.kind == TOK_EXPECT) {
-            // NEW flat syntax: no parens around params
+        // Accept identifiers and test framework keywords
+        if (parser->current.kind == TOK_IDENTIFIER || 
+            parser->current.kind == TOK_VAR ||
+            parser->current.kind == TOK_INPUT ||
+            parser->current.kind == TOK_EXPECT) {
             param_name = strdup(parser->current.value.string_val);
             parser_advance(parser);
             param_type = parser_parse_type(parser);
         } else {
-            parser_error(parser, "Expected parameter definition");
+            parser_error(parser, "Expected parameter name (identifier or keyword)");
         }
         
         ParamList* new_param = param_list_new(param_name, param_type, NULL);
@@ -778,11 +761,6 @@ static Definition* parser_parse_function_v3(Parser* parser) {
             params_tail->next = new_param;
             params_tail = new_param;
         }
-    }
-    
-    // If we consumed opening paren, expect closing paren
-    if (has_param_list_paren) {
-        parser_expect(parser, TOK_RPAREN);
     }
 
     // STRICT MODE: Return type is REQUIRED

@@ -5,6 +5,27 @@
 
 ---
 
+## ⚡ FOR LLMs: OPTIMIZED FORMATS AVAILABLE
+
+**This document is human-readable prose with examples.**  
+**For token-optimized LLM consumption, use these instead:**
+
+- **`.aisl.grammar`** - Complete language reference in 40 lines (95% fewer tokens)
+- **`.aisl.meta`** - Project context in compressed s-expr format (80% fewer tokens)
+- **`.aisl.analysis`** - Deep architectural analysis for LLM-first design
+
+**Token efficiency:**
+- This file: ~600 lines = ~8,000 tokens
+- `.aisl.grammar`: ~40 lines = ~400 tokens
+- **20x more efficient for context loading**
+
+**When to use each:**
+- **First time learning AISL**: Read this file (AGENTS.md)
+- **Generating AISL code**: Load `.aisl.grammar` + `.aisl.meta`
+- **Deep analysis**: Read `.aisl.analysis`
+
+---
+
 ## 🚨 CRITICAL: NO COMMENTS IN AISL CODE
 
 **AISL DOES NOT SUPPORT COMMENTS.** Do not use `;`, `//`, `#`, or any other comment syntax.
@@ -15,6 +36,45 @@ If you need to document code:
 - Write separate documentation files
 
 **This is the #1 cause of parse errors when generating AISL code.**
+
+---
+
+## 🚨 CRITICAL: ALWAYS USE AISL FOR TOOLING
+
+**ALL utility scripts, converters, and tools MUST be written in pure AISL.**
+
+**NEVER use Python, Bash, or any other language for AISL-related scripts.**
+
+Why this matters:
+- Eating our own dog food - discovers language limitations immediately
+- Scripts become working examples for LLMs to learn from
+- No external dependencies (Python, npm, etc.)
+- Forces AISL to be complete and self-sufficient
+- If AISL lacks a feature, ADD IT instead of working around it
+
+Process:
+1. Check if AISL has needed operations (it probably does!)
+2. If truly missing, extend AISL (add to VM/runtime/stdlib)
+3. Write script in pure AISL
+4. If you wrote Python/Bash, DELETE IT and rewrite in AISL
+
+Examples:
+```lisp
+; ✅ CORRECT - Pure AISL converter script
+(mod convert_syntax
+  (fn convert_file path string -> int
+    (set content string (call file_read path))
+    (set converted string (call regex_replace pattern content))
+    (call file_write path converted)
+    (ret 0)))
+
+; ❌ WRONG - Python fallback
+# def convert_file(path):
+#     with open(path) as f:
+#         ...
+```
+
+**If you catch yourself reaching for Python, STOP and use AISL.**
 
 ---
 

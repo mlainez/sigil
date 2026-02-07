@@ -1,5 +1,5 @@
 (mod math
-  (fn add ((a i32) (b i32)) -> i32
+  (fn add a int b int -> int
     (ret (call add a b)))
   
   (test-spec add
@@ -16,4 +16,4 @@
       (input -10 -5)
       (expect -15)))
   
-  (meta-note "Tests basic i32 addition operation using polymorphic add"))
+  (meta-note "Tests basic int addition operation using polymorphic add"))

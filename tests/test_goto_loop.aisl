@@ -1,8 +1,8 @@
 (mod test_goto_loop
-  (fn count_to_five () -> i32
-    (set n i32 0)
+  (fn count_to_five -> int
+    (set n int 0)
     (label loop_start)
-    (set n i32 (call add n 1))
+    (set n int (call add n 1))
     (ifnot (call lt n 5) loop_end)
     (goto loop_start)
     (label loop_end)

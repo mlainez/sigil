@@ -1,14 +1,14 @@
 (mod test_continue
-  (fn test_continue_in_while () -> i32
-    (set i i32 0)
-    (set sum i32 0)
+  (fn test_continue_in_while -> int
+    (set i int 0)
+    (set sum int 0)
     (while (call lt i 10)
-      (set i i32 (call add i 1))
+      (set i int (call add i 1))
       (set skip bool (call eq i 3))
       (ifnot skip no_cont)
       (continue)
       (label no_cont)
-      (set sum i32 (call add sum i)))
+      (set sum int (call add sum i)))
     (ret sum))
 
   (test-spec test_continue_in_while
@@ -16,11 +16,11 @@
       (input)
       (expect 52)))
 
-  (fn test_continue_in_loop () -> i32
-    (set i i32 0)
-    (set count i32 0)
+  (fn test_continue_in_loop -> int
+    (set i int 0)
+    (set count int 0)
     (loop
-      (set i i32 (call add i 1))
+      (set i int (call add i 1))
       (set should_break bool (call gt i 10))
       (ifnot should_break no_break)
       (break)
@@ -29,7 +29,7 @@
       (ifnot skip no_cont2)
       (continue)
       (label no_cont2)
-      (set count i32 (call add count 1)))
+      (set count int (call add count 1)))
     (ret count))
 
   (test-spec test_continue_in_loop

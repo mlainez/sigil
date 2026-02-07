@@ -1,5 +1,5 @@
 (mod test
-  (fn sum_one_to_n ((n i32)) -> i32
+  (fn sum_one_to_n n int -> int
     (if (call le n 0)
       (ret 0)
       (if (call eq n 1)

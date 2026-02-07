@@ -1,14 +1,14 @@
 (mod test_flat_syntax
-  (fn add_two a i32 b i32 -> i32
+  (fn add_two a int b int -> int
     (ret (call add a b)))
   
-  (fn max a i32 b i32 -> i32
+  (fn max a int b int -> int
     (set greater bool (call gt a b))
     (if greater
       (ret a))
     (ret b))
   
-  (fn min a i32 b i32 -> i32
+  (fn min a int b int -> int
     (set less bool (call lt a b))
     (if less
       (ret a))

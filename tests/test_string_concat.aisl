@@ -1,5 +1,5 @@
 (mod test
-  (fn concat_and_length ((a string) (b string)) -> i32
+  (fn concat_and_length a string b string -> int
     (ret (call len (call concat a b))))
   
   (test-spec concat_and_length

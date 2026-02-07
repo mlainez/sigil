@@ -1,5 +1,5 @@
 (mod test
-  (fn max_i32 ((x i32) (y i32)) -> i32
+  (fn max_i32 x int y int -> int
     (ret (call if_i32 (call gt x y) x y)))
   
   (test-spec max_i32

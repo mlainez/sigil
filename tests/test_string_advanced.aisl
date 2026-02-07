@@ -1,5 +1,5 @@
 (mod test_string_advanced
-  (fn split_csv ((text string) (delim string)) -> array
+  (fn split_csv text string delim string -> array
     (ret (call string_split text delim)))
   
   (test-spec split_csv
@@ -12,7 +12,7 @@
       (input "John,25,Engineer" ",")
       (expect "simple_csv")))
   
-  (fn trim_string ((text string)) -> string
+  (fn trim_string text string -> string
     (ret (call string_trim text)))
   
   (test-spec trim_string
@@ -25,7 +25,7 @@
       (input "  Hello   World!  ")
       (expect "Hello   World!")))
   
-  (fn replace_text ((text string) (old string) (new string)) -> string
+  (fn replace_text text string old string new string -> string
     (ret (call string_replace text old new)))
   
   (test-spec replace_text
@@ -42,7 +42,7 @@
       (input "Hello {{name}}, welcome!" "{{name}}" "Alice")
       (expect "Hello Alice, welcome!")))
   
-  (fn check_contains ((text string) (search string)) -> bool
+  (fn check_contains text string search string -> bool
     (ret (call string_contains text search)))
   
   (test-spec check_contains
@@ -55,7 +55,7 @@
       (input "The quick brown dog" "fox")
       (expect false)))
   
-  (fn concat_strings ((str1 string) (str2 string)) -> string
+  (fn concat_strings str1 string str2 string -> string
     (ret (call concat str1 str2)))
   
   (test-spec concat_strings

@@ -1,12 +1,12 @@
 (mod test_result_file_io
-  (fn safe_file_read ((path string)) -> i32
+  (fn safe_file_read path string -> int
     (set result string (call file_read_result path))
     (set success bool (call is_ok result))
     (if success
       (ret 1))
     (ret 0))
   
-  (fn read_nonexistent_file () -> i32
+  (fn read_nonexistent_file -> int
     (set result string (call file_read_result "/nonexistent/file/path.txt"))
     (set is_error bool (call is_err result))
     (if is_error
@@ -18,7 +18,7 @@
       (input)
       (expect 1)))
   
-  (fn safe_file_write ((path string) (content string)) -> i32
+  (fn safe_file_write path string content string -> int
     (set result string (call file_write_result path content))
     (set success bool (call is_ok result))
     (if success

@@ -1,6 +1,6 @@
 (mod test_file_io
-  (fn write_three_lines ((filepath string)) -> i32
-    (set fd i32 (call io_file_open filepath 1))
+  (fn write_three_lines filepath string -> int
+    (set fd int (call io_file_open filepath 1))
     (call io_file_write fd "Hello from AISL!\n")
     (call io_file_write fd "This is line 2.\n")
     (call io_file_write fd "And line 3.\n")
@@ -13,11 +13,11 @@
       (input "/tmp/test_aisl.txt")
       (expect 0)))
   
-  (fn read_after_write ((filepath string)) -> string
-    (set fd_write i32 (call io_file_open filepath 1))
+  (fn read_after_write filepath string -> string
+    (set fd_write int (call io_file_open filepath 1))
     (call io_file_write fd_write "Test content")
     (call io_file_close fd_write)
-    (set fd_read i32 (call io_file_open filepath 0))
+    (set fd_read int (call io_file_open filepath 0))
     (set content string (call io_file_read fd_read))
     (call io_file_close fd_read)
     (ret content))

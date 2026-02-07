@@ -1,5 +1,5 @@
 (mod test_simple
-  (fn create_object_with_name ((name string)) -> string
+  (fn create_object_with_name name string -> string
     (ret (call json_stringify (call json_set (call json_new_object) "name" name))))
   
   (test-spec create_object_with_name
@@ -10,7 +10,7 @@
       (input "Bob")
       (expect "{\"name\":\"Bob\"}")))
   
-  (fn create_array_with_value ((val i32)) -> string
+  (fn create_array_with_value val int -> string
     (ret (call json_stringify (call json_push (call json_new_array) val))))
   
   (test-spec create_array_with_value

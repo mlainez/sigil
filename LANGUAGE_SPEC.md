@@ -78,7 +78,10 @@ literal ::= <number> | <string> | true | false
 - **f64** - 64-bit floating point
 - **bool** - Boolean (true/false)
 - **string** - UTF-8 string
-- **result** - Result type for error handling (ok or err) - ⚠️ PLANNED, not yet implemented
+- **regex** - Compiled regular expression pattern
+- **array** - Dynamic array
+- **map** - Hash map
+- **result** - Result type for error handling (ok or err)
 
 ### Type Annotations
 
@@ -299,6 +302,50 @@ The compiler automatically selects the correct operation based on variable types
 (call string_to_lower text)            ; Convert to lowercase -> string
 (call string_substring text start len) ; Extract substring -> string
 ```
+
+### Regular Expression Operations
+
+**AISL has full regex support built-in** using POSIX Extended Regular Expression syntax:
+
+```scheme
+; Compile a pattern into a regex object
+(set pattern string "\\d+")
+(set digit_regex regex (call regex_compile pattern))
+
+; Test if a string matches the pattern
+(set text string "abc123")
+(set has_digits bool (call regex_match digit_regex text))  ; -> true
+
+; Find first match
+(set first string (call regex_find digit_regex "foo 123 bar"))  ; -> "123"
+
+; Find all matches (returns array of strings)
+(set numbers array (call regex_find_all digit_regex "123 456 789"))
+; -> ["123", "456", "789"]
+
+; Replace all matches
+(set cleaned string (call regex_replace digit_regex "foo 123 bar" "NUM"))
+; -> "foo NUM bar"
+```
+
+**Common regex patterns:**
+
+```scheme
+; Match word characters
+(set word_pattern string "\\w+")
+(set word_regex regex (call regex_compile word_pattern))
+
+; Match email addresses
+(set email_pattern string "[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}")
+(set email_regex regex (call regex_compile email_pattern))
+
+; Extract function signatures
+(set fn_pattern string "\\(fn (\\w+)")
+(set fn_regex regex (call regex_compile fn_pattern))
+(set matches array (call regex_find_all fn_regex source_code))
+```
+
+**Important**: Remember to escape backslashes in string literals: `"\\d"` not `"\d"`
 
 ### I/O Operations
 

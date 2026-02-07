@@ -1,5 +1,5 @@
 (mod test
-  (fn new_array_length ((size i32)) -> i32
+  (fn new_array_length size int -> int
     (ret (call array_length (call array_new size))))
   
   (test-spec new_array_length

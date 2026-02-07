@@ -1,5 +1,5 @@
 (mod test_string_simple
-  (fn i32_to_str ((x i32)) -> string
+  (fn i32_to_str x int -> string
     (ret (call string_from_i32 x)))
   
   (test-spec i32_to_str

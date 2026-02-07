@@ -1,5 +1,5 @@
 (mod test_math
-  (fn sqrt_wrapper ((x f64)) -> f64
+  (fn sqrt_wrapper x float -> float
     (ret (call math_sqrt x)))
   
   (test-spec sqrt_wrapper
@@ -13,7 +13,7 @@
       (input 1.0)
       (expect 1.0)))
   
-  (fn pow_wrapper ((base f64) (exp f64)) -> f64
+  (fn pow_wrapper base float exp float -> float
     (ret (call math_pow base exp)))
   
   (test-spec pow_wrapper
@@ -27,7 +27,7 @@
       (input 5.0 0.0)
       (expect 1.0)))
   
-  (fn abs_i32 ((x i32)) -> i32
+  (fn abs_i32 x int -> int
     (ret (call math_abs_i32 x)))
   
   (test-spec abs_i32
@@ -41,7 +41,7 @@
       (input 0)
       (expect 0)))
   
-  (fn min_i32 ((a i32) (b i32)) -> i32
+  (fn min_i32 a int b int -> int
     (ret (call math_min_i32 a b)))
   
   (test-spec min_i32
@@ -55,7 +55,7 @@
       (input 15 15)
       (expect 15)))
   
-  (fn max_i32 ((a i32) (b i32)) -> i32
+  (fn max_i32 a int b int -> int
     (ret (call math_max_i32 a b)))
   
   (test-spec max_i32
@@ -69,4 +69,4 @@
       (input 15 15)
       (expect 15)))
   
-  (meta-note "Tests mathematical functions: sqrt, pow, abs, min, max for i32 and f64 types"))
+  (meta-note "Tests mathematical functions: sqrt, pow, abs, min, max for int and float types"))

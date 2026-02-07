@@ -1,5 +1,5 @@
 (mod test
-  (fn multiply ((a i32) (b i32)) -> i32
+  (fn multiply a int b int -> int
     (ret (call mul a b)))
   
   (test-spec multiply
@@ -16,7 +16,7 @@
       (input -3 4)
       (expect -12)))
   
-  (fn factorial ((n i32)) -> i32
+  (fn factorial n int -> int
     (ret (call if_i32 
       (call le n 1)
       1

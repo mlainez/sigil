@@ -1,5 +1,5 @@
 (mod test_string_trim
-  (fn trim ((input string)) -> string
+  (fn trim input string -> string
     (ret (call string_trim input)))
   
   (test-spec trim

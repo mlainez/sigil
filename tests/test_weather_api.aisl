@@ -1,5 +1,5 @@
 (mod test_weather_api
-  (fn fetch_weather ((url string)) -> string
+  (fn fetch_weather url string -> string
     (ret (call http_get url)))
   
   (test-spec fetch_weather
@@ -8,7 +8,7 @@
       (input "http://wttr.in/Paris?format=j1")
       (expect "weather_response")))
   
-  (fn get_weather_status ((response string)) -> i32
+  (fn get_weather_status response string -> int
     (ret (call http_get_status response)))
   
   (test-spec get_weather_status
@@ -17,7 +17,7 @@
       (input "weather_response")
       (expect 200)))
   
-  (fn get_weather_body ((response string)) -> string
+  (fn get_weather_body response string -> string
     (ret (call http_get_body response)))
   
   (test-spec get_weather_body
@@ -26,7 +26,7 @@
       (input "weather_response")
       (expect "{\"current_condition\":[{\"temp_C\":\"15\"}]}")))
   
-  (fn get_body_length ((body string)) -> i32
+  (fn get_body_length body string -> int
     (ret (call len body)))
   
   (test-spec get_body_length
@@ -35,7 +35,7 @@
       (input "{\"weather\":\"sunny\"}")
       (expect 21)))
   
-  (fn parse_weather_json ((json_str string)) -> json
+  (fn parse_weather_json json_str string -> json
     (ret (call json_parse json_str)))
   
   (test-spec parse_weather_json
@@ -44,7 +44,7 @@
       (input "{\"current_condition\":[{\"temp_C\":\"15\"}]}")
       (expect "weather_json")))
   
-  (fn get_json_type ((json_data json)) -> string
+  (fn get_json_type json_data json -> string
     (ret (call json_type json_data)))
   
   (test-spec get_json_type
@@ -53,7 +53,7 @@
       (input "weather_json")
       (expect "object")))
   
-  (fn get_json_field ((json_data json) (field string)) -> json
+  (fn get_json_field json_data json field string -> json
     (ret (call json_get json_data field)))
   
   (test-spec get_json_field
@@ -62,7 +62,7 @@
       (input "weather_obj" "current_condition")
       (expect "condition_array")))
   
-  (fn get_field_type ((field_data json)) -> string
+  (fn get_field_type field_data json -> string
     (ret (call json_type field_data)))
   
   (test-spec get_field_type

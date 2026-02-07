@@ -1,5 +1,5 @@
 (mod test_split
-  (fn split_get ((text string) (delim string) (idx i32)) -> string
+  (fn split_get text string delim string idx int -> string
     (ret (call array_get (call string_split text delim) idx)))
   
   (test-spec split_get

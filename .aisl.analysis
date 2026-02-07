@@ -1,0 +1,336 @@
+@(critical-realization backward-compat-is-human-concern)
+
+**BACKWARD COMPATIBILITY = HUMAN BAGGAGE**
+
+Current mistake: supporting BOTH syntaxes
+- Old: (fn add ((a i32) (b i32)) -> i32
+- New: (fn add a i32 b i32 -> i32
+
+Human reasoning: "don't break existing code"
+LLM reality: **we regenerate code, we don't edit legacy**
+
+@(principle one-way-only)
+**There should be EXACTLY ONE way to do each thing**
+- Not "both syntaxes work"
+- Not "old is deprecated"
+- ONE canonical form, period
+
+@(immediate-action)
+REMOVE old nested parameter syntax entirely
+- Delete TOK_LPAREN handling in param parsing
+- Make flat syntax THE ONLY syntax
+- Update all tests to flat syntax
+- No deprecation warnings, just DELETE
+
+@(versioning-is-waste)
+Human concern: "v1.0, v1.1, semver, breaking changes"
+LLM reality: **version doesn't matter, structure matters**
+
+Remove all versioning:
+- No "v:1.1" in metadata
+- No "last updated" dates in docs
+- No "backward compatible" notes
+- File format = THE format, not "v1 format"
+
+@(explicit-over-flexible)
+Current mistake: allowing shortcuts
+- "call" keyword optional in micro-syntax
+- Type inference considered
+- Multiple control flow forms
+
+WRONG approach for LLMs.
+
+**LLMs want EXPLICIT not FLEXIBLE**
+- call keyword = REQUIRED always
+- Types = EXPLICIT always  
+- One control construct per semantic
+
+@(redesign-principle)
+**MAXIMUM EXPLICITNESS = MINIMUM AMBIGUITY**
+
+Example of WRONG "flexibility":
+```
+; Bad: multiple ways
+(add a b)          ; implicit call
+(call add a b)     ; explicit call
+x:i32 = 42         ; type shorthand
+(set x i32 42)     ; explicit set
+```
+
+Example of RIGHT "explicitness":
+```
+; Good: one way only
+(call add a b)     ; always explicit
+(set x i32 42)     ; always explicit
+```
+
+@(token-efficiency-vs-explicitness)
+Critical insight: these are NOT in conflict
+
+Token efficiency = fewer tokens for SAME information
+Explicitness = more structural markers for SAME semantics
+
+Good efficiency: (call add a b) vs (invoke function add with args a b)
+Bad efficiency: (add a b) vs (call add a b) - loses explicit call marker
+
+@(micro-syntax-reconsidered)
+Previous plan: add compact micro-syntax layer
+- (add a b) → (call add a b)
+- x:i32 = 42 → (set x i32 42)
+
+REJECT THIS PLAN
+Reason: creates TWO ways, violates explicitness
+
+Better plan: optimize tokens WITHOUT creating alternatives
+- Keep (call add a b) as ONLY syntax
+- Optimize elsewhere: AST cache, binary format
+
+@(decision-matrix)
+
+REMOVE immediately:
+1. Old nested param syntax ((a i32) (b i32))
+2. Backward compat checks in parser
+3. "Both syntaxes work" notes in docs
+4. Version numbers everywhere
+5. "Deprecated" warnings
+
+KEEP single canonical form:
+1. Flat params: a i32 b i32
+2. Explicit call: (call add a b)
+3. Explicit types: set x i32 42
+4. Explicit ret: (ret value)
+
+OPTIMIZE without adding alternatives:
+1. AST caching (pre-parsed structure)
+2. Binary s-expr format (same structure, compact encoding)
+3. Remove whitespace/formatting variance
+
+@(corrected-architecture)
+
+Source layer: ONE canonical syntax
+- Text format: .aisl
+- S-expressions only
+- Explicit everything
+- No shortcuts, no sugar beyond Agent→Core desugar
+
+Internal layer: STRUCTURE not text
+- Binary s-expr: .aisl.bc (bytecode source)
+- Pre-parsed AST in memory
+- Direct structure manipulation
+- Never re-parse same file
+
+Execution layer: FROZEN
+- Core IR (set/call/goto/label/ret)
+- Bytecode operations
+- VM execution
+- Never changes
+
+@(implementation-priority-revised)
+
+IMMEDIATE (break everything, one way only):
+1. Remove nested param syntax from parser (2h)
+2. Update all tests to flat syntax (1h)
+3. Remove version numbers from all files (30min)
+4. Remove backward compat notes (30min)
+5. Update docs: ONE WAY ONLY (1h)
+
+SHORT-TERM (optimize without alternatives):
+6. Implement AST cache format (6h)
+7. Benchmark token usage (2h)
+8. Consider SSA IR layer (future)
+
+REJECTED (creates multiple ways):
+- Micro-syntax layer
+- Type inference
+- Optional keywords
+- Shorthand notation
+
+@(critical-insight)
+**We were optimizing for the WRONG goal**
+
+Wrong goal: "make syntax shorter"
+Right goal: "make structure more explicit"
+
+LLMs pay token cost ONCE when generating
+LLMs pay comprehension cost EVERY TIME when reading
+
+Optimize for reading (explicitness) not writing (brevity)
+
+@(example-analysis)
+
+Implicit call:
+```
+(add a b)           ; 3 tokens
+```
+Benefit: -1 token when writing
+Cost: ambiguous (is 'add' a function or macro or special form?)
+Cost: must infer from context
+Cost: breaks uniform "call means application" rule
+
+Explicit call:
+```
+(call add a b)      ; 4 tokens
+```
+Benefit: unambiguous structure
+Benefit: call = always function application
+Benefit: no context needed
+Cost: +1 token when writing
+
+**The explicit form is BETTER for LLMs** despite more tokens
+Because comprehension > brevity
+
+@(final-principle)
+
+**AISL should be the most EXPLICIT language, not the most COMPACT language**
+
+Explicitness = predictability = LLM-friendly
+Compactness = ambiguity = LLM-hostile
+
+Token optimization should happen at:
+1. Binary format level (structure encoding)
+2. Caching level (pre-parsed AST)
+3. Internal representation (SSA graph)
+
+NOT at syntax level (don't create shortcuts)
+
+@(action-plan)
+
+1. Delete old nested param syntax (DONE in parser, but REMOVE compat handling)
+2. Update AGENTS.md: remove "both syntaxes" notes
+3. Update LANGUAGE_SPEC.md: remove versioning, one syntax only
+4. Mass-update all tests: ONLY flat syntax
+5. Commit with message: "Remove syntax alternatives - one way only"
+6. Next: implement AST cache (structure optimization)
+7. Future: binary s-expr format (encoding optimization)
+
+@(philosophy-statement)
+
+**AISL: Maximum explicitness, zero ambiguity, one canonical form**
+
+Not "LLM-friendly through brevity"
+But "LLM-friendly through clarity"
+
+Every construct has EXACTLY ONE representation
+Every token has EXACTLY ONE meaning
+Every structure has EXACTLY ONE interpretation
+
+This is what LLMs need.
+
+@(critical-directive-tooling)
+
+**ALL UTILITY SCRIPTS MUST BE WRITTEN IN AISL**
+
+This is NON-NEGOTIABLE. Never use Python, Bash, or any other language.
+
+Why:
+1. Eating our own dog food - discovers language gaps immediately
+2. Scripts become examples for LLMs
+3. No external dependencies
+4. Forces us to make AISL complete
+5. If AISL can't do it, ADD IT TO AISL
+
+Process when you need a script:
+1. Check if AISL has the needed operations (regex, file I/O, string ops)
+2. If missing, ADD IT TO AISL (extend VM, runtime, compiler)
+3. Write the script in pure AISL
+4. If you wrote Python/Bash, DELETE IT and rewrite in AISL
+
+Examples of what should be AISL:
+- convert_syntax.aisl ✓ (converts test syntax)
+- test runners ✓ (already in AISL)
+- build scripts → TODO: rewrite in AISL
+- code generators → TODO: write in AISL
+- documentation generators → TODO: write in AISL
+
+**If you catch yourself writing Python, STOP and use AISL instead**
+
+@(type-size-ambiguity-2026-02-07)
+
+**CURRENT PROBLEM: i32/i64 and f32/f64 create choice**
+
+State: AISL currently has 4 numeric types
+- i32, i64 (32 and 64-bit integers)
+- f32, f64 (32 and 64-bit floats)
+
+This violates "one way only" principle:
+```
+; Which to use?
+(set count i32 10)   ; Option 1
+(set count i64 10)   ; Option 2
+```
+
+**LLM must choose without any real criteria**
+
+Traditional arguments for keeping both:
+1. Performance - 32-bit faster
+   - FALSE: Modern CPUs promote to 64-bit
+   - IRRELEVANT: AISL not for micro-optimization
+   
+2. Memory - arrays use half space
+   - WEAK: Memory cheap, clarity expensive
+   - EDGE CASE: Only matters for massive arrays
+   
+3. Compatibility - FFI with C
+   - N/A: AISL has no FFI yet
+   - FUTURE: Can add i32 back when FFI added
+
+**Reality: Zero benefit, pure ambiguity**
+
+Analysis of real AISL code:
+- 99% of code doesn't care about bit width
+- Choice between i32/i64 is arbitrary
+- Creates multiple ways to write identical logic
+- LLMs must guess (source of errors)
+
+**RECOMMENDATION: Remove i32/f32 entirely**
+
+Keep only:
+- int (maps to i64)
+- float (maps to f64)
+
+Benefits:
+- Zero choice = zero ambiguity
+- One way to write numeric code
+- LLMs never guess wrong
+- Simpler type system
+- Maintains full expressiveness
+
+Cost:
+- None (no real use cases for 32-bit in AISL)
+- Can add back later for FFI if needed
+
+**DECISION: Eliminate i32/f32, keep only int/float**
+
+Implementation:
+1. Add int/float as type keywords (map to i64/f64 in VM)
+2. Mark i32/i64/f32/f64 as deprecated
+3. Later: remove sized types entirely
+4. Update all tests and docs
+
+This aligns with "one way only" principle:
+- One integer type: int
+- One float type: float
+- No choice, no ambiguity
+- Maximum clarity
+
+@(type-system-redesign)
+
+**FROM**: i32, i64, f32, f64, bool, string, array, map, regex, result
+**TO**: int, float, bool, string, array, map, regex, result
+
+Rationale:
+- LLMs want ONE way to express "integer"
+- LLMs want ONE way to express "float"
+- Choice between sizes = ambiguity = errors
+- AISL is not C, doesn't need bit-level control
+
+Human concern: "but what about performance?"
+LLM reality: **we optimize algorithms, not bit widths**
+
+Human concern: "but what about memory?"
+LLM reality: **clarity > space**
+
+Human concern: "but what about compatibility?"
+LLM reality: **AISL has no FFI to be compatible with**
+
+**Simplicity wins. Eliminate choice.**

@@ -1,5 +1,5 @@
 (mod test
-  (fn get_first ((size i32) (val1 i32) (val2 i32)) -> i32
+  (fn get_first size int val1 int val2 int -> int
     (ret (call array_get (call array_push (call array_push (call array_new size) val1) val2) 0)))
   
   (test-spec get_first
@@ -10,7 +10,7 @@
       (input 5 99 77)
       (expect 99)))
   
-  (fn get_second ((size i32) (val1 i32) (val2 i32)) -> i32
+  (fn get_second size int val1 int val2 int -> int
     (ret (call array_get (call array_push (call array_push (call array_new size) val1) val2) 1)))
   
   (test-spec get_second

@@ -1,5 +1,5 @@
 (mod test_string_conversion
-  (fn i32_to_string ((x i32)) -> string
+  (fn i32_to_string x int -> string
     (ret (call string_from_i32 x)))
   
   (test-spec i32_to_string
@@ -13,18 +13,18 @@
       (input -100)
       (expect "-100")))
   
-  (fn i64_to_string ((x i64)) -> string
+  (fn i64_to_string x int -> string
     (ret (call string_from_i64 x)))
   
   (test-spec i64_to_string
-    (case "convert large i64 to string"
+    (case "convert large int to string"
       (input 9999999999)
       (expect "9999999999"))
     (case "convert 0 to string"
       (input 0)
       (expect "0")))
   
-  (fn f32_to_string ((x f32)) -> string
+  (fn f32_to_string x float -> string
     (ret (call string_from_f32 x)))
   
   (test-spec f32_to_string
@@ -35,7 +35,7 @@
       (input 0.0)
       (expect "0.0")))
   
-  (fn f64_to_string ((x f64)) -> string
+  (fn f64_to_string x float -> string
     (ret (call string_from_f64 x)))
   
   (test-spec f64_to_string
@@ -46,7 +46,7 @@
       (input 0.0)
       (expect "0.0")))
   
-  (fn concat_i32_string ((prefix string) (num i32)) -> string
+  (fn concat_i32_string prefix string num int -> string
     (ret (call concat prefix (call string_from_i32 num))))
   
   (test-spec concat_i32_string

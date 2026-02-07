@@ -1,8 +1,8 @@
 (mod test_desugar_while
-  (fn count_to_five () -> i32
-    (set n i32 0)
+  (fn count_to_five -> int
+    (set n int 0)
     (while (call lt n 5)
-      (set n i32 (call add n 1)))
+      (set n int (call add n 1)))
     (ret n))
   
   (test-spec count_to_five
@@ -10,10 +10,10 @@
       (input)
       (expect 5)))
   
-  (fn count_to_target ((target i32)) -> i32
-    (set n i32 0)
+  (fn count_to_target target int -> int
+    (set n int 0)
     (while (call lt n target)
-      (set n i32 (call add n 1)))
+      (set n int (call add n 1)))
     (ret n))
   
   (test-spec count_to_target

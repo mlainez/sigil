@@ -1,5 +1,5 @@
 (mod test
-  (fn map_length_after_sets ((k1 string) (v1 i32) (k2 string) (v2 i32) (k3 string) (v3 i32)) -> i32
+  (fn map_length_after_sets k1 string v1 int k2 string v2 int k3 string v3 int -> int
     (ret (call map_length (call map_set (call map_set (call map_set (call map_new) k1 v1) k2 v2) k3 v3))))
   
   (test-spec map_length_after_sets
@@ -13,7 +13,7 @@
       (input "a" 5 "b" 10 "a" 15)
       (expect 2)))
   
-  (fn map_get_first ((k1 string) (v1 i32)) -> i32
+  (fn map_get_first k1 string v1 int -> int
     (ret (call map_get (call map_set (call map_new) k1 v1) k1)))
   
   (test-spec map_get_first
@@ -24,7 +24,7 @@
       (input "foo" 42)
       (expect 42)))
   
-  (fn map_get_after_multiple_sets ((k1 string) (v1 i32) (k2 string) (v2 i32) (key string)) -> i32
+  (fn map_get_after_multiple_sets k1 string v1 int k2 string v2 int key string -> int
     (ret (call map_get (call map_set (call map_set (call map_new) k1 v1) k2 v2) key)))
   
   (test-spec map_get_after_multiple_sets

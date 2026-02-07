@@ -1,5 +1,5 @@
 (mod test_file_io
-  (fn open_file_for_write ((filepath string) (mode i32)) -> i32
+  (fn open_file_for_write filepath string mode int -> int
     (ret (call io_file_open filepath mode)))
   
   (test-spec open_file_for_write

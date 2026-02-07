@@ -1,5 +1,5 @@
 (mod test_str_var
-  (fn return_hello () -> string
+  (fn return_hello -> string
     (ret "hello"))
   
   (test-spec return_hello
@@ -7,7 +7,7 @@
       (input)
       (expect "hello")))
   
-  (fn identity_string ((s string)) -> string
+  (fn identity_string s string -> string
     (ret s))
   
   (test-spec identity_string

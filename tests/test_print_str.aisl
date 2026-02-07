@@ -1,5 +1,5 @@
 (mod test
-  (fn print_string ((msg string)) -> i32
+  (fn print_string msg string -> int
     (call print msg)
     (ret 0))
   
@@ -17,7 +17,7 @@
       (input "\n")
       (expect 0)))
   
-  (fn print_integer ((num i32)) -> i32
+  (fn print_integer num int -> int
     (call print num)
     (ret 0))
   

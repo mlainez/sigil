@@ -1,5 +1,5 @@
 (mod test
-  (fn eq_i64 ((a i64) (b i64)) -> bool
+  (fn eq_i64 a int b int -> bool
     (ret (call eq a b)))
   
   (test-spec eq_i64
@@ -10,7 +10,7 @@
       (input 1000000000000 2000000000000)
       (expect 0)))
   
-  (fn lt_i64 ((a i64) (b i64)) -> bool
+  (fn lt_i64 a int b int -> bool
     (ret (call lt a b)))
   
   (test-spec lt_i64
@@ -21,7 +21,7 @@
       (input 100 50)
       (expect 0)))
   
-  (fn gt_i64 ((a i64) (b i64)) -> bool
+  (fn gt_i64 a int b int -> bool
     (ret (call gt a b)))
   
   (test-spec gt_i64
@@ -32,4 +32,4 @@
       (input 50 100)
       (expect 0)))
   
-  (meta-note "Tests i64 comparison operations for large integers"))
+  (meta-note "Tests int comparison operations for large integers"))

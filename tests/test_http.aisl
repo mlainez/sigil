@@ -1,5 +1,5 @@
 (mod test_http
-  (fn fetch_url ((url string)) -> string
+  (fn fetch_url url string -> string
     (ret (call http_get url)))
   
   (test-spec fetch_url
@@ -8,7 +8,7 @@
       (input "http://httpbin.org/status/200")
       (expect "response_object_1")))
   
-  (fn get_status_code ((response string)) -> i32
+  (fn get_status_code response string -> int
     (ret (call http_get_status response)))
   
   (test-spec get_status_code
@@ -17,7 +17,7 @@
       (input "response_object_1")
       (expect 200)))
   
-  (fn get_response_body ((response string)) -> string
+  (fn get_response_body response string -> string
     (ret (call http_get_body response)))
   
   (test-spec get_response_body

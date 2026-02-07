@@ -1,5 +1,5 @@
 (mod test_print_bool
-  (fn returns_true () -> i32
+  (fn returns_true -> int
     (set val bool true)
     (if val
       (ret 1))
@@ -10,7 +10,7 @@
       (input)
       (expect 1)))
   
-  (fn returns_false () -> i32
+  (fn returns_false -> int
     (set val bool false)
     (if val
       (ret 1))
@@ -21,7 +21,7 @@
       (input)
       (expect 0)))
   
-  (fn bool_from_comparison () -> i32
+  (fn bool_from_comparison -> int
     (set result bool (call lt 5 10))
     (if result
       (ret 1))

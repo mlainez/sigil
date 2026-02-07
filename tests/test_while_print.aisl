@@ -1,11 +1,11 @@
 (mod test
-  (fn increment_five_times ((start i32)) -> i32
-    (set i i32 start)
-    (set i i32 (call add i 1))
-    (set i i32 (call add i 1))
-    (set i i32 (call add i 1))
-    (set i i32 (call add i 1))
-    (set i i32 (call add i 1))
+  (fn increment_five_times start int -> int
+    (set i int start)
+    (set i int (call add i 1))
+    (set i int (call add i 1))
+    (set i int (call add i 1))
+    (set i int (call add i 1))
+    (set i int (call add i 1))
     (ret i))
   
   (test-spec increment_five_times

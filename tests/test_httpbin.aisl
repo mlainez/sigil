@@ -1,5 +1,5 @@
 (mod test_httpbin
-  (fn fetch_json_endpoint ((url string)) -> string
+  (fn fetch_json_endpoint url string -> string
     (ret (call http_get url)))
   
   (test-spec fetch_json_endpoint
@@ -16,7 +16,7 @@
       (input "http://httpbin.org/status/404")
       (expect "404_response")))
   
-  (fn parse_json_string ((body string)) -> json
+  (fn parse_json_string body string -> json
     (ret (call json_parse body)))
   
   (test-spec parse_json_string
@@ -25,7 +25,7 @@
       (input "{\"key\":\"value\"}")
       (expect "json_obj_1")))
   
-  (fn get_json_type ((json_obj json)) -> string
+  (fn get_json_type json_obj json -> string
     (ret (call json_type json_obj)))
   
   (test-spec get_json_type
@@ -34,7 +34,7 @@
       (input "json_obj_1")
       (expect "object")))
   
-  (fn stringify_json ((json_obj json)) -> string
+  (fn stringify_json json_obj json -> string
     (ret (call json_stringify json_obj)))
   
   (test-spec stringify_json
@@ -43,7 +43,7 @@
       (input "json_obj_1")
       (expect "{\"uuid\":\"123e4567-e89b-12d3-a456-426614174000\"}")))
   
-  (fn check_status_404 ((response string)) -> i32
+  (fn check_status_404 response string -> int
     (ret (call http_get_status response)))
   
   (test-spec check_status_404

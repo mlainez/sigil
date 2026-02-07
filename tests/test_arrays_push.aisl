@@ -1,5 +1,5 @@
 (mod test
-  (fn push_two_length ((size i32) (val1 i32) (val2 i32)) -> i32
+  (fn push_two_length size int val1 int val2 int -> int
     (ret (call array_length (call array_push (call array_push (call array_new size) val1) val2))))
   
   (test-spec push_two_length

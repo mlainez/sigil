@@ -1,5 +1,5 @@
 (mod test
-  (fn strlen ((s string)) -> i32
+  (fn strlen s string -> int
     (ret (call len s)))
   
   (test-spec strlen

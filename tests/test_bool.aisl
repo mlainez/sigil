@@ -1,5 +1,5 @@
 (mod test_bool
-  (fn return_true () -> bool
+  (fn return_true -> bool
     (ret 1))
   
   (test-spec return_true
@@ -7,7 +7,7 @@
       (input)
       (expect 1)))
   
-  (fn return_false () -> bool
+  (fn return_false -> bool
     (ret 0))
   
   (test-spec return_false
@@ -15,7 +15,7 @@
       (input)
       (expect 0)))
   
-  (fn identity_bool ((x bool)) -> bool
+  (fn identity_bool x bool -> bool
     (ret x))
   
   (test-spec identity_bool

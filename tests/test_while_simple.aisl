@@ -1,11 +1,11 @@
 (mod test
-  (fn count_up_to ((limit i32)) -> i32
-    (set counter i32 0)
-    (set counter i32 (call if_i32 (call lt counter limit) (call add counter 1) counter))
-    (set counter i32 (call if_i32 (call lt counter limit) (call add counter 1) counter))
-    (set counter i32 (call if_i32 (call lt counter limit) (call add counter 1) counter))
-    (set counter i32 (call if_i32 (call lt counter limit) (call add counter 1) counter))
-    (set counter i32 (call if_i32 (call lt counter limit) (call add counter 1) counter))
+  (fn count_up_to limit int -> int
+    (set counter int 0)
+    (set counter int (call if_i32 (call lt counter limit) (call add counter 1) counter))
+    (set counter int (call if_i32 (call lt counter limit) (call add counter 1) counter))
+    (set counter int (call if_i32 (call lt counter limit) (call add counter 1) counter))
+    (set counter int (call if_i32 (call lt counter limit) (call add counter 1) counter))
+    (set counter int (call if_i32 (call lt counter limit) (call add counter 1) counter))
     (ret counter))
   
   (test-spec count_up_to

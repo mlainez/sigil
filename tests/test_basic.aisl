@@ -1,5 +1,5 @@
 (mod test_basic
-  (fn return_constant () -> i32
+  (fn return_constant -> int
     (ret 42))
   
   (test-spec return_constant
@@ -7,7 +7,7 @@
       (input)
       (expect 42)))
   
-  (fn identity_i32 ((x i32)) -> i32
+  (fn identity_i32 x int -> int
     (ret x))
   
   (test-spec identity_i32

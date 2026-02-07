@@ -1,68 +1,68 @@
 (mod test
-  (fn eq_f32 ((a f32) (b f32)) -> bool
+  (fn eq_f32 a float b float -> bool
     (ret (call eq a b)))
   
   (test-spec eq_f32
-    (case "equal f32"
+    (case "equal float"
       (input 3.14 3.14)
       (expect 1))
-    (case "not equal f32"
+    (case "not equal float"
       (input 3.14 2.71)
       (expect 0)))
   
-  (fn lt_f32 ((a f32) (b f32)) -> bool
+  (fn lt_f32 a float b float -> bool
     (ret (call lt a b)))
   
   (test-spec lt_f32
-    (case "less than f32"
+    (case "less than float"
       (input 2.0 5.0)
       (expect 1))
-    (case "not less than f32"
+    (case "not less than float"
       (input 5.0 2.0)
       (expect 0)))
   
-  (fn gt_f32 ((a f32) (b f32)) -> bool
+  (fn gt_f32 a float b float -> bool
     (ret (call gt a b)))
   
   (test-spec gt_f32
-    (case "greater than f32"
+    (case "greater than float"
       (input 10.5 3.2)
       (expect 1))
-    (case "not greater than f32"
+    (case "not greater than float"
       (input 3.2 10.5)
       (expect 0)))
   
-  (fn eq_f64 ((a f64) (b f64)) -> bool
+  (fn eq_f64 a float b float -> bool
     (ret (call eq a b)))
   
   (test-spec eq_f64
-    (case "equal f64 pi"
+    (case "equal float pi"
       (input 3.141592653589793 3.141592653589793)
       (expect 1))
-    (case "not equal f64"
+    (case "not equal float"
       (input 2.718281828459045 3.141592653589793)
       (expect 0)))
   
-  (fn lt_f64 ((a f64) (b f64)) -> bool
+  (fn lt_f64 a float b float -> bool
     (ret (call lt a b)))
   
   (test-spec lt_f64
-    (case "less than f64"
+    (case "less than float"
       (input 1.5 2.5)
       (expect 1))
-    (case "not less than f64"
+    (case "not less than float"
       (input 2.5 1.5)
       (expect 0)))
   
-  (fn gt_f64 ((a f64) (b f64)) -> bool
+  (fn gt_f64 a float b float -> bool
     (ret (call gt a b)))
   
   (test-spec gt_f64
-    (case "greater than f64"
+    (case "greater than float"
       (input 100.0 50.0)
       (expect 1))
-    (case "not greater than f64"
+    (case "not greater than float"
       (input 50.0 100.0)
       (expect 0)))
   
-  (meta-note "Tests f32 and f64 comparison operators"))
+  (meta-note "Tests float and float comparison operators"))

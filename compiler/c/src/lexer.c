@@ -207,6 +207,8 @@ static Token read_identifier(Lexer* lexer) {
     else if (strcmp(str, "string") == 0) kind = TOK_TYPE_STRING;
     else if (strcmp(str, "bool") == 0) kind = TOK_TYPE_BOOL;
     else if (strcmp(str, "unit") == 0) kind = TOK_TYPE_UNIT;
+    else if (strcmp(str, "int") == 0) kind = TOK_TYPE_INT;
+    else if (strcmp(str, "float") == 0) kind = TOK_TYPE_FLOAT;
     else if (strcmp(str, "i8") == 0) kind = TOK_TYPE_I8;
     else if (strcmp(str, "i16") == 0) kind = TOK_TYPE_I16;
     else if (strcmp(str, "i32") == 0) kind = TOK_TYPE_I32;

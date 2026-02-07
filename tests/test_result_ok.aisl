@@ -1,5 +1,5 @@
 (mod test_result_ok
-  (fn create_ok_result ((value i32)) -> i32
+  (fn create_ok_result value int -> int
     (set result string (call result_ok value))
     (set is_success bool (call is_ok result))
     (if is_success
@@ -11,9 +11,9 @@
       (input 42)
       (expect 1)))
   
-  (fn unwrap_ok_value ((value i32)) -> i32
+  (fn unwrap_ok_value value int -> int
     (set result string (call result_ok value))
-    (set extracted i32 (call unwrap result))
+    (set extracted int (call unwrap result))
     (ret extracted))
   
   (test-spec unwrap_ok_value

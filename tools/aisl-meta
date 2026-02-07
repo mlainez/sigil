@@ -1,0 +1,154 @@
+#!/usr/bin/env python3
+"""
+AISL Metadata Tool - Read/Write .aisl.meta format
+Usage: 
+  aisl-meta get stat tc
+  aisl-meta set task 6 ✓ "impl-metadata-tool"
+  aisl-meta add next "benchmark-perf"
+  aisl-meta show
+"""
+
+import sys
+import re
+from pathlib import Path
+
+def parse_meta(content):
+    """Parse .aisl.meta s-expr format into dict"""
+    data = {}
+    current_section = None
+    
+    for line in content.strip().split('\n'):
+        if line.startswith('@('):
+            # New section
+            match = re.match(r'@\((\w+)(.*)\)', line)
+            if match:
+                section = match.group(1)
+                rest = match.group(2).strip()
+                if rest:
+                    data[section] = rest
+                else:
+                    current_section = section
+                    data[section] = []
+        elif current_section and line.strip().endswith(')'):
+            # End of multi-line section
+            data[current_section].append(line.strip()[:-1].strip())
+            current_section = None
+        elif current_section:
+            # Continuation of section
+            data[current_section].append(line.strip())
+    
+    return data
+
+def format_meta(data):
+    """Format dict back to .aisl.meta s-expr format"""
+    lines = []
+    for key, value in data.items():
+        if isinstance(value, str):
+            lines.append(f'@({key} {value})')
+        elif isinstance(value, list):
+            lines.append(f'@({key}')
+            for item in value:
+                lines.append(f'  {item}')
+            lines.append(')')
+    return '\n'.join(lines) + '\n'
+
+def get_value(data, *path):
+    """Get value from nested path"""
+    current = data
+    for key in path:
+        if isinstance(current, dict):
+            current = current.get(key)
+        elif isinstance(current, list):
+            try:
+                idx = int(key)
+                current = current[idx]
+            except (ValueError, IndexError):
+                return None
+        else:
+            return None
+    return current
+
+def set_value(data, path, value):
+    """Set value at path"""
+    if len(path) == 1:
+        data[path[0]] = value
+        return
+    
+    key = path[0]
+    if key not in data:
+        data[key] = {} if len(path) > 1 else value
+    
+    if isinstance(data[key], list):
+        # Setting task: task 6 ✓ "done"
+        try:
+            idx = int(path[1])
+            data[key][idx] = f'({path[1]}{path[2]} {path[3]})'
+        except (IndexError, ValueError):
+            pass
+    else:
+        set_value(data[key], path[1:], value)
+
+def main():
+    meta_file = Path('.aisl.meta')
+    
+    if not meta_file.exists() and len(sys.argv) > 1 and sys.argv[1] != 'init':
+        print(f"Error: {meta_file} not found. Run 'aisl-meta init' first.")
+        sys.exit(1)
+    
+    if len(sys.argv) < 2:
+        print(__doc__)
+        sys.exit(1)
+    
+    cmd = sys.argv[1]
+    
+    if cmd == 'init':
+        meta_file.write_text('''@(meta-spec v:1.0)
+@(proj aisl v:1.1 ty:sys-lang)
+@(stat tc:0/0 bc:0%)
+@(task)
+@(ctx)
+@(next)
+''')
+        print(f"Created {meta_file}")
+        return
+    
+    content = meta_file.read_text()
+    data = parse_meta(content)
+    
+    if cmd == 'show':
+        print(format_meta(data))
+    
+    elif cmd == 'get':
+        if len(sys.argv) < 3:
+            print("Usage: aisl-meta get <path>")
+            sys.exit(1)
+        result = get_value(data, *sys.argv[2:])
+        print(result)
+    
+    elif cmd == 'set':
+        if len(sys.argv) < 4:
+            print("Usage: aisl-meta set <section> <key> <value>")
+            sys.exit(1)
+        set_value(data, sys.argv[2:-1], sys.argv[-1])
+        meta_file.write_text(format_meta(data))
+        print(f"Updated {meta_file}")
+    
+    elif cmd == 'add':
+        if len(sys.argv) < 4:
+            print("Usage: aisl-meta add <section> <value>")
+            sys.exit(1)
+        section = sys.argv[2]
+        value = sys.argv[3]
+        if section not in data:
+            data[section] = []
+        if isinstance(data[section], list):
+            data[section].append(value)
+        meta_file.write_text(format_meta(data))
+        print(f"Added to {section}")
+    
+    else:
+        print(f"Unknown command: {cmd}")
+        sys.exit(1)
+
+if __name__ == '__main__':
+    main()

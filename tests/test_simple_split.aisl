@@ -1,5 +1,5 @@
 (mod test_simple
-  (fn split_by_space ((s string)) -> string
+  (fn split_by_space s string -> string
     (ret (call array_get (call string_split s " ") 0)))
   
   (test-spec split_by_space

@@ -1,5 +1,5 @@
 (mod test_manual_loop
-  (fn sum_zero_to_nine () -> i32
+  (fn sum_zero_to_nine -> int
     (ret 45))
   
   (test-spec sum_zero_to_nine
@@ -7,7 +7,7 @@
       (input)
       (expect 45)))
   
-  (fn sum_range ((start i32) (end i32)) -> i32
+  (fn sum_range start int end int -> int
     (ret (call if_i32 (call ge start end) 0
       (call add start (call sum_range (call add start 1) end)))))
   

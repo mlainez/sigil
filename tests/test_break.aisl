@@ -1,10 +1,10 @@
 (mod test_break
-  (fn test_break_in_while () -> i32
-    (set i i32 0)
-    (set sum i32 0)
+  (fn test_break_in_while -> int
+    (set i int 0)
+    (set sum int 0)
     (while (call lt i 100)
-      (set sum i32 (call add sum i))
-      (set i i32 (call add i 1))
+      (set sum int (call add sum i))
+      (set i int (call add i 1))
       (set should_break bool (call eq i 5))
       (ifnot should_break skip_break)
       (break)
@@ -16,10 +16,10 @@
       (input)
       (expect 10)))
 
-  (fn test_break_in_loop () -> i32
-    (set count i32 0)
+  (fn test_break_in_loop -> int
+    (set count int 0)
     (loop
-      (set count i32 (call add count 1))
+      (set count int (call add count 1))
       (set should_break bool (call gt count 10))
       (ifnot should_break skip_break2)
       (break)

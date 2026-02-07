@@ -1,6 +1,6 @@
 (mod simple_tests
 
-  (fn add ((a i32) (b i32)) -> i32
+  (fn add a int b int -> int
     (ret (call add a b)))
   
   (test-spec add
@@ -18,6 +18,6 @@
   
   (meta-note "This is a simple test example")
   
-  (fn multiply ((x i32) (y i32)) -> i32
+  (fn multiply x int y int -> int
     (ret (call mul x y)))
 )

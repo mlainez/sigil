@@ -1,6 +1,6 @@
 (mod test
-  (fn read_file ((filepath string) (mode i32)) -> string
-    (set fd i32 (call io_file_open filepath mode))
+  (fn read_file filepath string mode int -> string
+    (set fd int (call io_file_open filepath mode))
     (set content string (call io_file_read fd))
     (call io_file_close fd)
     (ret content))

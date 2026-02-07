@@ -83,6 +83,10 @@ typedef enum {
     TOK_TYPE_BOOL,
     TOK_TYPE_UNIT,
     
+    // Simple types (v5.0 - default int/float)
+    TOK_TYPE_INT,      // Maps to i64
+    TOK_TYPE_FLOAT,    // Maps to f64
+    
     // Explicit typed integer types (v4.0)
     TOK_TYPE_I8,
     TOK_TYPE_I16,

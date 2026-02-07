@@ -1,5 +1,5 @@
 (mod test_string_ext
-  (fn starts_with ((msg string) (prefix string)) -> bool
+  (fn starts_with msg string prefix string -> bool
     (ret (call string_starts_with msg prefix)))
   
   (test-spec starts_with
@@ -10,7 +10,7 @@
       (input "Hello World" "World")
       (expect 0)))
   
-  (fn ends_with ((msg string) (suffix string)) -> bool
+  (fn ends_with msg string suffix string -> bool
     (ret (call string_ends_with msg suffix)))
   
   (test-spec ends_with
@@ -21,7 +21,7 @@
       (input "Hello World" "Hello")
       (expect 0)))
   
-  (fn to_upper ((msg string)) -> string
+  (fn to_upper msg string -> string
     (ret (call string_to_upper msg)))
   
   (test-spec to_upper
@@ -32,7 +32,7 @@
       (input "TEST")
       (expect "TEST")))
   
-  (fn to_lower ((msg string)) -> string
+  (fn to_lower msg string -> string
     (ret (call string_to_lower msg)))
   
   (test-spec to_lower

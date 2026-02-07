@@ -1,6 +1,6 @@
 (mod test_polymorphic_ops
 
-(fn test_print ((x i32) (y i64) (z string) (b bool)) -> unit
+(fn test_print x int y int z string b bool -> unit
   (do
     (call print x)
     (call print y)
@@ -8,7 +8,7 @@
     (call print b)
     (ret unit)))
 
-(fn test_array ((arr array)) -> i32
+(fn test_array arr array -> int
   (do
     (call array_push arr 42)
     (call array_push arr 99)
@@ -17,13 +17,13 @@
     (set val (call array_get arr 0))
     (ret val)))
 
-(fn test_string ((s string)) -> i32
+(fn test_string s string -> int
   (do
     (set length (call len s))
     (call print length)
     (ret length)))
 
-(fn test_math ((x i32)) -> i32
+(fn test_math x int -> int
   (do
     (set result (call add x 10))
     (call print result)

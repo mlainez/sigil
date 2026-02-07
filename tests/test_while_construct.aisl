@@ -1,9 +1,9 @@
 (mod test_while
-  (fn test_while () -> i32
-    (set count i32 0)
+  (fn test_while -> int
+    (set count int 0)
     (while (call lt count 3)
       (call print "In while loop")
-      (set count i32 (call add count 1)))
+      (set count int (call add count 1)))
     (call print "Done")
     (ret count))
 

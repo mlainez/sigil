@@ -1,49 +1,49 @@
 (mod test
-  (fn i32_to_f32 ((x i32)) -> f32
+  (fn i32_to_f32 x int -> float
     (ret (call cast_i32_f32 x)))
   
   (test-spec i32_to_f32
-    (case "convert 42 to f32"
+    (case "convert 42 to float"
       (input 42)
       (expect 42.0))
-    (case "convert 0 to f32"
+    (case "convert 0 to float"
       (input 0)
       (expect 0.0))
-    (case "convert negative to f32"
+    (case "convert negative to float"
       (input -10)
       (expect -10.0)))
   
-  (fn i32_to_f64 ((x i32)) -> f64
+  (fn i32_to_f64 x int -> float
     (ret (call cast_i32_f64 x)))
   
   (test-spec i32_to_f64
-    (case "convert 100 to f64"
+    (case "convert 100 to float"
       (input 100)
       (expect 100.0))
-    (case "convert 0 to f64"
+    (case "convert 0 to float"
       (input 0)
       (expect 0.0)))
   
-  (fn f32_to_i32 ((x f32)) -> i32
+  (fn f32_to_i32 x float -> int
     (ret (call cast_f32_i32 x)))
   
   (test-spec f32_to_i32
-    (case "truncate 3.14 to i32"
+    (case "truncate 3.14 to int"
       (input 3.14)
       (expect 3))
-    (case "truncate 9.99 to i32"
+    (case "truncate 9.99 to int"
       (input 9.99)
       (expect 9)))
   
-  (fn f64_to_i32 ((x f64)) -> i32
+  (fn f64_to_i32 x float -> int
     (ret (call cast_f64_i32 x)))
   
   (test-spec f64_to_i32
-    (case "truncate 99.99 to i32"
+    (case "truncate 99.99 to int"
       (input 99.99)
       (expect 99))
-    (case "truncate 1.1 to i32"
+    (case "truncate 1.1 to int"
       (input 1.1)
       (expect 1)))
   
-  (meta-note "Tests type conversion between i32, f32, and f64 types"))
+  (meta-note "Tests type conversion between int, float, and float types"))

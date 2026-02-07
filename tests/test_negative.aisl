@@ -1,5 +1,5 @@
 (mod test_negative
-  (fn test_neg () -> i32
+  (fn test_neg -> int
     (ret -5))
   
   (test-spec test_neg
@@ -7,7 +7,7 @@
       (input)
       (expect -5)))
   
-  (fn negate ((x i32)) -> i32
+  (fn negate x int -> int
     (ret (call sub 0 x)))
   
   (test-spec negate

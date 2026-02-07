@@ -1,5 +1,5 @@
 (mod test_all_string_ops
-  (fn test_split ((text string) (delim string)) -> array
+  (fn test_split text string delim string -> array
     (ret (call string_split text delim)))
   
   (test-spec test_split
@@ -8,7 +8,7 @@
       (input "one-two-three" "-")
       (expect "array_result")))
   
-  (fn test_trim ((text string)) -> string
+  (fn test_trim text string -> string
     (ret (call string_trim text)))
   
   (test-spec test_trim
@@ -17,7 +17,7 @@
       (input "  hello  ")
       (expect "hello")))
   
-  (fn test_contains ((haystack string) (needle string)) -> bool
+  (fn test_contains haystack string needle string -> bool
     (ret (call string_contains haystack needle)))
   
   (test-spec test_contains
@@ -30,7 +30,7 @@
       (input "hello world" "xyz")
       (expect false)))
   
-  (fn test_replace ((text string) (old string) (new string)) -> string
+  (fn test_replace text string old string new string -> string
     (ret (call string_replace text old new)))
   
   (test-spec test_replace
@@ -39,7 +39,7 @@
       (input "foo bar foo" "foo" "X")
       (expect "X bar X")))
   
-  (fn test_array_get ((arr array) (idx i32)) -> string
+  (fn test_array_get arr array idx int -> string
     (ret (call array_get arr idx)))
   
   (test-spec test_array_get

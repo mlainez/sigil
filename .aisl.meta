@@ -1,0 +1,41 @@
+@(meta-spec)
+@(proj aisl ty:sys-lang principle:one-way-only)
+@(stat tc:1/88 bc:broken llm:100% breaking-change:in-progress)
+@(stdlib
+  (core arith cmp log bit cast)
+  (string concat len split trim contains replace)
+  (regex compile match find find_all replace POSIX-ERE)
+  (array new push pop get set len slice)
+  (map new get set has del keys vals)
+  (io print println read file_read file_write)
+  (net tcp http ws)
+  (sys time sleep env exit))
+@(task
+  (1✓flatten-param-syntax)
+  (2✓remove-backward-compat)
+  (3✓discover-regex-exists)
+  (4✓document-type-ambiguity-problem)
+  (5→decide-on-type-simplification)
+  (6→complete-converter-script)
+  (7→convert-all-tests-flat)
+  (8→implement-int-float-types)
+  (9→convert-to-int-float)
+  (10→commit-all-simplifications))
+@(ctx
+  (mod parser.c:757 removed-nested-param-support)
+  (tests 79-need-conversion 1-already-flat)
+  (principle explicit>compact one-form-only zero-ambiguity)
+  (regex-available YES vm.c:3593-3650 bytecode.h:237-241))
+@(next
+  complete-convert_syntax.aisl-using-regex
+  run-converter-on-all-tests
+  verify-88-tests-pass
+  commit-breaking-change
+  impl-ast-cache)
+@(philosophy
+  (no-backward-compat "llms-regenerate-dont-edit")
+  (no-versioning "structure-matters-not-version")
+  (one-way-only "exactly-one-form-per-construct")
+  (explicit-over-compact "clarity>brevity")
+  (stdlib-first "check-before-assuming-missing")
+  (aisl-only-tooling "NEVER use Python/Bash - ALWAYS use AISL for scripts"))

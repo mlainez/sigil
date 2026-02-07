@@ -1,6 +1,6 @@
 (mod test_file_io
-  (fn write_file ((filepath string) (mode i32) (content string)) -> i32
-    (set fd i32 (call io_file_open filepath mode))
+  (fn write_file filepath string mode int content string -> int
+    (set fd int (call io_file_open filepath mode))
     (call io_file_write fd content)
     (call io_file_close fd)
     (ret 0))

@@ -1,9 +1,9 @@
 (mod test_loop
-  (fn test_loop () -> i32
-    (set count i32 0)
+  (fn test_loop -> int
+    (set count int 0)
     (loop
       (call print "In loop")
-      (set count i32 (call add count 1))
+      (set count int (call add count 1))
       (ifnot (call lt count 3) done))
     (label done)
     (ret count))

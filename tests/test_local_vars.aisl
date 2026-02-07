@@ -1,5 +1,5 @@
 (mod test
-  (fn add_two_numbers ((x i32) (y i32)) -> i32
+  (fn add_two_numbers x int y int -> int
     (ret (call add x y)))
   
   (test-spec add_two_numbers

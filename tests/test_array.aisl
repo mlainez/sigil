@@ -1,5 +1,5 @@
 (mod test_array
-  (fn json_array_push_length ((val i32)) -> i32
+  (fn json_array_push_length val int -> int
     (ret (call json_length (call json_push (call json_new_array) val))))
   
   (test-spec json_array_push_length
@@ -10,7 +10,7 @@
       (input 100)
       (expect 1)))
   
-  (fn json_array_stringify ((val i32)) -> string
+  (fn json_array_stringify val int -> string
     (ret (call json_stringify (call json_push (call json_new_array) val))))
   
   (test-spec json_array_stringify

@@ -1,5 +1,5 @@
 (mod test_for_loop
-  (fn sum_recursive ((start i32) (end i32)) -> i32
+  (fn sum_recursive start int end int -> int
     (ret (call if_i32 (call ge start end) 0
       (call add start (call sum_recursive (call add start 1) end)))))
   

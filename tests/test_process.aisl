@@ -1,5 +1,5 @@
 (mod test_process
-  (fn create_args_array ((size i32)) -> array
+  (fn create_args_array size int -> array
     (ret (call ArrayNew size)))
   
   (test-spec create_args_array
@@ -8,7 +8,7 @@
       (input 1)
       (expect "array_1")))
   
-  (fn set_array_element ((arr array) (idx i32) (val string)) -> array
+  (fn set_array_element arr array idx int val string -> array
     (call ArraySet arr idx val)
     (ret arr))
   
@@ -18,7 +18,7 @@
       (input "array_1" 0 "1")
       (expect "array_1")))
   
-  (fn spawn_process ((cmd string) (args array)) -> string
+  (fn spawn_process cmd string args array -> string
     (ret (call process_spawn cmd args)))
   
   (test-spec spawn_process
@@ -31,7 +31,7 @@
       (input "echo" "array_2")
       (expect "proc_2")))
   
-  (fn wait_for_process ((proc string)) -> i32
+  (fn wait_for_process proc string -> int
     (ret (call process_wait proc)))
   
   (test-spec wait_for_process
@@ -44,7 +44,7 @@
       (input "proc_2")
       (expect 0)))
   
-  (fn read_process_output ((proc string)) -> string
+  (fn read_process_output proc string -> string
     (ret (call process_read proc)))
   
   (test-spec read_process_output

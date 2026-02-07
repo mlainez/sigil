@@ -1,5 +1,5 @@
 (mod test
-  (fn array_ops_length () -> i32
+  (fn array_ops_length -> int
     (ret (call array_length (call array_push (call array_push (call array_push (call array_new 10) 42) 100) 7))))
   
   (test-spec array_ops_length
@@ -7,7 +7,7 @@
       (input)
       (expect 3)))
   
-  (fn array_get_after_set ((idx i32)) -> i32
+  (fn array_get_after_set idx int -> int
     (ret (call array_get (call array_set (call array_push (call array_push (call array_push (call array_new 10) 42) 100) 7) 1 999) idx)))
   
   (test-spec array_get_after_set

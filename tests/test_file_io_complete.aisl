@@ -1,5 +1,5 @@
 (mod test_file_io_complete
-  (fn open_file_for_write ((filepath string)) -> i32
+  (fn open_file_for_write filepath string -> int
     (ret (call io_file_open filepath 1)))
   
   (test-spec open_file_for_write
@@ -8,7 +8,7 @@
       (input "/tmp/aisl_demo.txt")
       (expect 3)))
   
-  (fn write_single_line ((fd i32) (line string)) -> i32
+  (fn write_single_line fd int line string -> int
     (ret (call io_file_write fd line)))
   
   (test-spec write_single_line
@@ -17,7 +17,7 @@
       (input 3 "Line 1: Hello from AISL!\n")
       (expect 26)))
   
-  (fn open_file_for_read ((filepath string)) -> i32
+  (fn open_file_for_read filepath string -> int
     (ret (call io_file_open filepath 0)))
   
   (test-spec open_file_for_read
@@ -26,7 +26,7 @@
       (input "/tmp/aisl_demo.txt")
       (expect 4)))
   
-  (fn read_from_fd ((fd i32)) -> string
+  (fn read_from_fd fd int -> string
     (ret (call io_file_read fd)))
   
   (test-spec read_from_fd

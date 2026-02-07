@@ -1,6 +1,6 @@
 (mod test
-  (fn increment_and_return ((counter i32)) -> i32
-    (set new_counter i32 (call add counter 1))
+  (fn increment_and_return counter int -> int
+    (set new_counter int (call add counter 1))
     (ret new_counter))
   
   (test-spec increment_and_return

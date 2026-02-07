@@ -1,9 +1,9 @@
 (mod type_dispatch
-  (fn add_two_numbers ((x i32) (y i32)) -> i32
+  (fn add_two_numbers x int y int -> int
     (ret (call add x y)))
   
   (test-spec add_two_numbers
-    (case "basic i32 addition via polymorphic add"
+    (case "basic int addition via polymorphic add"
       (input 10 20)
       (expect 30))
     (case "zero addition"
@@ -13,22 +13,22 @@
       (input -5 15)
       (expect 10)))
   
-  (fn subtract_numbers ((x i32) (y i32)) -> i32
+  (fn subtract_numbers x int y int -> int
     (ret (call sub x y)))
   
   (test-spec subtract_numbers
-    (case "basic i32 subtraction via polymorphic sub"
+    (case "basic int subtraction via polymorphic sub"
       (input 20 10)
       (expect 10))
     (case "negative result"
       (input 5 10)
       (expect -5)))
   
-  (fn multiply_numbers ((x i32) (y i32)) -> i32
+  (fn multiply_numbers x int y int -> int
     (ret (call mul x y)))
   
   (test-spec multiply_numbers
-    (case "basic i32 multiplication via polymorphic mul"
+    (case "basic int multiplication via polymorphic mul"
       (input 5 6)
       (expect 30))
     (case "multiply by zero"

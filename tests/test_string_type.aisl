@@ -1,5 +1,5 @@
 (mod test
-  (fn identity_str ((x string)) -> string
+  (fn identity_str x string -> string
     (ret x))
   
   (test-spec identity_str

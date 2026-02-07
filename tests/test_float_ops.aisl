@@ -1,5 +1,5 @@
 (mod math
-  (fn multiply_f64 ((a f64) (b f64)) -> f64
+  (fn multiply_f64 a float b float -> float
     (ret (call mul a b)))
   
   (test-spec multiply_f64
@@ -13,7 +13,7 @@
       (input 7.5 1.0)
       (expect 7.5)))
   
-  (fn add_f64 ((a f64) (b f64)) -> f64
+  (fn add_f64 a float b float -> float
     (ret (call add a b)))
   
   (test-spec add_f64
@@ -27,4 +27,4 @@
       (input 2.5 0.0)
       (expect 2.5)))
   
-  (meta-note "Tests f64 floating-point arithmetic operations"))
+  (meta-note "Tests float floating-point arithmetic operations"))

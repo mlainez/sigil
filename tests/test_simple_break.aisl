@@ -1,8 +1,8 @@
 (mod test_simple_break
-  (fn test_simple () -> i32
-    (set i i32 0)
+  (fn test_simple -> int
+    (set i int 0)
     (loop
-      (set i i32 (call add i 1))
+      (set i int (call add i 1))
       (set done bool (call eq i 3))
       (ifnot done skip)
       (break)

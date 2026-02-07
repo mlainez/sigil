@@ -1,5 +1,5 @@
 (mod test
-  (fn map_ops_length () -> i32
+  (fn map_ops_length -> int
     (ret (call map_length (call map_set (call map_set (call map_set (call map_new) "a" 100) "b" 200) "c" 300))))
   
   (test-spec map_ops_length
@@ -7,7 +7,7 @@
       (input)
       (expect 3)))
   
-  (fn map_has_key ((key string)) -> bool
+  (fn map_has_key key string -> bool
     (ret (call map_has (call map_set (call map_set (call map_new) "a" 100) "b" 200) key)))
   
   (test-spec map_has_key
@@ -21,7 +21,7 @@
       (input "x")
       (expect 0)))
   
-  (fn map_delete_then_length () -> i32
+  (fn map_delete_then_length -> int
     (ret (call map_length (call map_delete (call map_set (call map_set (call map_set (call map_new) "a" 100) "b" 200) "c" 300) "b"))))
   
   (test-spec map_delete_then_length
@@ -29,7 +29,7 @@
       (input)
       (expect 2)))
   
-  (fn map_delete_then_has ((key string)) -> bool
+  (fn map_delete_then_has key string -> bool
     (ret (call map_has (call map_delete (call map_set (call map_new) "b" 200) "b") key)))
   
   (test-spec map_delete_then_has

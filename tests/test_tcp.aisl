@@ -1,5 +1,5 @@
 (mod test_tcp
-  (fn connect_tcp ((host string) (port i32)) -> string
+  (fn connect_tcp host string port int -> string
     (ret (call tcp_connect host port)))
   
   (test-spec connect_tcp
@@ -8,7 +8,7 @@
       (input "example.com" 80)
       (expect "socket_1")))
   
-  (fn send_tcp_data ((sock string) (data string)) -> i32
+  (fn send_tcp_data sock string data string -> int
     (call tcp_send sock data)
     (ret 0))
   
@@ -18,7 +18,7 @@
       (input "socket_1" "GET / HTTP/1.0\r\nHost: example.com\r\n\r\n")
       (expect 0)))
   
-  (fn receive_tcp_data ((sock string) (max_bytes i32)) -> string
+  (fn receive_tcp_data sock string max_bytes int -> string
     (ret (call tcp_receive sock max_bytes)))
   
   (test-spec receive_tcp_data
@@ -27,7 +27,7 @@
       (input "socket_1" 1024)
       (expect "HTTP/1.0 200 OK\r\nContent-Type: text/html\r\n\r\n<html>...</html>")))
   
-  (fn close_tcp ((sock string)) -> i32
+  (fn close_tcp sock string -> int
     (call tcp_close sock)
     (ret 0))
   

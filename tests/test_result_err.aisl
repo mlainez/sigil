@@ -1,5 +1,5 @@
 (mod test_result_err
-  (fn create_err_result ((code i32)) -> i32
+  (fn create_err_result code int -> int
     (set result string (call result_err code "Test error"))
     (set is_error bool (call is_err result))
     (if is_error
@@ -11,9 +11,9 @@
       (input 404)
       (expect 1)))
   
-  (fn get_error_info ((code i32)) -> i32
+  (fn get_error_info code int -> int
     (set result string (call result_err code "Error message"))
-    (set err_code i32 (call error_code result))
+    (set err_code int (call error_code result))
     (ret err_code))
   
   (test-spec get_error_info
