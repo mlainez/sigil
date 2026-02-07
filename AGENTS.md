@@ -122,6 +122,33 @@ Every test file must include:
 
 ---
 
+## 🚨 CRITICAL: ALWAYS UPDATE DOCUMENTATION WHEN FINDING INCONSISTENCIES
+
+**When you discover bugs, inconsistencies, or undocumented behavior, UPDATE DOCS IMMEDIATELY.**
+
+Documentation update order:
+1. **FIRST**: Update `.aisl.grammar` - add critical notes in `@(note ...)` section
+2. **SECOND**: Update `.aisl.analysis` - document the discovery with `@(tag-name)` section
+3. **THIRD**: Update `AGENTS.md` (this file) - if LLMs need to know to avoid errors
+4. **LAST**: Update other markdown files if humans need it
+
+Examples of what requires immediate documentation:
+- ✅ Found syntax that compiles but doesn't work → Document as "NOT IMPLEMENTED"
+- ✅ Found reserved keywords causing crashes → Add to critical notes
+- ✅ Found non-obvious pattern needed for common tasks → Add example
+- ✅ Found misleading docs that don't match reality → Fix immediately
+
+Process when discovering inconsistency:
+1. Verify the actual behavior (test it)
+2. Update machine-readable formats (`.aisl.grammar`, `.aisl.analysis`)
+3. Update human docs (AGENTS.md, LANGUAGE_SPEC.md)
+4. Add test case if it's a bug
+5. Fix the bug if possible, or document workaround
+
+**NEVER leave documentation out of sync with reality.** Misleading docs are worse than no docs.
+
+---
+
 ## What is AISL?
 
 AISL (AI-Optimized Systems Language) is a programming language specifically designed for **code generation by AI systems**. It eliminates the ambiguities and complexities that make traditional languages difficult for LLMs to generate reliably.
@@ -232,6 +259,10 @@ You rarely write these directly - they're what Agent code desugars to:
 Generate these - the compiler desugars them to Core:
 
 ```lisp
+; If statement - conditional execution
+(if (call gt x 5)
+  (call print "x is greater than 5"))
+
 ; While loop - iterate while condition holds
 (while (call lt i 10)
   (set i i32 (call add i 1)))
@@ -248,6 +279,8 @@ Generate these - the compiler desugars them to Core:
 (if (call eq val 0)
   (continue))
 ```
+
+**Note**: `if` is the primary conditional construct. It desugars to `ifnot` + `label` internally, but you should always use `if` for clarity.
 
 ---
 
@@ -435,11 +468,20 @@ Generate these - the compiler desugars them to Core:
 
 ```lisp
 (fn max a i32 b i32 -> i32
-  (set greater bool (call gt a b))
-  (call ifnot greater return_b)
-  (ret a)
-  (call label return_b)
+  (if (call gt a b)
+    (ret a))
   (ret b))
+```
+
+**Advanced Pattern with Core IR** (use only when `if` can't express the logic):
+
+```lisp
+(fn complex_conditional flag bool -> string
+  (set result string "default")
+  (ifnot flag skip)
+  (set result string "modified")
+  (label skip)
+  (ret result))
 ```
 
 ---
@@ -463,10 +505,8 @@ Generate these - the compiler desugars them to Core:
 
 ```lisp
 (fn factorial n i32 -> i32
-  (set is_zero bool (call eq n 0))
-  (call ifnot is_zero recurse)
-  (ret 1)
-  (call label recurse)
+  (if (call eq n 0)
+    (ret 1))
   (set n_minus_1 i32 (call sub n 1))
   (set result i32 (call factorial n_minus_1))
   (ret (call mul n result)))
@@ -733,9 +773,11 @@ Core IR constructs like `label`, `goto`, and `ifnot` are special syntax, not fun
 ```
 
 **When to use Core IR constructs:**
-- Use `label` and `goto` for complex control flow that can't be expressed with while/loop
-- Use `ifnot` for conditional jumps (jumps if condition is false)
-- Prefer Agent constructs (`while`, `loop`, `if`) when possible - they desugar to Core IR automatically
+- Use `label` and `goto` for complex control flow that can't be expressed with while/loop/if
+- Use `ifnot` for advanced conditional jumps when `if` can't express the logic
+- **Prefer Agent constructs (`if`, `while`, `loop`) whenever possible** - they desugar to Core IR automatically
+
+**Important**: Always use `if` for simple conditionals. Only use `ifnot` + `label` for complex control flow patterns.
 
 ---
 

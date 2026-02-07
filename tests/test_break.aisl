@@ -5,10 +5,8 @@
     (while (call lt i 100)
       (set sum int (call add sum i))
       (set i int (call add i 1))
-      (set should_break bool (call eq i 5))
-      (ifnot should_break skip_break)
-      (break)
-      (label skip_break))
+      (if (call eq i 5)
+        (break)))
     (ret sum))
 
   (test-spec test_break_in_while
@@ -20,10 +18,8 @@
     (set count int 0)
     (loop
       (set count int (call add count 1))
-      (set should_break bool (call gt count 10))
-      (ifnot should_break skip_break2)
-      (break)
-      (label skip_break2))
+      (if (call gt count 10)
+        (break)))
     (ret count))
 
   (test-spec test_break_in_loop

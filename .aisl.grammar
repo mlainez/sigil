@@ -2,7 +2,7 @@
 @(syn
   (prog (mod name fn*))
   (fn (fn name p* -> ty s*) | (fn name ((p ty)*) -> ty s*))
-  (s (set v ty e) | (call f a*) | (ret e) | (while e s*) | (loop s*) | (break) | (cont) | (if e s*) | (label n) | (goto n) | (ifnot v n))
+  (s (set v ty e) | (call f a*) | (ret e) | (while e s*) | (loop s*) | (if e s*) | (break) | (cont) | (label n) | (goto n) | (ifnot v n))
   (e lit | var | (call f a*))
   (lit int | float | str | true | false)
   (ty i32|i64|f32|f64|bool|str|arr|map|json|result|regex))
@@ -22,7 +22,8 @@
 @(ex
   (fn add a i32 b i32 -> i32 (ret (call add a b)))
   (fn fact n i32 -> i32 
-    (if (call eq n 0) (ret 1))
+    (if (call eq n 0)
+      (ret 1))
     (ret (call mul n (call fact (call sub n 1)))))
   (fn sum arr arr n i32 -> i32
     (set s i32 0)
@@ -42,4 +43,5 @@
   (reserved-types "NEVER use as var names: json array map result option int float string bool")
   (core-ir-syntax "label/goto/ifnot NOT calls - use directly not (call label x)")
   (single-ret "use result var + single ret - NOT multiple rets after labels")
-  (entry-point "fn main -> int required - VM errors if missing"))
+  (entry-point "fn main -> int required - VM errors if missing")
+  (if-desugars "if is primary - desugars to ifnot+label - prefer if over ifnot"))

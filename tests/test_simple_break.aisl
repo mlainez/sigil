@@ -3,10 +3,8 @@
     (set i int 0)
     (loop
       (set i int (call add i 1))
-      (set done bool (call eq i 3))
-      (ifnot done skip)
-      (break)
-      (label skip))
+      (if (call eq i 3)
+        (break)))
     (ret i))
 
   (test-spec test_simple

@@ -569,3 +569,53 @@ Examples of what to document:
 
 Rule: If an LLM would make mistakes without knowing it, DOCUMENT IT
 
+@(if-statement-not-implemented-2026-02-07)
+
+**DISCOVERED: `if` statement listed in grammar but NOT IMPLEMENTED**
+
+**STATUS: FIXED 2026-02-07**
+
+During CSV parser LLM generation testing, discovered:
+
+Issue:
+```aisl
+(set flag bool true)
+(if flag
+  (call print "Should print"))  ; Compiled but NEVER EXECUTED
+```
+
+Investigation:
+- .aisl.grammar listed `(if e s*)` as valid syntax
+- tests/test_flat_syntax.aisl uses `if` construct
+- Code COMPILED successfully
+- But `if` body NEVER RAN (printed nothing)
+
+Root cause:
+- Parser handled old-style `(If : type cond (Then ...) (Else ...))` (capitalized)
+- Statement-style `(if cond body)` NOT implemented in v3 parser
+- Lowercase `if` treated as identifier (function call to non-existent function)
+- No compilation error, but runtime did nothing
+
+**FIX IMPLEMENTED**:
+1. Added lowercase `if` as keyword in lexer (lexer.c:181)
+2. Added `if` statement parsing in v3 parser (parser.c:702-724)
+3. Added `desugar_if` function to convert to Core IR (desugar.c:238-271)
+4. Desugaring: `(if cond body)` → `(ifnot cond skip_N) body... (label skip_N)`
+5. Updated all documentation to show `if` as primary construct
+
+**NEW CORRECT PATTERN**: Use if statement (now IMPLEMENTED):
+```aisl
+(if (call gt x 5)
+  (call print "x is greater than 5"))
+```
+
+**ADVANCED PATTERN**: ifnot+label still available for complex control:
+```aisl
+(set flag bool (call gt x 5))
+(ifnot flag skip)
+(call print "Executed when flag is true")
+(label skip)
+```
+
+**FOR LLMs**: ALWAYS generate `(if cond body)` - it's more intuitive than `ifnot`
+

@@ -4,8 +4,8 @@
     (loop
       (call print "In loop")
       (set count int (call add count 1))
-      (ifnot (call lt count 3) done))
-    (label done)
+      (if (call ge count 3)
+        (break)))
     (ret count))
 
   (test-spec test_loop

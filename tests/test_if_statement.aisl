@@ -1,0 +1,104 @@
+(mod test_if_statement
+  (fn test_if_true -> int
+    (set result int 0)
+    (if (call eq 1 1)
+      (set result int 42))
+    (ret result))
+  
+  (fn test_if_false -> int
+    (set result int 0)
+    (if (call eq 1 2)
+      (set result int 42))
+    (ret result))
+  
+  (fn test_if_with_gt -> int
+    (set x int 10)
+    (set y int 5)
+    (set result int 0)
+    (if (call gt x y)
+      (set result int 1))
+    (ret result))
+  
+  (fn test_if_with_lt -> int
+    (set x int 3)
+    (set y int 7)
+    (set result int 0)
+    (if (call lt x y)
+      (set result int 1))
+    (ret result))
+  
+  (fn test_if_multiple_statements -> int
+    (set result int 0)
+    (if (call eq 5 5)
+      (set result int 1)
+      (set result int (call add result 9)))
+    (ret result))
+  
+  (fn test_if_with_return -> int
+    (if (call eq 2 2)
+      (ret 100))
+    (ret 0))
+  
+  (fn max a int b int -> int
+    (if (call gt a b)
+      (ret a))
+    (ret b))
+  
+  (fn min a int b int -> int
+    (if (call lt a b)
+      (ret a))
+    (ret b))
+  
+  (test-spec test_if_true
+    (case "if with true condition executes body"
+      (input)
+      (expect 42)))
+  
+  (test-spec test_if_false
+    (case "if with false condition skips body"
+      (input)
+      (expect 0)))
+  
+  (test-spec test_if_with_gt
+    (case "if with greater than comparison"
+      (input)
+      (expect 1)))
+  
+  (test-spec test_if_with_lt
+    (case "if with less than comparison"
+      (input)
+      (expect 1)))
+  
+  (test-spec test_if_multiple_statements
+    (case "if can contain multiple statements"
+      (input)
+      (expect 10)))
+  
+  (test-spec test_if_with_return
+    (case "if can contain return statement"
+      (input)
+      (expect 100)))
+  
+  (test-spec max
+    (case "max returns first when greater"
+      (input 10 5)
+      (expect 10))
+    (case "max returns second when greater"
+      (input 3 8)
+      (expect 8))
+    (case "max handles equal values"
+      (input 7 7)
+      (expect 7)))
+  
+  (test-spec min
+    (case "min returns first when smaller"
+      (input 3 9)
+      (expect 3))
+    (case "min returns second when smaller"
+      (input 12 4)
+      (expect 4))
+    (case "min handles equal values"
+      (input 5 5)
+      (expect 5)))
+  
+  (meta-note "Tests if statement: (if cond body) - desugars to ifnot+label"))

@@ -1,20 +1,20 @@
 (mod test
   (fn sum_one_to_n n int -> int
     (if (call le n 0)
-      (ret 0)
-      (if (call eq n 1)
-        (ret 1)
-        (if (call eq n 2)
-          (ret 3)
-          (if (call eq n 3)
-            (ret 6)
-            (if (call eq n 4)
-              (ret 10)
-              (if (call eq n 5)
-                (ret 15)
-                (if (call eq n 10)
-                  (ret 55)
-                  (ret 0)))))))))
+      (ret 0))
+    (if (call eq n 1)
+      (ret 1))
+    (if (call eq n 2)
+      (ret 3))
+    (if (call eq n 3)
+      (ret 6))
+    (if (call eq n 4)
+      (ret 10))
+    (if (call eq n 5)
+      (ret 15))
+    (if (call eq n 10)
+      (ret 55))
+    (ret 0))
   
   (test-spec sum_one_to_n
     (case "sum 1 to 10"
@@ -30,4 +30,4 @@
       (input 0)
       (expect 0)))
   
-  (meta-note "Tests sum calculation using nested conditionals simulating loop"))
+  (meta-note "Tests sum calculation using conditionals with early returns"))

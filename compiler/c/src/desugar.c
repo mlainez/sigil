@@ -234,6 +234,47 @@ static Expr* desugar_continue(LoopContext* ctx) {
     return make_goto(ctx->start_label);
 }
 
+// Desugar an if statement:
+//   (if cond body)
+// becomes:
+//   (ifnot cond skip_N)
+//   body...
+//   (label skip_N)
+static ExprList* desugar_if(Expr* if_expr, LoopContext* ctx) {
+    char* skip_label = gen_label("if_skip");
+    
+    ExprList* result = NULL;
+    
+    // (ifnot cond skip_N)
+    Expr* cond = desugar_expr_with_context(if_expr->data.if_expr.cond, ctx);
+    append_expr(&result, make_ifnot(cond, skip_label));
+    
+    // body... (then branch)
+    Expr* then_body = if_expr->data.if_expr.then_expr;
+    if (then_body->kind == EXPR_SEQ) {
+        ExprList* body_stmts = desugar_statement_list_with_context(
+            then_body->data.seq.exprs, 
+            ctx
+        );
+        
+        // Append all body statements
+        ExprList* cur = body_stmts;
+        while (cur) {
+            append_expr(&result, cur->expr);
+            cur = cur->next;
+        }
+    } else {
+        // Single statement body
+        Expr* body = desugar_expr_with_context(then_body, ctx);
+        append_expr(&result, body);
+    }
+    
+    // (label skip_N)
+    append_expr(&result, make_label(skip_label));
+    
+    return result;
+}
+
 // Desugar a single expression
 static Expr* desugar_expr_with_context(Expr* expr, LoopContext* ctx) {
     if (!expr) return NULL;
@@ -247,6 +288,11 @@ static Expr* desugar_expr_with_context(Expr* expr, LoopContext* ctx) {
         case EXPR_FOR:
             // Can't return a statement list from here, caller must handle
             fprintf(stderr, "Error: loop must be in statement context\n");
+            exit(1);
+            
+        case EXPR_IF:
+            // Can't return a statement list from here, caller must handle
+            fprintf(stderr, "Error: if statement must be in statement context\n");
             exit(1);
             
         case EXPR_BREAK:
@@ -332,6 +378,17 @@ static ExprList* desugar_statement_list_with_context(ExprList* stmts, LoopContex
         } else if (stmt->kind == EXPR_FOR) {
             // Infinite loop expands to multiple statements
             ExprList* desugared = desugar_loop(stmt, ctx);
+            
+            // Append all desugared statements
+            ExprList* d = desugared;
+            while (d) {
+                append_expr(&result, d->expr);
+                d = d->next;
+            }
+            
+        } else if (stmt->kind == EXPR_IF) {
+            // If statement expands to multiple statements
+            ExprList* desugared = desugar_if(stmt, ctx);
             
             // Append all desugared statements
             ExprList* d = desugared;
