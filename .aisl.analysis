@@ -360,3 +360,176 @@ Human concern: "but what about compatibility?"
 LLM reality: **AISL has no FFI to be compatible with**
 
 **Simplicity wins. Eliminate choice.**
+
+@(runtime-errors-2026-02-07)
+
+**DISCOVERED: Reserved type keywords used as variable names cause silent failures**
+
+Issue found during LLM generation testing:
+```
+(set json string "{\"model\":\"codellama\"}")  ; json is TYPE keyword
+(call print json)                              ; Prints "0" not string!
+```
+
+Root cause:
+- Lexer tokenizes 'json' as TOK_TYPE_JSON not TOK_IDENTIFIER
+- Parser accepts it (no error check)
+- VM treats as type confusion
+- Silent runtime failure (prints wrong value, crashes on string ops)
+
+**CRITICAL BUG**: Parser should reject type keywords as variable names
+
+Reserved keywords that CANNOT be variable names:
+- int, float, string, bool
+- json, array, map, result, option, regex
+
+Error should be: "Cannot use type keyword 'json' as variable name"
+
+Workaround for LLMs:
+- Use json_str, json_data, json_obj instead of json
+- Use arr, data_array instead of array
+- Use hashmap, value_map instead of map
+
+**ACTION NEEDED**: Add parser check to reject type keywords as identifiers
+
+@(core-ir-syntax-confusion-2026-02-07)
+
+**DISCOVERED: Core IR constructs are NOT function calls**
+
+Common LLM mistake during testing:
+```
+(call label my_label)   ; WRONG - parse error
+(call goto my_label)    ; WRONG - parse error
+(call ifnot flag skip)  ; WRONG - parse error
+```
+
+Correct syntax:
+```
+(label my_label)        ; Core IR construct
+(goto my_label)         ; Core IR construct
+(ifnot flag skip)       ; Core IR construct
+```
+
+Explanation:
+- label/goto/ifnot are Core IR primitives, not functions
+- They have special parsing rules
+- They do NOT use (call ...) syntax
+- Parser recognizes them as statement types directly
+
+When to use:
+- label: Mark jump target
+- goto: Unconditional jump to label
+- ifnot: Jump to label if condition is false
+
+Prefer Agent constructs when possible:
+- while/loop instead of label/goto
+- if instead of ifnot (when if is available)
+- break/continue for loop control
+
+**FOR LLMs**: Use label/goto/ifnot only for complex control flow that can't be expressed with while/loop/break/continue
+
+@(multiple-ret-restriction-2026-02-07)
+
+**DISCOVERED: Cannot have multiple ret statements after labels in simple functions**
+
+Pattern that FAILS:
+```
+(fn example flag bool -> string
+  (ifnot flag return_b)
+  (ret "A")              ; First ret
+  (label return_b)       ; Parse error - code after ret
+  (ret "B"))
+```
+
+Parser rejects this because:
+- ret is supposed to end function execution
+- Code after ret is unreachable in simple analysis
+- label after ret violates this assumption
+
+**WORKAROUND**: Use result variable with single ret:
+```
+(fn example flag bool -> string
+  (set result string "B")   ; Default value
+  (ifnot flag skip)         ; Jump if condition false
+  (set result string "A")   ; Override if not jumped
+  (label skip)
+  (ret result))             ; Single ret at end
+```
+
+Pattern:
+1. Initialize result variable with default/fallback value
+2. Use ifnot to skip override logic
+3. Set result to primary value if not skipped
+4. Place label after override
+5. Single ret result at end
+
+**FOR LLMs**: Always use result variable + single ret pattern for conditional returns
+
+@(http-response-object-2026-02-07)
+
+**DISCOVERED: HTTP operations return objects, not strings**
+
+Common mistake:
+```
+(set response string (call http_post url body))
+(call print response)                            ; Prints "[non-string]"
+```
+
+Correct usage:
+```
+(set response string (call http_post url body))
+(set body string (call http_get_body response))      ; Extract body
+(set status int (call http_get_status response))     ; Extract status
+(call print body)                                     ; Now prints content
+```
+
+HTTP operations:
+- http_get, http_post, http_put, http_delete return response OBJECT
+- Response object is opaque (can't print directly)
+- Use http_get_body to extract string body
+- Use http_get_status to extract int status code
+
+**FOR LLMs**: Always extract body/status from HTTP responses before using them
+
+@(fix-bugs-directive-2026-02-07)
+
+**NEW DIRECTIVE: Fix bugs in the language when discovered during use**
+
+Process:
+1. When writing AISL code, if you hit a bug or limitation
+2. FIX IT immediately in the language/compiler/VM
+3. Don't work around it - fix the root cause
+4. Update documentation with the fix
+5. Add test case for the bug
+
+This directive ensures:
+- AISL improves through actual use
+- No accumulated workarounds
+- Language becomes more robust over time
+- Real usage drives development
+
+Examples:
+- Found: type keywords as var names cause crashes → FIX: add parser check
+- Found: parser rejects valid syntax → FIX: update parser rules
+- Found: missing stdlib function → FIX: add to VM runtime
+
+**NEVER leave bugs unfixed** - they compound over time
+
+@(document-discoveries-directive-2026-02-07)
+
+**NEW DIRECTIVE: Document interesting language usage patterns immediately**
+
+When you discover non-obvious usage patterns:
+1. Add to .aisl.grammar @(note ...) section (token-efficient)
+2. Add to AGENTS.md if critical for LLMs (human-readable)
+3. Don't add to markdown if it's just internal design thinking
+
+Examples of what to document:
+- ✓ Reserved keywords can't be variable names
+- ✓ Core IR constructs not function calls
+- ✓ Single ret pattern for conditional returns
+- ✗ Implementation details of parser
+- ✗ Historical evolution of syntax
+
+Rule: If an LLM would make mistakes without knowing it, DOCUMENT IT
+
