@@ -244,6 +244,42 @@ Examples of what should be AISL:
 
 **If you catch yourself writing Python, STOP and use AISL instead**
 
+@(critical-directive-machine-readable-first)
+
+**ALWAYS CONSULT AND UPDATE MACHINE-READABLE FORMATS FIRST**
+
+When working on AISL, the order of consultation is:
+1. FIRST: .aisl.grammar (syntax reference, 42 lines, ~400 tokens)
+2. SECOND: .aisl.meta (project context, compressed s-expr)
+3. THIRD: .aisl.analysis (design decisions, this file)
+4. LAST: AGENTS.md and other markdown (human docs, 8000+ tokens)
+
+Why this order:
+- Token efficiency: 20x fewer tokens in machine formats
+- Faster context loading
+- More structured information
+- Easier to parse programmatically
+- Updated more frequently with discoveries
+
+**CRITICAL**: After ANY change to language behavior or discovering usage patterns:
+1. Update .aisl.grammar @(note ...) section FIRST
+2. Update .aisl.analysis with @(tag) entries SECOND
+3. Only then update AGENTS.md if humans need it
+4. Never duplicate info - keep it in ONE canonical place
+
+Machine format rules:
+- .aisl.grammar: Syntax rules, ops, types, critical notes (s-expr format)
+- .aisl.analysis: Design decisions, directives, discovered issues (tagged sections)
+- .aisl.meta: Project metadata, context (compressed s-expr)
+
+Markdown format rules:
+- AGENTS.md: Human-readable guide for LLMs generating AISL
+- LANGUAGE_SPEC.md: Complete language reference for humans
+- README.md: Project overview for humans
+- IMPLEMENTATION-STATUS.md: Feature tracking for maintainers
+
+**NEVER put information only in markdown** - always in machine-readable first, then optionally in markdown if humans need it.
+
 @(critical-directive-documentation)
 
 **DOCUMENTATION MUST ALWAYS BE UP TO DATE AND MINIMAL**

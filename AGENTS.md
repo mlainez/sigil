@@ -7,22 +7,33 @@
 
 ## ⚡ FOR LLMs: OPTIMIZED FORMATS AVAILABLE
 
+**⚠️ IMPORTANT: Always consult machine-readable formats FIRST**
+
 **This document is human-readable prose with examples.**  
 **For token-optimized LLM consumption, use these instead:**
 
-- **`.aisl.grammar`** - Complete language reference in 40 lines (95% fewer tokens)
+- **`.aisl.grammar`** - Complete language reference in 45 lines (~400 tokens) - **CONSULT FIRST**
 - **`.aisl.meta`** - Project context in compressed s-expr format (80% fewer tokens)
-- **`.aisl.analysis`** - Deep architectural analysis for LLM-first design
+- **`.aisl.analysis`** - Deep architectural analysis + runtime discoveries
 
 **Token efficiency:**
-- This file: ~600 lines = ~8,000 tokens
-- `.aisl.grammar`: ~40 lines = ~400 tokens
+- This file: ~700 lines = ~8,000 tokens
+- `.aisl.grammar`: ~45 lines = ~400 tokens
 - **20x more efficient for context loading**
 
+**Consultation order for AI agents:**
+1. **FIRST**: `.aisl.grammar` - syntax, operations, critical notes
+2. **SECOND**: `.aisl.meta` - project context
+3. **THIRD**: `.aisl.analysis` - design decisions, discovered issues
+4. **LAST**: This file (AGENTS.md) - only if you need detailed examples
+
 **When to use each:**
-- **First time learning AISL**: Read this file (AGENTS.md)
-- **Generating AISL code**: Load `.aisl.grammar` + `.aisl.meta`
-- **Deep analysis**: Read `.aisl.analysis`
+- **Generating AISL code**: Load `.aisl.grammar` + `.aisl.meta` ONLY
+- **Fixing bugs/issues**: Check `.aisl.analysis` for known issues
+- **Learning AISL deeply**: Read this file (AGENTS.md)
+- **Understanding design**: Read `.aisl.analysis`
+
+**Critical rule**: Machine-readable formats are the source of truth. Markdown is for human reference only.
 
 ---
 
