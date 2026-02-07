@@ -4,16 +4,16 @@
   (fn main -> int
     (call print "Testing validation module...")
     
-    (set in_range_result bool (call validation.in_range 5 1 10))
+    (set in_range_result bool (call in_range 5 1 10))
     (call print in_range_result)
     
-    (set out_of_range bool (call validation.in_range 15 1 10))
+    (set out_of_range bool (call in_range 15 1 10))
     (call print out_of_range)
     
-    (set is_div bool (call validation.is_divisible_by 10 5))
+    (set is_div bool (call is_divisible_by 10 5))
     (call print is_div)
     
-    (set not_div bool (call validation.is_divisible_by 10 3))
+    (set not_div bool (call is_divisible_by 10 3))
     (call print not_div)
     
     (call print "Validation module works!")

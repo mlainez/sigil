@@ -4,6 +4,6 @@
   (fn main -> int
     (set x int 42)
     (set y int -10)
-    (set abs_y int (call abs_i64 y))
+    (set abs_y int (call abs y))
     (call print abs_y)
     (ret 0)))

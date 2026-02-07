@@ -1,0 +1,57 @@
+(module network
+  (fn parse_url url string -> array
+    (set has_http bool (call string_contains url "http://"))
+    (set has_https bool (call string_contains url "https://"))
+    (set protocol string "http")
+    (if has_https
+      (set protocol string "https"))
+    
+    (set parts array (call array_new 2))
+    (call array_push parts protocol)
+    (call array_push parts url)
+    (ret parts))
+  
+  (fn build_query_string key1 string val1 string -> string
+    (set result string key1)
+    (set result string (call string_concat result "="))
+    (set result string (call string_concat result val1))
+    (ret result))
+  
+  (fn is_valid_port port int -> bool
+    (set result bool false)
+    (set gt_zero bool (call gt port 0))
+    (if gt_zero
+      (set lt_max bool (call lt port 65536))
+      (set result bool lt_max))
+    (ret result))
+  
+  (fn normalize_path path string -> string
+    (set result string path)
+    (set starts_slash bool (call string_contains path "/"))
+    (set needs_slash bool true)
+    (if starts_slash
+      (set needs_slash bool false))
+    (if needs_slash
+      (set result string (call string_concat "/" path)))
+    (ret result))
+  
+  (fn build_url host string port int path string -> string
+    (set result string "http://")
+    (set result string (call string_concat result host))
+    (set result string (call string_concat result ":"))
+    (set port_str string (call from_i64 port))
+    (set result string (call string_concat result port_str))
+    (set norm_path string (call normalize_path path))
+    (set result string (call string_concat result norm_path))
+    (ret result))
+  
+  (fn extract_domain url string -> string
+    (set has_proto bool (call string_contains url "://"))
+    (set result string url)
+    (if has_proto
+      (set parts array (call string_split url "://"))
+      (set len int (call array_length parts))
+      (set has_parts bool (call gt len 1))
+      (if has_parts
+        (set result string (call array_get parts 1))))
+    (ret result)))

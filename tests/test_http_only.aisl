@@ -3,6 +3,6 @@
   
   (fn main -> int
     (call print "Testing HTTP module")
-    (set status_text string (call http.get_status_text 200))
+    (set status_text string (call get_status_text 200))
     (call print status_text)
     (ret 0)))

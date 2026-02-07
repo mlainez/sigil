@@ -3,7 +3,7 @@
   
   (fn main -> int
     (call print "Testing JSON module")
-    (set obj json (call json.build_object_one "key" "value"))
-    (set str string (call json.to_string obj))
+    (set obj json (call build_object_one "key" "value"))
+    (set str string (call to_string obj))
     (call print str)
     (ret 0)))

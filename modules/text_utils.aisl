@@ -1,0 +1,85 @@
+(module text_utils
+  (fn to_uppercase_char c string -> string
+    (set result string c)
+    (set is_a bool (call string_eq c "a"))
+    (if is_a
+      (set result string "A"))
+    (set is_b bool (call string_eq c "b"))
+    (if is_b
+      (set result string "B"))
+    (set is_c bool (call string_eq c "c"))
+    (if is_c
+      (set result string "C"))
+    (ret result))
+  
+  (fn repeat_string text string count int -> string
+    (set result string "")
+    (set i int 0)
+    (while (call lt i count)
+      (set result string (call string_concat result text))
+      (set i int (call add i 1)))
+    (ret result))
+  
+  (fn pad_left text string width int pad_char string -> string
+    (set len int (call string_length text))
+    (set result string text)
+    (while (call lt len width)
+      (set result string (call string_concat pad_char result))
+      (set len int (call add len 1)))
+    (ret result))
+  
+  (fn pad_right text string width int pad_char string -> string
+    (set len int (call string_length text))
+    (set result string text)
+    (while (call lt len width)
+      (set result string (call string_concat result pad_char))
+      (set len int (call add len 1)))
+    (ret result))
+  
+  (fn truncate text string max_len int -> string
+    (set len int (call string_length text))
+    (set result string text)
+    (set too_long bool (call gt len max_len))
+    (if too_long
+      (set result string (call string_slice text 0 max_len)))
+    (ret result))
+  
+  (fn word_count text string -> int
+    (set words array (call string_split text " "))
+    (set count int (call array_length words))
+    (ret count))
+  
+  (fn reverse_string text string -> string
+    (set len int (call string_length text))
+    (set result string "")
+    (set i int (call sub len 1))
+    (while (call ge i 0)
+      (set c string (call string_slice text i (call add i 1)))
+      (set result string (call string_concat result c))
+      (set i int (call sub i 1)))
+    (ret result))
+  
+  (fn is_empty text string -> bool
+    (set len int (call string_length text))
+    (ret (call eq len 0)))
+  
+  (fn starts_with text string prefix string -> bool
+    (set text_len int (call string_length text))
+    (set prefix_len int (call string_length prefix))
+    (set result bool false)
+    (set len_ok bool (call ge text_len prefix_len))
+    (if len_ok
+      (set sub string (call string_slice text 0 prefix_len))
+      (set result bool (call string_eq sub prefix)))
+    (ret result))
+  
+  (fn ends_with text string suffix string -> bool
+    (set text_len int (call string_length text))
+    (set suffix_len int (call string_length suffix))
+    (set result bool false)
+    (set len_ok bool (call ge text_len suffix_len))
+    (if len_ok
+      (set start int (call sub text_len suffix_len))
+      (set sub string (call string_slice text start text_len))
+      (set result bool (call string_eq sub suffix)))
+    (ret result)))

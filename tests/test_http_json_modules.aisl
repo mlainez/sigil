@@ -5,40 +5,40 @@
   (fn main -> int
     (call print "=== Testing JSON Module ===")
     
-    (set obj json (call json.build_object_one "name" "Alice"))
-    (set obj_str string (call json.to_string obj))
+    (set obj json (call build_object_one "name" "Alice"))
+    (set obj_str string (call to_string obj))
     (call print "Created object:")
     (call print obj_str)
     
-    (set arr json (call json.build_array_one "hello"))
-    (set arr_str string (call json.to_string arr))
+    (set arr json (call build_array_one "hello"))
+    (set arr_str string (call to_string arr))
     (call print "Created array:")
     (call print arr_str)
     
-    (set parsed json (call json.from_string "{\"test\":\"value\"}"))
-    (set type_str string (call json.get_type parsed))
+    (set parsed json (call from_string "{\"test\":\"value\"}"))
+    (set type_str string (call get_type parsed))
     (call print "Parsed type:")
     (call print type_str)
     
-    (set is_obj bool (call json.is_object parsed))
+    (set is_obj bool (call is_object parsed))
     (call print "Is object:")
     (call print is_obj)
     
-    (set is_arr bool (call json.is_array parsed))
+    (set is_arr bool (call is_array parsed))
     (call print "Is array:")
     (call print is_arr)
     
     (call print "=== Testing HTTP Module ===")
     
-    (set status_200 string (call http.get_status_text 200))
+    (set status_200 string (call get_status_text 200))
     (call print "Status 200:")
     (call print status_200)
     
-    (set status_404 string (call http.get_status_text 404))
+    (set status_404 string (call get_status_text 404))
     (call print "Status 404:")
     (call print status_404)
     
-    (set status_500 string (call http.get_status_text 500))
+    (set status_500 string (call get_status_text 500))
     (call print "Status 500:")
     (call print status_500)
     

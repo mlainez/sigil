@@ -145,6 +145,10 @@ static char* value_to_string(Value val) {
 
 // Run a single test case
 TestResult run_test_case(VM* vm, TestCase* test, Definition* target_func, BytecodeProgram* program) {
+    (void)vm;  // Unused - for future VM-based test execution
+    (void)target_func;  // Unused - for future direct function invocation
+    (void)program;  // Unused - for future bytecode execution
+    
     TestResult result;
     result.test_name = strdup(test->description);
     result.line = test->line;

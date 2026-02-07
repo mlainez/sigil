@@ -1,0 +1,52 @@
+(module filesystem
+  (fn read_file_safe path string -> string
+    (set exists bool (call file_exists path))
+    (set result string "")
+    (if exists
+      (set result string (call file_read path)))
+    (ret result))
+  
+  (fn write_file_safe path string content string -> bool
+    (set success bool false)
+    (call file_write path content)
+    (set exists bool (call file_exists path))
+    (if exists
+      (set success bool true))
+    (ret success))
+  
+  (fn append_line path string line string -> int
+    (call file_append path line)
+    (call file_append path "\n")
+    (ret 0))
+  
+  (fn file_size_approx path string -> int
+    (set exists bool (call file_exists path))
+    (set result int 0)
+    (if exists
+      (set content string (call file_read path))
+      (set result int (call string_length content)))
+    (ret result))
+  
+  (fn delete_if_exists path string -> bool
+    (set exists bool (call file_exists path))
+    (set result bool false)
+    (if exists
+      (call file_delete path)
+      (set result bool true))
+    (ret result))
+  
+  (fn copy_file src string dst string -> bool
+    (set content string (call file_read src))
+    (call file_write dst content)
+    (set exists bool (call file_exists dst))
+    (ret exists))
+  
+  (fn read_lines path string -> array
+    (set content string (call file_read path))
+    (set lines array (call string_split content "\n"))
+    (ret lines))
+  
+  (fn count_lines path string -> int
+    (set lines array (call read_lines path))
+    (set count int (call array_length lines))
+    (ret count)))

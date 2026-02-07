@@ -1,0 +1,16 @@
+{
+  "name": "filesystem",
+  "version": "1.0.0",
+  "description": "File system operations with error handling",
+  "exports": [
+    "read_file_safe",
+    "write_file_safe",
+    "append_line",
+    "file_size_approx",
+    "delete_if_exists",
+    "copy_file",
+    "read_lines",
+    "count_lines"
+  ],
+  "dependencies": []
+}

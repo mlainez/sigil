@@ -1,14 +1,14 @@
 (module test_eq_strings
   (fn main -> int
-    (call print "Testing generic eq with strings:")
+    (call print "Testing string_eq with strings:")
     
     (set s1 string "object")
     (set s2 string "object")
-    (set result bool (call eq s1 s2))
+    (set result bool (call string_eq s1 s2))
     (call print result)
     
     (set s3 string "array")
-    (set result2 bool (call eq s1 s3))
+    (set result2 bool (call string_eq s1 s3))
     (call print result2)
     
     (ret 0)))

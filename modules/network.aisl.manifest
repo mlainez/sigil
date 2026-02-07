@@ -1,0 +1,14 @@
+{
+  "name": "network",
+  "version": "1.0.0",
+  "description": "Network utility functions for URLs and HTTP",
+  "exports": [
+    "parse_url",
+    "build_query_string",
+    "is_valid_port",
+    "normalize_path",
+    "build_url",
+    "extract_domain"
+  ],
+  "dependencies": []
+}

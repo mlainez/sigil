@@ -131,7 +131,19 @@ LoadedModule* module_load(ModuleCache* cache, const char* module_name) {
     // Resolve path
     char* module_path = module_resolve_path(module_name);
     if (!module_path) {
-        fprintf(stderr, "Error: Module '%s' not found in search paths\n", module_name);
+        fprintf(stderr, "Error: Module '%s' not found\n", module_name);
+        fprintf(stderr, "\nSearched in:\n");
+        const char** paths = module_get_search_paths();
+        for (int i = 0; i < MODULE_SEARCH_PATH_COUNT; i++) {
+            if (paths[i]) {
+                fprintf(stderr, "  - %s/%s.aisl\n", paths[i], module_name);
+            }
+        }
+        fprintf(stderr, "\nCommon issues:\n");
+        fprintf(stderr, "  1. Module file doesn't exist\n");
+        fprintf(stderr, "  2. Module name conflicts with type keyword (json, array, map, string, etc.)\n");
+        fprintf(stderr, "  3. Module uses 'mod' instead of 'module' keyword\n");
+        fprintf(stderr, "  4. Check spelling and capitalization\n");
         return NULL;
     }
     

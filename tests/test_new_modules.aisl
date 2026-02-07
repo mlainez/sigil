@@ -1,0 +1,45 @@
+(module test_new_modules
+  (import filesystem)
+  (import network)
+  (import text_utils)
+  
+  (fn main -> int
+    (call print "=== Testing filesystem module ===")
+    (set test_file string "/tmp/aisl_test.txt")
+    (set success bool (call write_file_safe test_file "Hello AISL!"))
+    (call print success)
+    
+    (set content string (call read_file_safe test_file))
+    (call print content)
+    
+    (set deleted bool (call delete_if_exists test_file))
+    (call print deleted)
+    
+    (call print "=== Testing network module ===")
+    (set valid_port bool (call is_valid_port 8080))
+    (call print valid_port)
+    
+    (set invalid_port bool (call is_valid_port 70000))
+    (call print invalid_port)
+    
+    (set url string (call build_url "localhost" 8080 "/api/v1"))
+    (call print url)
+    
+    (call print "=== Testing text_utils module ===")
+    (set repeated string (call repeat_string "x" 5))
+    (call print repeated)
+    
+    (set padded string (call pad_left "42" 5 "0"))
+    (call print padded)
+    
+    (set reversed string (call reverse_string "AISL"))
+    (call print reversed)
+    
+    (set empty bool (call is_empty ""))
+    (call print empty)
+    
+    (set not_empty bool (call is_empty "text"))
+    (call print not_empty)
+    
+    (call print "All new modules working!")
+    (ret 0)))

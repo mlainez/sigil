@@ -241,7 +241,7 @@ void gc_sweep(VM* vm) {
 }
 
 void gc_collect(VM* vm) {
-    size_t before = vm->gc.bytes_allocated;
+    // size_t before = vm->gc.bytes_allocated; // Unused - could be used for GC stats
     
     gc_mark_all_roots(vm);
     gc_sweep(vm);
@@ -654,6 +654,7 @@ static HttpResponse* http_response_new() {
     return resp;
 }
 
+static void http_response_free(HttpResponse* resp) __attribute__((unused));
 static void http_response_free(HttpResponse* resp) {
     if (!resp) return;
     free(resp->body);
@@ -931,6 +932,7 @@ static RegexValue* regex_compile(const char* pattern) {
     return re;
 }
 
+static void regex_free(RegexValue* re) __attribute__((unused));
 static void regex_free(RegexValue* re) {
     if (!re) return;
     regfree(&re->compiled);

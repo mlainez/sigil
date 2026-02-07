@@ -361,7 +361,7 @@ static Expr* parser_parse_value_expr_v3(Parser* parser) {
         if (inner.kind == TOK_LIT_INT) {
             // Typed integer literal: (int int 42) - but type is optional in AISL
             parser_advance(parser); // consume 'int'
-            Type* lit_type = parser_parse_type(parser); // parse type
+            parser_parse_type(parser); // parse and ignore type (not used in current implementation)
             int64_t val = parser->current.value.int_val;
             parser_advance(parser); // consume value
             parser_expect(parser, TOK_RPAREN);

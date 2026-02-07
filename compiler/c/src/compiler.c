@@ -348,11 +348,6 @@ void compile_apply(Compiler* comp, Expr* expr) {
     
     // Skip module checking for:
     // 1. Core IR constructs (label, goto, ifnot)
-    // 2. Variable assignments (set_<varname> pseudo-functions from v3 syntax)
-    bool is_core_ir = (strcmp(name, "label") == 0 || strcmp(name, "goto") == 0 || 
-                       strcmp(name, "ifnot") == 0);
-    bool is_var_assignment = (strncmp(name, "set_", 4) == 0);
-    
     // Module checking removed - functions are resolved at link time after
     // compiling imported modules. If a function doesn't exist, compilation
     // will fail naturally when trying to call it.
@@ -1136,7 +1131,7 @@ void compile_apply(Compiler* comp, Expr* expr) {
     }
 
     // Math functions
-    if (strcmp(name, "math_sqrt") == 0) {
+    if (strcmp(name, "math_sqrt") == 0 || strcmp(name, "math_sqrt_f64") == 0) {
         if (compile_args(comp, expr->data.apply.args) != 1) {
             fprintf(stderr, "math_sqrt expects 1 argument (f64)\n");
             exit(1);
@@ -1145,7 +1140,7 @@ void compile_apply(Compiler* comp, Expr* expr) {
         bytecode_emit(comp->program, inst);
         return;
     }
-    if (strcmp(name, "math_pow") == 0) {
+    if (strcmp(name, "math_pow") == 0 || strcmp(name, "math_pow_f64") == 0) {
         if (compile_args(comp, expr->data.apply.args) != 2) {
             fprintf(stderr, "math_pow expects 2 arguments (base f64, exp f64)\n");
             exit(1);
