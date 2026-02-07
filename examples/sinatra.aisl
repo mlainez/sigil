@@ -1,5 +1,5 @@
 (mod sinatra
-  (fn handle_connection ((client_sock string)) -> i32
+  (fn handle_connection client_sock string -> int
     (set request string (call tcp_receive client_sock 4096))
     (set has_get_hello_json bool (call string_contains request "GET /hello.json "))
     (set has_get_hello bool (call string_contains request "GET /hello "))
@@ -13,7 +13,7 @@
     (call tcp_close client_sock)
     (ret 0))
 
-  (fn start_server ((port i32)) -> i32
+  (fn start_server port int -> int
     (call print "==================================")
     (call print "  AISL Sinatra-style Web Server")
     (call print "==================================")
@@ -30,6 +30,6 @@
       (call handle_connection client_sock))
     (ret 0))
 
-  (fn main () -> i32
+  (fn main -> int
     (call start_server 8080)
     (ret 0)))

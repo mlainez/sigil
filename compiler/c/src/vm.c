@@ -1759,19 +1759,15 @@ int vm_run(VM* vm) {
     // Find main function
     uint32_t main_idx = (uint32_t)-1;
     for (uint32_t i = 0; i < vm->program->function_count; i++) {
-        if (strcmp(vm->program->functions[i].name, "main_func") == 0) {
+        if (strcmp(vm->program->functions[i].name, "main") == 0) {
             main_idx = i;
             break;
         }
     }
 
     if (main_idx == (uint32_t)-1) {
-        if (vm->program->function_count > 0) {
-            main_idx = 0;
-        } else {
-            fprintf(stderr, "Error: No main_func found\n");
-            return 1;
-        }
+        fprintf(stderr, "Error: No 'main' function found. Entry point must be named 'main'.\n");
+        return 1;
     }
 
     vm->ip = vm->program->functions[main_idx].start_addr;

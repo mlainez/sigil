@@ -1,11 +1,11 @@
 (mod simple_server
-  (fn handle_connection ((client_sock string)) -> i32
+  (fn handle_connection client_sock string -> int
     (set response string "HTTP/1.1 200 OK\r\nContent-Length: 2\r\n\r\nOK")
-    (set sent i32 (call tcp_send client_sock response))
+    (set sent int (call tcp_send client_sock response))
     (call tcp_close client_sock)
     (ret 0))
 
-  (fn start_server ((port i32)) -> i32
+  (fn start_server port int -> int
     (call print "Starting simple server...")
     (set server_sock string (call tcp_listen port))
     (call print "Listening on port 8080")
@@ -14,6 +14,6 @@
       (call handle_connection client_sock))
     (ret 0))
 
-  (fn main () -> i32
+  (fn main -> int
     (call start_server 8080)
     (ret 0)))

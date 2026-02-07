@@ -1,14 +1,14 @@
 (mod sequential_server
-  (fn build_json_response () -> string
+  (fn build_json_response -> string
     (ret "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: 33\r\n\r\n{\"message\": \"Hello from AISL\"}"))
 
-  (fn build_html_response () -> string
+  (fn build_html_response -> string
     (ret "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nContent-Length: 43\r\n\r\n<html><body>Hello from AISL</body></html>"))
 
-  (fn build_404_response () -> string
+  (fn build_404_response -> string
     (ret "HTTP/1.1 404 Not Found\r\nContent-Type: text/html\r\nContent-Length: 49\r\n\r\n<html><body><h1>404 Not Found</h1></body></html>"))
 
-  (fn handle_request ((request string)) -> string
+  (fn handle_request request string -> string
     (set is_json bool (call string_contains request "/hello.json"))
     (if is_json
       (then
@@ -21,14 +21,14 @@
           (else
             (ret (call build_404_response)))))))
 
-  (fn handle_connection ((client_sock string)) -> i32
+  (fn handle_connection client_sock string -> int
     (set request string (call tcp_receive client_sock 4096))
     (set response string (call handle_request request))
-    (set sent i32 (call tcp_send client_sock response))
+    (set sent int (call tcp_send client_sock response))
     (call tcp_close client_sock)
     (ret 0))
 
-  (fn start_server ((port i32)) -> i32
+  (fn start_server port int -> int
     (call print "AISL Web Server Starting...")
     (set server_sock string (call tcp_listen port))
     (call print "Listening on :8080")
@@ -37,6 +37,6 @@
       (call handle_connection client_sock))
     (ret 0))
 
-  (fn main () -> i32
+  (fn main -> int
     (call start_server 8080)
     (ret 0)))

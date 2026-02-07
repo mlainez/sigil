@@ -1,12 +1,12 @@
 (mod sinatra
-  (fn handle_connection ((client_sock string)) -> i32
+  (fn handle_connection client_sock string -> int
     (set request string (call tcp_receive client_sock 4096))
     (call print "Got request")
     (call tcp_send client_sock "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nContent-Length: 43\r\n\r\n<html><body>Hello from AISL</body></html>")
     (call tcp_close client_sock)
     (ret 0))
 
-  (fn start_server ((port i32)) -> i32
+  (fn start_server port int -> int
     (call print "Server starting...")
     (set server_sock string (call tcp_listen port))
     (call print "Server running on http://localhost:8080")
@@ -15,6 +15,6 @@
       (call handle_connection client_sock))
     (ret 0))
 
-  (fn main () -> i32
+  (fn main -> int
     (call start_server 8080)
     (ret 0)))

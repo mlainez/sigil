@@ -56,11 +56,18 @@ expr ::= <literal>
 literal ::= <number> | <string> | true | false
 ```
 
+**Entry Point:** Programs execute starting from the `main` function. The main function must:
+- Be named exactly `main` (not `main_func` or anything else)
+- Return type `int` (exit code: 0 = success, non-zero = error)
+- Take no parameters (unless your program requires command-line arguments)
+
+Test files using the `test-spec` framework don't require a `main` function.
+
 ### Simple Example
 
 ```scheme
 (mod hello
-  (fn main -> i32
+  (fn main -> int
     (call print "Hello, World!")
     (ret 0)))
 ```

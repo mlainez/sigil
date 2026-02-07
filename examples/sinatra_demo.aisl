@@ -1,12 +1,12 @@
 (mod sinatra_demo
-  (fn extract_path ((request string)) -> string
+  (fn extract_path request string -> string
     (set lines array (call string_split request "\n"))
-    (set line_count i32 (call array_length lines))
+    (set line_count int (call array_length lines))
     (if (call op_gt_i32 line_count 0)
       (then
         (set first_line string (call array_get lines 0))
         (set parts array (call string_split first_line " "))
-        (set part_count i32 (call array_length parts))
+        (set part_count int (call array_length parts))
         (if (call op_gt_i32 part_count 1)
           (then
             (ret (call array_get parts 1)))
@@ -15,14 +15,14 @@
       (else
         (ret "/"))))
 
-  (fn build_http_response ((status string) (content_type string) (body string)) -> string
+  (fn build_http_response status string content_type string body string -> string
     (set response string (call string_concat "HTTP/1.1 " status))
     (set response string (call string_concat response "\r\n"))
     (set response string (call string_concat response "Content-Type: "))
     (set response string (call string_concat response content_type))
     (set response string (call string_concat response "\r\n"))
     (set response string (call string_concat response "Content-Length: "))
-    (set body_len i32 (call string_length body))
+    (set body_len int (call string_length body))
     (set body_len_str string (call string_from_i32 body_len))
     (set response string (call string_concat response body_len_str))
     (set response string (call string_concat response "\r\n"))
@@ -31,19 +31,19 @@
     (set response string (call string_concat response body))
     (ret response))
 
-  (fn handle_hello_html () -> string
+  (fn handle_hello_html -> string
     (set body string "<html><body>Hello from AISL</body></html>")
     (ret (call build_http_response "200 OK" "text/html" body)))
 
-  (fn handle_hello_json () -> string
+  (fn handle_hello_json -> string
     (set body string "{\"message\": \"Hello from AISL\"}")
     (ret (call build_http_response "200 OK" "application/json" body)))
 
-  (fn handle_not_found () -> string
+  (fn handle_not_found -> string
     (set body string "<html><body><h1>404 Not Found</h1></body></html>")
     (ret (call build_http_response "404 Not Found" "text/html" body)))
 
-  (fn route_request ((path string)) -> string
+  (fn route_request path string -> string
     (if (call str_eq path "/hello")
       (then
         (ret (call handle_hello_html)))
@@ -54,15 +54,15 @@
           (else
             (ret (call handle_not_found)))))))
 
-  (fn handle_connection ((client_sock string)) -> i32
+  (fn handle_connection client_sock string -> int
     (set request string (call tcp_receive client_sock 4096))
     (set path string (call extract_path request))
     (set response string (call route_request path))
-    (set sent i32 (call tcp_send client_sock response))
+    (set sent int (call tcp_send client_sock response))
     (call tcp_close client_sock)
     (ret 0))
 
-  (fn start_server ((port i32)) -> i32
+  (fn start_server port int -> int
     (call print "Starting AISL web server on port 8080...")
     (set server_sock string (call tcp_listen port))
     (call print "Server listening on port 8080")
@@ -76,6 +76,6 @@
     (goto accept_loop)
     (ret 0))
 
-  (fn main () -> i32
+  (fn main -> int
     (call start_server 8080)
     (ret 0)))

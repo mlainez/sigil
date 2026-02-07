@@ -178,11 +178,30 @@ Every AISL program is a module with functions:
   (fn function_name param1 type1 param2 type2 -> return_type
     statements...)
   
-  (fn another_function -> i32
+  (fn another_function -> int
     statements...))
 ```
 
 **Note**: The old nested parameter syntax `((param1 type1) (param2 type2))` is still supported for backward compatibility, but the new flat syntax shown above is strongly recommended for LLM code generation as it eliminates visual ambiguity.
+
+### Entry Point
+
+**Every AISL program must have a `main` function as its entry point:**
+
+```lisp
+(mod my_program
+  (fn main -> int
+    (call print "Hello, AISL!")
+    (ret 0)))
+```
+
+**Requirements:**
+- Function name must be exactly `main` (not `main_func` or anything else)
+- Must return `int` (exit code: 0 = success, non-zero = error)
+- Takes no parameters (or use flat parameter syntax if needed)
+- VM will error if `main` function is not found
+
+**Note**: Test files using `test-spec` framework don't need a `main` function - the test runner provides its own entry point.
 
 ### The 6 Core Statements (What Everything Becomes)
 

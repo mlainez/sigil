@@ -1,4 +1,5 @@
 (mod hello
-  (fn main_func ()
-    (call io_print_i32 42)
-    (ret)))
+  (fn main -> int
+    (call print 42)
+    (ret 0)))
+

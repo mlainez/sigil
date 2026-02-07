@@ -1,6 +1,7 @@
 (mod math
-  (fn add ((a i32) (b i32)) -> i32 pure
-    (set result i32 (int i32 0))
-    (call io_print_i32 a)
-    (call io_print_i32 b)
+  (fn add a int b int -> int
+    (set result int 0)
+    (call print a)
+    (call print b)
     (ret result)))
+

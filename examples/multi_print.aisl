@@ -1,6 +1,7 @@
 (mod multi_print
-  (fn main ()
+  (fn main -> int
     (call print "Line 1\n")
     (call print "Line 2\n")
     (call print "Line 3\n")
-    (ret)))
+    (ret 0)))
+

@@ -244,6 +244,32 @@ Examples of what should be AISL:
 
 **If you catch yourself writing Python, STOP and use AISL instead**
 
+@(critical-directive-documentation)
+
+**DOCUMENTATION MUST ALWAYS BE UP TO DATE AND MINIMAL**
+
+Two rules:
+
+1. **Always Update Docs After Code Changes**
+   - Changed syntax? Update AGENTS.md, LANGUAGE_SPEC.md, .aisl.grammar
+   - Added feature? Document in all relevant places
+   - Changed behavior? Update examples
+   - NEVER commit code without updating docs
+   - Check examples/ folder - make sure examples work
+
+2. **Only Keep User-Facing Documentation**
+   - KEEP: Language reference, API docs, user guides
+   - REMOVE: Implementation plans, thinking process, session notes
+   - Store internal notes in .aisl.* files (compressed format)
+   - Delete: *-PLAN.md, *-SUMMARY.md, *-ANALYSIS.md (human-readable thinking)
+   - Keep: .aisl.meta, .aisl.grammar, .aisl.analysis (machine-readable context)
+
+Process:
+1. After ANY code change, update docs immediately
+2. Before committing, verify examples/ folder works
+3. Remove any human-readable "thinking" documents
+4. Keep only language description for users
+
 @(type-size-ambiguity-2026-02-07)
 
 **CURRENT PROBLEM: i32/i64 and f32/f64 create choice**
