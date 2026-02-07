@@ -1,0 +1,126 @@
+(mod test_llm_generation
+  (fn escape_newlines text string -> string
+    (set escaped string (call string_replace text "\n" "\\n"))
+    (set escaped string (call string_replace escaped "\r" "\\r"))
+    (set escaped string (call string_replace escaped "\"" "\\\""))
+    (ret escaped))
+  
+  (fn build_json_request prompt string -> string
+    (set escaped_prompt string (call escape_newlines prompt))
+    
+    (set json string "{\"model\":\"codellama\",\"prompt\":\"")
+    (set json string (call string_concat json escaped_prompt))
+    (set json string (call string_concat json "\",\"stream\":false}"))
+    (ret json))
+  
+  (fn build_prompt -> string
+    (set p1 string "Generate AISL code for a web server. AISL syntax:\n\n")
+    (set p2 string "MODULE: (mod name (fn main -> int ...))\n")
+    (set p3 string "FUNCTION: (fn name param1 type1 -> return_type body)\n")
+    (set p4 string "VARIABLE: (set var type value)\n")
+    (set p5 string "CALL: (call function arg1 arg2)\n")
+    (set p6 string "LOOP: (loop body)\n")
+    (set p7 string "RETURN: (ret value)\n\n")
+    
+    (set p8 string "TYPES: int, string, bool\n")
+    (set p9 string "NO COMMENTS ALLOWED\n\n")
+    
+    (set p10 string "TCP OPS:\n")
+    (set p11 string "(call tcp_listen port) returns socket\n")
+    (set p12 string "(call tcp_accept socket) returns client\n")
+    (set p13 string "(call tcp_receive client 4096) returns request\n")
+    (set p14 string "(call tcp_send client response) sends data\n")
+    (set p15 string "(call tcp_close client) closes connection\n\n")
+    
+    (set p16 string "STRING OPS:\n")
+    (set p17 string "(call string_concat a b) joins strings\n")
+    (set p18 string "(call string_contains text pattern) checks if contains\n\n")
+    
+    (set p19 string "TASK: Create a server on port 8080 that:\n")
+    (set p20 string "- Responds to /hello with 200 and HTML <html><body>Hello World</body></html>\n")
+    (set p21 string "- Responds to other paths with 404\n")
+    (set p22 string "- Uses (loop ...) for infinite accept loop\n")
+    (set p23 string "- Builds HTTP response with status line and headers\n\n")
+    
+    (set p24 string "Example HTTP response format:\n")
+    (set p25 string "HTTP/1.1 200 OK\\r\\nContent-Type: text/html\\r\\n\\r\\n<html>content</html>\n\n")
+    
+    (set p26 string "Generate complete AISL code with (fn main -> int ...) only. No explanations.\n")
+    
+    (set prompt string p1)
+    (set prompt string (call string_concat prompt p2))
+    (set prompt string (call string_concat prompt p3))
+    (set prompt string (call string_concat prompt p4))
+    (set prompt string (call string_concat prompt p5))
+    (set prompt string (call string_concat prompt p6))
+    (set prompt string (call string_concat prompt p7))
+    (set prompt string (call string_concat prompt p8))
+    (set prompt string (call string_concat prompt p9))
+    (set prompt string (call string_concat prompt p10))
+    (set prompt string (call string_concat prompt p11))
+    (set prompt string (call string_concat prompt p12))
+    (set prompt string (call string_concat prompt p13))
+    (set prompt string (call string_concat prompt p14))
+    (set prompt string (call string_concat prompt p15))
+    (set prompt string (call string_concat prompt p16))
+    (set prompt string (call string_concat prompt p17))
+    (set prompt string (call string_concat prompt p18))
+    (set prompt string (call string_concat prompt p19))
+    (set prompt string (call string_concat prompt p20))
+    (set prompt string (call string_concat prompt p21))
+    (set prompt string (call string_concat prompt p22))
+    (set prompt string (call string_concat prompt p23))
+    (set prompt string (call string_concat prompt p24))
+    (set prompt string (call string_concat prompt p25))
+    (set prompt string (call string_concat prompt p26))
+    
+    (ret prompt))
+  
+  (fn call_ollama json_body string -> string
+    (set url string "http://192.168.0.30:11434/api/generate")
+    (set response string (call http_post url json_body))
+    (ret response))
+  
+  (fn extract_response_field json_response string field string -> string
+    (set parsed string (call json_parse json_response))
+    (set value string (call json_get parsed field))
+    (ret value))
+  
+  (fn main -> int
+    (call print "=== AISL LLM Generation Test ===")
+    (call print "")
+    
+    (call print "Step 1: Building prompt...")
+    (set prompt string (call build_prompt))
+    (call print "Prompt built successfully")
+    (call print "")
+    
+    (call print "Step 2: Creating JSON request...")
+    (set json_body string (call build_json_request prompt))
+    (call file_write "request.json" json_body)
+    (call print "Request saved to request.json")
+    (call print "")
+    
+    (call print "Step 3: Calling Ollama at 192.168.0.30:11434...")
+    (set response string (call_ollama json_body))
+    (call file_write "response.json" response)
+    (call print "Response saved to response.json")
+    (call print "")
+    
+    (call print "Step 4: Extracting code from response...")
+    (set code string (call extract_response_field response "response"))
+    (call file_write "generated_server.aisl" code)
+    (call print "Code saved to generated_server.aisl")
+    (call print "")
+    
+    (call print "Step 5: Generated code:")
+    (call print code)
+    (call print "")
+    
+    (call print "=== Next Steps ===")
+    (call print "1. Review: cat generated_server.aisl")
+    (call print "2. Compile: cd compiler/c && ./bin/aislc ../../generated_server.aisl server.aislc")
+    (call print "3. Run: ./bin/aisl-run server.aislc")
+    (call print "4. Test: curl http://localhost:8080/hello")
+    
+    (ret 0)))

@@ -1,0 +1,111 @@
+(mod llm_generation_test
+  (fn build_aisl_primer -> string
+    (set p string "You are generating AISL code. Key rules:\n\n")
+    (set p string (call string_concat p "SYNTAX:\n"))
+    (set p string (call string_concat p "- Module: (mod name ...)\n"))
+    (set p string (call string_concat p "- Function: (fn name param1 type1 -> return_type ...)\n"))
+    (set p string (call string_concat p "- Variable: (set var type value)\n"))
+    (set p string (call string_concat p "- Call: (call function arg1 arg2)\n"))
+    (set p string (call string_concat p "- Loop: (loop ...)\n"))
+    (set p string (call string_concat p "- Return: (ret value)\n"))
+    (set p string (call string_concat p "- NO COMMENTS ALLOWED\n\n"))
+    (set p string (call string_concat p "TYPES: int, string, bool\n\n"))
+    (set p string (call string_concat p "TCP OPS:\n"))
+    (set p string (call string_concat p "- (call tcp_listen port) returns socket\n"))
+    (set p string (call string_concat p "- (call tcp_accept socket) returns client\n"))
+    (set p string (call string_concat p "- (call tcp_receive client bytes) returns request string\n"))
+    (set p string (call string_concat p "- (call tcp_send client data) sends response\n"))
+    (set p string (call string_concat p "- (call tcp_close client) closes connection\n\n"))
+    (set p string (call string_concat p "STRING OPS:\n"))
+    (set p string (call string_concat p "- (call string_concat a b) joins strings\n"))
+    (set p string (call string_concat p "- (call string_contains text pattern) checks substring\n\n"))
+    (ret p))
+  
+  (fn build_task_description -> string
+    (set t string "TASK: Write a web server on port 8080:\n")
+    (set t string (call string_concat t "- If request contains '/hello', respond with 200 and HTML: <html><body>Hello World</body></html>\n"))
+    (set t string (call string_concat t "- Otherwise respond with 404\n"))
+    (set t string (call string_concat t "- Use (loop ...) for infinite accept\n"))
+    (set t string (call string_concat t "- HTTP response format: HTTP/1.1 200 OK\\r\\nContent-Type: text/html\\r\\n\\r\\n<html>...</html>\n\n"))
+    (set t string (call string_concat t "Generate complete AISL code with (fn main -> int ...). No explanations, just code.\n"))
+    (ret t))
+  
+  (fn escape_for_json text string -> string
+    (set escaped string (call string_replace text "\"" "\\\""))
+    (set escaped string (call string_replace escaped "\n" "\\n"))
+    (set escaped string (call string_replace escaped "\r" "\\r"))
+    (set escaped string (call string_replace escaped "\t" "\\t"))
+    (ret escaped))
+  
+  (fn build_json_request prompt string -> string
+    (set escaped string (call escape_for_json prompt))
+    (set req string "{\"model\":\"codellama\",\"prompt\":\"")
+    (set req string (call string_concat req escaped))
+    (set req string (call string_concat req "\",\"stream\":false}"))
+    (ret req))
+  
+  (fn call_ollama json_request string -> string
+    (set url string "http://192.168.0.30:11434/api/generate")
+    (set response string (call http_post url json_request))
+    (set body string (call http_get_body response))
+    (ret body))
+  
+  (fn extract_code_from_json json_response string -> string
+    (set parsed string (call json_parse json_response))
+    (set code string (call json_get parsed "response"))
+    (ret code))
+  
+  (fn clean_code raw_code string -> string
+    (set has_backticks bool (call string_contains raw_code "```"))
+    (set result string raw_code)
+    
+    (ifnot has_backticks skip_cleaning)
+    (set parts string (call string_split raw_code "```"))
+    (set result string (call array_get parts 1))
+    (call print "Extracted code from markdown blocks")
+    
+    (label skip_cleaning)
+    (ret result))
+  
+  (fn test_compilation code string -> int
+    (call print "Saving generated code...")
+    (call file_write "generated_server.aisl" code)
+    
+    (call print "Code saved to generated_server.aisl")
+    (call print "")
+    (call print "=== Generated Code ===")
+    (call print code)
+    (call print "")
+    (call print "=== Next Steps ===")
+    (call print "1. Compile: cd compiler/c && ./bin/aislc ../../generated_server.aisl server.aislc")
+    (call print "2. Run: ./bin/aisl-run server.aislc")
+    (call print "3. Test: curl http://localhost:8080/hello")
+    (ret 1))
+  
+  (fn main -> int
+    (call print "=== AISL LLM Code Generation Test ===")
+    (call print "")
+    
+    (call print "Step 1: Building prompt...")
+    (set primer string (call build_aisl_primer))
+    (set task string (call build_task_description))
+    (set full_prompt string (call string_concat primer task))
+    
+    (call print "Step 2: Creating JSON request...")
+    (set json_req string (call build_json_request full_prompt))
+    (call file_write "llm_request.json" json_req)
+    (call print "Request saved to llm_request.json")
+    
+    (call print "Step 3: Calling Ollama...")
+    (set json_response string (call call_ollama json_req))
+    (call file_write "llm_response.json" json_response)
+    (call print "Response saved to llm_response.json")
+    
+    (call print "Step 4: Extracting code...")
+    (set raw_code string (call extract_code_from_json json_response))
+    (set clean_code string (call clean_code raw_code))
+    
+    (call print "Step 5: Testing...")
+    (set result int (call test_compilation clean_code))
+    
+    (ret result)))

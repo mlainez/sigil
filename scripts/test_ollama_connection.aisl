@@ -1,0 +1,36 @@
+(mod test_ollama_connection
+  (fn main -> int
+    (call print "=== Testing Ollama Connection ===")
+    (call print "")
+    
+    (call print "Building simple JSON request...")
+    (set prompt string "Say hello")
+    (set json_str string "{\"model\":\"codellama\",\"prompt\":\"")
+    (set json_str string (call string_concat json_str prompt))
+    (set json_str string (call string_concat json_str "\",\"stream\":false}"))
+    
+    (call print "Request JSON:")
+    (call print json_str)
+    (call print "")
+    
+    (call print "Sending POST to http://192.168.0.30:11434/api/generate...")
+    (set url string "http://192.168.0.30:11434/api/generate")
+    (set response string (call http_post url json_str))
+    
+    (call print "Getting response body...")
+    (set body string (call http_get_body response))
+    
+    (call print "Getting status code...")
+    (set status int (call http_get_status response))
+    (call print "Status:")
+    (call print status)
+    
+    (call print "")
+    (call print "Response body:")
+    (call print body)
+    
+    (call print "")
+    (call file_write "ollama_raw.json" body)
+    (call print "Saved to ollama_raw.json")
+    
+    (ret 0)))

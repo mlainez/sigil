@@ -660,11 +660,71 @@ AISL has a built-in test framework. Add tests to verify behavior:
 ### ✅ Do: Use Agent constructs
 
 ```lisp
-(fn example () -> i32
+(fn example () -> int
   (loop
     (call do_something))  ; Desugars automatically
   (ret 0))
 ```
+
+### ❌ Don't: Use reserved type keywords as variable names
+
+```lisp
+(set json string "test")    ; ERROR: 'json' is a type keyword
+(set array string "data")   ; ERROR: 'array' is a type keyword
+(set map string "values")   ; ERROR: 'map' is a type keyword
+```
+
+### ✅ Do: Use descriptive non-reserved names
+
+```lisp
+(set json_str string "test")     ; OK: Different name
+(set data_array string "data")   ; OK: Different name
+(set value_map string "values")  ; OK: Different name
+```
+
+**Reserved type keywords:** `int`, `float`, `string`, `bool`, `json`, `array`, `map`, `result`, `option`
+
+### ❌ Don't: Use multiple ret statements after labels
+
+```lisp
+(fn example flag bool -> string
+  (ifnot flag return_b)
+  (ret "A")              ; First ret
+  (label return_b)
+  (ret "B"))             ; ERROR: Parser doesn't allow this pattern
+```
+
+### ✅ Do: Use a result variable and single ret
+
+```lisp
+(fn example flag bool -> string
+  (set result string "B")
+  (ifnot flag skip)
+  (set result string "A")
+  (label skip)
+  (ret result))          ; Single ret at end
+```
+
+### ⚠️ Important: Core IR constructs are NOT function calls
+
+Core IR constructs like `label`, `goto`, and `ifnot` are special syntax, not function calls:
+
+```lisp
+; ❌ WRONG - Don't use 'call'
+(call label my_label)
+(call goto my_label)
+(call ifnot condition my_label)
+
+; ✅ CORRECT - Use directly
+(label my_label)
+(goto my_label)
+(ifnot condition my_label)
+```
+
+**When to use Core IR constructs:**
+- Use `label` and `goto` for complex control flow that can't be expressed with while/loop
+- Use `ifnot` for conditional jumps (jumps if condition is false)
+- Prefer Agent constructs (`while`, `loop`, `if`) when possible - they desugar to Core IR automatically
 
 ---
 
