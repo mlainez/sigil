@@ -1,0 +1,41 @@
+(mod test_flat_syntax
+  (fn add_two a i32 b i32 -> i32
+    (ret (call add a b)))
+  
+  (fn max a i32 b i32 -> i32
+    (set greater bool (call gt a b))
+    (if greater
+      (ret a))
+    (ret b))
+  
+  (fn min a i32 b i32 -> i32
+    (set less bool (call lt a b))
+    (if less
+      (ret a))
+    (ret b))
+  
+  (test-spec add_two
+    (case "adds two positive numbers"
+      (input 5 3)
+      (expect 8))
+    (case "adds negative numbers"
+      (input -5 -3)
+      (expect -8)))
+  
+  (test-spec max
+    (case "first is greater"
+      (input 10 5)
+      (expect 10))
+    (case "second is greater"
+      (input 5 10)
+      (expect 10)))
+  
+  (test-spec min
+    (case "first is smaller"
+      (input 5 10)
+      (expect 5))
+    (case "second is smaller"
+      (input 10 5)
+      (expect 5)))
+  
+  (meta-note "Tests new flat parameter syntax: fn name p1 t1 p2 t2 -> ret"))

@@ -31,9 +31,12 @@ This is what you write and what LLMs generate.
 ```
 program ::= (mod <name> <function>*)
 
-function ::= (fn <name> (<param>*) -> <return_type> <statement>*)
+function ::= (fn <name> <param_flat>* -> <return_type> <statement>*)
+           | (fn <name> (<param>*) -> <return_type> <statement>*)   [deprecated]
 
-param ::= (<name> <type>)
+param_flat ::= <name> <type>  [NEW: Recommended for LLM code generation]
+
+param ::= (<name> <type>)      [OLD: Still supported for backward compatibility]
 
 statement ::= (set <var> <type> <expr>)
             | (call <function> <arg>*)
@@ -57,10 +60,12 @@ literal ::= <number> | <string> | true | false
 
 ```scheme
 (mod hello
-  (fn main () -> i32
+  (fn main -> i32
     (call print "Hello, World!")
     (ret 0)))
 ```
+
+**Backward Compatibility Note**: The old nested parameter syntax `(fn main () -> i32)` is still supported, but the new flat syntax `(fn main -> i32)` is recommended for LLM code generation as it eliminates visual ambiguity.
 
 ---
 
@@ -97,7 +102,7 @@ Variables must be explicitly typed:
 Executes body while condition is true.
 
 ```scheme
-(fn countdown ((n i32)) -> i32
+(fn countdown n i32 -> i32
   (while (call gt n 0)
     (call print_i32 n)
     (set n i32 (call sub n 1)))
@@ -109,7 +114,7 @@ Executes body while condition is true.
 Executes forever. Use for server loops.
 
 ```scheme
-(fn start_server ((port i32)) -> i32
+(fn start_server port i32 -> i32
   (set server_sock string (call tcp_listen port))
   (loop
     (set client_sock string (call tcp_accept server_sock))
@@ -122,7 +127,7 @@ Executes forever. Use for server loops.
 **Break**: `(break)` - Exit nearest loop immediately
 
 ```scheme
-(fn find_value ((arr string) (target i32)) -> i32
+(fn find_value arr string target i32 -> i32
   (set i i32 0)
   (loop
     (set val i32 (call array_get arr i))
@@ -137,7 +142,7 @@ Executes forever. Use for server loops.
 **Continue**: `(continue)` - Skip to next iteration
 
 ```scheme
-(fn sum_positives ((arr string) (n i32)) -> i32
+(fn sum_positives arr string n i32 -> i32
   (set i i32 0)
   (set sum i32 0)
   (while (call lt i n)
@@ -156,7 +161,7 @@ Executes forever. Use for server loops.
 For complex control flow, use labels and goto:
 
 ```scheme
-(fn countdown_with_labels ((n i32)) -> i32
+(fn countdown_with_labels n i32 -> i32
   (label loop)
   (set done bool (call le n 0))
   (ifnot done continue)
@@ -186,7 +191,7 @@ For complex control flow, use labels and goto:
 Functions can call themselves:
 
 ```scheme
-(fn factorial ((n i32)) -> i32
+(fn factorial n i32 -> i32
   (set is_base bool (call le n 1))
   (ifnot is_base recurse)
   (ret 1)

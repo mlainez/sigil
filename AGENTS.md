@@ -115,12 +115,14 @@ Every AISL program is a module with functions:
 
 ```lisp
 (mod module_name
-  (fn function_name ((param1 type1) (param2 type2)) -> return_type
+  (fn function_name param1 type1 param2 type2 -> return_type
     statements...)
   
-  (fn another_function () -> i32
+  (fn another_function -> i32
     statements...))
 ```
+
+**Note**: The old nested parameter syntax `((param1 type1) (param2 type2))` is still supported for backward compatibility, but the new flat syntax shown above is strongly recommended for LLM code generation as it eliminates visual ambiguity.
 
 ### The 6 Core Statements (What Everything Becomes)
 
@@ -304,7 +306,7 @@ Generate these - the compiler desugars them to Core:
 ### Pattern 1: While Loop
 
 ```lisp
-(fn countdown ((n i32)) -> i32
+(fn countdown n i32 -> i32
   (while (call gt n 0)
     (call print n)
     (set n i32 (call sub n 1)))
@@ -314,7 +316,7 @@ Generate these - the compiler desugars them to Core:
 ### Pattern 2: Infinite Loop with Break
 
 ```lisp
-(fn find_first ((arr string) (target i32)) -> i32
+(fn find_first arr string target i32 -> i32
   (set i i32 0)
   (loop
     (set val i32 (call array_get arr i))
@@ -327,7 +329,7 @@ Generate these - the compiler desugars them to Core:
 ### Pattern 3: Skip with Continue
 
 ```lisp
-(fn count_positive ((arr string) (len i32)) -> i32
+(fn count_positive arr string len i32 -> i32
   (set i i32 0)
   (set count i32 0)
   (while (call lt i len)
@@ -342,7 +344,7 @@ Generate these - the compiler desugars them to Core:
 ### Pattern 4: Conditional Logic
 
 ```lisp
-(fn max ((a i32) (b i32)) -> i32
+(fn max a i32 b i32 -> i32
   (set greater bool (call gt a b))
   (call ifnot greater return_b)
   (ret a)
@@ -357,7 +359,7 @@ Generate these - the compiler desugars them to Core:
 ### Accumulator Pattern
 
 ```lisp
-(fn sum ((arr string) (n i32)) -> i32
+(fn sum arr string n i32 -> i32
   (set sum i32 0)
   (set i i32 0)
   (while (call lt i n)
@@ -370,7 +372,7 @@ Generate these - the compiler desugars them to Core:
 ### Recursive Pattern
 
 ```lisp
-(fn factorial ((n i32)) -> i32
+(fn factorial n i32 -> i32
   (set is_zero bool (call eq n 0))
   (call ifnot is_zero recurse)
   (ret 1)
@@ -383,7 +385,7 @@ Generate these - the compiler desugars them to Core:
 ### Search Pattern
 
 ```lisp
-(fn find ((arr string) (target i32) (len i32)) -> i32
+(fn find arr string target i32 len i32 -> i32
   (set i i32 0)
   (while (call lt i len)
     (set val i32 (call array_get arr i))
@@ -396,7 +398,7 @@ Generate these - the compiler desugars them to Core:
 ### Filter Pattern
 
 ```lisp
-(fn filter_evens ((arr string) (len i32)) -> string
+(fn filter_evens arr string len i32 -> string
   (set result string (call array_new))
   (set i i32 0)
   (while (call lt i len)
@@ -412,7 +414,7 @@ Generate these - the compiler desugars them to Core:
 ### Error Handling Pattern (Result Type)
 
 ```lisp
-(fn safe_file_read ((path string)) -> i32
+(fn safe_file_read path string -> i32
   ; Read file with error handling
   (set result string (call file_read_result path))
   (set success bool (call is_ok result))
@@ -432,7 +434,7 @@ Generate these - the compiler desugars them to Core:
 ### Safe Value Extraction Pattern
 
 ```lisp
-(fn read_with_default ((path string)) -> string
+(fn read_with_default path string -> string
   (set result string (call file_read_result path))
   (set default string "default content")
   ; Returns content if Ok, default if Err
@@ -443,7 +445,7 @@ Generate these - the compiler desugars them to Core:
 ### Error Checking Pattern
 
 ```lisp
-(fn check_file_error ((path string)) -> i32
+(fn check_file_error path string -> i32
   (set result string (call file_read_result path))
   (set is_error bool (call is_err result))
   
@@ -462,7 +464,7 @@ AISL has a built-in test framework. Add tests to verify behavior:
 
 ```lisp
 (mod my_module
-  (fn add_numbers ((x i32) (y i32)) -> i32
+  (fn add_numbers x i32 y i32 -> i32
     (ret (call add x y)))
   
   (test-spec add_numbers
@@ -626,14 +628,14 @@ AISL is designed for predictable performance:
 
 ```lisp
 (mod web_server
-  (fn handle_request ((client_socket string)) -> i32
+  (fn handle_request client_socket string -> i32
     (set request string (call tcp_receive client_socket 4096))
     (set response string "HTTP/1.1 200 OK\r\n\r\nHello, World!")
     (call tcp_send client_socket response)
     (call tcp_close client_socket)
     (ret 0))
   
-  (fn main () -> i32
+  (fn main -> i32
     (set port i32 8080)
     (set server_socket string (call tcp_listen port))
     (call print "Server listening on port 8080")

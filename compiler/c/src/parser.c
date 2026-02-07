@@ -724,41 +724,66 @@ static Definition* parser_parse_function_v3(Parser* parser) {
     char* name = strdup(parser->current.value.string_val);
     parser_advance(parser);
 
-    // Parse parameters - MUST be: ((param_name type) ...)
-    parser_expect(parser, TOK_LPAREN);
+    // Parse parameters - Accept both syntaxes:
+    // OLD: ((param_name type) (param_name type)) - double nested
+    // NEW: param_name type param_name type       - flat [RECOMMENDED for LLMs]
     ParamList* params = NULL;
     ParamList* params_tail = NULL;
     
-    while (parser->current.kind != TOK_RPAREN) {
-        // STRICT MODE: Parameters MUST have explicit types
+    // Check if using old syntax with parameter list paren
+    bool has_param_list_paren = false;
+    if (parser->current.kind == TOK_LPAREN) {
+        // Lookahead: is the next token also a paren? Then it's old syntax
+        // Otherwise treat first LPAREN as start of old-style param list
+        has_param_list_paren = true;
+        parser_advance(parser); // consume the opening (
+    }
+    
+    // Parse parameters until we hit -> or )
+    while (parser->current.kind != TOK_ARROW && parser->current.kind != TOK_RPAREN) {
+        char* param_name = NULL;
+        Type* param_type = NULL;
+        
         if (parser->current.kind == TOK_LPAREN) {
-            // Required syntax: (param_name type)
-            parser_advance(parser);
-            char* param_name = strdup(parser->current.value.string_val);
-            parser_advance(parser);
-            Type* param_type = parser_parse_type(parser);
-            parser_expect(parser, TOK_RPAREN);
-            
-            ParamList* new_param = param_list_new(param_name, param_type, NULL);
-            if (!params) {
-                params = new_param;
-                params_tail = new_param;
-            } else {
-                params_tail->next = new_param;
-                params_tail = new_param;
+            // OLD syntax: each param wrapped in parens
+            parser_advance(parser); // consume (
+            // Accept identifiers, var, and test keywords like "input", "expect", "delim" etc.
+            if (parser->current.kind != TOK_IDENTIFIER && 
+                parser->current.kind != TOK_VAR &&
+                parser->current.kind != TOK_INPUT &&
+                parser->current.kind != TOK_EXPECT) {
+                parser_error(parser, "Expected parameter name in old syntax");
             }
+            param_name = strdup(parser->current.value.string_val);
+            parser_advance(parser);
+            param_type = parser_parse_type(parser);
+            parser_expect(parser, TOK_RPAREN); // consume )
+        } else if (parser->current.kind == TOK_IDENTIFIER || 
+                   parser->current.kind == TOK_VAR ||
+                   parser->current.kind == TOK_INPUT ||
+                   parser->current.kind == TOK_EXPECT) {
+            // NEW flat syntax: no parens around params
+            param_name = strdup(parser->current.value.string_val);
+            parser_advance(parser);
+            param_type = parser_parse_type(parser);
         } else {
-            // ERROR: Untyped parameters not allowed in strict mode
-            char* param_name = strdup(parser->current.value.string_val);
-            char error_msg[256];
-            snprintf(error_msg, sizeof(error_msg), 
-                "Parameter '%s' requires explicit type annotation. Use: ((param_name type))", 
-                param_name);
-            parser_error_code(parser, "MISSING_PARAM_TYPE", error_msg);
-            parser_advance(parser); // Skip to avoid infinite loop
+            parser_error(parser, "Expected parameter definition");
+        }
+        
+        ParamList* new_param = param_list_new(param_name, param_type, NULL);
+        if (!params) {
+            params = new_param;
+            params_tail = new_param;
+        } else {
+            params_tail->next = new_param;
+            params_tail = new_param;
         }
     }
-    parser_expect(parser, TOK_RPAREN);
+    
+    // If we consumed opening paren, expect closing paren
+    if (has_param_list_paren) {
+        parser_expect(parser, TOK_RPAREN);
+    }
 
     // STRICT MODE: Return type is REQUIRED
     Type* return_type = NULL;
