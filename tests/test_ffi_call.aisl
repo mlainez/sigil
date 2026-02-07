@@ -1,0 +1,26 @@
+(module test_ffi_call
+  (fn test_hello -> int
+    (set lib int (call ffi_load "libaisl_test"))
+    (if (call eq lib 0)
+      (ret 0))
+    (set result int (call ffi_call lib "hello"))
+    (ret result))
+  
+  (fn test_add -> int
+    (set lib int (call ffi_load "libaisl_test"))
+    (if (call eq lib 0)
+      (ret 0))
+    (set result int (call ffi_call lib "add_numbers" 10 32))
+    (ret result))
+  
+  (test-spec test_hello
+    (case "calls hello function"
+      (input)
+      (expect 42)))
+  
+  (test-spec test_add
+    (case "calls add_numbers function"
+      (input)
+      (expect 42)))
+  
+  (meta-note "Tests FFI function calls with integer arguments and returns"))

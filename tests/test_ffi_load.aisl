@@ -1,0 +1,13 @@
+(module test_ffi_load
+  (fn test_load_library -> int
+    (set lib int (call ffi_load "libaisl_test"))
+    (if (call eq lib 0)
+      (ret 0))
+    (ret 1))
+  
+  (test-spec test_load_library
+    (case "loads test library successfully"
+      (input)
+      (expect 1)))
+  
+  (meta-note "Tests that FFI can load a native library"))

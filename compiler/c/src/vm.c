@@ -22,6 +22,7 @@
 #include <regex.h>
 #include <signal.h>
 #include <poll.h>
+#include <dlfcn.h>
 #include <openssl/sha.h>
 #include <openssl/md5.h>
 #include <openssl/hmac.h>
@@ -1710,6 +1711,9 @@ VM* vm_new(BytecodeProgram* program) {
     
     // Initialize garbage collector
     gc_init(&vm->gc);
+    
+    // Initialize FFI
+    vm->ffi_libraries = NULL;
 
     return vm;
 }
@@ -1721,8 +1725,156 @@ void vm_free(VM* vm) {
             free(vm->stack[i].data.string_val);
         }
     }
+    
+    // Free FFI libraries
+    FFILibrary* lib = vm->ffi_libraries;
+    while (lib) {
+        FFILibrary* next = lib->next;
+        if (lib->handle) {
+            dlclose(lib->handle);
+        }
+        free(lib->name);
+        free(lib);
+        lib = next;
+    }
+    
     free(vm->globals);
     free(vm);
+}
+
+// ============================================
+// FFI (FOREIGN FUNCTION INTERFACE) OPERATIONS
+// ============================================
+
+// FFI search paths
+static const char* ffi_get_home_extensions_path() {
+    static char path[1024];
+    const char* home = getenv("HOME");
+    if (home) {
+        snprintf(path, sizeof(path), "%s/.aisl/extensions", home);
+        return path;
+    }
+    return NULL;
+}
+
+// Find library in search paths
+static char* ffi_find_library(const char* lib_name) {
+    static const char* search_paths[] = {
+        "./extensions",
+        NULL,  // Will be filled with ~/.aisl/extensions
+        "/usr/lib/aisl/extensions",
+        "/usr/local/lib/aisl/extensions"
+    };
+    
+    // Add .so extension if not present
+    char full_name[256];
+    if (strstr(lib_name, ".so") == NULL) {
+        snprintf(full_name, sizeof(full_name), "%s.so", lib_name);
+    } else {
+        snprintf(full_name, sizeof(full_name), "%s", lib_name);
+    }
+    
+    // Try each search path
+    for (int i = 0; i < 4; i++) {
+        const char* base_path;
+        if (i == 1) {
+            base_path = ffi_get_home_extensions_path();
+            if (!base_path) continue;
+        } else {
+            base_path = search_paths[i];
+        }
+        
+        char full_path[1024];
+        snprintf(full_path, sizeof(full_path), "%s/%s", base_path, full_name);
+        
+        // Check if file exists
+        if (access(full_path, F_OK) == 0) {
+            return strdup(full_path);
+        }
+    }
+    
+    return NULL;
+}
+
+// Load FFI library
+static void* ffi_load_library(VM* vm, const char* lib_name) {
+    // Check if already loaded
+    FFILibrary* lib = vm->ffi_libraries;
+    while (lib) {
+        if (strcmp(lib->name, lib_name) == 0) {
+            return lib->handle;
+        }
+        lib = lib->next;
+    }
+    
+    // Find library file
+    char* lib_path = ffi_find_library(lib_name);
+    if (!lib_path) {
+        fprintf(stderr, "Warning: FFI library '%s' not found in search paths:\n", lib_name);
+        fprintf(stderr, "  - ./extensions\n");
+        const char* home_path = ffi_get_home_extensions_path();
+        if (home_path) {
+            fprintf(stderr, "  - %s\n", home_path);
+        }
+        fprintf(stderr, "  - /usr/lib/aisl/extensions\n");
+        fprintf(stderr, "  - /usr/local/lib/aisl/extensions\n");
+        return NULL;
+    }
+    
+    // Load library
+    void* handle = dlopen(lib_path, RTLD_LAZY);
+    if (!handle) {
+        fprintf(stderr, "Warning: Failed to load FFI library '%s': %s\n", lib_path, dlerror());
+        free(lib_path);
+        return NULL;
+    }
+    
+    // Add to loaded libraries list
+    FFILibrary* new_lib = malloc(sizeof(FFILibrary));
+    new_lib->name = strdup(lib_name);
+    new_lib->handle = handle;
+    new_lib->next = vm->ffi_libraries;
+    vm->ffi_libraries = new_lib;
+    
+    free(lib_path);
+    return handle;
+}
+
+// Check if FFI library is available
+static bool ffi_is_available(const char* lib_name) {
+    char* lib_path = ffi_find_library(lib_name);
+    if (lib_path) {
+        free(lib_path);
+        return true;
+    }
+    return false;
+}
+
+// Close FFI library (handle must be valid)
+static void ffi_close_library(VM* vm, void* handle) {
+    FFILibrary* prev = NULL;
+    FFILibrary* lib = vm->ffi_libraries;
+    
+    while (lib) {
+        if (lib->handle == handle) {
+            // Remove from list
+            if (prev) {
+                prev->next = lib->next;
+            } else {
+                vm->ffi_libraries = lib->next;
+            }
+            
+            // Close and free
+            if (lib->handle) {
+                dlclose(lib->handle);
+            }
+            free(lib->name);
+            free(lib);
+            return;
+        }
+        prev = lib;
+        lib = lib->next;
+    }
 }
 
 // ============================================
@@ -4453,6 +4605,168 @@ int vm_run(VM* vm) {
                 free(content_val.data.string_val);
                 Value result_val = {.type = VAL_RESULT, .data.ptr_val = result};
                 push(vm, result_val);
+                vm->ip++;
+                break;
+            }
+
+            // ============================================
+            // FFI (FOREIGN FUNCTION INTERFACE) OPERATIONS
+            // ============================================
+            
+            case OP_FFI_LOAD: {
+                // Load FFI library: library_name -> handle (0 on failure)
+                Value lib_name_val = pop(vm);
+                const char* lib_name = lib_name_val.data.string_val;
+                
+                void* handle = ffi_load_library(vm, lib_name);
+                free(lib_name_val.data.string_val);
+                
+                Value result = {.type = VAL_FFI_HANDLE, .data.ptr_val = handle};
+                push(vm, result);
+                vm->ip++;
+                break;
+            }
+            
+            case OP_FFI_CALL: {
+                // Call C function: arg_count handle func_name arg1 ... argN -> result
+                // Stack layout: [arg_count] [handle] [func_name] [arg1] [arg2] ... [argN]
+                Value arg_count_val = pop(vm);
+                int arg_count = (int)arg_count_val.data.i64_val;
+                
+                // Pop arguments (in reverse order, so we need to collect them)
+                Value* args = malloc(sizeof(Value) * arg_count);
+                for (int i = arg_count - 1; i >= 0; i--) {
+                    args[i] = pop(vm);
+                }
+                
+                Value func_name_val = pop(vm);
+                Value handle_val = pop(vm);
+                
+                void* handle = handle_val.data.ptr_val;
+                const char* func_name = func_name_val.data.string_val;
+                
+                if (!handle) {
+                    fprintf(stderr, "Error: Attempting to call FFI function '%s' with null handle\n", func_name);
+                    free(args);
+                    free(func_name_val.data.string_val);
+                    return 1;
+                }
+                
+                // Look up function (expect _aisl suffix)
+                char full_func_name[256];
+                if (strstr(func_name, "_aisl") == NULL) {
+                    snprintf(full_func_name, sizeof(full_func_name), "%s_aisl", func_name);
+                } else {
+                    snprintf(full_func_name, sizeof(full_func_name), "%s", func_name);
+                }
+                
+                void* func_ptr = dlsym(handle, full_func_name);
+                if (!func_ptr) {
+                    fprintf(stderr, "Error: FFI function '%s' not found in library: %s\n", 
+                           full_func_name, dlerror());
+                    free(args);
+                    free(func_name_val.data.string_val);
+                    return 1;
+                }
+                
+                // Call function based on argument count
+                // For now, support up to 3 arguments (can extend later)
+                Value result;
+                result.type = VAL_INT;  // Default return type
+                
+                if (arg_count == 0) {
+                    int64_t (*f)() = (int64_t (*)())func_ptr;
+                    result.data.i64_val = f();
+                } else if (arg_count == 1) {
+                    // Check argument type and call appropriately
+                    if (args[0].type == VAL_STRING || args[0].type == VAL_I32 || 
+                        args[0].type == VAL_I64 || args[0].type == VAL_INT) {
+                        if (args[0].type == VAL_STRING) {
+                            const char* (*f)(const char*) = (const char* (*)(const char*))func_ptr;
+                            const char* ret = f(args[0].data.string_val);
+                            if (ret) {
+                                result.type = VAL_STRING;
+                                result.data.string_val = strdup(ret);
+                            } else {
+                                result.type = VAL_INT;
+                                result.data.i64_val = 0;
+                            }
+                        } else {
+                            int64_t (*f)(int64_t) = (int64_t (*)(int64_t))func_ptr;
+                            int64_t arg = (args[0].type == VAL_I32) ? args[0].data.i32_val : args[0].data.i64_val;
+                            result.data.i64_val = f(arg);
+                        }
+                    }
+                } else if (arg_count == 2) {
+                    // Two string arguments -> string return (e.g., string_concat)
+                    if (args[0].type == VAL_STRING && args[1].type == VAL_STRING) {
+                        const char* (*f)(const char*, const char*) = 
+                            (const char* (*)(const char*, const char*))func_ptr;
+                        const char* ret = f(args[0].data.string_val, args[1].data.string_val);
+                        if (ret) {
+                            result.type = VAL_STRING;
+                            result.data.string_val = strdup(ret);
+                        } else {
+                            result.type = VAL_INT;
+                            result.data.i64_val = 0;
+                        }
+                    }
+                    // Add more type combinations as needed
+                } else if (arg_count == 3) {
+                    // Three string arguments (e.g., string_replace)
+                    if (args[0].type == VAL_STRING && args[1].type == VAL_STRING && args[2].type == VAL_STRING) {
+                        const char* (*f)(const char*, const char*, const char*) = 
+                            (const char* (*)(const char*, const char*, const char*))func_ptr;
+                        const char* ret = f(args[0].data.string_val, args[1].data.string_val, args[2].data.string_val);
+                        if (ret) {
+                            result.type = VAL_STRING;
+                            result.data.string_val = strdup(ret);
+                        } else {
+                            result.type = VAL_INT;
+                            result.data.i64_val = 0;
+                        }
+                    }
+                }
+                
+                // Free arguments
+                for (int i = 0; i < arg_count; i++) {
+                    if (args[i].type == VAL_STRING) {
+                        free(args[i].data.string_val);
+                    }
+                }
+                free(args);
+                free(func_name_val.data.string_val);
+                
+                push(vm, result);
+                vm->ip++;
+                break;
+            }
+            
+            case OP_FFI_AVAILABLE: {
+                // Check if library is available: library_name -> bool
+                Value lib_name_val = pop(vm);
+                const char* lib_name = lib_name_val.data.string_val;
+                
+                bool available = ffi_is_available(lib_name);
+                free(lib_name_val.data.string_val);
+                
+                Value result = {.type = VAL_BOOL, .data.bool_val = available};
+                push(vm, result);
+                vm->ip++;
+                break;
+            }
+            
+            case OP_FFI_CLOSE: {
+                // Close library: handle -> unit
+                Value handle_val = pop(vm);
+                void* handle = handle_val.data.ptr_val;
+                
+                if (handle) {
+                    ffi_close_library(vm, handle);
+                }
+                
+                Value result = {.type = VAL_UNIT};
+                push(vm, result);
                 vm->ip++;
                 break;
             }

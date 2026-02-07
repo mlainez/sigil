@@ -1575,6 +1575,62 @@ void compile_apply(Compiler* comp, Expr* expr) {
         return;
     }
     
+    // ============================================
+    // FFI (Foreign Function Interface) Operations
+    // ============================================
+    
+    if (strcmp(name, "ffi_load") == 0) {
+        if (compile_args(comp, expr->data.apply.args) != 1) {
+            fprintf(stderr, "ffi_load expects 1 argument (library name)\n");
+            exit(1);
+        }
+        Instruction inst = {.opcode = OP_FFI_LOAD};
+        bytecode_emit(comp->program, inst);
+        return;
+    }
+    
+    if (strcmp(name, "ffi_call") == 0) {
+        // Compile: handle, function_name, arg1, arg2, ..., argN
+        // Need at least handle + function_name
+        int arg_count = compile_args(comp, expr->data.apply.args);
+        if (arg_count < 2) {
+            fprintf(stderr, "ffi_call expects at least 2 arguments (handle, function_name)\n");
+            exit(1);
+        }
+        
+        // Push argument count (excluding handle and function_name)
+        Instruction count_inst = {.opcode = OP_PUSH_INT, .operand.int_val = arg_count - 2};
+        bytecode_emit(comp->program, count_inst);
+        
+        Instruction inst = {.opcode = OP_FFI_CALL};
+        bytecode_emit(comp->program, inst);
+        return;
+    }
+    
+    if (strcmp(name, "ffi_available") == 0) {
+        if (compile_args(comp, expr->data.apply.args) != 1) {
+            fprintf(stderr, "ffi_available expects 1 argument (library name)\n");
+            exit(1);
+        }
+        Instruction inst = {.opcode = OP_FFI_AVAILABLE};
+        bytecode_emit(comp->program, inst);
+        return;
+    }
+    
+    if (strcmp(name, "ffi_close") == 0) {
+        if (compile_args(comp, expr->data.apply.args) != 1) {
+            fprintf(stderr, "ffi_close expects 1 argument (handle)\n");
+            exit(1);
+        }
+        Instruction inst = {.opcode = OP_FFI_CLOSE};
+        bytecode_emit(comp->program, inst);
+        return;
+    }
+    
+    // ============================================
+    // HTTP Operations
+    // ============================================
+    
     if (strcmp(name, "http_get") == 0) {
         if (compile_args(comp, expr->data.apply.args) != 1) {
             fprintf(stderr, "http_get expects 1 argument (url string)\n");

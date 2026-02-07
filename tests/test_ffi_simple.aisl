@@ -1,0 +1,51 @@
+(module test_ffi_simple
+  (fn main -> int
+    (call print "Testing ffi_available...\n")
+    (set available bool (call ffi_available "libaisl_test"))
+    (if available
+      (call print "SUCCESS: libaisl_test is available\n"))
+    (ifnot available
+      (call print "FAILED: libaisl_test should be available\n")
+      (ret 1))
+    
+    (set not_available bool (call ffi_available "libaisl_nonexistent"))
+    (if not_available
+      (call print "FAILED: nonexistent library should not be available\n")
+      (ret 1))
+    (call print "SUCCESS: nonexistent library correctly not available\n")
+    
+    (call print "\nTesting ffi_load...\n")
+    (set lib int (call ffi_load "libaisl_test"))
+    (call print "FFI library loaded: ")
+    (call print lib)
+    (call print "\n")
+    
+    (if (call eq lib 0)
+      (call print "FAILED: Could not load library\n")
+      (ret 1))
+    (call print "SUCCESS: Library loaded\n")
+    
+    (call print "\nTesting ffi_call with hello()...\n")
+    (set result int (call ffi_call lib "hello"))
+    (call print "Result from hello(): ")
+    (call print result)
+    (call print "\n")
+    
+    (ifnot (call eq result 42)
+      (call print "FAILED: Expected 42\n")
+      (ret 1))
+    (call print "SUCCESS: hello() returned 42\n")
+    
+    (call print "\nTesting ffi_call with add_numbers(10, 32)...\n")
+    (set sum int (call ffi_call lib "add_numbers" 10 32))
+    (call print "Result from add_numbers(10, 32): ")
+    (call print sum)
+    (call print "\n")
+    
+    (ifnot (call eq sum 42)
+      (call print "FAILED: Expected 42\n")
+      (ret 1))
+    (call print "SUCCESS: add_numbers returned 42\n")
+    
+    (call print "\nAll FFI tests passed!\n")
+    (ret 0)))

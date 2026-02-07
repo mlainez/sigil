@@ -46,6 +46,7 @@ typedef enum {
     VAL_F64,
     
     VAL_RESULT,
+    VAL_FFI_HANDLE,
 } ValueType;
 
 // ============================================
@@ -67,6 +68,7 @@ typedef enum {
     OBJ_UDP_SOCKET,
     OBJ_FUTURE,
     OBJ_RESULT,
+    OBJ_FFI_HANDLE,
 } ObjType;
 
 typedef struct Obj Obj;
@@ -121,6 +123,16 @@ typedef struct {
 } CallFrame;
 
 // ============================================
+// FFI (FOREIGN FUNCTION INTERFACE)
+// ============================================
+
+typedef struct FFILibrary {
+    char* name;          // Library name (e.g., "libaisl_http")
+    void* handle;        // dlopen handle
+    struct FFILibrary* next;
+} FFILibrary;
+
+// ============================================
 // VIRTUAL MACHINE
 // ============================================
 
@@ -142,6 +154,9 @@ typedef struct {
 
     // Garbage collector
     GC gc;
+
+    // FFI (Foreign Function Interface)
+    FFILibrary* ffi_libraries;
 
     // Runtime state
     bool running;
