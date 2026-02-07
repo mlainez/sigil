@@ -73,7 +73,7 @@ literal ::= <number> | <string> | true | false
 - **f64** - 64-bit floating point
 - **bool** - Boolean (true/false)
 - **string** - UTF-8 string
-- **result** - Result type for error handling (ok or err)
+- **result** - Result type for error handling (ok or err) - ⚠️ PLANNED, not yet implemented
 
 ### Type Annotations
 
@@ -285,13 +285,14 @@ The compiler automatically selects the correct operation based on variable types
 
 ```scheme
 (call string_length text)              ; Get length -> i32
-(call string_contains haystack needle) ; Check contains -> bool
 (call string_concat a b)               ; Concatenate -> string
+(call string_contains haystack needle) ; Check contains -> bool
 (call string_split text delimiter)     ; Split -> array
 (call string_trim text)                ; Remove whitespace -> string
-(call string_replace text old new)     ; Replace -> string
-(call string_starts_with text prefix)  ; Check prefix -> bool
-(call string_ends_with text suffix)    ; Check suffix -> bool
+(call string_replace text old new)     ; Replace substring -> string
+(call string_to_upper text)            ; Convert to uppercase -> string
+(call string_to_lower text)            ; Convert to lowercase -> string
+(call string_substring text start len) ; Extract substring -> string
 ```
 
 ### I/O Operations
@@ -316,37 +317,37 @@ The compiler automatically selects the correct operation based on variable types
 (call file_size path)          ; Get size -> i64
 ```
 
-### Result Type for Error Handling
+### Error Handling
 
-Use `*_result` variants for operations that can fail:
+**⚠️ NOTE**: Result/Option types are planned but not yet implemented. Current file operations panic on error.
 
-```scheme
-(call file_read_result path)  ; Returns result type
-(call is_ok result)            ; Check if ok -> bool
-(call is_err result)           ; Check if error -> bool
-(call unwrap result)           ; Extract value (panics on err)
-(call unwrap_or result default); Extract value or use default
-(call error_code result)       ; Get error code -> i32
-(call error_message result)    ; Get error message -> string
-```
-
-**Example: Error Handling Pattern**
+**Current Workaround**: Use `file_exists` to check before reading:
 
 ```scheme
 (fn safe_read_file ((path string)) -> i32
-  (set file_result result (call file_read_result path))
-  (set success bool (call is_ok file_result))
-  (ifnot success handle_error)
-  ; Success path
-  (set content string (call unwrap file_result))
+  (set exists bool (call file_exists path))
+  (call ifnot exists handle_error)
+  ; File exists, safe to read
+  (set content string (call file_read path))
   (call print content)
   (ret 0)
   ; Error path
-  (label handle_error)
-  (set err_msg string (call error_message file_result))
-  (call print "Error reading file:")
-  (call print err_msg)
+  (call label handle_error)
+  (call print "Error: File does not exist")
   (ret 1))
+```
+
+**Future**: Result type operations (planned, not yet implemented):
+
+```scheme
+; These operations are NOT yet available:
+(call file_read_result path)  ; Returns result type (FUTURE)
+(call is_ok result)            ; Check if ok -> bool (FUTURE)
+(call is_err result)           ; Check if error -> bool (FUTURE)
+(call unwrap result)           ; Extract value (FUTURE)
+(call unwrap_or result default); Extract value or default (FUTURE)
+(call error_code result)       ; Get error code -> i32 (FUTURE)
+(call error_message result)    ; Get error message -> string (FUTURE)
 ```
 
 ### TCP Networking
