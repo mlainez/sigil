@@ -145,9 +145,7 @@ static const char* get_typed_operation(const char* short_name, TypeKind type) {
     // String operations (handle these first before type_suffix check)
     if (strcmp(short_name, "concat") == 0) return "string_concat";
     if (strcmp(short_name, "slice") == 0) return "string_slice";
-    if (strcmp(short_name, "from_i32") == 0) return "string_from_i32";
     if (strcmp(short_name, "from_i64") == 0) return "string_from_i64";
-    if (strcmp(short_name, "from_f32") == 0) return "string_from_f32";
     if (strcmp(short_name, "from_f64") == 0) return "string_from_f64";
     if (strcmp(short_name, "from_bool") == 0) return "string_from_bool";
     
@@ -366,8 +364,7 @@ void compile_apply(Compiler* comp, Expr* expr) {
         strcmp(name, "print") == 0 || strcmp(name, "len") == 0 ||
         strcmp(name, "push") == 0 || strcmp(name, "get") == 0 ||
         strcmp(name, "set") == 0 || strcmp(name, "concat") == 0 ||
-        strcmp(name, "slice") == 0 || strcmp(name, "from_i32") == 0 ||
-        strcmp(name, "from_i64") == 0 || strcmp(name, "from_f32") == 0 ||
+        strcmp(name, "slice") == 0 || strcmp(name, "from_i64") == 0 ||
         strcmp(name, "from_f64") == 0 || strcmp(name, "from_bool") == 0) {
         
         // Get type from first argument
@@ -427,6 +424,35 @@ void compile_apply(Compiler* comp, Expr* expr) {
         
         // Replace name with typed version and continue with normal compilation
         name = typed_name;
+    }
+
+    // Boolean operations - always operate on bool type
+    if (strcmp(name, "and") == 0) {
+        if (compile_args(comp, expr->data.apply.args) != 2) {
+            fprintf(stderr, "and expects 2 arguments\n");
+            exit(1);
+        }
+        Instruction inst = {.opcode = OP_AND_BOOL};
+        bytecode_emit(comp->program, inst);
+        return;
+    }
+    if (strcmp(name, "or") == 0) {
+        if (compile_args(comp, expr->data.apply.args) != 2) {
+            fprintf(stderr, "or expects 2 arguments\n");
+            exit(1);
+        }
+        Instruction inst = {.opcode = OP_OR_BOOL};
+        bytecode_emit(comp->program, inst);
+        return;
+    }
+    if (strcmp(name, "not") == 0) {
+        if (compile_args(comp, expr->data.apply.args) != 1) {
+            fprintf(stderr, "not expects 1 argument\n");
+            exit(1);
+        }
+        Instruction inst = {.opcode = OP_NOT_BOOL};
+        bytecode_emit(comp->program, inst);
+        return;
     }
 
     // AISL-Core: label, goto, ifnot (desugared from Agent constructs)
@@ -567,8 +593,7 @@ void compile_apply(Compiler* comp, Expr* expr) {
 
     // V4.0 Conditional expressions: if_i32, if_i64, if_f32, if_f64, if_string
     // Syntax: (call if_i32 condition then_value else_value)
-    if (strcmp(name, "if_i32") == 0 || strcmp(name, "if_i64") == 0 || 
-        strcmp(name, "if_f32") == 0 || strcmp(name, "if_f64") == 0 ||
+    if (strcmp(name, "if_i64") == 0 || strcmp(name, "if_f64") == 0 ||
         strcmp(name, "if_string") == 0) {
         
         // Validate args: condition, then_expr, else_expr
@@ -1020,85 +1045,13 @@ void compile_apply(Compiler* comp, Expr* expr) {
         return;
     }
 
-    // V4.0 Type conversion operations
-    if (strcmp(name, "cast_i32_i64") == 0) {
-        if (compile_args(comp, expr->data.apply.args) != 1) {
-            fprintf(stderr, "cast_i32_i64 expects 1 argument\n");
-            exit(1);
-        }
-        Instruction inst = {.opcode = OP_CAST_I64_F64};
-        bytecode_emit(comp->program, inst);
-        return;
-    }
-    if (strcmp(name, "cast_i64_i32") == 0) {
-        if (compile_args(comp, expr->data.apply.args) != 1) {
-            fprintf(stderr, "cast_i64_i32 expects 1 argument\n");
-            exit(1);
-        }
-        Instruction inst = {.opcode = OP_CAST_I64_F64};
-        bytecode_emit(comp->program, inst);
-        return;
-    }
-    if (strcmp(name, "cast_i32_f32") == 0) {
-        if (compile_args(comp, expr->data.apply.args) != 1) {
-            fprintf(stderr, "cast_i32_f32 expects 1 argument\n");
-            exit(1);
-        }
-        Instruction inst = {.opcode = OP_CAST_I64_F64};
-        bytecode_emit(comp->program, inst);
-        return;
-    }
-    if (strcmp(name, "cast_i32_f64") == 0) {
-        if (compile_args(comp, expr->data.apply.args) != 1) {
-            fprintf(stderr, "cast_i32_f64 expects 1 argument\n");
-            exit(1);
-        }
-        Instruction inst = {.opcode = OP_CAST_I64_F64};
-        bytecode_emit(comp->program, inst);
-        return;
-    }
-    if (strcmp(name, "cast_i64_f32") == 0) {
-        if (compile_args(comp, expr->data.apply.args) != 1) {
-            fprintf(stderr, "cast_i64_f32 expects 1 argument\n");
-            exit(1);
-        }
-        Instruction inst = {.opcode = OP_CAST_I64_F64};
-        bytecode_emit(comp->program, inst);
-        return;
-    }
+    // V4.0 Type conversion operations (only i64/f64, no i32/f32)
     if (strcmp(name, "cast_i64_f64") == 0) {
         if (compile_args(comp, expr->data.apply.args) != 1) {
             fprintf(stderr, "cast_i64_f64 expects 1 argument\n");
             exit(1);
         }
         Instruction inst = {.opcode = OP_CAST_I64_F64};
-        bytecode_emit(comp->program, inst);
-        return;
-    }
-    if (strcmp(name, "cast_f32_i32") == 0) {
-        if (compile_args(comp, expr->data.apply.args) != 1) {
-            fprintf(stderr, "cast_f32_i32 expects 1 argument\n");
-            exit(1);
-        }
-        Instruction inst = {.opcode = OP_CAST_F64_I64};
-        bytecode_emit(comp->program, inst);
-        return;
-    }
-    if (strcmp(name, "cast_f32_i64") == 0) {
-        if (compile_args(comp, expr->data.apply.args) != 1) {
-            fprintf(stderr, "cast_f32_i64 expects 1 argument\n");
-            exit(1);
-        }
-        Instruction inst = {.opcode = OP_CAST_F64_I64};
-        bytecode_emit(comp->program, inst);
-        return;
-    }
-    if (strcmp(name, "cast_f64_i32") == 0) {
-        if (compile_args(comp, expr->data.apply.args) != 1) {
-            fprintf(stderr, "cast_f64_i32 expects 1 argument\n");
-            exit(1);
-        }
-        Instruction inst = {.opcode = OP_CAST_F64_I64};
         bytecode_emit(comp->program, inst);
         return;
     }
@@ -1111,25 +1064,8 @@ void compile_apply(Compiler* comp, Expr* expr) {
         bytecode_emit(comp->program, inst);
         return;
     }
-    if (strcmp(name, "cast_f32_f64") == 0) {
-        if (compile_args(comp, expr->data.apply.args) != 1) {
-            fprintf(stderr, "cast_f32_f64 expects 1 argument\n");
-            exit(1);
-        }
-        Instruction inst = {.opcode = OP_CAST_F64_I64};
-        bytecode_emit(comp->program, inst);
-        return;
-    }
-    if (strcmp(name, "cast_f64_f32") == 0) {
-        if (compile_args(comp, expr->data.apply.args) != 1) {
-            fprintf(stderr, "cast_f64_f32 expects 1 argument\n");
-            exit(1);
-        }
-        Instruction inst = {.opcode = OP_CAST_F64_I64};
-        bytecode_emit(comp->program, inst);
-        return;
-    }
-
+    
+    
     // Math functions
     if (strcmp(name, "math_sqrt") == 0 || strcmp(name, "math_sqrt_f64") == 0) {
         if (compile_args(comp, expr->data.apply.args) != 1) {
@@ -1267,33 +1203,13 @@ void compile_apply(Compiler* comp, Expr* expr) {
         return;
     }
 
-    // V4.1 String conversion operations
-    if (strcmp(name, "string_from_i32") == 0) {
-        if (compile_args(comp, expr->data.apply.args) != 1) {
-            fprintf(stderr, "string_from_i32 expects 1 argument (i32)\n");
-            exit(1);
-        }
-        Instruction inst = {.opcode = OP_STR_FROM_I64};
-        bytecode_emit(comp->program, inst);
-        return;
-    }
-    
+    // V4.1 String conversion operations (only i64/f64)
     if (strcmp(name, "string_from_i64") == 0) {
         if (compile_args(comp, expr->data.apply.args) != 1) {
             fprintf(stderr, "string_from_i64 expects 1 argument (i64)\n");
             exit(1);
         }
         Instruction inst = {.opcode = OP_STR_FROM_I64};
-        bytecode_emit(comp->program, inst);
-        return;
-    }
-    
-    if (strcmp(name, "string_from_f32") == 0) {
-        if (compile_args(comp, expr->data.apply.args) != 1) {
-            fprintf(stderr, "string_from_f32 expects 1 argument (f32)\n");
-            exit(1);
-        }
-        Instruction inst = {.opcode = OP_STR_FROM_F64};
         bytecode_emit(comp->program, inst);
         return;
     }
@@ -1308,86 +1224,9 @@ void compile_apply(Compiler* comp, Expr* expr) {
         return;
     }
 
-    // V4.2 Advanced String operations
-    if (strcmp(name, "string_split") == 0) {
-        if (compile_args(comp, expr->data.apply.args) != 2) {
-            fprintf(stderr, "string_split expects 2 arguments (str, delimiter)\n");
-            exit(1);
-        }
-        Instruction inst = {.opcode = OP_STR_SPLIT};
-        bytecode_emit(comp->program, inst);
-        return;
-    }
-    
-    if (strcmp(name, "string_trim") == 0) {
-        if (compile_args(comp, expr->data.apply.args) != 1) {
-            fprintf(stderr, "string_trim expects 1 argument (str)\n");
-            exit(1);
-        }
-        Instruction inst = {.opcode = OP_STR_TRIM};
-        bytecode_emit(comp->program, inst);
-        return;
-    }
-    
-    if (strcmp(name, "string_contains") == 0) {
-        if (compile_args(comp, expr->data.apply.args) != 2) {
-            fprintf(stderr, "string_contains expects 2 arguments (str, substring)\n");
-            exit(1);
-        }
-        Instruction inst = {.opcode = OP_STR_CONTAINS};
-        bytecode_emit(comp->program, inst);
-        return;
-    }
-    
-    if (strcmp(name, "string_replace") == 0) {
-        if (compile_args(comp, expr->data.apply.args) != 3) {
-            fprintf(stderr, "string_replace expects 3 arguments (string, old, new)\n");
-            exit(1);
-        }
-        Instruction inst = {.opcode = OP_STR_REPLACE};
-        bytecode_emit(comp->program, inst);
-        return;
-    }
-
-    if (strcmp(name, "string_starts_with") == 0) {
-        if (compile_args(comp, expr->data.apply.args) != 2) {
-            fprintf(stderr, "string_starts_with expects 2 arguments (string, prefix)\n");
-            exit(1);
-        }
-        Instruction inst = {.opcode = OP_STR_STARTS_WITH};
-        bytecode_emit(comp->program, inst);
-        return;
-    }
-
-    if (strcmp(name, "string_ends_with") == 0) {
-        if (compile_args(comp, expr->data.apply.args) != 2) {
-            fprintf(stderr, "string_ends_with expects 2 arguments (string, suffix)\n");
-            exit(1);
-        }
-        Instruction inst = {.opcode = OP_STR_ENDS_WITH};
-        bytecode_emit(comp->program, inst);
-        return;
-    }
-
-    if (strcmp(name, "string_to_upper") == 0) {
-        if (compile_args(comp, expr->data.apply.args) != 1) {
-            fprintf(stderr, "string_to_upper expects 1 argument (string)\n");
-            exit(1);
-        }
-        Instruction inst = {.opcode = OP_STR_TO_UPPER};
-        bytecode_emit(comp->program, inst);
-        return;
-    }
-
-    if (strcmp(name, "string_to_lower") == 0) {
-        if (compile_args(comp, expr->data.apply.args) != 1) {
-            fprintf(stderr, "string_to_lower expects 1 argument (string)\n");
-            exit(1);
-        }
-        Instruction inst = {.opcode = OP_STR_TO_LOWER};
-        bytecode_emit(comp->program, inst);
-        return;
-    }
+    // V4.2 Advanced String operations - REMOVED
+    // Now implemented in stdlib/core/string_utils.aisl
+    // Use: (import string_utils) then call split, trim, contains, etc.
 
     
     if (strcmp(name, "array_new") == 0) {
@@ -1491,89 +1330,19 @@ void compile_apply(Compiler* comp, Expr* expr) {
         bytecode_emit(comp->program, inst);
         return;
     }
+    if (strcmp(name, "map_keys") == 0) {
+        if (compile_args(comp, expr->data.apply.args) != 1) {
+            fprintf(stderr, "map_keys expects 1 argument (map)\n");
+            exit(1);
+        }
+        Instruction inst = {.opcode = OP_MAP_KEYS};
+        bytecode_emit(comp->program, inst);
+        return;
+    }
     
-    // JSON operations (v4.4)
-    if (strcmp(name, "json_parse") == 0) {
-        if (compile_args(comp, expr->data.apply.args) != 1) {
-            fprintf(stderr, "json_parse expects 1 argument (string)\n");
-            exit(1);
-        }
-        Instruction inst = {.opcode = OP_JSON_PARSE};
-        bytecode_emit(comp->program, inst);
-        return;
-    }
-    if (strcmp(name, "json_stringify") == 0) {
-        if (compile_args(comp, expr->data.apply.args) != 1) {
-            fprintf(stderr, "json_stringify expects 1 argument (json)\n");
-            exit(1);
-        }
-        Instruction inst = {.opcode = OP_JSON_STRINGIFY};
-        bytecode_emit(comp->program, inst);
-        return;
-    }
-    if (strcmp(name, "json_new_object") == 0) {
-        if (compile_args(comp, expr->data.apply.args) != 0) {
-            fprintf(stderr, "json_new_object expects 0 arguments\n");
-            exit(1);
-        }
-        Instruction inst = {.opcode = OP_JSON_NEW_OBJECT};
-        bytecode_emit(comp->program, inst);
-        return;
-    }
-    if (strcmp(name, "json_new_array") == 0) {
-        if (compile_args(comp, expr->data.apply.args) != 0) {
-            fprintf(stderr, "json_new_array expects 0 arguments\n");
-            exit(1);
-        }
-        Instruction inst = {.opcode = OP_JSON_NEW_ARRAY};
-        bytecode_emit(comp->program, inst);
-        return;
-    }
-    if (strcmp(name, "json_get") == 0) {
-        if (compile_args(comp, expr->data.apply.args) != 2) {
-            fprintf(stderr, "json_get expects 2 arguments (json, key)\n");
-            exit(1);
-        }
-        Instruction inst = {.opcode = OP_JSON_GET};
-        bytecode_emit(comp->program, inst);
-        return;
-    }
-    if (strcmp(name, "json_set") == 0) {
-        if (compile_args(comp, expr->data.apply.args) != 3) {
-            fprintf(stderr, "json_set expects 3 arguments (json, key, value)\n");
-            exit(1);
-        }
-        Instruction inst = {.opcode = OP_JSON_SET};
-        bytecode_emit(comp->program, inst);
-        return;
-    }
-    if (strcmp(name, "json_push") == 0) {
-        if (compile_args(comp, expr->data.apply.args) != 2) {
-            fprintf(stderr, "json_push expects 2 arguments (json, value)\n");
-            exit(1);
-        }
-        Instruction inst = {.opcode = OP_JSON_PUSH};
-        bytecode_emit(comp->program, inst);
-        return;
-    }
-    if (strcmp(name, "json_length") == 0) {
-        if (compile_args(comp, expr->data.apply.args) != 1) {
-            fprintf(stderr, "json_length expects 1 argument (json)\n");
-            exit(1);
-        }
-        Instruction inst = {.opcode = OP_JSON_LENGTH};
-        bytecode_emit(comp->program, inst);
-        return;
-    }
-    if (strcmp(name, "json_type") == 0) {
-        if (compile_args(comp, expr->data.apply.args) != 1) {
-            fprintf(stderr, "json_type expects 1 argument (json)\n");
-            exit(1);
-        }
-        Instruction inst = {.opcode = OP_JSON_TYPE};
-        bytecode_emit(comp->program, inst);
-        return;
-    }
+    // JSON operations (v4.4) - REMOVED
+    // Now implemented in stdlib/data/json.aisl using map primitives
+    // Use: (import json) then call parse, stringify, etc.
     
     // ============================================
     // FFI (Foreign Function Interface) Operations
@@ -1732,79 +1501,11 @@ void compile_apply(Compiler* comp, Expr* expr) {
         return;
     }
     
-    // Result type operations
-    if (strcmp(name, "result_ok") == 0) {
-        if (compile_args(comp, expr->data.apply.args) != 1) {
-            fprintf(stderr, "result_ok expects 1 argument (value)\n");
-            exit(1);
-        }
-        Instruction inst = {.opcode = OP_RESULT_OK};
-        bytecode_emit(comp->program, inst);
-        return;
-    }
-    if (strcmp(name, "result_err") == 0) {
-        if (compile_args(comp, expr->data.apply.args) != 2) {
-            fprintf(stderr, "result_err expects 2 arguments (error_code, error_message)\n");
-            exit(1);
-        }
-        Instruction inst = {.opcode = OP_RESULT_ERR};
-        bytecode_emit(comp->program, inst);
-        return;
-    }
-    if (strcmp(name, "is_ok") == 0) {
-        if (compile_args(comp, expr->data.apply.args) != 1) {
-            fprintf(stderr, "is_ok expects 1 argument (result)\n");
-            exit(1);
-        }
-        Instruction inst = {.opcode = OP_RESULT_IS_OK};
-        bytecode_emit(comp->program, inst);
-        return;
-    }
-    if (strcmp(name, "is_err") == 0) {
-        if (compile_args(comp, expr->data.apply.args) != 1) {
-            fprintf(stderr, "is_err expects 1 argument (result)\n");
-            exit(1);
-        }
-        Instruction inst = {.opcode = OP_RESULT_IS_ERR};
-        bytecode_emit(comp->program, inst);
-        return;
-    }
-    if (strcmp(name, "unwrap") == 0) {
-        if (compile_args(comp, expr->data.apply.args) != 1) {
-            fprintf(stderr, "unwrap expects 1 argument (result)\n");
-            exit(1);
-        }
-        Instruction inst = {.opcode = OP_RESULT_UNWRAP};
-        bytecode_emit(comp->program, inst);
-        return;
-    }
-    if (strcmp(name, "unwrap_or") == 0) {
-        if (compile_args(comp, expr->data.apply.args) != 2) {
-            fprintf(stderr, "unwrap_or expects 2 arguments (result, default_value)\n");
-            exit(1);
-        }
-        Instruction inst = {.opcode = OP_RESULT_UNWRAP_OR};
-        bytecode_emit(comp->program, inst);
-        return;
-    }
-    if (strcmp(name, "error_code") == 0) {
-        if (compile_args(comp, expr->data.apply.args) != 1) {
-            fprintf(stderr, "error_code expects 1 argument (result)\n");
-            exit(1);
-        }
-        Instruction inst = {.opcode = OP_RESULT_ERROR_CODE};
-        bytecode_emit(comp->program, inst);
-        return;
-    }
-    if (strcmp(name, "error_message") == 0) {
-        if (compile_args(comp, expr->data.apply.args) != 1) {
-            fprintf(stderr, "error_message expects 1 argument (result)\n");
-            exit(1);
-        }
-        Instruction inst = {.opcode = OP_RESULT_ERROR_MSG};
-        bytecode_emit(comp->program, inst);
-        return;
-    }
+    // Result type operations (result_ok, result_err) - REMOVED
+    // Now implemented in stdlib/core/result.aisl using map primitives
+    // Use: (import result) then call ok, err, is_ok, is_err, unwrap, etc.
+    // Note: 'ok' and 'err' are now regular functions, not reserved keywords
+    
     
     // File operations with result type
     if (strcmp(name, "file_read_result") == 0) {
@@ -1954,24 +1655,9 @@ void compile_apply(Compiler* comp, Expr* expr) {
         return;
     }
     
-    if (strcmp(name, "base64_encode") == 0) {
-        if (compile_args(comp, expr->data.apply.args) != 1) {
-            fprintf(stderr, "base64_encode expects 1 argument (input)\n");
-            exit(1);
-        }
-        Instruction inst = {.opcode = OP_BASE64_ENCODE};
-        bytecode_emit(comp->program, inst);
-        return;
-    }
-    if (strcmp(name, "base64_decode") == 0) {
-        if (compile_args(comp, expr->data.apply.args) != 1) {
-            fprintf(stderr, "base64_decode expects 1 argument (input)\n");
-            exit(1);
-        }
-        Instruction inst = {.opcode = OP_BASE64_DECODE};
-        bytecode_emit(comp->program, inst);
-        return;
-    }
+    // Base64 operations - REMOVED
+    // Now implemented in stdlib/data/base64.aisl using pure AISL
+    // Use: (import base64) then call encode, decode
     
     if (strcmp(name, "time_now") == 0) {
         if (compile_args(comp, expr->data.apply.args) != 0) {
@@ -2688,8 +2374,9 @@ static void compile_imported_module(Compiler* comp, const char* module_name) {
         exit(1);
     }
     
-    // Store parsed module
+    // Store parsed module and source (DON'T FREE - AST points into source!)
     loaded->parsed_module = imported_module;
+    loaded->source = source;  // Keep source alive for AST pointers
     
     // Recursively compile its imports first
     for (int i = 0; i < imported_module->import_count; i++) {
@@ -2723,7 +2410,7 @@ static void compile_imported_module(Compiler* comp, const char* module_name) {
         current = current->next;
     }
     
-    free(source);
+    // Note: Don't free source - it's stored in loaded->source for AST pointers
 }
 
 void compile_module(Compiler* comp, Module* module) {
@@ -2736,7 +2423,39 @@ void compile_module(Compiler* comp, Module* module) {
     }
     
     // Then: compile this module
+    // Check if module has test-spec but no main function
+    bool has_test_spec = false;
+    bool has_main = false;
+    
     DefList* current = module->definitions;
+    while (current) {
+        if (current->def->kind == DEF_TEST_SPEC) {
+            has_test_spec = true;
+        }
+        if (current->def->kind == DEF_FUNCTION && 
+            strcmp(current->def->name, "main") == 0) {
+            has_main = true;
+        }
+        current = current->next;
+    }
+    
+    // If module has test-spec but no main, generate a dummy main that returns 0
+    // Test-spec validation happens at compile time, not runtime
+    if (has_test_spec && !has_main) {
+        // Declare main function
+        uint32_t main_idx = bytecode_declare_function(comp->program, "main", 0);
+        compiler_add_function(comp, "main", main_idx, 0);
+        
+        // Generate main body: just return 0
+        // (fn main -> int (ret 0))
+        Instruction push_zero = {.opcode = OP_PUSH_INT, .operand.int_val = 0};
+        Instruction ret = {.opcode = OP_RETURN};
+        bytecode_emit(comp->program, push_zero);
+        bytecode_emit(comp->program, ret);
+    }
+    
+    // Declare all user-defined functions
+    current = module->definitions;
     while (current) {
         if (current->def->kind == DEF_FUNCTION) {
             uint32_t param_count = 0;

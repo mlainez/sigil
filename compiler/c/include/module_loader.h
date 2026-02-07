@@ -4,7 +4,7 @@
 #include <stdbool.h>
 
 // Module search paths (priority order)
-#define MODULE_SEARCH_PATH_COUNT 3
+#define MODULE_SEARCH_PATH_COUNT 4
 
 typedef struct {
     char* module_name;           // e.g. "math"
@@ -12,6 +12,7 @@ typedef struct {
     char* manifest_path;         // Full path to .aisl.manifest
     bool has_manifest;           // Whether manifest exists
     void* parsed_module;         // Module* after compilation
+    char* source;                // Source code buffer (kept alive for AST)
 } LoadedModule;
 
 typedef struct {

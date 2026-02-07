@@ -1,0 +1,165 @@
+(module string_utils
+  (fn string_split text string delimiter string -> array
+    (set result array (call array_new 10))
+    (set text_len int (call string_length text))
+    (set delim_len int (call string_length delimiter))
+    (set start int 0)
+    (set i int 0)
+    
+    (while (call lt i text_len)
+      (set found bool false)
+      (set can_match bool (call le (call add i delim_len) text_len))
+      
+      (if can_match
+        (set substring string (call string_slice text i (call add i delim_len)))
+        (set matches bool (call string_eq substring delimiter))
+        (if matches
+          (set part string (call string_slice text start i))
+          (call array_push result part)
+          (set i int (call add i delim_len))
+          (set start int i)
+          (set found bool true)))
+      
+      (ifnot found
+        (set i int (call add i 1))))
+    
+    (set final string (call string_slice text start text_len))
+    (call array_push result final)
+    (ret result))
+  
+  (fn string_trim text string -> string
+    (set len int (call string_length text))
+    (set start int 0)
+    (set end int len)
+    
+    (while (call lt start end)
+      (set ch int (call string_get text start))
+      (set is_space bool (call eq ch 32))
+      (set is_tab bool (call eq ch 9))
+      (set is_newline bool (call eq ch 10))
+      (set is_cr bool (call eq ch 13))
+      (set is_ws bool false)
+      (if is_space
+        (set is_ws bool true))
+      (if is_tab
+        (set is_ws bool true))
+      (if is_newline
+        (set is_ws bool true))
+      (if is_cr
+        (set is_ws bool true))
+      (ifnot is_ws
+        (break))
+      (set start int (call add start 1)))
+    
+    (while (call gt end start)
+      (set ch int (call string_get text (call sub end 1)))
+      (set is_space bool (call eq ch 32))
+      (set is_tab bool (call eq ch 9))
+      (set is_newline bool (call eq ch 10))
+      (set is_cr bool (call eq ch 13))
+      (set is_ws bool false)
+      (if is_space
+        (set is_ws bool true))
+      (if is_tab
+        (set is_ws bool true))
+      (if is_newline
+        (set is_ws bool true))
+      (if is_cr
+        (set is_ws bool true))
+      (ifnot is_ws
+        (break))
+      (set end int (call sub end 1)))
+    
+    (ret (call string_slice text start end)))
+  
+  (fn string_contains haystack string needle string -> bool
+    (set haystack_len int (call string_length haystack))
+    (set needle_len int (call string_length needle))
+    (set max_pos int (call sub haystack_len needle_len))
+    (set i int 0)
+    
+    (while (call le i max_pos)
+      (set substring string (call string_slice haystack i (call add i needle_len)))
+      (set matches bool (call string_eq substring needle))
+      (if matches
+        (ret true))
+      (set i int (call add i 1)))
+    
+    (ret false))
+  
+  (fn string_replace text string old string new string -> string
+    (set parts array (call string_split text old))
+    (set result string "")
+    (set parts_len int (call array_length parts))
+    (set i int 0)
+    
+    (while (call lt i parts_len)
+      (set part string (call array_get parts i))
+      (set result string (call string_concat result part))
+      (set is_last bool (call eq i (call sub parts_len 1)))
+      (ifnot is_last
+        (set result string (call string_concat result new)))
+      (set i int (call add i 1)))
+    
+    (ret result))
+  
+  (fn string_starts_with text string prefix string -> bool
+    (set text_len int (call string_length text))
+    (set prefix_len int (call string_length prefix))
+    (set too_long bool (call gt prefix_len text_len))
+    (if too_long
+      (ret false))
+    (set start string (call string_slice text 0 prefix_len))
+    (ret (call string_eq start prefix)))
+  
+  (fn string_ends_with text string suffix string -> bool
+    (set text_len int (call string_length text))
+    (set suffix_len int (call string_length suffix))
+    (set too_long bool (call gt suffix_len text_len))
+    (if too_long
+      (ret false))
+    (set start int (call sub text_len suffix_len))
+    (set end_part string (call string_slice text start text_len))
+    (ret (call string_eq end_part suffix)))
+  
+  (fn string_to_upper text string -> string
+    (set len int (call string_length text))
+    (set result string "")
+    (set i int 0)
+    
+    (while (call lt i len)
+      (set ch int (call string_get text i))
+      (set ge_lower bool (call ge ch 97))
+      (set le_upper_lower bool (call le ch 122))
+      (set is_lower bool false)
+      (if ge_lower
+        (if le_upper_lower
+          (set is_lower bool true)))
+      (if is_lower
+        (set ch int (call sub ch 32)))
+      (set ch_str string (call string_from_i64 ch))
+      (set result string (call string_concat result ch_str))
+      (set i int (call add i 1)))
+    
+    (ret result))
+  
+  (fn string_to_lower text string -> string
+    (set len int (call string_length text))
+    (set result string "")
+    (set i int 0)
+    
+    (while (call lt i len)
+      (set ch int (call string_get text i))
+      (set ge_upper bool (call ge ch 65))
+      (set le_upper_z bool (call le ch 90))
+      (set is_upper bool false)
+      (if ge_upper
+        (if le_upper_z
+          (set is_upper bool true)))
+      (if is_upper
+        (set ch int (call add ch 32)))
+      (set ch_str string (call string_from_i64 ch))
+      (set result string (call string_concat result ch_str))
+      (set i int (call add i 1)))
+    
+    (ret result)))

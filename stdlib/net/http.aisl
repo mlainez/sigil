@@ -1,0 +1,32 @@
+(module http
+  
+  (fn get url string -> map
+    (set response_str string (call http_get url))
+    (set response map (call map_new))
+    (set response map (call map_set response "body" response_str))
+    (ret response))
+  
+  (fn post url string body string -> map
+    (set response_str string (call http_post url body))
+    (set response map (call map_new))
+    (set response map (call map_set response "body" response_str))
+    (ret response))
+  
+  (fn put url string body string -> map
+    (set response_str string (call http_put url body))
+    (set response map (call map_new))
+    (set response map (call map_set response "body" response_str))
+    (ret response))
+  
+  (fn delete url string -> map
+    (set response_str string (call http_delete url))
+    (set response map (call map_new))
+    (set response map (call map_set response "body" response_str))
+    (ret response))
+  
+  (fn get_body response map -> string
+    (ret (call map_get response "body")))
+  
+  (fn get_status response map -> int
+    (ret (call http_get_status response))))
+

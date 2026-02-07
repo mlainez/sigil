@@ -1,0 +1,9 @@
+(module hash
+  (fn sha256_hash data string -> string
+    (ret (call sha256 data)))
+  
+  (fn md5_hash data string -> string
+    (ret (call md5 data)))
+  
+  (fn hmac_sha256_hash key string message string -> string
+    (ret (call hmac_sha256 key message))))

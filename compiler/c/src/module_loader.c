@@ -11,6 +11,7 @@
 
 // Module search paths in priority order
 static const char* SEARCH_PATHS[MODULE_SEARCH_PATH_COUNT] = {
+    "./stdlib",               // Project stdlib (pure AISL)
     "./modules",              // Project-local modules
     NULL,                     // ~/.aisl/modules (set at runtime)
     "/usr/lib/aisl/modules"   // System stdlib
@@ -36,7 +37,7 @@ static void init_search_paths(void) {
     if (home) {
         char* user_path = malloc(strlen(home) + 20);
         sprintf(user_path, "%s/.aisl/modules", home);
-        SEARCH_PATHS[1] = user_path;
+        SEARCH_PATHS[2] = user_path;
         free(home);
     }
     
@@ -65,6 +66,21 @@ char* module_resolve_path(const char* module_name) {
         }
         
         free(path);
+        
+        // For stdlib, also search in subdirectories (core, data, net, sys, crypto, db, pattern)
+        if (strstr(SEARCH_PATHS[i], "stdlib")) {
+            const char* subdirs[] = {"core", "data", "net", "sys", "crypto", "db", "pattern", NULL};
+            for (int j = 0; subdirs[j] != NULL; j++) {
+                char* subpath = malloc(strlen(SEARCH_PATHS[i]) + strlen(subdirs[j]) + strlen(module_name) + 20);
+                sprintf(subpath, "%s/%s/%s.aisl", SEARCH_PATHS[i], subdirs[j], module_name);
+                
+                if (file_exists(subpath)) {
+                    return subpath;
+                }
+                
+                free(subpath);
+            }
+        }
     }
     
     return NULL;  // Not found
@@ -94,6 +110,7 @@ void module_cache_free(ModuleCache* cache) {
         free(mod->module_name);
         free(mod->module_path);
         if (mod->manifest_path) free(mod->manifest_path);
+        if (mod->source) free(mod->source);  // Free source buffer
         // Note: parsed_module is freed by AST cleanup
         free(mod);
     }
@@ -152,6 +169,7 @@ LoadedModule* module_load(ModuleCache* cache, const char* module_name) {
     module->module_name = strdup(module_name);
     module->module_path = module_path;
     module->parsed_module = NULL;
+    module->source = NULL;  // Will be set when compiling
     
     // Check for manifest
     module->manifest_path = malloc(strlen(module_path) + 10);

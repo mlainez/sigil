@@ -256,6 +256,60 @@ Functions can call themselves:
 
 AISL provides 180+ built-in functions. All use explicit `call` syntax.
 
+### Standard Library Modules
+
+Many high-level operations are now implemented in **pure AISL stdlib modules** instead of built-in opcodes. This follows AISL's philosophy: "If it CAN be written in AISL, it MUST be written in AISL."
+
+**Available stdlib modules (11 total):**
+
+**Core (2 modules):**
+- `stdlib/core/result.aisl` - Result type for error handling (ok, err, is_ok, is_err, unwrap, unwrap_or, error_code, error_message)
+- `stdlib/core/string_utils.aisl` - Advanced string operations (split, trim, contains, replace, starts_with, ends_with, to_upper, to_lower)
+
+**Data (2 modules):**
+- `stdlib/data/json.aisl` - JSON parsing and manipulation (parse, stringify, new_object, new_array, get, set, has, delete, push, length, type)
+- `stdlib/data/base64.aisl` - Base64 encoding/decoding (encode, decode)
+
+**Net (2 modules):**
+- `stdlib/net/http.aisl` - HTTP client operations (get, post, put, delete, parse_response, build_request)
+- `stdlib/net/websocket.aisl` - WebSocket client (connect, send, receive, close)
+
+**Pattern (1 module):**
+- `stdlib/pattern/regex.aisl` - Regular expression operations (compile, match, find, find_all, replace)
+
+**Crypto (1 module):**
+- `stdlib/crypto/hash.aisl` - Cryptographic hash functions (sha256, md5, sha1)
+
+**Database (1 module):**
+- `stdlib/db/sqlite.aisl` - SQLite database operations (open, close, exec, query, prepare, bind, step, column, finalize, last_insert_id, changes, error_msg)
+
+**System (2 modules):**
+- `stdlib/sys/time.aisl` - Time operations (unix_timestamp, sleep, format_time)
+- `stdlib/sys/process.aisl` - Process management (spawn, wait, kill, exit, get_pid, get_env, set_env)
+
+**Importing stdlib modules:**
+
+```scheme
+(module my_program
+  (import result)                    ; Import from stdlib/core/result.aisl
+  (import json)                      ; Import from stdlib/data/json.aisl
+  (import regex from pattern)        ; Import from stdlib/pattern/regex.aisl
+  
+  (fn main -> int
+    ; Use imported functions
+    (set result_val result (call ok "success!"))
+    (set is_success bool (call is_ok result_val))
+    
+    (set json_obj json (call new_object))
+    (call set json_obj "status" "ok")
+    
+    (ret 0)))
+```
+
+**Note:** String operations (split, trim, replace, etc.), JSON operations, Result type functions, and Base64 functions are no longer built-in opcodes - they are now implemented in stdlib modules. Import the appropriate module to use them.
+
+See `stdlib/README.md` for complete documentation of all stdlib modules.
+
 ### Type-Directed Operations
 
 The compiler infers types automatically. Write operation names without type suffixes:
@@ -298,16 +352,38 @@ The compiler automatically selects the correct operation based on variable types
 
 ### String Operations
 
+**Built-in string operations** (always available):
+
 ```scheme
 (call string_length text)              ; Get length -> i32
 (call string_concat a b)               ; Concatenate -> string
-(call string_contains haystack needle) ; Check contains -> bool
-(call string_split text delimiter)     ; Split -> array
-(call string_trim text)                ; Remove whitespace -> string
-(call string_replace text old new)     ; Replace substring -> string
-(call string_to_upper text)            ; Convert to uppercase -> string
-(call string_to_lower text)            ; Convert to lowercase -> string
 (call string_substring text start len) ; Extract substring -> string
+```
+
+**Advanced string operations** (require `(import string_utils)`):
+
+```scheme
+(call split text delimiter)            ; Split -> array
+(call trim text)                       ; Remove whitespace -> string
+(call contains haystack needle)        ; Check contains -> bool
+(call replace text old new)            ; Replace substring -> string
+(call starts_with text prefix)         ; Check prefix -> bool
+(call ends_with text suffix)           ; Check suffix -> bool
+(call to_upper text)                   ; Convert to uppercase -> string
+(call to_lower text)                   ; Convert to lowercase -> string
+```
+
+**Example:**
+```scheme
+(module string_demo
+  (import string_utils)                ; Import advanced operations
+  
+  (fn main -> int
+    (set text string "  hello world  ")
+    (set trimmed string (call trim text))           ; -> "hello world"
+    (set words array (call split trimmed " "))      ; -> ["hello", "world"]
+    (set upper string (call to_upper trimmed))      ; -> "HELLO WORLD"
+    (ret 0)))
 ```
 
 ### Regular Expression Operations
@@ -378,35 +454,76 @@ The compiler automatically selects the correct operation based on variable types
 
 ### Error Handling
 
-**⚠️ NOTE**: Result/Option types are planned but not yet implemented. Current file operations panic on error.
+**Result type is now implemented in `stdlib/core/result.aisl`!**
 
-**Current Workaround**: Use `file_exists` to check before reading:
+AISL uses the Result type for explicit error handling. Import the result module to use it:
 
 ```scheme
-(fn safe_read_file ((path string)) -> i32
-  (set exists bool (call file_exists path))
-  (call ifnot exists handle_error)
-  ; File exists, safe to read
-  (set content string (call file_read path))
-  (call print content)
-  (ret 0)
-  ; Error path
-  (call label handle_error)
-  (call print "Error: File does not exist")
-  (ret 1))
+(module error_handling_demo
+  (import result)
+  
+  (fn safe_divide ((a i32) (b i32)) -> result
+    (set is_zero bool (call eq b 0))
+    (if is_zero
+      (ret (call err 1 "Division by zero")))
+    (set quotient i32 (call div a b))
+    (ret (call ok quotient)))
+  
+  (fn main -> int
+    (set result1 result (call safe_divide 10 2))
+    (set success bool (call is_ok result1))
+    
+    (if success
+      (set value string (call unwrap result1))
+      (call print "Success:")
+      (call print value))
+    
+    (set result2 result (call safe_divide 10 0))
+    (set is_error bool (call is_err result2))
+    
+    (if is_error
+      (set code i32 (call error_code result2))
+      (set msg string (call error_message result2))
+      (call print "Error code:")
+      (call print code)
+      (call print "Error message:")
+      (call print msg))
+    
+    (ret 0)))
 ```
 
-**Future**: Result type operations (planned, not yet implemented):
+**Result type operations** (require `(import result)`):
 
 ```scheme
-; These operations are NOT yet available:
-(call file_read_result path)  ; Returns result type (FUTURE)
-(call is_ok result)            ; Check if ok -> bool (FUTURE)
-(call is_err result)           ; Check if error -> bool (FUTURE)
-(call unwrap result)           ; Extract value (FUTURE)
-(call unwrap_or result default); Extract value or default (FUTURE)
-(call error_code result)       ; Get error code -> i32 (FUTURE)
-(call error_message result)    ; Get error message -> string (FUTURE)
+(call ok value)                 ; Create success result with value
+(call err code message)         ; Create error result with code and message
+(call is_ok result)             ; Check if result is ok -> bool
+(call is_err result)            ; Check if result is error -> bool
+(call unwrap result)            ; Extract value (panics if error) -> string
+(call unwrap_or result default) ; Extract value or return default -> string
+(call error_code result)        ; Get error code -> i32
+(call error_message result)     ; Get error message -> string
+```
+
+**File operations with Result type:**
+
+Some file operations have `_result` variants that return Result instead of panicking:
+
+```scheme
+(fn safe_read_file path string -> int
+  (set result result (call file_read_result path))
+  (set success bool (call is_ok result))
+  
+  (if success
+    (set content string (call unwrap result))
+    (call print content)
+    (ret 0))
+  
+  ; Handle error
+  (set msg string (call error_message result))
+  (call print "Error reading file:")
+  (call print msg)
+  (ret 1))
 ```
 
 ### TCP Networking
@@ -433,15 +550,42 @@ The compiler automatically selects the correct operation based on variable types
 
 ### JSON Operations
 
+**All JSON operations require `(import json)` from stdlib:**
+
 ```scheme
-(call json_parse text)           ; Parse JSON
-(call json_stringify obj)        ; To JSON string
-(call json_new_object)           ; Empty object
-(call json_new_array)            ; Empty array
-(call json_get obj key)          ; Get value
-(call json_set obj key value)    ; Set value
-(call json_push array value)     ; Add to array
-(call json_length obj)           ; Length -> i32
+(call parse text)                    ; Parse JSON string -> json
+(call stringify obj)                 ; Convert to JSON string -> string
+(call new_object)                    ; Create empty object -> json
+(call new_array)                     ; Create empty array -> json
+(call get obj key)                   ; Get value from object -> string
+(call set obj key value)             ; Set value in object
+(call has obj key)                   ; Check if key exists -> bool
+(call delete obj key)                ; Remove key from object
+(call push array value)              ; Add element to array
+(call length obj)                    ; Get length -> i32
+(call type json_val)                 ; Get JSON type -> string ("object", "array", "string", "number", "bool", "null")
+```
+
+**Example:**
+```scheme
+(module json_demo
+  (import json from data)
+  
+  (fn main -> int
+    ; Parse JSON
+    (set json_str string "{\"name\":\"Alice\",\"age\":30}")
+    (set obj json (call parse json_str))
+    
+    ; Modify JSON
+    (set new_obj json (call new_object))
+    (call set new_obj "status" "active")
+    (call set new_obj "count" "42")
+    
+    ; Convert back to string
+    (set result string (call stringify new_obj))
+    (call print result)                ; Prints: {"status":"active","count":"42"}
+    
+    (ret 0)))
 ```
 
 ### Array Operations

@@ -1,0 +1,33 @@
+(module fix_tests
+  ; Script to add main() functions to test files that use test-spec
+  ; This is a one-time conversion to make tests executable
+  
+  (fn main -> int
+    (call print "Test Fixer Tool")
+    (call print "===============")
+    (call print "")
+    (call print "This tool adds main() functions to test-spec files.")
+    (call print "")
+    (call print "Philosophy: Test-spec is metadata that documents tests,")
+    (call print "but actual test execution should happen in main().")
+    (call print "")
+    (call print "Manual conversion required:")
+    (call print "1. Keep test-spec declarations for documentation")
+    (call print "2. Add main() that calls the tested function")
+    (call print "3. Print results or return 0 on success")
+    (call print "")
+    (call print "Example conversion:")
+    (call print "")
+    (call print "  Before:")
+    (call print "    (test-spec add")
+    (call print "      (case \"adds numbers\" (input 2 3) (expect 5)))")
+    (call print "")
+    (call print "  After:")
+    (call print "    (test-spec add")
+    (call print "      (case \"adds numbers\" (input 2 3) (expect 5)))")
+    (call print "")
+    (call print "    (fn main -> int")
+    (call print "      (set result int (call add 2 3))")
+    (call print "      (call print result)  ; Should print 5")
+    (call print "      (ret 0))")
+    (ret 0)))

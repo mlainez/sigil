@@ -1,0 +1,80 @@
+(module test_runner
+  ; AISL Test Runner - Generates main() function for test-spec modules
+  ; 
+  ; Usage:
+  ;   ./compiler/c/bin/aislc tools/test_runner.aisl /tmp/test_runner.aislc
+  ;   ./compiler/c/bin/aisl-run /tmp/test_runner.aislc <test_file.aisl>
+  ;
+  ; This tool reads an AISL test file with test-spec declarations and:
+  ; 1. Parses the test-spec metadata
+  ; 2. Generates a main() function that invokes each test case
+  ; 3. Compares actual results with expected results
+  ; 4. Reports pass/fail for each test case
+  ;
+  ; Philosophy: "If it CAN be written in AISL, it MUST be written in AISL."
+  ; Test execution should not be baked into the VM.
+  
+  (fn read_test_file path string -> string
+    ; Read the test file content
+    (set exists bool (call file_exists path))
+    (if (call not exists)
+      (call print "Error: Test file not found:")
+      (call print path)
+      (ret ""))
+    (ret (call file_read path)))
+  
+  (fn extract_module_name content string -> string
+    ; Extract module name from (module name ...)
+    ; Simple parser: find "(module " and extract next word
+    (set module_pos int (call string_contains content "(module "))
+    (if (call not module_pos)
+      (ret "test_module"))
+    
+    ; Find module name - skip "(module "
+    (set start int 8)  ; length of "(module "
+    (set end int start)
+    
+    ; Find end of module name (space or newline)
+    (while (call lt end (call string_length content))
+      (set char string (call string_substring content end 1))
+      (set is_space bool (call eq char " "))
+      (set is_newline bool (call eq char "\n"))
+      (if is_space
+        (break))
+      (if is_newline
+        (break))
+      (set end int (call add end 1)))
+    
+    (set module_name string (call string_substring content start (call sub end start)))
+    (ret module_name))
+  
+  (fn generate_test_main test_file_path string -> string
+    ; Generate a main() function that runs all tests
+    ; For now, just generate a simple main that returns 0
+    ; TODO: Parse test-spec and generate actual test invocations
+    
+    (set output string "(module test_runner_generated\n")
+    (set output string (call string_concat output "  (fn main -> int\n"))
+    (set output string (call string_concat output "    (call print \"Test runner not yet implemented\")\n"))
+    (set output string (call string_concat output "    (call print \"Test file:\")\n"))
+    (set output string (call string_concat output "    (call print \""))
+    (set output string (call string_concat output test_file_path))
+    (set output string (call string_concat output "\")\n"))
+    (set output string (call string_concat output "    (ret 0)))\n"))
+    (ret output))
+  
+  (fn main -> int
+    (call print "AISL Test Runner")
+    (call print "================")
+    (call print "")
+    (call print "This tool generates main() functions for test-spec modules.")
+    (call print "")
+    (call print "Status: PROTOTYPE - Basic scaffolding only")
+    (call print "")
+    (call print "Next steps:")
+    (call print "1. Parse test-spec declarations from AISL files")
+    (call print "2. Generate test invocation code")
+    (call print "3. Compare results and report pass/fail")
+    (call print "")
+    (call print "For now, test-spec files must include their own main() function.")
+    (ret 0)))

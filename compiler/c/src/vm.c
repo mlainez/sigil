@@ -2525,242 +2525,8 @@ int vm_run(VM* vm) {
                 break;
             }
 
-            case OP_STR_SPLIT: {
-                Value delim = pop(vm);
-                Value str = pop(vm);
-                const char* s = str.data.string_val;
-                const char* d = delim.data.string_val;
-                size_t delim_len = strlen(d);
-                
-                // Create array to hold split results
-                Array* arr = malloc(sizeof(Array));
-                arr->count = 0;
-                arr->capacity = 8;
-                arr->items = malloc(sizeof(Value) * arr->capacity);
-                
-                if (delim_len == 0) {
-                    // Empty delimiter: return array with original string
-                    Value elem = {.type = VAL_STRING, .data.string_val = strdup(s)};
-                    arr->items[arr->count++] = elem;
-                } else {
-                    const char* start = s;
-                    const char* found;
-                    while ((found = strstr(start, d)) != NULL) {
-                        // Found delimiter
-                        size_t len = found - start;
-                        char* part = malloc(len + 1);
-                        memcpy(part, start, len);
-                        part[len] = '\0';
-                        
-                        if (arr->count >= arr->capacity) {
-                            arr->capacity *= 2;
-                            arr->items = realloc(arr->items, sizeof(Value) * arr->capacity);
-                        }
-                        Value elem = {.type = VAL_STRING, .data.string_val = part};
-                        arr->items[arr->count++] = elem;
-                        start = found + delim_len;
-                    }
-                    // Add remaining part
-                    char* part = strdup(start);
-                    if (arr->count >= arr->capacity) {
-                        arr->capacity *= 2;
-                        arr->items = realloc(arr->items, sizeof(Value) * arr->capacity);
-                    }
-                    Value elem = {.type = VAL_STRING, .data.string_val = part};
-                    arr->items[arr->count++] = elem;
-                }
-                
-                free(str.data.string_val);
-                free(delim.data.string_val);
-                Value result = {.type = VAL_ARRAY, .data.ptr_val = arr};
-                push(vm, result);
-                vm->ip++;
-                break;
-            }
-
-            case OP_STR_TRIM: {
-                Value str = pop(vm);
-                const char* s = str.data.string_val;
-                size_t len = strlen(s);
-                
-                // Find start (skip leading whitespace)
-                size_t start = 0;
-                while (start < len && isspace((unsigned char)s[start])) {
-                    start++;
-                }
-                
-                // Find end (skip trailing whitespace)
-                size_t end = len;
-                while (end > start && isspace((unsigned char)s[end - 1])) {
-                    end--;
-                }
-                
-                // Create trimmed string
-                size_t trimmed_len = end - start;
-                char* trimmed = malloc(trimmed_len + 1);
-                memcpy(trimmed, s + start, trimmed_len);
-                trimmed[trimmed_len] = '\0';
-                
-                free(str.data.string_val);
-                Value result = {.type = VAL_STRING, .data.string_val = trimmed};
-                push(vm, result);
-                vm->ip++;
-                break;
-            }
-
-            case OP_STR_CONTAINS: {
-                Value needle = pop(vm);
-                Value haystack = pop(vm);
-                const char* h = haystack.data.string_val;
-                const char* n = needle.data.string_val;
-                
-                bool found = (strstr(h, n) != NULL);
-                
-                free(haystack.data.string_val);
-                free(needle.data.string_val);
-                Value result = {.type = VAL_BOOL, .data.bool_val = found};
-                push(vm, result);
-                vm->ip++;
-                break;
-            }
-
-            case OP_STR_REPLACE: {
-                Value new_str = pop(vm);
-                Value old_str = pop(vm);
-                Value str = pop(vm);
-                const char* s = str.data.string_val;
-                const char* old = old_str.data.string_val;
-                const char* new = new_str.data.string_val;
-                
-                size_t old_len = strlen(old);
-                size_t new_len = strlen(new);
-                
-                if (old_len == 0) {
-                    // Cannot replace empty string, return original
-                    Value result = {.type = VAL_STRING, .data.string_val = strdup(s)};
-                    free(str.data.string_val);
-                    free(old_str.data.string_val);
-                    free(new_str.data.string_val);
-                    push(vm, result);
-                    vm->ip++;
-                    break;
-                }
-                
-                // Count occurrences
-                int count = 0;
-                const char* p = s;
-                while ((p = strstr(p, old)) != NULL) {
-                    count++;
-                    p += old_len;
-                }
-                
-                // Allocate result buffer
-                size_t result_len = strlen(s) + count * (new_len - old_len);
-                char* result_str = malloc(result_len + 1);
-                char* dst = result_str;
-                const char* src = s;
-                
-                // Perform replacements
-                const char* found;
-                while ((found = strstr(src, old)) != NULL) {
-                    size_t len = found - src;
-                    memcpy(dst, src, len);
-                    dst += len;
-                    memcpy(dst, new, new_len);
-                    dst += new_len;
-                    src = found + old_len;
-                }
-                // Copy remaining
-                strcpy(dst, src);
-                
-                free(str.data.string_val);
-                free(old_str.data.string_val);
-                free(new_str.data.string_val);
-                Value result = {.type = VAL_STRING, .data.string_val = result_str};
-                push(vm, result);
-                vm->ip++;
-                break;
-            }
-
-            case OP_STR_STARTS_WITH: {
-                Value suffix_val = pop(vm);
-                Value str_val = pop(vm);
-                char* str = str_val.data.string_val;
-                char* prefix = suffix_val.data.string_val;
-                
-                size_t str_len = strlen(str);
-                size_t prefix_len = strlen(prefix);
-                
-                bool result = false;
-                if (prefix_len <= str_len) {
-                    result = (strncmp(str, prefix, prefix_len) == 0);
-                }
-                
-                free(str_val.data.string_val);
-                free(suffix_val.data.string_val);
-                Value bool_result = {.type = VAL_BOOL, .data.bool_val = result};
-                push(vm, bool_result);
-                vm->ip++;
-                break;
-            }
-
-            case OP_STR_ENDS_WITH: {
-                Value suffix_val = pop(vm);
-                Value str_val = pop(vm);
-                char* str = str_val.data.string_val;
-                char* suffix = suffix_val.data.string_val;
-                
-                size_t str_len = strlen(str);
-                size_t suffix_len = strlen(suffix);
-                
-                bool result = false;
-                if (suffix_len <= str_len) {
-                    result = (strcmp(str + str_len - suffix_len, suffix) == 0);
-                }
-                
-                free(str_val.data.string_val);
-                free(suffix_val.data.string_val);
-                Value bool_result = {.type = VAL_BOOL, .data.bool_val = result};
-                push(vm, bool_result);
-                vm->ip++;
-                break;
-            }
-
-            case OP_STR_TO_UPPER: {
-                Value str_val = pop(vm);
-                char* str = str_val.data.string_val;
-                size_t len = strlen(str);
-                
-                char* result_str = malloc(len + 1);
-                for (size_t i = 0; i < len; i++) {
-                    result_str[i] = toupper((unsigned char)str[i]);
-                }
-                result_str[len] = '\0';
-                
-                free(str_val.data.string_val);
-                Value result = {.type = VAL_STRING, .data.string_val = result_str};
-                push(vm, result);
-                vm->ip++;
-                break;
-            }
-
-            case OP_STR_TO_LOWER: {
-                Value str_val = pop(vm);
-                char* str = str_val.data.string_val;
-                size_t len = strlen(str);
-                
-                char* result_str = malloc(len + 1);
-                for (size_t i = 0; i < len; i++) {
-                    result_str[i] = tolower((unsigned char)str[i]);
-                }
-                result_str[len] = '\0';
-                
-                free(str_val.data.string_val);
-                Value result = {.type = VAL_STRING, .data.string_val = result_str};
-                push(vm, result);
-                vm->ip++;
-                break;
-            }
+            // String operations (OP_STR_SPLIT, OP_STR_TRIM, etc.) REMOVED
+            // Now implemented in stdlib/core/string_utils.aisl
 
             case OP_ARRAY_NEW: {
                 Value cap_val = pop(vm);
@@ -3058,235 +2824,38 @@ int vm_run(VM* vm) {
                 break;
             }
 
+            case OP_MAP_KEYS: {
+                Value map_val = pop(vm);
+                Map* map = (Map*)map_val.data.ptr_val;
+                
+                // Create array to hold keys
+                Array* keys_array = malloc(sizeof(Array));
+                keys_array->capacity = map->size > 0 ? map->size : 1;
+                keys_array->count = 0;
+                keys_array->items = malloc(sizeof(Value) * keys_array->capacity);
+                
+                // Iterate through map buckets and collect keys
+                for (uint32_t i = 0; i < map->bucket_count; i++) {
+                    MapEntry* entry = map->buckets[i];
+                    while (entry != NULL) {
+                        Value key_val = {.type = VAL_STRING, .data.string_val = strdup(entry->key)};
+                        keys_array->items[keys_array->count++] = key_val;
+                        entry = entry->next;
+                    }
+                }
+                
+                Value result = {.type = VAL_ARRAY, .data.ptr_val = keys_array};
+                push(vm, result);
+                vm->ip++;
+                break;
+            }
+
             // ============================================
             // JSON OPERATIONS
             // ============================================
 
-            case OP_JSON_PARSE: {
-                Value str_val = pop(vm);
-                const char* json_str = str_val.data.string_val;
-                JsonValue* json = json_parse(json_str);
-                free(str_val.data.string_val);
-                
-                if (!json) {
-                    // Parse error - return null JSON
-                    json = json_new(JSON_NULL);
-                }
-                
-                Value result = {.type = VAL_JSON, .data.ptr_val = json};
-                push(vm, result);
-                vm->ip++;
-                break;
-            }
-
-            case OP_JSON_STRINGIFY: {
-                Value json_val = pop(vm);
-                JsonValue* json = (JsonValue*)json_val.data.ptr_val;
-                char* json_str = json_stringify(json);
-                Value result = {.type = VAL_STRING, .data.string_val = json_str};
-                push(vm, result);
-                vm->ip++;
-                break;
-            }
-
-            case OP_JSON_NEW_OBJECT: {
-                JsonValue* json = json_new(JSON_OBJECT);
-                Value result = {.type = VAL_JSON, .data.ptr_val = json};
-                push(vm, result);
-                vm->ip++;
-                break;
-            }
-
-            case OP_JSON_NEW_ARRAY: {
-                JsonValue* json = json_new(JSON_ARRAY);
-                Value result = {.type = VAL_JSON, .data.ptr_val = json};
-                push(vm, result);
-                vm->ip++;
-                break;
-            }
-
-            case OP_JSON_GET: {
-                Value key_val = pop(vm);
-                Value json_val = pop(vm);
-                JsonValue* json = (JsonValue*)json_val.data.ptr_val;
-                
-                JsonValue* result_json = NULL;
-                if (json->type == JSON_OBJECT && key_val.type == VAL_STRING) {
-                    result_json = json_object_get(json, key_val.data.string_val);
-                    free(key_val.data.string_val);
-                } else if (json->type == JSON_ARRAY && key_val.type == VAL_I32) {
-                    result_json = json_array_get(json, (uint32_t)key_val.data.i32_val);
-                }
-                
-                // Convert JSON value to AISL Value
-                Value result = {.type = VAL_UNIT};
-                if (result_json) {
-                    switch (result_json->type) {
-                        case JSON_NULL:
-                            result.type = VAL_UNIT;
-                            break;
-                        case JSON_BOOL:
-                            result.type = VAL_BOOL;
-                            result.data.bool_val = result_json->data.bool_val;
-                            break;
-                        case JSON_NUMBER: {
-                            double num = result_json->data.number_val;
-                            // If it's a whole number, return as I32
-                            if (num == (int32_t)num && num >= INT32_MIN && num <= INT32_MAX) {
-                                result.type = VAL_I32;
-                                result.data.i32_val = (int32_t)num;
-                            } else {
-                                result.type = VAL_F64;
-                                result.data.f64_val = num;
-                            }
-                            break;
-                        }
-                        case JSON_STRING:
-                            result.type = VAL_STRING;
-                            result.data.string_val = strdup(result_json->data.string_val);
-                            break;
-                        case JSON_ARRAY:
-                        case JSON_OBJECT:
-                            result.type = VAL_JSON;
-                            result.data.ptr_val = result_json;
-                            break;
-                    }
-                }
-                push(vm, result);
-                vm->ip++;
-                break;
-            }
-
-            case OP_JSON_SET: {
-                Value val = pop(vm);
-                Value key_val = pop(vm);
-                Value json_val = pop(vm);
-                JsonValue* json = (JsonValue*)json_val.data.ptr_val;
-                
-                JsonValue* json_value = NULL;
-                switch (val.type) {
-                    case VAL_UNIT:
-                        json_value = json_new(JSON_NULL);
-                        break;
-                    case VAL_BOOL:
-                        json_value = json_new(JSON_BOOL);
-                        json_value->data.bool_val = val.data.bool_val;
-                        break;
-                    case VAL_INT:
-                    case VAL_I8:
-                    case VAL_I16:
-                    case VAL_I32:
-                        json_value = json_new(JSON_NUMBER);
-                        json_value->data.number_val = (double)val.data.i32_val;
-                        break;
-                    case VAL_I64:
-                        json_value = json_new(JSON_NUMBER);
-                        json_value->data.number_val = (double)val.data.i64_val;
-                        break;
-                    case VAL_F32:
-                        json_value = json_new(JSON_NUMBER);
-                        json_value->data.number_val = (double)val.data.f32_val;
-                        break;
-                    case VAL_F64:
-                        json_value = json_new(JSON_NUMBER);
-                        json_value->data.number_val = val.data.f64_val;
-                        break;
-                    case VAL_STRING:
-                        json_value = json_new(JSON_STRING);
-                        json_value->data.string_val = val.data.string_val;
-                        break;
-                    case VAL_JSON:
-                        json_value = (JsonValue*)val.data.ptr_val;
-                        break;
-                    default:
-                        json_value = json_new(JSON_NULL);
-                        break;
-                }
-                
-                if (json->type == JSON_OBJECT && key_val.type == VAL_STRING) {
-                    json_object_set(json, key_val.data.string_val, json_value);
-                    free(key_val.data.string_val);
-                }
-                
-                push(vm, json_val);
-                vm->ip++;
-                break;
-            }
-
-            case OP_JSON_PUSH: {
-                Value val = pop(vm);
-                Value json_val = pop(vm);
-                JsonValue* json = (JsonValue*)json_val.data.ptr_val;
-                
-                JsonValue* json_value = NULL;
-                switch (val.type) {
-                    case VAL_INT:
-                    case VAL_I8:
-                    case VAL_I16:
-                    case VAL_I32:
-                        json_value = json_new(JSON_NUMBER);
-                        json_value->data.number_val = (double)val.data.i32_val;
-                        break;
-                    case VAL_I64:
-                        json_value = json_new(JSON_NUMBER);
-                        json_value->data.number_val = (double)val.data.i64_val;
-                        break;
-                    case VAL_F32:
-                    case VAL_F64:
-                        json_value = json_new(JSON_NUMBER);
-                        json_value->data.number_val = val.data.f64_val;
-                        break;
-                    case VAL_STRING:
-                        json_value = json_new(JSON_STRING);
-                        json_value->data.string_val = val.data.string_val;
-                        break;
-                    case VAL_BOOL:
-                        json_value = json_new(JSON_BOOL);
-                        json_value->data.bool_val = val.data.bool_val;
-                        break;
-                    case VAL_JSON:
-                        json_value = (JsonValue*)val.data.ptr_val;
-                        break;
-                    default:
-                        json_value = json_new(JSON_NULL);
-                        break;
-                }
-                
-                if (json->type == JSON_ARRAY) {
-                    json_array_push(json, json_value);
-                }
-                
-                push(vm, json_val);
-                vm->ip++;
-                break;
-            }
-
-            case OP_JSON_LENGTH: {
-                Value json_val = pop(vm);
-                JsonValue* json = (JsonValue*)json_val.data.ptr_val;
-                Value result = {.type = VAL_I32, .data.i32_val = (int32_t)json->length};
-                push(vm, result);
-                vm->ip++;
-                break;
-            }
-
-            case OP_JSON_TYPE: {
-                Value json_val = pop(vm);
-                JsonValue* json = (JsonValue*)json_val.data.ptr_val;
-                const char* type_str = "unknown";
-                switch (json->type) {
-                    case JSON_NULL: type_str = "null"; break;
-                    case JSON_BOOL: type_str = "bool"; break;
-                    case JSON_NUMBER: type_str = "number"; break;
-                    case JSON_STRING: type_str = "string"; break;
-                    case JSON_ARRAY: type_str = "array"; break;
-                    case JSON_OBJECT: type_str = "object"; break;
-                }
-                Value result = {.type = VAL_STRING, .data.string_val = strdup(type_str)};
-                push(vm, result);
-                vm->ip++;
-                break;
-            }
+            // JSON operations (OP_JSON_PARSE, OP_JSON_STRINGIFY, etc.) REMOVED
+            // Now implemented in stdlib/data/json.aisl using map primitives
 
             case OP_HTTP_GET: {
                 Value url_val = pop(vm);
@@ -3547,25 +3116,8 @@ int vm_run(VM* vm) {
                 break;
             }
 
-            case OP_BASE64_ENCODE: {
-                Value input_val = pop(vm);
-                char* encoded = base64_encode(input_val.data.string_val);
-                free(input_val.data.string_val);
-                Value result = {.type = VAL_STRING, .data.string_val = encoded};
-                push(vm, result);
-                vm->ip++;
-                break;
-            }
-
-            case OP_BASE64_DECODE: {
-                Value input_val = pop(vm);
-                char* decoded = base64_decode(input_val.data.string_val);
-                free(input_val.data.string_val);
-                Value result = {.type = VAL_STRING, .data.string_val = decoded};
-                push(vm, result);
-                vm->ip++;
-                break;
-            }
+            // Base64 operations (OP_BASE64_ENCODE, OP_BASE64_DECODE) REMOVED
+            // Now implemented in stdlib/data/base64.aisl using pure AISL
 
             case OP_TIME_NOW: {
                 int64_t now = time_now();
@@ -4410,121 +3962,9 @@ int vm_run(VM* vm) {
             // ============================================
             // RESULT TYPE OPERATIONS
             // ============================================
-
-            case OP_RESULT_OK: {
-                // Create Ok result from stack value
-                Value val = pop(vm);
-                Result* result = malloc(sizeof(Result));
-                result->is_ok = true;
-                result->data.ok_value = val;
-                
-                Value result_val = {.type = VAL_RESULT, .data.ptr_val = result};
-                push(vm, result_val);
-                vm->ip++;
-                break;
-            }
-
-            case OP_RESULT_ERR: {
-                // Create Err result from error code and message
-                Value msg_val = pop(vm);
-                Value code_val = pop(vm);
-                
-                Result* result = malloc(sizeof(Result));
-                result->is_ok = false;
-                result->data.err.code = code_val.data.i32_val;
-                result->data.err.message = msg_val.data.string_val;
-                
-                Value result_val = {.type = VAL_RESULT, .data.ptr_val = result};
-                push(vm, result_val);
-                vm->ip++;
-                break;
-            }
-
-            case OP_RESULT_IS_OK: {
-                // Check if result is Ok
-                Value result_val = pop(vm);
-                Result* result = (Result*)result_val.data.ptr_val;
-                
-                Value is_ok = {.type = VAL_BOOL, .data.bool_val = result->is_ok};
-                push(vm, is_ok);
-                vm->ip++;
-                break;
-            }
-
-            case OP_RESULT_IS_ERR: {
-                // Check if result is Err
-                Value result_val = pop(vm);
-                Result* result = (Result*)result_val.data.ptr_val;
-                
-                Value is_err = {.type = VAL_BOOL, .data.bool_val = !result->is_ok};
-                push(vm, is_err);
-                vm->ip++;
-                break;
-            }
-
-            case OP_RESULT_UNWRAP: {
-                // Extract value from Ok, panic on Err
-                Value result_val = pop(vm);
-                Result* result = (Result*)result_val.data.ptr_val;
-                
-                if (!result->is_ok) {
-                    fprintf(stderr, "Runtime error: unwrap called on Err result\n");
-                    fprintf(stderr, "Error code: %d\n", result->data.err.code);
-                    fprintf(stderr, "Error message: %s\n", result->data.err.message);
-                    return 1;
-                }
-                
-                push(vm, result->data.ok_value);
-                vm->ip++;
-                break;
-            }
-
-            case OP_RESULT_UNWRAP_OR: {
-                // Extract value or return default
-                Value default_val = pop(vm);
-                Value result_val = pop(vm);
-                Result* result = (Result*)result_val.data.ptr_val;
-                
-                if (result->is_ok) {
-                    push(vm, result->data.ok_value);
-                } else {
-                    push(vm, default_val);
-                }
-                vm->ip++;
-                break;
-            }
-
-            case OP_RESULT_ERROR_CODE: {
-                // Get error code from Err
-                Value result_val = pop(vm);
-                Result* result = (Result*)result_val.data.ptr_val;
-                
-                if (result->is_ok) {
-                    fprintf(stderr, "Runtime error: error_code called on Ok result\n");
-                    return 1;
-                }
-                
-                Value code = {.type = VAL_I32, .data.i32_val = result->data.err.code};
-                push(vm, code);
-                vm->ip++;
-                break;
-            }
-
-            case OP_RESULT_ERROR_MSG: {
-                // Get error message from Err
-                Value result_val = pop(vm);
-                Result* result = (Result*)result_val.data.ptr_val;
-                
-                if (result->is_ok) {
-                    fprintf(stderr, "Runtime error: error_message called on Ok result\n");
-                    return 1;
-                }
-                
-                Value msg = {.type = VAL_STRING, .data.string_val = strdup(result->data.err.message)};
-                push(vm, msg);
-                vm->ip++;
-                break;
-            }
+            
+            // Result type operations (OP_RESULT_OK, OP_RESULT_ERR, etc.) REMOVED
+            // Now implemented in stdlib/core/result.aisl using map primitives
 
             case OP_FILE_READ_RESULT: {
                 // Read file with error handling
@@ -4913,18 +4353,7 @@ void vm_disassemble(BytecodeProgram* program) {
             case OP_STR_FROM_F64:
                 printf("STR_FROM_F64\n");
                 break;
-            case OP_STR_SPLIT:
-                printf("STR_SPLIT\n");
-                break;
-            case OP_STR_TRIM:
-                printf("STR_TRIM\n");
-                break;
-            case OP_STR_CONTAINS:
-                printf("STR_CONTAINS\n");
-                break;
-            case OP_STR_REPLACE:
-                printf("STR_REPLACE\n");
-                break;
+            // String operations removed (STR_SPLIT, STR_TRIM, STR_CONTAINS, STR_REPLACE, etc.)
             case OP_ARRAY_NEW:
                 printf("ARRAY_NEW\n");
                 break;

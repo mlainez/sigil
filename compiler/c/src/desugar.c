@@ -290,10 +290,16 @@ static Expr* desugar_expr_with_context(Expr* expr, LoopContext* ctx) {
             fprintf(stderr, "Error: loop must be in statement context\n");
             exit(1);
             
-        case EXPR_IF:
-            // Can't return a statement list from here, caller must handle
-            fprintf(stderr, "Error: if statement must be in statement context\n");
-            exit(1);
+        case EXPR_IF: {
+            // Recursively desugar the condition and branches, but keep the if structure
+            Expr* new_if = malloc(sizeof(Expr));
+            new_if->kind = EXPR_IF;
+            new_if->type = expr->type;
+            new_if->data.if_expr.cond = desugar_expr_with_context(expr->data.if_expr.cond, ctx);
+            new_if->data.if_expr.then_expr = desugar_expr_with_context(expr->data.if_expr.then_expr, ctx);
+            new_if->data.if_expr.else_expr = desugar_expr_with_context(expr->data.if_expr.else_expr, ctx);
+            return new_if;
+        }
             
         case EXPR_BREAK:
             return desugar_break(ctx);
@@ -387,15 +393,10 @@ static ExprList* desugar_statement_list_with_context(ExprList* stmts, LoopContex
             }
             
         } else if (stmt->kind == EXPR_IF) {
-            // If statement expands to multiple statements
-            ExprList* desugared = desugar_if(stmt, ctx);
-            
-            // Append all desugared statements
-            ExprList* d = desugared;
-            while (d) {
-                append_expr(&result, d->expr);
-                d = d->next;
-            }
+            // DON'T desugar if - let the compiler handle it directly!
+            // The compiler has a native compile_if() function that works correctly.
+            Expr* desugared = desugar_expr_with_context(stmt, ctx);
+            append_expr(&result, desugared);
             
         } else {
             // Regular statement - desugar recursively

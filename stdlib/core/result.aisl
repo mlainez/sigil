@@ -1,0 +1,41 @@
+(module result
+  (fn ok value string -> map
+    (set result map (call map_new))
+    (set result map (call map_set result "ok" true))
+    (set result map (call map_set result "value" value))
+    (ret result))
+  
+  (fn err error string -> map
+    (set result map (call map_new))
+    (set result map (call map_set result "ok" false))
+    (set result map (call map_set result "error" error))
+    (ret result))
+  
+  (fn is_ok result map -> bool
+    (ret (call map_get result "ok")))
+  
+  (fn is_err result map -> bool
+    (set ok_val bool (call map_get result "ok"))
+    (set false_val bool false)
+    (if ok_val
+      (ret false_val))
+    (set true_val bool true)
+    (ret true_val))
+  
+  (fn unwrap result map -> string
+    (set ok_val bool (call is_ok result))
+    (set result_val string "")
+    (if ok_val
+      (set result_val string (call map_get result "value"))
+      (ret result_val))
+    (call print "PANIC: unwrap called on err result\n")
+    (ret result_val))
+  
+  (fn unwrap_or result map default string -> string
+    (set ok_val bool (call is_ok result))
+    (if ok_val
+      (ret (call map_get result "value")))
+    (ret default))
+  
+  (fn error_message result map -> string
+    (ret (call map_get result "error"))))

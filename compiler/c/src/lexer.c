@@ -235,10 +235,12 @@ static Token read_identifier(Lexer* lexer) {
     else if (strcmp(str, "assert-fail") == 0) kind = TOK_ASSERT_FAIL;
     else if (strcmp(str, "match-result") == 0) kind = TOK_MATCH_RESULT;
     else if (strcmp(str, "match-option") == 0) kind = TOK_MATCH_OPTION;
-    else if (strcmp(str, "ok") == 0) kind = TOK_OK;
-    else if (strcmp(str, "err") == 0) kind = TOK_ERR;
-    else if (strcmp(str, "some") == 0) kind = TOK_SOME;
-    else if (strcmp(str, "none") == 0) kind = TOK_NONE;
+    // NOTE: ok, err, some, none are NOT keywords - they're stdlib functions!
+    // Removed to allow them to be used as function names.
+    // else if (strcmp(str, "ok") == 0) kind = TOK_OK;
+    // else if (strcmp(str, "err") == 0) kind = TOK_ERR;
+    // else if (strcmp(str, "some") == 0) kind = TOK_SOME;
+    // else if (strcmp(str, "none") == 0) kind = TOK_NONE;
 
     Token tok = make_token(kind, line, column);
     if (kind == TOK_IDENTIFIER) {

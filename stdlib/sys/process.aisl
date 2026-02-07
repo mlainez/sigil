@@ -1,0 +1,21 @@
+(module process
+  (fn spawn command string args array -> string
+    (ret (call process_spawn command args)))
+  
+  (fn exec command string args array -> int
+    (ret (call process_exec command args)))
+  
+  (fn wait proc string -> int
+    (ret (call process_wait proc)))
+  
+  (fn kill proc string signal int -> bool
+    (ret (call process_kill proc signal)))
+  
+  (fn pipe -> array
+    (ret (call process_pipe)))
+  
+  (fn read proc string -> string
+    (ret (call process_read proc)))
+  
+  (fn write proc string data string -> bool
+    (ret (call process_write proc data))))

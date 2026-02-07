@@ -1,0 +1,33 @@
+(module sqlite
+  (fn open path string -> string
+    (ret (call sqlite_open path)))
+  
+  (fn close db string -> int
+    (call sqlite_close db)
+    (ret 0))
+  
+  (fn exec db string sql string -> bool
+    (ret (call sqlite_exec db sql)))
+  
+  (fn query db string sql string -> array
+    (ret (call sqlite_query db sql)))
+  
+  (fn prepare db string sql string -> string
+    (ret (call sqlite_prepare db sql)))
+  
+  (fn bind stmt string index int value string -> bool
+    (ret (call sqlite_bind stmt index value)))
+  
+  (fn step stmt string -> bool
+    (ret (call sqlite_step stmt)))
+  
+  (fn column stmt string index int -> string
+    (ret (call sqlite_column stmt index)))
+  
+  (fn reset stmt string -> int
+    (call sqlite_reset stmt)
+    (ret 0))
+  
+  (fn finalize stmt string -> int
+    (call sqlite_finalize stmt)
+    (ret 0)))

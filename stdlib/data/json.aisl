@@ -1,0 +1,232 @@
+(module json
+  (fn skip_whitespace text string pos int -> int
+    (set len int (call string_length text))
+    (while (call lt pos len)
+      (set ch int (call string_get text pos))
+      (set is_space bool (call eq ch 32))
+      (set is_tab bool (call eq ch 9))
+      (set is_newline bool (call eq ch 10))
+      (set is_cr bool (call eq ch 13))
+      (set is_ws bool (call or is_space is_tab))
+      (set is_ws bool (call or is_ws is_newline))
+      (set is_ws bool (call or is_ws is_cr))
+      (ifnot is_ws
+        (break))
+      (set pos int (call add pos 1)))
+    (ret pos))
+  
+  (fn parse_string text string pos int -> map
+    (set len int (call string_length text))
+    (set result string "")
+    (set pos int (call add pos 1))
+    
+    (while (call lt pos len)
+      (set ch int (call string_get text pos))
+      (set is_quote bool (call eq ch 34))
+      (if is_quote
+        (set out map (call map_new))
+        (set out map (call map_set out "value" result))
+        (set out map (call map_set out "pos" (call add pos 1)))
+        (ret out))
+      
+      (set is_backslash bool (call eq ch 92))
+      (if is_backslash
+        (set pos int (call add pos 1))
+        (set next_ch int (call string_get text pos))
+        (set is_n bool (call eq next_ch 110))
+        (if is_n
+          (set ch_str string "\n")
+          (set result string (call string_concat result ch_str))))
+      
+      (ifnot is_backslash
+        (set ch_str string (call string_from_i64 ch))
+        (set result string (call string_concat result ch_str)))
+      
+      (set pos int (call add pos 1)))
+    
+    (set err map (call map_new))
+    (set err map (call map_set err "error" "unterminated string"))
+    (ret err))
+  
+  (fn parse_number text string pos int -> map
+    (set len int (call string_length text))
+    (set num_str string "")
+    (set start int pos)
+    
+    (while (call lt pos len)
+      (set ch int (call string_get text pos))
+      (set is_digit bool (call and (call ge ch 48) (call le ch 57)))
+      (set is_minus bool (call eq ch 45))
+      (set is_dot bool (call eq ch 46))
+      (set is_num_ch bool (call or is_digit is_minus))
+      (set is_num_ch bool (call or is_num_ch is_dot))
+      
+      (ifnot is_num_ch
+        (break))
+      
+      (set ch_str string (call string_from_i64 ch))
+      (set num_str string (call string_concat num_str ch_str))
+      (set pos int (call add pos 1)))
+    
+    (set out map (call map_new))
+    (set out map (call map_set out "value" num_str))
+    (set out map (call map_set out "pos" pos))
+    (ret out))
+  
+  (fn parse_value text string pos int -> map
+    (set pos int (call skip_whitespace text pos))
+    (set ch int (call string_get text pos))
+    
+    (set is_quote bool (call eq ch 34))
+    (if is_quote
+      (ret (call parse_string text pos)))
+    
+    (set is_lbrace bool (call eq ch 123))
+    (if is_lbrace
+      (ret (call parse_object text pos)))
+    
+    (set is_lbracket bool (call eq ch 91))
+    (if is_lbracket
+      (ret (call parse_array text pos)))
+    
+    (set is_digit bool (call and (call ge ch 48) (call le ch 57)))
+    (set is_minus bool (call eq ch 45))
+    (set is_num_start bool (call or is_digit is_minus))
+    (if is_num_start
+      (ret (call parse_number text pos)))
+    
+    (set is_t bool (call eq ch 116))
+    (if is_t
+      (set out map (call map_new))
+      (set out map (call map_set out "value" "true"))
+      (set out map (call map_set out "pos" (call add pos 4)))
+      (ret out))
+    
+    (set is_f bool (call eq ch 102))
+    (if is_f
+      (set out map (call map_new))
+      (set out map (call map_set out "value" "false"))
+      (set out map (call map_set out "pos" (call add pos 5)))
+      (ret out))
+    
+    (set is_n bool (call eq ch 110))
+    (if is_n
+      (set out map (call map_new))
+      (set out map (call map_set out "value" "null"))
+      (set out map (call map_set out "pos" (call add pos 4)))
+      (ret out))
+    
+    (set err map (call map_new))
+    (set err map (call map_set err "error" "unexpected character"))
+    (ret err))
+  
+  (fn parse_object text string pos int -> map
+    (set obj map (call map_new))
+    (set pos int (call add pos 1))
+    (set pos int (call skip_whitespace text pos))
+    
+    (set ch int (call string_get text pos))
+    (set is_rbrace bool (call eq ch 125))
+    (if is_rbrace
+      (set out map (call map_new))
+      (set out map (call map_set out "value" obj))
+      (set out map (call map_set out "pos" (call add pos 1)))
+      (ret out))
+    
+    (loop
+      (set pos int (call skip_whitespace text pos))
+      (set key_result map (call parse_string text pos))
+      (set key string (call map_get key_result "value"))
+      (set pos int (call map_get key_result "pos"))
+      
+      (set pos int (call skip_whitespace text pos))
+      (set pos int (call add pos 1))
+      
+      (set val_result map (call parse_value text pos))
+      (set val string (call map_get val_result "value"))
+      (set pos int (call map_get val_result "pos"))
+      
+      (set obj map (call map_set obj key val))
+      
+      (set pos int (call skip_whitespace text pos))
+      (set ch int (call string_get text pos))
+      (set is_comma bool (call eq ch 44))
+      (if is_comma
+        (set pos int (call add pos 1)))
+      
+      (set is_rbrace bool (call eq ch 125))
+      (if is_rbrace
+        (set out map (call map_new))
+        (set out map (call map_set out "value" obj))
+        (set out map (call map_set out "pos" (call add pos 1)))
+        (ret out)))
+    
+    (set err map (call map_new))
+    (set err map (call map_set err "error" "unterminated object"))
+    (ret err))
+  
+  (fn parse_array text string pos int -> map
+    (set arr array (call array_new 10))
+    (set pos int (call add pos 1))
+    (set pos int (call skip_whitespace text pos))
+    
+    (set ch int (call string_get text pos))
+    (set is_rbracket bool (call eq ch 93))
+    (if is_rbracket
+      (set out map (call map_new))
+      (set out map (call map_set out "value" arr))
+      (set out map (call map_set out "pos" (call add pos 1)))
+      (ret out))
+    
+    (loop
+      (set val_result map (call parse_value text pos))
+      (set val string (call map_get val_result "value"))
+      (set pos int (call map_get val_result "pos"))
+      
+      (call array_push arr val)
+      
+      (set pos int (call skip_whitespace text pos))
+      (set ch int (call string_get text pos))
+      (set is_comma bool (call eq ch 44))
+      (if is_comma
+        (set pos int (call add pos 1)))
+      
+      (set is_rbracket bool (call eq ch 93))
+      (if is_rbracket
+        (set out map (call map_new))
+        (set out map (call map_set out "value" arr))
+        (set out map (call map_set out "pos" (call add pos 1)))
+        (ret out)))
+    
+    (set err map (call map_new))
+    (set err map (call map_set err "error" "unterminated array"))
+    (ret err))
+  
+  (fn json_parse text string -> map
+    (set result map (call parse_value text 0))
+    (ret (call map_get result "value")))
+  
+  (fn json_stringify value map -> string
+    (set result string "{")
+    (set keys array (call map_keys value))
+    (set len int (call array_length keys))
+    (set i int 0)
+    
+    (while (call lt i len)
+      (set key string (call array_get keys i))
+      (set val string (call map_get value key))
+      
+      (set result string (call string_concat result "\""))
+      (set result string (call string_concat result key))
+      (set result string (call string_concat result "\":\""))
+      (set result string (call string_concat result val))
+      (set result string (call string_concat result "\""))
+      
+      (set is_last bool (call eq i (call sub len 1)))
+      (ifnot is_last
+        (set result string (call string_concat result ",")))
+      
+      (set i int (call add i 1)))
+    
+    (set result string (call string_concat result "}"))
+    (ret result)))

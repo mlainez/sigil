@@ -1,0 +1,13 @@
+(module websocket
+  (fn connect url string -> string
+    (ret (call ws_connect url)))
+  
+  (fn send ws string message string -> bool
+    (ret (call ws_send ws message)))
+  
+  (fn receive ws string -> string
+    (ret (call ws_receive ws)))
+  
+  (fn close ws string -> int
+    (call ws_close ws)
+    (ret 0)))

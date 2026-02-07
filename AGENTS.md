@@ -424,6 +424,225 @@ Generate these - the compiler desugars them to Core:
 
 ---
 
+## Standard Library Modules
+
+**CRITICAL: Many operations that were previously built-in opcodes are now implemented in stdlib modules.**
+
+AISL follows the philosophy: **"If it CAN be written in AISL, it MUST be written in AISL."** As of 2026-02-07, the following operations require importing stdlib modules:
+
+### Operations That Require Stdlib Import
+
+| Operation | Old (❌ Removed) | New (✅ Use This) |
+|-----------|------------------|-------------------|
+| **String operations** | `(call string_split ...)` | `(import string_utils)` then `(call split ...)` |
+| | `(call string_trim ...)` | `(import string_utils)` then `(call trim ...)` |
+| | `(call string_contains ...)` | `(import string_utils)` then `(call contains ...)` |
+| | `(call string_replace ...)` | `(import string_utils)` then `(call replace ...)` |
+| **JSON operations** | `(call json_parse ...)` | `(import json from data)` then `(call parse ...)` |
+| | `(call json_stringify ...)` | `(import json from data)` then `(call stringify ...)` |
+| | `(call json_new_object)` | `(import json from data)` then `(call new_object)` |
+| **Result type** | Not available | `(import result)` then `(call ok ...)`, `(call err ...)` |
+| **Base64** | `(call base64_encode ...)` | `(import base64 from data)` then `(call encode ...)` |
+| **Regex** | `(call regex_compile ...)` | `(import regex from pattern)` then `(call compile ...)` |
+| **Hashing** | `(call crypto_sha256 ...)` | `(import hash from crypto)` then `(call sha256 ...)` |
+
+### How to Use Stdlib Modules
+
+**1. Import at the top of your module:**
+
+```lisp
+(module my_program
+  (import result)                   ; From stdlib/core/result.aisl
+  (import string_utils)             ; From stdlib/core/string_utils.aisl
+  (import json from data)           ; From stdlib/data/json.aisl
+  (import regex from pattern)       ; From stdlib/pattern/regex.aisl
+  
+  (fn main -> int
+    ; Your code here
+    (ret 0)))
+```
+
+**2. Use the imported functions:**
+
+```lisp
+; String operations
+(set text string "  hello  ")
+(set trimmed string (call trim text))
+
+; JSON operations
+(set obj json (call new_object))
+(call set obj "key" "value")
+(set json_str string (call stringify obj))
+
+; Result type for error handling
+(set result result (call ok "success"))
+(if (call is_ok result)
+  (set value string (call unwrap result)))
+```
+
+### Complete List of 11 Stdlib Modules
+
+**Core (2):**
+- `result` - Error handling (ok, err, is_ok, is_err, unwrap, unwrap_or, error_code, error_message)
+- `string_utils` - String ops (split, trim, contains, replace, starts_with, ends_with, to_upper, to_lower)
+
+**Data (2):**
+- `json from data` - JSON (parse, stringify, new_object, new_array, get, set, has, delete, push, length, type)
+- `base64 from data` - Base64 (encode, decode)
+
+**Net (2):**
+- `http from net` - HTTP client (get, post, put, delete, parse_response, build_request)
+- `websocket from net` - WebSocket (connect, send, receive, close)
+
+**Pattern (1):**
+- `regex from pattern` - Regex (compile, match, find, find_all, replace)
+
+**Crypto (1):**
+- `hash from crypto` - Hashing (sha256, md5, sha1)
+
+**Database (1):**
+- `sqlite from db` - SQLite (open, close, exec, query, prepare, bind, step, column, finalize, etc.)
+
+**System (2):**
+- `time from sys` - Time (unix_timestamp, sleep, format_time)
+- `process from sys` - Processes (spawn, wait, kill, exit, get_pid, get_env, set_env)
+
+### When to Use Stdlib vs Built-in
+
+**Use stdlib imports for:**
+- ✅ String manipulation (split, trim, replace)
+- ✅ JSON operations (parse, stringify)
+- ✅ Result type (error handling)
+- ✅ Base64 encoding/decoding
+- ✅ HTTP request building
+- ✅ Regex operations
+- ✅ Cryptographic hashing
+- ✅ SQLite databases
+- ✅ Time operations
+- ✅ Process management
+
+**Use built-in operations for:**
+- ✅ Arithmetic (add, sub, mul, div, mod)
+- ✅ Comparisons (eq, ne, lt, gt, le, ge)
+- ✅ Basic math (abs, min, max, sqrt, pow)
+- ✅ Type conversions (cast_i32_f64, string_from_i32, etc.)
+- ✅ Basic string ops (string_length, string_concat, string_substring)
+- ✅ I/O (print, print_ln, read_line)
+- ✅ File operations (file_read, file_write, file_exists)
+- ✅ Arrays (array_new, array_push, array_get, array_set, array_length)
+- ✅ Maps (map_new, map_set, map_get, map_has, map_delete)
+- ✅ TCP/networking (tcp_listen, tcp_accept, tcp_connect, tcp_send, tcp_receive)
+
+### Common Stdlib Patterns
+
+**Pattern 1: Error Handling with Result Type**
+
+```lisp
+(module safe_file_reader
+  (import result)
+  
+  (fn safe_read path string -> result
+    (set exists bool (call file_exists path))
+    (if (call not exists)
+      (ret (call err 1 "File not found")))
+    (set content string (call file_read path))
+    (ret (call ok content)))
+  
+  (fn main -> int
+    (set result result (call safe_read "data.txt"))
+    (if (call is_ok result)
+      (set content string (call unwrap result))
+      (call print content)
+      (ret 0))
+    ; Handle error
+    (set msg string (call error_message result))
+    (call print msg)
+    (ret 1)))
+```
+
+**Pattern 2: String Processing**
+
+```lisp
+(module text_processor
+  (import string_utils)
+  
+  (fn process_text text string -> string
+    (set trimmed string (call trim text))
+    (set upper string (call to_upper trimmed))
+    (set words array (call split upper " "))
+    (ret upper))
+  
+  (fn main -> int
+    (set result string (call process_text "  hello world  "))
+    (call print result)  ; Prints: HELLO WORLD
+    (ret 0)))
+```
+
+**Pattern 3: JSON API Response**
+
+```lisp
+(module api_client
+  (import json from data)
+  (import http from net)
+  
+  (fn fetch_user id i32 -> json
+    (set url string "https://api.example.com/users/")
+    (set id_str string (call string_from_i32 id))
+    (set full_url string (call string_concat url id_str))
+    
+    (set response string (call get full_url))
+    (set json_obj json (call parse response))
+    (ret json_obj))
+  
+  (fn main -> int
+    (set user json (call fetch_user 123))
+    (set name string (call get user "name"))
+    (call print name)
+    (ret 0)))
+```
+
+**Pattern 4: Multiple Imports**
+
+```lisp
+(module complete_example
+  (import result)
+  (import string_utils)
+  (import json from data)
+  (import hash from crypto)
+  
+  (fn main -> int
+    ; Use all imports together
+    (set text string "  Hello  ")
+    (set trimmed string (call trim text))
+    (set hash_val string (call sha256 trimmed))
+    
+    (set obj json (call new_object))
+    (call set obj "text" trimmed)
+    (call set obj "hash" hash_val)
+    
+    (set result result (call ok (call stringify obj)))
+    (if (call is_ok result)
+      (call print (call unwrap result)))
+    
+    (ret 0)))
+```
+
+### Important Notes for LLMs
+
+1. **Always check if an operation needs an import** - If you get a "function not found" error, check if it's a stdlib function.
+
+2. **Import modules at the top** - Put all `(import ...)` statements right after `(module ...)`.
+
+3. **Use the correct import syntax:**
+   - For core modules: `(import module_name)`
+   - For subdirectory modules: `(import module_name from subdir)`
+
+4. **Function names are shorter in stdlib** - Instead of `string_split`, use `split` after importing `string_utils`.
+
+5. **Documentation location:** See `stdlib/README.md` for complete documentation of all 11 modules.
+
+---
+
 ## Control Flow Patterns
 
 ### Pattern 1: While Loop
@@ -660,6 +879,36 @@ AISL has a built-in test framework. Add tests to verify behavior:
 ```
 
 **Note**: The `mod` keyword was renamed to `module` to avoid conflict with the modulo operation `(call mod x y)`.
+
+### ❌ Don't: Use built-in function names that require stdlib imports
+
+```lisp
+(module my_program
+  ; Missing: (import string_utils)
+  (fn main -> int
+    (set text string "  hello  ")
+    (set trimmed string (call trim text))  ; ERROR: function 'trim' not found
+    (ret 0)))
+```
+
+### ✅ Do: Import required stdlib modules
+
+```lisp
+(module my_program
+  (import string_utils)  ; ✅ Import first!
+  
+  (fn main -> int
+    (set text string "  hello  ")
+    (set trimmed string (call trim text))  ; ✅ Works now
+    (ret 0)))
+```
+
+**Common functions that require imports:**
+- String ops (split, trim, replace) → `(import string_utils)`
+- JSON ops (parse, stringify) → `(import json from data)`
+- Result type (ok, err, is_ok) → `(import result)`
+- Base64 (encode, decode) → `(import base64 from data)`
+- Regex (compile, match, find) → `(import regex from pattern)`
 
 ### ❌ Don't: Mix types implicitly
 

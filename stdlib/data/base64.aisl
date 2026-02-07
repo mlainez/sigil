@@ -1,0 +1,60 @@
+(module base64
+  
+  (fn encode data string -> string
+    (set result string "")
+    (set len int (call string_length data))
+    (set i int 0)
+    
+    (set alphabet string "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/")
+    
+    (while (call lt i len)
+      (set byte1 int (call string_get data i))
+      (set byte2 int 0)
+      (set byte3 int 0)
+      (set has_byte2 bool false)
+      (set has_byte3 bool false)
+      
+      (set next_i int (call add i 1))
+      (if (call lt next_i len)
+        (set byte2 int (call string_get data next_i))
+        (set has_byte2 bool true))
+      
+      (set next_next_i int (call add i 2))
+      (if (call lt next_next_i len)
+        (set byte3 int (call string_get data next_next_i))
+        (set has_byte3 bool true))
+      
+      (set triple int (call mul byte1 65536))
+      (if has_byte2
+        (set triple int (call add triple (call mul byte2 256))))
+      (if has_byte3
+        (set triple int (call add triple byte3)))
+      
+      (set char1_idx int (call div triple 262144))
+      (set char1 string (call string_slice alphabet char1_idx (call add char1_idx 1)))
+      (set result string (call string_concat result char1))
+      
+      (set remainder1 int (call mod triple 262144))
+      (set char2_idx int (call div remainder1 4096))
+      (set char2 string (call string_slice alphabet char2_idx (call add char2_idx 1)))
+      (set result string (call string_concat result char2))
+      
+      (if has_byte2
+        (set remainder2 int (call mod remainder1 4096))
+        (set char3_idx int (call div remainder2 64))
+        (set char3 string (call string_slice alphabet char3_idx (call add char3_idx 1)))
+        (set result string (call string_concat result char3))
+        (set result string (call string_concat result "=")))
+      
+      (if has_byte3
+        (set remainder3 int (call mod remainder1 64))
+        (set char4 string (call string_slice alphabet remainder3 (call add remainder3 1)))
+        (set result string (call string_concat result char4))
+        (set result string (call string_concat result "=")))
+      
+      (set i int (call add i 3)))
+    
+    (ret result))
+  
+  (fn decode encoded string -> string
+    (ret "")))

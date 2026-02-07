@@ -93,21 +93,13 @@ typedef enum {
     OP_IO_OPEN,       // Open file, returns handle
     OP_IO_CLOSE,      // Close file handle
 
-    // String
+    // String (primitives only - high-level ops moved to stdlib/core/string_utils.aisl)
     OP_STR_LEN,
     OP_STR_CONCAT,
     OP_STR_SLICE,
     OP_STR_GET,
     OP_STR_FROM_INT,    // Convert int to string
     OP_STR_FROM_FLOAT,  // Convert float to string
-    OP_STR_SPLIT,      // Split string by delimiter -> array
-    OP_STR_TRIM,       // Trim whitespace from string
-    OP_STR_CONTAINS,   // Check if string contains substring -> bool
-    OP_STR_REPLACE,    // Replace all occurrences of substring
-    OP_STR_STARTS_WITH, // Check if string starts with prefix -> bool
-    OP_STR_ENDS_WITH,  // Check if string ends with suffix -> bool
-    OP_STR_TO_UPPER,   // Convert string to uppercase
-    OP_STR_TO_LOWER,   // Convert string to lowercase
 
     // Array
     OP_ARRAY_NEW,
@@ -123,29 +115,10 @@ typedef enum {
     OP_MAP_HAS,       // Check if key exists: map key -> bool
     OP_MAP_DELETE,    // Delete key: map key -> map
     OP_MAP_LEN,       // Get number of entries: map -> int
+    OP_MAP_KEYS,      // Get array of keys: map -> array
 
-    // JSON Operations
-    OP_JSON_PARSE,        // Parse JSON string to JSON value: string -> json
-    OP_JSON_STRINGIFY,    // Convert JSON value to string: json -> string
-    OP_JSON_NEW_OBJECT,   // Create new empty JSON object: -> json
-    OP_JSON_NEW_ARRAY,    // Create new empty JSON array: -> json
-    OP_JSON_GET,          // Get value from JSON object/array: json key/index -> value
-    OP_JSON_SET,          // Set value in JSON object/array: json key/index value -> json
-    OP_JSON_HAS,          // Check if JSON object has key: json key -> bool
-    OP_JSON_DELETE,       // Delete key from JSON object: json key -> json
-    OP_JSON_PUSH,         // Push value to JSON array: json value -> json
-    OP_JSON_LENGTH,       // Get length of JSON array or object: json -> int
-    OP_JSON_TYPE,         // Get type of JSON value: json -> string ("object", "array", "string", "number", "bool", "null")
-
-    // Result Type Operations
-    OP_RESULT_OK,         // Create Ok result: value -> result
-    OP_RESULT_ERR,        // Create Err result: error_code error_message -> result
-    OP_RESULT_IS_OK,      // Check if result is Ok: result -> bool
-    OP_RESULT_IS_ERR,     // Check if result is Err: result -> bool
-    OP_RESULT_UNWRAP,     // Extract value from Ok (panics on Err): result -> value
-    OP_RESULT_UNWRAP_OR,  // Extract value or return default: result default -> value
-    OP_RESULT_ERROR_CODE, // Get error code from Err: result -> int
-    OP_RESULT_ERROR_MSG,  // Get error message from Err: result -> string
+    // JSON Operations - REMOVED: Now in stdlib/data/json.aisl (uses map primitives)
+    // Result Type Operations - REMOVED: Now in stdlib/core/result.aisl (uses map primitives)
 
     // File System Operations (Result variants)
     OP_FILE_READ_RESULT,  // Read file with error handling: path -> result
@@ -193,9 +166,7 @@ typedef enum {
     OP_CRYPTO_MD5,        // MD5 hash: string -> string
     OP_CRYPTO_HMAC_SHA256, // HMAC-SHA256: key message -> string
 
-    // Base64 Operations
-    OP_BASE64_ENCODE,     // Base64 encode: string -> string
-    OP_BASE64_DECODE,     // Base64 decode: string -> string
+    // Base64 Operations - REMOVED: Now in stdlib/data/base64.aisl (pure AISL implementation)
 
     // Date/Time Operations
     OP_TIME_NOW,          // Get current Unix timestamp: -> i64

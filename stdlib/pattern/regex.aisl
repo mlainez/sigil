@@ -1,0 +1,15 @@
+(module regex
+  (fn compile pattern string -> string
+    (ret (call regex_compile pattern)))
+  
+  (fn match regex string text string -> bool
+    (ret (call regex_match regex text)))
+  
+  (fn find regex string text string -> string
+    (ret (call regex_find regex text)))
+  
+  (fn find_all regex string text string -> array
+    (ret (call regex_find_all regex text)))
+  
+  (fn replace regex string text string replacement string -> string
+    (ret (call regex_replace regex text replacement))))
