@@ -10,4 +10,6 @@
   (test-spec test_simple
     (case "break when i equals 3"
       (input)
-      (expect 3))))
+      (expect 3)))
+  
+  (meta-note "Tests simple break statement in a while loop"))

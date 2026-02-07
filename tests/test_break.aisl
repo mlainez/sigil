@@ -25,4 +25,6 @@
   (test-spec test_break_in_loop
     (case "break when count > 10"
       (input)
-      (expect 11))))
+      (expect 11)))
+  
+  (meta-note "Tests break statement in while loops and infinite loops"))

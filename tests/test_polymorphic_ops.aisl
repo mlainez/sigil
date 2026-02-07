@@ -1,52 +1,47 @@
 (mod test_polymorphic_ops
-
-(fn test_print x int y int z string b bool -> unit
-  (do
+  (fn test_print x int y int z string b bool -> int
     (call print x)
     (call print y)
     (call print z)
     (call print b)
-    (ret unit)))
+    (ret 0))
 
-(fn test_array arr array -> int
-  (do
+  (fn test_array arr string -> int
     (call array_push arr 42)
     (call array_push arr 99)
-    (set size (call len arr))
+    (set size int (call array_length arr))
     (call print size)
-    (set val (call array_get arr 0))
-    (ret val)))
+    (set val int (call array_get arr 0))
+    (ret val))
 
-(fn test_string s string -> int
-  (do
-    (set length (call len s))
+  (fn test_string s string -> int
+    (set length int (call string_length s))
     (call print length)
-    (ret length)))
+    (ret length))
 
-(fn test_math x int -> int
-  (do
-    (set result (call add x 10))
+  (fn test_math x int -> int
+    (set result int (call add x 10))
     (call print result)
-    (ret result)))
+    (ret result))
 
-(test-spec test_print
-  (case "print various types"
-    (input 42 100 "hello" true)
-    (expect unit)))
+  (test-spec test_print
+    (case "print various types"
+      (input 42 100 "hello" true)
+      (expect 0)))
 
-(test-spec test_array
-  (case "array operations"
-    (input (call array_new 10))
-    (expect 42)))
+  (test-spec test_array
+    (case "array operations"
+      (input (call array_new))
+      (expect 42)))
 
-(test-spec test_string
-  (case "string length"
-    (input "hello")
-    (expect 5)))
+  (test-spec test_string
+    (case "string length"
+      (input "hello")
+      (expect 5)))
 
-(test-spec test_math
-  (case "add"
-    (input 5)
-    (expect 15)))
-
-)
+  (test-spec test_math
+    (case "basic addition"
+      (input 5)
+      (expect 15)))
+  
+  (meta-note "Tests polymorphic operations: print works with multiple types, len works with strings and arrays"))

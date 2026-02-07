@@ -29,4 +29,6 @@
   (test-spec test_continue_in_loop
     (case "count iterations except when i=5"
       (input)
-      (expect 9))))
+      (expect 9)))
+  
+  (meta-note "Tests continue statement in while loops and infinite loops"))

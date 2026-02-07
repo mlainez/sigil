@@ -11,4 +11,6 @@
   (test-spec test_loop
     (case "infinite loop with manual exit"
       (input)
-      (expect 3))))
+      (expect 3)))
+  
+  (meta-note "Tests infinite loop construct with explicit break for termination"))

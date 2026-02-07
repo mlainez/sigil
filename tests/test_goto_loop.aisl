@@ -11,4 +11,6 @@
   (test-spec count_to_five
     (case "count using goto/label"
       (input)
-      (expect 5))))
+      (expect 5)))
+  
+  (meta-note "Tests low-level goto and label constructs for manual control flow"))

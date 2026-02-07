@@ -1,12 +1,11 @@
 (mod test_simple_poly
+  (fn test_add x int y int -> int
+    (set result int (call add x y))
+    (ret result))
 
-(fn test_add x int y int -> int
-  (set result int (call add x y))
-  (ret result))
-
-(test-spec test_add
-  (case "basic polymorphic addition"
-    (input 10 5)
-    (expect 15)))
-
-)
+  (test-spec test_add
+    (case "basic polymorphic addition"
+      (input 10 5)
+      (expect 15)))
+  
+  (meta-note "Tests basic polymorphic add operation with integers"))

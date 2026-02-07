@@ -10,4 +10,6 @@
   (test-spec test_while
     (case "while loop 3 iterations"
       (input)
-      (expect 3))))
+      (expect 3)))
+  
+  (meta-note "Tests basic while loop with condition and iteration counter"))

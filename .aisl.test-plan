@@ -1,0 +1,269 @@
+@(test-suite-review 2026-02-07)
+
+@(status
+  (total-tests 89)
+  (tests-with-spec 89)
+  (tests-with-meta 81)
+  (tests-missing-meta 8))
+
+@(missing-meta-note
+  test_break
+  test_continue
+  test_goto_loop
+  test_loop_construct
+  test_polymorphic_ops
+  test_simple_break
+  test_simple_poly
+  test_while_construct)
+
+@(feature-coverage-gaps
+  @(core-operations
+    @(missing
+      "No dedicated test for: OP_POP, OP_DUP"
+      "No test for global variables (OP_LOAD_GLOBAL, OP_STORE_GLOBAL)"
+      "No test for OP_JUMP_IF_TRUE"
+      "No test for modulo operation with edge cases (mod by zero, negative)"
+      "No test for division by zero"
+      "No test for negation (neg_int, neg_float)")
+    
+    @(incomplete
+      "test_add.aisl - only tests add, not sub/mul/div"
+      "test_negative.aisl - tests negative literals, not neg operation"
+      "test_float_ops.aisl - might not cover all float operations"))
+  
+  @(stdlib-operations
+    @(missing
+      "No tests for regex module (0 tests found)"
+      "No tests for crypto module"
+      "No tests for time module"
+      "No tests for math.sqrt, math.pow, math.abs"
+      "No tests for string.to_upper, string.to_lower"
+      "No tests for array.slice, array.sort, array.reverse"
+      "No tests for map.keys, map.values, map.delete, map.has"
+      "No tests for json.type, json.delete, json.push"
+      "No tests for websockets (test_tcp exists but no ws)")
+    
+    @(incomplete
+      "file tests exist but might not cover all result-based APIs"
+      "http tests exist but might not cover headers, status codes")))
+
+@(broken-tests
+  @(test test_polymorphic_ops
+    @(issues
+      "Uses undefined (do ...) syntax - not in grammar"
+      "Uses undefined 'unit' literal"
+      "Missing type annotations on variables (lines 15, 22, 28)"
+      "Missing meta-note")
+    @(action "Fix or delete"))
+  
+  @(test test_simple_poly
+    @(status "Need to review - similar name suggests similar issues")))
+
+@(redundant-tests
+  @(while-loops
+    "test_while_construct"
+    "test_while_count"
+    "test_while_print"
+    "test_while_seq"
+    "test_while_simple"
+    "test_desugar_while"
+    @(action "Consolidate into 1-2 comprehensive while tests"))
+  
+  @(if-statements
+    "test_if"
+    "test_if_statement"
+    @(action "Keep one, delete the other"))
+  
+  @(break-statements
+    "test_break"
+    "test_simple_break"
+    @(action "Consolidate into test_break"))
+  
+  @(string-tests
+    "test_strings"
+    "test_string_simple"
+    "test_all_string_ops"
+    @(action "Keep test_all_string_ops as comprehensive suite")))
+
+@(tests-to-add
+  @(core-operations-group
+    @(test test_arithmetic_comprehensive
+      @(desc "All int operations: add, sub, mul, div, mod, neg")
+      @(cases
+        "addition: positive, negative, zero"
+        "subtraction: positive, negative, zero, result negative"
+        "multiplication: positive, negative, zero, large numbers"
+        "division: positive, negative, div by zero (should error)"
+        "modulo: positive, negative, mod by zero (should error)"
+        "negation: positive -> negative, negative -> positive, zero"))
+    
+    @(test test_arithmetic_float
+      @(desc "All float operations: add, sub, mul, div, neg")
+      @(cases "Similar to int but with floats"))
+    
+    @(test test_comparison_comprehensive
+      @(desc "All comparisons for int and float")
+      @(cases
+        "eq: equal values, different values"
+        "ne: equal values, different values"
+        "lt/gt/le/ge: comprehensive coverage"))
+    
+    @(test test_logical
+      @(desc "Boolean and, or, not operations")
+      @(cases
+        "and: true && true, true && false, false && false"
+        "or: true || false, false || true, false || false"
+        "not: !true, !false"))
+    
+    @(test test_cast
+      @(desc "Type conversions between int and float")
+      @(cases
+        "int -> float: preserve value"
+        "float -> int: truncate decimals"
+        "edge cases: large numbers, negative numbers"))
+    
+    @(test test_stack_ops
+      @(desc "Stack operations: push, pop, dup")
+      @(cases
+        "push all types: int, float, string, bool"
+        "dup: duplicate and verify"
+        "pop: ensure stack consistency"))
+    
+    @(test test_globals
+      @(desc "Global variables")
+      @(cases
+        "load_global: read global variable"
+        "store_global: write global variable"
+        "across functions: verify persistence")))
+  
+  @(stdlib-group
+    @(test test_math
+      @(desc "Math module operations")
+      @(cases
+        "sqrt: positive, zero, negative (error)"
+        "pow: positive exponent, zero, negative"
+        "abs: positive, negative, zero (int and float)"
+        "min: two values, equal values (int and float)"
+        "max: two values, equal values (int and float)"))
+    
+    @(test test_string_comprehensive
+      @(desc "All string operations")
+      @(cases
+        "len, concat, slice, get - already tested"
+        "to_upper: lowercase -> uppercase, mixed case"
+        "to_lower: uppercase -> lowercase, mixed case"
+        "starts_with: true/false cases"
+        "ends_with: true/false cases"))
+    
+    @(test test_array_comprehensive
+      @(desc "All array operations")
+      @(cases
+        "new, push, pop, get, set, len - already tested"
+        "slice: subarray extraction"
+        "sort: unsorted array -> sorted"
+        "reverse: array reversed"))
+    
+    @(test test_map_comprehensive
+      @(desc "All map operations")
+      @(cases
+        "new, get, set - already tested"
+        "has: key exists, key doesn't exist"
+        "delete: remove key"
+        "keys: get all keys as array"
+        "values: get all values as array"
+        "len: count entries"))
+    
+    @(test test_json_comprehensive
+      @(desc "All JSON operations")
+      @(cases
+        "parse, stringify - already tested"
+        "type: object, array, string, number, bool, null"
+        "delete: remove key from object"
+        "push: add to JSON array"))
+    
+    @(test test_regex
+      @(desc "Regex operations")
+      @(cases
+        "compile: valid pattern, invalid pattern"
+        "match: pattern matches, pattern doesn't match"
+        "find: find first occurrence"
+        "find_all: find all occurrences"
+        "replace: replace matches"))
+    
+    @(test test_crypto
+      @(desc "Crypto operations")
+      @(cases
+        "sha256: hash string"
+        "md5: hash string"
+        "hmac: HMAC-SHA256"
+        "base64_encode: encode string"
+        "base64_decode: decode string"))
+    
+    @(test test_time
+      @(desc "Time operations")
+      @(cases
+        "now: get current timestamp"
+        "format: format timestamp to string"
+        "parse: parse string to timestamp"
+        "sleep: delay execution"))))
+
+@(tests-to-fix
+  @(test test_polymorphic_ops
+    @(issues "Uses (do ...), undefined unit, missing types")
+    @(action "Rewrite to use proper AISL syntax"))
+  
+  @(test test_simple_poly
+    @(action "Review and fix if similar issues")))
+
+@(tests-to-delete
+  @(redundant
+    "test_while_count"
+    "test_while_print"
+    "test_while_seq"
+    "test_while_simple"
+    @(reason "Consolidate into test_while_construct + test_desugar_while"))
+  
+  @(redundant
+    "test_if_statement"
+    @(reason "Keep test_if.aisl"))
+  
+  @(redundant
+    "test_simple_break"
+    @(reason "Merge into test_break.aisl"))
+  
+  @(redundant
+    "test_strings"
+    "test_string_simple"
+    @(reason "Keep test_all_string_ops.aisl as comprehensive suite")))
+
+@(tests-to-update
+  @(add-meta-note
+    "test_break"
+    "test_continue"
+    "test_goto_loop"
+    "test_loop_construct"
+    "test_simple_break"
+    "test_while_construct")
+  
+  @(ensure-proper-structure
+    "All tests should have:"
+    "1. test-spec with meaningful test cases"
+    "2. Functions that return verifiable values"
+    "3. meta-note documenting what is tested"
+    "4. Proper type annotations on all variables"))
+
+@(execution-plan
+  @(step-1 "Fix broken tests: test_polymorphic_ops, test_simple_poly")
+  @(step-2 "Add missing meta-notes to 8 tests")
+  @(step-3 "Delete redundant tests (8-10 tests)")
+  @(step-4 "Add missing core tests (7 new tests)")
+  @(step-5 "Add missing stdlib tests (6 new tests)")
+  @(step-6 "Verify all 89+ tests compile and follow conventions"))
+
+@(success-criteria
+  (all-tests-compile "Every test compiles without errors")
+  (all-tests-have-spec "Every test uses test-spec framework")
+  (all-tests-have-meta "Every test has meta-note documenting purpose")
+  (core-coverage-complete "All 35 core opcodes have at least one test")
+  (stdlib-coverage-good "All major stdlib modules have comprehensive tests")
+  (no-redundancy "No duplicate test coverage"))
