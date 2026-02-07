@@ -1818,71 +1818,9 @@ int vm_run(VM* vm) {
                 break;
             }
 
-            // New typed push operations
-            case OP_PUSH_I8: {
-                Value val = {.type = VAL_I8, .data.i8_val = (int8_t)inst.operand.int_val};
-                push(vm, val);
-                vm->ip++;
-                break;
-            }
 
-            case OP_PUSH_I16: {
-                Value val = {.type = VAL_I16, .data.i16_val = (int16_t)inst.operand.int_val};
-                push(vm, val);
-                vm->ip++;
-                break;
-            }
-
-            case OP_PUSH_I32: {
-                Value val = {.type = VAL_I32, .data.i32_val = (int32_t)inst.operand.int_val};
-                push(vm, val);
-                vm->ip++;
-                break;
-            }
-
-            case OP_PUSH_I64: {
-                Value val = {.type = VAL_I64, .data.i64_val = inst.operand.int_val};
-                push(vm, val);
-                vm->ip++;
-                break;
-            }
-
-            case OP_PUSH_U8: {
-                Value val = {.type = VAL_U8, .data.u8_val = (uint8_t)inst.operand.uint_val};
-                push(vm, val);
-                vm->ip++;
-                break;
-            }
-
-            case OP_PUSH_U16: {
-                Value val = {.type = VAL_U16, .data.u16_val = (uint16_t)inst.operand.uint_val};
-                push(vm, val);
-                vm->ip++;
-                break;
-            }
-
-            case OP_PUSH_U32: {
-                Value val = {.type = VAL_U32, .data.u32_val = inst.operand.uint_val};
-                push(vm, val);
-                vm->ip++;
-                break;
-            }
-
-            case OP_PUSH_U64: {
-                Value val = {.type = VAL_U64, .data.u64_val = inst.operand.uint_val};
-                push(vm, val);
-                vm->ip++;
-                break;
-            }
-
-            case OP_PUSH_F32: {
-                Value val = {.type = VAL_F32, .data.f32_val = (float)inst.operand.float_val};
-                push(vm, val);
-                vm->ip++;
-                break;
-            }
-
-            case OP_PUSH_F64: {
+            case OP_PUSH_F64:
+            case OP_PUSH_FLOAT: {
                 Value val = {.type = VAL_F64, .data.f64_val = inst.operand.float_val};
                 push(vm, val);
                 vm->ip++;
@@ -1927,72 +1865,8 @@ int vm_run(VM* vm) {
             }
 
             // ============================================
-            // TYPED I32 ARITHMETIC
             // ============================================
-
-            case OP_ADD_I32: {
-                Value b = pop(vm);
-                Value a = pop(vm);
-                Value result = {.type = VAL_I32, .data.i32_val = a.data.i32_val + b.data.i32_val};
-                push(vm, result);
-                vm->ip++;
-                break;
-            }
-
-            case OP_SUB_I32: {
-                Value b = pop(vm);
-                Value a = pop(vm);
-                Value result = {.type = VAL_I32, .data.i32_val = a.data.i32_val - b.data.i32_val};
-                push(vm, result);
-                vm->ip++;
-                break;
-            }
-
-            case OP_MUL_I32: {
-                Value b = pop(vm);
-                Value a = pop(vm);
-                Value result = {.type = VAL_I32, .data.i32_val = a.data.i32_val * b.data.i32_val};
-                push(vm, result);
-                vm->ip++;
-                break;
-            }
-
-            case OP_DIV_I32: {
-                Value b = pop(vm);
-                Value a = pop(vm);
-                if (b.data.i32_val == 0) {
-                    fprintf(stderr, "Division by zero\n");
-                    return 1;
-                }
-                Value result = {.type = VAL_I32, .data.i32_val = a.data.i32_val / b.data.i32_val};
-                push(vm, result);
-                vm->ip++;
-                break;
-            }
-
-            case OP_MOD_I32: {
-                Value b = pop(vm);
-                Value a = pop(vm);
-                if (b.data.i32_val == 0) {
-                    fprintf(stderr, "Modulo by zero\n");
-                    return 1;
-                }
-                Value result = {.type = VAL_I32, .data.i32_val = a.data.i32_val % b.data.i32_val};
-                push(vm, result);
-                vm->ip++;
-                break;
-            }
-
-            case OP_NEG_I32: {
-                Value a = pop(vm);
-                Value result = {.type = VAL_I32, .data.i32_val = -a.data.i32_val};
-                push(vm, result);
-                vm->ip++;
-                break;
-            }
-
-            // ============================================
-            // TYPED I64 ARITHMETIC
+            // INT (I64) ARITHMETIC (v6.0 - removed i32)
             // ============================================
 
             case OP_ADD_I64: {
@@ -2060,52 +1934,8 @@ int vm_run(VM* vm) {
             // TYPED F32 ARITHMETIC
             // ============================================
 
-            case OP_ADD_F32: {
-                Value b = pop(vm);
-                Value a = pop(vm);
-                Value result = {.type = VAL_F32, .data.f32_val = a.data.f32_val + b.data.f32_val};
-                push(vm, result);
-                vm->ip++;
-                break;
-            }
-
-            case OP_SUB_F32: {
-                Value b = pop(vm);
-                Value a = pop(vm);
-                Value result = {.type = VAL_F32, .data.f32_val = a.data.f32_val - b.data.f32_val};
-                push(vm, result);
-                vm->ip++;
-                break;
-            }
-
-            case OP_MUL_F32: {
-                Value b = pop(vm);
-                Value a = pop(vm);
-                Value result = {.type = VAL_F32, .data.f32_val = a.data.f32_val * b.data.f32_val};
-                push(vm, result);
-                vm->ip++;
-                break;
-            }
-
-            case OP_DIV_F32: {
-                Value b = pop(vm);
-                Value a = pop(vm);
-                Value result = {.type = VAL_F32, .data.f32_val = a.data.f32_val / b.data.f32_val};
-                push(vm, result);
-                vm->ip++;
-                break;
-            }
-
-            case OP_NEG_F32: {
-                Value a = pop(vm);
-                Value result = {.type = VAL_F32, .data.f32_val = -a.data.f32_val};
-                push(vm, result);
-                vm->ip++;
-                break;
-            }
-
             // ============================================
-            // TYPED F64 ARITHMETIC
+            // FLOAT (F64) ARITHMETIC (v6.0 - removed f32)
             // ============================================
 
             case OP_ADD_F64: {
@@ -2153,65 +1983,7 @@ int vm_run(VM* vm) {
             }
 
             // ============================================
-            // TYPED I32 COMPARISONS
-            // ============================================
-
-            case OP_EQ_I32: {
-                Value b = pop(vm);
-                Value a = pop(vm);
-                Value result = {.type = VAL_BOOL, .data.bool_val = a.data.i32_val == b.data.i32_val};
-                push(vm, result);
-                vm->ip++;
-                break;
-            }
-
-            case OP_NE_I32: {
-                Value b = pop(vm);
-                Value a = pop(vm);
-                Value result = {.type = VAL_BOOL, .data.bool_val = a.data.i32_val != b.data.i32_val};
-                push(vm, result);
-                vm->ip++;
-                break;
-            }
-
-            case OP_LT_I32: {
-                Value b = pop(vm);
-                Value a = pop(vm);
-                Value result = {.type = VAL_BOOL, .data.bool_val = a.data.i32_val < b.data.i32_val};
-                push(vm, result);
-                vm->ip++;
-                break;
-            }
-
-            case OP_GT_I32: {
-                Value b = pop(vm);
-                Value a = pop(vm);
-                Value result = {.type = VAL_BOOL, .data.bool_val = a.data.i32_val > b.data.i32_val};
-                push(vm, result);
-                vm->ip++;
-                break;
-            }
-
-            case OP_LE_I32: {
-                Value b = pop(vm);
-                Value a = pop(vm);
-                Value result = {.type = VAL_BOOL, .data.bool_val = a.data.i32_val <= b.data.i32_val};
-                push(vm, result);
-                vm->ip++;
-                break;
-            }
-
-            case OP_GE_I32: {
-                Value b = pop(vm);
-                Value a = pop(vm);
-                Value result = {.type = VAL_BOOL, .data.bool_val = a.data.i32_val >= b.data.i32_val};
-                push(vm, result);
-                vm->ip++;
-                break;
-            }
-
-            // ============================================
-            // TYPED I64 COMPARISONS
+            // INT (I64) COMPARISONS (v6.0 - removed i32)
             // ============================================
 
             case OP_EQ_I64: {
@@ -2269,65 +2041,7 @@ int vm_run(VM* vm) {
             }
 
             // ============================================
-            // TYPED F32 COMPARISONS
-            // ============================================
-
-            case OP_EQ_F32: {
-                Value b = pop(vm);
-                Value a = pop(vm);
-                Value result = {.type = VAL_BOOL, .data.bool_val = a.data.f32_val == b.data.f32_val};
-                push(vm, result);
-                vm->ip++;
-                break;
-            }
-
-            case OP_NE_F32: {
-                Value b = pop(vm);
-                Value a = pop(vm);
-                Value result = {.type = VAL_BOOL, .data.bool_val = a.data.f32_val != b.data.f32_val};
-                push(vm, result);
-                vm->ip++;
-                break;
-            }
-
-            case OP_LT_F32: {
-                Value b = pop(vm);
-                Value a = pop(vm);
-                Value result = {.type = VAL_BOOL, .data.bool_val = a.data.f32_val < b.data.f32_val};
-                push(vm, result);
-                vm->ip++;
-                break;
-            }
-
-            case OP_GT_F32: {
-                Value b = pop(vm);
-                Value a = pop(vm);
-                Value result = {.type = VAL_BOOL, .data.bool_val = a.data.f32_val > b.data.f32_val};
-                push(vm, result);
-                vm->ip++;
-                break;
-            }
-
-            case OP_LE_F32: {
-                Value b = pop(vm);
-                Value a = pop(vm);
-                Value result = {.type = VAL_BOOL, .data.bool_val = a.data.f32_val <= b.data.f32_val};
-                push(vm, result);
-                vm->ip++;
-                break;
-            }
-
-            case OP_GE_F32: {
-                Value b = pop(vm);
-                Value a = pop(vm);
-                Value result = {.type = VAL_BOOL, .data.bool_val = a.data.f32_val >= b.data.f32_val};
-                push(vm, result);
-                vm->ip++;
-                break;
-            }
-
-            // ============================================
-            // TYPED F64 COMPARISONS
+            // FLOAT (F64) COMPARISONS (v6.0 - removed f32)
             // ============================================
 
             case OP_EQ_F64: {
@@ -2616,30 +2330,10 @@ int vm_run(VM* vm) {
                 break;
             }
 
-            case OP_STR_FROM_I32: {
-                Value val = pop(vm);
-                char buffer[32];
-                snprintf(buffer, sizeof(buffer), "%d", (int32_t)val.data.int_val);
-                Value result = {.type = VAL_STRING, .data.string_val = strdup(buffer)};
-                push(vm, result);
-                vm->ip++;
-                break;
-            }
-
             case OP_STR_FROM_I64: {
                 Value val = pop(vm);
                 char buffer[32];
                 snprintf(buffer, sizeof(buffer), "%lld", (long long)val.data.int_val);
-                Value result = {.type = VAL_STRING, .data.string_val = strdup(buffer)};
-                push(vm, result);
-                vm->ip++;
-                break;
-            }
-
-            case OP_STR_FROM_F32: {
-                Value val = pop(vm);
-                char buffer[64];
-                snprintf(buffer, sizeof(buffer), "%g", (double)val.data.f32_val);
                 Value result = {.type = VAL_STRING, .data.string_val = strdup(buffer)};
                 push(vm, result);
                 vm->ip++;
@@ -3729,29 +3423,9 @@ int vm_run(VM* vm) {
                 break;
             }
 
-            case OP_PRINT_I32: {
-                Value val = pop(vm);
-                printf("%d", val.data.i32_val);
-                fflush(stdout);
-                Value unit = {.type = VAL_UNIT};
-                push(vm, unit);
-                vm->ip++;
-                break;
-            }
-
             case OP_PRINT_I64: {
                 Value val = pop(vm);
                 printf("%ld", val.data.i64_val);
-                fflush(stdout);
-                Value unit = {.type = VAL_UNIT};
-                push(vm, unit);
-                vm->ip++;
-                break;
-            }
-
-            case OP_PRINT_F32: {
-                Value val = pop(vm);
-                printf("%.6f", val.data.f32_val);
                 fflush(stdout);
                 Value unit = {.type = VAL_UNIT};
                 push(vm, unit);
@@ -3859,92 +3533,12 @@ int vm_run(VM* vm) {
             }
 
             // ============================================
-            // TYPE CONVERSION OPERATIONS
+            // TYPE CONVERSION OPERATIONS (v6.0 - int/float only)
             // ============================================
-
-            case OP_CAST_I32_I64: {
-                Value val = pop(vm);
-                Value result = {.type = VAL_I64, .data.i64_val = (int64_t)val.data.i32_val};
-                push(vm, result);
-                vm->ip++;
-                break;
-            }
-
-            case OP_CAST_I64_I32: {
-                Value val = pop(vm);
-                Value result = {.type = VAL_I32, .data.i32_val = (int32_t)val.data.i64_val};
-                push(vm, result);
-                vm->ip++;
-                break;
-            }
-
-            case OP_CAST_F32_F64: {
-                Value val = pop(vm);
-                Value result = {.type = VAL_F64, .data.f64_val = (double)val.data.f32_val};
-                push(vm, result);
-                vm->ip++;
-                break;
-            }
-
-            case OP_CAST_F64_F32: {
-                Value val = pop(vm);
-                Value result = {.type = VAL_F32, .data.f32_val = (float)val.data.f64_val};
-                push(vm, result);
-                vm->ip++;
-                break;
-            }
-
-            case OP_CAST_I32_F32: {
-                Value val = pop(vm);
-                Value result = {.type = VAL_F32, .data.f32_val = (float)val.data.i32_val};
-                push(vm, result);
-                vm->ip++;
-                break;
-            }
-
-            case OP_CAST_I32_F64: {
-                Value val = pop(vm);
-                Value result = {.type = VAL_F64, .data.f64_val = (double)val.data.i32_val};
-                push(vm, result);
-                vm->ip++;
-                break;
-            }
-
-            case OP_CAST_I64_F32: {
-                Value val = pop(vm);
-                Value result = {.type = VAL_F32, .data.f32_val = (float)val.data.i64_val};
-                push(vm, result);
-                vm->ip++;
-                break;
-            }
 
             case OP_CAST_I64_F64: {
                 Value val = pop(vm);
                 Value result = {.type = VAL_F64, .data.f64_val = (double)val.data.i64_val};
-                push(vm, result);
-                vm->ip++;
-                break;
-            }
-
-            case OP_CAST_F32_I32: {
-                Value val = pop(vm);
-                Value result = {.type = VAL_I32, .data.i32_val = (int32_t)val.data.f32_val};
-                push(vm, result);
-                vm->ip++;
-                break;
-            }
-
-            case OP_CAST_F32_I64: {
-                Value val = pop(vm);
-                Value result = {.type = VAL_I64, .data.i64_val = (int64_t)val.data.f32_val};
-                push(vm, result);
-                vm->ip++;
-                break;
-            }
-
-            case OP_CAST_F64_I32: {
-                Value val = pop(vm);
-                Value result = {.type = VAL_I32, .data.i32_val = (int32_t)val.data.f64_val};
                 push(vm, result);
                 vm->ip++;
                 break;
@@ -3981,15 +3575,6 @@ int vm_run(VM* vm) {
                 break;
             }
 
-            case OP_MATH_ABS_I32: {
-                Value val = pop(vm);
-                int32_t result = val.data.i32_val < 0 ? -val.data.i32_val : val.data.i32_val;
-                Value res = {.type = VAL_I32, .data.i32_val = result};
-                push(vm, res);
-                vm->ip++;
-                break;
-            }
-
             case OP_MATH_ABS_I64: {
                 Value val = pop(vm);
                 int64_t result = val.data.i64_val < 0 ? -val.data.i64_val : val.data.i64_val;
@@ -3999,29 +3584,10 @@ int vm_run(VM* vm) {
                 break;
             }
 
-            case OP_MATH_ABS_F32: {
-                Value val = pop(vm);
-                float result = fabsf(val.data.f32_val);
-                Value res = {.type = VAL_F32, .data.f32_val = result};
-                push(vm, res);
-                vm->ip++;
-                break;
-            }
-
             case OP_MATH_ABS_F64: {
                 Value val = pop(vm);
                 double result = fabs(val.data.f64_val);
                 Value res = {.type = VAL_F64, .data.f64_val = result};
-                push(vm, res);
-                vm->ip++;
-                break;
-            }
-
-            case OP_MATH_MIN_I32: {
-                Value b = pop(vm);
-                Value a = pop(vm);
-                int32_t result = a.data.i32_val < b.data.i32_val ? a.data.i32_val : b.data.i32_val;
-                Value res = {.type = VAL_I32, .data.i32_val = result};
                 push(vm, res);
                 vm->ip++;
                 break;
@@ -4037,16 +3603,6 @@ int vm_run(VM* vm) {
                 break;
             }
 
-            case OP_MATH_MIN_F32: {
-                Value b = pop(vm);
-                Value a = pop(vm);
-                float result = a.data.f32_val < b.data.f32_val ? a.data.f32_val : b.data.f32_val;
-                Value res = {.type = VAL_F32, .data.f32_val = result};
-                push(vm, res);
-                vm->ip++;
-                break;
-            }
-
             case OP_MATH_MIN_F64: {
                 Value b = pop(vm);
                 Value a = pop(vm);
@@ -4057,31 +3613,11 @@ int vm_run(VM* vm) {
                 break;
             }
 
-            case OP_MATH_MAX_I32: {
-                Value b = pop(vm);
-                Value a = pop(vm);
-                int32_t result = a.data.i32_val > b.data.i32_val ? a.data.i32_val : b.data.i32_val;
-                Value res = {.type = VAL_I32, .data.i32_val = result};
-                push(vm, res);
-                vm->ip++;
-                break;
-            }
-
             case OP_MATH_MAX_I64: {
                 Value b = pop(vm);
                 Value a = pop(vm);
                 int64_t result = a.data.i64_val > b.data.i64_val ? a.data.i64_val : b.data.i64_val;
                 Value res = {.type = VAL_I64, .data.i64_val = result};
-                push(vm, res);
-                vm->ip++;
-                break;
-            }
-
-            case OP_MATH_MAX_F32: {
-                Value b = pop(vm);
-                Value a = pop(vm);
-                float result = a.data.f32_val > b.data.f32_val ? a.data.f32_val : b.data.f32_val;
-                Value res = {.type = VAL_F32, .data.f32_val = result};
                 push(vm, res);
                 vm->ip++;
                 break;
@@ -4960,20 +4496,10 @@ void vm_disassemble(BytecodeProgram* program) {
             case OP_STORE_LOCAL:
                 printf("STORE_LOCAL %d\n", inst.operand.uint_val);
                 break;
-            case OP_ADD_INT:
-                printf("ADD_INT\n");
                 break;
-            case OP_SUB_INT:
-                printf("SUB_INT\n");
                 break;
-            case OP_MUL_INT:
-                printf("MUL_INT\n");
                 break;
-            case OP_DIV_INT:
-                printf("DIV_INT\n");
                 break;
-            case OP_MOD_INT:
-                printf("MOD_INT\n");
                 break;
             case OP_EQ_INT:
                 printf("EQ_INT\n");
@@ -5038,14 +4564,8 @@ void vm_disassemble(BytecodeProgram* program) {
             case OP_STR_GET:
                 printf("STR_GET\n");
                 break;
-            case OP_STR_FROM_I32:
-                printf("STR_FROM_I32\n");
-                break;
             case OP_STR_FROM_I64:
                 printf("STR_FROM_I64\n");
-                break;
-            case OP_STR_FROM_F32:
-                printf("STR_FROM_F32\n");
                 break;
             case OP_STR_FROM_F64:
                 printf("STR_FROM_F64\n");

@@ -679,18 +679,7 @@ void compile_apply(Compiler* comp, Expr* expr) {
         return;
     }
 
-    // V4.0 Typed print builtins
-    if (strcmp(name, "io_print_i32") == 0) {
-        if (expr->data.apply.args == NULL || expr->data.apply.args->next != NULL) {
-            fprintf(stderr, "io_print_i32 expects exactly 1 argument\n");
-            exit(1);
-        }
-        compile_expr(comp, expr->data.apply.args->expr);
-        Instruction inst = {.opcode = OP_PRINT_I32};
-        bytecode_emit(comp->program, inst);
-        return;
-    }
-    
+    // V4.0 Typed print builtins (v6.0 - removed i32/f32, kept i64/f64 which are now int/float)
     if (strcmp(name, "io_print_i64") == 0) {
         if (expr->data.apply.args == NULL || expr->data.apply.args->next != NULL) {
             fprintf(stderr, "io_print_i64 expects exactly 1 argument\n");
@@ -702,17 +691,7 @@ void compile_apply(Compiler* comp, Expr* expr) {
         return;
     }
     
-    if (strcmp(name, "io_print_f32") == 0) {
-        if (expr->data.apply.args == NULL || expr->data.apply.args->next != NULL) {
-            fprintf(stderr, "io_print_f32 expects exactly 1 argument\n");
-            exit(1);
-        }
-        compile_expr(comp, expr->data.apply.args->expr);
-        Instruction inst = {.opcode = OP_PRINT_F32};
-        bytecode_emit(comp->program, inst);
-        return;
-    }
-    
+    // V4.0 Typed print builtins (v6.0 - removed f32, kept f64 which is now float)
     if (strcmp(name, "io_print_f64") == 0) {
         if (expr->data.apply.args == NULL || expr->data.apply.args->next != NULL) {
             fprintf(stderr, "io_print_f64 expects exactly 1 argument\n");
@@ -820,7 +799,7 @@ void compile_apply(Compiler* comp, Expr* expr) {
             fprintf(stderr, "op_add_i32 expects 2 arguments\n");
             exit(1);
         }
-        Instruction inst = {.opcode = OP_ADD_I32};
+        Instruction inst = {.opcode = OP_ADD_I64};
         bytecode_emit(comp->program, inst);
         return;
     }
@@ -829,7 +808,7 @@ void compile_apply(Compiler* comp, Expr* expr) {
             fprintf(stderr, "op_sub_i32 expects 2 arguments\n");
             exit(1);
         }
-        Instruction inst = {.opcode = OP_SUB_I32};
+        Instruction inst = {.opcode = OP_SUB_I64};
         bytecode_emit(comp->program, inst);
         return;
     }
@@ -838,7 +817,7 @@ void compile_apply(Compiler* comp, Expr* expr) {
             fprintf(stderr, "op_mul_i32 expects 2 arguments\n");
             exit(1);
         }
-        Instruction inst = {.opcode = OP_MUL_I32};
+        Instruction inst = {.opcode = OP_MUL_I64};
         bytecode_emit(comp->program, inst);
         return;
     }
@@ -847,7 +826,7 @@ void compile_apply(Compiler* comp, Expr* expr) {
             fprintf(stderr, "op_div_i32 expects 2 arguments\n");
             exit(1);
         }
-        Instruction inst = {.opcode = OP_DIV_I32};
+        Instruction inst = {.opcode = OP_DIV_I64};
         bytecode_emit(comp->program, inst);
         return;
     }
@@ -896,7 +875,7 @@ void compile_apply(Compiler* comp, Expr* expr) {
             fprintf(stderr, "op_add_f32 expects 2 arguments\n");
             exit(1);
         }
-        Instruction inst = {.opcode = OP_ADD_F32};
+        Instruction inst = {.opcode = OP_ADD_F64};
         bytecode_emit(comp->program, inst);
         return;
     }
@@ -905,7 +884,7 @@ void compile_apply(Compiler* comp, Expr* expr) {
             fprintf(stderr, "op_sub_f32 expects 2 arguments\n");
             exit(1);
         }
-        Instruction inst = {.opcode = OP_SUB_F32};
+        Instruction inst = {.opcode = OP_SUB_F64};
         bytecode_emit(comp->program, inst);
         return;
     }
@@ -914,7 +893,7 @@ void compile_apply(Compiler* comp, Expr* expr) {
             fprintf(stderr, "op_mul_f32 expects 2 arguments\n");
             exit(1);
         }
-        Instruction inst = {.opcode = OP_MUL_F32};
+        Instruction inst = {.opcode = OP_MUL_F64};
         bytecode_emit(comp->program, inst);
         return;
     }
@@ -923,7 +902,7 @@ void compile_apply(Compiler* comp, Expr* expr) {
             fprintf(stderr, "op_div_f32 expects 2 arguments\n");
             exit(1);
         }
-        Instruction inst = {.opcode = OP_DIV_F32};
+        Instruction inst = {.opcode = OP_DIV_F64};
         bytecode_emit(comp->program, inst);
         return;
     }
@@ -972,7 +951,7 @@ void compile_apply(Compiler* comp, Expr* expr) {
             fprintf(stderr, "op_eq_i32 expects 2 arguments\n");
             exit(1);
         }
-        Instruction inst = {.opcode = OP_EQ_I32};
+        Instruction inst = {.opcode = OP_EQ_I64};
         bytecode_emit(comp->program, inst);
         return;
     }
@@ -981,7 +960,7 @@ void compile_apply(Compiler* comp, Expr* expr) {
             fprintf(stderr, "op_ne_i32 expects 2 arguments\n");
             exit(1);
         }
-        Instruction inst = {.opcode = OP_NE_I32};
+        Instruction inst = {.opcode = OP_NE_I64};
         bytecode_emit(comp->program, inst);
         return;
     }
@@ -990,7 +969,7 @@ void compile_apply(Compiler* comp, Expr* expr) {
             fprintf(stderr, "op_lt_i32 expects 2 arguments\n");
             exit(1);
         }
-        Instruction inst = {.opcode = OP_LT_I32};
+        Instruction inst = {.opcode = OP_LT_I64};
         bytecode_emit(comp->program, inst);
         return;
     }
@@ -999,7 +978,7 @@ void compile_apply(Compiler* comp, Expr* expr) {
             fprintf(stderr, "op_gt_i32 expects 2 arguments\n");
             exit(1);
         }
-        Instruction inst = {.opcode = OP_GT_I32};
+        Instruction inst = {.opcode = OP_GT_I64};
         bytecode_emit(comp->program, inst);
         return;
     }
@@ -1008,7 +987,7 @@ void compile_apply(Compiler* comp, Expr* expr) {
             fprintf(stderr, "op_le_i32 expects 2 arguments\n");
             exit(1);
         }
-        Instruction inst = {.opcode = OP_LE_I32};
+        Instruction inst = {.opcode = OP_LE_I64};
         bytecode_emit(comp->program, inst);
         return;
     }
@@ -1017,7 +996,7 @@ void compile_apply(Compiler* comp, Expr* expr) {
             fprintf(stderr, "op_ge_i32 expects 2 arguments\n");
             exit(1);
         }
-        Instruction inst = {.opcode = OP_GE_I32};
+        Instruction inst = {.opcode = OP_GE_I64};
         bytecode_emit(comp->program, inst);
         return;
     }
@@ -1084,7 +1063,7 @@ void compile_apply(Compiler* comp, Expr* expr) {
             fprintf(stderr, "op_eq_f32 expects 2 arguments\n");
             exit(1);
         }
-        Instruction inst = {.opcode = OP_EQ_F32};
+        Instruction inst = {.opcode = OP_EQ_F64};
         bytecode_emit(comp->program, inst);
         return;
     }
@@ -1093,7 +1072,7 @@ void compile_apply(Compiler* comp, Expr* expr) {
             fprintf(stderr, "op_ne_f32 expects 2 arguments\n");
             exit(1);
         }
-        Instruction inst = {.opcode = OP_NE_F32};
+        Instruction inst = {.opcode = OP_NE_F64};
         bytecode_emit(comp->program, inst);
         return;
     }
@@ -1102,7 +1081,7 @@ void compile_apply(Compiler* comp, Expr* expr) {
             fprintf(stderr, "op_lt_f32 expects 2 arguments\n");
             exit(1);
         }
-        Instruction inst = {.opcode = OP_LT_F32};
+        Instruction inst = {.opcode = OP_LT_F64};
         bytecode_emit(comp->program, inst);
         return;
     }
@@ -1111,7 +1090,7 @@ void compile_apply(Compiler* comp, Expr* expr) {
             fprintf(stderr, "op_gt_f32 expects 2 arguments\n");
             exit(1);
         }
-        Instruction inst = {.opcode = OP_GT_F32};
+        Instruction inst = {.opcode = OP_GT_F64};
         bytecode_emit(comp->program, inst);
         return;
     }
@@ -1120,7 +1099,7 @@ void compile_apply(Compiler* comp, Expr* expr) {
             fprintf(stderr, "op_le_f32 expects 2 arguments\n");
             exit(1);
         }
-        Instruction inst = {.opcode = OP_LE_F32};
+        Instruction inst = {.opcode = OP_LE_F64};
         bytecode_emit(comp->program, inst);
         return;
     }
@@ -1129,7 +1108,7 @@ void compile_apply(Compiler* comp, Expr* expr) {
             fprintf(stderr, "op_ge_f32 expects 2 arguments\n");
             exit(1);
         }
-        Instruction inst = {.opcode = OP_GE_F32};
+        Instruction inst = {.opcode = OP_GE_F64};
         bytecode_emit(comp->program, inst);
         return;
     }
@@ -1196,7 +1175,7 @@ void compile_apply(Compiler* comp, Expr* expr) {
             fprintf(stderr, "cast_i32_i64 expects 1 argument\n");
             exit(1);
         }
-        Instruction inst = {.opcode = OP_CAST_I32_I64};
+        Instruction inst = {.opcode = OP_CAST_I64_F64};
         bytecode_emit(comp->program, inst);
         return;
     }
@@ -1205,7 +1184,7 @@ void compile_apply(Compiler* comp, Expr* expr) {
             fprintf(stderr, "cast_i64_i32 expects 1 argument\n");
             exit(1);
         }
-        Instruction inst = {.opcode = OP_CAST_I64_I32};
+        Instruction inst = {.opcode = OP_CAST_I64_F64};
         bytecode_emit(comp->program, inst);
         return;
     }
@@ -1214,7 +1193,7 @@ void compile_apply(Compiler* comp, Expr* expr) {
             fprintf(stderr, "cast_i32_f32 expects 1 argument\n");
             exit(1);
         }
-        Instruction inst = {.opcode = OP_CAST_I32_F32};
+        Instruction inst = {.opcode = OP_CAST_I64_F64};
         bytecode_emit(comp->program, inst);
         return;
     }
@@ -1223,7 +1202,7 @@ void compile_apply(Compiler* comp, Expr* expr) {
             fprintf(stderr, "cast_i32_f64 expects 1 argument\n");
             exit(1);
         }
-        Instruction inst = {.opcode = OP_CAST_I32_F64};
+        Instruction inst = {.opcode = OP_CAST_I64_F64};
         bytecode_emit(comp->program, inst);
         return;
     }
@@ -1232,7 +1211,7 @@ void compile_apply(Compiler* comp, Expr* expr) {
             fprintf(stderr, "cast_i64_f32 expects 1 argument\n");
             exit(1);
         }
-        Instruction inst = {.opcode = OP_CAST_I64_F32};
+        Instruction inst = {.opcode = OP_CAST_I64_F64};
         bytecode_emit(comp->program, inst);
         return;
     }
@@ -1250,7 +1229,7 @@ void compile_apply(Compiler* comp, Expr* expr) {
             fprintf(stderr, "cast_f32_i32 expects 1 argument\n");
             exit(1);
         }
-        Instruction inst = {.opcode = OP_CAST_F32_I32};
+        Instruction inst = {.opcode = OP_CAST_F64_I64};
         bytecode_emit(comp->program, inst);
         return;
     }
@@ -1259,7 +1238,7 @@ void compile_apply(Compiler* comp, Expr* expr) {
             fprintf(stderr, "cast_f32_i64 expects 1 argument\n");
             exit(1);
         }
-        Instruction inst = {.opcode = OP_CAST_F32_I64};
+        Instruction inst = {.opcode = OP_CAST_F64_I64};
         bytecode_emit(comp->program, inst);
         return;
     }
@@ -1268,7 +1247,7 @@ void compile_apply(Compiler* comp, Expr* expr) {
             fprintf(stderr, "cast_f64_i32 expects 1 argument\n");
             exit(1);
         }
-        Instruction inst = {.opcode = OP_CAST_F64_I32};
+        Instruction inst = {.opcode = OP_CAST_F64_I64};
         bytecode_emit(comp->program, inst);
         return;
     }
@@ -1286,7 +1265,7 @@ void compile_apply(Compiler* comp, Expr* expr) {
             fprintf(stderr, "cast_f32_f64 expects 1 argument\n");
             exit(1);
         }
-        Instruction inst = {.opcode = OP_CAST_F32_F64};
+        Instruction inst = {.opcode = OP_CAST_F64_I64};
         bytecode_emit(comp->program, inst);
         return;
     }
@@ -1295,7 +1274,7 @@ void compile_apply(Compiler* comp, Expr* expr) {
             fprintf(stderr, "cast_f64_f32 expects 1 argument\n");
             exit(1);
         }
-        Instruction inst = {.opcode = OP_CAST_F64_F32};
+        Instruction inst = {.opcode = OP_CAST_F64_I64};
         bytecode_emit(comp->program, inst);
         return;
     }
@@ -1324,7 +1303,7 @@ void compile_apply(Compiler* comp, Expr* expr) {
             fprintf(stderr, "math_abs_i32 expects 1 argument\n");
             exit(1);
         }
-        Instruction inst = {.opcode = OP_MATH_ABS_I32};
+        Instruction inst = {.opcode = OP_MATH_ABS_I64};
         bytecode_emit(comp->program, inst);
         return;
     }
@@ -1342,7 +1321,7 @@ void compile_apply(Compiler* comp, Expr* expr) {
             fprintf(stderr, "math_abs_f32 expects 1 argument\n");
             exit(1);
         }
-        Instruction inst = {.opcode = OP_MATH_ABS_F32};
+        Instruction inst = {.opcode = OP_MATH_ABS_F64};
         bytecode_emit(comp->program, inst);
         return;
     }
@@ -1360,7 +1339,7 @@ void compile_apply(Compiler* comp, Expr* expr) {
             fprintf(stderr, "math_min_i32 expects 2 arguments\n");
             exit(1);
         }
-        Instruction inst = {.opcode = OP_MATH_MIN_I32};
+        Instruction inst = {.opcode = OP_MATH_MIN_I64};
         bytecode_emit(comp->program, inst);
         return;
     }
@@ -1378,7 +1357,7 @@ void compile_apply(Compiler* comp, Expr* expr) {
             fprintf(stderr, "math_min_f32 expects 2 arguments\n");
             exit(1);
         }
-        Instruction inst = {.opcode = OP_MATH_MIN_F32};
+        Instruction inst = {.opcode = OP_MATH_MIN_F64};
         bytecode_emit(comp->program, inst);
         return;
     }
@@ -1396,7 +1375,7 @@ void compile_apply(Compiler* comp, Expr* expr) {
             fprintf(stderr, "math_max_i32 expects 2 arguments\n");
             exit(1);
         }
-        Instruction inst = {.opcode = OP_MATH_MAX_I32};
+        Instruction inst = {.opcode = OP_MATH_MAX_I64};
         bytecode_emit(comp->program, inst);
         return;
     }
@@ -1414,7 +1393,7 @@ void compile_apply(Compiler* comp, Expr* expr) {
             fprintf(stderr, "math_max_f32 expects 2 arguments\n");
             exit(1);
         }
-        Instruction inst = {.opcode = OP_MATH_MAX_F32};
+        Instruction inst = {.opcode = OP_MATH_MAX_F64};
         bytecode_emit(comp->program, inst);
         return;
     }
@@ -1497,7 +1476,7 @@ void compile_apply(Compiler* comp, Expr* expr) {
             fprintf(stderr, "string_from_i32 expects 1 argument (i32)\n");
             exit(1);
         }
-        Instruction inst = {.opcode = OP_STR_FROM_I32};
+        Instruction inst = {.opcode = OP_STR_FROM_I64};
         bytecode_emit(comp->program, inst);
         return;
     }
@@ -1517,7 +1496,7 @@ void compile_apply(Compiler* comp, Expr* expr) {
             fprintf(stderr, "string_from_f32 expects 1 argument (f32)\n");
             exit(1);
         }
-        Instruction inst = {.opcode = OP_STR_FROM_F32};
+        Instruction inst = {.opcode = OP_STR_FROM_F64};
         bytecode_emit(comp->program, inst);
         return;
     }

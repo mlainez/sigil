@@ -5,7 +5,7 @@
   (s (set v ty e) | (call f a*) | (ret e) | (while e s*) | (loop s*) | (if e s*) | (break) | (cont) | (label n) | (goto n) | (ifnot v n))
   (e lit | var | (call f a*))
   (lit int | float | str | true | false)
-  (ty i32|i64|f32|f64|bool|str|arr|map|json|result|regex))
+  (ty int|float|bool|str|arr|map|json|result|regex))
 @(op
   (arith add sub mul div mod neg abs min max pow sqrt)
   (cmp eq ne lt gt le ge)
@@ -18,25 +18,26 @@
   (io print println read_line file_read file_write file_exists)
   (net tcp_listen tcp_accept tcp_send tcp_recv http_get http_post)
   (sys time sleep env exit)
-  (cast i32_f64 f64_i32 i32_str str_i32 etc))
+  (cast int_float float_int int_str str_int etc))
 @(ex
-  (fn add a i32 b i32 -> i32 (ret (call add a b)))
-  (fn fact n i32 -> i32 
+  (fn add a int b int -> int (ret (call add a b)))
+  (fn fact n int -> int 
     (if (call eq n 0)
       (ret 1))
     (ret (call mul n (call fact (call sub n 1)))))
-  (fn sum arr arr n i32 -> i32
-    (set s i32 0)
-    (set i i32 0)
+  (fn sum arr arr n int -> int
+    (set s int 0)
+    (set i int 0)
     (while (call lt i n)
-      (set s i32 (call add s (call array_get arr i)))
-      (set i i32 (call add i 1)))
+      (set s int (call add s (call array_get arr i)))
+      (set i int (call add i 1)))
     (ret s)))
 @(note
   (no-comments "AISL does not support comments")
   (explicit-types "all vars must have types")
   (no-implicit-conv "use cast functions")
-  (type-dispatch "add -> add_i32|add_f64 auto")
+  (type-dispatch "add -> add_i64|add_f64 auto")
+  (simplified-types "only int (i64) and float (f64) - removed i8/i16/i32/u8/u16/u32/u64/f32")
   (test-framework "use test-spec, case, input, expect")
   (regex-builtin "regex type + compile/match/find/replace ops")
   (aisl-only-tooling "NEVER Python/Bash - ALWAYS AISL for scripts")

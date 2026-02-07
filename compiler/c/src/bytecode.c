@@ -388,15 +388,15 @@ BytecodeProgram* bytecode_load(const char* filename) {
             }
             // Typed push operations
             else if (strcmp(tok, "PUSH_I8") == 0) {
-                inst.opcode = OP_PUSH_I8;
+                inst.opcode = OP_PUSH_I64;
                 text_next_token(&scanner, tok, sizeof(tok));
                 inst.operand.int_val = strtoll(tok, NULL, 10);
             } else if (strcmp(tok, "PUSH_I16") == 0) {
-                inst.opcode = OP_PUSH_I16;
+                inst.opcode = OP_PUSH_I64;
                 text_next_token(&scanner, tok, sizeof(tok));
                 inst.operand.int_val = strtoll(tok, NULL, 10);
             } else if (strcmp(tok, "PUSH_I32") == 0) {
-                inst.opcode = OP_PUSH_I32;
+                inst.opcode = OP_PUSH_I64;
                 text_next_token(&scanner, tok, sizeof(tok));
                 inst.operand.int_val = strtoll(tok, NULL, 10);
             } else if (strcmp(tok, "PUSH_I64") == 0) {
@@ -404,23 +404,23 @@ BytecodeProgram* bytecode_load(const char* filename) {
                 text_next_token(&scanner, tok, sizeof(tok));
                 inst.operand.int_val = strtoll(tok, NULL, 10);
             } else if (strcmp(tok, "PUSH_U8") == 0) {
-                inst.opcode = OP_PUSH_U8;
+                inst.opcode = OP_PUSH_I64;
                 text_next_token(&scanner, tok, sizeof(tok));
                 inst.operand.uint_val = (uint32_t)strtoul(tok, NULL, 10);
             } else if (strcmp(tok, "PUSH_U16") == 0) {
-                inst.opcode = OP_PUSH_U16;
+                inst.opcode = OP_PUSH_I64;
                 text_next_token(&scanner, tok, sizeof(tok));
                 inst.operand.uint_val = (uint32_t)strtoul(tok, NULL, 10);
             } else if (strcmp(tok, "PUSH_U32") == 0) {
-                inst.opcode = OP_PUSH_U32;
+                inst.opcode = OP_PUSH_I64;
                 text_next_token(&scanner, tok, sizeof(tok));
                 inst.operand.uint_val = (uint32_t)strtoul(tok, NULL, 10);
             } else if (strcmp(tok, "PUSH_U64") == 0) {
-                inst.opcode = OP_PUSH_U64;
+                inst.opcode = OP_PUSH_I64;
                 text_next_token(&scanner, tok, sizeof(tok));
                 inst.operand.uint_val = (uint32_t)strtoul(tok, NULL, 10);
             } else if (strcmp(tok, "PUSH_F32") == 0) {
-                inst.opcode = OP_PUSH_F32;
+                inst.opcode = OP_PUSH_F64;
                 text_next_token(&scanner, tok, sizeof(tok));
                 inst.operand.float_val = strtod(tok, NULL);
             } else if (strcmp(tok, "PUSH_F64") == 0) {
@@ -430,17 +430,17 @@ BytecodeProgram* bytecode_load(const char* filename) {
             }
             // Typed I32 arithmetic
             else if (strcmp(tok, "ADD_I32") == 0) {
-                inst.opcode = OP_ADD_I32;
+                inst.opcode = OP_ADD_I64;
             } else if (strcmp(tok, "SUB_I32") == 0) {
-                inst.opcode = OP_SUB_I32;
+                inst.opcode = OP_SUB_I64;
             } else if (strcmp(tok, "MUL_I32") == 0) {
-                inst.opcode = OP_MUL_I32;
+                inst.opcode = OP_MUL_I64;
             } else if (strcmp(tok, "DIV_I32") == 0) {
-                inst.opcode = OP_DIV_I32;
+                inst.opcode = OP_DIV_I64;
             } else if (strcmp(tok, "MOD_I32") == 0) {
-                inst.opcode = OP_MOD_I32;
+                inst.opcode = OP_MOD_I64;
             } else if (strcmp(tok, "NEG_I32") == 0) {
-                inst.opcode = OP_NEG_I32;
+                inst.opcode = OP_NEG_I64;
             }
             // Typed I64 arithmetic
             else if (strcmp(tok, "ADD_I64") == 0) {
@@ -458,15 +458,15 @@ BytecodeProgram* bytecode_load(const char* filename) {
             }
             // Typed F32 arithmetic
             else if (strcmp(tok, "ADD_F32") == 0) {
-                inst.opcode = OP_ADD_F32;
+                inst.opcode = OP_ADD_F64;
             } else if (strcmp(tok, "SUB_F32") == 0) {
-                inst.opcode = OP_SUB_F32;
+                inst.opcode = OP_SUB_F64;
             } else if (strcmp(tok, "MUL_F32") == 0) {
-                inst.opcode = OP_MUL_F32;
+                inst.opcode = OP_MUL_F64;
             } else if (strcmp(tok, "DIV_F32") == 0) {
-                inst.opcode = OP_DIV_F32;
+                inst.opcode = OP_DIV_F64;
             } else if (strcmp(tok, "NEG_F32") == 0) {
-                inst.opcode = OP_NEG_F32;
+                inst.opcode = OP_NEG_F64;
             }
             // Typed F64 arithmetic
             else if (strcmp(tok, "ADD_F64") == 0) {
@@ -482,17 +482,17 @@ BytecodeProgram* bytecode_load(const char* filename) {
             }
             // Typed I32 comparisons
             else if (strcmp(tok, "EQ_I32") == 0) {
-                inst.opcode = OP_EQ_I32;
+                inst.opcode = OP_EQ_I64;
             } else if (strcmp(tok, "NE_I32") == 0) {
-                inst.opcode = OP_NE_I32;
+                inst.opcode = OP_NE_I64;
             } else if (strcmp(tok, "LT_I32") == 0) {
-                inst.opcode = OP_LT_I32;
+                inst.opcode = OP_LT_I64;
             } else if (strcmp(tok, "GT_I32") == 0) {
-                inst.opcode = OP_GT_I32;
+                inst.opcode = OP_GT_I64;
             } else if (strcmp(tok, "LE_I32") == 0) {
-                inst.opcode = OP_LE_I32;
+                inst.opcode = OP_LE_I64;
             } else if (strcmp(tok, "GE_I32") == 0) {
-                inst.opcode = OP_GE_I32;
+                inst.opcode = OP_GE_I64;
             }
             // Typed I64 comparisons
             else if (strcmp(tok, "EQ_I64") == 0) {
@@ -510,17 +510,17 @@ BytecodeProgram* bytecode_load(const char* filename) {
             }
             // Typed F32 comparisons
             else if (strcmp(tok, "EQ_F32") == 0) {
-                inst.opcode = OP_EQ_F32;
+                inst.opcode = OP_EQ_F64;
             } else if (strcmp(tok, "NE_F32") == 0) {
-                inst.opcode = OP_NE_F32;
+                inst.opcode = OP_NE_F64;
             } else if (strcmp(tok, "LT_F32") == 0) {
-                inst.opcode = OP_LT_F32;
+                inst.opcode = OP_LT_F64;
             } else if (strcmp(tok, "GT_F32") == 0) {
-                inst.opcode = OP_GT_F32;
+                inst.opcode = OP_GT_F64;
             } else if (strcmp(tok, "LE_F32") == 0) {
-                inst.opcode = OP_LE_F32;
+                inst.opcode = OP_LE_F64;
             } else if (strcmp(tok, "GE_F32") == 0) {
-                inst.opcode = OP_GE_F32;
+                inst.opcode = OP_GE_F64;
             }
             // Typed F64 comparisons
             else if (strcmp(tok, "EQ_F64") == 0) {
@@ -552,37 +552,37 @@ BytecodeProgram* bytecode_load(const char* filename) {
             }
             // Typed print operations
             else if (strcmp(tok, "PRINT_I32") == 0) {
-                inst.opcode = OP_PRINT_I32;
+                inst.opcode = OP_PRINT_I64;
             } else if (strcmp(tok, "PRINT_I64") == 0) {
                 inst.opcode = OP_PRINT_I64;
             } else if (strcmp(tok, "PRINT_F32") == 0) {
-                inst.opcode = OP_PRINT_F32;
+                inst.opcode = OP_PRINT_F64;
             } else if (strcmp(tok, "PRINT_F64") == 0) {
                 inst.opcode = OP_PRINT_F64;
             }
             // Type conversion operations
             else if (strcmp(tok, "CAST_I32_I64") == 0) {
-                inst.opcode = OP_CAST_I32_I64;
+                inst.opcode = OP_CAST_I64_F64;
             } else if (strcmp(tok, "CAST_I64_I32") == 0) {
-                inst.opcode = OP_CAST_I64_I32;
+                inst.opcode = OP_CAST_I64_F64;
             } else if (strcmp(tok, "CAST_F32_F64") == 0) {
-                inst.opcode = OP_CAST_F32_F64;
+                inst.opcode = OP_CAST_F64_I64;
             } else if (strcmp(tok, "CAST_F64_F32") == 0) {
-                inst.opcode = OP_CAST_F64_F32;
+                inst.opcode = OP_CAST_F64_I64;
             } else if (strcmp(tok, "CAST_I32_F32") == 0) {
-                inst.opcode = OP_CAST_I32_F32;
+                inst.opcode = OP_CAST_I64_F64;
             } else if (strcmp(tok, "CAST_I32_F64") == 0) {
-                inst.opcode = OP_CAST_I32_F64;
+                inst.opcode = OP_CAST_I64_F64;
             } else if (strcmp(tok, "CAST_I64_F32") == 0) {
-                inst.opcode = OP_CAST_I64_F32;
+                inst.opcode = OP_CAST_I64_F64;
             } else if (strcmp(tok, "CAST_I64_F64") == 0) {
                 inst.opcode = OP_CAST_I64_F64;
             } else if (strcmp(tok, "CAST_F32_I32") == 0) {
-                inst.opcode = OP_CAST_F32_I32;
+                inst.opcode = OP_CAST_F64_I64;
             } else if (strcmp(tok, "CAST_F32_I64") == 0) {
-                inst.opcode = OP_CAST_F32_I64;
+                inst.opcode = OP_CAST_F64_I64;
             } else if (strcmp(tok, "CAST_F64_I32") == 0) {
-                inst.opcode = OP_CAST_F64_I32;
+                inst.opcode = OP_CAST_F64_I64;
             } else if (strcmp(tok, "CAST_F64_I64") == 0) {
                 inst.opcode = OP_CAST_F64_I64;
             } else {

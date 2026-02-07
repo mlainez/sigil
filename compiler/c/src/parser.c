@@ -51,36 +51,12 @@ Type* parser_parse_type(Parser* parser) {
         case TOK_TYPE_FLOAT:
             parser_advance(parser);
             return type_f64();  // float maps to f64
-        case TOK_TYPE_I8:
-            parser_advance(parser);
-            return type_i8();
-        case TOK_TYPE_I16:
-            parser_advance(parser);
-            return type_i16();
-        case TOK_TYPE_I32:
-            parser_advance(parser);
-            return type_i32();
         case TOK_TYPE_I64:
             parser_advance(parser);
-            return type_i64();
-        case TOK_TYPE_U8:
-            parser_advance(parser);
-            return type_u8();
-        case TOK_TYPE_U16:
-            parser_advance(parser);
-            return type_u16();
-        case TOK_TYPE_U32:
-            parser_advance(parser);
-            return type_u32();
-        case TOK_TYPE_U64:
-            parser_advance(parser);
-            return type_u64();
-        case TOK_TYPE_F32:
-            parser_advance(parser);
-            return type_f32();
+            return type_i64();  // Internal use - prefer TOK_TYPE_INT
         case TOK_TYPE_F64:
             parser_advance(parser);
-            return type_f64();
+            return type_f64();  // Internal use - prefer TOK_TYPE_FLOAT
         case TOK_TYPE_STRING:
             parser_advance(parser);
             return type_string();

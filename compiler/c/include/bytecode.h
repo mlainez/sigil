@@ -9,18 +9,11 @@
 // ============================================
 
 typedef enum {
-    // Stack operations
-    OP_PUSH_INT,      // Push integer constant (int64_t for now)
-    OP_PUSH_I8,       // Push i8 constant
-    OP_PUSH_I16,      // Push i16 constant
-    OP_PUSH_I32,      // Push i32 constant
-    OP_PUSH_I64,      // Push i64 constant
-    OP_PUSH_U8,       // Push u8 constant
-    OP_PUSH_U16,      // Push u16 constant
-    OP_PUSH_U32,      // Push u32 constant
-    OP_PUSH_U64,      // Push u64 constant
-    OP_PUSH_F32,      // Push f32 constant
-    OP_PUSH_F64,      // Push f64 constant
+    // Stack operations (v6.0 - simplified to int/float only)
+    OP_PUSH_INT,      // Push integer constant (i64)
+    OP_PUSH_I64,      // Alias for OP_PUSH_INT (backward compat)
+    OP_PUSH_FLOAT,    // Push float constant (f64)
+    OP_PUSH_F64,      // Alias for OP_PUSH_FLOAT (backward compat)
     OP_PUSH_STRING,   // Push string constant
     OP_PUSH_BOOL,     // Push boolean constant
     OP_PUSH_UNIT,     // Push unit value
@@ -33,102 +26,55 @@ typedef enum {
     OP_LOAD_GLOBAL,   // Load global variable
     OP_STORE_GLOBAL,  // Store global variable
 
-    // Arithmetic - i32
-    OP_ADD_I32,
-    OP_SUB_I32,
-    OP_MUL_I32,
-    OP_DIV_I32,
-    OP_MOD_I32,
-    OP_NEG_I32,
+    // Arithmetic - int (i64)
+    OP_ADD_INT,
+    OP_SUB_INT,
+    OP_MUL_INT,
+    OP_DIV_INT,
+    OP_MOD_INT,
+    OP_NEG_INT,
 
-    // Arithmetic - i64
-    OP_ADD_I64,
-    OP_SUB_I64,
-    OP_MUL_I64,
-    OP_DIV_I64,
-    OP_MOD_I64,
-    OP_NEG_I64,
+    // Arithmetic - float (f64)
+    OP_ADD_FLOAT,
+    OP_SUB_FLOAT,
+    OP_MUL_FLOAT,
+    OP_DIV_FLOAT,
+    OP_NEG_FLOAT,
 
-    // Arithmetic - f32
-    OP_ADD_F32,
-    OP_SUB_F32,
-    OP_MUL_F32,
-    OP_DIV_F32,
-    OP_NEG_F32,
+    // Comparison - int (i64)
+    OP_EQ_INT,
+    OP_NE_INT,
+    OP_LT_INT,
+    OP_GT_INT,
+    OP_LE_INT,
+    OP_GE_INT,
 
-    // Arithmetic - f64
-    OP_ADD_F64,
-    OP_SUB_F64,
-    OP_MUL_F64,
-    OP_DIV_F64,
-    OP_NEG_F64,
-
-    // Comparison - i32
-    OP_EQ_I32,
-    OP_NE_I32,
-    OP_LT_I32,
-    OP_GT_I32,
-    OP_LE_I32,
-    OP_GE_I32,
-
-    // Comparison - i64
-    OP_EQ_I64,
-    OP_NE_I64,
-    OP_LT_I64,
-    OP_GT_I64,
-    OP_LE_I64,
-    OP_GE_I64,
-
-    // Comparison - f32
-    OP_EQ_F32,
-    OP_NE_F32,
-    OP_LT_F32,
-    OP_GT_F32,
-    OP_LE_F32,
-    OP_GE_F32,
-
-    // Comparison - f64
-    OP_EQ_F64,
-    OP_NE_F64,
-    OP_LT_F64,
-    OP_GT_F64,
-    OP_LE_F64,
-    OP_GE_F64,
+    // Comparison - float (f64)
+    OP_EQ_FLOAT,
+    OP_NE_FLOAT,
+    OP_LT_FLOAT,
+    OP_GT_FLOAT,
+    OP_LE_FLOAT,
+    OP_GE_FLOAT,
 
     // Logical
     OP_AND_BOOL,
     OP_OR_BOOL,
     OP_NOT_BOOL,
 
-    // Type conversions
-    OP_CAST_I32_I64,
-    OP_CAST_I64_I32,
-    OP_CAST_I32_F32,
-    OP_CAST_F32_I32,
-    OP_CAST_I64_F64,
-    OP_CAST_F64_I64,
-    OP_CAST_F32_F64,
-    OP_CAST_F64_F32,
-    OP_CAST_I32_F64,
-    OP_CAST_I64_F32,
-    OP_CAST_F32_I64,
-    OP_CAST_F64_I32,
+    // Type conversions (v6.0 - simplified to int/float only)
+    OP_CAST_INT_FLOAT,   // int -> float
+    OP_CAST_FLOAT_INT,   // float -> int
 
-    // Math functions (f64)
-    OP_MATH_SQRT_F64,    // Square root
-    OP_MATH_POW_F64,     // Power (base, exp)
-    OP_MATH_ABS_I32,     // Absolute value for i32
-    OP_MATH_ABS_I64,     // Absolute value for i64
-    OP_MATH_ABS_F32,     // Absolute value for f32
-    OP_MATH_ABS_F64,     // Absolute value for f64
-    OP_MATH_MIN_I32,     // Minimum of two i32
-    OP_MATH_MIN_I64,     // Minimum of two i64
-    OP_MATH_MIN_F32,     // Minimum of two f32
-    OP_MATH_MIN_F64,     // Minimum of two f64
-    OP_MATH_MAX_I32,     // Maximum of two i32
-    OP_MATH_MAX_I64,     // Maximum of two i64
-    OP_MATH_MAX_F32,     // Maximum of two f32
-    OP_MATH_MAX_F64,     // Maximum of two f64
+    // Math functions
+    OP_MATH_SQRT_FLOAT,  // Square root (float only)
+    OP_MATH_POW_FLOAT,   // Power (float only): base exp -> result
+    OP_MATH_ABS_INT,     // Absolute value for int
+    OP_MATH_ABS_FLOAT,   // Absolute value for float
+    OP_MATH_MIN_INT,     // Minimum of two ints
+    OP_MATH_MIN_FLOAT,   // Minimum of two floats
+    OP_MATH_MAX_INT,     // Maximum of two ints
+    OP_MATH_MAX_FLOAT,   // Maximum of two floats
 
     // Control flow
     OP_JUMP,          // Unconditional jump
@@ -148,10 +94,8 @@ typedef enum {
     OP_STR_CONCAT,
     OP_STR_SLICE,
     OP_STR_GET,
-    OP_STR_FROM_I32,   // Convert i32 to string
-    OP_STR_FROM_I64,   // Convert i64 to string
-    OP_STR_FROM_F32,   // Convert f32 to string
-    OP_STR_FROM_F64,   // Convert f64 to string
+    OP_STR_FROM_INT,    // Convert int to string
+    OP_STR_FROM_FLOAT,  // Convert float to string
     OP_STR_SPLIT,      // Split string by delimiter -> array
     OP_STR_TRIM,       // Trim whitespace from string
     OP_STR_CONTAINS,   // Check if string contains substring -> bool
@@ -307,28 +251,54 @@ typedef enum {
     // System
     OP_HALT,          // Stop execution
     OP_PRINT_DEBUG,   // Debug print top of stack
-    OP_PRINT_I32,     // Print i32
-    OP_PRINT_I64,     // Print i64
-    OP_PRINT_F32,     // Print f32
-    OP_PRINT_F64,     // Print f64
+    OP_PRINT_INT,     // Print int
+    OP_PRINT_FLOAT,   // Print float
     OP_PRINT_STR,     // Print string
     OP_PRINT_BOOL,    // Print boolean
     OP_PRINT_ARRAY,   // Print array (for debugging)
     OP_PRINT_MAP,     // Print map (for debugging)
 
-    // Legacy compatibility (map to new typed versions)
-    OP_ADD_INT = OP_ADD_I64,
-    OP_SUB_INT = OP_SUB_I64,
-    OP_MUL_INT = OP_MUL_I64,
-    OP_DIV_INT = OP_DIV_I64,
-    OP_MOD_INT = OP_MOD_I64,
-    OP_NEG_INT = OP_NEG_I64,
-    OP_EQ_INT = OP_EQ_I64,
-    OP_NEQ_INT = OP_NE_I64,
-    OP_LT_INT = OP_LT_I64,
-    OP_GT_INT = OP_GT_I64,
-    OP_LTE_INT = OP_LE_I64,
-    OP_GTE_INT = OP_GE_I64,
+    // Legacy compatibility aliases (v6.0 - map old names to new simplified names)
+    OP_ADD_I64 = OP_ADD_INT,
+    OP_SUB_I64 = OP_SUB_INT,
+    OP_MUL_I64 = OP_MUL_INT,
+    OP_DIV_I64 = OP_DIV_INT,
+    OP_MOD_I64 = OP_MOD_INT,
+    OP_NEG_I64 = OP_NEG_INT,
+    OP_EQ_I64 = OP_EQ_INT,
+    OP_NEQ_INT = OP_NE_INT,
+    OP_NE_I64 = OP_NE_INT,
+    OP_LT_I64 = OP_LT_INT,
+    OP_GT_I64 = OP_GT_INT,
+    OP_LTE_INT = OP_LE_INT,
+    OP_LE_I64 = OP_LE_INT,
+    OP_GTE_INT = OP_GE_INT,
+    OP_GE_I64 = OP_GE_INT,
+    OP_ADD_F64 = OP_ADD_FLOAT,
+    OP_SUB_F64 = OP_SUB_FLOAT,
+    OP_MUL_F64 = OP_MUL_FLOAT,
+    OP_DIV_F64 = OP_DIV_FLOAT,
+    OP_NEG_F64 = OP_NEG_FLOAT,
+    OP_EQ_F64 = OP_EQ_FLOAT,
+    OP_NE_F64 = OP_NE_FLOAT,
+    OP_LT_F64 = OP_LT_FLOAT,
+    OP_GT_F64 = OP_GT_FLOAT,
+    OP_LE_F64 = OP_LE_FLOAT,
+    OP_GE_F64 = OP_GE_FLOAT,
+    OP_CAST_I64_F64 = OP_CAST_INT_FLOAT,
+    OP_CAST_F64_I64 = OP_CAST_FLOAT_INT,
+    OP_MATH_SQRT_F64 = OP_MATH_SQRT_FLOAT,
+    OP_MATH_POW_F64 = OP_MATH_POW_FLOAT,
+    OP_MATH_ABS_I64 = OP_MATH_ABS_INT,
+    OP_MATH_ABS_F64 = OP_MATH_ABS_FLOAT,
+    OP_MATH_MIN_I64 = OP_MATH_MIN_INT,
+    OP_MATH_MIN_F64 = OP_MATH_MIN_FLOAT,
+    OP_MATH_MAX_I64 = OP_MATH_MAX_INT,
+    OP_MATH_MAX_F64 = OP_MATH_MAX_FLOAT,
+    OP_STR_FROM_I64 = OP_STR_FROM_INT,
+    OP_STR_FROM_F64 = OP_STR_FROM_FLOAT,
+    OP_PRINT_I64 = OP_PRINT_INT,
+    OP_PRINT_F64 = OP_PRINT_FLOAT,
     OP_AND = OP_AND_BOOL,
     OP_OR = OP_OR_BOOL,
     OP_NOT = OP_NOT_BOOL,
