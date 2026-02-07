@@ -284,7 +284,7 @@ Markdown format rules:
 
 **DOCUMENTATION MUST ALWAYS BE UP TO DATE AND MINIMAL**
 
-Two rules:
+Three rules:
 
 1. **Always Update Docs After Code Changes**
    - Changed syntax? Update AGENTS.md, LANGUAGE_SPEC.md, .aisl.grammar
@@ -300,11 +300,19 @@ Two rules:
    - Delete: *-PLAN.md, *-SUMMARY.md, *-ANALYSIS.md (human-readable thinking)
    - Keep: .aisl.meta, .aisl.grammar, .aisl.analysis (machine-readable context)
 
+3. **NEVER Create Implementation Status Files**
+   - NO: IMPLEMENTATION-STATUS.md, ROADMAP.md, TODO.md, CHANGES.md
+   - NO: Any markdown files tracking progress, plans, or internal state
+   - YES: Put ALL relevant context in .aisl.* files (machine-readable)
+   - YES: Only keep README.md, AGENTS.md, LANGUAGE_SPEC.md, AISL-CORE.md, AISL-AGENT.md
+   - If you need to track something, add it to .aisl.analysis with @(tag)
+
 Process:
 1. After ANY code change, update docs immediately
 2. Before committing, verify examples/ folder works
 3. Remove any human-readable "thinking" documents
 4. Keep only language description for users
+5. NEVER generate implementation tracking markdown files
 
 @(type-size-ambiguity-2026-02-07)
 
