@@ -5,6 +5,52 @@
 
 ---
 
+## 🚨 CRITICAL: NO COMMENTS IN AISL CODE
+
+**AISL DOES NOT SUPPORT COMMENTS.** Do not use `;`, `//`, `#`, or any other comment syntax.
+
+If you need to document code:
+- Use the `meta-note` construct in test specs
+- Use descriptive variable names
+- Write separate documentation files
+
+**This is the #1 cause of parse errors when generating AISL code.**
+
+---
+
+## 🚨 CRITICAL: ALL TEST FILES MUST USE THE TEST FRAMEWORK
+
+**ALL files in the `tests/` directory with names matching `test_*.aisl` MUST use the test framework.**
+
+Every test file must include:
+- `test-spec` declarations with `case`, `input`, and `expect`
+- Functions that return verifiable values (not just print statements)
+- `meta-note` at the end to document what the test validates
+
+**Example structure:**
+```lisp
+(mod test_example
+  (fn add_numbers ((a i32) (b i32)) -> i32
+    (ret (call add a b)))
+  
+  (test-spec add_numbers
+    (case "adds positive numbers"
+      (input 2 3)
+      (expect 5))
+    (case "adds negative numbers"
+      (input -5 -3)
+      (expect -8)))
+  
+  (meta-note "Tests addition with positive and negative integers"))
+```
+
+**DO NOT create test files that:**
+- Only print output without assertions
+- Return 0 unconditionally
+- Lack `test-spec` declarations
+
+---
+
 ## What is AISL?
 
 AISL (AI-Optimized Systems Language) is a programming language specifically designed for **code generation by AI systems**. It eliminates the ambiguities and complexities that make traditional languages difficult for LLMs to generate reliably.
@@ -332,6 +378,51 @@ Generate these - the compiler desugars them to Core:
   (ret result))
 ```
 
+### Error Handling Pattern (Result Type)
+
+```lisp
+(fn safe_file_read ((path string)) -> i32
+  ; Read file with error handling
+  (set result string (call file_read_result path))
+  (set success bool (call is_ok result))
+  
+  (if success
+    ; Extract value from Ok result
+    (set content string (call unwrap result))
+    (call print content)
+    (ret 1))
+  
+  ; Handle error case
+  (set err_msg string (call error_message result))
+  (call print err_msg)
+  (ret 0))
+```
+
+### Safe Value Extraction Pattern
+
+```lisp
+(fn read_with_default ((path string)) -> string
+  (set result string (call file_read_result path))
+  (set default string "default content")
+  ; Returns content if Ok, default if Err
+  (set content string (call unwrap_or result default))
+  (ret content))
+```
+
+### Error Checking Pattern
+
+```lisp
+(fn check_file_error ((path string)) -> i32
+  (set result string (call file_read_result path))
+  (set is_error bool (call is_err result))
+  
+  (if is_error
+    (set code i32 (call error_code result))
+    (ret code))
+  
+  (ret 0))
+```
+
 ---
 
 ## Testing Your Generated Code
@@ -383,7 +474,7 @@ AISL has a built-in test framework. Add tests to verify behavior:
 - **Control flow**: See AISL-AGENT.md examples
 - **Built-in functions**: See LANGUAGE_SPEC.md section 5 (180+ functions)
 - **Type system**: See AISL-CORE.md section "Types"
-- **Error handling**: Currently limited - file operations may panic
+- **Error handling**: See result type patterns above and tests/test_result_*.aisl
 
 ---
 
@@ -481,19 +572,19 @@ AISL is designed for predictable performance:
 
 ### Not Yet Implemented
 
-1. **Result/Option types**: Documented in LANGUAGE_SPEC.md but not yet implemented
-   - `file_read_result`, `is_ok`, `unwrap` etc. are placeholders
-   - Current file operations panic on error instead of returning results
-   - **Workaround**: Check `file_exists` before reading
-
-2. **Struct/Record types**: Planned but not implemented
+1. **Struct/Record types**: Planned but not implemented
    - Use multiple variables or arrays for now
+   - Maps can be used for key-value pairs
+
+2. **Option type**: For nullable values (Result type is complete)
+   - `some`, `none`, `is_some`, `is_none` are planned
+   - Use result type with special error codes as workaround
 
 3. **Generics**: Not planned - use type-directed dispatch instead
 
 ### Design Decisions
 
-- **No exceptions**: Use explicit error checking
+- **No exceptions**: Use explicit error checking with result types
 - **No null**: Variables must be initialized
 - **No undefined behavior**: All operations have defined semantics
 - **No operator overloading**: One operation name = one meaning
@@ -543,7 +634,7 @@ AISL is designed for predictable performance:
 - **Repository**: [Link to be added]
 - **Documentation**: This directory (`*.md` files)
 - **Examples**: `examples/` directory (working programs)
-- **Tests**: `tests/` directory (81 test files)
+- **Tests**: `tests/` directory (85 test files)
 - **Issues**: [Link to be added]
 
 ---

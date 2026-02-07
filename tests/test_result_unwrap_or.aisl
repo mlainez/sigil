@@ -1,0 +1,25 @@
+(mod test_result_unwrap_or
+  (fn unwrap_or_with_ok ((value i32) (default i32)) -> i32
+    (set result string (call result_ok value))
+    (set extracted i32 (call unwrap_or result default))
+    (ret extracted))
+  
+  (test-spec unwrap_or_with_ok
+    (case "unwrap_or returns value when ok"
+      (input 42 999)
+      (expect 42)))
+  
+  (fn unwrap_or_with_err ((code i32) (default i32)) -> i32
+    (set result string (call result_err code "Error"))
+    (set extracted i32 (call unwrap_or result default))
+    (ret extracted))
+  
+  (test-spec unwrap_or_with_err
+    (case "unwrap_or returns default when error"
+      (input 404 999)
+      (expect 999))
+    (case "unwrap_or returns default with zero"
+      (input 500 0)
+      (expect 0)))
+  
+  (meta-note "Tests result type: unwrap_or provides safe value extraction"))

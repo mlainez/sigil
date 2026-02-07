@@ -64,6 +64,18 @@ typedef struct {
     uint32_t size;  // Number of entries
 } Map;
 
+// Result type for error handling
+typedef struct {
+    bool is_ok;
+    union {
+        Value ok_value;      // The actual value if Ok
+        struct {
+            int32_t code;    // Error code
+            char* message;   // Error message
+        } err;
+    } data;
+} Result;
+
 // JSON Value types
 typedef enum {
     JSON_NULL,
@@ -1796,11 +1808,11 @@ int vm_run(VM* vm) {
                 break;
             }
 
-            case OP_PUSH_BOOL: {
-                Value val = {.type = VAL_BOOL, .data.bool_val = inst.operand.bool_val};
-                push(vm, val);
-                vm->ip++;
-                break;
+        case OP_PUSH_BOOL: {
+            Value val = {.type = VAL_BOOL, .data.bool_val = inst.operand.bool_val};
+            push(vm, val);
+            vm->ip++;
+            break;
             }
 
             case OP_PUSH_UNIT: {
@@ -3775,6 +3787,81 @@ int vm_run(VM* vm) {
                 break;
             }
 
+            case OP_PRINT_BOOL: {
+                Value val = pop(vm);
+                printf("%s", val.data.bool_val ? "true" : "false");
+                fflush(stdout);
+                Value unit = {.type = VAL_UNIT};
+                push(vm, unit);
+                vm->ip++;
+                break;
+            }
+
+            case OP_PRINT_ARRAY: {
+                Value val = pop(vm);
+                if (val.type == VAL_ARRAY) {
+                    Array* arr = (Array*)val.data.ptr_val;
+                    printf("[");
+                    for (uint32_t i = 0; i < arr->count; i++) {
+                        if (i > 0) printf(", ");
+                        Value item = arr->items[i];
+                        switch (item.type) {
+                            case VAL_I32: printf("%d", item.data.i32_val); break;
+                            case VAL_I64: printf("%ld", item.data.i64_val); break;
+                            case VAL_F32: printf("%.6f", item.data.f32_val); break;
+                            case VAL_F64: printf("%.15f", item.data.f64_val); break;
+                            case VAL_BOOL: printf("%s", item.data.bool_val ? "true" : "false"); break;
+                            case VAL_STRING: printf("\"%s\"", item.data.string_val); break;
+                            default: printf("?"); break;
+                        }
+                    }
+                    printf("]");
+                } else {
+                    printf("[non-array]");
+                }
+                fflush(stdout);
+                Value unit = {.type = VAL_UNIT};
+                push(vm, unit);
+                vm->ip++;
+                break;
+            }
+
+            case OP_PRINT_MAP: {
+                Value val = pop(vm);
+                if (val.type == VAL_MAP) {
+                    Map* map = (Map*)val.data.ptr_val;
+                    printf("{");
+                    bool first = true;
+                    for (uint32_t i = 0; i < map->bucket_count; i++) {
+                        MapEntry* entry = map->buckets[i];
+                        while (entry) {
+                            if (!first) printf(", ");
+                            first = false;
+                            printf("\"%s\": ", entry->key);
+                            Value item = entry->value;
+                            switch (item.type) {
+                                case VAL_I32: printf("%d", item.data.i32_val); break;
+                                case VAL_I64: printf("%ld", item.data.i64_val); break;
+                                case VAL_F32: printf("%.6f", item.data.f32_val); break;
+                                case VAL_F64: printf("%.15f", item.data.f64_val); break;
+                                case VAL_BOOL: printf("%s", item.data.bool_val ? "true" : "false"); break;
+                                case VAL_STRING: printf("\"%s\"", item.data.string_val); break;
+                                default: printf("?"); break;
+                            }
+                            entry = entry->next;
+                        }
+                    }
+                    printf("}");
+                } else {
+                    printf("[non-map]");
+                }
+                fflush(stdout);
+                Value unit = {.type = VAL_UNIT};
+                push(vm, unit);
+                vm->ip++;
+                break;
+            }
+
             // ============================================
             // TYPE CONVERSION OPERATIONS
             // ============================================
@@ -4609,6 +4696,208 @@ int vm_run(VM* vm) {
                 
                 Value result = {.type = VAL_ARRAY, .data.ptr_val = arr};
                 push(vm, result);
+                vm->ip++;
+                break;
+            }
+
+            // ============================================
+            // RESULT TYPE OPERATIONS
+            // ============================================
+
+            case OP_RESULT_OK: {
+                // Create Ok result from stack value
+                Value val = pop(vm);
+                Result* result = malloc(sizeof(Result));
+                result->is_ok = true;
+                result->data.ok_value = val;
+                
+                Value result_val = {.type = VAL_RESULT, .data.ptr_val = result};
+                push(vm, result_val);
+                vm->ip++;
+                break;
+            }
+
+            case OP_RESULT_ERR: {
+                // Create Err result from error code and message
+                Value msg_val = pop(vm);
+                Value code_val = pop(vm);
+                
+                Result* result = malloc(sizeof(Result));
+                result->is_ok = false;
+                result->data.err.code = code_val.data.i32_val;
+                result->data.err.message = msg_val.data.string_val;
+                
+                Value result_val = {.type = VAL_RESULT, .data.ptr_val = result};
+                push(vm, result_val);
+                vm->ip++;
+                break;
+            }
+
+            case OP_RESULT_IS_OK: {
+                // Check if result is Ok
+                Value result_val = pop(vm);
+                Result* result = (Result*)result_val.data.ptr_val;
+                
+                Value is_ok = {.type = VAL_BOOL, .data.bool_val = result->is_ok};
+                push(vm, is_ok);
+                vm->ip++;
+                break;
+            }
+
+            case OP_RESULT_IS_ERR: {
+                // Check if result is Err
+                Value result_val = pop(vm);
+                Result* result = (Result*)result_val.data.ptr_val;
+                
+                Value is_err = {.type = VAL_BOOL, .data.bool_val = !result->is_ok};
+                push(vm, is_err);
+                vm->ip++;
+                break;
+            }
+
+            case OP_RESULT_UNWRAP: {
+                // Extract value from Ok, panic on Err
+                Value result_val = pop(vm);
+                Result* result = (Result*)result_val.data.ptr_val;
+                
+                if (!result->is_ok) {
+                    fprintf(stderr, "Runtime error: unwrap called on Err result\n");
+                    fprintf(stderr, "Error code: %d\n", result->data.err.code);
+                    fprintf(stderr, "Error message: %s\n", result->data.err.message);
+                    return 1;
+                }
+                
+                push(vm, result->data.ok_value);
+                vm->ip++;
+                break;
+            }
+
+            case OP_RESULT_UNWRAP_OR: {
+                // Extract value or return default
+                Value default_val = pop(vm);
+                Value result_val = pop(vm);
+                Result* result = (Result*)result_val.data.ptr_val;
+                
+                if (result->is_ok) {
+                    push(vm, result->data.ok_value);
+                } else {
+                    push(vm, default_val);
+                }
+                vm->ip++;
+                break;
+            }
+
+            case OP_RESULT_ERROR_CODE: {
+                // Get error code from Err
+                Value result_val = pop(vm);
+                Result* result = (Result*)result_val.data.ptr_val;
+                
+                if (result->is_ok) {
+                    fprintf(stderr, "Runtime error: error_code called on Ok result\n");
+                    return 1;
+                }
+                
+                Value code = {.type = VAL_I32, .data.i32_val = result->data.err.code};
+                push(vm, code);
+                vm->ip++;
+                break;
+            }
+
+            case OP_RESULT_ERROR_MSG: {
+                // Get error message from Err
+                Value result_val = pop(vm);
+                Result* result = (Result*)result_val.data.ptr_val;
+                
+                if (result->is_ok) {
+                    fprintf(stderr, "Runtime error: error_message called on Ok result\n");
+                    return 1;
+                }
+                
+                Value msg = {.type = VAL_STRING, .data.string_val = strdup(result->data.err.message)};
+                push(vm, msg);
+                vm->ip++;
+                break;
+            }
+
+            case OP_FILE_READ_RESULT: {
+                // Read file with error handling
+                Value path_val = pop(vm);
+                char* content = file_read(path_val.data.string_val);
+                
+                Result* result = malloc(sizeof(Result));
+                if (content) {
+                    // Success - create Ok result
+                    result->is_ok = true;
+                    result->data.ok_value.type = VAL_STRING;
+                    result->data.ok_value.data.string_val = content;
+                } else {
+                    // Error - create Err result
+                    result->is_ok = false;
+                    result->data.err.code = -1;
+                    char* err_msg = malloc(256);
+                    snprintf(err_msg, 256, "Failed to read file: %s", path_val.data.string_val);
+                    result->data.err.message = err_msg;
+                }
+                
+                free(path_val.data.string_val);
+                Value result_val = {.type = VAL_RESULT, .data.ptr_val = result};
+                push(vm, result_val);
+                vm->ip++;
+                break;
+            }
+
+            case OP_FILE_WRITE_RESULT: {
+                // Write file with error handling
+                Value content_val = pop(vm);
+                Value path_val = pop(vm);
+                int success = file_write(path_val.data.string_val, content_val.data.string_val);
+                
+                Result* result = malloc(sizeof(Result));
+                if (success) {
+                    // Success - create Ok result with unit
+                    result->is_ok = true;
+                    result->data.ok_value.type = VAL_UNIT;
+                } else {
+                    // Error - create Err result
+                    result->is_ok = false;
+                    result->data.err.code = -1;
+                    char* err_msg = malloc(256);
+                    snprintf(err_msg, 256, "Failed to write file: %s", path_val.data.string_val);
+                    result->data.err.message = err_msg;
+                }
+                
+                free(path_val.data.string_val);
+                free(content_val.data.string_val);
+                Value result_val = {.type = VAL_RESULT, .data.ptr_val = result};
+                push(vm, result_val);
+                vm->ip++;
+                break;
+            }
+
+            case OP_FILE_APPEND_RESULT: {
+                // Append to file with error handling
+                Value content_val = pop(vm);
+                Value path_val = pop(vm);
+                int success = file_append(path_val.data.string_val, content_val.data.string_val);
+                
+                Result* result = malloc(sizeof(Result));
+                if (success) {
+                    // Success - create Ok result with unit
+                    result->is_ok = true;
+                    result->data.ok_value.type = VAL_UNIT;
+                } else {
+                    // Error - create Err result
+                    result->is_ok = false;
+                    result->data.err.code = -1;
+                    char* err_msg = malloc(256);
+                    snprintf(err_msg, 256, "Failed to append to file: %s", path_val.data.string_val);
+                    result->data.err.message = err_msg;
+                }
+                
+                free(path_val.data.string_val);
+                free(content_val.data.string_val);
+                Value result_val = {.type = VAL_RESULT, .data.ptr_val = result};
+                push(vm, result_val);
                 vm->ip++;
                 break;
             }

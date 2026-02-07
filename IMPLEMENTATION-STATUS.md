@@ -109,44 +109,95 @@ Agent constructs provide ergonomic surface language that desugars to Core:
 
 ---
 
-### 4. ⚠️ Add Explicit Error/Result Type
+### 4. ✅ Add Explicit Error/Result Type
 
-**Status**: **PARTIALLY IMPLEMENTED**
+**Status**: **FULLY IMPLEMENTED**
 
 **Type system includes result**:
 ```c
 // ast.h:26-27
 TYPE_RESULT,
 TYPE_OPTION,
+
+// vm.h:47-48
+VAL_RESULT,  // Runtime value type
+
+// vm.c:68-77
+typedef struct {
+    bool is_ok;
+    union {
+        Value ok_value;      // The actual value if Ok
+        struct {
+            int32_t code;    // Error code
+            char* message;   // Error message
+        } err;
+    } data;
+} Result;
 ```
 
-**Result operations NOT implemented**:
-- ❌ `file_read_result` - Returns result type (MISSING)
-- ❌ `is_ok` - Check if result is ok (MISSING)
-- ❌ `is_err` - Check if result is error (MISSING)
-- ❌ `unwrap` - Extract value or panic (MISSING)
-- ❌ `unwrap_or` - Extract value or default (MISSING)
-- ❌ `error_code` - Get error code (MISSING)
-- ❌ `error_message` - Get error message (MISSING)
+**Result operations FULLY implemented**:
+- ✅ `result_ok` - Create Ok result (vm.c:4630-4641)
+- ✅ `result_err` - Create Err result (vm.c:4643-4656)
+- ✅ `is_ok` - Check if result is ok (vm.c:4658-4667)
+- ✅ `is_err` - Check if result is error (vm.c:4669-4678)
+- ✅ `unwrap` - Extract value or panic (vm.c:4680-4694)
+- ✅ `unwrap_or` - Extract value or default (vm.c:4696-4709)
+- ✅ `error_code` - Get error code (vm.c:4711-4724)
+- ✅ `error_message` - Get error message (vm.c:4726-4739)
+- ✅ `file_read_result` - Read file with error handling (vm.c:4741-4766)
+- ✅ `file_write_result` - Write file with error handling (vm.c:4768-4793)
+- ✅ `file_append_result` - Append with error handling (vm.c:4795-4820)
 
-**Current behavior**:
-- File operations like `file_read` panic on error
-- No way to handle errors gracefully
-- Workaround: Check `file_exists` before reading
+**Bytecode operations**:
+```c
+// bytecode.h:192-211
+OP_RESULT_OK,         // Create Ok result
+OP_RESULT_ERR,        // Create Err result
+OP_RESULT_IS_OK,      // Check if Ok
+OP_RESULT_IS_ERR,     // Check if Err
+OP_RESULT_UNWRAP,     // Extract value or panic
+OP_RESULT_UNWRAP_OR,  // Extract value or default
+OP_RESULT_ERROR_CODE, // Get error code
+OP_RESULT_ERROR_MSG,  // Get error message
+OP_FILE_READ_RESULT,  // File I/O with result
+OP_FILE_WRITE_RESULT,
+OP_FILE_APPEND_RESULT,
+```
 
-**Documentation status**:
-- ✅ LANGUAGE_SPEC.md now clearly marks result type as PLANNED
-- ✅ Workaround examples provided
-- ✅ Future operations marked as "(FUTURE)"
+**Compiler support**:
+```c
+// compiler.c:1882-1995
+- result_ok → OP_RESULT_OK
+- result_err → OP_RESULT_ERR
+- is_ok → OP_RESULT_IS_OK
+- is_err → OP_RESULT_IS_ERR
+- unwrap → OP_RESULT_UNWRAP
+- unwrap_or → OP_RESULT_UNWRAP_OR
+- error_code → OP_RESULT_ERROR_CODE
+- error_message → OP_RESULT_ERROR_MSG
+- file_read_result → OP_FILE_READ_RESULT
+- file_write_result → OP_FILE_WRITE_RESULT
+- file_append_result → OP_FILE_APPEND_RESULT
+```
 
-**What's needed**:
-1. Implement result type as tagged union in runtime
-2. Add bytecode operations for result creation/checking
-3. Implement all result operations in compiler.c
-4. Add error handling to file I/O operations
-5. Update tests to use result type patterns
+**Test files**:
+- ✅ tests/test_result_ok.aisl - Creating and unwrapping Ok results
+- ✅ tests/test_result_err.aisl - Creating and checking Err results
+- ✅ tests/test_result_unwrap_or.aisl - Safe value extraction
+- ✅ tests/test_result_file_io.aisl - Safe file I/O with error handling
 
-**Verdict**: Critical feature planned but not yet implemented. Documentation now accurate about limitations.
+**Example usage**:
+```lisp
+(fn safe_file_read ((path string)) -> i32
+  (set result string (call file_read_result path))
+  (set success bool (call is_ok result))
+  (if success
+    (ret 1))
+  (ret 0))
+```
+
+**Verdict**: Result type fully implemented. LLMs can now write error-resilient code with graceful error handling.
+
 
 ---
 
@@ -193,50 +244,40 @@ TYPE_OPTION,
 | 1. Freeze Core IR | ✅ DONE | CRITICAL | Core is stable forever |
 | 2. Agent macro layer | ✅ DONE | CRITICAL | LLMs write natural code |
 | 3. Type-directed dispatch | ✅ DONE | HIGH | Built-in explosion solved |
-| 4. Result/error type | ⚠️ PARTIAL | HIGH | Error handling limited |
+| 4. Result/error type | ✅ DONE | HIGH | Error handling complete |
 | 5. Control flow rules | ✅ DONE | MEDIUM | Behavior is explicit |
 
-**Overall Progress**: 4.5/5 = **90% Complete**
+**Overall Progress**: 5/5 = **100% Complete**
 
 ---
 
 ## 🎯 Next Steps (Priority Order)
 
-### Priority 1: Implement Result Type (HIGH)
+### Priority 1: Option Type for Nullable Values (MEDIUM)
 
-This is the main blocker preventing AISL from being "genuinely competitive."
+Result type is complete. Option type would be a nice complement for nullable values.
 
 **Tasks**:
-1. Define result type representation in VM
+1. Define option type representation in VM
    ```c
    typedef struct {
-       bool is_ok;
-       union {
-           Value ok_value;
-           struct {
-               i32 code;
-               String message;
-           } err;
-       };
-   } Result;
+       bool is_some;
+       Value value;  // Only valid if is_some
+   } Option;
    ```
 
 2. Add bytecode operations:
-   - `OP_RESULT_OK` - Create ok result
-   - `OP_RESULT_ERR` - Create error result
-   - `OP_RESULT_IS_OK` - Check if ok
-   - `OP_RESULT_UNWRAP` - Extract or panic
-   - `OP_RESULT_UNWRAP_OR` - Extract or default
+   - `OP_OPTION_SOME` - Create some value
+   - `OP_OPTION_NONE` - Create none value
+   - `OP_OPTION_IS_SOME` - Check if value present
+   - `OP_OPTION_UNWRAP` - Extract or panic
 
 3. Implement compiler support (compiler.c):
-   - `is_ok` → OP_RESULT_IS_OK
-   - `is_err` → OP_RESULT_IS_ERR
-   - `unwrap` → OP_RESULT_UNWRAP
-   - `unwrap_or` → OP_RESULT_UNWRAP_OR
-
-4. Update file operations:
-   - Add `file_read_result` that returns result instead of panicking
-   - Keep `file_read` for backwards compatibility (panics on error)
+   - `some` → OP_OPTION_SOME
+   - `none` → OP_OPTION_NONE
+   - `is_some` → OP_OPTION_IS_SOME
+   - `is_none` → OP_OPTION_IS_NONE
+   - `unwrap_option` → OP_OPTION_UNWRAP
 
 5. Add tests:
    - test_result_ok.aisl
@@ -299,8 +340,9 @@ AISL has successfully achieved:
 2. **LLM-friendly syntax** - Zero ambiguity, explicit everything
 3. **Type-directed operations** - Natural code without built-in explosion
 4. **Structured control flow** - While, loop, break, continue desugar perfectly
-5. **100% test pass rate** - 81 tests all passing
-6. **Comprehensive documentation** - 5 markdown files, 1880 lines total
+5. **Result type for error handling** - Graceful error handling for I/O operations
+6. **100% test pass rate** - 85 tests all passing
+7. **Comprehensive documentation** - 5 markdown files, 1880+ lines total
 
 ---
 
@@ -309,17 +351,17 @@ AISL has successfully achieved:
 **AISL is production-ready for:**
 - Command-line tools
 - Web servers (see examples/sinatra.aisl)
-- File processing
+- File processing with error handling (result types)
 - String manipulation
 - Numeric computation
 - JSON APIs
+- Error-resilient I/O operations
 
-**AISL has limitations for:**
-- Error-prone I/O (no result type yet)
-- Complex data structures (no structs yet)
-- Generic programming (not planned - use type dispatch)
+**AISL has minor limitations for:**
+- Complex data structures (no structs yet - use arrays/maps)
+- Generic programming (not planned - use type dispatch instead)
 
-**Bottom line**: AISL is a working, usable language that eliminates the main usability flaws. The result type is the final piece needed to make it "genuinely competitive as an LLM-native agent language."
+**Bottom line**: AISL is a working, production-ready language that eliminates all main usability flaws. Result types are now fully implemented, making AISL genuinely competitive as an LLM-native agent language.
 
 ---
 

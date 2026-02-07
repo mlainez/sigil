@@ -192,6 +192,44 @@ This builds:
 - `bin/aislc` - The AISL compiler
 - `bin/aisl-run` - The AISL runtime/VM
 
+## Testing
+
+AISL has a built-in test framework. All test files in `tests/` directory must follow these requirements:
+
+### Test File Requirements
+
+**CRITICAL:** Every test file (`test_*.aisl`) MUST include:
+1. `test-spec` declarations with `case`, `input`, and `expect` keywords
+2. Functions that return verifiable values (not just print statements)
+3. `meta-note` at the end documenting what the test validates
+
+**Example:**
+```lisp
+(mod test_addition
+  (fn add_numbers ((a i32) (b i32)) -> i32
+    (ret (call add a b)))
+  
+  (test-spec add_numbers
+    (case "adds positive numbers"
+      (input 2 3)
+      (expect 5))
+    (case "adds negative numbers"
+      (input -5 -3)
+      (expect -8)))
+  
+  (meta-note "Tests integer addition with various inputs"))
+```
+
+### Running Tests
+
+```bash
+cd compiler/c
+./bin/aislc ../tests/test_addition.aisl /tmp/test.aislc
+./bin/aisl-run /tmp/test.aislc
+```
+
+The test framework automatically validates that function outputs match expected values.
+
 ## Design Principles
 
 1. **Two-Layer Architecture** - Frozen Core IR + evolving Agent surface language

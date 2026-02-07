@@ -1,0 +1,27 @@
+(mod test_result_err
+  (fn create_err_result ((code i32)) -> i32
+    (set result string (call result_err code "Test error"))
+    (set is_error bool (call is_err result))
+    (if is_error
+      (ret 1))
+    (ret 0))
+  
+  (test-spec create_err_result
+    (case "result_err creates error result"
+      (input 404)
+      (expect 1)))
+  
+  (fn get_error_info ((code i32)) -> i32
+    (set result string (call result_err code "Error message"))
+    (set err_code i32 (call error_code result))
+    (ret err_code))
+  
+  (test-spec get_error_info
+    (case "error_code extracts error code"
+      (input 500)
+      (expect 500))
+    (case "error_code works with zero"
+      (input 0)
+      (expect 0)))
+  
+  (meta-note "Tests result type: creating Err results and extracting error information"))

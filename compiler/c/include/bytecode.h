@@ -189,6 +189,21 @@ typedef enum {
     OP_JSON_LENGTH,       // Get length of JSON array or object: json -> i32
     OP_JSON_TYPE,         // Get type of JSON value: json -> string ("object", "array", "string", "number", "bool", "null")
 
+    // Result Type Operations
+    OP_RESULT_OK,         // Create Ok result: value -> result
+    OP_RESULT_ERR,        // Create Err result: error_code error_message -> result
+    OP_RESULT_IS_OK,      // Check if result is Ok: result -> bool
+    OP_RESULT_IS_ERR,     // Check if result is Err: result -> bool
+    OP_RESULT_UNWRAP,     // Extract value from Ok (panics on Err): result -> value
+    OP_RESULT_UNWRAP_OR,  // Extract value or return default: result default -> value
+    OP_RESULT_ERROR_CODE, // Get error code from Err: result -> i32
+    OP_RESULT_ERROR_MSG,  // Get error message from Err: result -> string
+
+    // File System Operations (Result variants)
+    OP_FILE_READ_RESULT,  // Read file with error handling: path -> result
+    OP_FILE_WRITE_RESULT, // Write file with error handling: path content -> result
+    OP_FILE_APPEND_RESULT,// Append with error handling: path content -> result
+
     // HTTP Client Operations
     OP_HTTP_GET,          // HTTP GET request: url -> response
     OP_HTTP_POST,         // HTTP POST request: url body -> response
@@ -297,6 +312,9 @@ typedef enum {
     OP_PRINT_F32,     // Print f32
     OP_PRINT_F64,     // Print f64
     OP_PRINT_STR,     // Print string
+    OP_PRINT_BOOL,    // Print boolean
+    OP_PRINT_ARRAY,   // Print array (for debugging)
+    OP_PRINT_MAP,     // Print map (for debugging)
 
     // Legacy compatibility (map to new typed versions)
     OP_ADD_INT = OP_ADD_I64,

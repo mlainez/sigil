@@ -176,6 +176,17 @@ Expr* parser_parse_expr(Parser* parser) {
         return expr_lit_bool(val);
     }
 
+    // Handle standalone true/false keywords
+    if (tok.kind == TOK_TRUE) {
+        parser_advance(parser);
+        return expr_lit_bool(true);
+    }
+
+    if (tok.kind == TOK_FALSE) {
+        parser_advance(parser);
+        return expr_lit_bool(false);
+    }
+
     if (tok.kind == TOK_LIT_UNIT) {
         parser_advance(parser);
         parser_expect(parser, TOK_COLON);
@@ -441,6 +452,17 @@ static Expr* parser_parse_value_expr_v3(Parser* parser) {
         char* val = strdup(tok.value.string_val);
         parser_advance(parser);
         return expr_lit_string(val);
+    }
+
+    // Boolean literals
+    if (tok.kind == TOK_TRUE) {
+        parser_advance(parser);
+        return expr_lit_bool(true);
+    }
+
+    if (tok.kind == TOK_FALSE) {
+        parser_advance(parser);
+        return expr_lit_bool(false);
     }
 
     // Variable reference (identifiers are variables)

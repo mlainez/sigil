@@ -512,6 +512,54 @@ This server demonstrates:
 ./compiler/c/bin/aislc --emit-core program.aisl
 ```
 
+## Test Framework
+
+**CRITICAL:** All test files in `tests/` directory matching `test_*.aisl` MUST use the test framework.
+
+### Required Structure
+
+Every test file must include:
+1. **`test-spec`** declarations with `case`, `input`, and `expect` keywords
+2. **Functions that return values** - not just print statements
+3. **`meta-note`** at the end to document what the test validates
+
+### Example Test File
+
+```scheme
+(mod test_addition
+  (fn add_numbers ((a i32) (b i32)) -> i32
+    (ret (call add a b)))
+  
+  (test-spec add_numbers
+    (case "adds positive numbers"
+      (input 2 3)
+      (expect 5))
+    (case "adds negative numbers"
+      (input -5 -3)
+      (expect -8))
+    (case "adds zero"
+      (input 0 0)
+      (expect 0)))
+  
+  (meta-note "Tests integer addition with various inputs"))
+```
+
+### What NOT to Do
+
+**DON'T create test files that:**
+- Only print output without returning verifiable values
+- Return 0 unconditionally without testing anything
+- Lack `test-spec` declarations
+- Use comments (AISL doesn't support comments)
+
+### Test Framework Keywords
+
+- **`test-spec`** - Declares test cases for a function
+- **`case`** - Individual test case with description
+- **`input`** - Arguments to pass to the function
+- **`expect`** - Expected return value
+- **`meta-note`** - Documents what the test file validates
+
 ## File Extensions
 
 - `.aisl` - AISL-Agent source files

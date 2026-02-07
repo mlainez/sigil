@@ -201,6 +201,8 @@ static const char* get_typed_operation(const char* short_name, TypeKind type) {
             case TYPE_F64: return "io_print_f64";
             case TYPE_BOOL: return "io_print_bool";
             case TYPE_STRING: return "io_print_str";
+            case TYPE_ARRAY: return "io_print_array";
+            case TYPE_MAP: return "io_print_map";
             default: return "io_print_i32";
         }
     }
@@ -243,8 +245,9 @@ void compile_lit_float(Compiler* comp, Expr* expr) {
 void compile_lit_bool(Compiler* comp, Expr* expr) {
     Instruction inst = {
         .opcode = OP_PUSH_BOOL,
-        .operand.bool_val = expr->data.bool_val
+        .operand = {.int_val = 0}  // Zero-initialize union first
     };
+    inst.operand.bool_val = expr->data.bool_val;  // Then set bool value
     bytecode_emit(comp->program, inst);
 }
 
@@ -731,7 +734,7 @@ void compile_apply(Compiler* comp, Expr* expr) {
             exit(1);
         }
         compile_expr(comp, expr->data.apply.args->expr);
-        Instruction inst = {.opcode = OP_PRINT_DEBUG};  // Reuse PRINT_DEBUG for booleans
+        Instruction inst = {.opcode = OP_PRINT_BOOL};
         bytecode_emit(comp->program, inst);
         return;
     }
@@ -743,6 +746,28 @@ void compile_apply(Compiler* comp, Expr* expr) {
         }
         compile_expr(comp, expr->data.apply.args->expr);
         Instruction inst = {.opcode = OP_PRINT_STR};
+        bytecode_emit(comp->program, inst);
+        return;
+    }
+
+    if (strcmp(name, "io_print_array") == 0) {
+        if (expr->data.apply.args == NULL || expr->data.apply.args->next != NULL) {
+            fprintf(stderr, "io_print_array expects exactly 1 argument\n");
+            exit(1);
+        }
+        compile_expr(comp, expr->data.apply.args->expr);
+        Instruction inst = {.opcode = OP_PRINT_ARRAY};
+        bytecode_emit(comp->program, inst);
+        return;
+    }
+
+    if (strcmp(name, "io_print_map") == 0) {
+        if (expr->data.apply.args == NULL || expr->data.apply.args->next != NULL) {
+            fprintf(stderr, "io_print_map expects exactly 1 argument\n");
+            exit(1);
+        }
+        compile_expr(comp, expr->data.apply.args->expr);
+        Instruction inst = {.opcode = OP_PRINT_MAP};
         bytecode_emit(comp->program, inst);
         return;
     }
@@ -1875,6 +1900,109 @@ void compile_apply(Compiler* comp, Expr* expr) {
             exit(1);
         }
         Instruction inst = {.opcode = OP_FILE_DELETE};
+        bytecode_emit(comp->program, inst);
+        return;
+    }
+    
+    // Result type operations
+    if (strcmp(name, "result_ok") == 0) {
+        if (compile_args(comp, expr->data.apply.args) != 1) {
+            fprintf(stderr, "result_ok expects 1 argument (value)\n");
+            exit(1);
+        }
+        Instruction inst = {.opcode = OP_RESULT_OK};
+        bytecode_emit(comp->program, inst);
+        return;
+    }
+    if (strcmp(name, "result_err") == 0) {
+        if (compile_args(comp, expr->data.apply.args) != 2) {
+            fprintf(stderr, "result_err expects 2 arguments (error_code, error_message)\n");
+            exit(1);
+        }
+        Instruction inst = {.opcode = OP_RESULT_ERR};
+        bytecode_emit(comp->program, inst);
+        return;
+    }
+    if (strcmp(name, "is_ok") == 0) {
+        if (compile_args(comp, expr->data.apply.args) != 1) {
+            fprintf(stderr, "is_ok expects 1 argument (result)\n");
+            exit(1);
+        }
+        Instruction inst = {.opcode = OP_RESULT_IS_OK};
+        bytecode_emit(comp->program, inst);
+        return;
+    }
+    if (strcmp(name, "is_err") == 0) {
+        if (compile_args(comp, expr->data.apply.args) != 1) {
+            fprintf(stderr, "is_err expects 1 argument (result)\n");
+            exit(1);
+        }
+        Instruction inst = {.opcode = OP_RESULT_IS_ERR};
+        bytecode_emit(comp->program, inst);
+        return;
+    }
+    if (strcmp(name, "unwrap") == 0) {
+        if (compile_args(comp, expr->data.apply.args) != 1) {
+            fprintf(stderr, "unwrap expects 1 argument (result)\n");
+            exit(1);
+        }
+        Instruction inst = {.opcode = OP_RESULT_UNWRAP};
+        bytecode_emit(comp->program, inst);
+        return;
+    }
+    if (strcmp(name, "unwrap_or") == 0) {
+        if (compile_args(comp, expr->data.apply.args) != 2) {
+            fprintf(stderr, "unwrap_or expects 2 arguments (result, default_value)\n");
+            exit(1);
+        }
+        Instruction inst = {.opcode = OP_RESULT_UNWRAP_OR};
+        bytecode_emit(comp->program, inst);
+        return;
+    }
+    if (strcmp(name, "error_code") == 0) {
+        if (compile_args(comp, expr->data.apply.args) != 1) {
+            fprintf(stderr, "error_code expects 1 argument (result)\n");
+            exit(1);
+        }
+        Instruction inst = {.opcode = OP_RESULT_ERROR_CODE};
+        bytecode_emit(comp->program, inst);
+        return;
+    }
+    if (strcmp(name, "error_message") == 0) {
+        if (compile_args(comp, expr->data.apply.args) != 1) {
+            fprintf(stderr, "error_message expects 1 argument (result)\n");
+            exit(1);
+        }
+        Instruction inst = {.opcode = OP_RESULT_ERROR_MSG};
+        bytecode_emit(comp->program, inst);
+        return;
+    }
+    
+    // File operations with result type
+    if (strcmp(name, "file_read_result") == 0) {
+        if (compile_args(comp, expr->data.apply.args) != 1) {
+            fprintf(stderr, "file_read_result expects 1 argument (path)\n");
+            exit(1);
+        }
+        Instruction inst = {.opcode = OP_FILE_READ_RESULT};
+        bytecode_emit(comp->program, inst);
+        return;
+    }
+    if (strcmp(name, "file_write_result") == 0) {
+        if (compile_args(comp, expr->data.apply.args) != 2) {
+            fprintf(stderr, "file_write_result expects 2 arguments (path, content)\n");
+            exit(1);
+        }
+        Instruction inst = {.opcode = OP_FILE_WRITE_RESULT};
+        bytecode_emit(comp->program, inst);
+        return;
+    }
+    if (strcmp(name, "file_append_result") == 0) {
+        if (compile_args(comp, expr->data.apply.args) != 2) {
+            fprintf(stderr, "file_append_result expects 2 arguments (path, content)\n");
+            exit(1);
+        }
+        Instruction inst = {.opcode = OP_FILE_APPEND_RESULT};
         bytecode_emit(comp->program, inst);
         return;
     }

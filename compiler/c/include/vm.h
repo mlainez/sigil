@@ -44,6 +44,8 @@ typedef enum {
     
     VAL_F32,
     VAL_F64,
+    
+    VAL_RESULT,
 } ValueType;
 
 // ============================================
@@ -64,6 +66,7 @@ typedef enum {
     OBJ_TCP_SOCKET,
     OBJ_UDP_SOCKET,
     OBJ_FUTURE,
+    OBJ_RESULT,
 } ObjType;
 
 typedef struct Obj Obj;

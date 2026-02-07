@@ -1,0 +1,35 @@
+(mod test_print_bool
+  (fn returns_true () -> i32
+    (set val bool true)
+    (if val
+      (ret 1))
+    (ret 0))
+  
+  (test-spec returns_true
+    (case "true literal evaluates to true"
+      (input)
+      (expect 1)))
+  
+  (fn returns_false () -> i32
+    (set val bool false)
+    (if val
+      (ret 1))
+    (ret 0))
+  
+  (test-spec returns_false
+    (case "false literal evaluates to false"
+      (input)
+      (expect 0)))
+  
+  (fn bool_from_comparison () -> i32
+    (set result bool (call lt 5 10))
+    (if result
+      (ret 1))
+    (ret 0))
+  
+  (test-spec bool_from_comparison
+    (case "comparison returns boolean that evaluates correctly"
+      (input)
+      (expect 1)))
+  
+  (meta-note "Tests boolean literals and comparisons returning booleans"))

@@ -1,0 +1,30 @@
+(mod test_result_ok
+  (fn create_ok_result ((value i32)) -> i32
+    (set result string (call result_ok value))
+    (set is_success bool (call is_ok result))
+    (if is_success
+      (ret 1))
+    (ret 0))
+  
+  (test-spec create_ok_result
+    (case "result_ok creates successful result"
+      (input 42)
+      (expect 1)))
+  
+  (fn unwrap_ok_value ((value i32)) -> i32
+    (set result string (call result_ok value))
+    (set extracted i32 (call unwrap result))
+    (ret extracted))
+  
+  (test-spec unwrap_ok_value
+    (case "unwrap extracts value from ok result"
+      (input 100)
+      (expect 100))
+    (case "unwrap works with zero"
+      (input 0)
+      (expect 0))
+    (case "unwrap works with negative"
+      (input -50)
+      (expect -50)))
+  
+  (meta-note "Tests result type: creating Ok results and unwrapping values"))
