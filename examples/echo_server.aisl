@@ -1,21 +1,17 @@
 (module echo_server
+  (import string_utils)
+  
   (fn handle_connection client_sock string -> int
     (set request string (call tcp_receive client_sock 4096))
     (set lines array (call string_split request "\n"))
     (set line_count int (call array_length lines))
     (set path string "/")
-    (if (call op_gt_i32 line_count 0)
-      (then
-        (set first_line string (call array_get lines 0))
-        (set parts array (call string_split first_line " "))
-        (set part_count int (call array_length parts))
-        (if (call op_gt_i32 part_count 1)
-          (then
-            (set path string (call array_get parts 1)))
-          (else
-            (set path string "ERROR"))))
-      (else
-        (set path string "NOLINES")))
+    (if (call gt line_count 0)
+      (set first_line string (call array_get lines 0))
+      (set parts array (call string_split first_line " "))
+      (set part_count int (call array_length parts))
+      (if (call gt part_count 1)
+        (set path string (call array_get parts 1))))
     (set response string "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: ")
     (set path_len int (call string_length path))
     (set path_len_str string (call string_from_i32 path_len))

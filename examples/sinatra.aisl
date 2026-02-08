@@ -1,4 +1,6 @@
 (module sinatra
+  (import string_utils)
+  
   (fn handle_connection client_sock string -> int
     (set request string (call tcp_receive client_sock 4096))
     (set has_get_hello_json bool (call string_contains request "GET /hello.json "))
@@ -7,8 +9,10 @@
     (set html_resp string "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nContent-Length: 41\r\n\r\n<html><body>Hello from AISL</body></html>")
     (set notfound_resp string "HTTP/1.1 404 Not Found\r\nContent-Type: text/plain\r\nContent-Length: 9\r\n\r\nNot Found")
     (set response string notfound_resp)
-    (set response string (call if_string has_get_hello html_resp response))
-    (set response string (call if_string has_get_hello_json json_resp response))
+    (if has_get_hello
+      (set response string html_resp))
+    (if has_get_hello_json
+      (set response string json_resp))
     (call tcp_send client_sock response)
     (call tcp_close client_sock)
     (ret 0))
