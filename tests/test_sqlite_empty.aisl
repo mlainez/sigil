@@ -1,0 +1,58 @@
+(module test_sqlite_empty
+  (import sqlite)
+  
+  (fn query_empty_table -> int
+    (set db process (call open ":memory:"))
+    (call exec db "CREATE TABLE test (id INTEGER, val TEXT);")
+    (set rows array (call query db "SELECT * FROM test;"))
+    (set count int (call array_length rows))
+    (call close db)
+    (ret count))
+  
+  (fn query_with_rows -> int
+    (set db process (call open ":memory:"))
+    (call exec db "CREATE TABLE test (id INTEGER, val TEXT);")
+    (call exec db "INSERT INTO test VALUES (1, 'Alice');")
+    (call exec db "INSERT INTO test VALUES (2, 'Bob');")
+    (set rows array (call query db "SELECT * FROM test;"))
+    (set count int (call array_length rows))
+    (call close db)
+    (ret count))
+  
+  (fn query_first_row -> string
+    (set db process (call open ":memory:"))
+    (call exec db "CREATE TABLE test (id INTEGER, val TEXT);")
+    (call exec db "INSERT INTO test VALUES (1, 'Alice');")
+    (set rows array (call query db "SELECT * FROM test;"))
+    (set first_row array (call array_get rows 0))
+    (set val string (call array_get first_row 1))
+    (call close db)
+    (ret val))
+  
+  (test-spec query_empty_table
+    (case "empty table returns zero rows"
+      (input)
+      (expect 0)))
+  
+  (test-spec query_with_rows
+    (case "table with 2 rows returns count 2"
+      (input)
+      (expect 2)))
+  
+  (test-spec query_first_row
+    (case "retrieves first row value correctly"
+      (input)
+      (expect "Alice")))
+  
+  (meta-note "Tests SQLite empty query result handling.
+  
+  This validates the fix for the bug where empty SQLite query results returned
+  an array of length 1 containing garbage data (typically 'j' character from
+  uninitialized memory) instead of an empty array.
+  
+  The issue was that string_split on an empty string returns an array with one
+  empty string element. The fix checks if the output string is empty before
+  splitting and immediately returns an empty array.
+  
+  Critical test case is query_empty_table which ensures empty queries return
+  array length 0 (not 1 with garbage data)."))

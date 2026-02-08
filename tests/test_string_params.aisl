@@ -1,0 +1,49 @@
+(module test_string_params
+  (fn identity text string -> string
+    (ret text))
+  
+  (fn concat_twice a string b string -> string
+    (set result string (call string_concat a b))
+    (ret result))
+  
+  (fn chain text string -> string
+    (set temp string (call identity text))
+    (set result string (call identity temp))
+    (ret result))
+  
+  (test-spec identity
+    (case "passes empty string"
+      (input "")
+      (expect ""))
+    (case "passes simple string"
+      (input "hello")
+      (expect "hello"))
+    (case "passes string with spaces"
+      (input "hello world")
+      (expect "hello world")))
+  
+  (test-spec concat_twice
+    (case "concatenates two strings"
+      (input "hello" " world")
+      (expect "hello world"))
+    (case "concatenates with empty"
+      (input "test" "")
+      (expect "test")))
+  
+  (test-spec chain
+    (case "passes string through multiple function calls"
+      (input "test")
+      (expect "test"))
+    (case "passes empty string through chain"
+      (input "")
+      (expect "")))
+  
+  (meta-note "Tests string parameter passing through multiple function calls.
+  
+  This validates the fix for the double-free crash that occurred when strings
+  were passed as parameters through multiple function calls. The issue was that
+  OP_RETURN freed ALL locals including parameters, causing a double-free when
+  the caller returned and tried to free the same memory.
+  
+  The fix tracks param_count in Function metadata and CallFrame, ensuring only
+  non-parameter locals are freed on function return."))
