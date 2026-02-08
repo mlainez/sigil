@@ -179,7 +179,6 @@
     (call print "Initializing AISL Todo App...")
     (set db process (call open "todos.db"))
     (call exec db "CREATE TABLE IF NOT EXISTS todos (id INTEGER PRIMARY KEY, text TEXT, done INTEGER DEFAULT 0);")
-    (call exec db "INSERT OR IGNORE INTO todos (id, text, done) VALUES (1, 'Welcome! Delete this and add your own tasks', 0);")
     (call print "Database initialized")
     (call print "Starting server on http://localhost:8080")
     (set server socket (call tcp_listen 8080))

@@ -1554,6 +1554,12 @@ int vm_run(VM* vm) {
                 Value ret = pop(vm);
                 CallFrame frame = vm->call_stack[--vm->call_sp];
                 
+                // FIXME: Temporarily disabled string freeing to fix double-free crash
+                // The issue is that when passing strings between functions, both the
+                // caller and callee's local variables may reference the same memory,
+                // causing a double-free when both functions return.
+                // TODO: Implement proper reference counting or garbage collection
+                /*
                 // Free all string locals before resetting stack pointer
                 uint32_t fp = frame.frame_pointer;
                 uint32_t local_count = frame.local_count;
@@ -1563,6 +1569,7 @@ int vm_run(VM* vm) {
                         vm->stack[fp + i].data.string_val = NULL;
                     }
                 }
+                */
                 
                 vm->sp = frame.frame_pointer;
 
