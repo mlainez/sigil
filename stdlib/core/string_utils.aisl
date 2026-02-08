@@ -81,7 +81,7 @@
     (set i int 0)
     
     (while (call le i max_pos)
-      (set substring string (call string_slice haystack i (call add i needle_len)))
+      (set substring string (call string_slice haystack i needle_len))
       (set matches bool (call string_equals substring needle))
       (if matches
         (ret true))
@@ -99,7 +99,8 @@
       (set part string (call array_get parts i))
       (set result string (call string_concat result part))
       (set is_last bool (call eq i (call sub parts_len 1)))
-      (ifnot is_last
+      (set not_last bool (call not is_last))
+      (if not_last
         (set result string (call string_concat result new)))
       (set i int (call add i 1)))
     
