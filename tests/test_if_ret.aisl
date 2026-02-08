@@ -5,10 +5,15 @@
       (ret "one hundred"))
     (ret "not one hundred"))
   
-  (fn main -> int
-    (call print "Testing if with ret:")
-    (set result string (call test_if_return 100))
-    (call print result)
-    (set result2 string (call test_if_return 99))
-    (call print result2)
-    (ret 0)))
+  (test-spec test_if_return
+    (case "returns 'one hundred' when x is 100"
+      (input 100)
+      (expect "one hundred"))
+    (case "returns 'not one hundred' when x is not 100"
+      (input 99)
+      (expect "not one hundred"))
+    (case "returns 'not one hundred' for negative numbers"
+      (input -5)
+      (expect "not one hundred")))
+  
+  (meta-note "CRITICAL: Tests nested return in if blocks - regression test for fixed compiler bug"))

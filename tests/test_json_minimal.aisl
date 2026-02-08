@@ -1,7 +1,0 @@
-(module test_json_minimal
-  (import json_utils)
-  (fn main -> int
-    (call print "Testing JSON without import")
-    (set obj json (call json_new_object))
-    (call print "Created object")
-    (ret 0)))

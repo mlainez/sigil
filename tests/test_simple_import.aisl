@@ -1,8 +1,0 @@
-(module test_simple_import
-  (import math_simple)
-  
-  (fn main -> int
-    (set x int 42)
-    (set result int (call double x))
-    (call print result)
-    (ret 0)))

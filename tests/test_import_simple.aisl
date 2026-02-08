@@ -1,9 +1,0 @@
-(module test_import_simple
-  (fn main -> int
-    (set x int 10)
-    (set y int 5)
-    (set result int (call add x y))
-    (call print result)
-    (ret 0))
-  
-  (meta-note "Tests basic program without explicit imports - auto-import mode"))

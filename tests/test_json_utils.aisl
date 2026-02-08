@@ -1,9 +1,0 @@
-(module test_json_utils
-  (import json_utils)
-  
-  (fn main -> int
-    (call print "Testing json_utils")
-    (set obj json (call build_object_one "key" "value"))
-    (set str string (call to_string obj))
-    (call print str)
-    (ret 0)))

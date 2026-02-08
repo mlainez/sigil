@@ -1,24 +1,31 @@
 (module test_json_type
   (import json_utils)
-  (fn main -> int
-    (call print "Testing JSON type detection:")
-    
+  
+  (fn get_object_type -> string
     (set obj map (call json_new_object))
-    (call print "Created object")
-    
-    (set type_str string (call json_type obj))
-    (call print "Type string:")
-    (call print type_str)
-    
-    (set check bool (call string_eq type_str "object"))
-    (call print "String comparison result:")
-    (call print check)
-    
+    (ret (call json_type obj)))
+  
+  (fn check_is_array -> bool
     (set arr array (call json_new_array))
-    (call print "Created array")
-    
-    (set is_arr bool (call is_array arr))
-    (call print "Array check:")
-    (call print is_arr)
-    
-    (ret 0)))
+    (ret (call is_array arr)))
+  
+  (fn check_is_object -> bool
+    (set obj map (call json_new_object))
+    (ret (call is_object obj)))
+  
+  (test-spec get_object_type
+    (case "returns 'object' for json objects"
+      (input)
+      (expect "object")))
+  
+  (test-spec check_is_array
+    (case "returns true for json arrays"
+      (input)
+      (expect true)))
+  
+  (test-spec check_is_object
+    (case "returns true for json objects"
+      (input)
+      (expect true)))
+  
+  (meta-note "Tests JSON type detection functions: json_type, is_array, is_object"))

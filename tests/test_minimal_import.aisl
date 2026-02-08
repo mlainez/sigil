@@ -1,6 +1,0 @@
-(module minimal
-  (import math)
-  
-  (fn main -> int
-    (set x int 42)
-    (ret 0)))

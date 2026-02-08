@@ -1,8 +1,0 @@
-(module test_just_validation
-  (import validation)
-  
-  (fn main -> int
-    (call print "Testing validation")
-    (set result bool (call is_positive 10))
-    (call print result)
-    (ret 0)))

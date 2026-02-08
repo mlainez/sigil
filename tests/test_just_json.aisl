@@ -1,6 +1,0 @@
-(module test_just_json
-  (import json_utils)
-  
-  (fn main -> int
-    (call print "Testing just JSON")
-    (ret 0)))

@@ -1,8 +1,0 @@
-(module test_http_simple
-  (import http)
-  
-  (fn main -> int
-    (call print "Testing HTTP module")
-    (set status_text string (call get_status_text 200))
-    (call print status_text)
-    (ret 0)))

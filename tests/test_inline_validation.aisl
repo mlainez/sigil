@@ -2,10 +2,15 @@
   (fn is_positive x int -> bool
     (ret (call gt x 0)))
   
-  (fn main -> int
-    (call print "Testing inline validation")
-    (set result bool (call is_positive 42))
-    (if result
-      (call print "PASS")
-      (call print "FAIL"))
-    (ret 0)))
+  (test-spec is_positive
+    (case "returns true for positive numbers"
+      (input 42)
+      (expect true))
+    (case "returns false for zero"
+      (input 0)
+      (expect false))
+    (case "returns false for negative numbers"
+      (input -5)
+      (expect false)))
+  
+  (meta-note "Tests inline is_positive function without module imports"))
