@@ -1,60 +1,81 @@
 # AISL Tools
 
-This directory contains utility tools for AISL development.
+This directory contains utility tools for AISL development, all written in **pure AISL** following the "eat your own dog food" philosophy.
 
-## Test Runner
+## Test Runners (Pure AISL)
 
-**Current Implementation:** `run_tests.sh` (Bash script)
+### Quick Testing: `test_runner_limited.aisl`
 
-A shell script that discovers and runs all test-spec tests by compiling them with the AISL compiler.
+Tests a hardcoded set of 5 test files. Fast and reliable for quick validation.
 
 **Usage:**
 ```bash
-# Run all tests
-./tools/run_tests.sh
+# Compile
+./compiler/c/bin/aislc tools/test_runner_limited.aisl /tmp/test_runner_limited.aislc
 
-# Run tests matching a pattern
-./tools/run_tests.sh string      # Run string-related tests
-./tools/run_tests.sh test_ffi    # Run FFI tests
-
-# Verbose mode (show compilation errors)
-VERBOSE=1 ./tools/run_tests.sh
+# Run
+./compiler/c/bin/aisl-run /tmp/test_runner_limited.aislc
 ```
 
-**Features:**
-- ✓ Discovers all `test_*.aisl` files in `tests/` directory
-- ✓ Pattern filtering support
-- ✓ Color-coded output (green = pass, red = fail)
-- ✓ Summary statistics (total, passed, failed)
-- ✓ Verbose mode for debugging
+**Output:**
+```
+Testing 5 files...
+  ✓ test_simple
+  ✓ test_if
+  ✓ test_while_simple
+  ✓ test_string_simple
+  ✓ test_array
+Passed: 5 / 5
+```
 
-**Exit codes:**
-- `0` = All tests passed
-- `1` = One or more tests failed or no tests found
+**Status:** ✅ Works perfectly
 
 ---
 
-## Future: Pure AISL Test Runner
+### Full Test Suite: `test_runner_simple_loop.aisl`
 
-**Planned:** `test_runner.aisl` (Pure AISL implementation)
+Discovers and tests ALL test files in `tests/` directory using `dir_list`. Simple output format.
 
-Once the VM supports command-line arguments and process output capture, the test runner will be rewritten in pure AISL to follow the "eating our own dog food" philosophy.
+**Usage:**
+```bash
+# Compile
+./compiler/c/bin/aislc tools/test_runner_simple_loop.aisl /tmp/test_runner.aislc
 
-**Why wait:**
-- VM needs `process_get_args` builtin for command-line argument access
-- VM needs `process_exec` to capture stdout/stderr
-- Current Bash script is a temporary pragmatic solution
+# Run (takes ~2 minutes for 120 tests)
+./compiler/c/bin/aisl-run /tmp/test_runner.aislc
+```
 
-**When complete, the Bash script will be removed.**
+**Output:**
+```
+Getting test files...
+120
+Running tests...
+Done:
+120
+```
+
+**Status:** ✅ Works perfectly - Tests all 120 files successfully
+
+---
+
+### Advanced Test Runner: `test_runner.aisl`
+
+Full-featured test runner with fancy formatting, test name extraction, and detailed output.
+
+**Status:** ⚠️ KNOWN ISSUE - Stack overflow with full 120-test suite
+- **Cause:** Complex string operations (`string_replace` + multiple `string_concat` in loop)
+- **Workaround:** Use `test_runner_simple_loop.aisl` instead
+
+**When to use:** Once stack overflow issue is resolved, this will be the primary runner.
 
 ---
 
 ## Design Philosophy
 
-All tooling SHOULD be written in pure AISL to:
-1. Dogfood the language - discover limitations immediately
-2. Provide working examples for LLMs
-3. Eliminate external dependencies
-4. Prove AISL's completeness
+**ALL tooling MUST be written in pure AISL to:**
+1. **Dogfood the language** - Discover limitations immediately
+2. **Provide working examples** - LLMs learn from real code
+3. **Eliminate external dependencies** - No Python, Bash, Node.js, etc.
+4. **Prove AISL's completeness** - If it can't be done in AISL, fix AISL!
 
-The test runner is the ONLY exception due to missing VM features. Once those features exist, it MUST be rewritten in AISL.
+**No exceptions.** The previous Bash script (`run_tests.sh`) has been deleted.

@@ -905,6 +905,59 @@ AISL has a built-in test framework. Add tests to verify behavior:
 
 ## Common Pitfalls for LLMs
 
+### ⚠️ CRITICAL: If statement with multiple statements bug
+
+**PARSER BUG:** The current parser treats all statements after an `if` condition as part of the then-branch, making it **impossible to have an else-branch** with the intuitive syntax.
+
+### ❌ Don't: Use multiple statements after if condition
+
+```lisp
+; This looks like if-then-else but ALL THREE statements execute!
+(if condition
+  (call print "then 1")
+  (set x int 1)        ; ❌ Always executes regardless of condition!
+  (call print "else")) ; ❌ Always executes regardless of condition!
+```
+
+**What happens:** The parser treats everything after the condition as a single sequence in the then-branch. There's no way to specify an else-branch.
+
+### ✅ Do: Use the result variable pattern
+
+```lisp
+; Store condition result in a variable
+(set success bool (call compile_test file))
+
+; Then-branch: only executes if true
+(if success
+  (call print "✓ passed")
+  (set passed int (call add passed 1)))
+
+; Else-branch: only executes if false
+(if (call not success)
+  (call print "✗ failed"))
+```
+
+**Why this works:** Each `if` is independent, and we control which one executes by using `(call not ...)`.
+
+### Alternative: Use result variable with multiple actions
+
+```lisp
+; Set a default value
+(set message string "failed")
+
+; Override if condition is true
+(if (call gt x 5)
+  (set message string "success")
+  (set x int 0))
+
+; message is now either "failed" or "success"
+(call print message)
+```
+
+**Status:** This is a known parser limitation. The documented syntax `(if condition then_expr else_expr)` from AISL-AGENT.md is **not yet implemented** in the v3 parser. For now, use the workarounds above.
+
+---
+
 ### ❌ Don't: Use old 'mod' keyword for modules
 
 ```lisp

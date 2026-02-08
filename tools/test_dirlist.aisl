@@ -1,8 +1,0 @@
-(module test_dirlist
-  (fn main -> int
-    (call print "Testing dir_list...")
-    (set files array (call dir_list "tests"))
-    (set len int (call array_length files))
-    (call print "Found files:")
-    (call print len)
-    (ret 0)))
