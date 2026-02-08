@@ -1,0 +1,88 @@
+@(transformation-plan
+  @(meta
+    @(version "1.0")
+    @(date "2026-02-08")
+    @(goal "Optimize AISL compiler for LLM token efficiency + implement missing features")
+    @(philosophy "If it CAN be AISL, it MUST be AISL"))
+  
+  @(directives
+    @(ffi-priority "CRITICAL - Top implementation priority")
+    @(testing "Continuous with test-spec compliance")
+    @(backward-compat "NONE - Break everything for efficiency")
+    @(global-vars "REJECTED - Use explicit state passing")
+    @(http-websocket "Move to pure AISL using TCP primitives + TLS")
+    @(threading "OS threads (pthread) for predictability"))
+  
+  @(phases
+    @(phase-1-ffi
+      @(priority "CRITICAL")
+      @(vm-changes "Add 4 FFI opcodes: LOAD, CALL, AVAILABLE, CLOSE")
+      @(implementation "dlopen/dlsym/dlclose")
+      @(type-support "int64, double, char* only (v1)")
+      @(stdlib-module "stdlib/sys/ffi.aisl")
+      @(tests "test_ffi_*.aisl (5 tests)")
+      @(lines-added "+80 vm.c, +80 ffi.aisl"))
+    
+    @(phase-2-tls
+      @(priority "HIGH")
+      @(opcode "OP_TCP_TLS_CONNECT")
+      @(implementation "OpenSSL SSL_connect")
+      @(purpose "Enable https:// and wss://")
+      @(tests "test_tls_*.aisl (1 test)")
+      @(lines-added "+120 vm.c"))
+    
+    @(phase-3-async-channels
+      @(priority "MEDIUM")
+      @(opcodes "ASYNC_SPAWN, ASYNC_AWAIT, CHANNEL_NEW, CHANNEL_SEND, CHANNEL_RECV")
+      @(implementation "pthread for threads, mutex+cond for channels")
+      @(stdlib-modules "stdlib/core/async.aisl, stdlib/core/channel.aisl")
+      @(tests "test_async_*.aisl (4), test_channel_*.aisl (4)")
+      @(lines-added "+200 vm.c, +220 stdlib"))
+    
+    @(phase-4-math
+      @(priority "LOW")
+      @(opcodes "ABS, MIN, MAX, POW, SQRT for int/float")
+      @(implementation "math.h wrappers")
+      @(tests "test_math_*.aisl (3)")
+      @(lines-added "+100 vm.c"))
+    
+    @(phase-5-http-websocket-pure
+      @(priority "HIGH")
+      @(strategy "Reimplement in pure AISL using TCP+TLS primitives")
+      @(delete-from-vm "HTTP functions (180 lines), WebSocket (240 lines)")
+      @(stdlib-modules "stdlib/net/http_pure.aisl, stdlib/net/websocket_pure.aisl")
+      @(tests "test_http_pure_*.aisl (5), test_websocket_pure_*.aisl (4)")
+      @(lines-deleted "-420 vm.c")
+      @(lines-added "+700 stdlib"))
+    
+    @(phase-6-delete-dead-code
+      @(priority "HIGH")
+      @(delete-json "vm.c lines 278-648 (370 lines)")
+      @(delete-base64 "vm.c lines 1070-1129 (56 lines)")
+      @(delete-type-checker "type_checker.c (237), type_checker.h (23)")
+      @(delete-opcodes "44 unused opcodes from bytecode.h")
+      @(total-deleted "-686 lines"))
+    
+    @(phase-7-optimize-comments
+      @(priority "LOW")
+      @(strategy "Transform to terse machine-parseable format")
+      @(pattern "// function: input->output, properties")
+      @(files "vm.c, compiler.c, parser.c, lexer.c, all headers")
+      @(token-savings "~30% comment reduction")))
+  
+  @(metrics
+    @(c-code-before "12,657 lines")
+    @(c-code-after "11,067 lines")
+    @(c-reduction "-1,590 lines (-13%)")
+    @(aisl-added "+1,000 lines stdlib")
+    @(tests-added "+21 test files")
+    @(vm-reduction "4,379 -> 3,393 (-23%)")
+    @(token-savings "~15% total"))
+  
+  @(critical-notes
+    @(note "FFI implementation must come first - enables all future work")
+    @(note "TLS primitive needed for https:// and wss://")
+    @(note "Global variables rejected - use explicit state passing")
+    @(note "HTTP/WebSocket move to pure AISL after FFI+TLS ready")
+    @(note "All tests must be test-spec compliant")
+    @(note "Continuous testing - verify after each major change")))

@@ -1,0 +1,13 @@
+(module ffi
+  
+  (fn load library_name string -> int
+    (ret (call ffi_load library_name)))
+  
+  (fn available library_name string -> bool
+    (ret (call ffi_available library_name)))
+  
+  (fn close handle int -> int
+    (call ffi_close handle)
+    (ret 0))
+  
+  (meta-note "FFI wrapper for calling native C libraries. Supports int64, double, char* types. Returns negative values on error."))

@@ -10,7 +10,7 @@ BIN_DIR = bin
 EXAMPLES_DIR = ../../examples
 
 # Compiler executable
-COMPILER_SRCS = compiler.c lexer.c parser.c ast.c bytecode.c type_checker.c ast_export.c test_framework.c desugar.c module_loader.c
+COMPILER_SRCS = compiler.c lexer.c parser.c ast.c bytecode.c ast_export.c test_framework.c desugar.c module_loader.c
 COMPILER_OBJS = $(addprefix $(BUILD_DIR)/, $(COMPILER_SRCS:.c=.o))
 COMPILER = $(BIN_DIR)/aislc
 

@@ -1,7 +1,26 @@
 #include "ast_export.h"
-#include "type_checker.h"
 #include "test_framework.h"
 #include <string.h>
+
+// Simple type to string converter
+static const char* type_to_string(Type* type) {
+    if (!type) return "unit";
+    switch (type->kind) {
+        case TYPE_INT: return "int";
+        case TYPE_FLOAT: return "float";
+        case TYPE_STRING: return "string";
+        case TYPE_BOOL: return "bool";
+        case TYPE_UNIT: return "unit";
+        case TYPE_BYTES: return "bytes";
+        case TYPE_ARRAY: return "array";
+        case TYPE_MAP: return "map";
+        case TYPE_JSON: return "json";
+        case TYPE_OPTION: return "option";
+        case TYPE_RESULT: return "result";
+        case TYPE_CHANNEL: return "channel";
+        default: return "unknown";
+    }
+}
 
 // Export type to S-expression
 void ast_export_type(FILE* out, Type* type) {

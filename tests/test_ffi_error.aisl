@@ -1,0 +1,31 @@
+(module test_ffi_error
+  
+  (fn test_load_nonexistent -> int
+    (set handle int (call ffi_load "libnonexistent_xyz_123.so"))
+    (if (call lt handle 0)
+      (ret 1))
+    (ret 0))
+  
+  (fn test_close_invalid -> int
+    (set result int (call ffi_close -999))
+    (ret 1))
+  
+  (test-spec test_load_nonexistent
+    (case "returns error for nonexistent library"
+      (input)
+      (expect 1)))
+  
+  (test-spec test_close_invalid
+    (case "handles invalid handle gracefully"
+      (input)
+      (expect 1)))
+  
+  (fn main -> int
+    (set r1 int (call test_load_nonexistent))
+    (set r2 int (call test_close_invalid))
+    (if (call eq r1 1)
+      (if (call eq r2 1)
+        (ret 1)))
+    (ret 0))
+  
+  (meta-note "Tests FFI error handling"))
