@@ -143,13 +143,13 @@ The compiler infers the correct typed operation from argument types at compile t
 ## Function Definitions
 
 ```lisp
-(fn name ((param1 type1) (param2 type2) ...) -> return_type
+(fn name param1 type1 param2 type2 -> return_type
   body)
 ```
 
 Example:
 ```lisp
-(fn add_numbers ((x int) (y int)) -> int
+(fn add_numbers x int y int -> int
   (ret (call add x y)))
 ```
 

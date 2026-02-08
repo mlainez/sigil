@@ -36,7 +36,7 @@ function ::= (fn <name> <param_flat>* -> <return_type> <statement>*)
 
 param_flat ::= <name> <type>  [NEW: Recommended for LLM code generation]
 
-param ::= (<name> <type>)      [OLD: Still supported for backward compatibility]
+param ::= (<name> <type>)
 
 statement ::= (set <var> <type> <expr>)
             | (call <function> <arg>*)
@@ -71,8 +71,6 @@ Test files using the `test-spec` framework don't require a `main` function.
     (call print "Hello, World!")
     (ret 0)))
 ```
-
-**Backward Compatibility Note**: The old nested parameter syntax `(fn main () -> int)` is still supported, but the new flat syntax `(fn main -> int)` is recommended for LLM code generation as it eliminates visual ambiguity.
 
 ---
 

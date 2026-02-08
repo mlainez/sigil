@@ -211,8 +211,6 @@ static Token read_identifier(Lexer* lexer) {
     else if (strcmp(str, "unit") == 0) kind = TOK_TYPE_UNIT;
     else if (strcmp(str, "int") == 0) kind = TOK_TYPE_INT;
     else if (strcmp(str, "float") == 0) kind = TOK_TYPE_FLOAT;
-    else if (strcmp(str, "i64") == 0) kind = TOK_TYPE_I64;  // Internal use only
-    else if (strcmp(str, "f64") == 0) kind = TOK_TYPE_F64;  // Internal use only
     else if (strcmp(str, "array") == 0) kind = TOK_TYPE_ARRAY;
     else if (strcmp(str, "map") == 0) kind = TOK_TYPE_MAP;
     else if (strcmp(str, "json") == 0) kind = TOK_TYPE_JSON;

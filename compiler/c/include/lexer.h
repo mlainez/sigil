@@ -83,12 +83,8 @@ typedef enum {
     TOK_TYPE_UNIT,
     
     // Simple types (v6.0 - simplified to int/float only)
-    TOK_TYPE_INT,      // Maps to i64 (the only integer type for users)
-    TOK_TYPE_FLOAT,    // Maps to f64 (the only float type for users)
-    
-    // Internal only (kept for backward compat in compiler internals)
-    TOK_TYPE_I64,      // Internal use only - use TOK_TYPE_INT instead
-    TOK_TYPE_F64,      // Internal use only - use TOK_TYPE_FLOAT instead
+    TOK_TYPE_INT,      // 64-bit integer (the only integer type)
+    TOK_TYPE_FLOAT,    // 64-bit float (the only float type)
     
     // Additional v4.0 types
     TOK_TYPE_ARRAY,

@@ -1,9 +1,14 @@
 (module test_math_import
   (import math)
   
-  (fn main -> int
-    (set x int 42)
+  (fn abs_of_negative -> int
     (set y int -10)
     (set abs_y int (call abs y))
-    (call print abs_y)
-    (ret 0)))
+    (ret abs_y))
+  
+  (test-spec abs_of_negative
+    (case "computes absolute value of -10"
+      (input)
+      (expect 10)))
+  
+  (meta-note "Tests abs function from math module"))

@@ -20,12 +20,4 @@
       (input)
       (expect 1)))
   
-  (fn main -> int
-    (set r1 int (call test_load_nonexistent))
-    (set r2 int (call test_close_invalid))
-    (if (call eq r1 1)
-      (if (call eq r2 1)
-        (ret 1)))
-    (ret 0))
-  
   (meta-note "Tests FFI error handling"))

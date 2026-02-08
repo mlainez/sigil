@@ -5,40 +5,93 @@
   (import conversion)
   (import validation)
   
-  (fn main -> int
-    (call print "=== Testing math module ===")
-    (set abs_result int (call abs -42))
-    (call print abs_result)
-    (set min_result int (call min 10 5))
-    (call print min_result)
-    
-    (call print "=== Testing math_extended module ===")
-    (set clamped int (call clamp 15 0 10))
-    (call print clamped)
-    (set sign_result int (call sign -5))
-    (call print sign_result)
-    (set squared int (call square 7))
-    (call print squared)
-    
-    (call print "=== Testing array_utils module ===")
+  (fn test_math_abs -> int
+    (ret (call abs -42)))
+  
+  (fn test_math_min -> int
+    (ret (call min 10 5)))
+  
+  (fn test_clamp -> int
+    (ret (call clamp 15 0 10)))
+  
+  (fn test_sign -> int
+    (ret (call sign -5)))
+  
+  (fn test_square -> int
+    (ret (call square 7)))
+  
+  (fn test_array_sum -> int
     (set arr array (call array_range 1 6))
-    (set sum int (call array_sum arr 5))
-    (call print sum)
-    (set found_idx int (call array_find arr 3 5))
-    (call print found_idx)
-    
-    (call print "=== Testing conversion module ===")
+    (ret (call array_sum arr 5)))
+  
+  (fn test_array_find -> int
+    (set arr array (call array_range 1 6))
+    (ret (call array_find arr 3 5)))
+  
+  (fn test_bool_to_int -> int
     (set bool_val bool true)
-    (set int_val int (call bool_to_int bool_val))
-    (call print int_val)
-    (set miles float (call kilometers_to_miles 10.0))
-    (call print miles)
-    
-    (call print "=== Testing validation module ===")
+    (ret (call bool_to_int bool_val)))
+  
+  (fn test_in_range -> int
     (set in_range_result bool (call in_range 5 0 10))
-    (call print in_range_result)
+    (if in_range_result
+      (ret 1))
+    (ret 0))
+  
+  (fn test_is_positive -> int
     (set is_pos bool (call is_positive 42))
-    (call print is_pos)
-    
-    (call print "All tests completed!")
-    (ret 0)))
+    (if is_pos
+      (ret 1))
+    (ret 0))
+  
+  (test-spec test_math_abs
+    (case "abs of -42"
+      (input)
+      (expect 42)))
+  
+  (test-spec test_math_min
+    (case "min of 10 and 5"
+      (input)
+      (expect 5)))
+  
+  (test-spec test_clamp
+    (case "clamps 15 to range [0, 10]"
+      (input)
+      (expect 10)))
+  
+  (test-spec test_sign
+    (case "sign of -5"
+      (input)
+      (expect -1)))
+  
+  (test-spec test_square
+    (case "square of 7"
+      (input)
+      (expect 49)))
+  
+  (test-spec test_array_sum
+    (case "sum of array [1, 2, 3, 4, 5]"
+      (input)
+      (expect 15)))
+  
+  (test-spec test_array_find
+    (case "finds 3 in array [1, 2, 3, 4, 5]"
+      (input)
+      (expect 2)))
+  
+  (test-spec test_bool_to_int
+    (case "converts true to int"
+      (input)
+      (expect 1)))
+  
+  (test-spec test_in_range
+    (case "validates 5 in range [0, 10]"
+      (input)
+      (expect 1)))
+  
+  (test-spec test_is_positive
+    (case "validates 42 is positive"
+      (input)
+      (expect 1)))
+  
+  (meta-note "Integration tests for math, math_extended, array_utils, conversion, and validation modules"))

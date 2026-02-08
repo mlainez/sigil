@@ -1,11 +1,28 @@
 (module test_math_main
   (import math)
   
-  (fn main -> int
-    (set result int (call abs -42))
-    (call print result)
-    (set min_val int (call min 10 5))
-    (call print min_val)
-    (set max_val int (call max 10 5))
-    (call print max_val)
-    (ret 0)))
+  (fn test_abs -> int
+    (ret (call abs -42)))
+  
+  (fn test_min -> int
+    (ret (call min 10 5)))
+  
+  (fn test_max -> int
+    (ret (call max 10 5)))
+  
+  (test-spec test_abs
+    (case "absolute value of -42"
+      (input)
+      (expect 42)))
+  
+  (test-spec test_min
+    (case "minimum of 10 and 5"
+      (input)
+      (expect 5)))
+  
+  (test-spec test_max
+    (case "maximum of 10 and 5"
+      (input)
+      (expect 10)))
+  
+  (meta-note "Tests math module functions: abs, min, max"))

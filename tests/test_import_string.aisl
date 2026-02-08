@@ -1,8 +1,14 @@
 (module test_import_string
   (import string_utils)
   
-  (fn main -> int
+  (fn get_length -> int
     (set text string "hello world")
     (set len int (call string_length text))
-    (call print len)
-    (ret 0)))
+    (ret len))
+  
+  (test-spec get_length
+    (case "gets length of hello world string"
+      (input)
+      (expect 11)))
+  
+  (meta-note "Tests string_length with string_utils import"))

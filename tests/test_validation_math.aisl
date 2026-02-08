@@ -2,22 +2,53 @@
   (import validation)
   (import math_extended)
   
-  (fn main -> int
-    (call print "Testing validation:")
+  (fn test_in_range -> int
     (set in_range_result bool (call in_range 5 0 10))
-    (call print in_range_result)
-    
+    (if in_range_result
+      (ret 1))
+    (ret 0))
+  
+  (fn test_is_positive -> int
     (set is_pos bool (call is_positive 10))
-    (call print is_pos)
-    
-    (call print "Testing math_extended:")
-    (set clamped int (call clamp -5 0 10))
-    (call print clamped)
-    
-    (set sign_val int (call sign -42))
-    (call print sign_val)
-    
+    (if is_pos
+      (ret 1))
+    (ret 0))
+  
+  (fn test_clamp -> int
+    (ret (call clamp -5 0 10)))
+  
+  (fn test_sign -> int
+    (ret (call sign -42)))
+  
+  (fn test_is_even -> int
     (set even bool (call is_even 4))
-    (call print even)
-    
-    (ret 0)))
+    (if even
+      (ret 1))
+    (ret 0))
+  
+  (test-spec test_in_range
+    (case "validates number in range"
+      (input)
+      (expect 1)))
+  
+  (test-spec test_is_positive
+    (case "validates positive number"
+      (input)
+      (expect 1)))
+  
+  (test-spec test_clamp
+    (case "clamps -5 to range [0, 10]"
+      (input)
+      (expect 0)))
+  
+  (test-spec test_sign
+    (case "gets sign of -42"
+      (input)
+      (expect -1)))
+  
+  (test-spec test_is_even
+    (case "checks if 4 is even"
+      (input)
+      (expect 1)))
+  
+  (meta-note "Tests validation and math_extended modules"))

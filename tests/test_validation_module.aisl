@@ -1,20 +1,48 @@
 (module test_validation
   (import validation)
   
-  (fn main -> int
-    (call print "Testing validation module...")
-    
+  (fn test_in_range_true -> int
     (set in_range_result bool (call in_range 5 1 10))
-    (call print in_range_result)
-    
+    (if in_range_result
+      (ret 1))
+    (ret 0))
+  
+  (fn test_in_range_false -> int
     (set out_of_range bool (call in_range 15 1 10))
-    (call print out_of_range)
-    
+    (ifnot out_of_range
+      (ret 1))
+    (ret 0))
+  
+  (fn test_is_divisible_true -> int
     (set is_div bool (call is_divisible_by 10 5))
-    (call print is_div)
-    
+    (if is_div
+      (ret 1))
+    (ret 0))
+  
+  (fn test_is_divisible_false -> int
     (set not_div bool (call is_divisible_by 10 3))
-    (call print not_div)
-    
-    (call print "Validation module works!")
-    (ret 0)))
+    (ifnot not_div
+      (ret 1))
+    (ret 0))
+  
+  (test-spec test_in_range_true
+    (case "validates 5 is in range [1, 10]"
+      (input)
+      (expect 1)))
+  
+  (test-spec test_in_range_false
+    (case "validates 15 is not in range [1, 10]"
+      (input)
+      (expect 1)))
+  
+  (test-spec test_is_divisible_true
+    (case "validates 10 is divisible by 5"
+      (input)
+      (expect 1)))
+  
+  (test-spec test_is_divisible_false
+    (case "validates 10 is not divisible by 3"
+      (input)
+      (expect 1)))
+  
+  (meta-note "Tests validation module functions"))

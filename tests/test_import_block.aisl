@@ -1,10 +1,14 @@
 (module test_import_block
   (import math)
   
-  (fn main -> int
+  (fn get_string_length -> int
     (set text string "hello")
     (set len int (call string_length text))
-    (call print len)
-    (ret 0))
+    (ret len))
   
-  (meta-note "Tests that string functions are blocked without string import"))
+  (test-spec get_string_length
+    (case "gets length of hello string"
+      (input)
+      (expect 5)))
+  
+  (meta-note "Tests that string_length is a built-in operation (no string_utils import needed)"))

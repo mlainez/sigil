@@ -225,8 +225,6 @@ Every AISL program is a module with functions:
     statements...))
 ```
 
-**Note**: The old nested parameter syntax `((param1 type1) (param2 type2))` is still supported for backward compatibility, but the new flat syntax shown above is strongly recommended for LLM code generation as it eliminates visual ambiguity.
-
 ### Entry Point
 
 **Every AISL program must have a `main` function as its entry point:**

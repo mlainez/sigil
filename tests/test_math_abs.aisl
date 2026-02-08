@@ -1,10 +1,20 @@
 (module test_math_abs
   (import math)
   
-  (fn main -> int
-    (call print "Testing math.abs:")
-    (set result1 int (call abs -5))
-    (call print result1)
-    (set result2 int (call abs 10))
-    (call print result2)
-    (ret 0)))
+  (fn abs_negative -> int
+    (ret (call abs -5)))
+  
+  (fn abs_positive -> int
+    (ret (call abs 10)))
+  
+  (test-spec abs_negative
+    (case "returns absolute value of negative number"
+      (input)
+      (expect 5)))
+  
+  (test-spec abs_positive
+    (case "returns absolute value of positive number"
+      (input)
+      (expect 10)))
+  
+  (meta-note "Tests math.abs function from math module"))

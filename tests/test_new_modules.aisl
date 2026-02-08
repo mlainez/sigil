@@ -4,43 +4,116 @@
   (import network)
   (import text_utils)
   
-  (fn main -> int
-    (call print "=== Testing filesystem module ===")
+  (fn test_file_operations -> int
     (set test_file string "/tmp/aisl_test.txt")
     (set success bool (call write_file_safe test_file "Hello AISL!"))
-    (call print success)
-    
+    (ifnot success
+      (ret 0))
     (set content string (call read_file_safe test_file))
-    (call print content)
-    
     (set deleted bool (call delete_if_exists test_file))
-    (call print deleted)
-    
-    (call print "=== Testing network module ===")
-    (set valid_port bool (call is_valid_port 8080))
-    (call print valid_port)
-    
-    (set invalid_port bool (call is_valid_port 70000))
-    (call print invalid_port)
-    
+    (if deleted
+      (ret 1))
+    (ret 0))
+  
+  (fn test_valid_port -> int
+    (set valid bool (call is_valid_port 8080))
+    (if valid
+      (ret 1))
+    (ret 0))
+  
+  (fn test_invalid_port -> int
+    (set invalid bool (call is_valid_port 70000))
+    (ifnot invalid
+      (ret 1))
+    (ret 0))
+  
+  (fn test_build_url -> int
     (set url string (call build_url "localhost" 8080 "/api/v1"))
-    (call print url)
-    
-    (call print "=== Testing text_utils module ===")
+    (set expected string "http://localhost:8080/api/v1")
+    (set matches bool (call string_eq url expected))
+    (if matches
+      (ret 1))
+    (ret 0))
+  
+  (fn test_repeat_string -> int
     (set repeated string (call repeat_string "x" 5))
-    (call print repeated)
-    
+    (set expected string "xxxxx")
+    (set matches bool (call string_eq repeated expected))
+    (if matches
+      (ret 1))
+    (ret 0))
+  
+  (fn test_pad_left -> int
     (set padded string (call pad_left "42" 5 "0"))
-    (call print padded)
-    
+    (set expected string "00042")
+    (set matches bool (call string_eq padded expected))
+    (if matches
+      (ret 1))
+    (ret 0))
+  
+  (fn test_reverse_string -> int
     (set reversed string (call reverse_string "AISL"))
-    (call print reversed)
-    
+    (set expected string "LSIA")
+    (set matches bool (call string_eq reversed expected))
+    (if matches
+      (ret 1))
+    (ret 0))
+  
+  (fn test_is_empty -> int
     (set empty bool (call is_empty ""))
-    (call print empty)
-    
+    (if empty
+      (ret 1))
+    (ret 0))
+  
+  (fn test_is_not_empty -> int
     (set not_empty bool (call is_empty "text"))
-    (call print not_empty)
-    
-    (call print "All new modules working!")
-    (ret 0)))
+    (ifnot not_empty
+      (ret 1))
+    (ret 0))
+  
+  (test-spec test_file_operations
+    (case "writes, reads, and deletes file"
+      (input)
+      (expect 1)))
+  
+  (test-spec test_valid_port
+    (case "validates port 8080"
+      (input)
+      (expect 1)))
+  
+  (test-spec test_invalid_port
+    (case "rejects invalid port 70000"
+      (input)
+      (expect 1)))
+  
+  (test-spec test_build_url
+    (case "builds URL from components"
+      (input)
+      (expect 1)))
+  
+  (test-spec test_repeat_string
+    (case "repeats x five times"
+      (input)
+      (expect 1)))
+  
+  (test-spec test_pad_left
+    (case "pads 42 with zeros"
+      (input)
+      (expect 1)))
+  
+  (test-spec test_reverse_string
+    (case "reverses AISL to LSIA"
+      (input)
+      (expect 1)))
+  
+  (test-spec test_is_empty
+    (case "detects empty string"
+      (input)
+      (expect 1)))
+  
+  (test-spec test_is_not_empty
+    (case "detects non-empty string"
+      (input)
+      (expect 1)))
+  
+  (meta-note "Tests filesystem, network, and text_utils modules"))
