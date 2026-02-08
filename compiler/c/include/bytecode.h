@@ -277,6 +277,7 @@ typedef struct {
     char* name;
     uint32_t start_addr;
     uint32_t local_count;
+    uint32_t param_count;  // Number of parameters (subset of local_count)
 } Function;
 
 typedef struct {
@@ -299,10 +300,10 @@ BytecodeProgram* bytecode_program_new();
 void bytecode_program_free(BytecodeProgram* program);
 uint32_t bytecode_emit(BytecodeProgram* program, Instruction inst);
 uint32_t bytecode_add_string(BytecodeProgram* program, const char* str);
-uint32_t bytecode_add_function(BytecodeProgram* program, const char* name, uint32_t local_count);
-uint32_t bytecode_declare_function(BytecodeProgram* program, const char* name, uint32_t local_count);
+uint32_t bytecode_add_function(BytecodeProgram* program, const char* name, uint32_t local_count, uint32_t param_count);
+uint32_t bytecode_declare_function(BytecodeProgram* program, const char* name, uint32_t local_count, uint32_t param_count);
 void bytecode_set_function_start(BytecodeProgram* program, uint32_t idx, uint32_t start_addr);
-void bytecode_set_function_locals(BytecodeProgram* program, uint32_t idx, uint32_t local_count);
+void bytecode_set_function_locals(BytecodeProgram* program, uint32_t idx, uint32_t local_count, uint32_t param_count);
 void bytecode_patch_jump(BytecodeProgram* program, uint32_t offset, uint32_t target);
 
 // Serialization

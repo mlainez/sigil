@@ -94,7 +94,7 @@ uint32_t bytecode_add_string(BytecodeProgram* program, const char* str) {
     return idx;
 }
 
-uint32_t bytecode_declare_function(BytecodeProgram* program, const char* name, uint32_t local_count) {
+uint32_t bytecode_declare_function(BytecodeProgram* program, const char* name, uint32_t local_count, uint32_t param_count) {
     if (program->function_count >= program->function_capacity) {
         program->function_capacity *= 2;
         program->functions = realloc(program->functions,
@@ -105,6 +105,7 @@ uint32_t bytecode_declare_function(BytecodeProgram* program, const char* name, u
     program->functions[idx].name = strdup(name);
     program->functions[idx].start_addr = 0;
     program->functions[idx].local_count = local_count;
+    program->functions[idx].param_count = param_count;
     program->function_count++;
 
     return idx;
@@ -116,14 +117,15 @@ void bytecode_set_function_start(BytecodeProgram* program, uint32_t idx, uint32_
     }
 }
 
-void bytecode_set_function_locals(BytecodeProgram* program, uint32_t idx, uint32_t local_count) {
+void bytecode_set_function_locals(BytecodeProgram* program, uint32_t idx, uint32_t local_count, uint32_t param_count) {
     if (idx < program->function_count) {
         program->functions[idx].local_count = local_count;
+        program->functions[idx].param_count = param_count;
     }
 }
 
-uint32_t bytecode_add_function(BytecodeProgram* program, const char* name, uint32_t local_count) {
-    uint32_t idx = bytecode_declare_function(program, name, local_count);
+uint32_t bytecode_add_function(BytecodeProgram* program, const char* name, uint32_t local_count, uint32_t param_count) {
+    uint32_t idx = bytecode_declare_function(program, name, local_count, param_count);
     program->functions[idx].start_addr = program->instruction_count;
     return idx;
 }
@@ -165,6 +167,7 @@ void bytecode_save(BytecodeProgram* program, const char* filename) {
         fwrite(program->functions[i].name, 1, len, f);
         fwrite(&program->functions[i].start_addr, sizeof(uint32_t), 1, f);
         fwrite(&program->functions[i].local_count, sizeof(uint32_t), 1, f);
+        fwrite(&program->functions[i].param_count, sizeof(uint32_t), 1, f);
     }
 
     fclose(f);
@@ -257,8 +260,14 @@ BytecodeProgram* bytecode_load(const char* filename) {
                 return NULL;
             }
             uint32_t locals = (uint32_t)strtoul(tok, NULL, 10);
+            if (!text_next_token(&scanner, tok, sizeof(tok))) {
+                free(buffer);
+                bytecode_program_free(program);
+                return NULL;
+            }
+            uint32_t params = (uint32_t)strtoul(tok, NULL, 10);
 
-            uint32_t idx = bytecode_declare_function(program, name, locals);
+            uint32_t idx = bytecode_declare_function(program, name, locals, params);
             bytecode_set_function_start(program, idx, start);
         }
 
@@ -639,6 +648,7 @@ BytecodeProgram* bytecode_load(const char* filename) {
         program->functions[i].name[len] = '\0';
         fread(&program->functions[i].start_addr, sizeof(uint32_t), 1, f);
         fread(&program->functions[i].local_count, sizeof(uint32_t), 1, f);
+        fread(&program->functions[i].param_count, sizeof(uint32_t), 1, f);
     }
 
     fclose(f);

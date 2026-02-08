@@ -2125,9 +2125,11 @@ void compile_function(Compiler* comp, Definition* def) {
     comp->max_local_count = 0;
 
     ParamList* param = def->data.func.params;
+    uint32_t param_count = 0;
     while (param) {
         TypeKind param_type = type_to_typekind(param->param->type);
         compiler_add_local(comp, param->param->name, param_type);
+        param_count++;
         param = param->next;
     }
 
@@ -2176,7 +2178,7 @@ void compile_function(Compiler* comp, Definition* def) {
     Instruction ret = {.opcode = OP_RETURN};
     bytecode_emit(comp->program, ret);
 
-    bytecode_set_function_locals(comp->program, func_idx, comp->max_local_count);
+    bytecode_set_function_locals(comp->program, func_idx, comp->max_local_count, param_count);
 }
 
 // Compile an imported module and add its exports to the function table
@@ -2258,7 +2260,7 @@ static void compile_imported_module(Compiler* comp, const char* module_name) {
                 param_count++;
                 param = param->next;
             }
-            uint32_t idx = bytecode_declare_function(comp->program, current->def->name, 0);
+            uint32_t idx = bytecode_declare_function(comp->program, current->def->name, 0, param_count);
             compiler_add_function(comp, current->def->name, idx, param_count);
         }
         current = current->next;
@@ -2309,7 +2311,7 @@ void compile_module(Compiler* comp, Module* module) {
     // Test-spec validation happens at compile time, not runtime
     if (has_test_spec && !has_main) {
         // Declare main function
-        uint32_t main_idx = bytecode_declare_function(comp->program, "main", 0);
+        uint32_t main_idx = bytecode_declare_function(comp->program, "main", 0, 0);
         compiler_add_function(comp, "main", main_idx, 0);
         
         // Set function start before emitting instructions
@@ -2333,7 +2335,7 @@ void compile_module(Compiler* comp, Module* module) {
                 param_count++;
                 param = param->next;
             }
-            uint32_t idx = bytecode_declare_function(comp->program, current->def->name, 0);
+            uint32_t idx = bytecode_declare_function(comp->program, current->def->name, 0, param_count);
             compiler_add_function(comp, current->def->name, idx, param_count);
         }
         current = current->next;

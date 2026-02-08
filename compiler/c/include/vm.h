@@ -108,6 +108,7 @@ typedef struct {
     uint32_t return_addr;
     uint32_t frame_pointer;
     uint32_t local_count;
+    uint32_t param_count;
 } CallFrame;
 
 // FFI (FOREIGN FUNCTION INTERFACE)

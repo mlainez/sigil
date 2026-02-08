@@ -1526,11 +1526,13 @@ int vm_run(VM* vm) {
 
                 uint32_t fp = vm->sp - arg_count;
                 uint32_t local_count = vm->program->functions[func_idx].local_count;
+                uint32_t param_count = vm->program->functions[func_idx].param_count;
                 
                 CallFrame frame = {
                     .return_addr = vm->ip + 1,
                     .frame_pointer = fp,
-                    .local_count = local_count
+                    .local_count = local_count,
+                    .param_count = param_count
                 };
                 vm->call_stack[vm->call_sp++] = frame;
 
@@ -1554,22 +1556,17 @@ int vm_run(VM* vm) {
                 Value ret = pop(vm);
                 CallFrame frame = vm->call_stack[--vm->call_sp];
                 
-                // FIXME: Temporarily disabled string freeing to fix double-free crash
-                // The issue is that when passing strings between functions, both the
-                // caller and callee's local variables may reference the same memory,
-                // causing a double-free when both functions return.
-                // TODO: Implement proper reference counting or garbage collection
-                /*
-                // Free all string locals before resetting stack pointer
+                // Free ONLY non-parameter locals (locals[param_count:])
+                // Parameters are owned by the caller and will be freed when caller returns
                 uint32_t fp = frame.frame_pointer;
                 uint32_t local_count = frame.local_count;
-                for (uint32_t i = 0; i < local_count; i++) {
+                uint32_t param_count = frame.param_count;
+                for (uint32_t i = param_count; i < local_count; i++) {
                     if (vm->stack[fp + i].type == VAL_STRING && vm->stack[fp + i].data.string_val != NULL) {
                         free(vm->stack[fp + i].data.string_val);
                         vm->stack[fp + i].data.string_val = NULL;
                     }
                 }
-                */
                 
                 vm->sp = frame.frame_pointer;
 
