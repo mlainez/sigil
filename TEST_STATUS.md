@@ -1,17 +1,18 @@
 # AISL Test Suite Status
 
-**Last Updated:** 2026-02-07  
-**Test Suite:** 136/136 passing (100%) 🎉
+**Last Updated:** 2026-02-08  
+**Test Suite:** 117/117 passing (100%) 🎉
 
 ---
 
 ## Summary
 
-**ALL TESTS PASSING!** AISL test suite is complete and healthy.
+**ALL TESTS PASSING!** AISL test suite is clean, focused, and healthy.
 
 - **Compile errors:** 0 tests ✅
 - **Runtime errors:** 0 tests ✅  
-- **Passing:** 136 tests ✅
+- **Passing:** 117 tests ✅
+- **Test-spec coverage:** 99/117 tests use proper test-spec framework (85%)
 
 ---
 
@@ -23,43 +24,39 @@
 | After i32/f32 fixes | 99/136 | 136 | 72.7% | +13 tests | Type fixes |
 | After stdlib functions | 104/137 | 137 | 75.9% | +5 tests | Added missing stdlib funcs |
 | After test-spec fix | 127/137 | 137 | 92.7% | +23 tests | Fixed segfault bug |
-| **After all improvements** | **136/136** | **136** | **100%** | **+9 tests** | **Fixed test quality + nested return bug** |
+| After all improvements | 136/136 | 136 | 100% | +9 tests | Fixed nested return bug |
+| **After cleanup** | **117/117** | **117** | **100%** | **-19 tests** | **Deleted redundant demos, converted to test-spec** |
 
 ---
 
-## The Critical Bug (FIXED ✅)
+## Recent Updates (2026-02-08)
 
-**Problem:** Test-spec tests segfaulted when importing any stdlib module
+### Test Suite Cleanup (commit 3486407)
 
-**Root Cause:** In `compiler/c/src/compiler.c` lines 2444-2454, when generating a dummy `main()` function for test-spec modules, the compiler was:
-1. Declaring the main function
-2. Emitting bytecode instructions for the function body
-3. **BUT never calling `bytecode_set_function_start()` to set the instruction offset**
+**Goal:** Remove redundant demo tests and standardize on test-spec framework
 
-This caused the VM to jump to invalid memory when trying to execute main.
+**Actions:**
+- Deleted 19 redundant demo/debug tests that only printed output without verification
+- Converted 3 main() tests to proper test-spec structure:
+  * `test_inline_validation.aisl` - Now tests is_positive with 3 cases
+  * `test_json_type_debug.aisl` - Now tests json_type, is_array, is_object  
+  * `test_if_ret.aisl` - CRITICAL regression test for nested return bug
 
-**Fix Applied (commit fbed0b3):**
-```c
-// Added line 2450:
-bytecode_set_function_start(comp->program, main_idx, comp->program->instruction_count);
-```
+**Result:** 136 tests → 117 tests, maintaining 100% pass rate
 
-**Impact:**
-- Fixed 23 segfaulting tests with 1 line of code
-- All stdlib imports now work correctly with test-spec
-- Test suite jumped from 75.9% to 92.7% passing
+**Coverage:**
+- 99/117 tests (85%) use proper test-spec framework
+- 18/117 tests (15%) are integration tests that need main() for specific runtime verification
 
 ---
 
-## All Issues Fixed! ✅
-
-### ~~Bug #1: Test-Spec Segfault (FIXED)~~
+### Bug #1: Test-Spec Segfault (FIXED ✅)
 
 **Status:** ✅ FIXED in commit fbed0b3
 
 The test-spec framework was missing `bytecode_set_function_start()` call when generating dummy main functions. Fixed by adding one line of code.
 
-### ~~Bug #2: Nested Returns in If Statements (FIXED)~~
+### Bug #2: Nested Returns in If Statements (FIXED ✅)
 
 **Status:** ✅ FIXED in commit 0609572
 
@@ -86,7 +83,7 @@ The test-spec framework was missing `bytecode_set_function_start()` call when ge
   (ret "no"))
 ```
 
-### ~~Bug #3: Missing JSON Helper Functions (FIXED)~~
+### Bug #3: Missing JSON Helper Functions (FIXED ✅)
 
 **Status:** ✅ FIXED in commit 0609572
 
@@ -101,7 +98,7 @@ Added 9 helper functions to `stdlib/data/json_utils.aisl`:
 - `get_length(arr)` - Get array length
 - `array_to_string(arr)` - Serialize array to JSON string
 
-### ~~Bug #4: Type Mismatches in Tests (FIXED)~~
+### Bug #4: Type Mismatches in Tests (FIXED ✅)
 
 **Status:** ✅ FIXED in commit 0609572
 
@@ -112,30 +109,29 @@ Fixed type mismatches where tests used `json` type for both maps and arrays:
 
 ---
 
-## Passing Test Categories (136 tests - ALL)
+## Passing Test Categories (117 tests - ALL)
 
-### Core Language (25 tests)
+### Core Language (22 tests)
 - Arithmetic, comparisons, type conversions
 - Control flow (if, while, loop, break, continue)
 - Functions, recursion, parameters
 - Variables, locals, scope
 
-### Data Structures (18 tests)
+### Data Structures (16 tests)
 - Arrays: creation, access, modification, iteration
 - Maps: creation, get/set, has/delete, keys
 - Strings: concatenation, length, substring, comparison
 
-### Stdlib Modules (42 tests) ✅
-- **string_utils** (11 tests): split, trim, contains, replace, reverse
+### Stdlib Modules (38 tests) ✅
+- **string_utils** (9 tests): split, trim, contains, replace, reverse
 - **result** (4 tests): ok, err, is_ok, is_err, unwrap, error_code
-- **json_utils** (6 tests): parse, stringify, new_object, set/get
+- **json_utils** (5 tests): parse, stringify, new_object, set/get, type detection
 - **http** (2 tests): get_status_text
-- Mixed module tests (19 tests)
+- Mixed module tests (18 tests)
 
-### I/O & Files (8 tests)
+### I/O & Files (7 tests)
 - Print, print_ln (polymorphic)
 - File read/write/append/exists/delete
-- Path operations
 
 ### Networking (5 tests)
 - TCP listen/accept/connect/send/receive
@@ -260,21 +256,15 @@ The AISL test suite is now at 100% passing! Possible future enhancements:
 5. **Better error messages** - More helpful compiler diagnostics
 
 ---
-- Fixed boolean storage issue (maps only store strings)
-- Changed from storing `true`/`false` booleans to `"true"`/`"false"` strings
-- Fixed all comparison logic to use `string_eq`
-- Fixed `unwrap` to avoid nested return bug
-
----
 
 ## Documentation Files
 
 - **This file (TEST_STATUS.md):** Current test suite status
-- **AGENTS.md:** LLM reference for generating AISL code (updated with bug notes)
+- **AGENTS.md:** LLM reference for generating AISL code
 - **.aisl.grammar:** Token-optimized language reference for LLMs
 - **.aisl.analysis:** Deep architectural analysis + runtime discoveries
 - **LANGUAGE_SPEC.md:** Complete human-readable language specification
 
 ---
 
-**Conclusion:** The critical test-spec segfault bug is FIXED! Test suite is now at 92.7% passing. Remaining 10 failures are test quality issues (9 compile errors, 1 runtime error), not framework bugs.
+**Status:** Test suite is at 100% passing (117/117 tests). All critical bugs fixed. Codebase is clean and ready for development.
