@@ -1,14 +1,19 @@
 (module test_eq_strings
-  (fn main -> int
-    (call print "Testing string_eq with strings:")
-    
-    (set s1 string "object")
-    (set s2 string "object")
-    (set result bool (call string_eq s1 s2))
-    (call print result)
-    
-    (set s3 string "array")
-    (set result2 bool (call string_eq s1 s3))
-    (call print result2)
-    
-    (ret 0)))
+  (fn test_string_eq s1 string s2 string -> bool
+    (ret (call string_eq s1 s2)))
+  
+  (test-spec test_string_eq
+    (case "returns true for identical strings"
+      (input "object" "object")
+      (expect true))
+    (case "returns false for different strings"
+      (input "object" "array")
+      (expect false))
+    (case "returns true for empty strings"
+      (input "" "")
+      (expect true))
+    (case "returns false for empty vs non-empty"
+      (input "" "text")
+      (expect false)))
+  
+  (meta-note "Tests string_eq for comparing string equality"))

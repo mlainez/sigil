@@ -3,8 +3,15 @@
     (set x int (call add x 1))
     (ret x))
   
-  (fn main -> int
-    (call print "Testing reassignment:")
-    (set result int (call test_set_reassign 10))
-    (call print result)
-    (ret 0)))
+  (test-spec test_set_reassign
+    (case "increments positive number"
+      (input 10)
+      (expect 11))
+    (case "increments zero"
+      (input 0)
+      (expect 1))
+    (case "increments negative number"
+      (input -5)
+      (expect -4)))
+  
+  (meta-note "Tests variable reassignment with set - parameter can be reassigned"))

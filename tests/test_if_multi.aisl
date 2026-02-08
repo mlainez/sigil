@@ -7,7 +7,15 @@
       (set result bool temp))
     (ret result))
   
-  (fn main -> int
-    (set r bool (call test_multi 5))
-    (call print r)
-    (ret 0)))
+  (test-spec test_multi
+    (case "returns true for positive numbers"
+      (input 5)
+      (expect true))
+    (case "returns false for zero"
+      (input 0)
+      (expect false))
+    (case "returns false for negative numbers"
+      (input -3)
+      (expect false)))
+  
+  (meta-note "Tests if statement with multiple statements in body"))

@@ -5,10 +5,18 @@
       (ret (call neg x)))
     (ret x))
   
-  (fn main -> int
-    (call print "Testing abs clone:")
-    (set result1 int (call abs -5))
-    (call print result1)
-    (set result2 int (call abs 10))
-    (call print result2)
-    (ret 0)))
+  (test-spec abs
+    (case "returns positive number unchanged"
+      (input 10)
+      (expect 10))
+    (case "converts negative to positive"
+      (input -5)
+      (expect 5))
+    (case "handles zero"
+      (input 0)
+      (expect 0))
+    (case "handles large negative"
+      (input -100)
+      (expect 100)))
+  
+  (meta-note "Tests inline abs function - clone of built-in abs operation"))

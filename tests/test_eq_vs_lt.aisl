@@ -11,16 +11,26 @@
       (ret "equals 100"))
     (ret "not 100"))
   
-  (fn main -> int
-    (call print "Testing with lt:")
-    (set r1 string (call test_with_lt 10))
-    (call print r1)
-    (set r2 string (call test_with_lt 60))
-    (call print r2)
-    
-    (call print "Testing with eq:")
-    (set r3 string (call test_with_eq 100))
-    (call print r3)
-    (set r4 string (call test_with_eq 99))
-    (call print r4)
-    (ret 0)))
+  (test-spec test_with_lt
+    (case "returns 'less than 50' for small numbers"
+      (input 10)
+      (expect "less than 50"))
+    (case "returns '50 or more' for large numbers"
+      (input 60)
+      (expect "50 or more"))
+    (case "returns '50 or more' for exactly 50"
+      (input 50)
+      (expect "50 or more")))
+  
+  (test-spec test_with_eq
+    (case "returns 'equals 100' for 100"
+      (input 100)
+      (expect "equals 100"))
+    (case "returns 'not 100' for 99"
+      (input 99)
+      (expect "not 100"))
+    (case "returns 'not 100' for 101"
+      (input 101)
+      (expect "not 100")))
+  
+  (meta-note "Tests using eq vs lt in conditional checks"))

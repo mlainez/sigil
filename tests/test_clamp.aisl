@@ -8,12 +8,21 @@
       (ret max_val))
     (ret x))
   
-  (fn main -> int
-    (call print "Testing clamp:")
-    (set r1 int (call clamp 5 0 10))
-    (call print r1)
-    (set r2 int (call clamp -5 0 10))
-    (call print r2)
-    (set r3 int (call clamp 15 0 10))
-    (call print r3)
-    (ret 0)))
+  (test-spec clamp
+    (case "returns value when in range"
+      (input 5 0 10)
+      (expect 5))
+    (case "clamps to min when too low"
+      (input -5 0 10)
+      (expect 0))
+    (case "clamps to max when too high"
+      (input 15 0 10)
+      (expect 10))
+    (case "handles exact min value"
+      (input 0 0 10)
+      (expect 0))
+    (case "handles exact max value"
+      (input 10 0 10)
+      (expect 10)))
+  
+  (meta-note "Tests inline clamp function - constrains value to range"))
