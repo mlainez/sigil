@@ -1,0 +1,46 @@
+(module test_sqlite_query
+  (import sqlite)
+  
+  (fn test_query_results -> int
+    (set db string (call open ":memory:"))
+    (call exec db "CREATE TABLE users(id INTEGER, name TEXT)")
+    (call exec db "INSERT INTO users VALUES(1, 'Alice')")
+    (call exec db "INSERT INTO users VALUES(2, 'Bob')")
+    (set results array (call query db "SELECT * FROM users"))
+    (set row_count int (call array_length results))
+    (call close db)
+    (ret row_count))
+  
+  (fn test_get_tables -> int
+    (set db string (call open ":memory:"))
+    (call exec db "CREATE TABLE users(id INTEGER, name TEXT)")
+    (call exec db "CREATE TABLE posts(id INTEGER, title TEXT)")
+    (set tables array (call get_tables db))
+    (set table_count int (call array_length tables))
+    (call close db)
+    (ret table_count))
+  
+  (fn test_query_empty -> int
+    (set db string (call open ":memory:"))
+    (call exec db "CREATE TABLE test(id INTEGER)")
+    (set results array (call query db "SELECT * FROM test"))
+    (set count int (call array_length results))
+    (call close db)
+    (ret count))
+  
+  (test-spec test_query_results
+    (case "queries two rows from users table"
+      (input)
+      (expect 2)))
+  
+  (test-spec test_get_tables
+    (case "gets two tables from database"
+      (input)
+      (expect 2)))
+  
+  (test-spec test_query_empty
+    (case "queries empty table returns no rows"
+      (input)
+      (expect 0)))
+  
+  (meta-note "Real functional tests for SQLite query operations"))

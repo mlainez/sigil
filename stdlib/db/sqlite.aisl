@@ -1,0 +1,92 @@
+(module sqlite
+  (import string_utils)
+  
+  (fn open path string -> string
+    (set args array (call array_new 1))
+    (call array_push args path)
+    (set proc string (call process_spawn "sqlite3" args))
+    (call process_write proc ".mode list\n")
+    (call process_write proc ".separator |\n")
+    (ret proc))
+  
+  (fn close db string -> int
+    (call process_write db ".quit\n")
+    (set exit_code int (call process_wait db))
+    (ret exit_code))
+  
+  (fn exec db string sql string -> bool
+    (set sql_with_newline string (call string_concat sql "\n"))
+    (set written bool (call process_write db sql_with_newline))
+    (ret written))
+  
+  (fn query db string sql string -> array
+    (set sql_with_newline string (call string_concat sql "\n"))
+    (call process_write db sql_with_newline)
+    (set output string (call process_read db))
+    (set lines array (call string_split output "\n"))
+    (set results array (call array_new 16))
+    (set i int 0)
+    (set len int (call array_length lines))
+    (while (call lt i len)
+      (set line string (call array_get lines i))
+      (set line_len int (call string_length line))
+      (if (call gt line_len 0)
+        (set row array (call string_split line "|"))
+        (call array_push results row))
+      (set i int (call add i 1)))
+    (ret results))
+  
+  (fn execute_file db string filepath string -> bool
+    (set read_cmd string ".read ")
+    (set full_cmd string (call string_concat read_cmd filepath))
+    (set cmd_with_newline string (call string_concat full_cmd "\n"))
+    (set written bool (call process_write db cmd_with_newline))
+    (ret written))
+  
+  (fn get_tables db string -> array
+    (set sql string "SELECT name FROM sqlite_master WHERE type='table';")
+    (ret (call query db sql)))
+  
+  (fn get_schema db string table_name string -> string
+    (set sql_start string "SELECT sql FROM sqlite_master WHERE name='")
+    (set sql_mid string (call string_concat sql_start table_name))
+    (set sql string (call string_concat sql_mid "';"))
+    (set results array (call query db sql))
+    (set count int (call array_length results))
+    (if (call gt count 0)
+      (set first_row array (call array_get results 0))
+      (set schema string (call array_get first_row 0))
+      (ret schema))
+    (ret ""))
+  
+  (meta-note "Pure AISL SQLite implementation using process spawning
+  
+  Implementation strategy:
+  - Spawns 'sqlite3 <database>' as a subprocess
+  - Communicates via stdin/stdout using AISL process primitives
+  - Uses '.mode list' and '.separator |' for structured output
+  - Uses string_utils stdlib module for parsing output
+  
+  Advantages:
+  - 100% pure AISL (no C code, no FFI complexity)
+  - Uses only AISL process management primitives
+  - Eating our own dog food: demonstrates AISL capabilities
+  - No memory management issues with opaque pointers
+  - Works with any system that has sqlite3 CLI installed
+  
+  API:
+  - open(path) -> db handle (process)
+  - close(db) -> exit code
+  - exec(db, sql) -> success boolean
+  - query(db, sql) -> array of row arrays
+  - execute_file(db, filepath) -> success boolean
+  - get_tables(db) -> array of table names
+  - get_schema(db, table_name) -> CREATE TABLE statement
+  
+  Example usage:
+    (import sqlite)
+    (set db string (call open \"mydb.sqlite\"))
+    (call exec db \"CREATE TABLE users(id INTEGER, name TEXT)\")
+    (call exec db \"INSERT INTO users VALUES(1, 'Alice')\")
+    (set rows array (call query db \"SELECT * FROM users\"))
+    (call close db)"))

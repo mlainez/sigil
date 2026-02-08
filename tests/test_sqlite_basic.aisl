@@ -1,0 +1,38 @@
+(module test_sqlite_basic
+  (import sqlite)
+  
+  (fn test_open_memory -> bool
+    (set db string (call open ":memory:"))
+    (set is_valid bool (call gt (call string_length db) 0))
+    (call close db)
+    (ret is_valid))
+  
+  (fn test_create_table -> bool
+    (set db string (call open ":memory:"))
+    (set result bool (call exec db "CREATE TABLE users(id INTEGER, name TEXT)"))
+    (call close db)
+    (ret result))
+  
+  (fn test_insert_data -> bool
+    (set db string (call open ":memory:"))
+    (call exec db "CREATE TABLE users(id INTEGER, name TEXT)")
+    (set result bool (call exec db "INSERT INTO users VALUES(1, 'Alice')"))
+    (call close db)
+    (ret result))
+  
+  (test-spec test_open_memory
+    (case "opens in-memory database successfully"
+      (input)
+      (expect true)))
+  
+  (test-spec test_create_table
+    (case "creates table in database"
+      (input)
+      (expect true)))
+  
+  (test-spec test_insert_data
+    (case "inserts data into table"
+      (input)
+      (expect true)))
+  
+  (meta-note "Real functional tests for SQLite operations using actual sqlite3 process"))
