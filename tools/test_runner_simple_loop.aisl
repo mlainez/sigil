@@ -1,0 +1,57 @@
+(module test_runner_simple_loop
+  (import string_utils)
+  (import conversion)
+  
+  (fn compile_test file string -> bool
+    (set output string "/tmp/test_output.aislc")
+    (set args array (call array_new 10))
+    (call array_push args file)
+    (call array_push args output)
+    (set exit_code int (call process_exec "./compiler/c/bin/aislc" args))
+    (set success bool (call eq exit_code 0))
+    (ret success))
+  
+  (fn get_test_files -> array
+    (set all_files array (call dir_list "tests"))
+    (set test_files array (call array_new 200))
+    
+    (set i int 0)
+    (set len int (call array_length all_files))
+    
+    (while (call lt i len)
+      (set filename string (call array_get all_files i))
+      
+      (set is_test bool (call string_starts_with filename "test_"))
+      (if is_test
+        (set is_aisl bool (call string_ends_with filename ".aisl"))
+        (if is_aisl
+          (set full_path string "tests/")
+          (set full_path string (call string_concat full_path filename))
+          (call array_push test_files full_path)))
+      
+      (set i int (call add i 1)))
+    
+    (ret test_files))
+  
+  (fn main -> int
+    (call print "Getting test files...")
+    (set files array (call get_test_files))
+    (set total int (call array_length files))
+    (call print total)
+    
+    (call print "Running tests...")
+    (set passed int 0)
+    (set i int 0)
+    
+    (while (call lt i total)
+      (set file string (call array_get files i))
+      (set success bool (call compile_test file))
+      
+      (if success
+        (set passed int (call add passed 1)))
+      
+      (set i int (call add i 1)))
+    
+    (call print "Done:")
+    (call print passed)
+    (ret 0)))

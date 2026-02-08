@@ -16,29 +16,39 @@
     
     (set passed int 0)
     
-    (if (call compile_test "tests/test_simple.aisl")
+    (set success bool (call compile_test "tests/test_simple.aisl"))
+    (if success
       (call print "  ✓ test_simple")
-      (set passed int (call add passed 1))
+      (set passed int (call add passed 1)))
+    (if (call not success)
       (call print "  ✗ test_simple"))
     
-    (if (call compile_test "tests/test_if.aisl")
+    (set success bool (call compile_test "tests/test_if.aisl"))
+    (if success
       (call print "  ✓ test_if")
-      (set passed int (call add passed 1))
+      (set passed int (call add passed 1)))
+    (if (call not success)
       (call print "  ✗ test_if"))
     
-    (if (call compile_test "tests/test_while_simple.aisl")
+    (set success bool (call compile_test "tests/test_while_simple.aisl"))
+    (if success
       (call print "  ✓ test_while_simple")
-      (set passed int (call add passed 1))
+      (set passed int (call add passed 1)))
+    (if (call not success)
       (call print "  ✗ test_while_simple"))
     
-    (if (call compile_test "tests/test_string_simple.aisl")
+    (set success bool (call compile_test "tests/test_string_simple.aisl"))
+    (if success
       (call print "  ✓ test_string_simple")
-      (set passed int (call add passed 1))
+      (set passed int (call add passed 1)))
+    (if (call not success)
       (call print "  ✗ test_string_simple"))
     
-    (if (call compile_test "tests/test_array.aisl")
+    (set success bool (call compile_test "tests/test_array.aisl"))
+    (if success
       (call print "  ✓ test_array")
-      (set passed int (call add passed 1))
+      (set passed int (call add passed 1)))
+    (if (call not success)
       (call print "  ✗ test_array"))
     
     (set msg string "Passed: ")
