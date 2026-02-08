@@ -18,8 +18,4 @@
       (input)
       (expect 1)))
   
-  (fn main -> int
-    (set result int (call test_tls_connect_google))
-    (ret result))
-  
   (meta-note "Tests TLS connection to HTTPS endpoint"))
