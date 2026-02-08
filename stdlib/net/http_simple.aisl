@@ -1,0 +1,15 @@
+(module http_simple
+  
+  (fn get url string -> string
+    (ret (call http_get url)))
+  
+  (fn post url string body string -> string
+    (ret (call http_post url body)))
+  
+  (fn put url string body string -> string
+    (ret (call http_put url body)))
+  
+  (fn delete url string -> string
+    (ret (call http_delete url)))
+  
+  (meta-note "Simplified HTTP wrapper - uses existing C opcodes"))

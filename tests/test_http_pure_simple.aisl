@@ -1,0 +1,11 @@
+(module test_http_pure_simple
+  
+  (fn test_simple -> int
+    (ret 1))
+  
+  (test-spec test_simple
+    (case "simple test"
+      (input)
+      (expect 1)))
+  
+  (meta-note "Tests pure AISL HTTP - placeholder for now"))

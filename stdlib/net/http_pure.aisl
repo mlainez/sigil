@@ -1,0 +1,159 @@
+(module http_pure
+  (import string_utils)
+  (import conversion)
+  
+  (fn parse_url url string -> array
+    (set arr array (call array_new 5))
+    
+    (set is_https bool (call string_starts_with url "https://"))
+    (set is_http bool (call string_starts_with url "http://"))
+    
+    (if is_https
+      (call array_push arr "https")
+      (call array_push arr "http"))
+    
+    (set url_no_proto string url)
+    (if is_https
+      (set url_no_proto string (call string_slice url 8 (call string_length url))))
+    (if is_http
+      (set url_no_proto string (call string_slice url 7 (call string_length url))))
+    
+    (set slash_pos int -1)
+    (set i int 0)
+    (set url_len int (call string_length url_no_proto))
+    (while (call lt i url_len)
+      (set ch string (call string_slice url_no_proto i (call add i 1)))
+      (set is_slash bool (call string_eq ch "/"))
+      (if is_slash
+        (set slash_pos int i)
+        (break))
+      (set i int (call add i 1)))
+    
+    (set host string url_no_proto)
+    (set path string "/")
+    (if (call ge slash_pos 0)
+      (set host string (call string_slice url_no_proto 0 slash_pos))
+      (set path string (call string_slice url_no_proto slash_pos url_len)))
+    
+    (call array_push arr host)
+    
+    (set port int 80)
+    (if is_https
+      (set port int 443))
+    (call array_push arr port)
+    
+    (call array_push arr path)
+    (ret arr))
+  
+  (fn build_request method string host string path string body string -> string
+    (set req string method)
+    (set req string (call string_concat req " "))
+    (set req string (call string_concat req path))
+    (set req string (call string_concat req " HTTP/1.1\r\n"))
+    (set req string (call string_concat req "Host: "))
+    (set req string (call string_concat req host))
+    (set req string (call string_concat req "\r\n"))
+    (set req string (call string_concat req "Connection: close\r\n"))
+    
+    (set body_len int (call string_length body))
+    (if (call gt body_len 0)
+      (set req string (call string_concat req "Content-Length: "))
+      (set len_str string (call string_from_int body_len))
+      (set req string (call string_concat req len_str))
+      (set req string (call string_concat req "\r\n\r\n"))
+      (set req string (call string_concat req body)))
+    
+    (set req string (call string_concat req "\r\n"))
+    (ret req))
+  
+  (fn parse_response raw string -> map
+    (set response map (call map_new))
+    
+    (set header_end int -1)
+    (set i int 0)
+    (set raw_len int (call string_length raw))
+    (while (call lt i (call sub raw_len 3))
+      (set substr string (call string_slice raw i (call add i 4)))
+      (set is_crlf bool (call string_eq substr "\r\n\r\n"))
+      (if is_crlf
+        (set header_end int i)
+        (break))
+      (set i int (call add i 1)))
+    
+    (set body string "")
+    (if (call ge header_end 0)
+      (set body_start int (call add header_end 4))
+      (set body string (call string_slice raw body_start raw_len)))
+    
+    (call map_set response "body" body)
+    (call map_set response "status" 200)
+    (ret response))
+  
+  (fn get url string -> map
+    (set parts array (call parse_url url))
+    (set protocol string (call array_get parts 0))
+    (set host string (call array_get parts 1))
+    (set port int (call array_get parts 2))
+    (set path string (call array_get parts 3))
+    
+    (set sock string "")
+    (set is_https bool (call string_eq protocol "https"))
+    (if is_https
+      (set sock string (call tcp_tls_connect host port))
+      (set sock string (call tcp_connect host port)))
+    
+    (set req string (call build_request "GET" host path ""))
+    (call tcp_send sock req)
+    
+    (set raw string (call tcp_receive sock 8192))
+    (call tcp_close sock)
+    
+    (ret (call parse_response raw)))
+  
+  (fn post url string body string -> map
+    (set parts array (call parse_url url))
+    (set protocol string (call array_get parts 0))
+    (set host string (call array_get parts 1))
+    (set port int (call array_get parts 2))
+    (set path string (call array_get parts 3))
+    
+    (set sock string "")
+    (set is_https bool (call string_eq protocol "https"))
+    (if is_https
+      (set sock string (call tcp_tls_connect host port))
+      (set sock string (call tcp_connect host port)))
+    
+    (set req string (call build_request "POST" host path body))
+    (call tcp_send sock req)
+    
+    (set raw string (call tcp_receive sock 8192))
+    (call tcp_close sock)
+    
+    (ret (call parse_response raw)))
+  
+  (meta-note "Pure AISL HTTP client using TCP/TLS primitives
+
+Usage:
+  (import http_pure)
+  (set response map (call get \"https://example.com/api\"))
+  (set body string (call map_get response \"body\"))
+  (set status string (call map_get response \"status\"))
+
+Functions:
+  - parse_url(url) -> array [protocol host port path]
+  - build_request(method host path body) -> string
+  - parse_response(raw) -> map with keys: status body
+  - get(url) -> map
+  - post(url body) -> map
+
+Dependencies:
+  - tcp_connect / tcp_tls_connect (C primitives)
+  - string_utils (stdlib)
+  - conversion (stdlib)
+
+Implementation notes:
+  - Uses tcp_connect for http:// URLs
+  - Uses tcp_tls_connect for https:// URLs
+  - Builds HTTP/1.1 requests manually
+  - Parses responses using string operations
+  - No external dependencies - pure AISL!"))

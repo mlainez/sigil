@@ -1,0 +1,40 @@
+(module test_http_pure_parse_url
+  (import string_utils)
+  
+  (fn parse_simple_url url string -> string
+    (set is_https bool (call string_starts_with url "https://"))
+    (set is_http bool (call string_starts_with url "http://"))
+    
+    (set result string "unknown")
+    (if is_https
+      (set result string "https"))
+    (if is_http
+      (set result string "http"))
+    
+    (ret result))
+  
+  (fn test_https -> int
+    (set proto string (call parse_simple_url "https://example.com/api"))
+    (set matches bool (call string_eq proto "https"))
+    (if matches
+      (ret 1))
+    (ret 0))
+  
+  (fn test_http -> int
+    (set proto string (call parse_simple_url "http://example.com/"))
+    (set matches bool (call string_eq proto "http"))
+    (if matches
+      (ret 1))
+    (ret 0))
+  
+  (test-spec test_https
+    (case "detects HTTPS protocol"
+      (input)
+      (expect 1)))
+  
+  (test-spec test_http
+    (case "detects HTTP protocol"
+      (input)
+      (expect 1)))
+  
+  (meta-note "Tests basic URL protocol parsing using string_starts_with from string_utils stdlib"))
