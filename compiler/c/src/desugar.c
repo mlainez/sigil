@@ -307,6 +307,12 @@ static Expr* desugar_expr_with_context(Expr* expr, LoopContext* ctx) {
         case EXPR_CONTINUE:
             return desugar_continue(ctx);
             
+        case EXPR_RETURN: {
+            // Recursively desugar return value
+            Expr* new_value = desugar_expr_with_context(expr->data.return_expr.value, ctx);
+            return expr_return(new_value, expr->type);
+        }
+            
         case EXPR_SEQ: {
             // Desugar sequence of statements
             ExprList* desugared = desugar_statement_list_with_context(expr->data.seq.exprs, ctx);

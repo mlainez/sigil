@@ -10,12 +10,12 @@
     (call print status_404)
     
     (call print "Testing JSON module:")
-    (set obj json (call build_object_one "name" "Alice"))
+    (set obj map (call build_object_one "name" "Alice"))
     (set obj_str string (call to_string obj))
     (call print obj_str)
     
-    (set arr json (call build_array_one "hello"))
-    (set arr_str string (call to_string arr))
+    (set arr array (call build_array_one "hello"))
+    (set arr_str string (call array_to_string arr))
     (call print arr_str)
     
     (set is_obj bool (call is_object obj))

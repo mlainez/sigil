@@ -567,8 +567,11 @@ static Expr* parser_parse_statements_v3(Parser* parser) {
             }
             parser_expect(parser, TOK_RPAREN);
 
+            // Create an EXPR_RETURN node
+            Expr* ret_expr = expr_return(ret_val, ret_val->type);
+            
             ExprList* stmt = malloc(sizeof(ExprList));
-            stmt->expr = ret_val;
+            stmt->expr = ret_expr;
             stmt->next = NULL;
             if (stmts) {
                 ExprList* cur = stmts;

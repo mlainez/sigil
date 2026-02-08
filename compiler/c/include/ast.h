@@ -303,6 +303,9 @@ struct Expr {
             Expr* ref;
             Expr* value;
         } ref_write;
+        struct {
+            Expr* value;
+        } return_expr;
     } data;
 };
 
@@ -416,6 +419,7 @@ Expr* expr_io_open(Expr* path, Expr* mode, Type* type);
 Expr* expr_io_close(Expr* handle, Type* type);
 Expr* expr_let(BindingList* bindings, Expr* body, Type* type);
 Expr* expr_while(Expr* cond, Expr* body, Type* type);
+Expr* expr_return(Expr* value, Type* type);
 
 ExprList* expr_list_new(Expr* expr, ExprList* next);
 ParamList* param_list_new(const char* name, Type* type, ParamList* next);

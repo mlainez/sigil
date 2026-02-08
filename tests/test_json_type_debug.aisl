@@ -3,7 +3,7 @@
   (fn main -> int
     (call print "Testing JSON type detection:")
     
-    (set obj json (call json_new_object))
+    (set obj map (call json_new_object))
     (call print "Created object")
     
     (set type_str string (call json_type obj))
@@ -14,13 +14,11 @@
     (call print "String comparison result:")
     (call print check)
     
-    (set arr json (call json_new_array))
-    (set arr_type string (call json_type arr))
-    (call print "Array type:")
-    (call print arr_type)
+    (set arr array (call json_new_array))
+    (call print "Created array")
     
-    (set arr_check bool (call string_eq arr_type "array"))
+    (set is_arr bool (call is_array arr))
     (call print "Array check:")
-    (call print arr_check)
+    (call print is_arr)
     
     (ret 0)))

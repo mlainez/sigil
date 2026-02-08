@@ -1,8 +1,8 @@
 (module test_json_test_module
-  (import json_test)
+  (import json_utils)
   
   (fn main -> int
-    (call print "Testing json_test:")
+    (call print "Testing json_utils:")
     (set obj json (call json_new_object))
     (set str string (call to_string obj))
     (call print str)

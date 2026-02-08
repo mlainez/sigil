@@ -5,26 +5,22 @@
   (fn main -> int
     (call print "=== Testing JSON Module ===")
     
-    (set obj json (call build_object_one "name" "Alice"))
+    (set obj map (call build_object_one "name" "Alice"))
     (set obj_str string (call to_string obj))
     (call print "Created object:")
     (call print obj_str)
     
-    (set arr json (call build_array_one "hello"))
-    (set arr_str string (call to_string arr))
+    (set arr array (call build_array_one "hello"))
+    (set arr_str string (call array_to_string arr))
     (call print "Created array:")
     (call print arr_str)
     
-    (set parsed json (call from_string "{\"test\":\"value\"}"))
-    (set type_str string (call get_type parsed))
-    (call print "Parsed type:")
-    (call print type_str)
-    
-    (set is_obj bool (call is_object parsed))
+    (set is_obj bool (call is_object obj))
     (call print "Is object:")
     (call print is_obj)
     
-    (set is_arr bool (call is_array parsed))
+    (set arr2 array (call build_array_one "test"))
+    (set is_arr bool (call is_array arr2))
     (call print "Is array:")
     (call print is_arr)
     

@@ -193,6 +193,12 @@ Expr* expr_while(Expr* cond, Expr* body, Type* type) {
     return e;
 }
 
+Expr* expr_return(Expr* value, Type* type) {
+    Expr* e = expr_new(EXPR_RETURN, type);
+    e->data.return_expr.value = value;
+    return e;
+}
+
 // ============================================
 // LIST CONSTRUCTORS
 // ============================================

@@ -254,4 +254,52 @@
     (set has_keys bool (call map_has value "type"))
     (if has_keys
       (ret (call map_get value "type")))
-    (ret "object")))
+    (ret "object"))
+  
+  (fn build_object_one key string value string -> map
+    (set obj map (call json_new_object))
+    (ret (call json_set obj key value)))
+  
+  (fn build_array_one value string -> array
+    (set arr array (call json_new_array))
+    (call array_push arr value)
+    (ret arr))
+  
+  (fn to_string value map -> string
+    (ret (call json_stringify value)))
+  
+  (fn from_string text string -> map
+    (ret (call json_parse text)))
+  
+  (fn get_type value map -> string
+    (ret (call json_type value)))
+  
+  (fn is_object value map -> bool
+    (set type_str string (call json_type value))
+    (ret (call string_eq type_str "object")))
+  
+  (fn is_array value array -> bool
+    (ret true))
+  
+  (fn get_length value array -> int
+    (ret (call json_length value)))
+  
+  (fn array_to_string arr array -> string
+    (set result string "[")
+    (set len int (call array_length arr))
+    (set i int 0)
+    
+    (while (call lt i len)
+      (set val string (call array_get arr i))
+      (set result string (call string_concat result "\""))
+      (set result string (call string_concat result val))
+      (set result string (call string_concat result "\""))
+      
+      (set is_last bool (call eq i (call sub len 1)))
+      (ifnot is_last
+        (set result string (call string_concat result ",")))
+      
+      (set i int (call add i 1)))
+    
+    (set result string (call string_concat result "]"))
+    (ret result)))

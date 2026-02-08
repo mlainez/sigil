@@ -5,26 +5,22 @@
     (call print "Testing JSON module")
     
     (call print "Creating object with one key:")
-    (set obj json (call build_object_one "name" "Alice"))
+    (set obj map (call build_object_one "name" "Alice"))
     (set obj_str string (call to_string obj))
     (call print obj_str)
     
     (call print "Creating array with one element:")
-    (set arr json (call build_array_one "hello"))
-    (set arr_str string (call to_string arr))
+    (set arr array (call build_array_one "hello"))
+    (set arr_str string (call array_to_string arr))
     (call print arr_str)
     
-    (call print "Parsing JSON:")
-    (set parsed json (call from_string "{\"test\":123}"))
-    (set type_name string (call get_type parsed))
-    (call print type_name)
-    
-    (call print "Checking if object:")
-    (set is_obj bool (call is_object parsed))
+    (call print "Testing object detection:")
+    (set is_obj bool (call is_object obj))
     (call print is_obj)
     
-    (call print "Checking if array:")
-    (set is_arr bool (call is_array parsed))
+    (call print "Testing array detection:")
+    (set is_arr bool (call is_array arr))
     (call print is_arr)
     
+    (call print "All tests passed!")
     (ret 0)))

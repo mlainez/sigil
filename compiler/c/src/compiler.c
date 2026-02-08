@@ -2243,6 +2243,12 @@ void compile_expr(Compiler* comp, Expr* expr) {
             Instruction cont_jump = {.opcode = OP_JUMP, .operand.jump.target = comp->loop_stack->start_label};
             bytecode_emit(comp->program, cont_jump);
             break;
+        case EXPR_RETURN:
+            // Compile return value and emit OP_RETURN
+            compile_expr(comp, expr->data.return_expr.value);
+            Instruction ret = {.opcode = OP_RETURN};
+            bytecode_emit(comp->program, ret);
+            break;
         case EXPR_IO_WRITE:
             compile_io_write(comp, expr);
             break;
