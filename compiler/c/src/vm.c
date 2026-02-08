@@ -161,6 +161,20 @@ typedef struct {
     pthread_t thread;
 } Future;
 
+typedef struct ChannelItem {
+    Value value;
+    struct ChannelItem* next;
+} ChannelItem;
+
+typedef struct {
+    ChannelItem* head;
+    ChannelItem* tail;
+    pthread_mutex_t mutex;
+    pthread_cond_t cond;
+    int capacity;
+    int size;
+} Channel;
+
 // ============================================
 // GARBAGE COLLECTOR IMPLEMENTATION
 // ============================================
@@ -1381,6 +1395,65 @@ static int udp_bind(Socket* sock, int port) {
     sock->addr.sin_port = htons(port);
     
     return bind(sock->sockfd, (struct sockaddr*)&sock->addr, sizeof(sock->addr)) >= 0;
+}
+
+// ============================================
+// CHANNEL IMPLEMENTATION (Thread-Safe Queues)
+// ============================================
+
+static Channel* channel_new(int capacity) {
+    Channel* ch = malloc(sizeof(Channel));
+    ch->head = NULL;
+    ch->tail = NULL;
+    ch->capacity = capacity;
+    ch->size = 0;
+    pthread_mutex_init(&ch->mutex, NULL);
+    pthread_cond_init(&ch->cond, NULL);
+    return ch;
+}
+
+static void channel_send(Channel* ch, Value val) {
+    pthread_mutex_lock(&ch->mutex);
+    
+    // Create new item
+    ChannelItem* item = malloc(sizeof(ChannelItem));
+    item->value = val;
+    item->next = NULL;
+    
+    // Add to queue
+    if (ch->tail) {
+        ch->tail->next = item;
+    } else {
+        ch->head = item;
+    }
+    ch->tail = item;
+    ch->size++;
+    
+    // Signal waiting receivers
+    pthread_cond_signal(&ch->cond);
+    pthread_mutex_unlock(&ch->mutex);
+}
+
+static Value channel_recv(Channel* ch) {
+    pthread_mutex_lock(&ch->mutex);
+    
+    // Wait for data
+    while (ch->size == 0) {
+        pthread_cond_wait(&ch->cond, &ch->mutex);
+    }
+    
+    // Remove from queue
+    ChannelItem* item = ch->head;
+    Value val = item->value;
+    ch->head = item->next;
+    if (!ch->head) {
+        ch->tail = NULL;
+    }
+    ch->size--;
+    free(item);
+    
+    pthread_mutex_unlock(&ch->mutex);
+    return val;
 }
 
 VM* vm_new(BytecodeProgram* program) {
@@ -3623,6 +3696,40 @@ int vm_run(VM* vm) {
                     push(vm, result);
                 }
                 
+                vm->ip++;
+                break;
+            }
+
+            // ============================================
+            // CHANNEL OPERATIONS (Thread-Safe Queues)
+            // ============================================
+
+            case OP_CHANNEL_NEW: {
+                Value capacity_val = pop(vm);
+                int capacity = capacity_val.data.int_val;
+                Channel* ch = channel_new(capacity);
+                Value result = {.type = VAL_CHANNEL, .data.ptr_val = ch};
+                push(vm, result);
+                vm->ip++;
+                break;
+            }
+
+            case OP_CHANNEL_SEND: {
+                Value value_val = pop(vm);
+                Value channel_val = pop(vm);
+                Channel* ch = (Channel*)channel_val.data.ptr_val;
+                channel_send(ch, value_val);
+                Value unit = {.type = VAL_UNIT};
+                push(vm, unit);
+                vm->ip++;
+                break;
+            }
+
+            case OP_CHANNEL_RECV: {
+                Value channel_val = pop(vm);
+                Channel* ch = (Channel*)channel_val.data.ptr_val;
+                Value result = channel_recv(ch);
+                push(vm, result);
                 vm->ip++;
                 break;
             }

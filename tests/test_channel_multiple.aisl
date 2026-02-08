@@ -1,0 +1,25 @@
+(module test_channel_multiple
+  
+  (fn test_multiple_values -> int
+    (set ch channel (call channel_new 10))
+    (call channel_send ch 10)
+    (call channel_send ch 20)
+    (call channel_send ch 30)
+    
+    (set v1 int (call channel_recv ch))
+    (set v2 int (call channel_recv ch))
+    (set v3 int (call channel_recv ch))
+    
+    (set sum int (call add v1 v2))
+    (set sum int (call add sum v3))
+    
+    (if (call eq sum 60)
+      (ret 1))
+    (ret 0))
+  
+  (test-spec test_multiple_values
+    (case "sends and receives multiple values"
+      (input)
+      (expect 1)))
+  
+  (meta-note "Tests sending and receiving multiple values through channel"))

@@ -1,0 +1,16 @@
+(module test_channel_send_recv
+  
+  (fn test_send_recv -> int
+    (set ch channel (call channel_new 10))
+    (call channel_send ch 42)
+    (set val int (call channel_recv ch))
+    (if (call eq val 42)
+      (ret 1))
+    (ret 0))
+  
+  (test-spec test_send_recv
+    (case "sends and receives value"
+      (input)
+      (expect 1)))
+  
+  (meta-note "Tests channel send and receive operations"))

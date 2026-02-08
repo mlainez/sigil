@@ -96,6 +96,10 @@ typedef enum {
     
     // v4.4 JSON type
     TOK_TYPE_JSON,
+    
+    // v7.0 Concurrency types
+    TOK_TYPE_CHANNEL,
+    TOK_TYPE_FUTURE,
 
     // Test framework keywords
     TOK_TEST_SPEC,

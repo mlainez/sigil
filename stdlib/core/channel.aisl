@@ -1,0 +1,13 @@
+(module channel
+  
+  (fn new capacity int -> channel
+    (ret (call channel_new capacity)))
+  
+  (fn send ch channel value int -> int
+    (call channel_send ch value)
+    (ret 0))
+  
+  (fn recv ch channel -> int
+    (ret (call channel_recv ch)))
+  
+  (meta-note "Thread-safe channel for inter-thread communication"))

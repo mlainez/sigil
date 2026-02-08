@@ -1996,6 +1996,38 @@ void compile_apply(Compiler* comp, Expr* expr) {
     }
     
     // ============================================
+    // CHANNEL OPERATIONS (Thread-Safe Queues)
+    // ============================================
+    
+    if (strcmp(name, "channel_new") == 0) {
+        if (compile_args(comp, expr->data.apply.args) != 1) {
+            fprintf(stderr, "channel_new expects 1 argument (capacity)\n");
+            exit(1);
+        }
+        Instruction inst = {.opcode = OP_CHANNEL_NEW};
+        bytecode_emit(comp->program, inst);
+        return;
+    }
+    if (strcmp(name, "channel_send") == 0) {
+        if (compile_args(comp, expr->data.apply.args) != 2) {
+            fprintf(stderr, "channel_send expects 2 arguments (channel, value)\n");
+            exit(1);
+        }
+        Instruction inst = {.opcode = OP_CHANNEL_SEND};
+        bytecode_emit(comp->program, inst);
+        return;
+    }
+    if (strcmp(name, "channel_recv") == 0) {
+        if (compile_args(comp, expr->data.apply.args) != 1) {
+            fprintf(stderr, "channel_recv expects 1 argument (channel)\n");
+            exit(1);
+        }
+        Instruction inst = {.opcode = OP_CHANNEL_RECV};
+        bytecode_emit(comp->program, inst);
+        return;
+    }
+    
+    // ============================================
     // GARBAGE COLLECTION OPERATIONS
     // ============================================
     

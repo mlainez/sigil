@@ -75,6 +75,12 @@ Type* parser_parse_type(Parser* parser) {
         case TOK_TYPE_JSON:
             parser_advance(parser);
             return type_json();
+        case TOK_TYPE_CHANNEL:
+            parser_advance(parser);
+            return type_channel(type_unit());
+        case TOK_TYPE_FUTURE:
+            parser_advance(parser);
+            return type_future(type_unit());
         default:
             parser_error(parser, "Expected type");
             return type_unit();
@@ -514,8 +520,8 @@ static Expr* parser_parse_statements_v3(Parser* parser) {
 
             // STRICT MODE: Type is REQUIRED for all variable declarations
             Type* var_type = NULL;
-            // Check if current token is a type keyword (string, bool, unit, i8-u64, f32, f64, array, map, json)
-            if ((parser->current.kind >= TOK_TYPE_STRING && parser->current.kind <= TOK_TYPE_JSON)) {
+            // Check if current token is a type keyword (string, bool, unit, i8-u64, f32, f64, array, map, json, channel, future)
+            if ((parser->current.kind >= TOK_TYPE_STRING && parser->current.kind <= TOK_TYPE_FUTURE)) {
                 var_type = parser_parse_type(parser);
             } else {
                 // ERROR: Type is missing
@@ -1048,7 +1054,9 @@ static bool is_valid_module_name_token(TokenKind kind) {
            kind == TOK_TYPE_STRING ||
            kind == TOK_TYPE_ARRAY ||
            kind == TOK_TYPE_MAP ||
-           kind == TOK_TYPE_JSON;
+           kind == TOK_TYPE_JSON ||
+           kind == TOK_TYPE_CHANNEL ||
+           kind == TOK_TYPE_FUTURE;
 }
 
 // Parse import statement

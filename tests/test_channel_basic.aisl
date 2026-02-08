@@ -1,0 +1,12 @@
+(module test_channel_basic
+  
+  (fn test_create_channel -> int
+    (set ch channel (call channel_new 10))
+    (ret 1))
+  
+  (test-spec test_create_channel
+    (case "creates channel successfully"
+      (input)
+      (expect 1)))
+  
+  (meta-note "Tests basic channel creation"))
