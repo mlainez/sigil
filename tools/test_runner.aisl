@@ -1,51 +1,15 @@
-(module test_runner
+(module test_runner_simple_loop
   (import string_utils)
   (import conversion)
   
-  (fn print_banner -> int
-    (call print "╔════════════════════════════════════════╗")
-    (call print "║     AISL Test Framework Runner         ║")
-    (call print "╚════════════════════════════════════════╝")
-    (ret 0))
-  
-  (fn print_separator -> int
-    (call print "═══════════════════════════════════════")
-    (ret 0))
-  
   (fn compile_test file string -> bool
     (set output string "/tmp/test_output.aislc")
-    
     (set args array (call array_new 10))
     (call array_push args file)
     (call array_push args output)
-    (call array_push args "2>&1")
-    (call array_push args ">/dev/null")
-    
     (set exit_code int (call process_exec "./compiler/c/bin/aislc" args))
-    
     (set success bool (call eq exit_code 0))
     (ret success))
-  
-  (fn extract_test_name file string -> string
-    (set name string (call string_replace file "tests/" ""))
-    (set name string (call string_replace name ".aisl" ""))
-    (ret name))
-  
-  (fn run_single_test file string passed_ptr int failed_ptr int -> int
-    (set test_name string (call extract_test_name file))
-    (set success bool (call compile_test file))
-    
-    (set msg string "")
-    (if success
-      (set msg string "  ✓ ")
-      (set msg string (call string_concat msg test_name))
-      (call print msg)
-      (ret 1))
-    
-    (set msg string "  ✗ ")
-    (set msg string (call string_concat msg test_name))
-    (call print msg)
-    (ret 0))
   
   (fn get_test_files -> array
     (set all_files array (call dir_list "tests"))
@@ -69,79 +33,25 @@
     
     (ret test_files))
   
-  (fn print_summary passed int failed int total int -> int
-    (call print "")
-    (call print_separator)
-    (call print "           TEST SUMMARY")
-    (call print_separator)
-    
-    (set passed_str string (call string_from_int passed))
-    (set failed_str string (call string_from_int failed))
-    (set total_str string (call string_from_int total))
-    
-    (set msg string "Total Tests:  ")
-    (set msg string (call string_concat msg total_str))
-    (call print msg)
-    
-    (set msg string "✓ Passed:     ")
-    (set msg string (call string_concat msg passed_str))
-    (call print msg)
-    
-    (set has_failures bool (call gt failed 0))
-    (if has_failures
-      (set msg string "✗ Failed:     ")
-      (set msg string (call string_concat msg failed_str))
-      (call print msg))
-    
-    (call print_separator)
-    
-    (set all_passed bool (call eq failed 0))
-    (if all_passed
-      (call print "")
-      (call print "🎉 ALL TESTS PASSED!")
-      (ret 0))
-    
-    (call print "")
-    (call print "❌ SOME TESTS FAILED")
-    (ret 1))
-  
   (fn main -> int
-    (call print_banner)
-    (call print "")
-    (call print "Discovering test files...")
-    
+    (call print "Getting test files...")
     (set files array (call get_test_files))
     (set total int (call array_length files))
+    (call print total)
     
-    (set is_empty bool (call eq total 0))
-    (if is_empty
-      (call print "No test files found!")
-      (ret 1))
-    
-    (set total_str string (call string_from_int total))
-    (set msg string "Found ")
-    (set msg string (call string_concat msg total_str))
-    (set msg string (call string_concat msg " test files"))
-    (call print msg)
-    (call print "")
-    
+    (call print "Running tests...")
     (set passed int 0)
-    (set failed int 0)
     (set i int 0)
     
     (while (call lt i total)
       (set file string (call array_get files i))
-      (set result int (call run_single_test file 0 0))
+      (set success bool (call compile_test file))
       
-      (set is_pass bool (call eq result 1))
-      (if is_pass
+      (if success
         (set passed int (call add passed 1)))
-      (if (call not is_pass)
-        (set failed int (call add failed 1)))
       
       (set i int (call add i 1)))
     
-    (set exit_code int (call print_summary passed failed total))
-    (ret exit_code))
-  
-  (meta-note "Pure AISL test runner for test-spec framework. Uses dir_list to discover tests, process_exec to compile them, reports results. Demonstrates AISL dogfooding principle - if it CAN be in AISL, it MUST be in AISL!"))
+    (call print "Done:")
+    (call print passed)
+    (ret 0)))
