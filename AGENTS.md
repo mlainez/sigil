@@ -1,7 +1,12 @@
 # AISL for AI Agents: A Complete Guide
 
-**Last Updated**: 2026-02-07  
+**Last Updated**: 2026-02-08  
 **Target Audience**: LLMs, AI Agents, Code Generation Systems
+
+**Recent Changes** (2026-02-08):
+- Removed 621 lines of dead code from compiler (HTTP/WebSocket/base64 C implementations)
+- Removed 137 verbose section header comments for token efficiency
+- All HTTP/WebSocket functionality now in pure AISL (stdlib/net/)
 
 ---
 

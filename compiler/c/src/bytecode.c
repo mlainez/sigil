@@ -132,9 +132,7 @@ void bytecode_patch_jump(BytecodeProgram* program, uint32_t offset, uint32_t tar
     program->instructions[offset].operand.jump.target = target;
 }
 
-// ============================================
 // SERIALIZATION
-// ============================================
 
 void bytecode_save(BytecodeProgram* program, const char* filename) {
     FILE* f = fopen(filename, "wb");

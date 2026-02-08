@@ -4,9 +4,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-// ============================================
 // BYTECODE INSTRUCTION SET
-// ============================================
 
 typedef enum {
     // Stack operations (v6.0 - simplified to int/float only)
@@ -287,9 +285,7 @@ typedef struct {
     } operand;
 } Instruction;
 
-// ============================================
 // BYTECODE PROGRAM
-// ============================================
 
 typedef struct {
     char* name;
@@ -311,9 +307,7 @@ typedef struct {
     uint32_t string_capacity;
 } BytecodeProgram;
 
-// ============================================
 // BYTECODE PROGRAM FUNCTIONS
-// ============================================
 
 BytecodeProgram* bytecode_program_new();
 void bytecode_program_free(BytecodeProgram* program);

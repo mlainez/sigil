@@ -8,9 +8,7 @@
 #define CALL_STACK_SIZE 256
 #define GC_HEAP_GROW_FACTOR 2
 
-// ============================================
 // VALUE SYSTEM
-// ============================================
 
 typedef enum {
     VAL_INT,
@@ -47,9 +45,7 @@ typedef enum {
     VAL_FFI_HANDLE,
 } ValueType;
 
-// ============================================
 // GARBAGE COLLECTION
-// ============================================
 
 typedef enum {
     OBJ_STRING,
@@ -110,9 +106,7 @@ typedef struct {
     } data;
 } Value;
 
-// ============================================
 // CALL FRAME
-// ============================================
 
 typedef struct {
     uint32_t return_addr;
@@ -120,9 +114,7 @@ typedef struct {
     uint32_t local_count;
 } CallFrame;
 
-// ============================================
 // FFI (FOREIGN FUNCTION INTERFACE)
-// ============================================
 
 typedef struct FFILibrary {
     char* name;          // Library name (e.g., "libaisl_http")
@@ -130,9 +122,7 @@ typedef struct FFILibrary {
     struct FFILibrary* next;
 } FFILibrary;
 
-// ============================================
 // VIRTUAL MACHINE
-// ============================================
 
 typedef struct {
     BytecodeProgram* program;
@@ -161,9 +151,7 @@ typedef struct {
     int exit_code;
 } VM;
 
-// ============================================
 // VM FUNCTIONS
-// ============================================
 
 VM* vm_new(BytecodeProgram* program);
 void vm_free(VM* vm);

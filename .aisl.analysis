@@ -915,3 +915,32 @@ Documentation updated:
 **Breaking Change**: Yes - all code must use `(module ...)` not `(mod ...)`
 **Justification**: Prevents parsing ambiguity, enables modulo operation
 
+
+## @(dead-code-removal 2026-02-08)
+
+**Removed 621 lines of dead code from compiler/c/***
+
+**Deleted Functions** (vm.c):
+- HTTP implementation: http_response_new, http_response_free, init_openssl, http_request, http_get, http_post, http_put, http_delete (~179 lines)
+- WebSocket implementation: ws_connect, ws_send, ws_receive, ws_close (~193 lines)
+- Base64 implementation: base64_encode, base64_decode, base64_chars (~59 lines)
+- Unused: desugar_if (desugar.c, 34 lines)
+
+**Deleted Types** (vm.c):
+- HttpResponse struct (removed - HTTP now pure AISL)
+- WebSocket struct (removed - WebSocket now pure AISL)
+
+**Comment Optimization**:
+- Removed 137 verbose section header lines (// ====...====)
+- Removed duplicate section titles
+- Token efficiency: ~700 tokens saved in vm.c alone
+
+**Rationale**:
+All removed functions were unused after HTTP/WebSocket moved to pure AISL implementations in stdlib/net/. No opcodes reference them, no tests use them.
+
+**Verification**:
+- Tests: 118/118 passing (100%)
+- Examples: 17/17 compiling (100%)
+- No compiler warnings (except 40 potentially unused opcodes to investigate later)
+
+**Net Change**: -621 lines across 10 files

@@ -3,9 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-// ============================================
 // TYPE CONSTRUCTORS
-// ============================================
 
 Type* type_new(TypeKind kind) {
     Type* t = malloc(sizeof(Type));
@@ -79,9 +77,7 @@ Type* type_json() {
     return type_new(TYPE_JSON);
 }
 
-// ============================================
 // EXPRESSION CONSTRUCTORS
-// ============================================
 
 Expr* expr_new(ExprKind kind, Type* type) {
     Expr* e = malloc(sizeof(Expr));
@@ -199,9 +195,7 @@ Expr* expr_return(Expr* value, Type* type) {
     return e;
 }
 
-// ============================================
 // LIST CONSTRUCTORS
-// ============================================
 
 ExprList* expr_list_new(Expr* expr, ExprList* next) {
     ExprList* list = malloc(sizeof(ExprList));
@@ -229,9 +223,7 @@ BindingList* binding_list_new(const char* name, Type* type, Expr* value, Binding
     return list;
 }
 
-// ============================================
 // CLEANUP FUNCTIONS
-// ============================================
 
 void free_type(Type* type) {
     if (!type) return;

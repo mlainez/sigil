@@ -4,9 +4,7 @@
 #include <string.h>
 #include <stdio.h>
 
-// ============================================
 // VALUE CONSTRUCTORS
-// ============================================
 
 Value* value_int(int64_t val) {
     Value* v = malloc(sizeof(Value));
@@ -35,9 +33,7 @@ Value* value_unit() {
     return v;
 }
 
-// ============================================
 // CHANNEL IMPLEMENTATION
-// ============================================
 
 Channel* channel_new(int capacity) {
     Channel* ch = malloc(sizeof(Channel));
@@ -92,9 +88,7 @@ void channel_close(Channel* ch) {
     free(ch);
 }
 
-// ============================================
 // FUTURE IMPLEMENTATION
-// ============================================
 
 Future* future_new() {
     Future* fut = malloc(sizeof(Future));
@@ -126,9 +120,7 @@ Value* future_await(Future* fut) {
     return val;
 }
 
-// ============================================
 // THREADING
-// ============================================
 
 void* spawn_thread(void* (*func)(void*), void* arg) {
     pthread_t thread;
@@ -137,9 +129,7 @@ void* spawn_thread(void* (*func)(void*), void* arg) {
     return NULL;
 }
 
-// ============================================
 // RUNTIME INITIALIZATION
-// ============================================
 
 void runtime_init() {
     // Initialize any global runtime state

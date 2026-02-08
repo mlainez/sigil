@@ -3,9 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-// ============================================
 // LABEL GENERATION
-// ============================================
 
 static int label_counter = 0;
 
@@ -15,9 +13,7 @@ static char* gen_label(const char* prefix) {
     return label;
 }
 
-// ============================================
 // LOOP CONTEXT
-// ============================================
 
 // Track loop start/end labels for break/continue
 typedef struct LoopContext {
@@ -34,9 +30,7 @@ static LoopContext* loop_ctx_new(char* start, char* end, LoopContext* parent) {
     return ctx;
 }
 
-// ============================================
 // HELPER FUNCTIONS
-// ============================================
 
 // Create a label statement: (label name)
 static Expr* make_label(const char* name) {
@@ -93,9 +87,7 @@ static void append_expr(ExprList** list, Expr* expr) {
     }
 }
 
-// ============================================
 // DESUGARING
-// ============================================
 
 // Forward declaration
 static Expr* desugar_expr_with_context(Expr* expr, LoopContext* ctx);
@@ -240,40 +232,6 @@ static Expr* desugar_continue(LoopContext* ctx) {
 //   (ifnot cond skip_N)
 //   body...
 //   (label skip_N)
-static ExprList* desugar_if(Expr* if_expr, LoopContext* ctx) {
-    char* skip_label = gen_label("if_skip");
-    
-    ExprList* result = NULL;
-    
-    // (ifnot cond skip_N)
-    Expr* cond = desugar_expr_with_context(if_expr->data.if_expr.cond, ctx);
-    append_expr(&result, make_ifnot(cond, skip_label));
-    
-    // body... (then branch)
-    Expr* then_body = if_expr->data.if_expr.then_expr;
-    if (then_body->kind == EXPR_SEQ) {
-        ExprList* body_stmts = desugar_statement_list_with_context(
-            then_body->data.seq.exprs, 
-            ctx
-        );
-        
-        // Append all body statements
-        ExprList* cur = body_stmts;
-        while (cur) {
-            append_expr(&result, cur->expr);
-            cur = cur->next;
-        }
-    } else {
-        // Single statement body
-        Expr* body = desugar_expr_with_context(then_body, ctx);
-        append_expr(&result, body);
-    }
-    
-    // (label skip_N)
-    append_expr(&result, make_label(skip_label));
-    
-    return result;
-}
 
 // Desugar a single expression
 static Expr* desugar_expr_with_context(Expr* expr, LoopContext* ctx) {
@@ -416,9 +374,7 @@ static ExprList* desugar_statement_list_with_context(ExprList* stmts, LoopContex
     return result;
 }
 
-// ============================================
 // PUBLIC API
-// ============================================
 
 Expr* desugar_expr(Expr* expr) {
     return desugar_expr_with_context(expr, NULL);

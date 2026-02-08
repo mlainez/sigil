@@ -1344,9 +1344,7 @@ void compile_apply(Compiler* comp, Expr* expr) {
     // Now implemented in stdlib/data/json.aisl using map primitives
     // Use: (import json) then call parse, stringify, etc.
     
-    // ============================================
     // FFI (Foreign Function Interface) Operations
-    // ============================================
     
     if (strcmp(name, "ffi_load") == 0) {
         if (compile_args(comp, expr->data.apply.args) != 1) {
@@ -1396,9 +1394,7 @@ void compile_apply(Compiler* comp, Expr* expr) {
         return;
     }
     
-    // ============================================
     // HTTP Operations
-    // ============================================
     
     
     if (strcmp(name, "file_read") == 0) {
@@ -1633,9 +1629,7 @@ void compile_apply(Compiler* comp, Expr* expr) {
         return;
     }
     
-    // ============================================
     // SQLITE DATABASE OPERATIONS
-    // ============================================
     
     if (strcmp(name, "sqlite_open") == 0) {
         if (compile_args(comp, expr->data.apply.args) != 1) {
@@ -1728,14 +1722,10 @@ void compile_apply(Compiler* comp, Expr* expr) {
         return;
     }
     
-    // ============================================
     // WEBSOCKET OPERATIONS
-    // ============================================
     
     
-    // ============================================
     // PROCESS MANAGEMENT OPERATIONS
-    // ============================================
     
     if (strcmp(name, "process_spawn") == 0) {
         if (compile_args(comp, expr->data.apply.args) != 2) {
@@ -1801,9 +1791,7 @@ void compile_apply(Compiler* comp, Expr* expr) {
         return;
     }
     
-    // ============================================
     // NETWORK SOCKET OPERATIONS
-    // ============================================
     
     if (strcmp(name, "tcp_listen") == 0) {
         if (compile_args(comp, expr->data.apply.args) != 1) {
@@ -1905,9 +1893,7 @@ void compile_apply(Compiler* comp, Expr* expr) {
         return;
     }
     
-    // ============================================
     // CHANNEL OPERATIONS (Thread-Safe Queues)
-    // ============================================
     
     if (strcmp(name, "channel_new") == 0) {
         if (compile_args(comp, expr->data.apply.args) != 1) {
@@ -1937,9 +1923,7 @@ void compile_apply(Compiler* comp, Expr* expr) {
         return;
     }
     
-    // ============================================
     // GARBAGE COLLECTION OPERATIONS
-    // ============================================
     
     if (strcmp(name, "gc_collect") == 0) {
         if (compile_args(comp, expr->data.apply.args) != 0) {

@@ -112,19 +112,6 @@ struct JsonValue {
     uint32_t length;
 };
 
-typedef struct {
-    int status_code;
-    char* body;
-    size_t body_length;
-    Map* headers;
-} HttpResponse;
-
-typedef struct {
-    int sockfd;
-    SSL* ssl;
-    SSL_CTX* ssl_ctx;
-    int connected;
-} WebSocket;
 
 typedef struct {
     regex_t compiled;
@@ -175,9 +162,7 @@ typedef struct {
     int size;
 } Channel;
 
-// ============================================
 // GARBAGE COLLECTOR IMPLEMENTATION
-// ============================================
 
 void gc_init(GC* gc) {
     gc->objects = NULL;
@@ -287,185 +272,6 @@ static Value value_clone(Value val) {
     return val;
 }
 
-static HttpResponse* http_response_new() {
-    HttpResponse* resp = malloc(sizeof(HttpResponse));
-    resp->status_code = 0;
-    resp->body = NULL;
-    resp->body_length = 0;
-    resp->headers = NULL;
-    return resp;
-}
-
-static void http_response_free(HttpResponse* resp) __attribute__((unused));
-static void http_response_free(HttpResponse* resp) {
-    if (!resp) return;
-    free(resp->body);
-    free(resp);
-}
-
-static int ssl_initialized = 0;
-
-static void init_openssl() {
-    if (!ssl_initialized) {
-        SSL_load_error_strings();
-        SSL_library_init();
-        OpenSSL_add_all_algorithms();
-        ssl_initialized = 1;
-    }
-}
-
-static HttpResponse* http_request(const char* method, const char* url, const char* body) {
-    init_openssl();
-    HttpResponse* resp = http_response_new();
-    
-    char host[256] = {0};
-    char path[1024] = "/";
-    int port = 80;
-    int use_https = 0;
-    
-    if (strncmp(url, "https://", 8) == 0) {
-        use_https = 1;
-        port = 443;
-        sscanf(url + 8, "%255[^/]%1023s", host, path);
-    } else if (strncmp(url, "http://", 7) == 0) {
-        sscanf(url + 7, "%255[^/]%1023s", host, path);
-    } else {
-        resp->status_code = -1;
-        return resp;
-    }
-    
-    struct hostent* server = gethostbyname(host);
-    if (server == NULL) {
-        resp->status_code = -3;
-        return resp;
-    }
-    
-    int sockfd = socket(AF_INET, SOCK_STREAM, 0);
-    if (sockfd < 0) {
-        resp->status_code = -4;
-        return resp;
-    }
-    
-    struct sockaddr_in serv_addr;
-    memset(&serv_addr, 0, sizeof(serv_addr));
-    serv_addr.sin_family = AF_INET;
-    memcpy(&serv_addr.sin_addr.s_addr, server->h_addr_list[0], server->h_length);
-    serv_addr.sin_port = htons(port);
-    
-    if (connect(sockfd, (struct sockaddr*)&serv_addr, sizeof(serv_addr)) < 0) {
-        close(sockfd);
-        resp->status_code = -5;
-        return resp;
-    }
-    
-    SSL* ssl = NULL;
-    SSL_CTX* ssl_ctx = NULL;
-    
-    if (use_https) {
-        ssl_ctx = SSL_CTX_new(TLS_client_method());
-        if (!ssl_ctx) {
-            close(sockfd);
-            resp->status_code = -8;
-            return resp;
-        }
-        
-        ssl = SSL_new(ssl_ctx);
-        SSL_set_fd(ssl, sockfd);
-        
-        if (SSL_connect(ssl) != 1) {
-            SSL_free(ssl);
-            SSL_CTX_free(ssl_ctx);
-            close(sockfd);
-            resp->status_code = -9;
-            return resp;
-        }
-    }
-    
-    char request[4096];
-    int body_len = body ? strlen(body) : 0;
-    snprintf(request, sizeof(request),
-        "%s %s HTTP/1.1\r\nHost: %s\r\nConnection: close\r\n%s%s\r\n%s",
-        method, path, host,
-        body_len > 0 ? "Content-Length: " : "",
-        body_len > 0 ? (char[]){body_len / 100 + '0', (body_len / 10) % 10 + '0', body_len % 10 + '0', '\0'} : "",
-        body ? body : "");
-    
-    ssize_t sent;
-    if (use_https) {
-        sent = SSL_write(ssl, request, strlen(request));
-    } else {
-        sent = write(sockfd, request, strlen(request));
-    }
-    
-    if (sent < 0) {
-        if (use_https) {
-            SSL_free(ssl);
-            SSL_CTX_free(ssl_ctx);
-        }
-        close(sockfd);
-        resp->status_code = -6;
-        return resp;
-    }
-    
-    size_t response_cap = 4096;
-    size_t response_len = 0;
-    char* response_buf = malloc(response_cap);
-    
-    ssize_t n;
-    while (1) {
-        if (use_https) {
-            n = SSL_read(ssl, response_buf + response_len, response_cap - response_len - 1);
-        } else {
-            n = read(sockfd, response_buf + response_len, response_cap - response_len - 1);
-        }
-        
-        if (n <= 0) break;
-        
-        response_len += n;
-        if (response_len + 1024 > response_cap) {
-            response_cap *= 2;
-            response_buf = realloc(response_buf, response_cap);
-        }
-    }
-    
-    if (use_https) {
-        SSL_free(ssl);
-        SSL_CTX_free(ssl_ctx);
-    }
-    close(sockfd);
-    response_buf[response_len] = '\0';
-    
-    char* body_start = strstr(response_buf, "\r\n\r\n");
-    if (body_start) {
-        body_start += 4;
-        resp->body = strdup(body_start);
-        resp->body_length = strlen(resp->body);
-        *body_start = '\0';
-    }
-    
-    if (sscanf(response_buf, "HTTP/1.%*d %d", &resp->status_code) != 1) {
-        resp->status_code = -7;
-    }
-    
-    free(response_buf);
-    return resp;
-}
-
-static HttpResponse* http_get(const char* url) {
-    return http_request("GET", url, NULL);
-}
-
-static HttpResponse* http_post(const char* url, const char* body) {
-    return http_request("POST", url, body);
-}
-
-static HttpResponse* http_put(const char* url, const char* body) {
-    return http_request("PUT", url, body);
-}
-
-static HttpResponse* http_delete(const char* url) {
-    return http_request("DELETE", url, NULL);
-}
 
 static char* file_read(const char* path) {
     FILE* f = fopen(path, "rb");
@@ -708,66 +514,6 @@ static char* crypto_hmac_sha256(const char* key, const char* message) {
     return output;
 }
 
-static const char base64_chars[] = 
-    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-
-static char* base64_encode(const char* input) {
-    size_t len = strlen(input);
-    size_t output_len = 4 * ((len + 2) / 3);
-    char* output = malloc(output_len + 1);
-    
-    size_t i, j;
-    for (i = 0, j = 0; i < len;) {
-        uint32_t octet_a = i < len ? (unsigned char)input[i++] : 0;
-        uint32_t octet_b = i < len ? (unsigned char)input[i++] : 0;
-        uint32_t octet_c = i < len ? (unsigned char)input[i++] : 0;
-        
-        uint32_t triple = (octet_a << 16) + (octet_b << 8) + octet_c;
-        
-        output[j++] = base64_chars[(triple >> 18) & 0x3F];
-        output[j++] = base64_chars[(triple >> 12) & 0x3F];
-        output[j++] = base64_chars[(triple >> 6) & 0x3F];
-        output[j++] = base64_chars[triple & 0x3F];
-    }
-    
-    for (i = 0; i < (3 - len % 3) % 3; i++) {
-        output[output_len - 1 - i] = '=';
-    }
-    
-    output[output_len] = '\0';
-    return output;
-}
-
-static char* base64_decode(const char* input) {
-    size_t len = strlen(input);
-    size_t output_len = len / 4 * 3;
-    if (input[len - 1] == '=') output_len--;
-    if (input[len - 2] == '=') output_len--;
-    
-    char* output = malloc(output_len + 1);
-    
-    unsigned char decode_table[256] = {0};
-    for (int i = 0; i < 64; i++) {
-        decode_table[(unsigned char)base64_chars[i]] = i;
-    }
-    
-    size_t i, j;
-    for (i = 0, j = 0; i < len;) {
-        uint32_t sextet_a = input[i] == '=' ? 0 : decode_table[(unsigned char)input[i]]; i++;
-        uint32_t sextet_b = input[i] == '=' ? 0 : decode_table[(unsigned char)input[i]]; i++;
-        uint32_t sextet_c = input[i] == '=' ? 0 : decode_table[(unsigned char)input[i]]; i++;
-        uint32_t sextet_d = input[i] == '=' ? 0 : decode_table[(unsigned char)input[i]]; i++;
-        
-        uint32_t triple = (sextet_a << 18) + (sextet_b << 12) + (sextet_c << 6) + sextet_d;
-        
-        if (j < output_len) output[j++] = (triple >> 16) & 0xFF;
-        if (j < output_len) output[j++] = (triple >> 8) & 0xFF;
-        if (j < output_len) output[j++] = triple & 0xFF;
-    }
-    
-    output[output_len] = '\0';
-    return output;
-}
 
 static int64_t time_now() {
     return (int64_t)time(NULL);
@@ -793,211 +539,7 @@ static int64_t time_parse(const char* time_str, const char* format) {
     return (int64_t)mktime(&tm_info);
 }
 
-// ============================================
-// WEBSOCKET IMPLEMENTATION
-// ============================================
-
-static WebSocket* ws_connect(const char* url) {
-    init_openssl();
-    
-    WebSocket* ws = malloc(sizeof(WebSocket));
-    ws->ssl = NULL;
-    ws->ssl_ctx = NULL;
-    ws->connected = 0;
-    
-    char host[256] = {0};
-    char path[1024] = "/";
-    int port = 80;
-    int use_wss = 0;
-    
-    if (strncmp(url, "wss://", 6) == 0) {
-        use_wss = 1;
-        port = 443;
-        sscanf(url + 6, "%255[^/]%1023s", host, path);
-    } else if (strncmp(url, "ws://", 5) == 0) {
-        sscanf(url + 5, "%255[^/]%1023s", host, path);
-    } else {
-        return ws;
-    }
-    
-    struct hostent* server = gethostbyname(host);
-    if (!server) return ws;
-    
-    ws->sockfd = socket(AF_INET, SOCK_STREAM, 0);
-    if (ws->sockfd < 0) return ws;
-    
-    struct sockaddr_in serv_addr;
-    memset(&serv_addr, 0, sizeof(serv_addr));
-    serv_addr.sin_family = AF_INET;
-    memcpy(&serv_addr.sin_addr.s_addr, server->h_addr_list[0], server->h_length);
-    serv_addr.sin_port = htons(port);
-    
-    if (connect(ws->sockfd, (struct sockaddr*)&serv_addr, sizeof(serv_addr)) < 0) {
-        close(ws->sockfd);
-        return ws;
-    }
-    
-    if (use_wss) {
-        ws->ssl_ctx = SSL_CTX_new(TLS_client_method());
-        if (!ws->ssl_ctx) {
-            close(ws->sockfd);
-            return ws;
-        }
-        ws->ssl = SSL_new(ws->ssl_ctx);
-        SSL_set_fd(ws->ssl, ws->sockfd);
-        if (SSL_connect(ws->ssl) != 1) {
-            SSL_free(ws->ssl);
-            SSL_CTX_free(ws->ssl_ctx);
-            close(ws->sockfd);
-            return ws;
-        }
-    }
-    
-    char handshake[1024];
-    snprintf(handshake, sizeof(handshake),
-        "GET %s HTTP/1.1\r\n"
-        "Host: %s\r\n"
-        "Upgrade: websocket\r\n"
-        "Connection: Upgrade\r\n"
-        "Sec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==\r\n"
-        "Sec-WebSocket-Version: 13\r\n\r\n",
-        path, host);
-    
-    if (use_wss) {
-        SSL_write(ws->ssl, handshake, strlen(handshake));
-    } else {
-        write(ws->sockfd, handshake, strlen(handshake));
-    }
-    
-    char response[2048];
-    int n;
-    if (use_wss) {
-        n = SSL_read(ws->ssl, response, sizeof(response) - 1);
-    } else {
-        n = read(ws->sockfd, response, sizeof(response) - 1);
-    }
-    
-    if (n > 0) {
-        response[n] = '\0';
-        if (strstr(response, "101 Switching Protocols")) {
-            ws->connected = 1;
-        }
-    }
-    
-    return ws;
-}
-
-static int ws_send(WebSocket* ws, const char* message) {
-    if (!ws || !ws->connected) return 0;
-    
-    size_t len = strlen(message);
-    unsigned char frame[10];
-    int frame_size = 0;
-    
-    frame[0] = 0x81;
-    if (len < 126) {
-        frame[1] = 0x80 | len;
-        frame_size = 2;
-    } else if (len < 65536) {
-        frame[1] = 0x80 | 126;
-        frame[2] = (len >> 8) & 0xFF;
-        frame[3] = len & 0xFF;
-        frame_size = 4;
-    } else {
-        frame[1] = 0x80 | 127;
-        for (int i = 0; i < 8; i++) {
-            frame[2 + i] = (len >> (56 - i * 8)) & 0xFF;
-        }
-        frame_size = 10;
-    }
-    
-    unsigned char mask[4] = {0x12, 0x34, 0x56, 0x78};
-    memcpy(frame + frame_size, mask, 4);
-    frame_size += 4;
-    
-    unsigned char* masked = malloc(len);
-    for (size_t i = 0; i < len; i++) {
-        masked[i] = message[i] ^ mask[i % 4];
-    }
-    
-    int sent = 0;
-    if (ws->ssl) {
-        sent = SSL_write(ws->ssl, frame, frame_size);
-        sent += SSL_write(ws->ssl, masked, len);
-    } else {
-        sent = write(ws->sockfd, frame, frame_size);
-        sent += write(ws->sockfd, masked, len);
-    }
-    
-    free(masked);
-    return sent > 0;
-}
-
-static char* ws_receive(WebSocket* ws) {
-    if (!ws || !ws->connected) return strdup("");
-    
-    unsigned char header[2];
-    int n;
-    
-    if (ws->ssl) {
-        n = SSL_read(ws->ssl, header, 2);
-    } else {
-        n = read(ws->sockfd, header, 2);
-    }
-    
-    if (n < 2) return strdup("");
-    
-    uint64_t payload_len = header[1] & 0x7F;
-    if (payload_len == 126) {
-        unsigned char len_bytes[2];
-        if (ws->ssl) {
-            SSL_read(ws->ssl, len_bytes, 2);
-        } else {
-            read(ws->sockfd, len_bytes, 2);
-        }
-        payload_len = (len_bytes[0] << 8) | len_bytes[1];
-    } else if (payload_len == 127) {
-        unsigned char len_bytes[8];
-        if (ws->ssl) {
-            SSL_read(ws->ssl, len_bytes, 8);
-        } else {
-            read(ws->sockfd, len_bytes, 8);
-        }
-        payload_len = 0;
-        for (int i = 0; i < 8; i++) {
-            payload_len = (payload_len << 8) | len_bytes[i];
-        }
-    }
-    
-    char* payload = malloc(payload_len + 1);
-    if (ws->ssl) {
-        SSL_read(ws->ssl, payload, payload_len);
-    } else {
-        read(ws->sockfd, payload, payload_len);
-    }
-    payload[payload_len] = '\0';
-    
-    return payload;
-}
-
-static void ws_close(WebSocket* ws) {
-    if (!ws) return;
-    
-    if (ws->ssl) {
-        SSL_free(ws->ssl);
-        SSL_CTX_free(ws->ssl_ctx);
-    }
-    close(ws->sockfd);
-    free(ws);
-}
-
-// ============================================
 // SQLITE IMPLEMENTATION
-// ============================================
-
-// ============================================
-// SQLITE IMPLEMENTATION
-// ============================================
 
 #ifdef HAVE_SQLITE3
 
@@ -1124,9 +666,7 @@ static SqliteStmt* sqlite_prepare(SqliteDB* db, const char* sql) {
 
 #endif
 
-// ============================================
 // PROCESS IMPLEMENTATION
-// ============================================
 
 static Process* process_spawn(const char* command, const char** args) {
     Process* proc = malloc(sizeof(Process));
@@ -1201,9 +741,7 @@ static int process_write(Process* proc, const char* data) {
     return n > 0;
 }
 
-// ============================================
 // NETWORK SOCKET IMPLEMENTATION
-// ============================================
 
 static Socket* tcp_listen(int port) {
     Socket* sock = malloc(sizeof(Socket));
@@ -1396,9 +934,7 @@ static int udp_bind(Socket* sock, int port) {
     return bind(sock->sockfd, (struct sockaddr*)&sock->addr, sizeof(sock->addr)) >= 0;
 }
 
-// ============================================
 // CHANNEL IMPLEMENTATION (Thread-Safe Queues)
-// ============================================
 
 static Channel* channel_new(int capacity) {
     Channel* ch = malloc(sizeof(Channel));
@@ -1501,9 +1037,7 @@ void vm_free(VM* vm) {
     free(vm);
 }
 
-// ============================================
 // FFI (FOREIGN FUNCTION INTERFACE) OPERATIONS
-// ============================================
 
 // FFI search paths
 static const char* ffi_get_home_extensions_path() {
@@ -1636,9 +1170,7 @@ static void ffi_close_library(VM* vm, void* handle) {
     }
 }
 
-// ============================================
 // STACK OPERATIONS
-// ============================================
 
 static inline void push(VM* vm, Value val) {
     if (vm->sp >= STACK_SIZE) {
@@ -1664,9 +1196,7 @@ static inline Value peek(VM* vm, uint32_t offset) {
     return vm->stack[vm->sp - 1 - offset];
 }
 
-// ============================================
 // VM EXECUTION
-// ============================================
 
 int vm_run(VM* vm) {
     // Find main function
@@ -1777,10 +1307,7 @@ int vm_run(VM* vm) {
                 break;
             }
 
-            // ============================================
-            // ============================================
             // INT (I64) ARITHMETIC (v6.0 - removed i32)
-            // ============================================
 
             case OP_ADD_I64: {
                 Value b = pop(vm);
@@ -1843,13 +1370,9 @@ int vm_run(VM* vm) {
                 break;
             }
 
-            // ============================================
             // TYPED F32 ARITHMETIC
-            // ============================================
 
-            // ============================================
             // FLOAT (F64) ARITHMETIC - AISL 'float' type
-            // ============================================
 
             case OP_ADD_F64: {
                 Value b = pop(vm);
@@ -1895,9 +1418,7 @@ int vm_run(VM* vm) {
                 break;
             }
 
-            // ============================================
             // INT (I64) COMPARISONS (v6.0 - removed i32)
-            // ============================================
 
             case OP_EQ_I64: {
                 Value b = pop(vm);
@@ -1953,9 +1474,7 @@ int vm_run(VM* vm) {
                 break;
             }
 
-            // ============================================
             // FLOAT (F64) COMPARISONS - AISL 'float' type
-            // ============================================
 
             case OP_EQ_F64: {
                 Value b = pop(vm);
@@ -2353,9 +1872,7 @@ int vm_run(VM* vm) {
                 break;
             }
 
-            // ============================================
             // MAP OPERATIONS
-            // ============================================
 
             case OP_MAP_NEW: {
                 Map* map = malloc(sizeof(Map));
@@ -2609,23 +2126,17 @@ int vm_run(VM* vm) {
                 break;
             }
 
-            // ============================================
             // JSON OPERATIONS
-            // ============================================
 
             // JSON operations (OP_JSON_PARSE, OP_JSON_STRINGIFY, etc.) REMOVED
             // Now implemented in stdlib/data/json.aisl using map primitives
 
-            // ============================================
             // HTTP OPERATIONS
-            // ============================================
 
             // HTTP operations (OP_HTTP_GET, OP_HTTP_POST, etc.) REMOVED
             // Now implemented in stdlib/net/http.aisl using TCP/TLS primitives
 
-            // ============================================
             // FILE OPERATIONS
-            // ============================================
 
             case OP_FILE_READ: {
                 Value path_val = pop(vm);
@@ -2966,9 +2477,7 @@ int vm_run(VM* vm) {
                 break;
             }
 
-            // ============================================
             // TYPE CONVERSION OPERATIONS (v6.0 - int/float only)
-            // ============================================
 
             case OP_CAST_I64_F64: {
                 Value val = pop(vm);
@@ -2986,9 +2495,7 @@ int vm_run(VM* vm) {
                 break;
             }
 
-            // ============================================
             // MATH OPERATIONS
-            // ============================================
 
             case OP_MATH_SQRT_F64: {
                 Value val = pop(vm);
@@ -3125,9 +2632,7 @@ int vm_run(VM* vm) {
                 break;
             }
 
-            // ============================================
             // SQLITE DATABASE OPERATIONS
-            // ============================================
 
             case OP_SQLITE_OPEN: {
                 Value path_val = pop(vm);
@@ -3316,9 +2821,7 @@ int vm_run(VM* vm) {
                 break;
             }
 
-            // ============================================
             // PROCESS MANAGEMENT OPERATIONS
-            // ============================================
 
             case OP_PROCESS_SPAWN: {
                 Value args_val = pop(vm);
@@ -3430,9 +2933,7 @@ int vm_run(VM* vm) {
                 break;
             }
 
-            // ============================================
             // NETWORK SOCKET OPERATIONS
-            // ============================================
 
             case OP_TCP_LISTEN: {
                 Value port_val = pop(vm);
@@ -3601,9 +3102,7 @@ int vm_run(VM* vm) {
                 break;
             }
 
-            // ============================================
             // CHANNEL OPERATIONS (Thread-Safe Queues)
-            // ============================================
 
             case OP_CHANNEL_NEW: {
                 Value capacity_val = pop(vm);
@@ -3635,9 +3134,7 @@ int vm_run(VM* vm) {
                 break;
             }
 
-            // ============================================
             // GARBAGE COLLECTION OPERATIONS
-            // ============================================
 
             case OP_GC_COLLECT: {
                 gc_collect(vm);
@@ -3666,9 +3163,7 @@ int vm_run(VM* vm) {
                 break;
             }
 
-            // ============================================
             // RESULT TYPE OPERATIONS
-            // ============================================
             
             // Result type operations (OP_RESULT_OK, OP_RESULT_ERR, etc.) REMOVED
             // Now implemented in stdlib/core/result.aisl using map primitives
@@ -3756,9 +3251,7 @@ int vm_run(VM* vm) {
                 break;
             }
 
-            // ============================================
             // FFI (FOREIGN FUNCTION INTERFACE) OPERATIONS
-            // ============================================
             
             case OP_FFI_LOAD: {
                 // Load FFI library: library_name -> handle (0 on failure)
@@ -3927,9 +3420,7 @@ int vm_run(VM* vm) {
     return vm->exit_code;
 }
 
-// ============================================
 // DISASSEMBLER
-// ============================================
 
 void vm_disassemble(BytecodeProgram* program) {
     printf("=== AISL Bytecode Disassembly ===\n\n");

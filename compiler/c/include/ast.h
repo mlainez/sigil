@@ -4,9 +4,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-// ============================================
 // TYPE DEFINITIONS
-// ============================================
 
 typedef enum {
     TYPE_INT,           // Always i64 - only integer type in AISL
@@ -58,9 +56,7 @@ struct Type {
     } data;
 };
 
-// ============================================
 // EXPRESSION DEFINITIONS
-// ============================================
 
 typedef enum {
     EXPR_LIT_INT,
@@ -309,9 +305,7 @@ struct Expr {
     } data;
 };
 
-// ============================================
 // DEFINITION DEFINITIONS
-// ============================================
 
 typedef enum {
     DEF_FUNCTION,
@@ -356,9 +350,7 @@ struct DefList {
     DefList* next;
 };
 
-// ============================================
 // MODULE DEFINITION
-// ============================================
 
 // Import types
 typedef enum {
@@ -383,9 +375,7 @@ typedef struct Module {
     DefList* definitions;
 } Module;
 
-// ============================================
 // HELPER FUNCTIONS
-// ============================================
 
 Type* type_int();
 Type* type_string();

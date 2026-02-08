@@ -1,127 +1,68 @@
 @(transformation-status
   @(date "2026-02-08")
-  @(session "initial-analysis-and-planning")
+  @(session "session-6-dead-code-removal-and-optimization")
   
-  @(already-implemented
-    @(ffi
+  @(completed-this-session
+    @(dead-code-removal
+      @(lines-removed "621 lines from 10 files")
+      @(vm.c "-445 lines: HTTP, WebSocket, base64, value_clone")
+      @(desugar.c "-34 lines: unused desugar_if function")
+      @(comment-optimization "-137 section header lines")
+      @(types-removed "HttpResponse, WebSocket structs"))
+    
+    @(comment-optimization
+      @(removed "137 verbose === section headers")
+      @(impact "~700 tokens saved in vm.c")
+      @(philosophy "Comments for humans, not LLMs"))
+    
+    @(http-websocket-pure-aisl
       @(status "COMPLETE")
-      @(vm-opcodes "OP_FFI_LOAD, OP_FFI_CALL, OP_FFI_AVAILABLE, OP_FFI_CLOSE")
-      @(vm-functions "ffi_load_library, ffi_is_available, ffi_close_library")
-      @(compiler-support "ffi_load, ffi_call, ffi_available, ffi_close mapped")
-      @(missing "stdlib/sys/ffi.aisl wrapper module")
-      @(missing "test files for FFI"))
-    
-    @(tcp-udp
-      @(status "COMPLETE")
-      @(opcodes "OP_TCP_LISTEN, OP_TCP_ACCEPT, OP_TCP_CONNECT, OP_TCP_SEND, OP_TCP_RECEIVE, OP_TCP_CLOSE, OP_UDP_*"))
-    
-    @(file-ops
-      @(status "COMPLETE")
-      @(opcodes "OP_FILE_READ, OP_FILE_WRITE, OP_FILE_EXISTS, etc."))
-    
-    @(math-basic
-      @(status "COMPLETE")
-      @(opcodes "OP_ADD_INT, OP_SUB_INT, OP_MUL_INT, OP_DIV_INT, etc.")))
+      @(stdlib "stdlib/net/http.aisl (241 lines)")
+      @(stdlib "stdlib/net/websocket.aisl (182 lines)")
+      @(c-code "ZERO - all removed")
+      @(opcodes "ZERO - OP_HTTP_*, OP_WS_* all removed")))
   
-  @(not-yet-implemented
-    @(tls
-      @(status "NOT STARTED")
-      @(need "OP_TCP_TLS_CONNECT opcode")
-      @(impact "CRITICAL - enables https:// and wss://"))
+  @(next-session-plan
+    @(task "Move SQLite from C opcodes to pure AISL/FFI module")
+    @(reason "SQLite is 400+ lines of C, should use FFI like other DB libraries")
+    @(impact "~400 more lines removed from vm.c")
+    @(approach "Use FFI to call libsqlite3.so directly from AISL")
     
-    @(async-channels
-      @(status "NOT STARTED")
-      @(need "OP_ASYNC_SPAWN, OP_ASYNC_AWAIT, OP_CHANNEL_NEW, OP_CHANNEL_SEND, OP_CHANNEL_RECV")
-      @(impact "MEDIUM - concurrency primitives"))
+    @(steps
+      @(step-1 "Create stdlib/db/sqlite_ffi.aisl using FFI primitives")
+      @(step-2 "Test that FFI-based implementation works")
+      @(step-3 "Remove OP_SQLITE_* opcodes from bytecode.h")
+      @(step-4 "Remove sqlite_* C functions from vm.c")
+      @(step-5 "Remove SqliteDB/SqliteStmt types")
+      @(step-6 "Update compiler.c to remove sqlite dispatches")
+      @(step-7 "Rebuild and test")
+      @(step-8 "Commit with breaking changes"))
     
-    @(math-advanced
-      @(status "NOT STARTED")
-      @(need "OP_MATH_ABS, OP_MATH_MIN, OP_MATH_MAX, OP_MATH_POW, OP_MATH_SQRT")
-      @(impact "LOW - nice to have"))
-    
-    @(http-websocket-pure
-      @(status "NOT STARTED")
-      @(need "stdlib/net/http_pure.aisl, stdlib/net/websocket_pure.aisl")
-      @(depends "TLS primitive for https:///wss://")
-      @(impact "HIGH - move from C to AISL")))
+    @(estimated-effort "60-90 minutes")
+    @(breaking-change "YES - stdlib/db/sqlite.aisl API will change")
+    @(acceptable "YES - no users yet, breaking changes OK"))
   
-  @(dead-code-to-delete
-    @(json-implementation
-      @(location "vm.c lines 278-648")
-      @(size "370 lines")
-      @(reason "OP_JSON_* opcodes removed, functions orphaned")
-      @(impact "HIGH - immediate 8.5% vm.c reduction"))
+  @(overall-progress
+    @(vm.c-original "4,369 lines")
+    @(vm.c-session-5 "3,725 lines (HTTP/WS opcodes removed)")
+    @(vm.c-session-6 "3,180 lines (dead code removed)")
+    @(vm.c-reduction "-1,189 lines (-27%)")
+    @(compiler.c-reduction "~160 lines (HTTP/WS/comment removal)")
     
-    @(base64-implementation
-      @(location "vm.c lines 1070-1129")
-      @(size "56 lines")
-      @(reason "OP_BASE64_* opcodes removed, duplicate of stdlib")
-      @(impact "MEDIUM - 1.3% vm.c reduction"))
-    
-    @(type-checker
-      @(location "type_checker.c (237 lines), type_checker.h (23 lines)")
-      @(size "260 lines")
-      @(reason "Never invoked, tests pass without it")
-      @(impact "MEDIUM - remove entire unused subsystem"))
-    
-    @(http-websocket-c-code
-      @(location "vm.c lines 649-828 (HTTP), 1159-1400 (WebSocket)")
-      @(size "420 lines")
-      @(reason "Should be pure AISL using TCP+TLS primitives")
-      @(depends "TLS + pure AISL implementations")
-      @(impact "HIGH - 9.5% vm.c reduction"))
-    
-    @(unused-opcodes
-      @(location "bytecode.h")
-      @(count "44 opcodes")
-      @(examples "OP_ASYNC_*, OP_GLOBAL_*, OP_HTTP_REQUEST, etc.")
-      @(impact "MEDIUM - cleaner API")))
+    @(philosophy-achievement
+      @(http "Pure AISL ✅")
+      @(websocket "Pure AISL ✅")
+      @(json "Pure AISL ✅")
+      @(base64 "Pure AISL ✅")
+      @(sqlite "In C - NEXT TARGET")
+      @(regex "In C - uses system regex, acceptable")
+      @(tcp-tls "In C - OS interface, acceptable")
+      @(ffi "In C - dynamic loading, acceptable")))
   
-  @(quick-wins-available
-    @(win-1
-      @(task "Delete orphaned JSON code (370 lines)")
-      @(effort "5 minutes")
-      @(risk "ZERO - confirmed unused")
-      @(impact "HIGH"))
-    
-    @(win-2
-      @(task "Delete orphaned base64 code (56 lines)")
-      @(effort "2 minutes")
-      @(risk "ZERO - confirmed unused")
-      @(impact "MEDIUM"))
-    
-    @(win-3
-      @(task "Delete type_checker.c/.h (260 lines)")
-      @(effort "3 minutes")
-      @(risk "ZERO - never called")
-      @(impact "MEDIUM"))
-    
-    @(win-4
-      @(task "Create stdlib/sys/ffi.aisl wrapper")
-      @(effort "10 minutes")
-      @(risk "LOW - FFI already works")
-      @(impact "HIGH - completes FFI feature"))
-    
-    @(win-5
-      @(task "Create 5 FFI test files")
-      @(effort "20 minutes")
-      @(risk "LOW - testing existing feature")
-      @(impact "HIGH - validates FFI works")))
-  
-  @(recommendation
-    @(immediate-actions
-      @(action "Execute quick wins 1-3: Delete 686 lines of dead code")
-      @(action "Create FFI stdlib wrapper and tests")
-      @(action "Commit: 'refactor: remove dead code + add FFI stdlib'"))
-    
-    @(next-session
-      @(action "Implement TLS primitive (OP_TCP_TLS_CONNECT)")
-      @(action "Implement async/channel primitives")
-      @(action "Implement math opcodes")
-      @(action "Create pure AISL HTTP/WebSocket")
-      @(action "Delete HTTP/WebSocket C code")
-      @(action "Optimize all comments for LLM tokens"))
-    
-    @(estimated-effort
-      @(immediate "~40 minutes")
-      @(full-transformation "~4-6 hours total"))))
+  @(metrics
+    @(tests "118/118 passing (100%)")
+    @(examples "17/17 compiling (100%)")
+    @(compiler-warnings "0 errors, 0 warnings")
+    @(total-opcodes "196")
+    @(unused-opcodes "~40 (to investigate later)")
+    @(active-opcodes "~156")))

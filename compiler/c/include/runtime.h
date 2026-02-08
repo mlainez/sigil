@@ -5,9 +5,7 @@
 #include <stdbool.h>
 #include <pthread.h>
 
-// ============================================
 // VALUE REPRESENTATION
-// ============================================
 
 typedef enum {
     VAL_INT,
@@ -62,9 +60,7 @@ struct Future {
     pthread_cond_t cond;
 };
 
-// ============================================
 // RUNTIME FUNCTIONS
-// ============================================
 
 Value* value_int(int64_t val);
 Value* value_string(const char* val);
