@@ -104,12 +104,12 @@ All stdlib modules are written in AISL and compiled to bytecode, making them:
 
 **Stats:** 8 functions, 987 instructions
 
-**Import:** `(import json from data)`
+**Import:** `(import json_utils)` - auto-finds stdlib/data/json_utils.aisl
 
 **Example:**
 ```scheme
 (module json_demo
-  (import json from data)
+  (import json_utils)
   
   (fn main -> int
     (set obj json (call new_object))
@@ -131,12 +131,12 @@ All stdlib modules are written in AISL and compiled to bytecode, making them:
 
 **Stats:** 2 functions, 255 instructions
 
-**Import:** `(import base64 from data)`
+**Import:** `(import base64)`
 
 **Example:**
 ```scheme
 (module base64_demo
-  (import base64 from data)
+  (import base64)
   
   (fn main -> int
     (set text string "Hello, World!")
@@ -165,12 +165,12 @@ All stdlib modules are written in AISL and compiled to bytecode, making them:
 
 **Stats:** 6 functions, 82 instructions
 
-**Import:** `(import http from net)`
+**Import:** `(import http)`
 
 **Example:**
 ```scheme
 (module http_demo
-  (import http from net)
+  (import http)
   
   (fn main -> int
     (set response string (call get "https://api.example.com/data"))
@@ -191,12 +191,12 @@ All stdlib modules are written in AISL and compiled to bytecode, making them:
 
 **Stats:** 4 functions, 16 instructions
 
-**Import:** `(import websocket from net)`
+**Import:** `(import websocket)`
 
 **Example:**
 ```scheme
 (module ws_demo
-  (import websocket from net)
+  (import websocket)
   
   (fn main -> int
     (set socket string (call connect "ws://localhost:8080"))
@@ -223,12 +223,12 @@ All stdlib modules are written in AISL and compiled to bytecode, making them:
 
 **Stats:** 5 functions, 21 instructions
 
-**Import:** `(import regex from pattern)`
+**Import:** `(import regex)`
 
 **Example:**
 ```scheme
 (module regex_demo
-  (import regex from pattern)
+  (import regex)
   
   (fn main -> int
     (set pattern regex (call compile "\\d+"))
@@ -251,12 +251,12 @@ All stdlib modules are written in AISL and compiled to bytecode, making them:
 
 **Stats:** 3 functions, 11 instructions
 
-**Import:** `(import hash from crypto)`
+**Import:** `(import hash)`
 
 **Example:**
 ```scheme
 (module hash_demo
-  (import hash from crypto)
+  (import hash)
   
   (fn main -> int
     (set text string "hello")
@@ -288,12 +288,12 @@ All stdlib modules are written in AISL and compiled to bytecode, making them:
 
 **Stats:** 10 functions, 43 instructions
 
-**Import:** `(import sqlite from db)`
+**Import:** `(import sqlite)`
 
 **Example:**
 ```scheme
 (module db_demo
-  (import sqlite from db)
+  (import sqlite)
   
   (fn main -> int
     (set db string (call open "test.db"))
@@ -319,12 +319,12 @@ All stdlib modules are written in AISL and compiled to bytecode, making them:
 
 **Stats:** 3 functions, 11 instructions
 
-**Import:** `(import time from sys)`
+**Import:** `(import time)`
 
 **Example:**
 ```scheme
 (module time_demo
-  (import time from sys)
+  (import time)
   
   (fn main -> int
     (set now i64 (call unix_timestamp))
@@ -349,12 +349,12 @@ All stdlib modules are written in AISL and compiled to bytecode, making them:
 
 **Stats:** 7 functions, 25 instructions
 
-**Import:** `(import process from sys)`
+**Import:** `(import process)`
 
 **Example:**
 ```scheme
 (module process_demo
-  (import process from sys)
+  (import process)
   
   (fn main -> int
     (set pid i32 (call get_pid))
@@ -379,19 +379,19 @@ All stdlib modules are written in AISL and compiled to bytecode, making them:
 
 ### Import from Subdirectory
 ```scheme
-(import module_name from subdir)  ; Import from stdlib/subdir/module_name.aisl
+; Module loader automatically searches stdlib/core/, stdlib/data/, stdlib/net/, etc.
 ```
 
 ### Examples
 ```scheme
 (import result)                   ; stdlib/core/result.aisl
 (import string_utils)             ; stdlib/core/string_utils.aisl
-(import json from data)           ; stdlib/data/json.aisl
-(import regex from pattern)       ; stdlib/pattern/regex.aisl
-(import hash from crypto)         ; stdlib/crypto/hash.aisl
-(import sqlite from db)           ; stdlib/db/sqlite.aisl
-(import http from net)            ; stdlib/net/http.aisl
-(import time from sys)            ; stdlib/sys/time.aisl
+(import json_utils)           ; stdlib/data/json.aisl
+(import regex)       ; stdlib/pattern/regex.aisl
+(import hash)         ; stdlib/crypto/hash.aisl
+(import sqlite)           ; stdlib/db/sqlite.aisl
+(import http)            ; stdlib/net/http.aisl
+(import time)            ; stdlib/sys/time.aisl
 ```
 
 ---

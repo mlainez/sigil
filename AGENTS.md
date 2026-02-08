@@ -438,13 +438,13 @@ AISL follows the philosophy: **"If it CAN be written in AISL, it MUST be written
 | | `(call string_trim ...)` | `(import string_utils)` then `(call trim ...)` |
 | | `(call string_contains ...)` | `(import string_utils)` then `(call contains ...)` |
 | | `(call string_replace ...)` | `(import string_utils)` then `(call replace ...)` |
-| **JSON operations** | `(call json_parse ...)` | `(import json from data)` then `(call parse ...)` |
-| | `(call json_stringify ...)` | `(import json from data)` then `(call stringify ...)` |
-| | `(call json_new_object)` | `(import json from data)` then `(call new_object)` |
+| **JSON operations** | `(call json_parse ...)` | `(import json_utils)` then `(call json_parse ...)` |
+| | `(call json_stringify ...)` | `(import json_utils)` then `(call json_stringify ...)` |
+| | `(call json_new_object)` | `(import json_utils)` then `(call json_new_object)` |
 | **Result type** | Not available | `(import result)` then `(call ok ...)`, `(call err ...)` |
-| **Base64** | `(call base64_encode ...)` | `(import base64 from data)` then `(call encode ...)` |
-| **Regex** | `(call regex_compile ...)` | `(import regex from pattern)` then `(call compile ...)` |
-| **Hashing** | `(call crypto_sha256 ...)` | `(import hash from crypto)` then `(call sha256 ...)` |
+| **Base64** | `(call base64_encode ...)` | `(import base64)` then `(call base64_encode ...)` |
+| **Regex** | `(call regex_compile ...)` | `(import regex)` then `(call regex_compile ...)` |
+| **Hashing** | `(call crypto_sha256 ...)` | `(import hash)` then `(call crypto_sha256 ...)` |
 
 ### How to Use Stdlib Modules
 
@@ -454,8 +454,8 @@ AISL follows the philosophy: **"If it CAN be written in AISL, it MUST be written
 (module my_program
   (import result)                   ; From stdlib/core/result.aisl
   (import string_utils)             ; From stdlib/core/string_utils.aisl
-  (import json from data)           ; From stdlib/data/json.aisl
-  (import regex from pattern)       ; From stdlib/pattern/regex.aisl
+  (import json_utils)               ; From stdlib/data/json_utils.aisl
+  (import regex)                    ; From stdlib/pattern/regex.aisl
   
   (fn main -> int
     ; Your code here
@@ -585,8 +585,8 @@ AISL follows the philosophy: **"If it CAN be written in AISL, it MUST be written
 
 ```lisp
 (module api_client
-  (import json from data)
-  (import http from net)
+  (import json_utils)
+  (import http)
   
   (fn fetch_user id i32 -> json
     (set url string "https://api.example.com/users/")
@@ -594,12 +594,12 @@ AISL follows the philosophy: **"If it CAN be written in AISL, it MUST be written
     (set full_url string (call string_concat url id_str))
     
     (set response string (call get full_url))
-    (set json_obj json (call parse response))
+    (set json_obj json (call json_parse response))
     (ret json_obj))
   
   (fn main -> int
     (set user json (call fetch_user 123))
-    (set name string (call get user "name"))
+    (set name string (call json_get user "name"))
     (call print name)
     (ret 0)))
 ```
@@ -610,20 +610,20 @@ AISL follows the philosophy: **"If it CAN be written in AISL, it MUST be written
 (module complete_example
   (import result)
   (import string_utils)
-  (import json from data)
-  (import hash from crypto)
+  (import json_utils)
+  (import hash)
   
   (fn main -> int
     ; Use all imports together
     (set text string "  Hello  ")
     (set trimmed string (call trim text))
-    (set hash_val string (call sha256 trimmed))
+    (set hash_val string (call crypto_sha256 trimmed))
     
-    (set obj json (call new_object))
-    (call set obj "text" trimmed)
-    (call set obj "hash" hash_val)
+    (set obj json (call json_new_object))
+    (call json_set obj "text" trimmed)
+    (call json_set obj "hash" hash_val)
     
-    (set result result (call ok (call stringify obj)))
+    (set result result (call ok (call json_stringify obj)))
     (if (call is_ok result)
       (call print (call unwrap result)))
     
@@ -674,10 +674,12 @@ AISL follows the philosophy: **"If it CAN be written in AISL, it MUST be written
 2. **Import modules at the top** - Put all `(import ...)` statements right after `(module ...)`.
 
 3. **Use the correct import syntax:**
-   - For core modules: `(import module_name)`
-   - For subdirectory modules: `(import module_name from subdir)`
+   - Simple import: `(import module_name)` - Module loader automatically searches `stdlib/core/`, `stdlib/data/`, `stdlib/net/`, `stdlib/sys/`, `stdlib/crypto/`, `stdlib/db/`, `stdlib/pattern/`
+   - Example: `(import json_utils)` automatically finds `stdlib/data/json_utils.aisl`
+   - Example: `(import http)` automatically finds `stdlib/net/http.aisl`
+   - **NOTE**: The `(import module_name from subdir)` syntax is NOT supported!
 
-4. **Function names are shorter in stdlib** - Instead of `string_split`, use `split` after importing `string_utils`.
+4. **Function names match module names** - After importing `json_utils`, use `json_parse`, `json_stringify`, etc. (not shortened names).
 
 5. **Documentation location:** See `stdlib/README.md` for complete documentation of all 12 modules.
 
@@ -945,10 +947,10 @@ AISL has a built-in test framework. Add tests to verify behavior:
 
 **Common functions that require imports:**
 - String ops (split, trim, replace) → `(import string_utils)`
-- JSON ops (parse, stringify) → `(import json from data)`
+- JSON ops (json_parse, json_stringify) → `(import json_utils)`
 - Result type (ok, err, is_ok) → `(import result)`
-- Base64 (encode, decode) → `(import base64 from data)`
-- Regex (compile, match, find) → `(import regex from pattern)`
+- Base64 (base64_encode, base64_decode) → `(import base64)`
+- Regex (regex_compile, regex_match, regex_find) → `(import regex)`
 
 ### ❌ Don't: Mix types implicitly
 
