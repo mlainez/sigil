@@ -20,7 +20,7 @@ This architecture prevents long-term entropy: the Core IR remains stable forever
 
 ```scheme
 (module hello
-  (fn main () -> i32
+  (fn main () -> int
     (call print "Hello, World!")
     (ret 0)))
 ```
@@ -41,7 +41,7 @@ This architecture prevents long-term entropy: the Core IR remains stable forever
 
 1. **Two-Layer Design** - Stable IR (Core) + Ergonomic surface (Agent)
 2. **Zero Ambiguity** - Every construct has exactly one meaning
-3. **Type-Directed Operations** - Write `add`, not `add_i32` (compiler infers types)
+3. **Type-Directed Operations** - Write `add`, not `add` (compiler infers types)
 4. **Explicit Error Handling** - Result type for fallible operations
 5. **Flat Structure** - No complex nesting, easy to generate
 6. **S-Expression Syntax** - Trivial to parse and generate
@@ -58,10 +58,10 @@ This architecture prevents long-term entropy: the Core IR remains stable forever
 ## Language Features
 
 - **Two-Layer Architecture**: Core IR (frozen) + Agent surface language
-- **Types**: i32, i64, f32, f64, bool, string, result
+- **Types**: int, int, float, float, bool, string, result
 - **Control Flow**: Structured loops (`while`, `loop`, `break`, `continue`) desugar to labels/goto
 - **Error Handling**: Result type with `is_ok`, `unwrap`, `unwrap_or` operations
-- **Type-Directed Operations**: Write `add`, compiler infers `add_i32` vs `add_f64`
+- **Type-Directed Operations**: Write `add`, compiler infers `add` vs `add`
 - **Functions**: First-class with recursion support
 - **Standard Library**: String ops, file I/O, TCP/HTTP, JSON, regex, crypto (180+ functions)
 - **No Operator Precedence**: All operations are explicit function calls
@@ -77,14 +77,14 @@ This architecture prevents long-term entropy: the Core IR remains stable forever
 
 ```scheme
 ; While loop - iterate while condition is true
-(fn countdown ((n i32)) -> i32
-  (while (call op_gt_i32 n 0)
-    (call print_i32 n)
-    (set n i32 (call op_sub_i32 n 1)))
+(fn countdown ((n int)) -> int
+  (while (call gt n 0)
+    (call print n)
+    (set n int (call sub n 1)))
   (ret 0))
 
 ; Infinite loop - for servers and event loops
-(fn start_server ((port i32)) -> i32
+(fn start_server ((port int)) -> int
   (set server_sock string (call tcp_listen port))
   (loop
     (set client_sock string (call tcp_accept server_sock))
@@ -92,29 +92,29 @@ This architecture prevents long-term entropy: the Core IR remains stable forever
   (ret 0))
 
 ; Break - exit loop early
-(fn find_in_array ((arr string) (target i32) (n i32)) -> i32
-  (set i i32 0)
-  (while (call op_lt_i32 i n)
-    (set val i32 (call array_get arr i))
-    (set found bool (call op_eq_i32 val target))
+(fn find_in_array ((arr string) (target int) (n int)) -> int
+  (set i int 0)
+  (while (call lt i n)
+    (set val int (call array_get arr i))
+    (set found bool (call eq val target))
     (ifnot found skip)
     (break)
     (label skip)
-    (set i i32 (call op_add_i32 i 1)))
+    (set i int (call add i 1)))
   (ret i))
 
 ; Continue - skip to next iteration
-(fn count_non_zero ((arr string) (n i32)) -> i32
-  (set i i32 0)
-  (set count i32 0)
-  (while (call op_lt_i32 i n)
-    (set val i32 (call array_get arr i))
-    (set i i32 (call op_add_i32 i 1))
-    (set is_zero bool (call op_eq_i32 val 0))
+(fn count_non_zero ((arr string) (n int)) -> int
+  (set i int 0)
+  (set count int 0)
+  (while (call lt i n)
+    (set val int (call array_get arr i))
+    (set i int (call add i 1))
+    (set is_zero bool (call eq val 0))
     (ifnot is_zero no_skip)
     (continue)
     (label no_skip)
-    (set count i32 (call op_add_i32 count 1)))
+    (set count int (call add count 1)))
   (ret count))
 ```
 
@@ -122,19 +122,19 @@ This architecture prevents long-term entropy: the Core IR remains stable forever
 
 ```scheme
 (module factorial
-  (fn fact ((n i32)) -> i32
-    (set is_zero bool (call op_eq_i32 n 0))
-    (set result i32 (call if_i32 is_zero 1 0))
+  (fn fact ((n int)) -> int
+    (set is_zero bool (call eq n 0))
+    (set result int (call if_int is_zero 1 0))
     (if is_zero done)
-    (set n_minus_1 i32 (call op_sub_i32 n 1))
-    (set prev i32 (call fact n_minus_1))
-    (set result i32 (call op_mul_i32 n prev))
+    (set n_minus_1 int (call sub n 1))
+    (set prev int (call fact n_minus_1))
+    (set result int (call mul n prev))
     (label done)
     (ret result))
 
-  (fn main () -> i32
-    (set x i32 (call fact 5))
-    (call print_i32 x)
+  (fn main () -> int
+    (set x int (call fact 5))
+    (call print x)
     (ret 0)))
 ```
 
@@ -142,7 +142,7 @@ This architecture prevents long-term entropy: the Core IR remains stable forever
 
 ```scheme
 (module sinatra
-  (fn handle_connection ((client_sock string)) -> i32
+  (fn handle_connection ((client_sock string)) -> int
     (set request string (call tcp_receive client_sock 4096))
     (set has_json bool (call string_contains request "/hello.json"))
     (set json_resp string "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\n\r\n{\"message\": \"Hello\"}")
@@ -152,7 +152,7 @@ This architecture prevents long-term entropy: the Core IR remains stable forever
     (call tcp_close client_sock)
     (ret 0))
 
-  (fn main () -> i32
+  (fn main () -> int
     (set server_sock string (call tcp_listen 8080))
     (loop
       (set client_sock string (call tcp_accept server_sock))
@@ -206,7 +206,7 @@ AISL has a built-in test framework. All test files in `tests/` directory must fo
 **Example:**
 ```lisp
 (module test_addition
-  (fn add_numbers ((a i32) (b i32)) -> i32
+  (fn add_numbers ((a int) (b int)) -> int
     (ret (call add a b)))
   
   (test-spec add_numbers
@@ -268,7 +268,7 @@ The test framework automatically validates that function outputs match expected 
 - String manipulation (split, trim, replace, contains)
 - Array operations (push, get, set, length)
 - Map operations (get, set, has, delete)
-- Type conversions (cast_i32_i64, cast_f32_i32, etc.)
+- Type conversions (cast_int_int, cast_float_int, etc.)
 
 ### Math
 - Arithmetic operations (add, sub, mul, div, mod)

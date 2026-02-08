@@ -26,7 +26,7 @@ AISL-Core is NOT meant for humans to write directly. It is the compilation targe
 
 Example:
 ```lisp
-(set x i32 42)
+(set x int 42)
 (set result bool (call lt x 100))
 ```
 
@@ -43,7 +43,7 @@ Example:
 
 Examples:
 ```lisp
-(call add x y)              ; Type-directed: resolves to op_add_i32 or op_add_i64
+(call add x y)              ; Type-directed: resolves to add or add
 (call my_function 10 20)    ; User function
 (call label loop_start)     ; Core construct
 ```
@@ -108,10 +108,10 @@ Example:
 ## Types
 
 Core supports these primitive types:
-- `i32` - 32-bit signed integer
-- `i64` - 64-bit signed integer  
-- `f32` - 32-bit float
-- `f64` - 64-bit float
+- `int` - 32-bit signed integer
+- `int` - 64-bit signed integer  
+- `float` - 32-bit float
+- `float` - 64-bit float
 - `bool` - Boolean
 - `string` - String (heap-allocated)
 - `unit` - Unit type (void)
@@ -122,21 +122,21 @@ Built-in operations use **short names** that resolve based on argument types:
 
 | Short Name | Typed Operations |
 |------------|------------------|
-| `add` | `op_add_i32`, `op_add_i64`, `op_add_f32`, `op_add_f64` |
-| `sub` | `op_sub_i32`, `op_sub_i64`, `op_sub_f32`, `op_sub_f64` |
-| `mul` | `op_mul_i32`, `op_mul_i64`, `op_mul_f32`, `op_mul_f64` |
-| `div` | `op_div_i32`, `op_div_i64`, `op_div_f32`, `op_div_f64` |
-| `mod` | `op_mod_i32`, `op_mod_i64` |
-| `neg` | `op_neg_i32`, `op_neg_i64`, `op_neg_f32`, `op_neg_f64` |
-| `lt` | `op_lt_i32`, `op_lt_i64`, `op_lt_f32`, `op_lt_f64` |
-| `gt` | `op_gt_i32`, `op_gt_i64`, `op_gt_f32`, `op_gt_f64` |
-| `le` | `op_le_i32`, `op_le_i64`, `op_le_f32`, `op_le_f64` |
-| `ge` | `op_ge_i32`, `op_ge_i64`, `op_ge_f32`, `op_ge_f64` |
-| `eq` | `op_eq_i32`, `op_eq_i64`, `op_eq_f32`, `op_eq_f64` |
-| `ne` | `op_ne_i32`, `op_ne_i64`, `op_ne_f32`, `op_ne_f64` |
-| `abs` | `op_abs_i32`, `op_abs_i64`, `op_abs_f32`, `op_abs_f64` |
-| `min` | `op_min_i32`, `op_min_i64`, `op_min_f32`, `op_min_f64` |
-| `max` | `op_max_i32`, `op_max_i64`, `op_max_f32`, `op_max_f64` |
+| `add` | `add`, `add`, `add`, `add` |
+| `sub` | `sub`, `sub`, `sub`, `sub` |
+| `mul` | `mul`, `mul`, `mul`, `mul` |
+| `div` | `div`, `div`, `div`, `div` |
+| `mod` | `mod`, `mod` |
+| `neg` | `neg`, `neg`, `neg`, `neg` |
+| `lt` | `lt`, `lt`, `lt`, `lt` |
+| `gt` | `gt`, `gt`, `gt`, `gt` |
+| `le` | `le`, `le`, `le`, `le` |
+| `ge` | `ge`, `ge`, `ge`, `ge` |
+| `eq` | `eq`, `eq`, `eq`, `eq` |
+| `ne` | `ne`, `ne`, `ne`, `ne` |
+| `abs` | `abs`, `abs`, `abs`, `abs` |
+| `min` | `min`, `min`, `min`, `min` |
+| `max` | `max`, `max`, `max`, `max` |
 
 The compiler infers the correct typed operation from argument types at compile time.
 
@@ -149,7 +149,7 @@ The compiler infers the correct typed operation from argument types at compile t
 
 Example:
 ```lisp
-(fn add_numbers ((x i32) (y i32)) -> i32
+(fn add_numbers ((x int) (y int)) -> int
   (ret (call add x y)))
 ```
 
@@ -187,12 +187,12 @@ Example:
 
 ### Simple loop (Core IR)
 ```lisp
-(fn count_to_five () -> i32
-  (set n i32 0)
+(fn count_to_five () -> int
+  (set n int 0)
   (call label loop_start)
   (set cond bool (call lt n 5))
   (call ifnot cond loop_end)
-  (set n i32 (call add n 1))
+  (set n int (call add n 1))
   (call goto loop_start)
   (call label loop_end)
   (ret n))
@@ -200,7 +200,7 @@ Example:
 
 ### Conditional (Core IR)
 ```lisp
-(fn max ((a i32) (b i32)) -> i32
+(fn max ((a int) (b int)) -> int
   (set cond bool (call gt a b))
   (call ifnot cond else_branch)
   (ret a)

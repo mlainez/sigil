@@ -3,8 +3,8 @@
 **BACKWARD COMPATIBILITY = HUMAN BAGGAGE**
 
 Current mistake: supporting BOTH syntaxes
-- Old: (fn add ((a i32) (b i32)) -> i32
-- New: (fn add a i32 b i32 -> i32
+- Old: (fn add ((a int) (b int)) -> int
+- New: (fn add a int b int -> int
 
 Human reasoning: "don't break existing code"
 LLM reality: **we regenerate code, we don't edit legacy**
@@ -53,15 +53,15 @@ Example of WRONG "flexibility":
 ; Bad: multiple ways
 (add a b)          ; implicit call
 (call add a b)     ; explicit call
-x:i32 = 42         ; type shorthand
-(set x i32 42)     ; explicit set
+x:int = 42         ; type shorthand
+(set x int 42)     ; explicit set
 ```
 
 Example of RIGHT "explicitness":
 ```
 ; Good: one way only
 (call add a b)     ; always explicit
-(set x i32 42)     ; always explicit
+(set x int 42)     ; always explicit
 ```
 
 @(token-efficiency-vs-explicitness)
@@ -76,7 +76,7 @@ Bad efficiency: (add a b) vs (call add a b) - loses explicit call marker
 @(micro-syntax-reconsidered)
 Previous plan: add compact micro-syntax layer
 - (add a b) → (call add a b)
-- x:i32 = 42 → (set x i32 42)
+- x:int = 42 → (set x int 42)
 
 REJECT THIS PLAN
 Reason: creates TWO ways, violates explicitness
@@ -88,16 +88,16 @@ Better plan: optimize tokens WITHOUT creating alternatives
 @(decision-matrix)
 
 REMOVE immediately:
-1. Old nested param syntax ((a i32) (b i32))
+1. Old nested param syntax ((a int) (b int))
 2. Backward compat checks in parser
 3. "Both syntaxes work" notes in docs
 4. Version numbers everywhere
 5. "Deprecated" warnings
 
 KEEP single canonical form:
-1. Flat params: a i32 b i32
+1. Flat params: a int b int
 2. Explicit call: (call add a b)
-3. Explicit types: set x i32 42
+3. Explicit types: set x int 42
 4. Explicit ret: (ret value)
 
 OPTIMIZE without adding alternatives:
@@ -316,17 +316,17 @@ Process:
 
 @(type-size-ambiguity-2026-02-07)
 
-**CURRENT PROBLEM: i32/i64 and f32/f64 create choice**
+**CURRENT PROBLEM: int/int and float/float create choice**
 
 State: AISL currently has 4 numeric types
-- i32, i64 (32 and 64-bit integers)
-- f32, f64 (32 and 64-bit floats)
+- int, int (32 and 64-bit integers)
+- float, float (32 and 64-bit floats)
 
 This violates "one way only" principle:
 ```
 ; Which to use?
-(set count i32 10)   ; Option 1
-(set count i64 10)   ; Option 2
+(set count int 10)   ; Option 1
+(set count int 10)   ; Option 2
 ```
 
 **LLM must choose without any real criteria**
@@ -342,21 +342,21 @@ Traditional arguments for keeping both:
    
 3. Compatibility - FFI with C
    - N/A: AISL has no FFI yet
-   - FUTURE: Can add i32 back when FFI added
+   - FUTURE: Can add int back when FFI added
 
 **Reality: Zero benefit, pure ambiguity**
 
 Analysis of real AISL code:
 - 99% of code doesn't care about bit width
-- Choice between i32/i64 is arbitrary
+- Choice between int/int is arbitrary
 - Creates multiple ways to write identical logic
 - LLMs must guess (source of errors)
 
-**RECOMMENDATION: Remove i32/f32 entirely**
+**RECOMMENDATION: Remove int/float entirely**
 
 Keep only:
-- int (maps to i64)
-- float (maps to f64)
+- int (maps to int)
+- float (maps to float)
 
 Benefits:
 - Zero choice = zero ambiguity
@@ -369,11 +369,11 @@ Cost:
 - None (no real use cases for 32-bit in AISL)
 - Can add back later for FFI if needed
 
-**DECISION: Eliminate i32/f32, keep only int/float**
+**DECISION: Eliminate int/float, keep only int/float**
 
 Implementation:
-1. Add int/float as type keywords (map to i64/f64 in VM)
-2. Mark i32/i64/f32/f64 as deprecated
+1. Add int/float as type keywords (map to int/float in VM)
+2. Mark int/int/float/float as deprecated
 3. Later: remove sized types entirely
 4. Update all tests and docs
 
@@ -385,7 +385,7 @@ This aligns with "one way only" principle:
 
 @(type-system-redesign)
 
-**FROM**: i32, i64, f32, f64, bool, string, array, map, regex, result
+**FROM**: int, int, float, float, bool, string, array, map, regex, result
 **TO**: int, float, bool, string, array, map, regex, result
 
 Rationale:
@@ -637,48 +637,48 @@ Result: ✅ **ALL 89 TESTS PASS**
 Changes made:
 1. **Lexer (lexer.h/c)**
    - Removed 8 type tokens: TOK_I8, TOK_I16, TOK_I32, TOK_U8, TOK_U16, TOK_U32, TOK_U64, TOK_F32
-   - Kept: TOK_INT (→i64), TOK_FLOAT (→f64)
-   - Internal aliases: i64/f64 exist as tokens but not exposed to users
+   - Kept: TOK_INT (→int), TOK_FLOAT (→float)
+   - Internal aliases: int/float exist as tokens but not exposed to users
 
 2. **Parser (parser.c)**
    - Removed 8 type parsing cases (lines 54-83)
    - Only parses: int, float, bool, string, array, map, json, result, regex
 
 3. **Bytecode (bytecode.h)**
-   - Removed ~48 opcodes (all i32/f32 variants)
+   - Removed ~48 opcodes (all int/float variants)
    - Renamed: OP_ADD_I64→OP_ADD_INT, OP_ADD_F64→OP_ADD_FLOAT (etc.)
    - Added legacy aliases: `#define OP_ADD_I64 OP_ADD_INT` for backward compat
    - Simplified: 204 opcodes → 156 opcodes (23% reduction)
 
 4. **Compiler (compiler.c)**
-   - All i32/f32 opcode references replaced with i64/f64
-   - Removed io_print_i32, io_print_f32 handlers
-   - Type dispatch still works: `add` → `add_i64` or `add_f64`
+   - All int/float opcode references replaced with int/float
+   - Removed print, print handlers
+   - Type dispatch still works: `add` → `add` or `add`
 
 5. **VM (vm.c)**
-   - Removed 6 i32 comparison cases (OP_EQ_I32, OP_NE_I32, etc.)
-   - Removed 6 f32 comparison cases (OP_EQ_F32, OP_NE_F32, etc.)
+   - Removed 6 int comparison cases (OP_EQ_I32, OP_NE_I32, etc.)
+   - Removed 6 float comparison cases (OP_EQ_F32, OP_NE_F32, etc.)
    - Fixed 6 orphaned arithmetic blocks (missing case statements after sed deletion)
-   - Removed duplicate cases: ABS, MIN, MAX, STR_FROM (i32/f32 duplicates)
+   - Removed duplicate cases: ABS, MIN, MAX, STR_FROM (int/float duplicates)
    - Removed OP_PRINT_I32, OP_PRINT_F32 handlers
    - Simplified casts: only OP_CAST_I64_F64 and OP_CAST_F64_I64
    - Net change: 572 lines deleted, 204 lines modified
 
 6. **Documentation (.aisl.grammar)**
    - Updated type list: `int|float|bool|str|arr|map|json|result|regex`
-   - Updated examples to use `int` instead of `i32`
-   - Added note: "(simplified-types "only int (i64) and float (f64) - removed i8/i16/i32/u8/u16/u32/u64/f32")"
+   - Updated examples to use `int` instead of `int`
+   - Added note: "(simplified-types "only int (int) and float (float) - removed i8/i16/int/u8/u16/u32/u64/float")"
 
 Impact:
 - **Token efficiency**: 23% fewer opcodes = ~25% fewer type-related tokens
-- **LLM simplicity**: No more "should I use i32 or i64?" decision
+- **LLM simplicity**: No more "should I use int or int?" decision
 - **Code clarity**: `int` and `float` are universal, intuitive names
-- **Backward compat**: i64/f64 opcodes still work via aliases
+- **Backward compat**: int/float opcodes still work via aliases
 - **Test coverage**: 89/89 tests compile and hello_world.aisl runs correctly
 
 Discovered issues (fixed):
 1. **Orphaned code blocks**: Previous sed/Python script removed `case` statements but left code blocks
-2. **Duplicate handlers**: i32/f32 handlers were duplicated with i64/f64 handlers in VM
+2. **Duplicate handlers**: int/float handlers were duplicated with int/float handlers in VM
 3. **Disassembly inconsistency**: Duplicate STR_FROM cases in disassembly function
 
 Files touched: 8 files, 572 deletions, 204 modifications
@@ -889,12 +889,12 @@ Documentation updated:
 1. Updated lexer.c: Changed keyword mapping
 2. Updated lexer.h: Removed TOK_MOD enum value
 3. Updated parser.c: Merged both syntax paths under TOK_MODULE check
-4. Updated compiler.c: Added missing op_mod_i64 registration
+4. Updated compiler.c: Added missing mod registration
 5. Batch updated 158 .aisl files: `(mod ` → `(module `
 
 **Bonus Cleanup**: Removed unused 32-bit operation registrations
-- Deleted all op_*_i32 and op_*_f32 functions (add, sub, mul, div, cmp, math)
-- AISL only uses int (i64) and float (f64) - compiler now reflects this
+- Deleted all op_* and op_* functions (add, sub, mul, div, cmp, math)
+- AISL only uses int (int) and float (float) - compiler now reflects this
 - Reduced compiler.c by ~150 lines of dead code
 
 **Files Modified**:

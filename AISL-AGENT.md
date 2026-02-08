@@ -32,10 +32,10 @@ body
 
 Example:
 ```lisp
-(fn count_to_ten () -> i32
-  (set n i32 0)
+(fn count_to_ten () -> int
+  (set n int 0)
   (while (call lt n 10)
-    (set n i32 (call add n 1)))
+    (set n int (call add n 1)))
   (ret n))
 ```
 
@@ -74,13 +74,13 @@ Must be inside a `while` or `loop`.
 
 Example:
 ```lisp
-(fn find_first_match ((arr Array) (target i32)) -> i32
-  (set i i32 0)
+(fn find_first_match ((arr Array) (target int)) -> int
+  (set i int 0)
   (loop
-    (set val i32 (call array_get arr i))
+    (set val int (call array_get arr i))
     (if (call eq val target)
       (break))
-    (set i i32 (call add i 1)))
+    (set i int (call add i 1)))
   (ret i))
 ```
 
@@ -98,15 +98,15 @@ Must be inside a `while` or `loop`.
 
 Example:
 ```lisp
-(fn sum_evens ((arr Array)) -> i32
-  (set sum i32 0)
-  (set i i32 0)
+(fn sum_evens ((arr Array)) -> int
+  (set sum int 0)
+  (set i int 0)
   (while (call lt i (call array_len arr))
-    (set val i32 (call array_get arr i))
+    (set val int (call array_get arr i))
     (if (call ne (call mod val 2) 0)
       (continue))
-    (set sum i32 (call add sum val))
-    (set i i32 (call add i 1)))
+    (set sum int (call add sum val))
+    (set i int (call add i 1)))
   (ret sum))
 ```
 
@@ -165,7 +165,7 @@ This ensures `break` and `continue` jump to the correct loop.
 ### Break/Continue target nearest enclosing loop
 ```lisp
 (while outer_condition
-  (set x i32 0)
+  (set x int 0)
   (while inner_condition
     (continue))  ; Continues inner loop
   (break))       ; Breaks outer loop
@@ -175,21 +175,21 @@ This ensures `break` and `continue` jump to the correct loop.
 
 ### ✅ DO write Agent code
 ```lisp
-(fn factorial ((n i32)) -> i32
-  (set result i32 1)
-  (set i i32 1)
+(fn factorial ((n int)) -> int
+  (set result int 1)
+  (set i int 1)
   (while (call le i n)
-    (set result i32 (call mul result i))
-    (set i i32 (call add i 1)))
+    (set result int (call mul result i))
+    (set i int (call add i 1)))
   (ret result))
 ```
 
 ### ❌ DON'T write Core IR directly
 ```lisp
 ; Don't do this - let desugarer handle it
-(fn factorial ((n i32)) -> i32
-  (set result i32 1)
-  (set i i32 1)
+(fn factorial ((n int)) -> int
+  (set result int 1)
+  (set i int 1)
   (call label loop_start_0)
   (set _cond_0 bool (call le i n))
   (call ifnot _cond_0 loop_end_0)
@@ -202,9 +202,9 @@ Agent code uses **short names** for operations:
 
 ```lisp
 ; Agent code (what LLMs write)
-(call add x y)      ; Instead of op_add_i32
-(call lt a b)       ; Instead of op_lt_i32
-(call mul x 2)      ; Instead of op_mul_i32
+(call add x y)      ; Instead of add
+(call lt a b)       ; Instead of lt
+(call mul x 2)      ; Instead of mul
 ```
 
 The compiler resolves these to typed operations based on argument types.
@@ -231,43 +231,43 @@ See AISL-CORE.md for full list of polymorphic operations.
 
 ### Fibonacci
 ```lisp
-(fn fibonacci ((n i32)) -> i32
+(fn fibonacci ((n int)) -> int
   (if (call le n 1)
     (ret n))
-  (set a i32 0)
-  (set b i32 1)
-  (set i i32 2)
+  (set a int 0)
+  (set b int 1)
+  (set i int 2)
   (while (call le i n)
-    (set temp i32 b)
-    (set b i32 (call add a b))
-    (set a i32 temp)
-    (set i i32 (call add i 1)))
+    (set temp int b)
+    (set b int (call add a b))
+    (set a int temp)
+    (set i int (call add i 1)))
   (ret b))
 ```
 
 ### Find in array
 ```lisp
-(fn find ((arr Array) (target i32)) -> i32
-  (set i i32 0)
+(fn find ((arr Array) (target int)) -> int
+  (set i int 0)
   (while (call lt i (call array_len arr))
-    (set val i32 (call array_get arr i))
+    (set val int (call array_get arr i))
     (if (call eq val target)
       (ret i))
-    (set i i32 (call add i 1)))
+    (set i int (call add i 1)))
   (ret -1))
 ```
 
 ### Break example
 ```lisp
-(fn first_negative ((arr Array)) -> i32
-  (set i i32 0)
+(fn first_negative ((arr Array)) -> int
+  (set i int 0)
   (loop
     (if (call ge i (call array_len arr))
       (break))
-    (set val i32 (call array_get arr i))
+    (set val int (call array_get arr i))
     (if (call lt val 0)
       (ret val))
-    (set i i32 (call add i 1)))
+    (set i int (call add i 1)))
   (ret 0))
 ```
 
@@ -277,10 +277,10 @@ Agent constructs should be tested via the test framework:
 
 ```lisp
 (module test_while
-  (fn count_to_n ((n i32)) -> i32
-    (set i i32 0)
+  (fn count_to_n ((n int)) -> int
+    (set i int 0)
     (while (call lt i n)
-      (set i i32 (call add i 1)))
+      (set i int (call add i 1)))
     (ret i))
   
   (test-spec count_to_n

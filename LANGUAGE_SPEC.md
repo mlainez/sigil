@@ -16,7 +16,7 @@ The minimal, stable intermediate representation that the VM executes. This layer
 - `ret` - Return from function
 
 ### AISL-Agent (Surface Layer)
-The ergonomic surface language that LLMs generate. Agent code includes structured control flow (`while`, `loop`, `break`, `continue`) and type-directed operations (`add` instead of `add_i32`). The compiler desugars Agent code to Core IR before execution.
+The ergonomic surface language that LLMs generate. Agent code includes structured control flow (`while`, `loop`, `break`, `continue`) and type-directed operations (`add` instead of `add`). The compiler desugars Agent code to Core IR before execution.
 
 **LLMs write Agent code. The VM runs Core code.**
 
@@ -72,17 +72,17 @@ Test files using the `test-spec` framework don't require a `main` function.
     (ret 0)))
 ```
 
-**Backward Compatibility Note**: The old nested parameter syntax `(fn main () -> i32)` is still supported, but the new flat syntax `(fn main -> i32)` is recommended for LLM code generation as it eliminates visual ambiguity.
+**Backward Compatibility Note**: The old nested parameter syntax `(fn main () -> int)` is still supported, but the new flat syntax `(fn main -> int)` is recommended for LLM code generation as it eliminates visual ambiguity.
 
 ---
 
 ## Types
 
 ### Primitive Types
-- **i32** - 32-bit signed integer
-- **i64** - 64-bit signed integer
-- **f32** - 32-bit floating point
-- **f64** - 64-bit floating point
+- **int** - 32-bit signed integer
+- **int** - 64-bit signed integer
+- **float** - 32-bit floating point
+- **float** - 64-bit floating point
 - **bool** - Boolean (true/false)
 - **string** - UTF-8 string
 - **regex** - Compiled regular expression pattern
@@ -95,10 +95,10 @@ Test files using the `test-spec` framework don't require a `main` function.
 Variables must be explicitly typed:
 
 ```scheme
-(set count i32 42)
+(set count int 42)
 (set name string "Alice")
 (set active bool true)
-(set price f64 19.99)
+(set price float 19.99)
 ```
 
 ---
@@ -112,10 +112,10 @@ Variables must be explicitly typed:
 Executes body while condition is true.
 
 ```scheme
-(fn countdown n i32 -> i32
+(fn countdown n int -> int
   (while (call gt n 0)
-    (call print_i32 n)
-    (set n i32 (call sub n 1)))
+    (call print n)
+    (set n int (call sub n 1)))
   (ret 0))
 ```
 
@@ -124,7 +124,7 @@ Executes body while condition is true.
 Executes forever. Use for server loops.
 
 ```scheme
-(fn start_server port i32 -> i32
+(fn start_server port int -> int
   (set server_sock string (call tcp_listen port))
   (loop
     (set client_sock string (call tcp_accept server_sock))
@@ -137,32 +137,32 @@ Executes forever. Use for server loops.
 **Break**: `(break)` - Exit nearest loop immediately
 
 ```scheme
-(fn find_value arr string target i32 -> i32
-  (set i i32 0)
+(fn find_value arr string target int -> int
+  (set i int 0)
   (loop
-    (set val i32 (call array_get arr i))
+    (set val int (call array_get arr i))
     (set found bool (call eq val target))
     (ifnot found skip)
     (break)
     (label skip)
-    (set i i32 (call add i 1)))
+    (set i int (call add i 1)))
   (ret i))
 ```
 
 **Continue**: `(continue)` - Skip to next iteration
 
 ```scheme
-(fn sum_positives arr string n i32 -> i32
-  (set i i32 0)
-  (set sum i32 0)
+(fn sum_positives arr string n int -> int
+  (set i int 0)
+  (set sum int 0)
   (while (call lt i n)
-    (set val i32 (call array_get arr i))
-    (set i i32 (call add i 1))
+    (set val int (call array_get arr i))
+    (set i int (call add i 1))
     (set is_negative bool (call lt val 0))
     (ifnot is_negative no_skip)
     (continue)
     (label no_skip)
-    (set sum i32 (call add sum val)))
+    (set sum int (call add sum val)))
   (ret sum))
 ```
 
@@ -171,14 +171,14 @@ Executes forever. Use for server loops.
 For complex control flow, use labels and goto:
 
 ```scheme
-(fn countdown_with_labels n i32 -> i32
+(fn countdown_with_labels n int -> int
   (label loop)
   (set done bool (call le n 0))
   (ifnot done continue)
   (ret 0)
   (label continue)
-  (call print_i32 n)
-  (set n i32 (call sub n 1))
+  (call print n)
+  (set n int (call sub n 1))
   (goto loop))
 ```
 
@@ -201,13 +201,13 @@ For complex control flow, use labels and goto:
 Functions can call themselves:
 
 ```scheme
-(fn factorial n i32 -> i32
+(fn factorial n int -> int
   (set is_base bool (call le n 1))
   (ifnot is_base recurse)
   (ret 1)
   (label recurse)
-  (set n_minus_1 i32 (call sub n 1))
-  (set result i32 (call factorial n_minus_1))
+  (set n_minus_1 int (call sub n 1))
+  (set result int (call factorial n_minus_1))
   (ret (call mul n result)))
 ```
 
@@ -237,7 +237,7 @@ Functions can call themselves:
 ; Agent code:
 (loop
   (if (call eq count 10) (break))
-  (set count i32 (call add count 1)))
+  (set count int (call add count 1)))
 
 ; Desugars to Core:
 (label loop_start_2)
@@ -245,7 +245,7 @@ Functions can call themselves:
 (ifnot _cond_2 skip_break_2)
 (goto loop_end_2)
 (label skip_break_2)
-(set count i32 (call add count 1))
+(set count int (call add count 1))
 (goto loop_start_2)
 (label loop_end_2)
 ```
@@ -315,7 +315,7 @@ See `stdlib/README.md` for complete documentation of all stdlib modules.
 The compiler infers types automatically. Write operation names without type suffixes:
 
 ```scheme
-; Arithmetic (works for i32, i64, f32, f64)
+; Arithmetic (works for int, int, float, float)
 (call add a b)     ; Addition
 (call sub a b)     ; Subtraction
 (call mul a b)     ; Multiplication
@@ -323,7 +323,7 @@ The compiler infers types automatically. Write operation names without type suff
 (call mod a b)     ; Modulo (integers only)
 (call neg a)       ; Negation
 
-; Comparison (works for i32, i64, f32, f64)
+; Comparison (works for int, int, float, float)
 (call eq a b)      ; Equal
 (call ne a b)      ; Not equal
 (call lt a b)      ; Less than
@@ -331,23 +331,23 @@ The compiler infers types automatically. Write operation names without type suff
 (call le a b)      ; Less or equal
 (call ge a b)      ; Greater or equal
 
-; Math (works for i32, i64, f32, f64)
+; Math (works for int, int, float, float)
 (call abs value)   ; Absolute value
 (call min a b)     ; Minimum
 (call max a b)     ; Maximum
-(call sqrt value)  ; Square root (f32, f64 only)
-(call pow base exp); Power (f32, f64 only)
+(call sqrt value)  ; Square root (float, float only)
+(call pow base exp); Power (float, float only)
 ```
 
 The compiler automatically selects the correct operation based on variable types:
 ```scheme
-(set x i32 10)
-(set y i32 20)
-(set sum i32 (call add x y))  ; Compiler uses add_i32
+(set x int 10)
+(set y int 20)
+(set sum int (call add x y))  ; Compiler uses add
 
-(set a f64 3.14)
-(set b f64 2.71)
-(set result f64 (call mul a b))  ; Compiler uses mul_f64
+(set a float 3.14)
+(set b float 2.71)
+(set result float (call mul a b))  ; Compiler uses mul
 ```
 
 ### String Operations
@@ -355,7 +355,7 @@ The compiler automatically selects the correct operation based on variable types
 **Built-in string operations** (always available):
 
 ```scheme
-(call string_length text)              ; Get length -> i32
+(call string_length text)              ; Get length -> int
 (call string_concat a b)               ; Concatenate -> string
 (call string_substring text start len) ; Extract substring -> string
 ```
@@ -434,10 +434,10 @@ The compiler automatically selects the correct operation based on variable types
 
 ```scheme
 (call print text)              ; Print string
-(call print_i32 number)        ; Print i32
-(call print_i64 number)        ; Print i64
-(call print_f32 number)        ; Print f32
-(call print_f64 number)        ; Print f64
+(call print number)        ; Print int
+(call print number)        ; Print int
+(call print number)        ; Print float
+(call print number)        ; Print float
 (call print_bool value)        ; Print bool
 ```
 
@@ -449,7 +449,7 @@ The compiler automatically selects the correct operation based on variable types
 (call file_append path content); Append to file
 (call file_exists path)        ; Check exists -> bool
 (call file_delete path)        ; Delete file
-(call file_size path)          ; Get size -> i64
+(call file_size path)          ; Get size -> int
 ```
 
 ### Error Handling
@@ -462,11 +462,11 @@ AISL uses the Result type for explicit error handling. Import the result module 
 (module error_handling_demo
   (import result)
   
-  (fn safe_divide ((a i32) (b i32)) -> result
+  (fn safe_divide ((a int) (b int)) -> result
     (set is_zero bool (call eq b 0))
     (if is_zero
       (ret (call err 1 "Division by zero")))
-    (set quotient i32 (call div a b))
+    (set quotient int (call div a b))
     (ret (call ok quotient)))
   
   (fn main -> int
@@ -482,7 +482,7 @@ AISL uses the Result type for explicit error handling. Import the result module 
     (set is_error bool (call is_err result2))
     
     (if is_error
-      (set code i32 (call error_code result2))
+      (set code int (call error_code result2))
       (set msg string (call error_message result2))
       (call print "Error code:")
       (call print code)
@@ -501,7 +501,7 @@ AISL uses the Result type for explicit error handling. Import the result module 
 (call is_err result)            ; Check if result is error -> bool
 (call unwrap result)            ; Extract value (panics if error) -> string
 (call unwrap_or result default) ; Extract value or return default -> string
-(call error_code result)        ; Get error code -> i32
+(call error_code result)        ; Get error code -> int
 (call error_message result)     ; Get error message -> string
 ```
 
@@ -532,7 +532,7 @@ Some file operations have `_result` variants that return Result instead of panic
 (call tcp_listen port)           ; Listen -> socket
 (call tcp_accept server_socket)  ; Accept -> socket
 (call tcp_connect host port)     ; Connect -> socket
-(call tcp_send socket data)      ; Send -> i32
+(call tcp_send socket data)      ; Send -> int
 (call tcp_receive socket bytes)  ; Receive -> string
 (call tcp_close socket)          ; Close socket
 ```
@@ -544,7 +544,7 @@ Some file operations have `_result` variants that return Result instead of panic
 (call http_post url body)        ; POST -> response
 (call http_put url body)         ; PUT -> response
 (call http_delete url)           ; DELETE -> response
-(call http_get_status response)  ; Status code -> i32
+(call http_get_status response)  ; Status code -> int
 (call http_get_body response)    ; Body -> string
 ```
 
@@ -562,7 +562,7 @@ Some file operations have `_result` variants that return Result instead of panic
 (call has obj key)                   ; Check if key exists -> bool
 (call delete obj key)                ; Remove key from object
 (call push array value)              ; Add element to array
-(call length obj)                    ; Get length -> i32
+(call length obj)                    ; Get length -> int
 (call type json_val)                 ; Get JSON type -> string ("object", "array", "string", "number", "bool", "null")
 ```
 
@@ -595,7 +595,7 @@ Some file operations have `_result` variants that return Result instead of panic
 (call array_push array value)    ; Add element
 (call array_get array index)     ; Get element
 (call array_set array index val) ; Set element
-(call array_length array)        ; Length -> i32
+(call array_length array)        ; Length -> int
 ```
 
 ### Map Operations
@@ -606,32 +606,32 @@ Some file operations have `_result` variants that return Result instead of panic
 (call map_get map key)           ; Get value
 (call map_has map key)           ; Check key -> bool
 (call map_delete map key)        ; Remove key
-(call map_length map)            ; Size -> i32
+(call map_length map)            ; Size -> int
 ```
 
 ### Type Conversions
 
 ```scheme
-(call cast_i32_i64 value)        ; i32 -> i64
-(call cast_i64_i32 value)        ; i64 -> i32 (truncate)
-(call cast_i32_f32 value)        ; i32 -> f32
-(call cast_i32_f64 value)        ; i32 -> f64
-(call cast_f32_i32 value)        ; f32 -> i32 (truncate)
-(call cast_f64_i32 value)        ; f64 -> i32 (truncate)
-(call string_from_i32 value)     ; i32 -> string
-(call string_from_i64 value)     ; i64 -> string
-(call string_from_f32 value)     ; f32 -> string
-(call string_from_f64 value)     ; f64 -> string
+(call cast_int_int value)        ; int -> int
+(call cast_int_int value)        ; int -> int (truncate)
+(call cast_int_float value)        ; int -> float
+(call cast_int_float value)        ; int -> float
+(call cast_float_int value)        ; float -> int (truncate)
+(call cast_float_int value)        ; float -> int (truncate)
+(call string_from_int value)     ; int -> string
+(call string_from_int value)     ; int -> string
+(call string_from_float value)     ; float -> string
+(call string_from_float value)     ; float -> string
 (call string_from_bool value)    ; bool -> string
 ```
 
 ### Conditional Functions
 
 ```scheme
-(call if_i32 condition then else)    ; Conditional i32
-(call if_i64 condition then else)    ; Conditional i64
-(call if_f32 condition then else)    ; Conditional f32
-(call if_f64 condition then else)    ; Conditional f64
+(call if_int condition then else)    ; Conditional int
+(call if_int condition then else)    ; Conditional int
+(call if_float condition then else)    ; Conditional float
+(call if_float condition then else)    ; Conditional float
 (call if_string condition then else) ; Conditional string
 ```
 
@@ -648,7 +648,7 @@ Some file operations have `_result` variants that return Result instead of panic
 
 ```scheme
 (module sinatra
-  (fn handle_connection ((client_sock string)) -> i32
+  (fn handle_connection ((client_sock string)) -> int
     (set request string (call tcp_receive client_sock 4096))
     (set has_json bool (call string_contains request "GET /hello.json "))
     (set has_html bool (call string_contains request "GET /hello "))
@@ -665,7 +665,7 @@ Some file operations have `_result` variants that return Result instead of panic
     (call tcp_close client_sock)
     (ret 0))
 
-  (fn start_server ((port i32)) -> i32
+  (fn start_server ((port int)) -> int
     (call print "Server running on http://localhost:8080")
     (set server_sock string (call tcp_listen port))
     (loop
@@ -673,14 +673,14 @@ Some file operations have `_result` variants that return Result instead of panic
       (call handle_connection client_sock))
     (ret 0))
 
-  (fn main () -> i32
+  (fn main () -> int
     (call start_server 8080)
     (ret 0)))
 ```
 
 This server demonstrates:
 - Structured loop (`loop`) for accept loop
-- Type-directed operations (no `_i32` suffixes needed for comparison)
+- Type-directed operations (no `_int` suffixes needed for comparison)
 - String operations
 - TCP networking
 - Conditional routing with `if_string`
@@ -730,7 +730,7 @@ Every test file must include:
 
 ```scheme
 (module test_addition
-  (fn add_numbers ((a i32) (b i32)) -> i32
+  (fn add_numbers ((a int) (b int)) -> int
     (ret (call add a b)))
   
   (test-spec add_numbers

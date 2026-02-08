@@ -106,7 +106,7 @@ Every test file must include:
 **Example structure:**
 ```lisp
 (module test_example
-  (fn add_numbers ((a i32) (b i32)) -> i32
+  (fn add_numbers ((a int) (b int)) -> int
     (ret (call add a b)))
   
   (test-spec add_numbers
@@ -172,7 +172,7 @@ AISL (AI-Optimized Systems Language) is a programming language specifically desi
 - No implicit conversions - types are always explicit
 - One canonical form for each construct
 - Flat, sequential control flow with simple desugaring
-- Type-directed dispatch - write `add`, compiler infers `add_i32` vs `add_f64`
+- Type-directed dispatch - write `add`, compiler infers `add` vs `add`
 
 ---
 
@@ -270,7 +270,7 @@ Generate these - the compiler desugars them to Core:
 
 ; While loop - iterate while condition holds
 (while (call lt i 10)
-  (set i i32 (call add i 1)))
+  (set i int (call add i 1)))
 
 ; Infinite loop - for servers
 (loop
@@ -295,10 +295,10 @@ Generate these - the compiler desugars them to Core:
 
 | Type | Description | Example |
 |------|-------------|---------|
-| `i32` | 32-bit signed integer | `42` |
-| `i64` | 64-bit signed integer | `9223372036854775807` |
-| `f32` | 32-bit float | `3.14` |
-| `f64` | 64-bit float | `2.718281828` |
+| `int` | 32-bit signed integer | `42` |
+| `int` | 64-bit signed integer | `9223372036854775807` |
+| `float` | 32-bit float | `3.14` |
+| `float` | 64-bit float | `2.718281828` |
 | `bool` | Boolean | `true`, `false` |
 | `string` | UTF-8 string | `"hello"` |
 
@@ -307,8 +307,8 @@ Generate these - the compiler desugars them to Core:
 **Every variable must have an explicit type:**
 
 ```lisp
-(set count i32 0)              ; Integer counter
-(set price f64 19.99)          ; Float price
+(set count int 0)              ; Integer counter
+(set price float 19.99)          ; Float price
 (set name string "Alice")      ; String
 (set active bool true)         ; Boolean
 ```
@@ -317,13 +317,13 @@ Generate these - the compiler desugars them to Core:
 
 ```lisp
 ; ❌ Wrong - mixing types
-(set x i32 10)
-(set y f64 (call add x 3.14))  ; Type error!
+(set x int 10)
+(set y float (call add x 3.14))  ; Type error!
 
 ; ✅ Correct - explicit conversion
-(set x i32 10)
-(set x_f64 f64 (call cast_i32_f64 x))
-(set y f64 (call add x_f64 3.14))
+(set x int 10)
+(set x_float float (call cast_int_float x))
+(set y float (call add x_float 3.14))
 ```
 
 ---
@@ -335,7 +335,7 @@ Generate these - the compiler desugars them to Core:
 ### Arithmetic
 
 ```lisp
-(call add x y)     ; Becomes add_i32, add_i64, add_f32, or add_f64
+(call add x y)     ; Becomes add, add, add, or add
 (call sub x y)     ; Subtraction
 (call mul x y)     ; Multiplication
 (call div x y)     ; Division
@@ -343,7 +343,7 @@ Generate these - the compiler desugars them to Core:
 (call neg x)       ; Negation
 ```
 
-**You don't need to remember:** `op_add_i32`, `op_add_i64`, `op_add_f32`, `op_add_f64`  
+**You don't need to remember:** `add`, `add`, `add`, `add`  
 **Just write:** `(call add x y)` and the compiler figures it out from `x`'s type.
 
 ### Comparisons
@@ -363,14 +363,14 @@ Generate these - the compiler desugars them to Core:
 (call abs x)       ; Absolute value
 (call min a b)     ; Minimum
 (call max a b)     ; Maximum
-(call sqrt x)      ; Square root (f32/f64 only)
-(call pow x y)     ; Power (f32/f64 only)
+(call sqrt x)      ; Square root (float/float only)
+(call pow x y)     ; Power (float/float only)
 ```
 
 ### String Operations
 
 ```lisp
-(call string_length text)              ; Get length -> i32
+(call string_length text)              ; Get length -> int
 (call string_concat a b)               ; Concatenate -> string
 (call string_contains haystack needle) ; Check contains -> bool
 (call string_split text delimiter)     ; Split -> array
@@ -387,7 +387,7 @@ Generate these - the compiler desugars them to Core:
 (call print "Hello")           ; Prints: Hello
 
 ; Print integers
-(set x i32 42)
+(set x int 42)
 (call print x)                 ; Prints: 42
 
 ; Print booleans
@@ -406,10 +406,10 @@ Generate these - the compiler desugars them to Core:
 ```
 
 **How it works**: The compiler automatically dispatches to the correct print function based on the value's type:
-- `i32` → `io_print_i32`
-- `i64` → `io_print_i64`  
-- `f32` → `io_print_f32`
-- `f64` → `io_print_f64`
+- `int` → `print`
+- `int` → `print`  
+- `float` → `print`
+- `float` → `print`
 - `bool` → `io_print_bool`
 - `string` → `io_print_str`
 - `array` → `io_print_array`
@@ -530,7 +530,7 @@ AISL follows the philosophy: **"If it CAN be written in AISL, it MUST be written
 - ✅ Arithmetic (add, sub, mul, div, mod)
 - ✅ Comparisons (eq, ne, lt, gt, le, ge)
 - ✅ Basic math (abs, min, max, sqrt, pow)
-- ✅ Type conversions (cast_i32_f64, string_from_i32, etc.)
+- ✅ Type conversions (cast_int_float, string_from_int, etc.)
 - ✅ Basic string ops (string_length, string_concat, string_substring)
 - ✅ I/O (print, print_ln, read_line)
 - ✅ File operations (file_read, file_write, file_exists)
@@ -590,9 +590,9 @@ AISL follows the philosophy: **"If it CAN be written in AISL, it MUST be written
   (import json_utils)
   (import http)
   
-  (fn fetch_user id i32 -> json
+  (fn fetch_user id int -> json
     (set url string "https://api.example.com/users/")
-    (set id_str string (call string_from_i32 id))
+    (set id_str string (call string_from_int id))
     (set full_url string (call string_concat url id_str))
     
     (set response string (call get full_url))
@@ -692,45 +692,45 @@ AISL follows the philosophy: **"If it CAN be written in AISL, it MUST be written
 ### Pattern 1: While Loop
 
 ```lisp
-(fn countdown n i32 -> i32
+(fn countdown n int -> int
   (while (call gt n 0)
     (call print n)
-    (set n i32 (call sub n 1)))
+    (set n int (call sub n 1)))
   (ret 0))
 ```
 
 ### Pattern 2: Infinite Loop with Break
 
 ```lisp
-(fn find_first arr string target i32 -> i32
-  (set i i32 0)
+(fn find_first arr string target int -> int
+  (set i int 0)
   (loop
-    (set val i32 (call array_get arr i))
+    (set val int (call array_get arr i))
     (if (call eq val target)
       (break))
-    (set i i32 (call add i 1)))
+    (set i int (call add i 1)))
   (ret i))
 ```
 
 ### Pattern 3: Skip with Continue
 
 ```lisp
-(fn count_positive arr string len i32 -> i32
-  (set i i32 0)
-  (set count i32 0)
+(fn count_positive arr string len int -> int
+  (set i int 0)
+  (set count int 0)
   (while (call lt i len)
-    (set val i32 (call array_get arr i))
-    (set i i32 (call add i 1))
+    (set val int (call array_get arr i))
+    (set i int (call add i 1))
     (if (call le val 0)
       (continue))
-    (set count i32 (call add count 1)))
+    (set count int (call add count 1)))
   (ret count))
 ```
 
 ### Pattern 4: Conditional Logic
 
 ```lisp
-(fn max a i32 b i32 -> i32
+(fn max a int b int -> int
   (if (call gt a b)
     (ret a))
   (ret b))
@@ -754,60 +754,60 @@ AISL follows the philosophy: **"If it CAN be written in AISL, it MUST be written
 ### Accumulator Pattern
 
 ```lisp
-(fn sum arr string n i32 -> i32
-  (set sum i32 0)
-  (set i i32 0)
+(fn sum arr string n int -> int
+  (set sum int 0)
+  (set i int 0)
   (while (call lt i n)
-    (set val i32 (call array_get arr i))
-    (set sum i32 (call add sum val))
-    (set i i32 (call add i 1)))
+    (set val int (call array_get arr i))
+    (set sum int (call add sum val))
+    (set i int (call add i 1)))
   (ret sum))
 ```
 
 ### Recursive Pattern
 
 ```lisp
-(fn factorial n i32 -> i32
+(fn factorial n int -> int
   (if (call eq n 0)
     (ret 1))
-  (set n_minus_1 i32 (call sub n 1))
-  (set result i32 (call factorial n_minus_1))
+  (set n_minus_1 int (call sub n 1))
+  (set result int (call factorial n_minus_1))
   (ret (call mul n result)))
 ```
 
 ### Search Pattern
 
 ```lisp
-(fn find arr string target i32 len i32 -> i32
-  (set i i32 0)
+(fn find arr string target int len int -> int
+  (set i int 0)
   (while (call lt i len)
-    (set val i32 (call array_get arr i))
+    (set val int (call array_get arr i))
     (if (call eq val target)
       (ret i))
-    (set i i32 (call add i 1)))
+    (set i int (call add i 1)))
   (ret -1))  ; Not found
 ```
 
 ### Filter Pattern
 
 ```lisp
-(fn filter_evens arr string len i32 -> string
+(fn filter_evens arr string len int -> string
   (set result string (call array_new))
-  (set i i32 0)
+  (set i int 0)
   (while (call lt i len)
-    (set val i32 (call array_get arr i))
-    (set remainder i32 (call mod val 2))
+    (set val int (call array_get arr i))
+    (set remainder int (call mod val 2))
     (set is_even bool (call eq remainder 0))
     (if is_even
       (call array_push result val))
-    (set i i32 (call add i 1)))
+    (set i int (call add i 1)))
   (ret result))
 ```
 
 ### Error Handling Pattern (Result Type)
 
 ```lisp
-(fn safe_file_read path string -> i32
+(fn safe_file_read path string -> int
   ; Read file with error handling
   (set result string (call file_read_result path))
   (set success bool (call is_ok result))
@@ -838,12 +838,12 @@ AISL follows the philosophy: **"If it CAN be written in AISL, it MUST be written
 ### Error Checking Pattern
 
 ```lisp
-(fn check_file_error path string -> i32
+(fn check_file_error path string -> int
   (set result string (call file_read_result path))
   (set is_error bool (call is_err result))
   
   (if is_error
-    (set code i32 (call error_code result))
+    (set code int (call error_code result))
     (ret code))
   
   (ret 0))
@@ -857,7 +857,7 @@ AISL has a built-in test framework. Add tests to verify behavior:
 
 ```lisp
 (module my_module
-  (fn add_numbers x i32 y i32 -> i32
+  (fn add_numbers x int y int -> int
     (ret (call add x y)))
   
   (test-spec add_numbers
@@ -957,28 +957,28 @@ AISL has a built-in test framework. Add tests to verify behavior:
 ### ❌ Don't: Mix types implicitly
 
 ```lisp
-(set x i32 10)
-(set y f64 (call add x 3.14))  ; ERROR: i32 + f64
+(set x int 10)
+(set y float (call add x 3.14))  ; ERROR: int + float
 ```
 
 ### ✅ Do: Convert explicitly
 
 ```lisp
-(set x i32 10)
-(set x_float f64 (call cast_i32_f64 x))
-(set y f64 (call add x_float 3.14))
+(set x int 10)
+(set x_float float (call cast_int_float x))
+(set y float (call add x_float 3.14))
 ```
 
 ### ❌ Don't: Use infix operators
 
 ```lisp
-(set sum i32 (x + y))  ; ERROR: Not valid syntax
+(set sum int (x + y))  ; ERROR: Not valid syntax
 ```
 
 ### ✅ Do: Use function calls
 
 ```lisp
-(set sum i32 (call add x y))
+(set sum int (call add x y))
 ```
 
 ### ❌ Don't: Forget type annotations
@@ -990,13 +990,13 @@ AISL has a built-in test framework. Add tests to verify behavior:
 ### ✅ Do: Always specify types
 
 ```lisp
-(set count i32 0)
+(set count int 0)
 ```
 
 ### ❌ Don't: Use break/continue outside loops
 
 ```lisp
-(fn example () -> i32
+(fn example () -> int
   (break)  ; ERROR: Not in a loop
   (ret 0))
 ```
@@ -1004,7 +1004,7 @@ AISL has a built-in test framework. Add tests to verify behavior:
 ### ✅ Do: Only use break/continue inside while/loop
 
 ```lisp
-(fn example () -> i32
+(fn example () -> int
   (loop
     (break))  ; OK: Inside loop
   (ret 0))
@@ -1013,7 +1013,7 @@ AISL has a built-in test framework. Add tests to verify behavior:
 ### ❌ Don't: Write Core IR directly (usually)
 
 ```lisp
-(fn example () -> i32
+(fn example () -> int
   (call label loop_start)
   (call goto loop_start)  ; Tedious, error-prone
   (ret 0))
@@ -1201,15 +1201,15 @@ AISL is designed for predictable performance:
 
 ```lisp
 (module web_server
-  (fn handle_request client_socket string -> i32
+  (fn handle_request client_socket string -> int
     (set request string (call tcp_receive client_socket 4096))
     (set response string "HTTP/1.1 200 OK\r\n\r\nHello, World!")
     (call tcp_send client_socket response)
     (call tcp_close client_socket)
     (ret 0))
   
-  (fn main -> i32
-    (set port i32 8080)
+  (fn main -> int
+    (set port int 8080)
     (set server_socket string (call tcp_listen port))
     (call print "Server listening on port 8080")
     (loop
@@ -1224,7 +1224,7 @@ AISL is designed for predictable performance:
 
 1. **Two layers**: Agent (what you write) desugars to Core (what runs)
 2. **Explicit everything**: Types, calls, control flow - no hidden behavior
-3. **Type dispatch**: Write `add`, compiler picks `add_i32` or `add_f64`
+3. **Type dispatch**: Write `add`, compiler picks `add` or `add`
 4. **S-expressions**: Uniform syntax, easy to parse and generate
 5. **Structured control**: `while`, `loop`, `break`, `continue` desugar to jumps
 6. **No precedence**: All operations are function calls
