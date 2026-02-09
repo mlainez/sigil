@@ -29,7 +29,7 @@ Note: Run manual compilation test with:
 ```
 
 **Current Status:**
-- Total tests: 117
+- Total tests: 126
 - All tests compile successfully
 - All use test-spec format
 

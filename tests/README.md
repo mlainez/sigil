@@ -4,18 +4,19 @@ Test files for AISL language features and standard library.
 
 ## Test Status
 
-**117 tests - All use test-spec format**
+**126 tests - All use test-spec format**
 
 ## Test Categories
 
 ### Language Features
-- Type system (int, float, string, bool, process, socket, file)
+- Type system (int, float, string, bool, decimal, json, regex)
 - Control flow (if, while, loop, break, continue)
 - Functions and recursion
 - Variables and operators
 - String operations
 - Arrays and maps
 - Channels
+- Decimal arithmetic
 
 ### Standard Library
 - File I/O operations
@@ -25,9 +26,10 @@ Test files for AISL language features and standard library.
 - Process management
 - Type conversions
 - Math functions
-- Result type for error handling
 - String utilities
 - Regex operations
+- Base64 encoding/decoding
+- Cryptographic hashing
 
 ## Running Tests
 

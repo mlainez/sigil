@@ -100,7 +100,7 @@ These design decisions were made during collaborative AI-human development to ma
 
 8. **Eating Our Own Dog Food** - All tooling, utilities, and stdlib modules are written in pure AISL. If AISL can't express something, we fix AISL, not reach for Python.
 
-9. **Result Type Over Exceptions** - Explicit error handling with `Result` type. No hidden control flow from exceptions.
+9. **Panic-Based Errors** - Operations fail with clear panic messages. LLM regenerates with checks when needed.
 
 10. **Machine-Readable First** - Documentation prioritizes machine-readable formats (`.aisl.grammar`, `.aisl.meta`) over prose. LLMs read these first.
 
@@ -134,7 +134,6 @@ string   ; UTF-8 string
 array    ; Dynamic array
 map      ; Hash map
 json     ; JSON values
-result   ; Result<T, Error> for error handling
 regex    ; Compiled regular expression
 ```
 
@@ -173,36 +172,27 @@ regex    ; Compiled regular expression
 
 **AI Decision:** LLMs don't need to remember `add_int`, `add_i64`, `add_f32`, `add_f64` - just write `add` and the compiler figures it out.
 
-### Error Handling (Result Type)
+### Error Handling
 
 ```lisp
-(import result)
-
-(fn safe_divide a int b int -> result
+(fn safe_divide a int b int -> int
   (if (call eq b 0)
-    (ret (call err 1 "Division by zero")))
-  (set quotient int (call div a b))
-  (ret (call ok quotient)))
+    (panic "Division by zero"))
+  (ret (call div a b)))
 
 (fn main -> int
-  (set result result (call safe_divide 10 0))
-  (if (call is_err result)
-    (set msg string (call error_message result))
-    (call print msg)
-    (ret 1))
-  (set value int (call unwrap result))
+  (set value int (call safe_divide 10 0))
   (call print value)
   (ret 0))
 ```
 
-**AI Decision:** Explicit Result type instead of exceptions. No hidden control flow, easier for LLMs to reason about.
+**AI Decision:** Operations panic on error with clear messages. LLM regenerates with checks (file_exists, etc.) when panics occur.
 
-## Standard Library (14 Modules in Pure AISL)
+## Standard Library (13 Modules in Pure AISL)
 
 All stdlib modules are implemented **in pure AISL**, not C. This enforces our philosophy: "If it CAN be written in AISL, it MUST be written in AISL."
 
-### Core (3 modules)
-- **result** - Error handling (`ok`, `err`, `is_ok`, `is_err`, `unwrap`, `unwrap_or`)
+### Core (2 modules)
 - **string_utils** - String operations (`split`, `trim`, `contains`, `replace`, `starts_with`, `ends_with`)
 - **conversion** - Type conversion (`string_from_int`, `bool_to_int`, `kilometers_to_miles`)
 
@@ -272,7 +262,7 @@ See [examples/](examples/) for 17 complete working examples.
 
 ## Testing
 
-AISL has **117 passing tests** covering all language features. All tests use the `test-spec` structure:
+AISL has **126 passing tests** covering all language features. All tests use the `test-spec` structure:
 
 ```lisp
 (module test_addition
@@ -334,7 +324,7 @@ aisl/
 │   ├── db/                     # Databases (sqlite)
 │   └── README.md               # Stdlib documentation
 │
-├── tests/                      # Test suite (117 tests, all passing)
+├── tests/                      # Test suite (126 tests, all passing)
 │   ├── test_*.aisl             # Unit tests
 │   └── README.md
 │
@@ -455,7 +445,7 @@ make
 ## Running Tests
 
 ```bash
-# Run all 120 tests
+# Run all 126 tests
 cd compiler/c
 for test in ../tests/test_*.aisl; do
   ./bin/aislc "$test" "/tmp/$(basename $test).aislc" && ./bin/aisl-run "/tmp/$(basename $test).aislc"
@@ -477,7 +467,7 @@ done
 AISL is currently in active development. All changes must:
 
 1. ✅ Maintain zero ambiguity (ONE WAY ONLY)
-2. ✅ Pass all 120 tests
+2. ✅ Pass all 126 tests
 3. ✅ Update machine-readable docs (`.aisl.grammar`, `.aisl.meta`)
 4. ✅ Write new stdlib modules in pure AISL (no C)
 5. ✅ Follow the "frozen Core IR" principle

@@ -1,11 +1,11 @@
 @(meta-spec)
 @(proj aisl ty:sys-lang principle:one-way-only)
-@(stat tests:117 passing:117 stdlib:11-modules examples:17 lines-of-code:~15000)
+@(stat tests:126 stdlib:13-modules examples:17)
 @(types
   (primitives int float bool string)
   (handles process socket file)
   (collections array map json)
-  (special result regex))
+  (special regex))
 @(stdlib
   (core arith cmp log bit cast)
   (string concat len split trim contains replace)

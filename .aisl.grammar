@@ -1,5 +1,5 @@
 @(grammar aisl-agent)
-@(stat tests:126 passing:126 examples:17 stdlib:10)
+@(stat tests:126 examples:17 stdlib:13)
 @(syn
   (prog (module name imp* fn*))
   (imp (import name))
@@ -27,6 +27,9 @@
     (if (eq n 0)
       (ret 1))
     (ret (mul n (fact (sub n 1)))))
+    (if (eq n 0)
+      (ret 1))
+    (ret (mul n (fact (sub n 1)))))
   (fn sum arr arr n int -> int
     (set s int 0)
     (set i int 0)
@@ -35,7 +38,7 @@
       (set i int (add i 1)))
     (ret s)))
 @(mod
-  (stdlib-modules "11 modules in pure AISL")
+  (stdlib-modules "13 modules in pure AISL")
   (core "string_utils conversion")
   (data "json base64")
   (net "http websocket")
