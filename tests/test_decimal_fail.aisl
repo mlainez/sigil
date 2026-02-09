@@ -1,13 +1,13 @@
 (module test_decimal_fail
   (fn add_decimals a decimal b decimal -> decimal
-    (ret (call add a b)))
+    (ret (add a b)))
   
   (test-spec add_decimals
     (case "should fail - wrong expected"
-      (input (call cast_float_decimal 10.5) (call cast_float_decimal 5.25))
+      (input (cast_float_decimal 10.5) (cast_float_decimal 5.25))
       (expect "20.0"))
     (case "should pass"
-      (input (call cast_float_decimal 10.5) (call cast_float_decimal 5.25))
+      (input (cast_float_decimal 10.5) (cast_float_decimal 5.25))
       (expect "15.75")))
   
   (meta-note "Test decimal with intentional failure"))

@@ -1,6 +1,6 @@
 (module test_debug
   (fn main -> int
     (set x int 5)
-    (call print x)
-    (call print "\n")
+    (print x)
+    (print "\n")
     (ret 0)))

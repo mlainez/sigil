@@ -73,9 +73,9 @@ Examples:
 ; ✅ CORRECT - Pure AISL converter script
 (module convert_syntax
   (fn convert_file path string -> int
-    (set content string (call file_read path))
-    (set converted string (call regex_replace pattern content))
-    (call file_write path converted)
+    (set content string (file_read path))
+    (set converted string (regex_replace pattern content))
+    (file_write path converted)
     (ret 0)))
 
 ; ❌ WRONG - Python fallback
@@ -101,7 +101,7 @@ Every test file must include:
 ```lisp
 (module test_example
   (fn add_numbers ((a int) (b int)) -> int
-    (ret (call add a b)))
+    (ret (add a b)))
   
   (test-spec add_numbers
     (case "adds positive numbers"
@@ -226,7 +226,7 @@ Every AISL program is a module with functions:
 ```lisp
 (module my_program
   (fn main -> int
-    (call print "Hello, AISL!")
+    (print "Hello, AISL!")
     (ret 0)))
 ```
 
@@ -245,10 +245,10 @@ You rarely write these directly - they're what Agent code desugars to:
 | Statement | Syntax | Purpose |
 |-----------|--------|---------|
 | `set` | `(set var type expr)` | Variable binding |
-| `call` | `(call func arg1 arg2)` | Function invocation |
-| `label` | `(call label name)` | Mark jump target |
-| `goto` | `(call goto target)` | Unconditional jump |
-| `ifnot` | `(call ifnot bool_var target)` | Jump if false |
+| `call` | `(func arg1 arg2)` | Function invocation |
+| `label` | `(label name)` | Mark jump target |
+| `goto` | `(goto target)` | Unconditional jump |
+| `ifnot` | `(ifnot bool_var target)` | Jump if false |
 | `ret` | `(ret expr)` | Return from function |
 
 ### Agent Constructs (What You Should Generate)
@@ -257,23 +257,23 @@ Generate these - the compiler desugars them to Core:
 
 ```lisp
 ; If statement - conditional execution
-(if (call gt x 5)
-  (call print "x is greater than 5"))
+(if (gt x 5)
+  (print "x is greater than 5"))
 
 ; While loop - iterate while condition holds
-(while (call lt i 10)
-  (set i int (call add i 1)))
+(while (lt i 10)
+  (set i int (add i 1)))
 
 ; Infinite loop - for servers
 (loop
-  (call handle_request))
+  (handle_request))
 
 ; Break - exit loop early
-(if (call eq val target)
+(if (eq val target)
   (break))
 
 ; Continue - skip to next iteration
-(if (call eq val 0)
+(if (eq val 0)
   (continue))
 ```
 
@@ -317,12 +317,12 @@ Generate these - the compiler desugars them to Core:
 ```lisp
 ; ❌ Wrong - mixing types
 (set x int 10)
-(set y float (call add x 3.14))  ; Type error!
+(set y float (add x 3.14))  ; Type error!
 
 ; ✅ Correct - explicit conversion
 (set x int 10)
-(set x_float float (call cast_int_float x))
-(set y float (call add x_float 3.14))
+(set x_float float (cast_int_float x))
+(set y float (add x_float 3.14))
 ```
 
 ---
@@ -334,54 +334,54 @@ Generate these - the compiler desugars them to Core:
 ### Arithmetic
 
 ```lisp
-(call add x y)     ; Becomes add, add, add, add, or add
-(call sub x y)     ; Subtraction
-(call mul x y)     ; Multiplication
-(call div x y)     ; Division
-(call mod x y)     ; Modulo (integers only)
-(call neg x)       ; Negation
+(add x y)     ; Becomes add_int, add_float, add_decimal, or add
+(sub x y)     ; Subtraction
+(mul x y)     ; Multiplication
+(div x y)     ; Division
+(mod x y)     ; Modulo (integers only)
+(neg x)       ; Negation
 ```
 
-**You don't need to remember:** `add`, `add`, `add`, `add`, `add`  
-**Just write:** `(call add x y)` and the compiler figures it out from `x`'s type.
+**You don't need to remember:** `add_int`, `add_float`, `add_decimal`, `add`  
+**Just write:** `(add x y)` and the compiler figures it out from `x`'s type.
 
 ### Comparisons
 
 ```lisp
-(call eq x y)      ; Equal
-(call ne x y)      ; Not equal
-(call lt x y)      ; Less than
-(call gt x y)      ; Greater than
-(call le x y)      ; Less or equal
-(call ge x y)      ; Greater or equal
+(eq x y)      ; Equal
+(ne x y)      ; Not equal
+(lt x y)      ; Less than
+(gt x y)      ; Greater than
+(le x y)      ; Less or equal
+(ge x y)      ; Greater or equal
 ```
 
 ### Math Functions
 
 ```lisp
-(call abs x)       ; Absolute value
-(call min a b)     ; Minimum
-(call max a b)     ; Maximum
-(call sqrt x)      ; Square root (float/float only)
-(call pow x y)     ; Power (float/float only)
+(abs x)       ; Absolute value
+(min a b)     ; Minimum
+(max a b)     ; Maximum
+(sqrt x)      ; Square root (float only)
+(pow x y)     ; Power (float only)
 ```
 
 ### String Operations
 
 ```lisp
-(call string_length text)              ; Get length -> int
-(call string_concat a b)               ; Concatenate -> string
-(call string_equals a b)               ; Compare equality -> bool
-(call string_contains haystack needle) ; Check contains -> bool
-(call string_slice text start len)    ; Extract substring (start, LENGTH) -> string
-(call string_split text delimiter)     ; Split -> array
-(call string_trim text)                ; Remove whitespace -> string
-(call string_replace text old new)     ; Replace substring -> string
+(string_length text)              ; Get length -> int
+(string_concat a b)               ; Concatenate -> string
+(string_equals a b)               ; Compare equality -> bool
+(string_contains haystack needle)  ; Check contains -> bool
+(string_slice text start len)     ; Extract substring (start, LENGTH) -> string
+(string_split text delimiter)     ; Split -> array
+(string_trim text)                ; Remove whitespace -> string
+(string_replace text old new)      ; Replace substring -> string
 ```
 
 **CRITICAL**: `string_slice` takes `(text, start, LENGTH)` NOT `(text, start, end)`.
-- To get characters 1-3: `(call string_slice text 1 3)` extracts 3 characters starting at index 1
-- To get substring from index 5 to 10: `(call string_slice text 5 5)` (length = 10 - 5)
+- To get characters 1-3: `(string_slice text 1 3)` extracts 3 characters starting at index 1
+- To get substring from index 5 to 10: `(string_slice text 5 5)` (length = 10 - 5)
 
 **There is only ONE string slicing operation**: `string_slice`. Do not use `string_substring` or any other variants.
 
@@ -391,47 +391,47 @@ Generate these - the compiler desugars them to Core:
 
 ```lisp
 ; Print strings
-(call print "Hello")           ; Prints: Hello
+(print "Hello")           ; Prints: Hello
 
 ; Print integers
 (set x int 42)
-(call print x)                 ; Prints: 42
+(print x)                 ; Prints: 42
 
 ; Print booleans
 (set flag bool true)
-(call print flag)              ; Prints: true
+(print flag)              ; Prints: true
 
 ; Print nested expressions (type inference!)
-(call print (call lt 5 10))   ; Prints: true
-(call print (call add 2 3))   ; Prints: 5
+(print (lt 5 10))        ; Prints: true
+(print (add 2 3))        ; Prints: 5
 
 ; Print with newline
-(call print_ln "Done!")        ; Prints: Done!\n
+(println "Done!")        ; Prints: Done!\n
 
 ; Read input
-(call read_line)               ; Read line from stdin -> string
+(read_line)               ; Read line from stdin -> string
 ```
 
 **How it works**: The compiler automatically dispatches to the correct print function based on the value's type:
-- `int` → `print`
-- `int` → `print`  
-- `float` → `print`
-- `float` → `print`
+- `int` → `print_int`
+- `int` → `print_int`  
+- `float` → `print_float`
+- `float` → `print_float`
 - `bool` → `io_print_bool`
 - `string` → `io_print_str`
 - `array` → `io_print_array`
 - `map` → `io_print_map`
 
-**You never need to remember the specific function names** - just use `(call print value)`!
+**You never need to remember the specific function names** - just use `(print value)`!
 
 ### File Operations
 
 ```lisp
-(call file_read path)        ; Read file -> string
-(call file_write path data)  ; Write file
-(call file_append path data) ; Append to file
-(call file_exists path)      ; Check exists -> bool
-(call file_delete path)      ; Delete file
+(file_read path)        ; Read file -> string
+(file_write path data)  ; Write file
+(file_append path data) ; Append to file
+(file_exists path)      ; Check exists -> bool
+(file_delete path)      ; Delete file
 ```
 
 ---
@@ -451,16 +451,16 @@ AISL follows the philosophy: **"If it CAN be written in AISL, it MUST be written
 | Operation | Stdlib Import Required | Function Name |
 |-----------|------------------------|---------------|
 | **String operations** | `(import string_utils)` | `split`, `trim`, `contains`, `replace` |
-| | `(import string_utils) then (call trim ...)` | `(import string_utils)` then `(call trim ...)` |
-| | `(import string_utils) then (call contains ...)` | `(import string_utils)` then `(call contains ...)` |
-| | `(import string_utils) then (call replace ...)` | `(import string_utils)` then `(call replace ...)` |
-| **JSON operations** | `(call json_parse ...)` | `(import json_utils)` then `(call json_parse ...)` |
-| | `(call json_stringify ...)` | `(import json_utils)` then `(call json_stringify ...)` |
-| | `(call json_new_object)` | `(import json_utils)` then `(call json_new_object)` |
-| **Result type** | Not available | `(import result)` then `(call ok ...)`, `(call err ...)` |
-| **Base64** | `(call base64_encode ...)` | `(import base64)` then `(call base64_encode ...)` |
-| **Regex** | `(call regex_compile ...)` | `(import regex)` then `(call regex_compile ...)` |
-| **Hashing** | `(call crypto_sha256 ...)` | `(import hash)` then `(call crypto_sha256 ...)` |
+| | `(import string_utils)` then `(trim ...)` | |
+| | `(import string_utils)` then `(contains ...)` | |
+| | `(import string_utils)` then `(replace ...)` | |
+| **JSON operations** | `(json_parse ...)` | `(import json_utils)` then `(json_parse ...)` |
+| | `(json_stringify ...)` | `(import json_utils)` then `(json_stringify ...)` |
+| | `(json_new_object)` | `(import json_utils)` then `(json_new_object)` |
+| **Result type** | Not available | `(import result)` then `(ok ...)`, `(err ...)` |
+| **Base64** | `(base64_encode ...)` | `(import base64)` then `(base64_encode ...)` |
+| **Regex** | `(regex_compile ...)` | `(import regex)` then `(regex_compile ...)` |
+| **Hashing** | `(crypto_sha256 ...)` | `(import hash)` then `(crypto_sha256 ...)` |
 
 ### How to Use Stdlib Modules
 
@@ -483,17 +483,17 @@ AISL follows the philosophy: **"If it CAN be written in AISL, it MUST be written
 ```lisp
 ; String operations
 (set text string "  hello  ")
-(set trimmed string (call trim text))
+(set trimmed string (trim text))
 
 ; JSON operations
-(set obj json (call new_object))
-(call set obj "key" "value")
-(set json_str string (call stringify obj))
+(set obj json (new_object))
+(set obj "key" "value")
+(set json_str string (stringify obj))
 
 ; Result type for error handling
-(set result result (call ok "success"))
-(if (call is_ok result)
-  (set value string (call unwrap result)))
+(set result result (ok "success"))
+(if (is_ok result)
+  (set value string (unwrap result)))
 ```
 
 ### Complete List of 11 Stdlib Modules
@@ -575,9 +575,9 @@ AISL follows the philosophy: **"If it CAN be written in AISL, it MUST be written
 
 ```lisp
 (fn countdown n int -> int
-  (while (call gt n 0)
-    (call print n)
-    (set n int (call sub n 1)))
+  (while (gt n 0)
+    (print n)
+    (set n int (sub n 1)))
   (ret 0))
 ```
 
@@ -587,10 +587,10 @@ AISL follows the philosophy: **"If it CAN be written in AISL, it MUST be written
 (fn find_first arr string target int -> int
   (set i int 0)
   (loop
-    (set val int (call array_get arr i))
-    (if (call eq val target)
+    (set val int (array_get arr i))
+    (if (eq val target)
       (break))
-    (set i int (call add i 1)))
+    (set i int (add i 1)))
   (ret i))
 ```
 
@@ -600,12 +600,12 @@ AISL follows the philosophy: **"If it CAN be written in AISL, it MUST be written
 (fn count_positive arr string len int -> int
   (set i int 0)
   (set count int 0)
-  (while (call lt i len)
-    (set val int (call array_get arr i))
-    (set i int (call add i 1))
-    (if (call le val 0)
+  (while (lt i len)
+    (set val int (array_get arr i))
+    (set i int (add i 1))
+    (if (le val 0)
       (continue))
-    (set count int (call add count 1)))
+    (set count int (add count 1)))
   (ret count))
 ```
 
@@ -613,7 +613,7 @@ AISL follows the philosophy: **"If it CAN be written in AISL, it MUST be written
 
 ```lisp
 (fn max a int b int -> int
-  (if (call gt a b)
+  (if (gt a b)
     (ret a))
   (ret b))
 ```
@@ -639,10 +639,10 @@ AISL follows the philosophy: **"If it CAN be written in AISL, it MUST be written
 (fn sum arr string n int -> int
   (set sum int 0)
   (set i int 0)
-  (while (call lt i n)
-    (set val int (call array_get arr i))
-    (set sum int (call add sum val))
-    (set i int (call add i 1)))
+  (while (lt i n)
+    (set val int (array_get arr i))
+    (set sum int (add sum val))
+    (set i int (add i 1)))
   (ret sum))
 ```
 
@@ -650,11 +650,11 @@ AISL follows the philosophy: **"If it CAN be written in AISL, it MUST be written
 
 ```lisp
 (fn factorial n int -> int
-  (if (call eq n 0)
+  (if (eq n 0)
     (ret 1))
-  (set n_minus_1 int (call sub n 1))
-  (set result int (call factorial n_minus_1))
-  (ret (call mul n result)))
+  (set n_minus_1 int (sub n 1))
+  (set result int (factorial n_minus_1))
+  (ret (mul n result)))
 ```
 
 ### Search Pattern
@@ -662,11 +662,11 @@ AISL follows the philosophy: **"If it CAN be written in AISL, it MUST be written
 ```lisp
 (fn find arr string target int len int -> int
   (set i int 0)
-  (while (call lt i len)
-    (set val int (call array_get arr i))
-    (if (call eq val target)
+  (while (lt i len)
+    (set val int (array_get arr i))
+    (if (eq val target)
       (ret i))
-    (set i int (call add i 1)))
+    (set i int (add i 1)))
   (ret -1))  ; Not found
 ```
 
@@ -674,15 +674,15 @@ AISL follows the philosophy: **"If it CAN be written in AISL, it MUST be written
 
 ```lisp
 (fn filter_evens arr string len int -> string
-  (set result string (call array_new))
+  (set result string (array_new))
   (set i int 0)
-  (while (call lt i len)
-    (set val int (call array_get arr i))
-    (set remainder int (call mod val 2))
-    (set is_even bool (call eq remainder 0))
+  (while (lt i len)
+    (set val int (array_get arr i))
+    (set remainder int (mod val 2))
+    (set is_even bool (eq remainder 0))
     (if is_even
-      (call array_push result val))
-    (set i int (call add i 1)))
+      (array_push result val))
+    (set i int (add i 1)))
   (ret result))
 ```
 
@@ -690,29 +690,29 @@ AISL follows the philosophy: **"If it CAN be written in AISL, it MUST be written
 
 ```lisp
 (fn calculate_total prices string tax_rate decimal -> decimal
-  (set total decimal (call cast_int_decimal 0))
+  (set total decimal (cast_int_decimal 0))
   (set i int 0)
-  (set len int (call array_length prices))
-  (while (call lt i len)
-    (set price decimal (call array_get prices i))
-    (set total decimal (call add total price))
-    (set i int (call add i 1)))
+  (set len int (array_length prices))
+  (while (lt i len)
+    (set price decimal (array_get prices i))
+    (set total decimal (add total price))
+    (set i int (add i 1)))
   
   ; Apply tax
-  (set tax decimal (call mul total tax_rate))
-  (set total_with_tax decimal (call add total tax))
+  (set tax decimal (mul total tax_rate))
+  (set total_with_tax decimal (add total tax))
   (ret total_with_tax))
 
 (fn main -> int
-  (set prices string (call array_new))
-  (call array_push prices (call cast_float_decimal 19.99))
-  (call array_push prices (call cast_float_decimal 29.99))
+  (set prices string (array_new))
+  (array_push prices (cast_float_decimal 19.99))
+  (array_push prices (cast_float_decimal 29.99))
   
-  (set tax_rate decimal (call cast_float_decimal 0.08))  ; 8% tax
-  (set total decimal (call calculate_total prices tax_rate))
+  (set tax_rate decimal (cast_float_decimal 0.08))  ; 8% tax
+  (set total decimal (calculate_total prices tax_rate))
   
-  (call print "Total with tax: ")
-  (call print total)  ; Precise decimal calculation
+  (print "Total with tax: ")
+  (print total)  ; Precise decimal calculation
   (ret 0))
 ```
 
@@ -726,18 +726,18 @@ AISL follows the philosophy: **"If it CAN be written in AISL, it MUST be written
 ```lisp
 (fn safe_file_read path string -> int
   ; Read file with error handling
-  (set result string (call file_read_result path))
-  (set success bool (call is_ok result))
+  (set result string (file_read_result path))
+  (set success bool (is_ok result))
   
   (if success
     ; Extract value from Ok result
-    (set content string (call unwrap result))
-    (call print content)
+    (set content string (unwrap result))
+    (print content)
     (ret 1))
   
   ; Handle error case
-  (set err_msg string (call error_message result))
-  (call print err_msg)
+  (set err_msg string (error_message result))
+  (print err_msg)
   (ret 0))
 ```
 
@@ -745,10 +745,10 @@ AISL follows the philosophy: **"If it CAN be written in AISL, it MUST be written
 
 ```lisp
 (fn read_with_default path string -> string
-  (set result string (call file_read_result path))
+  (set result string (file_read_result path))
   (set default string "default content")
   ; Returns content if Ok, default if Err
-  (set content string (call unwrap_or result default))
+  (set content string (unwrap_or result default))
   (ret content))
 ```
 
@@ -756,11 +756,11 @@ AISL follows the philosophy: **"If it CAN be written in AISL, it MUST be written
 
 ```lisp
 (fn check_file_error path string -> int
-  (set result string (call file_read_result path))
-  (set is_error bool (call is_err result))
+  (set result string (file_read_result path))
+  (set is_error bool (is_err result))
   
   (if is_error
-    (set code int (call error_code result))
+    (set code int (error_code result))
     (ret code))
   
   (ret 0))
@@ -775,7 +775,7 @@ AISL has a built-in test framework. Add tests to verify behavior:
 ```lisp
 (module my_module
   (fn add_numbers x int y int -> int
-    (ret (call add x y)))
+    (ret (add x y)))
   
   (test-spec add_numbers
     (case "adds two positive numbers"
@@ -837,7 +837,7 @@ AISL has a built-in test framework. Add tests to verify behavior:
 ```lisp
 (fn process_data -> int
   (set input string "test")        ; ❌ ERROR: 'input' is reserved!
-  (set result string (call parse input))  ; ❌ Parsed as EXPR_LIT_UNIT, not variable!
+  (set result string (parse input))  ; ❌ Parsed as EXPR_LIT_UNIT, not variable!
   (ret 0))
 ```
 
@@ -850,7 +850,7 @@ AISL has a built-in test framework. Add tests to verify behavior:
   (set data_input string "test")      ; ✅ Works: not a keyword
   (set my_input string "test")        ; ✅ Works: not a keyword
   (set input_data string "test")      ; ✅ Works: not a keyword
-  (set result string (call parse data_input))  ; ✅ Correctly parsed as variable
+  (set result string (parse data_input))  ; ✅ Correctly parsed as variable
   (ret 0))
 ```
 
@@ -872,9 +872,9 @@ AISL has a built-in test framework. Add tests to verify behavior:
 ```lisp
 ; This looks like if-then-else but ALL THREE statements execute!
 (if condition
-  (call print "then 1")
+  (print "then 1")
   (set x int 1)        ; ❌ Always executes regardless of condition!
-  (call print "else")) ; ❌ Always executes regardless of condition!
+  (print "else")) ; ❌ Always executes regardless of condition!
 ```
 
 **What happens:** The parser treats everything after the condition as a single sequence in the then-branch. There's no way to specify an else-branch.
@@ -883,19 +883,19 @@ AISL has a built-in test framework. Add tests to verify behavior:
 
 ```lisp
 ; Store condition result in a variable
-(set success bool (call compile_test file))
+(set success bool (compile_test file))
 
 ; Then-branch: only executes if true
 (if success
-  (call print "✓ passed")
-  (set passed int (call add passed 1)))
+  (print "✓ passed")
+  (set passed int (add passed 1)))
 
 ; Else-branch: only executes if false
-(if (call not success)
-  (call print "✗ failed"))
+(if (not success)
+  (print "✗ failed"))
 ```
 
-**Why this works:** Each `if` is independent, and we control which one executes by using `(call not ...)`.
+**Why this works:** Each `if` is independent, and we control which one executes by using `(not ...)`.
 
 ### Alternative: Use result variable with multiple actions
 
@@ -904,12 +904,12 @@ AISL has a built-in test framework. Add tests to verify behavior:
 (set message string "failed")
 
 ; Override if condition is true
-(if (call gt x 5)
+(if (gt x 5)
   (set message string "success")
   (set x int 0))
 
 ; message is now either "failed" or "success"
-(call print message)
+(print message)
 ```
 
 **Status:** This is a known parser limitation. The documented syntax `(if condition then_expr else_expr)` from AISL-AGENT.md is not yet implemented. Use the workarounds above.
@@ -921,7 +921,7 @@ AISL has a built-in test framework. Add tests to verify behavior:
 ```lisp
 (mod my_module    ; ERROR: 'mod' is not valid
   (fn add x int y int -> int
-    (ret (call add x y))))
+    (ret (add x y))))
 ```
 
 ### ✅ Do: Use 'module' keyword
@@ -929,10 +929,10 @@ AISL has a built-in test framework. Add tests to verify behavior:
 ```lisp
 (module my_module
   (fn add x int y int -> int
-    (ret (call add x y))))
+    (ret (add x y))))
 ```
 
-**Note**: The `mod` keyword was renamed to `module` to avoid conflict with the modulo operation `(call mod x y)`.
+**Note**: The `mod` keyword was renamed to `module` to avoid conflict with the modulo operation `(mod x y)`.
 
 ### ❌ Don't: Use built-in function names that require stdlib imports
 
@@ -941,7 +941,7 @@ AISL has a built-in test framework. Add tests to verify behavior:
   ; Missing: (import string_utils)
   (fn main -> int
     (set text string "  hello  ")
-    (set trimmed string (call trim text))  ; ERROR: function 'trim' not found
+    (set trimmed string (trim text))  ; ERROR: function 'trim' not found
     (ret 0)))
 ```
 
@@ -953,7 +953,7 @@ AISL has a built-in test framework. Add tests to verify behavior:
   
   (fn main -> int
     (set text string "  hello  ")
-    (set trimmed string (call trim text))  ; ✅ Works now
+    (set trimmed string (trim text))  ; ✅ Works now
     (ret 0)))
 ```
 
@@ -968,15 +968,15 @@ AISL has a built-in test framework. Add tests to verify behavior:
 
 ```lisp
 (set x int 10)
-(set y float (call add x 3.14))  ; ERROR: int + float
+(set y float (add x 3.14))  ; ERROR: int + float
 ```
 
 ### ✅ Do: Convert explicitly
 
 ```lisp
 (set x int 10)
-(set x_float float (call cast_int_float x))
-(set y float (call add x_float 3.14))
+(set x_float float (cast_int_float x))
+(set y float (add x_float 3.14))
 ```
 
 ### ❌ Don't: Use infix operators
@@ -988,7 +988,7 @@ AISL has a built-in test framework. Add tests to verify behavior:
 ### ✅ Do: Use function calls
 
 ```lisp
-(set sum int (call add x y))
+(set sum int (add x y))
 ```
 
 ### ❌ Don't: Forget type annotations
@@ -1024,8 +1024,8 @@ AISL has a built-in test framework. Add tests to verify behavior:
 
 ```lisp
 (fn example () -> int
-  (call label loop_start)
-  (call goto loop_start)  ; Tedious, error-prone
+  (label loop_start)
+  (goto loop_start)  ; Tedious, error-prone
   (ret 0))
 ```
 
@@ -1034,7 +1034,7 @@ AISL has a built-in test framework. Add tests to verify behavior:
 ```lisp
 (fn example () -> int
   (loop
-    (call do_something))  ; Desugars automatically
+    (do_something))  ; Desugars automatically
   (ret 0))
 ```
 
@@ -1058,7 +1058,7 @@ Use a descriptive name instead (e.g., 'json_data', 'json_value')
 ```lisp
 (fn test -> int
   (set json string "{\"status\":\"ok\"}")  ; Compiler error!
-  (call print json)
+  (print json)
   (ret 0))
 ```
 
@@ -1072,7 +1072,7 @@ Use a descriptive name instead (e.g., 'json_data', 'json_value')
 ; Fixed example:
 (fn test -> int
   (set json_str string "{\"status\":\"ok\"}")
-  (call print json_str)  ; Prints: {"status":"ok"} (correct!)
+  (print json_str)  ; Prints: {"status":"ok"} (correct!)
   (ret 0))
 ```
 
@@ -1222,19 +1222,19 @@ AISL is designed for predictable performance:
 ```lisp
 (module web_server
   (fn handle_request client_socket string -> int
-    (set request string (call tcp_receive client_socket 4096))
+    (set request string (tcp_receive client_socket 4096))
     (set response string "HTTP/1.1 200 OK\r\n\r\nHello, World!")
-    (call tcp_send client_socket response)
-    (call tcp_close client_socket)
+    (tcp_send client_socket response)
+    (tcp_close client_socket)
     (ret 0))
   
   (fn main -> int
     (set port int 8080)
-    (set server_socket string (call tcp_listen port))
-    (call print "Server listening on port 8080")
+    (set server_socket string (tcp_listen port))
+    (print "Server listening on port 8080")
     (loop
-      (set client_socket string (call tcp_accept server_socket))
-      (call handle_request client_socket))
+      (set client_socket string (tcp_accept server_socket))
+      (handle_request client_socket))
     (ret 0)))
 ```
 
@@ -1243,8 +1243,8 @@ AISL is designed for predictable performance:
 ## Summary: AISL in 10 Points
 
 1. **Two layers**: Agent (what you write) desugars to Core (what runs)
-2. **Explicit everything**: Types, calls, control flow - no hidden behavior
-3. **Type dispatch**: Write `add`, compiler picks `add` or `add`
+2. **Explicit everything**: Types, control flow - no hidden behavior
+3. **Type dispatch**: Write `add`, compiler picks `add_int` or `add_float`
 4. **S-expressions**: Uniform syntax, easy to parse and generate
 5. **Structured control**: `while`, `loop`, `break`, `continue` desugar to jumps
 6. **No precedence**: All operations are function calls

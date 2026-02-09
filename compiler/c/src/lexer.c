@@ -185,7 +185,6 @@ static Token read_identifier(Lexer* lexer) {
     else if (strcmp(str, "import") == 0) kind = TOK_IMPORT;
     else if (strcmp(str, "defs") == 0) kind = TOK_DEFS;
     else if (strcmp(str, "fn") == 0) kind = TOK_FN;
-    else if (strcmp(str, "call") == 0) kind = TOK_CALL;
     else if (strcmp(str, "set") == 0) kind = TOK_SET;
     // Core IR constructs are now handled as regular function calls, not keywords
     // else if (strcmp(str, "goto") == 0) kind = TOK_GOTO;

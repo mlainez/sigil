@@ -1,10 +1,10 @@
 (module test_verify_return
   (fn add_two a int b int -> int
-    (ret (call add a b)))
+    (ret (add a b)))
   
   (fn main -> int
-    (set result int (call add_two 2 3))
-    (call print "Result: ")
-    (call print result)
-    (call print "\n")
+    (set result int (add_two 2 3))
+    (print "Result: ")
+    (print result)
+    (print "\n")
     (ret 0)))

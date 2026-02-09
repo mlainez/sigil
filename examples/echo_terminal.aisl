@@ -1,7 +1,7 @@
 (module echo_terminal
   (fn main -> int
-    (call print "Echo terminal - type something and press Enter (Ctrl+C to quit)")
+    (print "Echo terminal - type something and press Enter (Ctrl+C to quit)")
     (loop
       (set line string (stdin_read))
-      (call print line))
+      (print line))
     (ret 0)))

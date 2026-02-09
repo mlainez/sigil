@@ -27,7 +27,7 @@ AISL-Core is NOT meant for humans to write directly. It is the compilation targe
 Example:
 ```lisp
 (set x int 42)
-(set result bool (call lt x 100))
+(set result bool (lt x 100))
 ```
 
 ### 2. `call` - Function invocation
@@ -43,14 +43,14 @@ Example:
 
 Examples:
 ```lisp
-(call add x y)              ; Type-directed: resolves to add or add
-(call my_function 10 20)    ; User function
-(call label loop_start)     ; Core construct
+(add x y)              ; Type-directed: resolves to add_int or add_float
+(my_function 10 20)    ; User function
+(label loop_start)     ; Core construct
 ```
 
 ### 3. `label` - Jump target marker
 ```
-(call label name)
+(label name)
 ```
 - Marks a position in the instruction stream
 - Does not emit bytecode (virtual construct)
@@ -59,14 +59,14 @@ Examples:
 
 Example:
 ```lisp
-(call label loop_start)
+(label loop_start)
 ; ... code ...
-(call goto loop_start)
+(goto loop_start)
 ```
 
 ### 4. `goto` - Unconditional jump
 ```
-(call goto target)
+(goto target)
 ```
 - Jumps to label `target`
 - Target must exist in same function
@@ -74,12 +74,12 @@ Example:
 
 Example:
 ```lisp
-(call goto loop_end)
+(goto loop_end)
 ```
 
 ### 5. `ifnot` - Conditional jump
 ```
-(call ifnot condition target)
+(ifnot condition target)
 ```
 - Evaluates `condition` (must be bool)
 - If condition is **false**, jumps to `target`
@@ -88,8 +88,8 @@ Example:
 
 Example:
 ```lisp
-(set cond bool (call lt n 10))
-(call ifnot cond loop_end)
+(set cond bool (lt n 10))
+(ifnot cond loop_end)
 ```
 
 ### 6. `ret` - Return from function
@@ -102,7 +102,7 @@ Example:
 
 Example:
 ```lisp
-(ret (call add x y))
+(ret (add x y))
 ```
 
 ## Types
@@ -122,21 +122,21 @@ Built-in operations use **short names** that resolve based on argument types:
 
 | Short Name | Typed Operations |
 |------------|------------------|
-| `add` | `add`, `add`, `add`, `add` |
-| `sub` | `sub`, `sub`, `sub`, `sub` |
-| `mul` | `mul`, `mul`, `mul`, `mul` |
-| `div` | `div`, `div`, `div`, `div` |
-| `mod` | `mod`, `mod` |
-| `neg` | `neg`, `neg`, `neg`, `neg` |
-| `lt` | `lt`, `lt`, `lt`, `lt` |
-| `gt` | `gt`, `gt`, `gt`, `gt` |
-| `le` | `le`, `le`, `le`, `le` |
-| `ge` | `ge`, `ge`, `ge`, `ge` |
-| `eq` | `eq`, `eq`, `eq`, `eq` |
-| `ne` | `ne`, `ne`, `ne`, `ne` |
-| `abs` | `abs`, `abs`, `abs`, `abs` |
-| `min` | `min`, `min`, `min`, `min` |
-| `max` | `max`, `max`, `max`, `max` |
+| `add` | `add_int`, `add_float`, `add_decimal`, `add` |
+| `sub` | `sub_int`, `sub_float`, `sub_decimal`, `sub` |
+| `mul` | `mul_int`, `mul_float`, `mul_decimal`, `mul` |
+| `div` | `div_int`, `div_float`, `div_decimal`, `div` |
+| `mod` | `mod_int`, `mod` |
+| `neg` | `neg_int`, `neg_float`, `neg_decimal`, `neg` |
+| `lt` | `lt_int`, `lt_float`, `lt_decimal`, `lt` |
+| `gt` | `gt_int`, `gt_float`, `gt_decimal`, `gt` |
+| `le` | `le_int`, `le_float`, `le_decimal`, `le` |
+| `ge` | `ge_int`, `ge_float`, `ge_decimal`, `ge` |
+| `eq` | `eq_int`, `eq_float`, `eq_decimal`, `eq` |
+| `ne` | `ne_int`, `ne_float`, `ne_decimal`, `ne` |
+| `abs` | `abs_int`, `abs_float`, `abs_decimal`, `abs` |
+| `min` | `min_int`, `min_float`, `min_decimal`, `min` |
+| `max` | `max_int`, `max_float`, `max_decimal`, `max` |
 
 The compiler infers the correct typed operation from argument types at compile time.
 
@@ -150,7 +150,7 @@ The compiler infers the correct typed operation from argument types at compile t
 Example:
 ```lisp
 (fn add_numbers x int y int -> int
-  (ret (call add x y)))
+  (ret (add x y)))
 ```
 
 ## Module Structure
@@ -189,12 +189,12 @@ Example:
 ```lisp
 (fn count_to_five () -> int
   (set n int 0)
-  (call label loop_start)
-  (set cond bool (call lt n 5))
-  (call ifnot cond loop_end)
-  (set n int (call add n 1))
-  (call goto loop_start)
-  (call label loop_end)
+  (label loop_start)
+  (set cond bool (lt n 5))
+  (ifnot cond loop_end)
+  (set n int (add n 1))
+  (goto loop_start)
+  (label loop_end)
   (ret n))
 ```
 

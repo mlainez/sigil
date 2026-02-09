@@ -392,34 +392,6 @@ static Expr* parser_parse_value_expr_v3(Parser* parser) {
             return expr_lit_string(val);
         }
         
-        if (inner.kind == TOK_CALL) {
-            // Legacy: (call func arg1 arg2 ...) - still supported
-            parser_advance(parser); // consume 'call'
-            
-            char* func_name = strdup(parser->current.value.string_val);
-            parser_advance(parser);
-            
-            ExprList* args = NULL;
-            ExprList* args_tail = NULL;
-            while (parser->current.kind != TOK_RPAREN) {
-                Expr* arg = parser_parse_value_expr_v3(parser);
-                ExprList* new_arg = malloc(sizeof(ExprList));
-                new_arg->expr = arg;
-                new_arg->next = NULL;
-                if (!args) {
-                    args = new_arg;
-                    args_tail = new_arg;
-                } else {
-                    args_tail->next = new_arg;
-                    args_tail = new_arg;
-                }
-            }
-            parser_expect(parser, TOK_RPAREN);
-            
-            Expr* func_expr = expr_var(func_name, type_unit());
-            return expr_apply(func_expr, args, type_unit());
-        }
-        
         if (inner.kind == TOK_IDENTIFIER || inner.kind == TOK_VAR) {
             // Direct function call: (func arg1 arg2 ...)
             char* func_name = strdup(parser->current.value.string_val);
@@ -507,13 +479,13 @@ static Expr* parser_parse_statements_v3(Parser* parser) {
     while (parser->current.kind == TOK_LPAREN && parser->peek_tok.kind != TOK_RPAREN) {
         Token next = parser->peek_tok;
 
-        if (next.kind == TOK_CALL) {
-            // (call func arg arg ...)
+        if (next.kind == TOK_IDENTIFIER || next.kind == TOK_VAR) {
+            // Direct function call: (func arg arg ...)
             parser_advance(parser); // (
-            parser_advance(parser); // call
-
+            
+            // Save function name BEFORE advancing past it
             char* func_name = strdup(parser->current.value.string_val);
-            parser_advance(parser);
+            parser_advance(parser); // function name
 
             ExprList* args = NULL;
             while (parser->current.kind != TOK_RPAREN) {

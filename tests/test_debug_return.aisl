@@ -1,9 +1,9 @@
 (module test_debug_return
   (fn add_two a int b int -> int
-    (set result int (call add a b))
-    (call print "[Function returning: ")
-    (call print result)
-    (call print "]\n")
+    (set result int (add a b))
+    (print "[Function returning: ")
+    (print result)
+    (print "]\n")
     (ret result))
   
   (test-spec add_two

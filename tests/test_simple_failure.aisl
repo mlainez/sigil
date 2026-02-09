@@ -1,6 +1,6 @@
 (module test_simple_failure
   (fn add_two a int b int -> int
-    (ret (call add a b)))
+    (ret (add a b)))
   
   (test-spec add_two
     (case "should pass"

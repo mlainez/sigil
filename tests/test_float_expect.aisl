@@ -1,6 +1,6 @@
 (module test_float_expect
   (fn divide a float b float -> float
-    (ret (call div a b)))
+    (ret (div a b)))
   
   (test-spec divide
     (case "divides evenly"
