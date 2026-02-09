@@ -114,6 +114,10 @@ typedef enum {
     OP_IO_OPEN,       // Open file, returns handle
     OP_IO_CLOSE,      // Close file handle
 
+    // Standard Input
+    OP_STDIN_READ,    // Read line from stdin: -> string
+    OP_STDIN_READ_ALL, // Read all available stdin: -> string
+
     // String (primitives only - high-level ops moved to stdlib/core/string_utils.aisl)
     OP_STR_LEN,
     OP_STR_CONCAT,

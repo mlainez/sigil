@@ -1819,6 +1819,38 @@ int vm_run(VM* vm) {
                 break;
             }
 
+            case OP_STDIN_READ: {
+                char line[4096];
+                if (fgets(line, sizeof(line), stdin) != NULL) {
+                    size_t len = strlen(line);
+                    if (len > 0 && line[len-1] == '\n') {
+                        line[len-1] = '\0';
+                    }
+                    char* result = strdup(line);
+                    Value result_val = {.type = VAL_STRING, .data.string_val = result};
+                    push(vm, result_val);
+                } else {
+                    Value empty = {.type = VAL_STRING, .data.string_val = strdup("")};
+                    push(vm, empty);
+                }
+                vm->ip++;
+                break;
+            }
+
+            case OP_STDIN_READ_ALL: {
+                char buffer[65536];
+                size_t total = 0;
+                while (fgets(buffer + total, sizeof(buffer) - total, stdin) != NULL) {
+                    total += strlen(buffer + total);
+                    if (total >= sizeof(buffer) - 1) break;
+                }
+                char* result = strdup(buffer);
+                Value result_val = {.type = VAL_STRING, .data.string_val = result};
+                push(vm, result_val);
+                vm->ip++;
+                break;
+            }
+
             case OP_STR_LEN: {
                 Value str = pop(vm);
                 int64_t len = (int64_t)strlen(str.data.string_val);

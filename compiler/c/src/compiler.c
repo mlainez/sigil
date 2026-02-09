@@ -1613,6 +1613,26 @@ void compile_apply(Compiler* comp, Expr* expr) {
         bytecode_emit(comp->program, inst);
         return;
     }
+
+    // Standard Input
+    if (strcmp(name, "stdin_read") == 0) {
+        if (compile_args(comp, expr->data.apply.args) != 0) {
+            fprintf(stderr, "stdin_read takes no arguments\n");
+            exit(1);
+        }
+        Instruction inst = {.opcode = OP_STDIN_READ};
+        bytecode_emit(comp->program, inst);
+        return;
+    }
+    if (strcmp(name, "stdin_read_all") == 0) {
+        if (compile_args(comp, expr->data.apply.args) != 0) {
+            fprintf(stderr, "stdin_read_all takes no arguments\n");
+            exit(1);
+        }
+        Instruction inst = {.opcode = OP_STDIN_READ_ALL};
+        bytecode_emit(comp->program, inst);
+        return;
+    }
     
     // Result type operations (result_ok, result_err) - REMOVED
     // Now implemented in stdlib/core/result.aisl using map primitives

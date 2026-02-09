@@ -17,7 +17,7 @@
   (regex compile match find find_all replace)
   (arr new push pop get set len slice sort filter map reduce)
   (map new get set has del keys vals len)
-  (io print println read_line file_read file_write file_exists)
+  (io print println read_line file_read file_write file_exists stdin_read stdin_read_all)
   (net tcp_listen tcp_accept tcp_send tcp_recv http_get http_post)
   (sys time sleep env exit process_exec)
   (cast int_float float_int int_str str_int int_decimal decimal_int float_decimal decimal_float))
