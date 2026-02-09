@@ -1,18 +1,1 @@
-{
-  "name": "text_utils",
-  "version": "1.0.0",
-  "description": "Text manipulation utilities",
-  "exports": [
-    "to_uppercase_char",
-    "repeat_string",
-    "pad_left",
-    "pad_right",
-    "truncate",
-    "word_count",
-    "reverse_string",
-    "is_empty",
-    "starts_with",
-    "ends_with"
-  ],
-  "dependencies": []
-}
+(manifest@(m text_utils)@(v 1.0.0)@(e@(f to_uppercase_char(int)int)@(f repeat_string(string int)string)@(f pad_left(string int string)string)@(f pad_right(string int string)string)@(f truncate(string int)string)@(f word_count(string)int)@(f reverse_string(string)string)@(f is_empty(string)bool)@(f starts_with(string string)bool)@(f ends_with(string string)bool))@(d "Text manipulation utilities")@(p string_length string_slice string_concat add sub)@(t 450))

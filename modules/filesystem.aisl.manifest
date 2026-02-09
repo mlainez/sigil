@@ -1,16 +1,1 @@
-{
-  "name": "filesystem",
-  "version": "1.0.0",
-  "description": "File system operations with error handling",
-  "exports": [
-    "read_file_safe",
-    "write_file_safe",
-    "append_line",
-    "file_size_approx",
-    "delete_if_exists",
-    "copy_file",
-    "read_lines",
-    "count_lines"
-  ],
-  "dependencies": []
-}
+(manifest@(m filesystem)@(v 1.0.0)@(e@(f read_file_safe(string)string)@(f write_file_safe(string string)bool)@(f append_line(string string)bool)@(f file_size_approx(string)int)@(f delete_if_exists(string)bool)@(f copy_file(string string)bool)@(f read_lines(string)array)@(f count_lines(string)int))@(d "File system operations with error handling")@(p file_read file_write add)@(t 320))
