@@ -1,7 +1,7 @@
 (module test_split
   (import string_utils)
   (fn split_get text string delim string idx int -> string
-    (ret (array_get (string_split text delim) idx)))
+    (ret (array_get (split text delim) idx)))
   
   (test-spec split_get
     (case "get first element"
@@ -14,4 +14,4 @@
       (input "one,two,three" "," 2)
       (expect "three")))
   
-  (meta-note "Tests string_split and array_get"))
+  (meta-note "Tests split and array_get"))

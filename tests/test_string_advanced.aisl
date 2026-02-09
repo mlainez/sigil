@@ -1,58 +1,58 @@
 (module test_string_advanced
   (import string_utils)
   (fn split_csv text string delim string -> array
-    (ret (string_split text delim)))
+    (ret (split text delim)))
   
   (test-spec split_csv
     (case "split CSV with spaces"
-      (mock (string_split "  apple  , banana , cherry  " ",") "csv_array")
+      (mock (split "  apple  , banana , cherry  " ",") "csv_array")
       (input "  apple  , banana , cherry  " ",")
       (expect "csv_array"))
     (case "split simple CSV"
-      (mock (string_split "John,25,Engineer" ",") "simple_csv")
+      (mock (split "John,25,Engineer" ",") "simple_csv")
       (input "John,25,Engineer" ",")
       (expect "simple_csv")))
   
   (fn trim_string text string -> string
-    (ret (string_trim text)))
+    (ret (trim text)))
   
   (test-spec trim_string
     (case "trim padded text"
-      (mock (string_trim "  apple  ") "apple")
+      (mock (trim "  apple  ") "apple")
       (input "  apple  ")
       (expect "apple"))
     (case "trim with multiple spaces"
-      (mock (string_trim "  Hello   World!  ") "Hello   World!")
+      (mock (trim "  Hello   World!  ") "Hello   World!")
       (input "  Hello   World!  ")
       (expect "Hello   World!")))
   
   (fn replace_text text string old string new string -> string
-    (ret (string_replace text old new)))
+    (ret (replace text old new)))
   
   (test-spec replace_text
     (case "replace fox with dog"
-      (mock (string_replace "The quick brown fox" "fox" "dog") "The quick brown dog")
+      (mock (replace "The quick brown fox" "fox" "dog") "The quick brown dog")
       (input "The quick brown fox" "fox" "dog")
       (expect "The quick brown dog"))
     (case "replace double spaces"
-      (mock (string_replace "Hello   World!" "  " " ") "Hello  World!")
+      (mock (replace "Hello   World!" "  " " ") "Hello  World!")
       (input "Hello   World!" "  " " ")
       (expect "Hello  World!"))
     (case "replace template variable"
-      (mock (string_replace "Hello {{name}}, welcome!" "{{name}}" "Alice") "Hello Alice, welcome!")
+      (mock (replace "Hello {{name}}, welcome!" "{{name}}" "Alice") "Hello Alice, welcome!")
       (input "Hello {{name}}, welcome!" "{{name}}" "Alice")
       (expect "Hello Alice, welcome!")))
   
   (fn check_contains text string search string -> bool
-    (ret (string_contains text search)))
+    (ret (contains text search)))
   
   (test-spec check_contains
     (case "contains dog"
-      (mock (string_contains "The quick brown dog" "dog") true)
+      (mock (contains "The quick brown dog" "dog") true)
       (input "The quick brown dog" "dog")
       (expect true))
     (case "does not contain fox"
-      (mock (string_contains "The quick brown dog" "fox") false)
+      (mock (contains "The quick brown dog" "fox") false)
       (input "The quick brown dog" "fox")
       (expect false)))
   

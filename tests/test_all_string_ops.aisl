@@ -1,42 +1,42 @@
 (module test_all_string_ops
   (import string_utils)
   (fn test_split text string delim string -> array
-    (ret (string_split text delim)))
+    (ret (split text delim)))
   
   (test-spec test_split
     (case "split by hyphen"
-      (mock (string_split "one-two-three" "-") "array_result")
+      (mock (split "one-two-three" "-") "array_result")
       (input "one-two-three" "-")
       (expect "array_result")))
   
   (fn test_trim text string -> string
-    (ret (string_trim text)))
+    (ret (trim text)))
   
   (test-spec test_trim
     (case "trim whitespace"
-      (mock (string_trim "  hello  ") "hello")
+      (mock (trim "  hello  ") "hello")
       (input "  hello  ")
       (expect "hello")))
   
   (fn test_contains haystack string needle string -> bool
-    (ret (string_contains haystack needle)))
+    (ret (contains haystack needle)))
   
   (test-spec test_contains
     (case "contains world"
-      (mock (string_contains "hello world" "world") true)
+      (mock (contains "hello world" "world") true)
       (input "hello world" "world")
       (expect true))
     (case "does not contain xyz"
-      (mock (string_contains "hello world" "xyz") false)
+      (mock (contains "hello world" "xyz") false)
       (input "hello world" "xyz")
       (expect false)))
   
   (fn test_replace text string old string new string -> string
-    (ret (string_replace text old new)))
+    (ret (replace text old new)))
   
   (test-spec test_replace
     (case "replace foo with X"
-      (mock (string_replace "foo bar foo" "foo" "X") "X bar X")
+      (mock (replace "foo bar foo" "foo" "X") "X bar X")
       (input "foo bar foo" "foo" "X")
       (expect "X bar X")))
   

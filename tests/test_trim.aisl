@@ -1,7 +1,7 @@
 (module test_trim
   (import string_utils)
   (fn trim text string -> string
-    (ret (string_trim text)))
+    (ret (trim text)))
   
   (test-spec trim
     (case "trim spaces both sides"
@@ -17,4 +17,4 @@
       (input "clean")
       (expect "clean")))
   
-  (meta-note "Tests string_trim function"))
+  (meta-note "Tests trim function"))

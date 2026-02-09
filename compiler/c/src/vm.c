@@ -628,7 +628,10 @@ static int process_write(Process* proc, const char* data) {
 static Socket* tcp_listen(int port) {
     Socket* sock = malloc(sizeof(Socket));
     sock->is_udp = false;
-    
+    sock->is_tls = false;
+    sock->ssl = NULL;
+    sock->ssl_ctx = NULL;
+
     sock->sockfd = socket(AF_INET, SOCK_STREAM, 0);
     if (sock->sockfd < 0) {
         free(sock);
@@ -648,13 +651,13 @@ static Socket* tcp_listen(int port) {
         free(sock);
         return NULL;
     }
-    
+
     if (listen(sock->sockfd, 10) < 0) {
         close(sock->sockfd);
         free(sock);
         return NULL;
     }
-    
+
     return sock;
 }
 
@@ -816,8 +819,8 @@ static Array* socket_select(Array* sockets) {
     fd_set read_fds;
     FD_ZERO(&read_fds);
     int max_fd = 0;
-    
-    // Build fd_set from sockets
+
+    // Build fd_set from sockets and file descriptors
     for (int i = 0; i < sockets->count; i++) {
         Value* val = &sockets->items[i];
         if (val->type == VAL_TCP_SOCKET || val->type == VAL_UDP_SOCKET) {
@@ -825,14 +828,19 @@ static Array* socket_select(Array* sockets) {
             if (sock && sock->sockfd > max_fd) {
                 max_fd = sock->sockfd;
             }
-            FD_SET(sock->sockfd, &read_fds);
+            if (sock) FD_SET(sock->sockfd, &read_fds);
+        } else if (val->type == VAL_INT) {
+            int fd = (int)val->data.int_val;
+            if (fd >= 0 && fd > max_fd) {
+                max_fd = fd;
+            }
+            FD_SET(fd, &read_fds);
         }
     }
-    
-    struct timeval tv = {0, 0};  // Non-blocking check
+
+    struct timeval tv = {0, 0};
     int ready = select(max_fd + 1, &read_fds, NULL, NULL, &tv);
     
-    // Build result array of indices
     Array* result = malloc(sizeof(Array));
     result->capacity = 16;
     result->count = 0;
@@ -841,14 +849,23 @@ static Array* socket_select(Array* sockets) {
     if (ready > 0) {
         for (int i = 0; i < sockets->count; i++) {
             Value* val = &sockets->items[i];
+            bool is_ready = false;
             if (val->type == VAL_TCP_SOCKET || val->type == VAL_UDP_SOCKET) {
                 Socket* sock = (Socket*)val->data.ptr_val;
                 if (sock && FD_ISSET(sock->sockfd, &read_fds)) {
-                    Value idx_val;
-                    idx_val.type = VAL_INT;
-                    idx_val.data.int_val = i;
-                    result->items[result->count++] = idx_val;
+                    is_ready = true;
                 }
+            } else if (val->type == VAL_INT) {
+                int fd = (int)val->data.int_val;
+                if (fd >= 0 && FD_ISSET(fd, &read_fds)) {
+                    is_ready = true;
+                }
+            }
+            if (is_ready) {
+                Value idx_val;
+                idx_val.type = VAL_INT;
+                idx_val.data.int_val = i;
+                result->items[result->count++] = idx_val;
             }
         }
     }
@@ -1887,19 +1904,44 @@ int vm_run(VM* vm) {
                 break;
             }
 
-            case OP_STDIN_READ: {
-                char line[4096];
-                if (fgets(line, sizeof(line), stdin) != NULL) {
-                    size_t len = strlen(line);
-                    if (len > 0 && line[len-1] == '\n') {
-                        line[len-1] = '\0';
-                    }
-                    char* result = strdup(line);
-                    Value result_val = {.type = VAL_STRING, .data.string_val = result};
-                    push(vm, result_val);
+            case OP_GETENV: {
+                Value name_val = pop(vm);
+                char* value = getenv(name_val.data.string_val);
+                if (value) {
+                    Value result = {.type = VAL_STRING, .data.string_val = strdup(value)};
+                    push(vm, result);
                 } else {
                     Value empty = {.type = VAL_STRING, .data.string_val = strdup("")};
                     push(vm, empty);
+                }
+                vm->ip++;
+                break;
+            }
+
+            case OP_STDIN_READ: {
+                fd_set read_fds;
+                FD_ZERO(&read_fds);
+                FD_SET(STDIN_FILENO, &read_fds);
+                struct timeval tv = {0, 0};
+                int ready = select(STDIN_FILENO + 1, &read_fds, NULL, NULL, &tv);
+                
+                if (ready <= 0) {
+                    Value empty = {.type = VAL_STRING, .data.string_val = strdup("")};
+                    push(vm, empty);
+                } else {
+                    char line[4096];
+                    if (fgets(line, sizeof(line), stdin) != NULL) {
+                        size_t len = strlen(line);
+                        if (len > 0 && line[len-1] == '\n') {
+                            line[len-1] = '\0';
+                        }
+                        char* result = strdup(line);
+                        Value result_val = {.type = VAL_STRING, .data.string_val = result};
+                        push(vm, result_val);
+                    } else {
+                        Value empty = {.type = VAL_STRING, .data.string_val = strdup("")};
+                        push(vm, empty);
+                    }
                 }
                 vm->ip++;
                 break;
@@ -3087,7 +3129,7 @@ int vm_run(VM* vm) {
                 Value port_val = pop(vm);
                 int port = port_val.data.i32_val;
                 Socket* sock = tcp_listen(port);
-                
+
                 // NULL CHECK: tcp_listen can return NULL on error
                 if (!sock) {
                     fprintf(stderr, "Runtime Error: tcp_listen failed to create listening socket on port %d\n", port);
@@ -3095,7 +3137,7 @@ int vm_run(VM* vm) {
                     vm->exit_code = 1;
                     return 1;
                 }
-                
+
                 Value result = {.type = VAL_TCP_SOCKET, .data.ptr_val = sock};
                 push(vm, result);
                 vm->ip++;
@@ -3717,6 +3759,9 @@ void vm_disassemble(BytecodeProgram* program) {
                 break;
             case OP_IO_CLOSE:
                 printf("IO_CLOSE\n");
+                break;
+            case OP_GETENV:
+                printf("GETENV\n");
                 break;
             case OP_STR_LEN:
                 printf("STR_LEN\n");

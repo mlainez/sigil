@@ -1,7 +1,7 @@
 (module test_simple
   (import string_utils)
   (fn split_by_space s string -> string
-    (ret (array_get (string_split s " ") 0)))
+    (ret (array_get (split s " ") 0)))
   
   (test-spec split_by_space
     (case "get first word"
@@ -14,4 +14,4 @@
       (input "one two three")
       (expect "one")))
   
-  (meta-note "Tests string_split by space delimiter"))
+  (meta-note "Tests split by space delimiter"))

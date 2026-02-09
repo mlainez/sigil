@@ -12,10 +12,10 @@
 
   (fn handle_request request string -> string
     (set result string (build_404_response))
-    (set is_html bool (string_contains request "/hello"))
+    (set is_html bool (contains request "/hello"))
     (if is_html
       (set result string (build_html_response)))
-    (set is_json bool (string_contains request "/hello.json"))
+    (set is_json bool (contains request "/hello.json"))
     (if is_json
       (set result string (build_json_response)))
     (ret result))

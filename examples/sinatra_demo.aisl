@@ -3,12 +3,12 @@
   (import conversion)
   
   (fn extract_path request string -> string
-    (set lines array (string_split request "\n"))
+    (set lines array (split request "\n"))
     (set line_count int (array_length lines))
     (set result string "/")
     (if (gt line_count 0)
       (set first_line string (array_get lines 0))
-      (set parts array (string_split first_line " "))
+      (set parts array (split first_line " "))
       (set part_count int (array_length parts))
       (if (gt part_count 1)
         (set result string (array_get parts 1))))

@@ -2,14 +2,47 @@
   (fn main -> int
     (set port int 8080)
     (set server socket (tcp_listen port))
-    (print "Echo server on port 8080")
+    (print "Chat server running on port 8080")
+    (print "Press Ctrl+C to stop")
+
+    (set clients array (array_new))
 
     (loop
-      (set client socket (tcp_accept server))
-      (loop
-        (set data string (tcp_receive client 1024))
-        (if (eq (string_length data) 0)
-          (break))
-        (tcp_send client data)))
+      (set inputs array (array_new))
+      (array_push inputs server)
+
+      (set client_count int (array_length clients))
+      (set j int 0)
+      (while (lt j client_count)
+        (set client socket (array_get clients j))
+        (array_push inputs client)
+        (set j int (add j 1)))
+
+      (set ready array (socket_select inputs))
+      (set ready_len int (array_length ready))
+      (set k int 0)
+
+      (while (lt k ready_len)
+        (set idx int (array_get ready k))
+        (set sock socket (array_get inputs idx))
+
+        (if (eq idx 0)
+          (set client socket (tcp_accept server))
+          (array_push clients client)
+          (set welcome string "[System] Welcome to the chat!")
+          (tcp_send client welcome))
+
+        (if (not (eq idx 0))
+          (set data string (tcp_receive sock 1024))
+          (set data_len int (string_length data))
+          (if (gt data_len 0)
+            (set len int (array_length clients))
+            (set m int 0)
+            (while (lt m len)
+              (set c socket (array_get clients m))
+              (tcp_send c data)
+              (set m int (add m 1)))))
+
+        (set k int (add k 1))))
 
     (ret 0)))

@@ -1,5 +1,5 @@
 (module string_utils
-  (fn string_split text string delimiter string -> array
+  (fn split text string delimiter string -> array
     (set result array (array_new))
     (set text_len int (string_length text))
     (set delim_len int (string_length delimiter))
@@ -29,7 +29,7 @@
     (array_push result final)
     (ret result))
   
-  (fn string_trim text string -> string
+  (fn trim text string -> string
     (set len int (string_length text))
     (set start int 0)
     (set end int len)
@@ -74,7 +74,7 @@
     
     (ret (string_slice text start end)))
   
-  (fn string_contains haystack string needle string -> bool
+  (fn contains haystack string needle string -> bool
     (set haystack_len int (string_length haystack))
     (set needle_len int (string_length needle))
     (set max_pos int (sub haystack_len needle_len))
@@ -89,8 +89,8 @@
     
     (ret false))
   
-  (fn string_replace text string old string new string -> string
-    (set parts array (string_split text old))
+  (fn replace text string old string new string -> string
+    (set parts array (split text old))
     (set result string "")
     (set parts_len int (array_length parts))
     (set i int 0)
@@ -106,7 +106,7 @@
     
     (ret result))
   
-  (fn string_starts_with text string prefix string -> bool
+  (fn starts_with text string prefix string -> bool
     (set text_len int (string_length text))
     (set prefix_len int (string_length prefix))
     (set too_long bool (gt prefix_len text_len))
@@ -115,7 +115,7 @@
     (set start string (string_slice text 0 prefix_len))
     (ret (string_equals start prefix)))
   
-  (fn string_ends_with text string suffix string -> bool
+  (fn ends_with text string suffix string -> bool
     (set text_len int (string_length text))
     (set suffix_len int (string_length suffix))
     (set too_long bool (gt suffix_len text_len))
@@ -125,7 +125,7 @@
     (set end_part string (string_slice text start text_len))
     (ret (string_equals end_part suffix)))
   
-  (fn string_to_upper text string -> string
+  (fn to_upper text string -> string
     (set len int (string_length text))
     (set result string "")
     (set i int 0)
@@ -146,7 +146,7 @@
     
     (ret result))
   
-  (fn string_to_lower text string -> string
+  (fn to_lower text string -> string
     (set len int (string_length text))
     (set result string "")
     (set i int 0)
@@ -167,7 +167,7 @@
     
     (ret result))
   
-  (fn string_reverse text string -> string
+  (fn reverse text string -> string
     (set len int (string_length text))
     (set result string "")
     (set i int (sub len 1))

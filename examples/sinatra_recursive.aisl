@@ -7,7 +7,7 @@
     (set request string (tcp_receive client_sock 4096))
     (print "Request received:")
     (print request)
-    (set has_json bool (string_contains request "/hello.json"))
+    (set has_json bool (contains request "/hello.json"))
     (print "Routing decision:")
     (set json_resp string "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: 33\r\n\r\n{\"message\": \"Hello from AISL\"}")
     (set html_resp string "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nContent-Length: 43\r\n\r\n<html><body>Hello from AISL</body></html>")

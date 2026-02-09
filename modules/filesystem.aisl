@@ -43,7 +43,7 @@
   
   (fn read_lines path string -> array
     (set content string (file_read path))
-    (set lines array (string_split content "\n"))
+    (set lines array (split content "\n"))
     (ret lines))
   
   (fn count_lines path string -> int

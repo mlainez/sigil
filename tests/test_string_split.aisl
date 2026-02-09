@@ -1,10 +1,10 @@
-(module test_string_split
+(module test_split
   (import string_utils)
   (fn split input string delim string -> array
-    (ret (string_split input delim)))
+    (ret (split input delim)))
   
   (fn get_first_element input string delim string -> string
-    (ret (array_get (string_split input delim) 0)))
+    (ret (array_get (split input delim) 0)))
   
   (test-spec get_first_element
     (case "split by comma first element"
@@ -18,7 +18,7 @@
       (expect "one")))
   
   (fn count_split_parts input string delim string -> int
-    (ret (len (string_split input delim))))
+    (ret (len (split input delim))))
   
   (test-spec count_split_parts
     (case "split by comma count"
@@ -34,4 +34,4 @@
       (input "nodelimiter" ",")
       (expect 1)))
   
-  (meta-note "Tests string_split for splitting strings by various delimiters"))
+  (meta-note "Tests split for splitting strings by various delimiters"))

@@ -1,7 +1,7 @@
 (module test_string_ext
   (import string_utils)
   (fn starts_with msg string prefix string -> bool
-    (ret (string_starts_with msg prefix)))
+    (ret (starts_with msg prefix)))
   
   (test-spec starts_with
     (case "starts with Hello"
@@ -12,7 +12,7 @@
       (expect 0)))
   
   (fn ends_with msg string suffix string -> bool
-    (ret (string_ends_with msg suffix)))
+    (ret (ends_with msg suffix)))
   
   (test-spec ends_with
     (case "ends with World"
@@ -23,7 +23,7 @@
       (expect 0)))
   
   (fn to_upper msg string -> string
-    (ret (string_to_upper msg)))
+    (ret (to_upper msg)))
   
   (test-spec to_upper
     (case "convert to uppercase"
@@ -34,7 +34,7 @@
       (expect "TEST")))
   
   (fn to_lower msg string -> string
-    (ret (string_to_lower msg)))
+    (ret (to_lower msg)))
   
   (test-spec to_lower
     (case "convert to lowercase"

@@ -3,7 +3,7 @@
   (import string_utils)
   
   (fn parse_request req string -> string
-    (set lines array (string_split req "\r\n"))
+    (set lines array (split req "\r\n"))
     (set len int (array_length lines))
     (set first_line string "")
     (if (gt len 0)
@@ -40,11 +40,11 @@
     (set todos_json_str string (get_todos_json db))
     (set template_path string "examples/todo_app/index.html")
     (set html_template string (file_read template_path))
-    (set html_with_data string (string_replace html_template "__TODOS_DATA__" todos_json_str))
+    (set html_with_data string (replace html_template "__TODOS_DATA__" todos_json_str))
     (ret html_with_data))
   
   (fn extract_query path string -> string
-    (set parts array (string_split path "?"))
+    (set parts array (split path "?"))
     (set len int (array_length parts))
     (set query string "")
     (if (ge len 2)
@@ -52,13 +52,13 @@
     (ret query))
   
   (fn extract_param query_string string param_name string -> string
-    (set parts array (string_split query_string "&"))
+    (set parts array (split query_string "&"))
     (set i int 0)
     (set len int (array_length parts))
     (set result string "")
     (while (lt i len)
       (set part string (array_get parts i))
-      (set kv array (string_split part "="))
+      (set kv array (split part "="))
       (set kv_len int (array_length kv))
       (if (ge kv_len 2)
         (set key string (array_get kv 0))
@@ -97,7 +97,7 @@
     (ret "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\r\nOK"))
   
   (fn extract_path first_line string -> string
-    (set parts array (string_split first_line " "))
+    (set parts array (split first_line " "))
     (set len int (array_length parts))
     (set path string "/")
     (if (ge len 2)
@@ -111,17 +111,17 @@
       (set resp string "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n")
       (set resp string (string_concat resp html))
       (ret resp))
-    (set is_add bool (string_contains path "/api/add"))
+    (set is_add bool (contains path "/api/add"))
     (if is_add
       (set query string (extract_query path))
       (set resp string (handle_api_add db query))
       (ret resp))
-    (set is_toggle bool (string_contains path "/api/toggle"))
+    (set is_toggle bool (contains path "/api/toggle"))
     (if is_toggle
       (set query string (extract_query path))
       (set resp string (handle_api_toggle db query))
       (ret resp))
-    (set is_delete bool (string_contains path "/api/delete"))
+    (set is_delete bool (contains path "/api/delete"))
     (if is_delete
       (set query string (extract_query path))
       (set resp string (handle_api_delete db query))
@@ -129,7 +129,7 @@
     (ret "HTTP/1.1 404 Not Found\r\n\r\nNot Found"))
   
   (fn is_complete_http_request req string -> bool
-    (set has_end bool (string_contains req "\r\n\r\n"))
+    (set has_end bool (contains req "\r\n\r\n"))
     (ret has_end))
   
   (fn handle_client_data db process client socket buffer string -> string

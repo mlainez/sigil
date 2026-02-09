@@ -50,7 +50,7 @@
   an array of length 1 containing garbage data (typically 'j' character from
   uninitialized memory) instead of an empty array.
   
-  The issue was that string_split on an empty string returns an array with one
+  The issue was that split on an empty string returns an array with one
   empty string element. The fix checks if the output string is empty before
   splitting and immediately returns an empty array.
   

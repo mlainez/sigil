@@ -1,7 +1,7 @@
 (module test_ops
   (import string_utils)
   (fn split_get_first text string delim string -> string
-    (ret (array_get (string_split text delim) 0)))
+    (ret (array_get (split text delim) 0)))
   
   (test-spec split_get_first
     (case "split by dash first"
@@ -9,7 +9,7 @@
       (expect "one")))
   
   (fn split_get_second text string delim string -> string
-    (ret (array_get (string_split text delim) 1)))
+    (ret (array_get (split text delim) 1)))
   
   (test-spec split_get_second
     (case "split by dash second"
@@ -17,7 +17,7 @@
       (expect "two")))
   
   (fn trim dirty string -> string
-    (ret (string_trim dirty)))
+    (ret (trim dirty)))
   
   (test-spec trim
     (case "trim spaces"
@@ -25,7 +25,7 @@
       (expect "hello")))
   
   (fn contains haystack string needle string -> bool
-    (ret (string_contains haystack needle)))
+    (ret (contains haystack needle)))
   
   (test-spec contains
     (case "contains world"
@@ -36,7 +36,7 @@
       (expect 0)))
   
   (fn replace original string from string to string -> string
-    (ret (string_replace original from to)))
+    (ret (replace original from to)))
   
   (test-spec replace
     (case "replace foo with X"

@@ -1,7 +1,7 @@
 (module network
   (fn parse_url url string -> array
-    (set has_http bool (string_contains url "http://"))
-    (set has_https bool (string_contains url "https://"))
+    (set has_http bool (contains url "http://"))
+    (set has_https bool (contains url "https://"))
     (set protocol string "http")
     (if has_https
       (set protocol string "https"))
@@ -27,7 +27,7 @@
   
   (fn normalize_path path string -> string
     (set result string path)
-    (set starts_slash bool (string_contains path "/"))
+    (set starts_slash bool (contains path "/"))
     (set needs_slash bool true)
     (if starts_slash
       (set needs_slash bool false))
@@ -46,10 +46,10 @@
     (ret result))
   
   (fn extract_domain url string -> string
-    (set has_proto bool (string_contains url "://"))
+    (set has_proto bool (contains url "://"))
     (set result string url)
     (if has_proto
-      (set parts array (string_split url "://"))
+      (set parts array (split url "://"))
       (set len int (array_length parts))
       (set has_parts bool (gt len 1))
       (if has_parts

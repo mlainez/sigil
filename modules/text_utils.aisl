@@ -45,7 +45,7 @@
     (ret result))
   
   (fn word_count text string -> int
-    (set words array (string_split text " "))
+    (set words array (split text " "))
     (set count int (array_length words))
     (ret count))
   

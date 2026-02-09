@@ -114,6 +114,9 @@ typedef enum {
     OP_IO_OPEN,       // Open file, returns handle
     OP_IO_CLOSE,      // Close file handle
 
+    // Environment
+    OP_GETENV,        // Get environment variable: var_name -> string (empty if not set)
+
     // Standard Input
     OP_STDIN_READ,    // Read line from stdin: -> string
     OP_STDIN_READ_ALL, // Read all available stdin: -> string

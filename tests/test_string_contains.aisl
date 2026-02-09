@@ -1,7 +1,7 @@
-(module test_string_contains
+(module test_contains
   (import string_utils)
   (fn contains text string search string -> bool
-    (ret (string_contains text search)))
+    (ret (contains text search)))
   
   (test-spec contains
     (case "contains substring at end"
@@ -26,4 +26,4 @@
       (input "hello world" "o w")
       (expect 1)))
   
-  (meta-note "Tests string_contains for various substring search cases"))
+  (meta-note "Tests contains for various substring search cases"))

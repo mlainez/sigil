@@ -3,10 +3,10 @@
   
   (fn handle_request request string -> string
     (set result string "HTTP/1.1 404 Not Found\r\nContent-Type: text/html\r\nContent-Length: 49\r\n\r\n<html><body><h1>404 Not Found</h1></body></html>")
-    (set is_hello bool (string_starts_with request "GET /hello "))
+    (set is_hello bool (starts_with request "GET /hello "))
     (if is_hello
       (set result string "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nContent-Length: 43\r\n\r\n<html><body>Hello from AISL</body></html>"))
-    (set is_json bool (string_starts_with request "GET /hello.json "))
+    (set is_json bool (starts_with request "GET /hello.json "))
     (if is_json
       (set result string "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: 33\r\n\r\n{\"message\": \"Hello from AISL\"}"))
     (ret result))

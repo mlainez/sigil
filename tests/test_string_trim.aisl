@@ -1,7 +1,7 @@
-(module test_string_trim
+(module test_trim
   (import string_utils)
   (fn trim input string -> string
-    (ret (string_trim input)))
+    (ret (trim input)))
   
   (test-spec trim
     (case "trim both sides"
@@ -23,4 +23,4 @@
       (input "")
       (expect "")))
   
-  (meta-note "Tests string_trim for removing leading and trailing whitespace"))
+  (meta-note "Tests trim for removing leading and trailing whitespace"))

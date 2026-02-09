@@ -842,6 +842,17 @@ void compile_apply(Compiler* comp, Expr* expr) {
         return;
     }
 
+    if (strcmp(name, "getenv") == 0) {
+        // getenv(name: string) -> string (empty if not set)
+        if (compile_args(comp, expr->data.apply.args) != 1) {
+            fprintf(stderr, "getenv expects 1 argument (variable name)\n");
+            exit(1);
+        }
+        Instruction inst = {.opcode = OP_GETENV};
+        bytecode_emit(comp->program, inst);
+        return;
+    }
+
     // V4.0 Typed arithmetic operations - i64 (int is always i64 in AISL)
     if (strcmp(name, "op_add_i64") == 0) {
         if (compile_args(comp, expr->data.apply.args) != 2) {

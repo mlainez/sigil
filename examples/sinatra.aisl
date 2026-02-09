@@ -3,8 +3,8 @@
   
   (fn handle_connection client_sock string -> int
     (set request string (tcp_receive client_sock 4096))
-    (set has_get_hello_json bool (string_contains request "GET /hello.json "))
-    (set has_get_hello bool (string_contains request "GET /hello "))
+    (set has_get_hello_json bool (contains request "GET /hello.json "))
+    (set has_get_hello bool (contains request "GET /hello "))
     (set json_resp string "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: 30\r\n\r\n{\"message\": \"Hello from AISL\"}")
     (set html_resp string "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nContent-Length: 41\r\n\r\n<html><body>Hello from AISL</body></html>")
     (set notfound_resp string "HTTP/1.1 404 Not Found\r\nContent-Type: text/plain\r\nContent-Length: 9\r\n\r\nNot Found")
