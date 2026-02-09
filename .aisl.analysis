@@ -12,7 +12,7 @@ Why:
 5. If AISL can't do it, ADD IT TO AISL
 
 Process when you need a script:
-1. Check if AISL has the needed operations (regex, file I/O, string ops)
+1. Check stdlib/ and modules/ for available modules (string_utils, json_utils, conversion, etc.)
 2. If missing, ADD IT TO AISL (extend VM, runtime, compiler)
 3. Write the script in pure AISL
 4. If you wrote Python/Bash, DELETE IT and rewrite in AISL
@@ -25,6 +25,38 @@ Examples of what should be AISL:
 - documentation generators → TODO: write in AISL
 
 **If you catch yourself writing Python, STOP and use AISL instead**
+
+@(always-check-stdlib)
+
+**ALWAYS CHECK stdlib/ AND modules/ FOR AVAILABLE MODULES BEFORE IMPLEMENTING**
+
+Available modules:
+
+stdlib/ (pure AISL implementations):
+- core/: string_utils, conversion, channel
+- data/: json_utils, base64
+- net/: http, websocket
+- pattern/: regex
+- crypto/: hash
+- sys/: time, process
+- db/: sqlite
+
+modules/ (additional modules):
+- array_utils, unit_conversion, array_utils, math, http, json_utils, network, filesystem, validation
+
+Process:
+1. List stdlib/ AND modules/ directories to see available modules
+2. Check module manifest (.aisl.manifest) for function signatures
+3. Import module with: (import <module_name>)
+4. Use available functions
+
+Example:
+```
+(import conversion)
+(set num_str string (string_from_int 42))
+```
+
+**NEVER implement something that exists in stdlib/ or modules/**
 
 @(critical-directive-machine-readable-first)
 

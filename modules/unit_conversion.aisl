@@ -1,4 +1,4 @@
-(module conversion
+(module unit_conversion
   (fn bool_to_int b bool -> int
     (if b
       (ret 1))

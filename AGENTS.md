@@ -553,7 +553,41 @@ AISL follows the philosophy: **"If it CAN be written in AISL, it MUST be written
 
 ### Important Notes for LLMs
 
-1. **Always check if an operation needs an import** - If you get a "function not found" error, check if it's a stdlib function.
+**BEFORE IMPLEMENTING: Check stdlib/ AND modules/ for available modules**
+
+stdlib/ (pure AISL implementations):
+- `string_utils` - trim, split, contains, replace
+- `conversion` - string_from_int, bool_to_int
+- `json_utils` - parse, stringify
+- `base64` - encode, decode
+- `http` - get, post
+- `websocket` - connect, send, receive
+- `regex` - compile, match, replace
+- `hash` - sha256, md5
+- `time` - sleep, unix_timestamp
+- `process` - spawn, wait
+- `sqlite` - open, exec
+
+modules/ (additional modules):
+- `array_utils` - array_sum, array_find
+- `unit_conversion` - celsius_to_fahrenheit, kilometers_to_miles
+- `math` - abs, min, max
+- `network` - parse_url, build_url
+- `filesystem` - read_file_safe, write_file_safe
+- `validation` - is_positive, is_negative
+- `string_utils` - string operations
+- `http` - HTTP client
+- `json_utils` - JSON parsing
+
+**Process:**
+1. List `stdlib/` AND `modules/` directories
+2. Check module manifest (.aisl.manifest) for function signatures
+3. Import: `(import module_name)`
+4. Use available functions
+
+**NEVER implement something that exists in stdlib/ or modules/**
+
+1. **Always check if an operation needs an import** - If you get a "function not found" error, check if it's a stdlib or modules function.
 
 2. **Import modules at the top** - Put all `(import ...)` statements right after `(module ...)`.
 

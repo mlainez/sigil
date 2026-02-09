@@ -1,0 +1,42 @@
+(module chat_server
+  (import conversion)
+
+  (fn broadcast msg string clients array -> int
+    (set len int (array_length clients))
+    (set i int 0)
+    (while (lt i len)
+      (set client socket (array_get clients i))
+      (tcp_send client msg)
+      (set i int (add i 1)))
+    (ret 0))
+
+  (fn handle_client client socket clients array -> int
+    (set sender_id int (array_length clients))
+    (set msg string (tcp_receive client 1024))
+    (while (gt (string_length msg) 0)
+      (set prefix string "[User")
+      (set num_str string (string_from_int sender_id))
+      (set prefix string (string_concat prefix num_str))
+      (set prefix string (string_concat prefix "]: "))
+      (set full_msg string (string_concat prefix msg))
+      (broadcast full_msg clients)
+      (set msg string (tcp_receive client 1024)))
+    (ret 0))
+
+  (fn main -> int
+    (set port int 8080)
+    (set server socket (tcp_listen port))
+    (print "Chat server started on port 8080")
+    (print "Run chat_client.aisl in another terminal to connect")
+
+    (set clients array (array_new))
+
+    (loop
+      (set client socket (tcp_accept server))
+      (array_push clients client)
+      (set client_count int (array_length clients))
+      (print "New connection. Total clients: ")
+      (print client_count)
+      (handle_client client clients)))
+
+  (ret 0))
