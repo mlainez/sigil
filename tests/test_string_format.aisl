@@ -1,0 +1,59 @@
+(module test_string_format
+
+  (fn format_simple name string -> string
+    (ret (string_format "Hello, {}!" name)))
+
+  (fn format_two name string age int -> string
+    (ret (string_format "{} is {} years old" name age)))
+
+  (fn format_numbers a int b int -> string
+    (ret (string_format "{} + {} = {}" a b (add a b))))
+
+  (fn format_no_placeholders -> string
+    (ret (string_format "no placeholders here")))
+
+  (fn format_empty_args -> string
+    (ret (string_format "missing {} placeholder")))
+
+  (fn format_bool_val flag bool -> string
+    (ret (string_format "flag is {}" flag)))
+
+  (fn format_float_val pi float -> string
+    (ret (string_format "pi is approximately {}" pi)))
+
+  (test-spec format_simple
+    (case "formats single string placeholder"
+      (input "World")
+      (expect "Hello, World!")))
+
+  (test-spec format_two
+    (case "formats string and int placeholders"
+      (input "Alice" 30)
+      (expect "Alice is 30 years old")))
+
+  (test-spec format_numbers
+    (case "formats multiple int values with expression"
+      (input 3 5)
+      (expect "3 + 5 = 8")))
+
+  (test-spec format_no_placeholders
+    (case "returns template unchanged when no placeholders"
+      (input)
+      (expect "no placeholders here")))
+
+  (test-spec format_empty_args
+    (case "leaves placeholder when no args available"
+      (input)
+      (expect "missing {} placeholder")))
+
+  (test-spec format_bool_val
+    (case "formats boolean value"
+      (input true)
+      (expect "flag is true")))
+
+  (test-spec format_float_val
+    (case "formats float value"
+      (input 3.14)
+      (expect "pi is approximately 3.14")))
+
+  (meta-note "Tests string_format builtin with various types and edge cases"))

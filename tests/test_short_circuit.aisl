@@ -1,0 +1,84 @@
+(module test_short_circuit
+
+  (fn and_basic a bool b bool -> bool
+    (ret (and a b)))
+
+  (fn or_basic a bool b bool -> bool
+    (ret (or a b)))
+
+  (fn and_true_true -> bool
+    (ret (and true true)))
+
+  (fn and_true_false -> bool
+    (ret (and true false)))
+
+  (fn and_false_anything -> bool
+    (ret (and false (gt (div 1 0) 0))))
+
+  (fn or_true_anything -> bool
+    (ret (or true (gt (div 1 0) 0))))
+
+  (fn or_false_false -> bool
+    (ret (or false false)))
+
+  (fn or_false_true -> bool
+    (ret (or false true)))
+
+  (fn nested_and_or a bool b bool c bool -> bool
+    (ret (and a (or b c))))
+
+  (fn not_combined a bool -> bool
+    (ret (and (not a) true)))
+
+  (test-spec and_basic
+    (case "and with true true"
+      (input true true)
+      (expect true))
+    (case "and with true false"
+      (input true false)
+      (expect false))
+    (case "and with false true"
+      (input false true)
+      (expect false))
+    (case "and with false false"
+      (input false false)
+      (expect false)))
+
+  (test-spec or_basic
+    (case "or with true true"
+      (input true true)
+      (expect true))
+    (case "or with true false"
+      (input true false)
+      (expect true))
+    (case "or with false true"
+      (input false true)
+      (expect true))
+    (case "or with false false"
+      (input false false)
+      (expect false)))
+
+  (test-spec and_false_anything
+    (case "short-circuits: false and (div 1 0) does not crash"
+      (input)
+      (expect false)))
+
+  (test-spec or_true_anything
+    (case "short-circuits: true or (div 1 0) does not crash"
+      (input)
+      (expect true)))
+
+  (test-spec nested_and_or
+    (case "nested: true and (false or true)"
+      (input true false true)
+      (expect true))
+    (case "nested: true and (false or false)"
+      (input true false false)
+      (expect false)))
+
+  (test-spec not_combined
+    (case "not combined with and"
+      (input false)
+      (expect true)))
+
+  (meta-note "Tests short-circuit evaluation of and/or operators"))

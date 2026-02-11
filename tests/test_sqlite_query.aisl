@@ -2,7 +2,7 @@
   (import sqlite)
   
   (fn test_query_results -> int
-    (set db string (open ":memory:"))
+    (set db process (open ":memory:"))
     (exec db "CREATE TABLE users(id INTEGER, name TEXT)")
     (exec db "INSERT INTO users VALUES(1, 'Alice')")
     (exec db "INSERT INTO users VALUES(2, 'Bob')")
@@ -12,7 +12,7 @@
     (ret row_count))
   
   (fn test_get_tables -> int
-    (set db string (open ":memory:"))
+    (set db process (open ":memory:"))
     (exec db "CREATE TABLE users(id INTEGER, name TEXT)")
     (exec db "CREATE TABLE posts(id INTEGER, title TEXT)")
     (set tables array (get_tables db))
@@ -21,7 +21,7 @@
     (ret table_count))
   
   (fn test_query_empty -> int
-    (set db string (open ":memory:"))
+    (set db process (open ":memory:"))
     (exec db "CREATE TABLE test(id INTEGER)")
     (set results array (query db "SELECT * FROM test"))
     (set count int (array_length results))

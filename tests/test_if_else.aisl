@@ -1,0 +1,96 @@
+(module test_if_else
+  (fn classify_sign n int -> string
+    (set result string "zero")
+    (if (gt n 0)
+      (set result string "positive")
+      (else
+        (if (lt n 0)
+          (set result string "negative"))))
+    (ret result))
+
+  (fn abs_value n int -> int
+    (if (lt n 0)
+      (ret (neg n))
+      (else
+        (ret n))))
+
+  (fn max_of_two a int b int -> int
+    (if (gt a b)
+      (ret a)
+      (else
+        (ret b))))
+
+  (fn if_else_with_set flag bool -> int
+    (set result int 0)
+    (if flag
+      (set result int 1)
+      (set result int (add result 10))
+      (else
+        (set result int 2)
+        (set result int (add result 20))))
+    (ret result))
+
+  (fn nested_if_else x int -> string
+    (set result string "unknown")
+    (if (gt x 100)
+      (set result string "large")
+      (else
+        (if (gt x 10)
+          (set result string "medium")
+          (else
+            (set result string "small")))))
+    (ret result))
+
+  (test-spec classify_sign
+    (case "positive number returns positive"
+      (input 5)
+      (expect "positive"))
+    (case "negative number returns negative"
+      (input -3)
+      (expect "negative"))
+    (case "zero returns zero"
+      (input 0)
+      (expect "zero")))
+
+  (test-spec abs_value
+    (case "negative becomes positive"
+      (input -7)
+      (expect 7))
+    (case "positive stays positive"
+      (input 4)
+      (expect 4))
+    (case "zero stays zero"
+      (input 0)
+      (expect 0)))
+
+  (test-spec max_of_two
+    (case "first is larger"
+      (input 10 3)
+      (expect 10))
+    (case "second is larger"
+      (input 2 8)
+      (expect 8))
+    (case "both equal"
+      (input 5 5)
+      (expect 5)))
+
+  (test-spec if_else_with_set
+    (case "true branch executes multiple statements"
+      (input true)
+      (expect 11))
+    (case "false branch executes multiple statements"
+      (input false)
+      (expect 22)))
+
+  (test-spec nested_if_else
+    (case "large value"
+      (input 200)
+      (expect "large"))
+    (case "medium value"
+      (input 50)
+      (expect "medium"))
+    (case "small value"
+      (input 3)
+      (expect "small")))
+
+  (meta-note "Tests if-else construct with else branch, nesting, returns, and multi-statement bodies"))

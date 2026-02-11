@@ -1,0 +1,75 @@
+(module test_type_enforcement
+  (fn test_int_type -> bool
+    (set x int 42)
+    (set y int (add x 1))
+    (ret (eq y 43)))
+  
+  (fn test_float_type -> bool
+    (set x float 3.14)
+    (set y float (add x 1.0))
+    (ret (gt y 4.0)))
+  
+  (fn test_string_type -> bool
+    (set name string "hello")
+    (set greeting string (string_concat name " world"))
+    (ret (string_equals greeting "hello world")))
+  
+  (fn test_bool_type -> bool
+    (set flag bool true)
+    (set result bool (not flag))
+    (ret (eq result false)))
+  
+  (fn test_array_type -> int
+    (set arr array (array_new))
+    (array_push arr 1)
+    (array_push arr 2)
+    (ret (array_length arr)))
+  
+  (fn test_map_type -> bool
+    (set m map (map_new))
+    (map_set m "key" "value")
+    (set result string (map_get m "key"))
+    (ret (string_equals result "value")))
+  
+  (fn test_decimal_type -> bool
+    (set price decimal (cast_float_decimal 19.99))
+    (set tax decimal (cast_float_decimal 1.60))
+    (set total decimal (add price tax))
+    (ret (gt (cast_decimal_float total) 21.0)))
+
+  (test-spec test_int_type
+    (case "int type enforced correctly"
+      (input)
+      (expect true)))
+  
+  (test-spec test_float_type
+    (case "float type enforced correctly"
+      (input)
+      (expect true)))
+  
+  (test-spec test_string_type
+    (case "string type enforced correctly"
+      (input)
+      (expect true)))
+  
+  (test-spec test_bool_type
+    (case "bool type enforced correctly"
+      (input)
+      (expect true)))
+  
+  (test-spec test_array_type
+    (case "array type enforced correctly"
+      (input)
+      (expect 2)))
+  
+  (test-spec test_map_type
+    (case "map type enforced correctly"
+      (input)
+      (expect true)))
+  
+  (test-spec test_decimal_type
+    (case "decimal type enforced correctly"
+      (input)
+      (expect true)))
+  
+  (meta-note "Tests that type annotations on set statements are properly enforced at runtime"))

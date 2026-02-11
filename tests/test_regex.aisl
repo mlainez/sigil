@@ -1,0 +1,208 @@
+(module test_regex
+  (fn test_compile pattern string -> string
+    (set compiled string (regex_compile pattern))
+    (ret compiled))
+
+  (fn test_match pattern string text string -> bool
+    (ret (regex_match pattern text)))
+
+  (fn test_find pattern string text string -> string
+    (ret (regex_find pattern text)))
+
+  (fn test_replace pattern string text string replacement string -> string
+    (ret (regex_replace pattern text replacement)))
+
+  (fn test_find_all_count pattern string text string -> int
+    (set matches array (regex_find_all pattern text))
+    (ret (array_length matches)))
+
+  (fn test_find_all_first pattern string text string -> string
+    (set matches array (regex_find_all pattern text))
+    (if (gt (array_length matches) 0)
+      (ret (array_get matches 0)))
+    (ret ""))
+
+  (fn test_find_all_last pattern string text string -> string
+    (set matches array (regex_find_all pattern text))
+    (set len int (array_length matches))
+    (if (gt len 0)
+      (ret (array_get matches (sub len 1))))
+    (ret ""))
+
+  (test-spec test_compile
+    (case "compiles digit pattern"
+      (input "[0-9]+")
+      (expect "[0-9]+"))
+    (case "compiles word pattern"
+      (input "[a-zA-Z]+")
+      (expect "[a-zA-Z]+"))
+    (case "compiles empty pattern"
+      (input "")
+      (expect "")))
+
+  (test-spec test_match
+    (case "digits anywhere in string"
+      (input "[0-9]+" "abc123def")
+      (expect true))
+    (case "anchored match fails on mixed"
+      (input "^[0-9]+$" "abc123")
+      (expect false))
+    (case "anchored match succeeds on pure digits"
+      (input "^[0-9]+$" "12345")
+      (expect true))
+    (case "word boundary match"
+      (input "hello" "say hello world")
+      (expect true))
+    (case "no match at all"
+      (input "xyz" "hello world")
+      (expect false))
+    (case "dot matches any character"
+      (input "h.llo" "hello")
+      (expect true))
+    (case "dot does not match across missing"
+      (input "h.llo" "hllo")
+      (expect false))
+    (case "alternation with escaped pipe"
+      (input "cat\\|dog" "I have a dog")
+      (expect true))
+    (case "alternation no match"
+      (input "cat\\|dog" "I have a fish")
+      (expect false))
+    (case "star quantifier zero occurrences"
+      (input "ab*c" "ac")
+      (expect true))
+    (case "star quantifier multiple occurrences"
+      (input "ab*c" "abbbc")
+      (expect true))
+    (case "plus quantifier requires one"
+      (input "ab+c" "ac")
+      (expect false))
+    (case "plus quantifier succeeds"
+      (input "ab+c" "abbc")
+      (expect true))
+    (case "question mark optional present"
+      (input "colou?r" "colour")
+      (expect true))
+    (case "question mark optional absent"
+      (input "colou?r" "color")
+      (expect true))
+    (case "character class negation"
+      (input "[^0-9]+" "abcdef")
+      (expect true))
+    (case "character class negation fails on digits only"
+      (input "^[^0-9]+$" "12345")
+      (expect false))
+    (case "empty string matches empty pattern"
+      (input "" "")
+      (expect true))
+    (case "empty pattern matches any string"
+      (input "" "hello")
+      (expect true))
+    (case "caret and dollar on empty"
+      (input "^$" "")
+      (expect true))
+    (case "caret and dollar fail on non-empty"
+      (input "^$" "x")
+      (expect false)))
+
+  (test-spec test_find
+    (case "finds first digit sequence"
+      (input "[0-9]+" "abc123def456")
+      (expect "123"))
+    (case "finds word"
+      (input "[a-z]+" "123hello456")
+      (expect "hello"))
+    (case "returns empty on no match"
+      (input "[0-9]+" "abcdef")
+      (expect ""))
+    (case "finds with dot wildcard"
+      (input "h.llo" "say hello world")
+      (expect "hello"))
+    (case "finds alternation first branch"
+      (input "cat\\|dog" "the cat sat")
+      (expect "cat"))
+    (case "finds alternation second branch"
+      (input "cat\\|dog" "the dog ran")
+      (expect "dog"))
+    (case "finds repeated characters"
+      (input "a+" "baaab")
+      (expect "aaa"))
+    (case "finds entire match with anchors"
+      (input "^hello" "hello world")
+      (expect "hello"))
+    (case "empty pattern finds empty at start"
+      (input "" "hello")
+      (expect "")))
+
+  (test-spec test_replace
+    (case "replaces all digit sequences"
+      (input "[0-9]+" "a1b22c333" "X")
+      (expect "aXbXcX"))
+    (case "replaces specific word"
+      (input "world" "hello world" "AISL")
+      (expect "hello AISL"))
+    (case "replaces whitespace"
+      (input "[ \t]+" "hello   world" " ")
+      (expect "hello world"))
+    (case "replaces with empty string deletes"
+      (input "[0-9]" "a1b2c3" "")
+      (expect "abc"))
+    (case "no match returns original"
+      (input "xyz" "hello world" "replaced")
+      (expect "hello world"))
+    (case "replaces all occurrences globally"
+      (input "a" "banana" "o")
+      (expect "bonono"))
+    (case "replaces dot wildcard"
+      (input "h.t" "hat hit hut" "X")
+      (expect "X X X"))
+    (case "replaces character class"
+      (input "[aeiou]" "hello" "X")
+      (expect "hXllX"))
+    (case "empty pattern inserts between chars"
+      (input "" "ab" "X")
+      (expect "XaXbX")))
+
+  (test-spec test_find_all_count
+    (case "finds multiple digit groups"
+      (input "[0-9]+" "a1b22c333")
+      (expect 3))
+    (case "finds no matches"
+      (input "[0-9]+" "abcdef")
+      (expect 0))
+    (case "finds single match"
+      (input "hello" "hello")
+      (expect 1))
+    (case "finds overlapping-adjacent matches"
+      (input "[a-z]+" "abc def ghi")
+      (expect 3))
+    (case "finds individual characters"
+      (input "[aeiou]" "hello world")
+      (expect 3))
+    (case "finds alternation matches"
+      (input "cat\\|dog" "cat and dog and cat")
+      (expect 3)))
+
+  (test-spec test_find_all_first
+    (case "first digit group"
+      (input "[0-9]+" "a1b22c333")
+      (expect "1"))
+    (case "first word"
+      (input "[a-z]+" "123abc 456def")
+      (expect "abc"))
+    (case "no match returns empty"
+      (input "[0-9]+" "abcdef")
+      (expect "")))
+
+  (test-spec test_find_all_last
+    (case "last digit group"
+      (input "[0-9]+" "a1b22c333")
+      (expect "333"))
+    (case "last word"
+      (input "[a-z]+" "123abc 456def")
+      (expect "def"))
+    (case "no match returns empty"
+      (input "[0-9]+" "abcdef")
+      (expect "")))
+
+  (meta-note "Comprehensive tests for regex_compile, regex_match, regex_find, regex_find_all, and regex_replace using OCaml Str library (POSIX regex syntax: escaped pipe for alternation, no PCRE features)"))

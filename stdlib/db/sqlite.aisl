@@ -45,18 +45,18 @@
       (set i int (add i 1)))
     (ret results))
   
-  (fn execute_file db string filepath string -> bool
+  (fn execute_file db process filepath string -> bool
     (set read_cmd string ".read ")
     (set full_cmd string (string_concat read_cmd filepath))
     (set cmd_with_newline string (string_concat full_cmd "\n"))
     (set written bool (process_write db cmd_with_newline))
     (ret written))
   
-  (fn get_tables db string -> array
+  (fn get_tables db process -> array
     (set sql string "SELECT name FROM sqlite_master WHERE type='table';")
     (ret (query db sql)))
   
-  (fn get_schema db string table_name string -> string
+  (fn get_schema db process table_name string -> string
     (set sql_start string "SELECT sql FROM sqlite_master WHERE name='")
     (set sql_mid string (string_concat sql_start table_name))
     (set sql string (string_concat sql_mid "';"))
@@ -94,7 +94,7 @@
   
   Example usage:
     (import sqlite)
-    (set db string (open \"mydb.sqlite\"))
+     (set db process (open \"mydb.sqlite\"))
     (exec db \"CREATE TABLE users(id INTEGER, name TEXT)\")
     (exec db \"INSERT INTO users VALUES(1, 'Alice')\")
     (set rows array (query db \"SELECT * FROM users\"))

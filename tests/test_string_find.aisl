@@ -1,0 +1,62 @@
+(module test_string_find
+
+  (fn find_basic haystack string needle string -> int
+    (ret (string_find haystack needle)))
+
+  (fn find_not_present -> int
+    (ret (string_find "hello world" "xyz")))
+
+  (fn find_at_start -> int
+    (ret (string_find "hello world" "hello")))
+
+  (fn find_at_end -> int
+    (ret (string_find "hello world" "world")))
+
+  (fn find_empty_needle -> int
+    (ret (string_find "hello" "")))
+
+  (fn find_same_string -> int
+    (ret (string_find "test" "test")))
+
+  (fn find_single_char -> int
+    (ret (string_find "abcdef" "d")))
+
+  (test-spec find_basic
+    (case "finds substring in middle"
+      (input "hello world" "lo w")
+      (expect 3))
+    (case "finds single char"
+      (input "abcdef" "c")
+      (expect 2)))
+
+  (test-spec find_not_present
+    (case "returns -1 when not found"
+      (input)
+      (expect -1)))
+
+  (test-spec find_at_start
+    (case "finds at start position 0"
+      (input)
+      (expect 0)))
+
+  (test-spec find_at_end
+    (case "finds at end of string"
+      (input)
+      (expect 6)))
+
+  (test-spec find_empty_needle
+    (case "empty needle returns 0"
+      (input)
+      (expect 0)))
+
+  (test-spec find_same_string
+    (case "finds identical string at 0"
+      (input)
+      (expect 0)))
+
+  (test-spec find_single_char
+    (case "finds single char d at index 3"
+      (input)
+      (expect 3)))
+
+  (meta-note "Tests string_find builtin for finding substring positions"))

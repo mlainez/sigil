@@ -39,7 +39,7 @@
           (set result string (string_concat result ch_str))))
       
       (if (not is_backslash)
-        (set ch_str string (string_from_int ch))
+        (set ch_str string (char_from_code ch))
         (set result string (string_concat result ch_str)))
       
       (set pos int (add pos 1)))
@@ -64,7 +64,7 @@
       (if (not is_num_ch)
         (break))
       
-      (set ch_str string (string_from_int ch))
+      (set ch_str string (char_from_code ch))
       (set num_str string (string_concat num_str ch_str))
       (set pos int (add pos 1)))
     
