@@ -1,41 +1,33 @@
 (module math_extended
   (fn clamp x int min_val int max_val int -> int
     (set result int x)
-    (set too_low bool (lt x min_val))
-    (if too_low
+    (if (lt x min_val)
       (set result int min_val))
-    (set too_high bool (gt x max_val))
-    (if too_high
+    (if (gt x max_val)
       (set result int max_val))
     (ret result))
   
   (fn clamp_float x float min_val float max_val float -> float
     (set result float x)
-    (set too_low bool (lt x min_val))
-    (if too_low
+    (if (lt x min_val)
       (set result float min_val))
-    (set too_high bool (gt x max_val))
-    (if too_high
+    (if (gt x max_val)
       (set result float max_val))
     (ret result))
   
   (fn sign x int -> int
     (set result int 0)
-    (set is_neg bool (lt x 0))
-    (if is_neg
+    (if (lt x 0)
       (set result int -1))
-    (set is_pos bool (gt x 0))
-    (if is_pos
+    (if (gt x 0)
       (set result int 1))
     (ret result))
   
   (fn sign_float x float -> int
     (set result int 0)
-    (set is_neg bool (lt x 0.0))
-    (if is_neg
+    (if (lt x 0.0)
       (set result int -1))
-    (set is_pos bool (gt x 0.0))
-    (if is_pos
+    (if (gt x 0.0)
       (set result int 1))
     (ret result))
   

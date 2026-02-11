@@ -43,10 +43,23 @@ let parse_type state =
   | Symbol "regex" -> (TRegex, advance state)
   | Symbol "process" -> (TProcess, advance state)
   | Symbol "socket" -> (TSocket, advance state)
-  | Symbol "file" -> (TFile, advance state)
   | Symbol "channel" -> (TSocket, advance state)  (* channel maps to TSocket for now *)
-  | Symbol "future" -> (TUnit, advance state)  (* future maps to TUnit for now *)
   | tok -> raise (ParseError ("Expected type but got " ^ string_of_token tok))
+
+(* Reserved type keywords that cannot be used as variable names *)
+let type_keywords = [
+  "int"; "float"; "decimal"; "string"; "bool"; "unit";
+  "array"; "map"; "json"; "regex"; "process"; "socket";
+  "channel"
+]
+
+let is_type_keyword name = List.mem name type_keywords
+
+let check_not_type_keyword name context =
+  if is_type_keyword name then
+    raise (ParseError (
+      "Cannot use type keyword '" ^ name ^ "' as " ^ context ^
+      ". Use a descriptive name instead (e.g., '" ^ name ^ "_data', '" ^ name ^ "_value')"))
 
 (* Parse expressions *)
 let rec parse_expr state =
@@ -80,6 +93,7 @@ and parse_sexpr state =
 
 and parse_set state =
   let (var_name, state) = expect_symbol state in
+  check_not_type_keyword var_name "variable name";
   let (var_type, state) = parse_type state in
   let (value_expr, state) = parse_expr state in
   let state = expect_token RParen state in
@@ -135,6 +149,7 @@ and parse_loop state =
 
 and parse_foreach state =
   let (var_name, state) = expect_symbol state in
+  check_not_type_keyword var_name "for-each variable name";
   let (var_type, state) = parse_type state in
   let (collection_expr, state) = parse_expr state in
   let (body, state) = parse_body_until_rparen state [] in
@@ -193,6 +208,7 @@ let rec parse_params state acc =
   | Symbol "->" -> (List.rev acc, state)
   | Symbol _ ->
       let (param_name, state) = expect_symbol state in
+      check_not_type_keyword param_name "function parameter name";
       let (param_type, state) = parse_type state in
       let param = { param_name; param_type } in
       parse_params state (param :: acc)

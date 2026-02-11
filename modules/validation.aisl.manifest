@@ -1,1 +1,0 @@
-(manifest@(m validation)@(v 1.0.0)@(e@(f in_range(int int int)bool)@(f in_range_float(float float float)bool)@(f is_positive(int)bool)@(f is_negative(int)bool)@(f is_zero(int)bool)@(f is_positive_float(float)bool)@(f is_negative_float(float)bool)@(f is_zero_float(float)bool)@(f is_divisible_by(int int)bool))@(d "Validation and predicate functions")@(p ge le gt lt eq mod)@(t 420)

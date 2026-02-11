@@ -1,1 +1,0 @@
-(manifest@(m math)@(v 1.0.0)@(e@(f abs(int)int)@(f abs_float(float)float)@(f min(int int)int)@(f max(int int)int)@(f min_float(float float)float)@(f max_float(float float)float))@(d "Composable math operations built from VM primitives")@(p neg lt gt)@(t 162))

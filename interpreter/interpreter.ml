@@ -53,7 +53,6 @@ let type_matches (tk : type_kind) (v : value) : bool =
   | TSocket, VTlsSocket _ -> true
   | TSocket, VWsSocket _ -> true
   | TSocket, VChannel _ -> true
-  | TFile, VSocket _ -> true  (* file fds use VSocket *)
   | TFunction _, VFunction _ -> true
   | _ -> false
 
@@ -62,7 +61,7 @@ let string_of_type_kind = function
   | TString -> "string" | TBool -> "bool" | TUnit -> "unit"
   | TArray _ -> "array" | TMap _ -> "map" | TJson -> "json"
   | TRegex -> "regex" | TProcess -> "process" | TSocket -> "socket"
-  | TFile -> "file"   | TFunction _ -> "function"
+  | TFunction _ -> "function"
 
 let string_of_value_type = function
   | VInt _ -> "int" | VFloat _ -> "float" | VDecimal _ -> "decimal"
@@ -381,7 +380,7 @@ let rec string_of_value = function
 (* Compare values for test assertions *)
 let values_equal v1 v2 =
   match v1, v2 with
-  | VDecimal s1, VDecimal s2 -> s1 = s2
+  | VDecimal s1, VDecimal s2 -> float_of_string s1 = float_of_string s2
   | VDecimal s1, VString s2 -> s1 = s2
   | VString s1, VDecimal s2 -> s1 = s2
   | VBool true, VInt n -> n = 1L
@@ -585,42 +584,60 @@ and eval_block env exprs =
 
    | "div" | "op_div_i64" ->
        (match arg_vals with
-        | [VInt a; VInt b] -> VInt (Int64.div a b)
+        | [VInt a; VInt b] ->
+            if b = 0L then raise (RuntimeError "Division by zero")
+            else VInt (Int64.div a b)
         | [VFloat a; VFloat b] -> VFloat (a /. b)
         | [VDecimal a; VDecimal b] ->
-            let a_val = float_of_string a in
             let b_val = float_of_string b in
-            let result = a_val /. b_val in
-            VDecimal (format_decimal result)
+            if b_val = 0.0 then raise (RuntimeError "Division by zero")
+            else
+              let a_val = float_of_string a in
+              let result = a_val /. b_val in
+              VDecimal (format_decimal result)
         | _ -> raise (RuntimeError "Invalid arguments to div"))
   
   | "mod" | "op_mod_i64" ->
       (match arg_vals with
-       | [VInt a; VInt b] -> VInt (Int64.rem a b)
+       | [VInt a; VInt b] ->
+           if b = 0L then raise (RuntimeError "Division by zero")
+           else VInt (Int64.rem a b)
        | _ -> raise (RuntimeError "Invalid arguments to mod"))
   
   | "neg" | "op_neg_i64" ->
       (match arg_vals with
        | [VInt a] -> VInt (Int64.neg a)
        | [VFloat a] -> VFloat (a *. -1.0)
+       | [VDecimal a] ->
+           let f = float_of_string a in
+           VDecimal (format_decimal (f *. -1.0))
        | _ -> raise (RuntimeError "Invalid arguments to neg"))
 
   | "abs" | "math_abs_i64" ->
       (match arg_vals with
        | [VInt a] -> VInt (if a < 0L then Int64.neg a else a)
        | [VFloat a] -> VFloat (abs_float a)
+       | [VDecimal a] ->
+           let f = float_of_string a in
+           VDecimal (format_decimal (abs_float f))
        | _ -> raise (RuntimeError "Invalid arguments to abs"))
 
   | "min" | "math_min_i64" ->
       (match arg_vals with
        | [VInt a; VInt b] -> VInt (if a < b then a else b)
        | [VFloat a; VFloat b] -> VFloat (min a b)
+       | [VDecimal a; VDecimal b] ->
+           let fa = float_of_string a and fb = float_of_string b in
+           if fa < fb then VDecimal a else VDecimal b
        | _ -> raise (RuntimeError "Invalid arguments to min"))
 
   | "max" | "math_max_i64" ->
       (match arg_vals with
        | [VInt a; VInt b] -> VInt (if a > b then a else b)
        | [VFloat a; VFloat b] -> VFloat (max a b)
+       | [VDecimal a; VDecimal b] ->
+           let fa = float_of_string a and fb = float_of_string b in
+           if fa > fb then VDecimal a else VDecimal b
        | _ -> raise (RuntimeError "Invalid arguments to max"))
 
   | "sqrt" | "math_sqrt_f64" ->
@@ -634,22 +651,26 @@ and eval_block env exprs =
        | _ -> raise (RuntimeError "Invalid arguments to pow"))
 
   (* Comparisons *)
-  | "eq" | "op_eq_i64" ->
-      (match arg_vals with
-       | [VInt a; VInt b] -> VBool (a = b)
-       | [VFloat a; VFloat b] -> VBool (a = b)
-       | [VBool a; VBool b] -> VBool (a = b)
-       | [VString a; VString b] -> VBool (a = b)
-       | [VDecimal a; VDecimal b] -> VBool (a = b)
-       | _ -> VBool false)
+   | "eq" | "op_eq_i64" ->
+       (match arg_vals with
+        | [VInt a; VInt b] -> VBool (a = b)
+        | [VFloat a; VFloat b] -> VBool (a = b)
+        | [VBool a; VBool b] -> VBool (a = b)
+        | [VString a; VString b] -> VBool (a = b)
+        | [VDecimal a; VDecimal b] ->
+            (* Normalize decimals through float for proper comparison *)
+            VBool (float_of_string a = float_of_string b)
+        | _ -> VBool false)
   
-  | "ne" | "op_ne_i64" ->
-      (match arg_vals with
-       | [VInt a; VInt b] -> VBool (a <> b)
-       | [VFloat a; VFloat b] -> VBool (a <> b)
-       | [VBool a; VBool b] -> VBool (a <> b)
-       | [VString a; VString b] -> VBool (a <> b)
-       | _ -> VBool true)
+   | "ne" | "op_ne_i64" ->
+       (match arg_vals with
+        | [VInt a; VInt b] -> VBool (a <> b)
+        | [VFloat a; VFloat b] -> VBool (a <> b)
+        | [VBool a; VBool b] -> VBool (a <> b)
+        | [VString a; VString b] -> VBool (a <> b)
+        | [VDecimal a; VDecimal b] ->
+            VBool (float_of_string a <> float_of_string b)
+        | _ -> VBool true)
   
   | "lt" | "op_lt_i64" ->
       (match arg_vals with
@@ -703,7 +724,13 @@ and eval_block env exprs =
 
    | "cast_decimal_i64" | "cast_decimal_int" ->
        (match arg_vals with
-        | [VDecimal s] -> VInt (Int64.of_string s)
+        | [VDecimal s] ->
+            (* Handle fractional decimals by truncating toward zero *)
+            (try VInt (Int64.of_string s)
+             with Failure _ ->
+               try VInt (Int64.of_float (float_of_string s))
+               with Failure _ -> raise (RuntimeError ("Cannot convert decimal to int: " ^ s)))
+        | [VFloat f] -> VInt (Int64.of_float f)
         | _ -> raise (RuntimeError "Invalid arguments to cast_decimal_int"))
 
    | "string_from_int" ->
@@ -722,6 +749,13 @@ and eval_block env exprs =
       (match arg_vals with
        | [VFloat a] -> VString (format_float_string a)
        | _ -> raise (RuntimeError "Invalid arguments to string_from_float"))
+
+  | "string_to_float" ->
+      (match arg_vals with
+       | [VString s] ->
+           (try VFloat (float_of_string (String.trim s))
+            with Failure _ -> raise (RuntimeError ("Cannot convert to float: " ^ s)))
+       | _ -> raise (RuntimeError "Invalid arguments to string_to_float"))
 
   | "string_from_bool" ->
       (match arg_vals with
@@ -921,6 +955,16 @@ and eval_block env exprs =
         | [VString path] -> VBool (Sys.file_exists path)
         | _ -> raise (RuntimeError "Invalid arguments to file_exists"))
 
+   | "file_size" ->
+       (match arg_vals with
+        | [VString path] ->
+            (try
+              let stats = Unix.stat path in
+              VInt (Int64.of_int stats.Unix.st_size)
+            with Unix.Unix_error _ ->
+              raise (RuntimeError ("Could not stat file: " ^ path)))
+        | _ -> raise (RuntimeError "Invalid arguments to file_size"))
+
    | "file_delete" ->
        (match arg_vals with
         | [VString path] ->
@@ -1015,7 +1059,7 @@ and eval_block env exprs =
             (match status with
              | Unix.WEXITED code -> VInt (Int64.of_int code)
              | _ -> VInt 0L)
-        | _ -> VInt 0L)
+        | _ -> raise (RuntimeError "Invalid arguments to process_wait"))
 
    | "process_write" ->
        (match arg_vals with
@@ -1023,8 +1067,6 @@ and eval_block env exprs =
             let bytes = Bytes.of_string data in
             let written = Unix.write stdin_write bytes 0 (Bytes.length bytes) in
             VBool (written > 0)
-        | [VProcess pid; VString data] ->
-            VBool true  (* Simplified *)
         | _ -> raise (RuntimeError "Invalid arguments to process_write"))
 
    | "process_read" ->
@@ -1044,8 +1086,8 @@ and eval_block env exprs =
               Unix.clear_nonblock stdout_read;
               VString result
             end
-        | [VProcess pid] ->
-            VString ""
+        | [VProcess _pid] ->
+            raise (RuntimeError "process_read requires a VChannel from process_spawn with pipes, not a bare PID")
         | _ -> raise (RuntimeError "Invalid arguments to process_read"))
 
    | "process_kill" ->
@@ -1058,8 +1100,11 @@ and eval_block env exprs =
   | "process_exec" ->
       (match arg_vals with
        | [VString cmd] ->
-           ignore (Unix.waitpid [] (Unix.create_process cmd [|cmd|] Unix.stdin Unix.stdout Unix.stderr));
-           VInt 0L
+           let _, status = Unix.waitpid [] (Unix.create_process cmd [|cmd|] Unix.stdin Unix.stdout Unix.stderr) in
+           (match status with
+            | Unix.WEXITED code -> VInt (Int64.of_int code)
+            | Unix.WSIGNALED _ -> VInt (-1L)
+            | Unix.WSTOPPED _ -> VInt (-1L))
        | _ -> raise (RuntimeError "Invalid arguments to process_exec"))
 
   (* TCP operations *)
@@ -1568,31 +1613,6 @@ and eval_block env exprs =
             VArray (ref (Array.append !a !b))
         | _ -> raise (RuntimeError "Invalid arguments to array_concat"))
 
-   (* io_file_open, io_file_write, io_file_read, io_file_close - low-level file ops *)
-   | "io_file_open" ->
-       (match arg_vals with
-        | [VString path; VInt mode] ->
-            let flags = if mode = 1L then [Unix.O_WRONLY; Unix.O_CREAT; Unix.O_TRUNC]
-                        else [Unix.O_RDONLY] in
-            let fd = Unix.openfile path flags 0o644 in
-            VInt (Int64.of_int (Obj.magic fd : int))
-        | _ -> raise (RuntimeError "Invalid arguments to io_file_open"))
-
-   | "io_file_write" ->
-       (match arg_vals with
-        | [VInt _fd; VString _data] -> VUnit (* stub for mock tests *)
-        | _ -> raise (RuntimeError "Invalid arguments to io_file_write"))
-
-   | "io_file_read" ->
-       (match arg_vals with
-        | [VInt _fd] -> VString "" (* stub for mock tests *)
-        | _ -> raise (RuntimeError "Invalid arguments to io_file_read"))
-
-   | "io_file_close" ->
-       (match arg_vals with
-        | [VInt _fd] -> VUnit (* stub for mock tests *)
-        | _ -> raise (RuntimeError "Invalid arguments to io_file_close"))
-
    (* file_append *)
    | "file_append" ->
        (match arg_vals with
@@ -1619,10 +1639,6 @@ and eval_block env exprs =
             Ssl.set_client_SNI_hostname ssl_sock host;
             VTlsSocket ssl_sock
         | _ -> raise (RuntimeError "Invalid arguments to tcp_tls_connect"))
-
-   (* gc_stats stub *)
-   | "gc_stats" ->
-       make_vmap ()
 
    (* Type checking *)
    | "type_of" ->
@@ -1653,6 +1669,11 @@ and eval_block env exprs =
         | [VString name] ->
             VString (try Sys.getenv name with Not_found -> "")
         | _ -> raise (RuntimeError "Invalid arguments to getenv"))
+
+   | "exit" ->
+       (match arg_vals with
+        | [VInt code] -> exit (Int64.to_int code)
+        | _ -> raise (RuntimeError "Invalid arguments to exit"))
 
    (* WebSocket operations *)
    | "ws_accept" ->
@@ -1810,7 +1831,7 @@ let source_file_path = ref ""
 let compute_stdlib_paths () =
   let subdirs = ["stdlib/core/"; "stdlib/data/"; "stdlib/net/";
                  "stdlib/sys/"; "stdlib/crypto/"; "stdlib/pattern/";
-                 "stdlib/db/"; "modules/"] in
+                 "stdlib/db/"] in
   let make_paths root =
     List.map (fun sub -> Filename.concat root sub) subdirs
   in

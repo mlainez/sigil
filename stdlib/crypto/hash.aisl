@@ -1,9 +1,0 @@
-(module hash
-  (fn sha256_hash data string -> string
-    (ret (sha256 data)))
-  
-  (fn md5_hash data string -> string
-    (ret (md5 data)))
-  
-  (fn hmac_sha256_hash key string message string -> string
-    (ret (hmac_sha256 key message))))

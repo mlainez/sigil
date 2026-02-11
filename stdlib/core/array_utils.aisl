@@ -21,8 +21,7 @@
     (set i int 0)
     (while (lt i len)
       (set val int (array_get arr i))
-      (set found bool (eq val target))
-      (if found
+      (if (eq val target)
         (ret i))
       (set i int (add i 1)))
     (ret -1))
@@ -36,8 +35,7 @@
     (set i int 1)
     (while (lt i len)
       (set val int (array_get arr i))
-      (set is_less bool (lt val min_val))
-      (if is_less
+      (if (lt val min_val)
         (set min_val int val))
       (set i int (add i 1)))
     (ret min_val))
@@ -47,8 +45,7 @@
     (set i int 1)
     (while (lt i len)
       (set val int (array_get arr i))
-      (set is_greater bool (gt val max_val))
-      (if is_greater
+      (if (gt val max_val)
         (set max_val int val))
       (set i int (add i 1)))
     (ret max_val))
@@ -62,19 +59,18 @@
       (set i int (sub i 1)))
     (ret result))
   
-  (fn array_fill value int count int -> array
+  (fn array_fill fill_value int count int -> array
     (set arr array (array_new))
     (set i int 0)
     (while (lt i count)
-      (array_push arr value)
+      (array_push arr fill_value)
       (set i int (add i 1)))
     (ret arr))
   
-  (fn array_range start int end int -> array
-    (set len int (sub end start))
+  (fn array_range start int end_val int -> array
     (set arr array (array_new))
     (set i int start)
-    (while (lt i end)
+    (while (lt i end_val)
       (array_push arr i)
       (set i int (add i 1)))
     (ret arr)))

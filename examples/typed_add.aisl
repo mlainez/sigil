@@ -1,7 +1,0 @@
-(module math
-  (fn add a int b int -> int
-    (set result int 0)
-    (print a)
-    (print b)
-    (ret result)))
-

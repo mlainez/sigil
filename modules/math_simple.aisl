@@ -1,7 +1,0 @@
-(module math
-  (fn identity x int -> int
-    (ret x))
-  
-  (fn double x int -> int
-    (set result int (add x x))
-    (ret result)))

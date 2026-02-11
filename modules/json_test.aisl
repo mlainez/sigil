@@ -1,6 +1,0 @@
-(module json
-  (fn to_string data json -> string
-    (ret (json_stringify data)))
-  
-  (fn from_string text string -> json
-    (ret (json_parse text))))

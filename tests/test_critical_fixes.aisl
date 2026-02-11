@@ -1,0 +1,96 @@
+(module test_critical_fixes
+
+  (fn test_div a int b int -> int
+    (ret (div a b)))
+
+  (fn test_mod a int b int -> int
+    (ret (mod a b)))
+
+  (fn test_decimal_eq a decimal b decimal -> bool
+    (ret (eq a b)))
+
+  (fn test_neg_decimal a decimal -> decimal
+    (ret (neg a)))
+
+  (fn test_abs_decimal a decimal -> decimal
+    (ret (abs a)))
+
+  (fn test_cast_decimal_int a decimal -> int
+    (ret (cast_decimal_int a)))
+
+  (fn test_min_decimal a decimal b decimal -> decimal
+    (ret (min a b)))
+
+  (fn test_max_decimal a decimal b decimal -> decimal
+    (ret (max a b)))
+
+  (fn test_string_to_float a string -> float
+    (ret (string_to_float a)))
+
+  (test-spec test_div
+    (case "normal division"
+      (input 10 2)
+      (expect 5))
+    (case "negative division"
+      (input -10 3)
+      (expect -3)))
+
+  (test-spec test_mod
+    (case "normal modulo"
+      (input 10 3)
+      (expect 1))
+    (case "even check"
+      (input 8 2)
+      (expect 0)))
+
+  (test-spec test_decimal_eq
+    (case "same value different format"
+      (input 10.0 10.0)
+      (expect true))
+    (case "different values"
+      (input 10.0 20.0)
+      (expect false)))
+
+  (test-spec test_neg_decimal
+    (case "negate positive"
+      (input 5.5)
+      (expect -5.5))
+    (case "negate negative"
+      (input -3.2)
+      (expect 3.2)))
+
+  (test-spec test_abs_decimal
+    (case "abs of negative"
+      (input -7.5)
+      (expect 7.5))
+    (case "abs of positive"
+      (input 3.14)
+      (expect 3.14)))
+
+  (test-spec test_cast_decimal_int
+    (case "whole number decimal"
+      (input 42.0)
+      (expect 42))
+    (case "fractional decimal truncates"
+      (input 3.14)
+      (expect 3)))
+
+  (test-spec test_min_decimal
+    (case "min of two decimals"
+      (input 3.5 7.2)
+      (expect 3.5)))
+
+  (test-spec test_max_decimal
+    (case "max of two decimals"
+      (input 3.5 7.2)
+      (expect 7.2)))
+
+  (test-spec test_string_to_float
+    (case "convert string to float"
+      (input "3.14")
+      (expect 3.14))
+    (case "convert integer string"
+      (input "42")
+      (expect 42.0)))
+
+  (meta-note "Tests critical bug fixes: div-by-zero, decimal equality, decimal ops, cast_decimal_int"))

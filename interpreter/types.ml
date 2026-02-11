@@ -13,7 +13,6 @@ type type_kind =
   | TRegex
   | TProcess
   | TSocket
-  | TFile
   | TFunction of type_kind list * type_kind
 
 let rec string_of_type = function
@@ -29,7 +28,6 @@ let rec string_of_type = function
   | TRegex -> "regex"
   | TProcess -> "process"
   | TSocket -> "socket"
-  | TFile -> "file"
   | TFunction (params, ret) ->
       let params_str = String.concat ", " (List.map string_of_type params) in
       "(" ^ params_str ^ " -> " ^ string_of_type ret ^ ")"

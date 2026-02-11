@@ -4,31 +4,31 @@
     (if is_neg
       (ret (neg x)))
     (ret x))
-  
+
   (fn abs_float x float -> float
     (set is_neg bool (lt x 0.0))
     (if is_neg
       (ret (neg x)))
     (ret x))
-  
+
   (fn min a int b int -> int
     (set is_less bool (lt a b))
     (if is_less
       (ret a))
     (ret b))
-  
+
   (fn max a int b int -> int
     (set is_greater bool (gt a b))
     (if is_greater
       (ret a))
     (ret b))
-  
+
   (fn min_float a float b float -> float
     (set is_less bool (lt a b))
     (if is_less
       (ret a))
     (ret b))
-  
+
   (fn max_float a float b float -> float
     (set is_greater bool (gt a b))
     (if is_greater

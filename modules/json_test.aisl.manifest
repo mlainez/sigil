@@ -1,1 +1,0 @@
-(manifest@(m json_test)@(v 1.0.0)@(e@(f to_string(json)string)@(f from_string(string)json))@(d "JSON test")@(p json_stringify json_parse)@(t 100))

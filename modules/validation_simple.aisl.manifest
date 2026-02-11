@@ -1,1 +1,0 @@
-(manifest@(m validation)@(v 1.0.0)@(e@(f in_range(int int int)bool)@(f is_positive(int)bool)@(f is_negative(int)bool))@(d "Validation functions")@(t 100))

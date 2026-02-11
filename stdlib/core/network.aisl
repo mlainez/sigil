@@ -1,23 +1,6 @@
 (module network
   (import string_utils)
-  (fn parse_url url string -> array
-    (set has_http bool (contains url "http://"))
-    (set has_https bool (contains url "https://"))
-    (set protocol string "http")
-    (if has_https
-      (set protocol string "https"))
-    
-    (set parts array (array_new))
-    (array_push parts protocol)
-    (array_push parts url)
-    (ret parts))
-  
-  (fn build_query_string key1 string val1 string -> string
-    (set result string key1)
-    (set result string (string_concat result "="))
-    (set result string (string_concat result val1))
-    (ret result))
-  
+
   (fn is_valid_port port int -> bool
     (set result bool false)
     (set gt_zero bool (gt port 0))
@@ -25,7 +8,7 @@
       (set lt_max bool (lt port 65536))
       (set result bool lt_max))
     (ret result))
-  
+
   (fn normalize_path path string -> string
     (set result string path)
     (set starts_slash bool (contains path "/"))
@@ -35,7 +18,7 @@
     (if needs_slash
       (set result string (string_concat "/" path)))
     (ret result))
-  
+
   (fn build_url host string port int path string -> string
     (set result string "http://")
     (set result string (string_concat result host))
@@ -45,7 +28,23 @@
     (set norm_path string (normalize_path path))
     (set result string (string_concat result norm_path))
     (ret result))
-  
+
+  (fn build_query_string key1 string val1 string -> string
+    (set result string key1)
+    (set result string (string_concat result "="))
+    (set result string (string_concat result val1))
+    (ret result))
+
+  (fn parse_url url string -> array
+    (set has_https bool (contains url "https://"))
+    (set protocol string "http")
+    (if has_https
+      (set protocol string "https"))
+    (set parts array (array_new))
+    (array_push parts protocol)
+    (array_push parts url)
+    (ret parts))
+
   (fn extract_domain url string -> string
     (set has_proto bool (contains url "://"))
     (set result string url)

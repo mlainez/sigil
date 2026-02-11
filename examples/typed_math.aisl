@@ -1,7 +1,0 @@
-(module math
-  (fn main -> int
-    (print (add 10 32))
-    (print (mul 6 7))
-    (print (sub 100 42))
-    (ret 0)))
-

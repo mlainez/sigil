@@ -1,9 +1,0 @@
-(module sleep
-  (fn sleep ms int -> int
-    (set iterations int (div ms 10))
-    (set remaining int (mod ms 10))
-    (set i int 0)
-    (while (lt i iterations)
-      (thread_yield)
-      (set i int (add i 1)))
-    (ret 0)))

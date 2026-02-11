@@ -1,7 +1,0 @@
-(module multi_print
-  (fn main -> int
-    (print "Line 1\n")
-    (print "Line 2\n")
-    (print "Line 3\n")
-    (ret 0)))
-

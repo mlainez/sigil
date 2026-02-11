@@ -5,7 +5,7 @@
     (if exists
       (set result string (file_read path)))
     (ret result))
-  
+
   (fn write_file_safe path string content string -> bool
     (set success bool false)
     (file_write path content)
@@ -13,20 +13,7 @@
     (if exists
       (set success bool true))
     (ret success))
-  
-  (fn append_line path string line string -> int
-    (file_append path line)
-    (file_append path "\n")
-    (ret 0))
-  
-  (fn file_size_approx path string -> int
-    (set exists bool (file_exists path))
-    (set result int 0)
-    (if exists
-      (set content string (file_read path))
-      (set result int (string_length content)))
-    (ret result))
-  
+
   (fn delete_if_exists path string -> bool
     (set exists bool (file_exists path))
     (set result bool false)
@@ -34,18 +21,18 @@
       (file_delete path)
       (set result bool true))
     (ret result))
-  
+
   (fn copy_file src string dst string -> bool
     (set content string (file_read src))
     (file_write dst content)
     (set exists bool (file_exists dst))
     (ret exists))
-  
+
   (fn read_lines path string -> array
     (set content string (file_read path))
     (set lines array (string_split content "\n"))
     (ret lines))
-  
+
   (fn count_lines path string -> int
     (set lines array (read_lines path))
     (set count int (array_length lines))

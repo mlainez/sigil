@@ -1,1 +1,0 @@
-(manifest@(m network)@(v 1.0.0)@(e@(f parse_url(string)string)@(f build_query_string(string)string)@(f is_valid_port(int)bool)@(f normalize_path(string)string)@(f build_url(string string int string)string)@(f extract_domain(string)string))@(d "Network utility functions for URLs and HTTP")@(p string_length string_slice string_concat add)@(t 280))

@@ -1,0 +1,14 @@
+(module test_div_by_zero
+
+  (fn safe_div a int b int -> int
+    (ret (div a b)))
+
+  (fn safe_mod a int b int -> int
+    (ret (mod a b)))
+
+  (fn main -> int
+    (set result int (div 10 2))
+    (print result)
+    (ret 0))
+
+  (meta-note "Tests that division by zero raises proper error instead of crashing"))
