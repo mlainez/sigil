@@ -32,13 +32,12 @@ Examples of what should be AISL:
 
 Available modules:
 
-stdlib/ (13 pure AISL implementations):
-- core/: string_utils, conversion, channel
-- data/: json_utils, base64
-- net/: http, websocket
+stdlib/ (14 pure AISL implementations):
+- core/: string_utils, conversion, array_utils, math, math_extended, filesystem, network, text_utils, validation
+- data/: json_utils
+- net/: http
 - pattern/: regex
-- crypto/: hash
-- sys/: time, process, sleep
+- sys/: process
 - db/: sqlite
 
 Note: Many string ops are now BOTH builtins AND in stdlib:
@@ -84,7 +83,6 @@ Why this order:
 Machine format rules:
 - .aisl.grammar: Syntax rules, ops, types, critical notes (s-expr format)
 - .aisl.analysis: Design decisions, directives, discovered issues (tagged sections)
-- .aisl.meta: Project metadata, context (compressed s-expr)
 
 Markdown format rules:
 - AGENTS.md: Human-readable guide for LLMs generating AISL
@@ -111,7 +109,7 @@ Three rules:
    - REMOVE: Implementation plans, thinking process, session notes
    - Store internal notes in .aisl.* files (compressed format)
    - Delete: *-PLAN.md, *-SUMMARY.md, *-ANALYSIS.md (human-readable thinking)
-   - Keep: .aisl.meta, .aisl.grammar, .aisl.analysis (machine-readable context)
+   - Keep: .aisl.grammar, .aisl.analysis (machine-readable context)
 
 3. **NEVER Create Implementation Status Files**
    - NO: IMPLEMENTATION-STATUS.md, ROADMAP.md, TODO.md, CHANGES.md

@@ -113,18 +113,6 @@ and parse_if state =
   let (cond, state) = parse_expr state in
   (* Collect all body expressions *)
   let (all_body, state) = parse_body_until_rparen state [] in
-  (* Check if the last expression is an (else ...) block *)
-  let has_else_block exprs =
-    match exprs with
-    | [] -> ([], None)
-    | [Call ("else", _)] ->
-        (* This shouldn't happen via normal parsing - else is handled below *)
-        ([], None)
-    | _ ->
-        (* Scan for an else block: look for the pattern where we have
-           expressions and the last group starts with else *)
-        (exprs, None)
-  in
   (* Re-parse: we need to detect (else ...) during body parsing.
      The trick: if any body expr is a Call("else", args), it's actually
      the else branch. But "else" gets parsed as a function call.
@@ -140,7 +128,6 @@ and parse_if state =
     | expr :: rest -> split_else (expr :: acc) rest
   in
   let (then_body, else_body) = split_else [] all_body in
-  let _ = has_else_block in  (* suppress warning *)
   (If (cond, then_body, else_body), state)
 
 and parse_while state =

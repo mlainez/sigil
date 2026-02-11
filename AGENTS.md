@@ -490,15 +490,8 @@ AISL follows the philosophy: **"If it CAN be written in AISL, it MUST be written
 | Operation | Stdlib Import Required | Function Name |
 |-----------|------------------------|---------------|
 | **String operations** | `(import string_utils)` | `split`, `trim`, `contains`, `replace` |
-| | `(import string_utils)` then `(trim ...)` | |
-| | `(import string_utils)` then `(contains ...)` | |
-| | `(import string_utils)` then `(replace ...)` | |
-| **JSON operations** | `(json_parse ...)` | `(import json_utils)` then `(json_parse ...)` |
-| | `(json_stringify ...)` | `(import json_utils)` then `(json_stringify ...)` |
-| | `(json_new_object)` | `(import json_utils)` then `(json_new_object)` |
-| **Base64** | `(base64_encode ...)` | `(import base64)` then `(base64_encode ...)` |
-| **Regex** | `(regex_compile ...)` | `(import regex)` then `(regex_compile ...)` |
-| **Hashing** | `(crypto_sha256 ...)` | `(import hash)` then `(crypto_sha256 ...)` |
+| **JSON operations** | `(import json_utils)` | `json_parse`, `json_stringify`, `json_new_object` |
+| **Regex** | `(import regex)` | `regex_compile`, `regex_match`, `regex_find` |
 
 ### How to Use Stdlib Modules
 
@@ -530,31 +523,30 @@ AISL follows the philosophy: **"If it CAN be written in AISL, it MUST be written
 
 ```
 
-### Complete List of 13 Stdlib Modules
+### Complete List of 14 Stdlib Modules
 
-**Core (3):**
+**Core (9):**
 - `string_utils` - String ops (split, trim, contains, replace, starts_with, ends_with, to_upper, to_lower)
 - `conversion` - Type conversion (string_from_int, string_from_float, string_from_bool, bool_to_int, int_to_bool, kilometers_to_miles, celsius_to_fahrenheit)
-- `channel` - Channel operations
+- `array_utils` - Array utilities (array_sum, array_product, array_find, array_contains, array_min, array_max, array_reverse, array_fill, array_range)
+- `math` - Math operations (abs, abs_float, min, max, min_float, max_float)
+- `math_extended` - Extended math (clamp, sign, lerp, is_even, is_odd, square, cube)
+- `filesystem` - File utilities (read_file_safe, write_file_safe, delete_if_exists, copy_file, read_lines, count_lines)
+- `network` - Network utilities (is_valid_port, normalize_path, build_url, build_query_string, parse_url, extract_domain)
+- `text_utils` - Text utilities (repeat_string, pad_left, pad_right, truncate, word_count, reverse_string, is_empty)
+- `validation` - Validation (in_range, is_positive, is_negative, is_zero, is_divisible_by)
 
-**Data (2):**
+**Data (1):**
 - `json_utils` - JSON (parse, stringify, new_object, new_array, get, set, has, delete, push, length, type)
-- `base64` - Base64 (encode, decode)
 
-**Net (2):**
+**Net (1):**
 - `http` - HTTP client (get, post, put, delete, parse_response, build_request)
-- `websocket` - WebSocket (connect, send, receive, close)
 
 **Pattern (1):**
 - `regex` - Regex (compile, match, find, find_all, replace)
 
-**Crypto (1):**
-- `hash` - Hashing (sha256, md5, sha1)
-
-**System (3):**
-- `time` - Time (unix_timestamp, sleep, format_time)
+**System (1):**
 - `process` - Processes (spawn, wait, kill, exit, get_pid, get_env, set_env)
-- `sleep` - Sleep/delay operations
 
 **Database (1):**
 - `sqlite` - SQLite database operations
@@ -567,11 +559,13 @@ AISL follows the philosophy: **"If it CAN be written in AISL, it MUST be written
 - ✅ Type conversion (string_from_int, string_from_float, bool_to_int)
 - ✅ Unit conversion (kilometers_to_miles, celsius_to_fahrenheit)
 - ✅ JSON operations (parse, stringify)
-- ✅ Base64 encoding/decoding
 - ✅ HTTP request building
 - ✅ Regex operations
-- ✅ Cryptographic hashing
-- ✅ Time operations
+- ✅ Array utilities (sum, product, find, reverse)
+- ✅ Math utilities (clamp, sign, lerp)
+- ✅ File utilities (safe read/write, copy)
+- ✅ Text utilities (pad, truncate, word count)
+- ✅ Validation (in_range, is_positive)
 - ✅ Process management
 
 **Use built-in operations for:**
@@ -597,12 +591,14 @@ stdlib/ (pure AISL implementations):
 - `string_utils` - trim, split, contains, replace
 - `conversion` - string_from_int, bool_to_int
 - `json_utils` - parse, stringify
-- `base64` - encode, decode
 - `http` - get, post
-- `websocket` - connect, send, receive
 - `regex` - compile, match, replace
-- `hash` - sha256, md5
-- `time` - sleep, unix_timestamp
+- `array_utils` - sum, product, find, reverse
+- `math` / `math_extended` - abs, clamp, sign, lerp
+- `filesystem` - safe read/write, copy
+- `network` - build_url, parse_url
+- `text_utils` - pad, truncate, word_count
+- `validation` - in_range, is_positive
 - `process` - spawn, wait
 - `sqlite` - open, exec
 
@@ -626,7 +622,7 @@ stdlib/ (pure AISL implementations):
 
 4. **Function names match module names** - After importing `json_utils`, use `json_parse`, `json_stringify`, etc. (not shortened names).
 
-5. **Documentation location:** See `stdlib/README.md` for complete documentation of all 13 modules.
+5. **Documentation location:** See `stdlib/README.md` for complete documentation of all 14 modules.
 
 ---
 
@@ -971,7 +967,6 @@ AISL has a built-in test framework. Add tests to verify behavior:
 **Common functions that require imports:**
 - String ops (split, trim, replace) → `(import string_utils)`
 - JSON ops (json_parse, json_stringify) → `(import json_utils)`
-- Base64 (base64_encode, base64_decode) → `(import base64)`
 - Regex (regex_compile, regex_match, regex_find) → `(import regex)`
 
 ### ❌ Don't: Mix types implicitly

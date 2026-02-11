@@ -1,5 +1,5 @@
 @(grammar aisl-agent)
-@(stat tests:134 examples:22 stdlib:13)
+@(stat tests:134 examples:4 stdlib:14)
 @(impl ocaml tree-walking-interpreter)
 @(syn
   (prog (module name imp* fn* test-spec* meta-note?))
@@ -50,7 +50,7 @@
     (string_replace s:string old:string new:string -> string "replaces all occurrences")
     (string_to_upper s:string -> string)
     (string_to_lower s:string -> string)
-    (string_get s:string idx:int -> string "single char as string")
+    (string_get s:string idx:int -> int "char code as int")
     (char_from_code n:int -> string))
   (cast
     (cast_int_float a:int -> float)
@@ -97,14 +97,14 @@
     (read_line -> string "read line from stdin"))
   (file
     (file_read path:string -> string)
-    (file_write path:string data:string -> unit)
-    (file_append path:string data:string -> unit)
+    (file_write path:string data:string -> bool)
+    (file_append path:string data:string -> bool)
     (file_exists path:string -> bool)
     (file_delete path:string -> bool)
     (file_size path:string -> int)
     (dir_list path:string -> array)
-    (dir_create path:string -> unit)
-    (dir_delete path:string -> unit))
+    (dir_create path:string -> bool)
+    (dir_delete path:string -> bool))
   (json
     (json_parse s:string -> json)
     (json_stringify j:json -> string)
@@ -133,7 +133,7 @@
     (tcp_send sock:socket data:string -> unit)
     (tcp_receive sock:socket bufsize:int -> string)
     (tcp_close sock:socket -> unit)
-    (socket_select socks:array timeout:float -> array))
+    (socket_select socks:array -> array "timeout hardcoded 0.01s"))
   (websocket
     (ws_accept sock:socket -> socket)
     (ws_connect host:string port:int path:string -> socket)
@@ -147,10 +147,10 @@
   (process
     (process_spawn cmd:string args:array -> process)
     (process_wait p:process -> int)
-    (process_kill p:process -> unit)
+    (process_kill p:process sig:int -> bool)
     (process_read p:process -> string)
     (process_write p:process data:string -> unit)
-    (process_exec cmd:string -> string))
+    (process_exec cmd:string -> int "exit code, -1 on signal"))
   (system
     (argv -> array "CLI args after filename")
     (argv_count -> int "count of CLI args")
@@ -185,15 +185,14 @@
     ((eq x 0) (set result string "zero"))
     (true (set result string "positive"))))
 @(mod
-  (stdlib-modules "13 modules in pure AISL")
-  (core "string_utils conversion channel")
-  (data "json_utils base64")
-  (net "http websocket")
+  (stdlib-modules "14 modules in pure AISL")
+  (core "string_utils conversion array_utils math math_extended filesystem network text_utils validation")
+  (data "json_utils")
+  (net "http")
   (pattern "regex")
-  (crypto "hash")
-  (sys "time process sleep")
+  (sys "process")
   (db "sqlite")
-  (paths "stdlib/core/ stdlib/data/ stdlib/net/ stdlib/sys/ stdlib/crypto/ stdlib/pattern/ stdlib/db/")
+  (paths "stdlib/core/ stdlib/data/ stdlib/net/ stdlib/sys/ stdlib/pattern/ stdlib/db/")
   (import-syntax "(import module_name) - auto-searches stdlib subdirs"))
 @(note
   (no-comments "AISL has NO comment syntax - no ; // # or any other form")

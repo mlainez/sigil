@@ -7,9 +7,8 @@ AISL (AI-Optimized Systems Language) - A two-layer programming language designed
 AISL consists of two distinct layers:
 
 ### AISL-Core (IR Layer)
-The minimal, stable intermediate representation. This layer is **frozen** - it will never change. Core consists of only 6 statement types:
+The minimal, stable intermediate representation. This layer is **frozen** - it will never change. Core consists of only 5 statement types:
 - `set` - Variable binding
-- `call` - Function calls
 - `label` - Jump targets
 - `goto` - Unconditional jumps
 - `ifnot` - Conditional jumps
@@ -32,14 +31,11 @@ This is what you write and what LLMs generate.
 program ::= (module <name> <function>*)
 
 function ::= (fn <name> <param_flat>* -> <return_type> <statement>*)
-           | (fn <name> (<param>*) -> <return_type> <statement>*)   [deprecated]
 
-param_flat ::= <name> <type>  [NEW: Recommended for LLM code generation]
-
-param ::= (<name> <type>)
+param_flat ::= <name> <type>
 
 statement ::= (set <var> <type> <expr>)
-            | (call <function> <arg>*)
+            | (<function> <arg>*)
             | (label <name>)
             | (goto <label>)
             | (ifnot <bool_var> <label>)
@@ -55,7 +51,7 @@ statement ::= (set <var> <type> <expr>)
 
 expr ::= <literal>
        | <variable>
-       | (call <function> <arg>*)
+       | (<function> <arg>*)
        | (and <expr> <expr>)     ; Short-circuit: e2 not evaluated if e1 is false
        | (or <expr> <expr>)      ; Short-circuit: e2 not evaluated if e1 is true
        | [<expr>*]               ; Array literal
@@ -76,7 +72,7 @@ Test files using the `test-spec` framework don't require a `main` function.
 ```scheme
 (module hello
   (fn main -> int
-    (call print "Hello, World!")
+    (print "Hello, World!")
     (ret 0)))
 ```
 
@@ -177,9 +173,9 @@ Executes body while condition is true.
 
 ```scheme
 (fn countdown n int -> int
-  (while (call gt n 0)
-    (call print n)
-    (set n int (call sub n 1)))
+  (while (gt n 0)
+    (print n)
+    (set n int (sub n 1)))
   (ret 0))
 ```
 
@@ -189,10 +185,10 @@ Executes forever. Use for server loops.
 
 ```scheme
 (fn start_server port int -> int
-  (set server_sock string (call tcp_listen port))
+  (set server_sock string (tcp_listen port))
   (loop
-    (set client_sock string (call tcp_accept server_sock))
-    (call handle_connection client_sock))
+    (set client_sock string (tcp_accept server_sock))
+    (handle_connection client_sock))
   (ret 0))
 ```
 
@@ -204,12 +200,12 @@ Executes forever. Use for server loops.
 (fn find_value arr string target int -> int
   (set i int 0)
   (loop
-    (set val int (call array_get arr i))
-    (set found bool (call eq val target))
+    (set val int (array_get arr i))
+    (set found bool (eq val target))
     (ifnot found skip)
     (break)
     (label skip)
-    (set i int (call add i 1)))
+    (set i int (add i 1)))
   (ret i))
 ```
 
@@ -219,14 +215,14 @@ Executes forever. Use for server loops.
 (fn sum_positives arr string n int -> int
   (set i int 0)
   (set sum int 0)
-  (while (call lt i n)
-    (set val int (call array_get arr i))
-    (set i int (call add i 1))
-    (set is_negative bool (call lt val 0))
+  (while (lt i n)
+    (set val int (array_get arr i))
+    (set i int (add i 1))
+    (set is_negative bool (lt val 0))
     (ifnot is_negative no_skip)
     (continue)
     (label no_skip)
-    (set sum int (call add sum val)))
+    (set sum int (add sum val)))
   (ret sum))
 ```
 
@@ -285,12 +281,12 @@ For complex control flow, use labels and goto:
 ```scheme
 (fn countdown_with_labels n int -> int
   (label loop)
-  (set done bool (call le n 0))
+  (set done bool (le n 0))
   (ifnot done continue)
   (ret 0)
   (label continue)
-  (call print n)
-  (set n int (call sub n 1))
+  (print n)
+  (set n int (sub n 1))
   (goto loop))
 ```
 
@@ -338,13 +334,13 @@ Functions can call themselves:
 
 ```scheme
 (fn factorial n int -> int
-  (set is_base bool (call le n 1))
+  (set is_base bool (le n 1))
   (ifnot is_base recurse)
   (ret 1)
   (label recurse)
-  (set n_minus_1 int (call sub n 1))
-  (set result int (call factorial n_minus_1))
-  (ret (call mul n result)))
+  (set n_minus_1 int (sub n 1))
+  (set result int (factorial n_minus_1))
+  (ret (mul n result)))
 ```
 
 ---
@@ -355,14 +351,14 @@ Functions can call themselves:
 
 ```scheme
 ; Agent code:
-(while (call lt count 10)
-  (call print count))
+(while (lt count 10)
+  (print count))
 
 ; Desugars to Core:
 (label loop_start_1)
-(set _cond_1 bool (call lt count 10))
+(set _cond_1 bool (lt count 10))
 (ifnot _cond_1 loop_end_1)
-(call print count)
+(print count)
 (goto loop_start_1)
 (label loop_end_1)
 ```
@@ -372,16 +368,16 @@ Functions can call themselves:
 ```scheme
 ; Agent code:
 (loop
-  (if (call eq count 10) (break))
-  (set count int (call add count 1)))
+  (if (eq count 10) (break))
+  (set count int (add count 1)))
 
 ; Desugars to Core:
 (label loop_start_2)
-(set _cond_2 bool (call eq count 10))
+(set _cond_2 bool (eq count 10))
 (ifnot _cond_2 skip_break_2)
 (goto loop_end_2)
 (label skip_break_2)
-(set count int (call add count 1))
+(set count int (add count 1))
 (goto loop_start_2)
 (label loop_end_2)
 ```
@@ -390,40 +386,39 @@ Functions can call themselves:
 
 ## Standard Library
 
-AISL provides 180+ built-in functions. All use explicit `call` syntax.
+AISL provides 180+ built-in functions. All use direct call syntax: `(function arg1 arg2)`.
 
 ### Standard Library Modules
 
 Many high-level operations are now implemented in **pure AISL stdlib modules** instead of built-in opcodes. This follows AISL's philosophy: "If it CAN be written in AISL, it MUST be written in AISL."
 
-**Available stdlib modules (13 total):**
+**Available stdlib modules (14 total):**
 
-**Core (3 modules):**
+**Core (9 modules):**
 - `stdlib/core/string_utils.aisl` - Advanced string operations (split, trim, contains, replace, starts_with, ends_with, to_upper, to_lower)
 - `stdlib/core/conversion.aisl` - Type conversion (string_from_int, bool_to_int, kilometers_to_miles)
-- `stdlib/core/channel.aisl` - Channel operations
+- `stdlib/core/array_utils.aisl` - Array utilities (array_sum, array_product, array_find, array_contains, array_min, array_max, array_reverse, array_fill, array_range)
+- `stdlib/core/math.aisl` - Math operations (abs, abs_float, min, max, min_float, max_float)
+- `stdlib/core/math_extended.aisl` - Extended math (clamp, sign, lerp, is_even, is_odd, square, cube)
+- `stdlib/core/filesystem.aisl` - File utilities (read_file_safe, write_file_safe, delete_if_exists, copy_file, read_lines, count_lines)
+- `stdlib/core/network.aisl` - Network utilities (is_valid_port, normalize_path, build_url, build_query_string, parse_url, extract_domain)
+- `stdlib/core/text_utils.aisl` - Text utilities (repeat_string, pad_left, pad_right, truncate, word_count, reverse_string, is_empty)
+- `stdlib/core/validation.aisl` - Validation (in_range, is_positive, is_negative, is_zero, is_divisible_by)
 
-**Data (2 modules):**
-- `stdlib/data/json.aisl` - JSON parsing and manipulation (parse, stringify, new_object, new_array, get, set, has, delete, push, length, type)
-- `stdlib/data/base64.aisl` - Base64 encoding/decoding (encode, decode)
+**Data (1 module):**
+- `stdlib/data/json_utils.aisl` - JSON parsing and manipulation (parse, stringify, new_object, new_array, get, set, has, delete, push, length, type)
 
-**Net (2 modules):**
+**Net (1 module):**
 - `stdlib/net/http.aisl` - HTTP client operations (get, post, put, delete, parse_response, build_request)
-- `stdlib/net/websocket.aisl` - WebSocket client (connect, send, receive, close)
 
 **Pattern (1 module):**
 - `stdlib/pattern/regex.aisl` - Regular expression operations (compile, match, find, find_all, replace)
 
-**Crypto (1 module):**
-- `stdlib/crypto/hash.aisl` - Cryptographic hash functions (sha256, md5, sha1)
-
 **Database (1 module):**
 - `stdlib/db/sqlite.aisl` - SQLite database operations (open, close, exec, query, prepare, bind, step, column, finalize, last_insert_id, changes, error_msg)
 
-**System (3 modules):**
-- `stdlib/sys/time.aisl` - Time operations (unix_timestamp, sleep, format_time)
+**System (1 module):**
 - `stdlib/sys/process.aisl` - Process management (spawn, wait, kill, exit, get_pid, get_env, set_env)
-- `stdlib/sys/sleep.aisl` - Sleep/delay operations
 
 **Importing stdlib modules:**
 
@@ -434,13 +429,13 @@ Many high-level operations are now implemented in **pure AISL stdlib modules** i
   
   (fn main -> int
     ; Use imported functions
-    (set json_obj json (call json_new_object))
-    (call json_set json_obj "status" "ok")
+    (set json_obj json (json_new_object))
+    (json_set json_obj "status" "ok")
     
     (ret 0)))
 ```
 
-**Note:** String operations like split, to_upper, and to_lower are implemented in stdlib modules (import string_utils). However, string_contains, string_trim, string_replace, string_starts_with, string_ends_with, and string_split are also available as builtins without any import. JSON operations and Base64 functions are implemented in stdlib modules. Import the appropriate module to use them.
+**Note:** String operations like split, to_upper, and to_lower are implemented in stdlib modules (import string_utils). However, string_contains, string_trim, string_replace, string_starts_with, string_ends_with, and string_split are also available as builtins without any import. JSON operations are implemented as builtins (json_parse, json_stringify, etc.) and also available via stdlib.
 
 See `stdlib/README.md` for complete documentation of all stdlib modules.
 
@@ -450,41 +445,41 @@ The interpreter infers types automatically. Write operation names without type s
 
 ```scheme
 ; Arithmetic (works for int, int, float, float)
-(call add a b)     ; Addition
-(call sub a b)     ; Subtraction
-(call mul a b)     ; Multiplication
-(call div a b)     ; Division
-(call mod a b)     ; Modulo (integers only)
-(call neg a)       ; Negation
+(add a b)     ; Addition
+(sub a b)     ; Subtraction
+(mul a b)     ; Multiplication
+(div a b)     ; Division
+(mod a b)     ; Modulo (integers only)
+(neg a)       ; Negation
 
 ; Comparison (works for int, int, float, float)
-(call eq a b)      ; Equal
-(call ne a b)      ; Not equal
-(call lt a b)      ; Less than
-(call gt a b)      ; Greater than
-(call le a b)      ; Less or equal
-(call ge a b)      ; Greater or equal
+(eq a b)      ; Equal
+(ne a b)      ; Not equal
+(lt a b)      ; Less than
+(gt a b)      ; Greater than
+(le a b)      ; Less or equal
+(ge a b)      ; Greater or equal
 
 ; Math (works for int, int, float, float)
-(call abs value)   ; Absolute value
-(call min a b)     ; Minimum
-(call max a b)     ; Maximum
-(call sqrt value)  ; Square root (float, float only)
-(call pow base exp); Power (float, float only)
-(call floor value) ; Round toward -infinity (float -> int)
-(call ceil value)  ; Round toward +infinity (float -> int)
-(call round value) ; Round to nearest (float -> int)
+(abs value)   ; Absolute value
+(min a b)     ; Minimum
+(max a b)     ; Maximum
+(sqrt value)  ; Square root (float, float only)
+(pow base exp); Power (float, float only)
+(floor value) ; Round toward -infinity (float -> int)
+(ceil value)  ; Round toward +infinity (float -> int)
+(round value) ; Round to nearest (float -> int)
 ```
 
 The interpreter automatically selects the correct operation based on variable types:
 ```scheme
 (set x int 10)
 (set y int 20)
-(set sum int (call add x y))  ; Compiler uses add
+(set sum int (add x y))  ; Interpreter uses add
 
 (set a float 3.14)
 (set b float 2.71)
-(set result float (call mul a b))  ; Compiler uses mul
+(set result float (mul a b))  ; Interpreter uses mul
 ```
 
 ### String Operations
@@ -492,31 +487,31 @@ The interpreter automatically selects the correct operation based on variable ty
 **Built-in string operations** (always available):
 
 ```scheme
-(call string_length text)              ; Get length -> int
-(call string_concat a b)               ; Concatenate -> string
-(call string_equals a b)               ; Compare equality -> bool
-(call string_slice text start len)     ; Extract substring (start index, length) -> string
-(call string_format template args...)  ; Format with {} placeholders -> string
-(call string_find haystack needle)     ; Find index of needle (-1 if not found) -> int
-(call string_contains haystack needle) ; Check contains -> bool
-(call string_trim text)                ; Remove whitespace from both ends -> string
-(call string_replace text old new)     ; Replace ALL occurrences -> string
-(call string_starts_with text prefix)  ; Check prefix -> bool
-(call string_ends_with text suffix)    ; Check suffix -> bool
-(call string_split text delimiter)     ; Split into array -> array
+(string_length text)              ; Get length -> int
+(string_concat a b)               ; Concatenate -> string
+(string_equals a b)               ; Compare equality -> bool
+(string_slice text start len)     ; Extract substring (start index, length) -> string
+(string_format template args...)  ; Format with {} placeholders -> string
+(string_find haystack needle)     ; Find index of needle (-1 if not found) -> int
+(string_contains haystack needle) ; Check contains -> bool
+(string_trim text)                ; Remove whitespace from both ends -> string
+(string_replace text old new)     ; Replace ALL occurrences -> string
+(string_starts_with text prefix)  ; Check prefix -> bool
+(string_ends_with text suffix)    ; Check suffix -> bool
+(string_split text delimiter)     ; Split into array -> array
 ```
 
 **Advanced string operations** (available via `(import string_utils)` — note: trim, contains, replace, starts_with, ends_with are also builtins):
 
 ```scheme
-(call split text delimiter)            ; Split -> array
-(call trim text)                       ; Remove whitespace -> string
-(call contains haystack needle)        ; Check contains -> bool
-(call replace text old new)            ; Replace substring -> string
-(call starts_with text prefix)         ; Check prefix -> bool
-(call ends_with text suffix)           ; Check suffix -> bool
-(call to_upper text)                   ; Convert to uppercase -> string
-(call to_lower text)                   ; Convert to lowercase -> string
+(split text delimiter)            ; Split -> array
+(trim text)                       ; Remove whitespace -> string
+(contains haystack needle)        ; Check contains -> bool
+(replace text old new)            ; Replace substring -> string
+(starts_with text prefix)         ; Check prefix -> bool
+(ends_with text suffix)           ; Check suffix -> bool
+(to_upper text)                   ; Convert to uppercase -> string
+(to_lower text)                   ; Convert to lowercase -> string
 ```
 
 **Example:**
@@ -526,9 +521,9 @@ The interpreter automatically selects the correct operation based on variable ty
   
   (fn main -> int
     (set text string "  hello world  ")
-    (set trimmed string (call trim text))           ; -> "hello world"
-    (set words array (call split trimmed " "))      ; -> ["hello", "world"]
-    (set upper string (call to_upper trimmed))      ; -> "HELLO WORLD"
+    (set trimmed string (trim text))           ; -> "hello world"
+    (set words array (split trimmed " "))      ; -> ["hello", "world"]
+    (set upper string (to_upper trimmed))      ; -> "HELLO WORLD"
     (ret 0)))
 ```
 
@@ -539,21 +534,21 @@ The interpreter automatically selects the correct operation based on variable ty
 ```scheme
 ; Compile a pattern into a regex object
 (set pattern string "\\d+")
-(set digit_regex regex (call regex_compile pattern))
+(set digit_regex regex (regex_compile pattern))
 
 ; Test if a string matches the pattern
 (set text string "abc123")
-(set has_digits bool (call regex_match digit_regex text))  ; -> true
+(set has_digits bool (regex_match digit_regex text))  ; -> true
 
 ; Find first match
-(set first string (call regex_find digit_regex "foo 123 bar"))  ; -> "123"
+(set first string (regex_find digit_regex "foo 123 bar"))  ; -> "123"
 
 ; Find all matches (returns array of strings)
-(set numbers array (call regex_find_all digit_regex "123 456 789"))
+(set numbers array (regex_find_all digit_regex "123 456 789"))
 ; -> ["123", "456", "789"]
 
 ; Replace all matches
-(set cleaned string (call regex_replace digit_regex "foo 123 bar" "NUM"))
+(set cleaned string (regex_replace digit_regex "foo 123 bar" "NUM"))
 ; -> "foo NUM bar"
 ```
 
@@ -562,16 +557,16 @@ The interpreter automatically selects the correct operation based on variable ty
 ```scheme
 ; Match word characters
 (set word_pattern string "\\w+")
-(set word_regex regex (call regex_compile word_pattern))
+(set word_regex regex (regex_compile word_pattern))
 
 ; Match email addresses
 (set email_pattern string "[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}")
-(set email_regex regex (call regex_compile email_pattern))
+(set email_regex regex (regex_compile email_pattern))
 
 ; Extract function signatures
 (set fn_pattern string "\\(fn (\\w+)")
-(set fn_regex regex (call regex_compile fn_pattern))
-(set matches array (call regex_find_all fn_regex source_code))
+(set fn_regex regex (regex_compile fn_pattern))
+(set matches array (regex_find_all fn_regex source_code))
 ```
 
 **Important**: Remember to escape backslashes in string literals: `"\\d"` not `"\d"`
@@ -579,27 +574,27 @@ The interpreter automatically selects the correct operation based on variable ty
 ### I/O Operations
 
 ```scheme
-(call print value)             ; Print any type (polymorphic dispatch)
-(call println value)           ; Print with newline
-(call read_line)               ; Read line from stdin -> string
+(print value)             ; Print any type (polymorphic dispatch)
+(println value)           ; Print with newline
+(read_line)               ; Read line from stdin -> string
 ```
 
 ### File Operations
 
 ```scheme
-(call file_read path)          ; Read file -> string (panics on error)
-(call file_write path content) ; Write file
-(call file_append path content); Append to file
-(call file_exists path)        ; Check exists -> bool
-(call file_delete path)        ; Delete file
-(call file_size path)          ; Get size -> int
+(file_read path)          ; Read file -> string (panics on error)
+(file_write path content) ; Write file -> bool
+(file_append path content); Append to file -> bool
+(file_exists path)        ; Check exists -> bool
+(file_delete path)        ; Delete file -> bool
+(file_size path)          ; Get size -> int
 ```
 
 ### System Operations
 
 ```scheme
-(call argv)                    ; Get command-line arguments (after filename) -> array of strings
-(call argv_count)              ; Get count of extra arguments -> int
+(argv)                    ; Get command-line arguments (after filename) -> array of strings
+(argv_count)              ; Get count of extra arguments -> int
 ```
 
 ### Error Handling
@@ -670,23 +665,23 @@ For predictable errors, guard checks are simpler and more explicit:
 ### TCP Networking
 
 ```scheme
-(call tcp_listen port)           ; Listen -> socket
-(call tcp_accept server_socket)  ; Accept -> socket
-(call tcp_connect host port)     ; Connect -> socket
-(call tcp_send socket data)      ; Send -> int
-(call tcp_receive socket bytes)  ; Receive -> string
-(call tcp_close socket)          ; Close socket
+(tcp_listen port)           ; Listen -> socket
+(tcp_accept server_socket)  ; Accept -> socket
+(tcp_connect host port)     ; Connect -> socket
+(tcp_send socket data)      ; Send -> int
+(tcp_receive socket bytes)  ; Receive -> string
+(tcp_close socket)          ; Close socket
 ```
 
 ### HTTP Operations
 
 ```scheme
-(call http_get url)              ; GET -> response
-(call http_post url body)        ; POST -> response
-(call http_put url body)         ; PUT -> response
-(call http_delete url)           ; DELETE -> response
-(call http_get_status response)  ; Status code -> int
-(call http_get_body response)    ; Body -> string
+(http_get url)              ; GET -> response
+(http_post url body)        ; POST -> response
+(http_put url body)         ; PUT -> response
+(http_delete url)           ; DELETE -> response
+(http_get_status response)  ; Status code -> int
+(http_get_body response)    ; Body -> string
 ```
 
 ### JSON Operations
@@ -694,17 +689,17 @@ For predictable errors, guard checks are simpler and more explicit:
 **All JSON operations require `(import json_utils)` from stdlib:**
 
 ```scheme
-(call parse text)                    ; Parse JSON string -> json
-(call stringify obj)                 ; Convert to JSON string -> string
-(call new_object)                    ; Create empty object -> json
-(call new_array)                     ; Create empty array -> json
-(call get obj key)                   ; Get value from object -> string
-(call set obj key value)             ; Set value in object
-(call has obj key)                   ; Check if key exists -> bool
-(call delete obj key)                ; Remove key from object
-(call push array value)              ; Add element to array
-(call length obj)                    ; Get length -> int
-(call type json_val)                 ; Get JSON type -> string ("object", "array", "string", "number", "bool", "null")
+(json_parse text)                    ; Parse JSON string -> json
+(json_stringify obj)                 ; Convert to JSON string -> string
+(json_new_object)                    ; Create empty object -> json
+(json_new_array)                     ; Create empty array -> json
+(json_get obj key)                   ; Get value from object -> string
+(json_set obj key value)             ; Set value in object
+(json_has obj key)                   ; Check if key exists -> bool
+(json_delete obj key)                ; Remove key from object
+(json_push array_val value)          ; Add element to array
+(json_length obj)                    ; Get length -> int
+(json_type json_val)                 ; Get JSON type -> string ("object", "array", "string", "number", "bool", "null")
 ```
 
 **Example:**
@@ -715,16 +710,16 @@ For predictable errors, guard checks are simpler and more explicit:
   (fn main -> int
     ; Parse JSON
     (set json_str string "{\"name\":\"Alice\",\"age\":30}")
-    (set obj json (call json_parse json_str))
+    (set obj json (json_parse json_str))
     
     ; Modify JSON
-    (set new_obj json (call json_new_object))
-    (call json_set new_obj "status" "active")
-    (call json_set new_obj "count" "42")
+    (set new_obj json (json_new_object))
+    (json_set new_obj "status" "active")
+    (json_set new_obj "count" "42")
     
     ; Convert back to string
-    (set result string (call json_stringify new_obj))
-    (call print result)                ; Prints: {"status":"active","count":"42"}
+    (set result string (json_stringify new_obj))
+    (print result)                ; Prints: {"status":"active","count":"42"}
     
     (ret 0)))
 ```
@@ -732,53 +727,51 @@ For predictable errors, guard checks are simpler and more explicit:
 ### Array Operations
 
 ```scheme
-(call array_new size)            ; Create array
-(call array_push array value)    ; Add element
-(call array_get array index)     ; Get element
-(call array_set array index val) ; Set element
-(call array_length array)        ; Length -> int
+(array_new)                  ; Create array
+(array_push arr value)       ; Add element
+(array_get arr index)        ; Get element
+(array_set arr index val)    ; Set element
+(array_length arr)           ; Length -> int
 ```
 
 ### Map Operations
 
 ```scheme
-(call map_new)                   ; Create map
-(call map_set map key value)     ; Set key-value
-(call map_get map key)           ; Get value
-(call map_has map key)           ; Check key -> bool
-(call map_delete map key)        ; Remove key
-(call map_length map)            ; Size -> int
+(map_new)                   ; Create map
+(map_set m key value)       ; Set key-value
+(map_get m key)             ; Get value
+(map_has m key)             ; Check key -> bool
+(map_delete m key)          ; Remove key
+(map_length m)              ; Size -> int
 ```
 
 ### Type Conversions
 
 ```scheme
-(call cast_int_float value)      ; int -> float
-(call cast_float_int value)      ; float -> int (truncate)
-(call cast_int_decimal value)    ; int -> decimal
-(call cast_decimal_int value)    ; decimal -> int
-(call cast_float_decimal value)  ; float -> decimal
-(call cast_decimal_float value)  ; decimal -> float
-(call string_from_int value)     ; int -> string
-(call string_from_float value)   ; float -> string
-(call string_from_bool value)    ; bool -> string
+(cast_int_float value)      ; int -> float
+(cast_float_int value)      ; float -> int (truncate)
+(cast_int_decimal value)    ; int -> decimal
+(cast_decimal_int value)    ; decimal -> int
+(cast_float_decimal value)  ; float -> decimal
+(cast_decimal_float value)  ; decimal -> float
+(string_from_int value)     ; int -> string
+(string_from_float value)   ; float -> string
+(string_from_bool value)    ; bool -> string
 ```
 
 ### Conditional Functions
 
 ```scheme
-(call if_int condition then else)    ; Conditional int
-(call if_int condition then else)    ; Conditional int
-(call if_float condition then else)    ; Conditional float
-(call if_float condition then else)    ; Conditional float
-(call if_string condition then else) ; Conditional string
+(if_int condition then else)       ; Conditional int
+(if_float condition then else)     ; Conditional float
+(if_string condition then else)    ; Conditional string
 ```
 
 ### Garbage Collection
 
 ```scheme
-(call gc_collect)                ; Force collection
-(call gc_stats)                  ; GC statistics
+(gc_collect)                ; Force collection
+(gc_stats)                  ; GC statistics
 ```
 
 ---
@@ -787,33 +780,33 @@ For predictable errors, guard checks are simpler and more explicit:
 
 ```scheme
 (module sinatra
-  (fn handle_connection ((client_sock string)) -> int
-    (set request string (call tcp_receive client_sock 4096))
-    (set has_json bool (call string_contains request "GET /hello.json "))
-    (set has_html bool (call string_contains request "GET /hello "))
+  (fn handle_connection client_sock string -> int
+    (set request string (tcp_receive client_sock 4096))
+    (set has_json bool (string_contains request "GET /hello.json "))
+    (set has_html bool (string_contains request "GET /hello "))
     
     (set json_resp string "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\n\r\n{\"status\":\"ok\"}")
     (set html_resp string "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n<h1>Hello</h1>")
     (set not_found string "HTTP/1.1 404 Not Found\r\n\r\nNot Found")
     
     (set response string not_found)
-    (set response string (call if_string has_html html_resp response))
-    (set response string (call if_string has_json json_resp response))
+    (set response string (if_string has_html html_resp response))
+    (set response string (if_string has_json json_resp response))
     
-    (call tcp_send client_sock response)
-    (call tcp_close client_sock)
+    (tcp_send client_sock response)
+    (tcp_close client_sock)
     (ret 0))
 
-  (fn start_server ((port int)) -> int
-    (call print "Server running on http://localhost:8080")
-    (set server_sock string (call tcp_listen port))
+  (fn start_server port int -> int
+    (print "Server running on http://localhost:8080")
+    (set server_sock string (tcp_listen port))
     (loop
-      (set client_sock string (call tcp_accept server_sock))
-      (call handle_connection client_sock))
+      (set client_sock string (tcp_accept server_sock))
+      (handle_connection client_sock))
     (ret 0))
 
-  (fn main () -> int
-    (call start_server 8080)
+  (fn main -> int
+    (start_server 8080)
     (ret 0)))
 ```
 
@@ -891,7 +884,7 @@ This is intentional for LLM code generation:
 4. **Flat Structure** - No complex nested expressions
 5. **Structured Control** - `while`/`loop`/`for-each` handled directly by interpreter
 6. **Try/Catch + Guard Checks** - Try/catch for recoverable errors; guard checks for predictable ones
-7. **Function Calls** - All operations use explicit `call` syntax
+7. **Direct Function Calls** - All operations use `(function arg1 arg2)` syntax
 8. **No Operator Precedence** - Everything is a function call
 9. **S-Expression Syntax** - Lisp-style parenthesized syntax
 10. **LLM-First Design** - Optimized for code generation by AI
@@ -920,8 +913,8 @@ Every test file must include:
 
 ```scheme
 (module test_addition
-  (fn add_numbers ((a int) (b int)) -> int
-    (ret (call add a b)))
+  (fn add_numbers a int b int -> int
+    (ret (add a b)))
   
   (test-spec add_numbers
     (case "adds positive numbers"

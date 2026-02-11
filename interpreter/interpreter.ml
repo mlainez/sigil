@@ -532,14 +532,6 @@ let ws_write transport data =
     | WsTls ssl -> Ssl.write_substring ssl data 0 len
   in ()
 
-let ws_read_available transport max_bytes =
-  let buf = Bytes.create max_bytes in
-  let got = match transport with
-    | WsPlain fd -> Unix.read fd buf 0 max_bytes
-    | WsTls ssl -> Ssl.read ssl buf 0 max_bytes
-  in
-  if got > 0 then Bytes.sub_string buf 0 got else ""
-
 (* Server-side handshake: read HTTP request, extract key, send response *)
 let ws_server_handshake transport =
   (* Read HTTP upgrade request *)
