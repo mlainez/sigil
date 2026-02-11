@@ -46,7 +46,6 @@ let parse_type state =
   | Symbol "file" -> (TFile, advance state)
   | Symbol "channel" -> (TSocket, advance state)  (* channel maps to TSocket for now *)
   | Symbol "future" -> (TUnit, advance state)  (* future maps to TUnit for now *)
-  | Symbol "result" -> (TUnit, advance state)  (* result maps to TUnit for now *)
   | tok -> raise (ParseError ("Expected type but got " ^ string_of_token tok))
 
 (* Parse expressions *)
@@ -69,6 +68,9 @@ and parse_sexpr state =
   | "if" -> parse_if state
   | "while" -> parse_while state
   | "loop" -> parse_loop state
+  | "for-each" -> parse_foreach state
+  | "and" -> parse_and state
+  | "or" -> parse_or state
   | "break" -> (Break, expect_token RParen state)
   | "continue" -> (Continue, expect_token RParen state)
   | "label" -> parse_label state
@@ -90,8 +92,37 @@ and parse_return state =
 
 and parse_if state =
   let (cond, state) = parse_expr state in
-  let (then_body, state) = parse_body_until_rparen state [] in
-  (If (cond, then_body, None), state)
+  (* Collect all body expressions *)
+  let (all_body, state) = parse_body_until_rparen state [] in
+  (* Check if the last expression is an (else ...) block *)
+  let has_else_block exprs =
+    match exprs with
+    | [] -> ([], None)
+    | [Call ("else", _)] ->
+        (* This shouldn't happen via normal parsing - else is handled below *)
+        ([], None)
+    | _ ->
+        (* Scan for an else block: look for the pattern where we have
+           expressions and the last group starts with else *)
+        (exprs, None)
+  in
+  (* Re-parse: we need to detect (else ...) during body parsing.
+     The trick: if any body expr is a Call("else", args), it's actually
+     the else branch. But "else" gets parsed as a function call.
+     We split: everything before the else-call is then-body,
+     the else-call's args are the else-body. *)
+  let rec split_else acc = function
+    | [] -> (List.rev acc, None)
+    | Call ("else", else_args) :: rest ->
+        (* Everything after else should be empty since else is last *)
+        if rest <> [] then
+          raise (ParseError "else block must be the last item in an if expression");
+        (List.rev acc, Some else_args)
+    | expr :: rest -> split_else (expr :: acc) rest
+  in
+  let (then_body, else_body) = split_else [] all_body in
+  let _ = has_else_block in  (* suppress warning *)
+  (If (cond, then_body, else_body), state)
 
 and parse_while state =
   let (cond, state) = parse_expr state in
@@ -101,6 +132,25 @@ and parse_while state =
 and parse_loop state =
   let (body, state) = parse_body_until_rparen state [] in
   (Loop body, state)
+
+and parse_foreach state =
+  let (var_name, state) = expect_symbol state in
+  let (var_type, state) = parse_type state in
+  let (collection_expr, state) = parse_expr state in
+  let (body, state) = parse_body_until_rparen state [] in
+  (ForEach (var_name, var_type, collection_expr, body), state)
+
+and parse_and state =
+  let (left, state) = parse_expr state in
+  let (right, state) = parse_expr state in
+  let state = expect_token RParen state in
+  (And (left, right), state)
+
+and parse_or state =
+  let (left, state) = parse_expr state in
+  let (right, state) = parse_expr state in
+  let state = expect_token RParen state in
+  (Or (left, right), state)
 
 and parse_label state =
   let (label_name, state) = expect_symbol state in

@@ -6,6 +6,9 @@ open Interpreter
 
 let run_file filename =
   try
+    (* Set source file path for stdlib resolution *)
+    Interpreter.source_file_path := filename;
+
     (* Read the file *)
     let ic = open_in filename in
     let content = really_input_string ic (in_channel_length ic) in

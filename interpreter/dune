@@ -1,10 +1,4 @@
 (executable
-  (name main)
-  (public_name aislc)
-  (libraries unix str ssl)
-  (flags :standard -w -8 -w -27 -w -33))
-
-(executable
   (name vm)
   (public_name aisl-run)
   (libraries unix str ssl)

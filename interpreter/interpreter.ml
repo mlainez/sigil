@@ -34,6 +34,43 @@ exception Continue
 exception GotoLabel of string
 exception RuntimeError of string
 
+(* Check if a value matches a declared type *)
+let type_matches (tk : type_kind) (v : value) : bool =
+  match tk, v with
+  | TInt, VInt _ -> true
+  | TFloat, VFloat _ -> true
+  | TDecimal, VDecimal _ -> true
+  | TString, VString _ -> true
+  | TBool, VBool _ -> true
+  | TUnit, VUnit -> true
+  | TArray _, VArray _ -> true
+  | TMap _, VMap _ -> true
+  | TJson, _ -> true  (* JSON can hold any value *)
+  | TRegex, VString _ -> true  (* regex patterns stored as strings *)
+  | TProcess, VProcess _ -> true
+  | TProcess, VChannel _ -> true  (* process_spawn returns VChannel *)
+  | TSocket, VSocket _ -> true
+  | TSocket, VTlsSocket _ -> true
+  | TSocket, VWsSocket _ -> true
+  | TSocket, VChannel _ -> true
+  | TFile, VSocket _ -> true  (* file fds use VSocket *)
+  | TFunction _, VFunction _ -> true
+  | _ -> false
+
+let string_of_type_kind = function
+  | TInt -> "int" | TFloat -> "float" | TDecimal -> "decimal"
+  | TString -> "string" | TBool -> "bool" | TUnit -> "unit"
+  | TArray _ -> "array" | TMap _ -> "map" | TJson -> "json"
+  | TRegex -> "regex" | TProcess -> "process" | TSocket -> "socket"
+  | TFile -> "file"   | TFunction _ -> "function"
+
+let string_of_value_type = function
+  | VInt _ -> "int" | VFloat _ -> "float" | VDecimal _ -> "decimal"
+  | VString _ -> "string" | VBool _ -> "bool" | VUnit -> "unit"
+  | VArray _ -> "array" | VMap _ -> "map" | VFunction _ -> "function"
+  | VSocket _ -> "socket" | VTlsSocket _ -> "socket" | VWsSocket _ -> "socket"
+  | VChannel _ -> "socket" | VProcess _ -> "process"
+
 (* Environment for variable bindings *)
 type env = (string, value) Hashtbl.t
 
@@ -370,10 +407,17 @@ let rec eval env expr =
   | Call (func_name, args) ->
       eval_call env func_name args
   
-  | Set (var_name, _var_type, value_expr) ->
+  | Set (var_name, var_type, value_expr) ->
       let value = eval env value_expr in
-      env_set env var_name value;
-      VUnit
+      if not (type_matches var_type value) then
+        raise (RuntimeError (
+          "Type mismatch: variable '" ^ var_name ^
+          "' declared as " ^ string_of_type_kind var_type ^
+          " but got " ^ string_of_value_type value))
+      else begin
+        env_set env var_name value;
+        VUnit
+      end
   
   | Return expr -> raise (Return (eval env expr))
   | Break -> raise Break
@@ -394,6 +438,24 @@ let rec eval env expr =
             | Some body -> eval_block env body
             | None -> VUnit)
        | _ -> raise (RuntimeError "If condition must be boolean"))
+
+  | And (left, right) ->
+      (match eval env left with
+       | VBool false -> VBool false
+       | VBool true ->
+           (match eval env right with
+            | VBool b -> VBool b
+            | _ -> raise (RuntimeError "Invalid right operand for and: expected bool"))
+       | _ -> raise (RuntimeError "Invalid left operand for and: expected bool"))
+
+  | Or (left, right) ->
+      (match eval env left with
+       | VBool true -> VBool true
+       | VBool false ->
+           (match eval env right with
+            | VBool b -> VBool b
+            | _ -> raise (RuntimeError "Invalid right operand for or: expected bool"))
+       | _ -> raise (RuntimeError "Invalid left operand for or: expected bool"))
   
   | While (cond, body) ->
       let rec loop () =
@@ -418,6 +480,46 @@ let rec eval env expr =
            | Continue -> loop ()
       in
       loop ()
+
+  | ForEach (var_name, var_type, collection_expr, body) ->
+      let coll = eval env collection_expr in
+      (match coll with
+       | VArray arr ->
+           let len = Array.length !arr in
+           let i = ref 0 in
+           (try
+             while !i < len do
+               let elem = !arr.(!i) in
+               if not (type_matches var_type elem) then
+                 raise (RuntimeError (
+                   "Type mismatch in for-each: variable '" ^ var_name ^
+                   "' declared as " ^ string_of_type_kind var_type ^
+                   " but got " ^ string_of_value_type elem));
+               env_set env var_name elem;
+               (try
+                 let _ = eval_block env body in ()
+               with Continue -> ());
+               i := !i + 1
+             done;
+             VUnit
+           with Break -> VUnit)
+       | VMap (_, keys) ->
+           (try
+             List.iter (fun k ->
+               let key_val = VString k in
+               if not (type_matches var_type key_val) then
+                 raise (RuntimeError (
+                   "Type mismatch in for-each: variable '" ^ var_name ^
+                   "' declared as " ^ string_of_type_kind var_type ^
+                   " but got " ^ string_of_value_type key_val));
+               env_set env var_name key_val;
+               (try
+                 let _ = eval_block env body in ()
+               with Continue -> ())
+             ) !keys;
+             VUnit
+           with Break -> VUnit)
+       | _ -> raise (RuntimeError "for-each requires an array or map"))
 
 and eval_block env exprs =
   let arr = Array.of_list exprs in
@@ -583,16 +685,6 @@ and eval_block env exprs =
        | [VBool a] -> VBool (not a)
        | _ -> raise (RuntimeError "Invalid arguments to not"))
 
-  | "and" | "op_and" ->
-      (match arg_vals with
-       | [VBool a; VBool b] -> VBool (a && b)
-       | _ -> raise (RuntimeError "Invalid arguments to and"))
-
-  | "or" | "op_or" ->
-      (match arg_vals with
-       | [VBool a; VBool b] -> VBool (a || b)
-       | _ -> raise (RuntimeError "Invalid arguments to or"))
-
   (* Type conversions *)
   | "cast_i64_f64" | "cast_int_float" ->
       (match arg_vals with
@@ -669,7 +761,7 @@ and eval_block env exprs =
              VString ""
        | _ -> raise (RuntimeError "Invalid arguments to string_slice"))
 
-  | "string_get" ->
+   | "string_get" ->
       (match arg_vals with
        | [VString s; VInt idx] ->
            let i = Int64.to_int idx in
@@ -678,6 +770,49 @@ and eval_block env exprs =
            else
              VInt 0L
        | _ -> raise (RuntimeError "Invalid arguments to string_get"))
+
+   | "string_format" ->
+       (match arg_vals with
+        | VString template :: format_args ->
+            let buf = Buffer.create (String.length template) in
+            let len = String.length template in
+            let arg_idx = ref 0 in
+            let i = ref 0 in
+            while !i < len do
+              if !i + 1 < len && template.[!i] = '{' && template.[!i + 1] = '}' then begin
+                if !arg_idx < List.length format_args then begin
+                  Buffer.add_string buf (string_of_value (List.nth format_args !arg_idx));
+                  arg_idx := !arg_idx + 1
+                end else
+                  Buffer.add_string buf "{}";
+                i := !i + 2
+              end else begin
+                Buffer.add_char buf template.[!i];
+                i := !i + 1
+              end
+            done;
+            VString (Buffer.contents buf)
+        | _ -> raise (RuntimeError "string_format requires a template string"))
+
+   | "string_find" ->
+       (match arg_vals with
+        | [VString haystack; VString needle] ->
+            let h_len = String.length haystack in
+            let n_len = String.length needle in
+            if n_len = 0 then VInt 0L
+            else if n_len > h_len then VInt (-1L)
+            else begin
+              let found = ref (-1) in
+              let i = ref 0 in
+              while !i <= h_len - n_len && !found = -1 do
+                if String.sub haystack !i n_len = needle then
+                  found := !i
+                else
+                  i := !i + 1
+              done;
+              VInt (Int64.of_int !found)
+            end
+        | _ -> raise (RuntimeError "Invalid arguments to string_find"))
 
   (* Array operations *)
   | "array_new" | "ArrayNew" ->
@@ -826,8 +961,17 @@ and eval_block env exprs =
   | "read_line" | "stdin_read" ->
       VString (read_line ())
 
-  | "stdin_read_all" ->
-      VString ""
+   | "stdin_read_all" ->
+       let buf = Buffer.create 4096 in
+       (try
+         while true do
+           let line = Stdlib.input_line Stdlib.stdin in
+           Buffer.add_string buf line;
+           Buffer.add_char buf '\n'
+         done;
+         VString (Buffer.contents buf)
+       with End_of_file ->
+         VString (Buffer.contents buf))
 
   (* Time operations *)
   | "time_now" ->
@@ -835,7 +979,7 @@ and eval_block env exprs =
 
   | "sleep" ->
       (match arg_vals with
-       | [VInt ms] -> Unix.sleep (Int64.to_int ms / 1000); VUnit
+       | [VInt ms] -> Unix.sleepf (Int64.to_float ms /. 1000.0); VUnit
        | _ -> raise (RuntimeError "Invalid arguments to sleep"))
 
    (* Process operations - stores (pid, stdin_fd, stdout_fd) *)
@@ -1062,25 +1206,61 @@ and eval_block env exprs =
              VUnit
        | _ -> raise (RuntimeError "Invalid arguments to channel_recv"))
 
-  (* Regex operations *)
+  (* Regex operations - using OCaml Str library *)
   | "regex_compile" ->
       (match arg_vals with
-       | [VString pattern] -> VString ("<regex:" ^ pattern ^ ">")
+       | [VString pattern] -> VString pattern  (* Store pattern as string for Str *)
        | _ -> raise (RuntimeError "Invalid arguments to regex_compile"))
 
   | "regex_match" ->
       (match arg_vals with
-       | [VString _pattern; VString _text] -> VBool false
+       | [VString pattern; VString text] ->
+           (try
+             let re = Str.regexp pattern in
+             let _ = Str.search_forward re text 0 in
+             VBool true
+           with Not_found -> VBool false
+              | _ -> raise (RuntimeError ("Invalid regex pattern: " ^ pattern)))
        | _ -> raise (RuntimeError "Invalid arguments to regex_match"))
 
   | "regex_find" ->
       (match arg_vals with
-       | [VString _pattern; VString _text] -> VString ""
+       | [VString pattern; VString text] ->
+           (try
+             let re = Str.regexp pattern in
+             let _ = Str.search_forward re text 0 in
+             VString (Str.matched_string text)
+           with Not_found -> VString ""
+              | _ -> raise (RuntimeError ("Invalid regex pattern: " ^ pattern)))
        | _ -> raise (RuntimeError "Invalid arguments to regex_find"))
+
+  | "regex_find_all" ->
+      (match arg_vals with
+       | [VString pattern; VString text] ->
+           (try
+             let re = Str.regexp pattern in
+             let results = ref [] in
+             let pos = ref 0 in
+             (try
+               while true do
+                 let _ = Str.search_forward re text !pos in
+                 let matched = Str.matched_string text in
+                 results := VString matched :: !results;
+                 pos := Str.match_end ();
+                 if !pos >= String.length text then raise Not_found
+               done
+             with Not_found -> ());
+             VArray (ref (Array.of_list (List.rev !results)))
+           with _ -> VArray (ref [||]))
+       | _ -> raise (RuntimeError "Invalid arguments to regex_find_all"))
 
    | "regex_replace" ->
        (match arg_vals with
-        | [VString pattern; VString text; VString replacement] -> VString text
+        | [VString pattern; VString text; VString replacement] ->
+            (try
+              let re = Str.regexp pattern in
+              VString (Str.global_replace re replacement text)
+            with _ -> raise (RuntimeError ("Invalid regex pattern: " ^ pattern)))
         | _ -> raise (RuntimeError "Invalid arguments to regex_replace"))
 
   (* Directory operations *)
@@ -1610,20 +1790,67 @@ and execute_tests env tests =
   if !failed > 0 then 1 else 0
 
 (* Execute module *)
-let stdlib_paths = [
-  "/var/home/marc/Projects/aisl/stdlib/core/";
-  "/var/home/marc/Projects/aisl/stdlib/data/";
-  "/var/home/marc/Projects/aisl/stdlib/net/";
-  "/var/home/marc/Projects/aisl/stdlib/sys/";
-  "/var/home/marc/Projects/aisl/stdlib/crypto/";
-  "/var/home/marc/Projects/aisl/stdlib/pattern/";
-  "/var/home/marc/Projects/aisl/stdlib/db/";
-  "/var/home/marc/Projects/aisl/modules/";
-]
+
+(* Find project root by walking up from a starting directory looking for stdlib/ *)
+let find_project_root start_dir =
+  let rec walk dir =
+    let stdlib_dir = Filename.concat dir "stdlib" in
+    if Sys.file_exists stdlib_dir && Sys.is_directory stdlib_dir then
+      Some dir
+    else
+      let parent = Filename.dirname dir in
+      if parent = dir then None  (* reached filesystem root *)
+      else walk parent
+  in
+  walk start_dir
+
+(* Mutable reference to the source file path, set by VM entry point *)
+let source_file_path = ref ""
+
+let compute_stdlib_paths () =
+  let subdirs = ["stdlib/core/"; "stdlib/data/"; "stdlib/net/";
+                 "stdlib/sys/"; "stdlib/crypto/"; "stdlib/pattern/";
+                 "stdlib/db/"; "modules/"] in
+  let make_paths root =
+    List.map (fun sub -> Filename.concat root sub) subdirs
+  in
+  (* Strategy 1: relative to source file *)
+  let from_source =
+    if !source_file_path <> "" then
+      let source_dir = Filename.dirname (if Filename.is_relative !source_file_path
+        then Filename.concat (Sys.getcwd ()) !source_file_path
+        else !source_file_path) in
+      match find_project_root source_dir with
+      | Some root -> make_paths root
+      | None -> []
+    else []
+  in
+  (* Strategy 2: relative to executable *)
+  let from_exe =
+    let exe_dir = Filename.dirname Sys.executable_name in
+    let exe_abs = if Filename.is_relative exe_dir
+      then Filename.concat (Sys.getcwd ()) exe_dir
+      else exe_dir in
+    match find_project_root exe_abs with
+    | Some root -> make_paths root
+    | None -> []
+  in
+  (* Strategy 3: relative to cwd *)
+  let from_cwd =
+    match find_project_root (Sys.getcwd ()) with
+    | Some root -> make_paths root
+    | None -> []
+  in
+  (* Deduplicate while preserving order *)
+  let seen = Hashtbl.create 16 in
+  List.filter (fun p ->
+    if Hashtbl.mem seen p then false
+    else (Hashtbl.replace seen p (); true)
+  ) (from_source @ from_exe @ from_cwd)
 
 (* Load a module from stdlib *)
 let load_module module_name =
-  let search_paths = stdlib_paths in
+  let search_paths = compute_stdlib_paths () in
   let found_path = ref None in
   List.iter (fun base_path ->
     let file_path = base_path ^ module_name ^ ".aisl" in

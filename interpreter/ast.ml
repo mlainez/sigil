@@ -15,8 +15,11 @@ type expr =
   | If of expr * expr list * expr list option  (* condition, then, else *)
   | While of expr * expr list  (* condition, body *)
   | Loop of expr list  (* Infinite loop *)
+  | And of expr * expr  (* short-circuit and *)
+  | Or of expr * expr   (* short-circuit or *)
   | Break
   | Continue
+  | ForEach of string * type_kind * expr * expr list  (* var, type, collection, body *)
   | Set of string * type_kind * expr  (* var, type, value *)
   | Return of expr
   (* Core IR constructs *)
@@ -84,8 +87,13 @@ let rec string_of_expr = function
   | Loop body ->
       let body_str = String.concat " " (List.map string_of_expr body) in
       "(loop " ^ body_str ^ ")"
+  | And (a, b) -> "(and " ^ string_of_expr a ^ " " ^ string_of_expr b ^ ")"
+  | Or (a, b) -> "(or " ^ string_of_expr a ^ " " ^ string_of_expr b ^ ")"
   | Break -> "(break)"
   | Continue -> "(continue)"
+  | ForEach (var, ty, coll, body) ->
+      let body_str = String.concat " " (List.map string_of_expr body) in
+      "(for-each " ^ var ^ " " ^ string_of_type ty ^ " " ^ string_of_expr coll ^ " " ^ body_str ^ ")"
   | Set (var, ty, value) ->
       "(set " ^ var ^ " " ^ string_of_type ty ^ " " ^ string_of_expr value ^ ")"
   | Return expr -> "(ret " ^ string_of_expr expr ^ ")"
