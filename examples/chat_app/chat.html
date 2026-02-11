@@ -36,6 +36,8 @@
     </div>
     <script>
         let lastMsg = 0;
+        let polling = false;
+        
         function send() {
             const u = document.getElementById('username').value.trim();
             const m = document.getElementById('message').value.trim();
@@ -44,35 +46,43 @@
                 .then(r => r.text())
                 .then(() => {
                     document.getElementById('message').value = '';
-                    poll();
+                    // Don't call poll() here - let the periodic poll handle it
                 });
         }
+        
         function poll() {
+            if (polling) return; // Prevent concurrent polls
+            polling = true;
+            
             fetch('/poll?last=' + lastMsg)
                 .then(r => r.text())
                 .then(data => {
                     if (data && data !== 'NONE') {
-                        const lines = data.split('\n');
+                        const lines = data.trim().split('\n').filter(l => l.trim());
                         const msgs = document.getElementById('messages');
                         lines.forEach(line => {
-                            if (line.trim()) {
-                                const div = document.createElement('div');
-                                div.className = 'mb-3 p-3 bg-white rounded-lg shadow-sm';
-                                const parts = line.split(': ', 2);
-                                if (parts.length === 2) {
-                                    const user = parts[0];
-                                    const msg = parts[1];
-                                    const isSystem = user === '[System]';
-                                    div.innerHTML = '<span class="font-bold ' + (isSystem ? 'text-gray-500' : 'text-purple-600') + '">' + user + '</span><span class="text-gray-700">: ' + msg + '</span>';
-                                } else {
-                                    div.innerHTML = '<span class="text-gray-700">' + line + '</span>';
-                                }
-                                msgs.appendChild(div);
-                                lastMsg++;
+                            const div = document.createElement('div');
+                            div.className = 'mb-3 p-3 bg-white rounded-lg shadow-sm';
+                            const parts = line.split(': ', 2);
+                            if (parts.length === 2) {
+                                const user = parts[0];
+                                const msg = parts[1];
+                                const isSystem = user === '[System]';
+                                div.innerHTML = '<span class="font-bold ' + (isSystem ? 'text-gray-500' : 'text-purple-600') + '">' + user + '</span><span class="text-gray-700">: ' + msg + '</span>';
+                            } else {
+                                div.innerHTML = '<span class="text-gray-700">' + line + '</span>';
                             }
+                            msgs.appendChild(div);
                         });
+                        lastMsg += lines.length;
                         msgs.scrollTop = msgs.scrollHeight;
                     }
+                    polling = false;
+                    setTimeout(poll, 500);
+                })
+                .catch(err => {
+                    console.error('Poll error:', err);
+                    polling = false;
                     setTimeout(poll, 500);
                 });
         }

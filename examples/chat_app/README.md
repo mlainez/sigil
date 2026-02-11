@@ -1,25 +1,26 @@
 # AISL Chat App
 
-A real-time chat application built with AISL featuring a modern web interface.
+A real-time chat application built with AISL featuring WebSocket communication and a modern web interface.
 
 ## Files
 
-- `chat_server.aisl` - Chat server that handles multiple clients and broadcasts messages (49 lines)
-- `chat_client.aisl` - Web-based chat client with HTTP interface (254 lines)
+- `chat_server.aisl` - WebSocket chat server that handles multiple clients and broadcasts messages
+- `chat_client.aisl` - Web-based chat client with HTTP bridge to WebSocket server
 - `chat.html` - HTML/CSS/JavaScript frontend with Tailwind CSS
 
 ## Architecture
 
 ### Chat Server (Port 8080)
-- Non-blocking event-driven TCP server
-- Broadcasts all messages to all connected clients
-- Uses `socket_select` for efficient I/O multiplexing
+- Non-blocking event-driven WebSocket server
+- Broadcasts all messages to all connected WebSocket clients
+- Uses `ws_accept` for WebSocket handshake and `socket_select` for efficient I/O multiplexing
+- Handles WebSocket frame encoding/decoding natively
 
 ### Chat Client (Configurable HTTP Port)
 - Dual-socket event loop:
   - HTTP server for web interface (configurable port)
-  - TCP client connection to chat server (port 8080)
-- Polls chat server for new messages
+  - WebSocket client connection to chat server (port 8080)
+- Uses `ws_connect` to establish WebSocket connection to server
 - Buffers messages and serves them to browser clients via HTTP
 - Each client instance runs on its own HTTP port
 
@@ -28,11 +29,10 @@ A real-time chat application built with AISL featuring a modern web interface.
 ### 1. Start the Chat Server
 
 ```bash
-./compiler/c/bin/aislc examples/chat_app/chat_server.aisl
-./compiler/c/bin/aisl-run examples/chat_app/chat_server.aislc
+./interpreter/_build/default/vm.exe examples/chat_app/chat_server.aisl
 ```
 
-The server listens on port 8080.
+The server listens on port 8080 for WebSocket connections.
 
 ### 2. Start Chat Clients
 
@@ -40,18 +40,17 @@ Each client needs its own HTTP port to avoid conflicts.
 
 **First Client (port 3000):**
 ```bash
-./compiler/c/bin/aislc examples/chat_app/chat_client.aisl
-HTTP_PORT=3000 ./compiler/c/bin/aisl-run examples/chat_app/chat_client.aislc
+HTTP_PORT=3000 ./interpreter/_build/default/vm.exe examples/chat_app/chat_client.aisl
 ```
 
 **Second Client (port 3001):**
 ```bash
-HTTP_PORT=3001 ./compiler/c/bin/aisl-run examples/chat_app/chat_client.aislc
+HTTP_PORT=3001 ./interpreter/_build/default/vm.exe examples/chat_app/chat_client.aisl
 ```
 
 **Third Client (port 3002):**
 ```bash
-HTTP_PORT=3002 ./compiler/c/bin/aisl-run examples/chat_app/chat_client.aislc
+HTTP_PORT=3002 ./interpreter/_build/default/vm.exe examples/chat_app/chat_client.aisl
 ```
 
 ### 3. Open in Browser
@@ -70,12 +69,13 @@ All clients see the same chatroom and can communicate in real-time!
 ### Connecting to Remote Chat Server
 
 ```bash
-CHAT_HOST=192.168.1.100 HTTP_PORT=3000 ./compiler/c/bin/aisl-run examples/chat_app/chat_client.aislc
+CHAT_HOST=192.168.1.100 HTTP_PORT=3000 ./interpreter/_build/default/vm.exe examples/chat_app/chat_client.aisl
 ```
 
 ## Features
 
 - **Modern Web Interface** - Beautiful gradient UI with Tailwind CSS
+- **WebSocket Protocol** - Native WebSocket communication (not raw TCP)
 - **Real-time Updates** - Automatic polling for new messages (500ms)
 - **Multiple Clients** - Run multiple clients on the same machine
 - **User Names** - Each user can set their own name
@@ -97,17 +97,17 @@ Each chat client HTTP server exposes:
 
 The chat client uses a sophisticated event loop that monitors three types of sockets:
 1. HTTP server socket (for new browser connections)
-2. Chat server TCP connection (for incoming chat messages)
+2. WebSocket connection to chat server (for incoming chat messages)
 3. Active HTTP client sockets (for serving web requests)
 
 ```lisp
 (loop
-  ; Build inputs array: [http_server, chat_conn, ...http_clients]
+  ; Build inputs array: [http_server, ws_conn, ...http_clients]
   (set ready array (socket_select inputs))
   
   ; Handle ready sockets:
   ; - idx 0: new HTTP client (tcp_accept)
-  ; - idx 1: message from chat server (tcp_receive)
+  ; - idx 1: message from chat server (ws_receive)
   ; - idx 2+: HTTP request from browser (handle_http_client)
 )
 ```
@@ -115,9 +115,9 @@ The chat client uses a sophisticated event loop that monitors three types of soc
 ### Message Flow
 
 1. Browser sends message via `/send` endpoint
-2. Client forwards to chat server via TCP
-3. Chat server broadcasts to all connected clients
-4. Clients receive and buffer messages
+2. Client forwards to chat server via WebSocket (`ws_send`)
+3. Chat server broadcasts to all connected WebSocket clients
+4. Clients receive and buffer messages via `ws_receive`
 5. Browser polls `/poll` endpoint to fetch new messages
 6. JavaScript updates UI with new messages
 
@@ -125,19 +125,19 @@ The chat client uses a sophisticated event loop that monitors three types of soc
 
 **Terminal 1 - Server:**
 ```bash
-./compiler/c/bin/aisl-run examples/chat_app/chat_server.aislc
-# Chat server running on port 8080
+./interpreter/_build/default/vm.exe examples/chat_app/chat_server.aisl
+# WebSocket chat server running on port 8080
 ```
 
 **Terminal 2 - Alice's Client:**
 ```bash
-HTTP_PORT=3000 ./compiler/c/bin/aisl-run examples/chat_app/chat_client.aislc
+HTTP_PORT=3000 ./interpreter/_build/default/vm.exe examples/chat_app/chat_client.aisl
 # HTTP interface running on http://localhost:3000
 ```
 
 **Terminal 3 - Bob's Client:**
 ```bash
-HTTP_PORT=3001 ./compiler/c/bin/aisl-run examples/chat_app/chat_client.aislc
+HTTP_PORT=3001 ./interpreter/_build/default/vm.exe examples/chat_app/chat_client.aisl
 # HTTP interface running on http://localhost:3001
 ```
 
@@ -150,8 +150,9 @@ HTTP_PORT=3001 ./compiler/c/bin/aisl-run examples/chat_app/chat_client.aislc
 ## Demonstrating AISL's Capabilities
 
 This chat application showcases:
+- **WebSocket protocol** with `ws_accept`, `ws_connect`, `ws_send`, `ws_receive`
 - **Non-blocking I/O** with `socket_select`
-- **Multi-socket event loops** (HTTP + TCP simultaneously)
+- **Multi-socket event loops** (HTTP + WebSocket simultaneously)
 - **HTTP server implementation** with request parsing and routing
 - **Message buffering and state management**
 - **URL decoding** for query parameters

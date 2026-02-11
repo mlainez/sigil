@@ -1,14 +1,6 @@
 (module chat_client
   (import string_utils)
-  
-  (fn handle_send chat_conn socket query_string string -> string
-    (set username string (extract_param query_string "username"))
-    (set message string (extract_param query_string "message"))
-    (set formatted string (string_concat username ": "))
-    (set formatted string (string_concat formatted message))
-    (tcp_send chat_conn formatted)
-    (ret "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\r\nOK"))
-  
+
   (fn extract_param query_string string param_name string -> string
     (set parts array (split query_string "&"))
     (set i int 0)
@@ -25,14 +17,16 @@
           (set result string (array_get kv 1))))
       (set i int (add i 1)))
     (ret result))
-  
+
   (fn url_decode text string -> string
     (set result string (replace text "%20" " "))
     (set result string (replace result "%21" "!"))
     (set result string (replace result "%3A" ":"))
     (set result string (replace result "%3F" "?"))
+    (set result string (replace result "%2C" ","))
+    (set result string (replace result "%27" "'"))
     (ret result))
-  
+
   (fn extract_query path string -> string
     (set parts array (split path "?"))
     (set len int (array_length parts))
@@ -40,15 +34,15 @@
     (if (ge len 2)
       (set query string (array_get parts 1)))
     (ret query))
-  
-  (fn parse_request req string -> string
+
+  (fn parse_first_line req string -> string
     (set lines array (split req "\r\n"))
     (set len int (array_length lines))
     (set first_line string "")
     (if (gt len 0)
       (set first_line string (array_get lines 0)))
     (ret first_line))
-  
+
   (fn extract_path first_line string -> string
     (set parts array (split first_line " "))
     (set len int (array_length parts))
@@ -56,167 +50,136 @@
     (if (ge len 2)
       (set path string (array_get parts 1)))
     (ret path))
-  
+
   (fn is_complete_http_request req string -> bool
     (set has_end bool (contains req "\r\n\r\n"))
     (ret has_end))
-  
-  (fn handle_poll chat_conn socket messages array query_string string -> string
-    (set last_str string (extract_param query_string "last"))
-    (set last_idx int 0)
-    (set msg_count int (array_length messages))
-    (if (gt (string_length last_str) 0)
-      (set last_idx int (string_to_int last_str)))
-    
-    (if (ge last_idx msg_count)
-      (ret "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\r\nNONE"))
-    
-    (set response string "")
-    (set i int last_idx)
-    (while (lt i msg_count)
-      (set msg string (array_get messages i))
-      (set response string (string_concat response msg))
-      (set response string (string_concat response "\n"))
-      (set i int (add i 1)))
-    
-    (set resp string "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\r\n")
-    (set resp string (string_concat resp response))
-    (ret resp))
-  
-  (fn string_to_int str string -> int
-    (set result int 0)
-    (set len int (string_length str))
-    (set i int 0)
-    (while (lt i len)
-      (set char string (string_slice str i 1))
-      (set digit int 0)
-      (if (string_equals char "0")
-        (set digit int 0))
-      (if (string_equals char "1")
-        (set digit int 1))
-      (if (string_equals char "2")
-        (set digit int 2))
-      (if (string_equals char "3")
-        (set digit int 3))
-      (if (string_equals char "4")
-        (set digit int 4))
-      (if (string_equals char "5")
-        (set digit int 5))
-      (if (string_equals char "6")
-        (set digit int 6))
-      (if (string_equals char "7")
-        (set digit int 7))
-      (if (string_equals char "8")
-        (set digit int 8))
-      (if (string_equals char "9")
-        (set digit int 9))
-      (set result int (mul result 10))
-      (set result int (add result digit))
-      (set i int (add i 1)))
-    (ret result))
-  
-  (fn handle_http_client chat_conn socket http_client socket buffer string messages array -> string
-    (set chunk string (tcp_receive http_client 4096))
-    (set chunk_len int (string_length chunk))
-    (if (eq chunk_len 0)
-      (ret buffer))
-    
-    (set new_buffer string (string_concat buffer chunk))
-    (set is_complete bool (is_complete_http_request new_buffer))
-    (if is_complete
-      (set first_line string (parse_request new_buffer))
-      (set line_len int (string_length first_line))
-      (if (gt line_len 0)
-        (set path string (extract_path first_line))
-        (set query string (extract_query path))
-        (set is_root bool (string_equals path "/"))
-        (set is_send bool (contains path "/send"))
-        (set is_poll bool (contains path "/poll"))
-        
-        (if is_root
-          (set template_path string "examples/chat_app/chat.html")
-          (set html string (file_read template_path))
-          (set resp string "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n")
-          (set resp string (string_concat resp html))
-          (tcp_send http_client resp))
-        
-        (if is_send
-          (set decoded_query string (url_decode query))
-          (set resp string (handle_send chat_conn decoded_query))
-          (tcp_send http_client resp))
-        
-        (if is_poll
-          (set resp string (handle_poll chat_conn messages query))
-          (tcp_send http_client resp)))
-      
-      (tcp_close http_client)
-      (ret "CLOSE"))
-    
-    (ret new_buffer))
-  
+
   (fn main -> int
     (set default_port string "3000")
     (set port_str string (getenv "HTTP_PORT"))
     (if (eq (string_length port_str) 0)
       (set port_str string default_port))
     (set http_port int (string_to_int port_str))
-    
+
     (set default_host string "localhost")
     (set chat_host string (getenv "CHAT_HOST"))
     (if (eq (string_length chat_host) 0)
       (set chat_host string default_host))
-    
-    (set chat_conn socket (tcp_connect chat_host 8080))
-    (print "Connected to chat server at ")
+
+    (set chat_ws socket (ws_connect chat_host 8080 "/"))
+    (print "Connected to chat server via WebSocket at ")
     (print chat_host)
-    (print ":8080")
-    
+    (print ":8080\n")
+
     (set http_server socket (tcp_listen http_port))
     (print "HTTP interface running on http://localhost:")
     (print http_port)
-    
+    (print "\n")
+
     (set http_clients array (array_new))
     (set http_buffers array (array_new))
     (set messages array (array_new))
-    
+
     (loop
-      (set inputs array (array_new))
-      (array_push inputs http_server)
-      (array_push inputs chat_conn)
-      
+      (set select_inputs array (array_new))
+      (array_push select_inputs http_server)
+      (array_push select_inputs chat_ws)
+
       (set client_count int (array_length http_clients))
       (set j int 0)
       (while (lt j client_count)
-        (set client socket (array_get http_clients j))
-        (array_push inputs client)
+        (set http_client socket (array_get http_clients j))
+        (array_push select_inputs http_client)
         (set j int (add j 1)))
-      
-      (set ready array (socket_select inputs))
+
+      (set ready array (socket_select select_inputs))
       (set ready_len int (array_length ready))
       (set k int 0)
-      
+
       (while (lt k ready_len)
         (set idx int (array_get ready k))
-        
+
         (if (eq idx 0)
-          (set http_client socket (tcp_accept http_server))
-          (array_push http_clients http_client)
+          (set new_http_client socket (tcp_accept http_server))
+          (array_push http_clients new_http_client)
           (array_push http_buffers ""))
-        
+
         (if (eq idx 1)
-          (set data string (tcp_receive chat_conn 4096))
-          (set data_len int (string_length data))
-          (if (gt data_len 0)
-            (array_push messages data)))
-        
+          (set ws_msg string (ws_receive chat_ws))
+          (set ws_msg_len int (string_length ws_msg))
+          (if (gt ws_msg_len 0)
+            (array_push messages ws_msg)))
+
         (if (and (not (eq idx 0)) (not (eq idx 1)))
           (set client_idx int (sub idx 2))
           (set http_client socket (array_get http_clients client_idx))
-          (set buffer string (array_get http_buffers client_idx))
-          (set new_buffer string (handle_http_client chat_conn http_client buffer messages))
-          (set should_close bool (string_equals new_buffer "CLOSE"))
-          
-          (if should_close
+          (set prev_buffer string (array_get http_buffers client_idx))
+          (set chunk string (tcp_receive http_client 4096))
+          (set chunk_len int (string_length chunk))
+
+          (set should_remove bool false)
+
+          (if (eq chunk_len 0)
+            (set should_remove bool true))
+
+          (if (gt chunk_len 0)
+            (set new_buffer string (string_concat prev_buffer chunk))
+            (set is_complete bool (is_complete_http_request new_buffer))
+
+            (if is_complete
+              (set first_line string (parse_first_line new_buffer))
+              (set path string (extract_path first_line))
+              (set query string (extract_query path))
+              (set is_root bool (string_equals path "/"))
+              (set is_send bool (contains path "/send"))
+              (set is_poll bool (contains path "/poll"))
+
+              (if is_root
+                (set template_path string "examples/chat_app/chat.html")
+                (set html string (file_read template_path))
+                (set resp string "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nConnection: close\r\n\r\n")
+                (set resp string (string_concat resp html))
+                (tcp_send http_client resp))
+
+              (if is_send
+                (set decoded_query string (url_decode query))
+                (set username string (extract_param decoded_query "username"))
+                (set message string (extract_param decoded_query "message"))
+                (set formatted string (string_concat username ": "))
+                (set formatted string (string_concat formatted message))
+                (ws_send chat_ws formatted)
+                (set resp string "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nConnection: close\r\n\r\nOK")
+                (tcp_send http_client resp))
+
+              (if is_poll
+                (set last_str string (extract_param query "last"))
+                (set last_idx int 0)
+                (set msg_count int (array_length messages))
+                (if (gt (string_length last_str) 0)
+                  (set last_idx int (string_to_int last_str)))
+
+                (set poll_body string "NONE")
+                (if (lt last_idx msg_count)
+                  (set poll_body string "")
+                  (set pi int last_idx)
+                  (while (lt pi msg_count)
+                    (set line string (array_get messages pi))
+                    (set poll_body string (string_concat poll_body line))
+                    (set poll_body string (string_concat poll_body "\n"))
+                    (set pi int (add pi 1))))
+
+                (set resp string "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nConnection: close\r\n\r\n")
+                (set resp string (string_concat resp poll_body))
+                (tcp_send http_client resp))
+
+              (tcp_close http_client)
+              (set should_remove bool true))
+
+            (if (not is_complete)
+              (array_set http_buffers client_idx new_buffer)))
+
+          (if should_remove
             (set last_idx int (sub (array_length http_clients) 1))
             (if (ne client_idx last_idx)
               (set last_client socket (array_get http_clients last_idx))
@@ -227,17 +190,14 @@
             (set temp_buffers array (array_new))
             (set m int 0)
             (while (lt m last_idx)
-              (set c socket (array_get http_clients m))
-              (array_push temp_clients c)
-              (set b string (array_get http_buffers m))
-              (array_push temp_buffers b)
+              (set tc socket (array_get http_clients m))
+              (array_push temp_clients tc)
+              (set tb string (array_get http_buffers m))
+              (array_push temp_buffers tb)
               (set m int (add m 1)))
             (set http_clients array temp_clients)
-            (set http_buffers array temp_buffers))
-          
-          (if (not should_close)
-            (array_set http_buffers client_idx new_buffer)))
-        
+            (set http_buffers array temp_buffers)))
+
         (set k int (add k 1))))
-    
+
     (ret 0)))
