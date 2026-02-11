@@ -1,0 +1,97 @@
+(module test_literals
+
+  (fn test_array_literal_length -> int
+    (set nums array [1 2 3 4 5])
+    (ret (array_length nums)))
+
+  (fn test_array_literal_get idx int -> int
+    (set nums array [10 20 30])
+    (ret (array_get nums idx)))
+
+  (fn test_array_literal_empty -> int
+    (set arr array [])
+    (ret (array_length arr)))
+
+  (fn test_array_literal_strings -> string
+    (set words array ["hello" "world"])
+    (ret (array_get words 1)))
+
+  (fn test_array_literal_mixed_ops -> int
+    (set nums array [1 2 3])
+    (array_push nums 4)
+    (ret (array_length nums)))
+
+  (fn test_map_literal_get key_name string -> string
+    (set person map {"name" "Alice" "city" "Paris"})
+    (ret (map_get person key_name)))
+
+  (fn test_map_literal_length -> int
+    (set data map {"a" 1 "b" 2 "c" 3})
+    (ret (map_length data)))
+
+  (fn test_map_literal_empty -> int
+    (set empty_map map {})
+    (ret (map_length empty_map)))
+
+  (fn test_map_literal_has key_name string -> bool
+    (set data map {"x" 10 "y" 20})
+    (ret (map_has data key_name)))
+
+  (test-spec test_array_literal_length
+    (case "5 element array"
+      (input)
+      (expect 5)))
+
+  (test-spec test_array_literal_get
+    (case "first element"
+      (input 0)
+      (expect 10))
+    (case "second element"
+      (input 1)
+      (expect 20))
+    (case "third element"
+      (input 2)
+      (expect 30)))
+
+  (test-spec test_array_literal_empty
+    (case "empty array has length 0"
+      (input)
+      (expect 0)))
+
+  (test-spec test_array_literal_strings
+    (case "string array access"
+      (input)
+      (expect "world")))
+
+  (test-spec test_array_literal_mixed_ops
+    (case "push to literal array"
+      (input)
+      (expect 4)))
+
+  (test-spec test_map_literal_get
+    (case "get name"
+      (input "name")
+      (expect "Alice"))
+    (case "get city"
+      (input "city")
+      (expect "Paris")))
+
+  (test-spec test_map_literal_length
+    (case "3 key map"
+      (input)
+      (expect 3)))
+
+  (test-spec test_map_literal_empty
+    (case "empty map has length 0"
+      (input)
+      (expect 0)))
+
+  (test-spec test_map_literal_has
+    (case "existing key"
+      (input "x")
+      (expect true))
+    (case "missing key"
+      (input "z")
+      (expect false)))
+
+  (meta-note "Tests array literals [1 2 3] and map literals {\"key\" \"value\"} syntax"))

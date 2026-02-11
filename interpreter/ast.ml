@@ -28,6 +28,8 @@ type expr =
   | IfNot of expr * string  (* condition, label *)
   | Try of expr list * string * type_kind * expr list  (* try_body, catch_var, catch_type, catch_body *)
   | Cond of (expr * expr list) list  (* list of (condition, body) branches *)
+  | LitArray of expr list  (* [1 2 3] *)
+  | LitMap of (expr * expr) list  (* {"key" "value" "key2" "value2"} *)
 
 (* Function parameter *)
 type param = {
@@ -112,3 +114,8 @@ let rec string_of_expr = function
         "(" ^ string_of_expr cond ^ " " ^ body_str ^ ")"
       ) branches in
       "(cond " ^ String.concat " " branch_strs ^ ")"
+  | LitArray elems ->
+      "[" ^ String.concat " " (List.map string_of_expr elems) ^ "]"
+  | LitMap pairs ->
+      let pair_strs = List.map (fun (k, v) -> string_of_expr k ^ " " ^ string_of_expr v) pairs in
+      "{" ^ String.concat " " pair_strs ^ "}"

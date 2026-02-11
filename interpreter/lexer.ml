@@ -3,6 +3,10 @@
 type token =
   | LParen
   | RParen
+  | LBracket
+  | RBracket
+  | LBrace
+  | RBrace
   | Symbol of string
   | IntLit of int64
   | FloatLit of float
@@ -93,6 +97,10 @@ let tokenize input =
       match c with
       | '(' -> loop (pos + 1) (LParen :: acc)
       | ')' -> loop (pos + 1) (RParen :: acc)
+      | '[' -> loop (pos + 1) (LBracket :: acc)
+      | ']' -> loop (pos + 1) (RBracket :: acc)
+      | '{' -> loop (pos + 1) (LBrace :: acc)
+      | '}' -> loop (pos + 1) (RBrace :: acc)
       | '"' ->
           let (str, next_pos) = read_string input (pos + 1) in
           loop next_pos (StringLit str :: acc)
@@ -137,6 +145,10 @@ let tokenize input =
 let string_of_token = function
   | LParen -> "("
   | RParen -> ")"
+  | LBracket -> "["
+  | RBracket -> "]"
+  | LBrace -> "{"
+  | RBrace -> "}"
   | Symbol s -> "Symbol(" ^ s ^ ")"
   | IntLit n -> "Int(" ^ Int64.to_string n ^ ")"
   | FloatLit f -> "Float(" ^ string_of_float f ^ ")"

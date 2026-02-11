@@ -71,6 +71,8 @@ let rec parse_expr state =
   | BoolLit b -> (LitBool b, advance state)
   | Symbol s -> (Var s, advance state)
   | LParen -> parse_sexpr state
+  | LBracket -> parse_array_literal state
+  | LBrace -> parse_map_literal state
   | tok -> raise (ParseError ("Expected expression but got " ^ string_of_token tok))
 
 and parse_sexpr state =
@@ -237,6 +239,31 @@ and parse_cond state =
   if branches = [] then
     raise (ParseError "cond requires at least one branch");
   (Cond branches, state)
+
+and parse_array_literal state =
+  let state = expect_token LBracket state in
+  let rec parse_elems state acc =
+    match peek state with
+    | RBracket -> (List.rev acc, expect_token RBracket state)
+    | _ ->
+        let (expr, state) = parse_expr state in
+        parse_elems state (expr :: acc)
+  in
+  let (elems, state) = parse_elems state [] in
+  (LitArray elems, state)
+
+and parse_map_literal state =
+  let state = expect_token LBrace state in
+  let rec parse_pairs state acc =
+    match peek state with
+    | RBrace -> (List.rev acc, expect_token RBrace state)
+    | _ ->
+        let (key, state) = parse_expr state in
+        let (value, state) = parse_expr state in
+        parse_pairs state ((key, value) :: acc)
+  in
+  let (pairs, state) = parse_pairs state [] in
+  (LitMap pairs, state)
 
 and parse_call func_name state =
   let (args, state) = parse_args state [] in

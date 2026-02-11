@@ -790,6 +790,24 @@ let rec eval env expr =
       in
       try_branches branches
 
+  | LitArray elems ->
+      let vals = List.map (eval env) elems in
+      VArray (ref (Array.of_list vals))
+
+  | LitMap pairs ->
+      let tbl = Hashtbl.create (List.length pairs) in
+      let keys = ref [] in
+      List.iter (fun (k_expr, v_expr) ->
+        let key = match eval env k_expr with
+          | VString s -> s
+          | _ -> raise (RuntimeError "Map literal keys must be strings")
+        in
+        Hashtbl.replace tbl key (eval env v_expr);
+        if not (List.mem key !keys) then
+          keys := !keys @ [key]
+      ) pairs;
+      VMap (tbl, keys)
+
   | And (left, right) ->
       (match eval env left with
        | VBool false -> VBool false
