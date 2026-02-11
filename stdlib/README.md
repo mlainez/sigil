@@ -2,7 +2,7 @@
 
 The AISL Standard Library provides high-level functionality implemented in **pure AISL code**. This follows AISL's core philosophy: **"If it CAN be written in AISL, it MUST be written in AISL."**
 
-All stdlib modules are written in AISL and compiled to bytecode, making them:
+All stdlib modules are written in AISL and interpreted directly, making them:
 - **Readable** - Easy to understand and modify
 - **Maintainable** - Written in the same language as user code
 - **Self-documenting** - Working examples for LLMs to learn from
@@ -43,7 +43,7 @@ All stdlib modules are written in AISL and compiled to bytecode, making them:
 ### System
 - **time** - Time and date operations
 - **process** - Process management
-- **ffi** - Foreign function interface
+- **sleep** - Sleep/delay operations
 
 ### Database
 - **sqlite** - SQLite database operations

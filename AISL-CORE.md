@@ -213,7 +213,9 @@ These constructs are **AISL-Agent** features that desugar to Core:
 - `loop` (infinite loops)
 - `break` statements
 - `continue` statements
-- `if/else` expressions
+- `if/else` conditionals
+- `for-each` iteration
+- `and`/`or` short-circuit boolean operators
 - `match` expressions
 - `for` loops
 
@@ -221,14 +223,14 @@ See AISL-AGENT.md for Agent layer specification.
 
 ## Implementation
 
-- **Interpreter**: `interpreter/interpreter.ml` — Tree-walking interpreter (~1640 lines)
+- **Interpreter**: `interpreter/interpreter.ml` — Tree-walking interpreter (~1930 lines)
 - **Parser**: `interpreter/parser.ml` — Recursive descent S-expression parser
 - **Lexer**: `interpreter/lexer.ml` — Tokenizer
 - **AST**: `interpreter/ast.ml` — AST node types
 - **Types**: `interpreter/types.ml` — Type kind definitions
 - **Entry Point**: `interpreter/vm.ml` — Reads file, tokenizes, parses, executes
 
-The interpreter handles Agent constructs (while, loop, break, continue, if) directly during evaluation — there is no separate desugaring pass or bytecode compilation step.
+The interpreter handles Agent constructs (while, loop, break, continue, if, if-else, for-each, and, or) directly during evaluation — there is no separate desugaring pass or bytecode compilation step.
 
 ## Version History
 

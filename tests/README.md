@@ -4,19 +4,21 @@ Test files for AISL language features and standard library.
 
 ## Test Status
 
-**119 tests - All passing, all use test-spec format**
+**126 tests - All passing, all use test-spec format**
 
 ## Test Categories
 
 ### Language Features
 - Type system (int, float, string, bool, decimal, json, regex)
-- Control flow (if, while, loop, break, continue)
+- Control flow (if, if-else, while, loop, for-each, break, continue)
 - Functions and recursion
 - Variables and operators
-- String operations
+- Short-circuit boolean operators (and, or)
+- String operations (including string_format, string_find)
 - Arrays and maps
 - Channels
 - Decimal arithmetic
+- Type enforcement (runtime type checking on set)
 
 ### Standard Library
 - File I/O operations
@@ -27,7 +29,7 @@ Test files for AISL language features and standard library.
 - Type conversions
 - Math functions
 - String utilities
-- Regex operations
+- Regex operations (POSIX extended via OCaml Str)
 - Base64 encoding/decoding
 - Cryptographic hashing
 

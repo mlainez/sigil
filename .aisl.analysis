@@ -32,13 +32,13 @@ Examples of what should be AISL:
 
 Available modules:
 
-stdlib/ (14 pure AISL implementations):
+stdlib/ (13 pure AISL implementations):
 - core/: string_utils, conversion, channel
 - data/: json_utils, base64
 - net/: http, websocket
 - pattern/: regex
 - crypto/: hash
-- sys/: time, process, sleep, ffi
+- sys/: time, process, sleep
 - db/: sqlite
 
 modules/ (additional modules):
@@ -231,42 +231,48 @@ Pattern:
 2. Use ifnot to skip override logic
 3. Single ret at end
 
-@(if-statement-workaround)
+@(if-else-support)
 
-**Parser limitation: if-then-else not yet implemented**
+**If-else now works with (else ...) block syntax**
 
-The parser treats ALL statements after if condition as then-branch. No else-branch support yet.
-
-Workaround - use result variable pattern:
+Syntax:
 ```
-(set success bool (compile_test file))
-(if success
-  (print "passed"))
-(if (not success)
-  (print "failed"))
+(if condition
+  then-statements...
+  (else
+    else-statements...))
 ```
 
-Or:
+The `(else ...)` block is optional. When present, it must be the last element in the if body.
+
+Example:
 ```
-(set message string "default")
-(if success
-  (set message string "modified"))
-(print message)
+(fn classify x int -> string
+  (set result string "zero")
+  (if (gt x 0)
+    (set result string "positive")
+    (else
+      (if (lt x 0)
+        (set result string "negative"))))
+  (ret result))
 ```
+
+Note: Multiple statements work correctly in both then and else branches.
 
 @(return-string-from-if)
 
-**Never return string literals directly from if blocks**
+**Returning string literals from if blocks works correctly with if-else**
 
-Pattern that FAILS:
+With if-else support, you can now use:
 ```
 (fn test x int -> string
   (if (lt x 0)
-    (ret "negative"))
-  (ret "positive"))
+    (ret "negative")
+    (else
+      (ret "positive"))))
 ```
 
-ALWAYS use result variable:
+The result variable pattern is still valid but no longer required:
 ```
 (fn test x int -> string
   (set result string "positive")
@@ -279,7 +285,7 @@ ALWAYS use result variable:
 
 **Never name modules same as type keywords**
 
-Type keywords: int, float, string, bool, json, array, map, result, option, regex
+Type keywords: int, float, string, bool, json, array, map, option, regex
 
 Use descriptive names:
 - json_utils (NOT json)
@@ -312,7 +318,7 @@ Components:
 - parser.ml - Recursive descent parser, produces AST
 - types.ml - Type kind definitions
 - ast.ml - AST node types
-- interpreter.ml - ~1640 lines: eval, eval_call (all builtins), eval_block, test framework, import system, WebSocket helpers
+- interpreter.ml - ~1930 lines: eval, eval_call (all builtins), eval_block, test framework, import system, WebSocket helpers, special forms (And, Or, ForEach)
 - vm.ml - Entry point: reads file, tokenizes, parses, executes
 
 Build: cd interpreter && eval $(opam env) && dune build
@@ -320,4 +326,61 @@ Run: ./interpreter/_build/default/vm.exe program.aisl
 
 Libraries: unix, str, ssl (OpenSSL bindings)
 
-No separate desugaring pass - interpreter handles Agent constructs (while, loop, if, break, continue) directly in eval_block.
+No separate desugaring pass - interpreter handles Agent constructs (while, loop, if, if-else, for-each, break, continue, and, or) directly in eval_block.
+
+@(for-each-loop)
+
+**for-each loop iterates array elements or map keys**
+
+Syntax: `(for-each var type collection body...)`
+
+- For arrays: binds each element to `var` with declared `type`
+- For maps: binds each key (as string) to `var`
+- Supports `break` and `continue`
+- Validates element type against declared type at runtime
+
+Example:
+```
+(set nums array (array_new))
+(array_push nums 1)
+(array_push nums 2)
+(array_push nums 3)
+(set total int 0)
+(for-each val int nums
+  (set total int (add total val)))
+```
+
+@(short-circuit-and-or)
+
+**and/or are AST-level special forms, NOT function calls**
+
+Key design: `and`/`or` are parsed as `And`/`Or` AST nodes and evaluated in `eval`, not `eval_call`.
+This is because `eval_call` pre-evaluates all arguments (`List.map (eval env) args`), which defeats short-circuit evaluation.
+
+- `(and e1 e2)`: Returns false immediately if e1 is false; e2 is never evaluated
+- `(or e1 e2)`: Returns true immediately if e1 is true; e2 is never evaluated
+- `not` remains in `eval_call` (single arg, no short-circuit needed)
+
+Verified: `(and false (gt (div 1 0) 0))` does NOT divide by zero.
+
+@(string-format-find)
+
+**string_format and string_find builtins**
+
+`string_format`: Takes template with `{}` placeholders plus additional args.
+- Replaces `{}` sequentially with string_of_value of each arg
+- Extra `{}` without args left as-is
+- Example: `(string_format "Hello, {}! You are {} years old." name age)`
+
+`string_find`: Returns index of first occurrence of needle in haystack.
+- Returns -1 if not found
+- Returns 0 for empty needle
+- Example: `(string_find "hello world" "world")` -> 6
+
+@(dynamic-stdlib-resolution)
+
+**Stdlib paths resolved dynamically at runtime**
+
+The interpreter walks up from the source file directory to find the project root containing `stdlib/`.
+Falls back to executable directory, then current working directory.
+This eliminates hardcoded absolute paths that break on different machines.

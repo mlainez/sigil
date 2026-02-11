@@ -45,6 +45,8 @@ statement ::= (set <var> <type> <expr>)
             | (ifnot <bool_var> <label>)
             | (while <bool_expr> <statement>*)
             | (loop <statement>*)
+            | (if <bool_expr> <statement>* [(else <statement>*)])
+            | (for-each <var> <type> <collection_expr> <statement>*)
             | (break)
             | (continue)
             | (ret <expr>)
@@ -52,6 +54,8 @@ statement ::= (set <var> <type> <expr>)
 expr ::= <literal>
        | <variable>
        | (call <function> <arg>*)
+       | (and <expr> <expr>)     ; Short-circuit: e2 not evaluated if e1 is false
+       | (or <expr> <expr>)      ; Short-circuit: e2 not evaluated if e1 is true
 
 literal ::= <number> | <string> | true | false
 ```
@@ -79,12 +83,12 @@ Test files using the `test-spec` framework don't require a `main` function.
 ### Primitive Types
 - **int** - 64-bit signed integer
 - **float** - 64-bit floating point
+- **decimal** - Arbitrary precision decimal (financial calculations)
 - **bool** - Boolean (true/false)
 - **string** - UTF-8 string
 - **regex** - Compiled regular expression pattern
 - **array** - Dynamic array
 - **map** - Hash map
-- **result** - Result type for error handling (ok or err)
 
 ### Type Annotations
 
@@ -100,6 +104,35 @@ Variables must be explicitly typed:
 ---
 
 ## Control Flow (Agent Layer)
+
+### Conditional
+
+**If**: `(if <condition> <statements>...)`
+
+Executes body if condition is true.
+
+```scheme
+(fn check_positive n int -> string
+  (set result string "not positive")
+  (if (gt n 0)
+    (set result string "positive"))
+  (ret result))
+```
+
+**If-Else**: `(if <condition> <then-statements>... (else <else-statements>...))`
+
+Executes then-branch if condition is true, else-branch otherwise.
+
+```scheme
+(fn classify n int -> string
+  (set result string "zero")
+  (if (gt n 0)
+    (set result string "positive")
+    (else
+      (if (lt n 0)
+        (set result string "negative"))))
+  (ret result))
+```
 
 ### Structured Loops
 
@@ -162,6 +195,29 @@ Executes forever. Use for server loops.
   (ret sum))
 ```
 
+### For-Each Loop
+
+**For-Each**: `(for-each <var> <type> <collection> <statements>...)`
+
+Iterates over array elements or map keys.
+
+```scheme
+; Iterate array elements
+(fn sum_array arr array -> int
+  (set total int 0)
+  (for-each val int arr
+    (set total int (add total val)))
+  (ret total))
+
+; Iterate map keys
+(fn print_keys m map -> int
+  (for-each key string m
+    (print key))
+  (ret 0))
+```
+
+For-each supports `break` and `continue`. Element type is validated at runtime against the declared type.
+
 ### Label-based Control Flow (Core Level)
 
 For complex control flow, use labels and goto:
@@ -179,6 +235,30 @@ For complex control flow, use labels and goto:
 ```
 
 **Statement**: `(ifnot <bool_var> <label>)` - Jump to label if variable is false
+
+### Boolean Special Forms
+
+**Short-circuit and**: `(and <expr1> <expr2>)`
+- Returns false immediately if expr1 is false; expr2 is NOT evaluated
+- Both expressions must evaluate to bool
+
+**Short-circuit or**: `(or <expr1> <expr2>)`
+- Returns true immediately if expr1 is true; expr2 is NOT evaluated
+- Both expressions must evaluate to bool
+
+**Logical not**: `(not <expr>)` - Regular function call, negates boolean
+
+```scheme
+; Short-circuit prevents division by zero
+(if (and (ne b 0) (gt (div a b) threshold))
+  (print "above threshold"))
+
+; Short-circuit with or
+(if (or (eq x 0) (eq y 0))
+  (print "at least one is zero"))
+```
+
+**Important**: `and`/`or` are special forms (AST nodes), not function calls. They are evaluated before their arguments, enabling short-circuit behavior.
 
 ### Control Flow Rules
 
@@ -256,11 +336,12 @@ AISL provides 180+ built-in functions. All use explicit `call` syntax.
 
 Many high-level operations are now implemented in **pure AISL stdlib modules** instead of built-in opcodes. This follows AISL's philosophy: "If it CAN be written in AISL, it MUST be written in AISL."
 
-**Available stdlib modules (11 total):**
+**Available stdlib modules (13 total):**
 
-**Core (2 modules):**
-- `stdlib/core/result.aisl` - Result type for error handling (ok, err, is_ok, is_err, unwrap, unwrap_or, error_code, error_message)
+**Core (3 modules):**
 - `stdlib/core/string_utils.aisl` - Advanced string operations (split, trim, contains, replace, starts_with, ends_with, to_upper, to_lower)
+- `stdlib/core/conversion.aisl` - Type conversion (string_from_int, bool_to_int, kilometers_to_miles)
+- `stdlib/core/channel.aisl` - Channel operations
 
 **Data (2 modules):**
 - `stdlib/data/json.aisl` - JSON parsing and manipulation (parse, stringify, new_object, new_array, get, set, has, delete, push, length, type)
@@ -279,30 +360,27 @@ Many high-level operations are now implemented in **pure AISL stdlib modules** i
 **Database (1 module):**
 - `stdlib/db/sqlite.aisl` - SQLite database operations (open, close, exec, query, prepare, bind, step, column, finalize, last_insert_id, changes, error_msg)
 
-**System (2 modules):**
+**System (3 modules):**
 - `stdlib/sys/time.aisl` - Time operations (unix_timestamp, sleep, format_time)
 - `stdlib/sys/process.aisl` - Process management (spawn, wait, kill, exit, get_pid, get_env, set_env)
+- `stdlib/sys/sleep.aisl` - Sleep/delay operations
 
 **Importing stdlib modules:**
 
 ```scheme
 (module my_program
-  (import result)     ; Import from stdlib/core/result.aisl
   (import json_utils) ; Import from stdlib/data/json_utils.aisl
   (import regex)      ; Import from stdlib/pattern/regex.aisl
   
   (fn main -> int
     ; Use imported functions
-    (set result_val result (call ok "success!"))
-    (set is_success bool (call is_ok result_val))
-    
     (set json_obj json (call json_new_object))
     (call json_set json_obj "status" "ok")
     
     (ret 0)))
 ```
 
-**Note:** String operations (split, trim, replace, etc.), JSON operations, Result type functions, and Base64 functions are no longer built-in opcodes - they are now implemented in stdlib modules. Import the appropriate module to use them.
+**Note:** String operations (split, trim, replace, etc.), JSON operations, and Base64 functions are implemented in stdlib modules. Import the appropriate module to use them.
 
 See `stdlib/README.md` for complete documentation of all stdlib modules.
 
@@ -355,6 +433,8 @@ The interpreter automatically selects the correct operation based on variable ty
 (call string_concat a b)               ; Concatenate -> string
 (call string_equals a b)               ; Compare equality -> bool
 (call string_slice text start len)     ; Extract substring (start index, length) -> string
+(call string_format template args...)  ; Format with {} placeholders -> string
+(call string_find haystack needle)     ; Find index of needle (-1 if not found) -> int
 ```
 
 **Advanced string operations** (require `(import string_utils)`):
@@ -451,77 +531,21 @@ The interpreter automatically selects the correct operation based on variable ty
 
 ### Error Handling
 
-**Result type is now implemented in `stdlib/core/result.aisl`!**
-
-AISL uses the Result type for explicit error handling. Import the result module to use it:
+**AISL uses panic-based error handling.** Operations fail with clear panic messages. Use guard checks to prevent panics:
 
 ```scheme
-(module error_handling_demo
-  (import result)
-  
-  (fn safe_divide ((a int) (b int)) -> result
-    (set is_zero bool (call eq b 0))
-    (if is_zero
-      (ret (call err 1 "Division by zero")))
-    (set quotient int (call div a b))
-    (ret (call ok quotient)))
-  
-  (fn main -> int
-    (set result1 result (call safe_divide 10 2))
-    (set success bool (call is_ok result1))
-    
-    (if success
-      (set value string (call unwrap result1))
-      (call print "Success:")
-      (call print value))
-    
-    (set result2 result (call safe_divide 10 0))
-    (set is_error bool (call is_err result2))
-    
-    (if is_error
-      (set code int (call error_code result2))
-      (set msg string (call error_message result2))
-      (call print "Error code:")
-      (call print code)
-      (call print "Error message:")
-      (call print msg))
-    
-    (ret 0)))
-```
-
-**Result type operations** (require `(import result)`):
-
-```scheme
-(call ok value)                 ; Create success result with value
-(call err code message)         ; Create error result with code and message
-(call is_ok result)             ; Check if result is ok -> bool
-(call is_err result)            ; Check if result is error -> bool
-(call unwrap result)            ; Extract value (panics if error) -> string
-(call unwrap_or result default) ; Extract value or return default -> string
-(call error_code result)        ; Get error code -> int
-(call error_message result)     ; Get error message -> string
-```
-
-**File operations with Result type:**
-
-Some file operations have `_result` variants that return Result instead of panicking:
-
-```scheme
-(fn safe_read_file path string -> int
-  (set result result (call file_read_result path))
-  (set success bool (call is_ok result))
-  
-  (if success
-    (set content string (call unwrap result))
-    (call print content)
+(fn safe_divide a int b int -> int
+  (if (eq b 0)
     (ret 0))
-  
-  ; Handle error
-  (set msg string (call error_message result))
-  (call print "Error reading file:")
-  (call print msg)
-  (ret 1))
+  (ret (div a b)))
+
+(fn safe_read path string -> string
+  (if (not (file_exists path))
+    (ret ""))
+  (ret (file_read path)))
 ```
+
+**Philosophy:** LLMs regenerate code with appropriate checks when panics occur. No Result/Option type machinery needed.
 
 ### TCP Networking
 
@@ -690,8 +714,8 @@ This server demonstrates:
 2. **Explicit Types** - Every variable has declared type
 3. **Type-Directed Dispatch** - Interpreter infers operation types automatically
 4. **Flat Structure** - No complex nested expressions
-5. **Structured Control** - `while`/`loop` handled directly by interpreter
-6. **Explicit Error Handling** - Result type for fallible operations
+5. **Structured Control** - `while`/`loop`/`for-each` handled directly by interpreter
+6. **Panic-Based Errors** - Operations panic with clear messages; use guard checks
 7. **Function Calls** - All operations use explicit `call` syntax
 8. **No Operator Precedence** - Everything is a function call
 9. **S-Expression Syntax** - Lisp-style parenthesized syntax

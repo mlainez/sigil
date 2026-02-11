@@ -260,9 +260,19 @@ Generate these - the interpreter handles them directly:
 (if (gt x 5)
   (print "x is greater than 5"))
 
+; If-else statement
+(if (gt x 5)
+  (print "greater")
+  (else
+    (print "not greater")))
+
 ; While loop - iterate while condition holds
 (while (lt i 10)
   (set i int (add i 1)))
+
+; For-each loop - iterate collections
+(for-each val int my_array
+  (print val))
 
 ; Infinite loop - for servers
 (loop
@@ -275,9 +285,15 @@ Generate these - the interpreter handles them directly:
 ; Continue - skip to next iteration
 (if (eq val 0)
   (continue))
+
+; Short-circuit boolean operators
+(if (and (gt x 0) (lt x 100))
+  (print "in range"))
+(if (or (eq x 0) (eq y 0))
+  (print "at least one zero"))
 ```
 
-**Note**: `if` is the primary conditional construct. It desugars to `ifnot` + `label` internally, but you should always use `if` for clarity.
+**Note**: `if` is the primary conditional construct. It supports an optional `(else ...)` block. `and`/`or` are short-circuit special forms (not function calls) - the second expression is not evaluated if the result is determined by the first.
 
 ---
 
@@ -375,6 +391,8 @@ Generate these - the interpreter handles them directly:
 (string_split text delimiter)     ; Split -> array
 (string_trim text)                ; Remove whitespace -> string
 (string_replace text old new)      ; Replace substring -> string
+(string_format template args...)  ; Format with {} placeholders -> string
+(string_find haystack needle)     ; Find index of needle (-1 if not found) -> int
 ```
 
 **CRITICAL**: `string_slice` takes `(text, start, LENGTH)` NOT `(text, start, end)`.
@@ -382,6 +400,12 @@ Generate these - the interpreter handles them directly:
 - To get substring from index 5 to 10: `(string_slice text 5 5)` (length = 10 - 5)
 
 **There is only ONE string slicing operation**: `string_slice`. Do not use `string_substring` or any other variants.
+
+**`string_format`**: Uses `{}` as placeholders, replaced sequentially with arguments.
+- Example: `(string_format "Hello, {}! Age: {}" name age)` -> `"Hello, Alice! Age: 30"`
+- Extra `{}` without arguments are left as-is.
+
+**`string_find`**: Returns index of first occurrence, or -1 if not found. Empty needle returns 0.
 
 ### I/O Operations
 
@@ -453,7 +477,6 @@ AISL follows the philosophy: **"If it CAN be written in AISL, it MUST be written
 | **JSON operations** | `(json_parse ...)` | `(import json_utils)` then `(json_parse ...)` |
 | | `(json_stringify ...)` | `(import json_utils)` then `(json_stringify ...)` |
 | | `(json_new_object)` | `(import json_utils)` then `(json_new_object)` |
-| **Result type** | Not available | `(import result)` then `(ok ...)`, `(err ...)` |
 | **Base64** | `(base64_encode ...)` | `(import base64)` then `(base64_encode ...)` |
 | **Regex** | `(regex_compile ...)` | `(import regex)` then `(regex_compile ...)` |
 | **Hashing** | `(crypto_sha256 ...)` | `(import hash)` then `(crypto_sha256 ...)` |
@@ -486,36 +509,36 @@ AISL follows the philosophy: **"If it CAN be written in AISL, it MUST be written
 (set obj "key" "value")
 (set json_str string (stringify obj))
 
-; Result type for error handling
-(set result result (ok "success"))
-(if (is_ok result)
-  (set value string (unwrap result)))
 ```
 
-### Complete List of 11 Stdlib Modules
+### Complete List of 13 Stdlib Modules
 
 **Core (3):**
-- `result` - Error handling (ok, err, is_ok, is_err, unwrap, unwrap_or, error_code, error_message)
 - `string_utils` - String ops (split, trim, contains, replace, starts_with, ends_with, to_upper, to_lower)
 - `conversion` - Type conversion (string_from_int, string_from_float, string_from_bool, bool_to_int, int_to_bool, kilometers_to_miles, celsius_to_fahrenheit)
+- `channel` - Channel operations
 
 **Data (2):**
-- `json from data` - JSON (parse, stringify, new_object, new_array, get, set, has, delete, push, length, type)
-- `base64 from data` - Base64 (encode, decode)
+- `json_utils` - JSON (parse, stringify, new_object, new_array, get, set, has, delete, push, length, type)
+- `base64` - Base64 (encode, decode)
 
 **Net (2):**
-- `http from net` - HTTP client (get, post, put, delete, parse_response, build_request)
-- `websocket from net` - WebSocket (connect, send, receive, close)
+- `http` - HTTP client (get, post, put, delete, parse_response, build_request)
+- `websocket` - WebSocket (connect, send, receive, close)
 
 **Pattern (1):**
-- `regex from pattern` - Regex (compile, match, find, find_all, replace)
+- `regex` - Regex (compile, match, find, find_all, replace)
 
 **Crypto (1):**
-- `hash from crypto` - Hashing (sha256, md5, sha1)
+- `hash` - Hashing (sha256, md5, sha1)
 
-**System (2):**
-- `time from sys` - Time (unix_timestamp, sleep, format_time)
-- `process from sys` - Processes (spawn, wait, kill, exit, get_pid, get_env, set_env)
+**System (3):**
+- `time` - Time (unix_timestamp, sleep, format_time)
+- `process` - Processes (spawn, wait, kill, exit, get_pid, get_env, set_env)
+- `sleep` - Sleep/delay operations
+
+**Database (1):**
+- `sqlite` - SQLite database operations
 
 
 ### When to Use Stdlib vs Built-in
@@ -525,7 +548,6 @@ AISL follows the philosophy: **"If it CAN be written in AISL, it MUST be written
 - ✅ Type conversion (string_from_int, string_from_float, bool_to_int)
 - ✅ Unit conversion (kilometers_to_miles, celsius_to_fahrenheit)
 - ✅ JSON operations (parse, stringify)
-- ✅ Result type (error handling)
 - ✅ Base64 encoding/decoding
 - ✅ HTTP request building
 - ✅ Regex operations
@@ -538,7 +560,7 @@ AISL follows the philosophy: **"If it CAN be written in AISL, it MUST be written
 - ✅ Comparisons (eq, ne, lt, gt, le, ge)
 - ✅ Basic math (abs, min, max, sqrt, pow)
 - ✅ Type conversions (cast_int_float, cast_int_decimal, cast_decimal_int, cast_float_decimal, cast_decimal_float, string_from_int, etc.)
-- ✅ Basic string ops (string_length, string_concat, string_slice)
+- ✅ Basic string ops (string_length, string_concat, string_slice, string_format, string_find)
 - ✅ I/O (print, print_ln, read_line)
 - ✅ File operations (file_read, file_write, file_exists)
 - ✅ Arrays (array_new, array_push, array_get, array_set, array_length)
@@ -751,51 +773,6 @@ modules/ (additional modules):
 - Decimal: `0.1 + 0.2` = `0.3` (correct!)
 - Always use `decimal` for money, percentages, and accounting
 
-### Error Handling Pattern (Result Type)
-
-```lisp
-(fn safe_file_read path string -> int
-  ; Read file with error handling
-  (set result string (file_read_result path))
-  (set success bool (is_ok result))
-  
-  (if success
-    ; Extract value from Ok result
-    (set content string (unwrap result))
-    (print content)
-    (ret 1))
-  
-  ; Handle error case
-  (set err_msg string (error_message result))
-  (print err_msg)
-  (ret 0))
-```
-
-### Safe Value Extraction Pattern
-
-```lisp
-(fn read_with_default path string -> string
-  (set result string (file_read_result path))
-  (set default string "default content")
-  ; Returns content if Ok, default if Err
-  (set content string (unwrap_or result default))
-  (ret content))
-```
-
-### Error Checking Pattern
-
-```lisp
-(fn check_file_error path string -> int
-  (set result string (file_read_result path))
-  (set is_error bool (is_err result))
-  
-  (if is_error
-    (set code int (error_code result))
-    (ret code))
-  
-  (ret 0))
-```
-
 ---
 
 ## Testing Your Generated Code
@@ -840,7 +817,7 @@ AISL has a built-in test framework. Add tests to verify behavior:
 | `interpreter/ast.ml` | AST node types |
 | `interpreter/types.ml` | Type kind definitions |
 | `interpreter/vm.ml` | Entry point |
-| `tests/` | 119 test files with examples |
+| `tests/` | 126 test files with examples |
 | `examples/` | Complete working programs |
 
 ### Quick Lookups
@@ -895,56 +872,49 @@ AISL has a built-in test framework. Add tests to verify behavior:
 
 ---
 
-### ⚠️ CRITICAL: If statement with multiple statements bug
+### If-Else Syntax
 
-**PARSER BUG:** The current parser treats all statements after an `if` condition as part of the then-branch, making it **impossible to have an else-branch** with the intuitive syntax.
-
-### ❌ Don't: Use multiple statements after if condition
+**If-else is fully supported** using the `(else ...)` block:
 
 ```lisp
-; This looks like if-then-else but ALL THREE statements execute!
-(if condition
-  (print "then 1")
-  (set x int 1)        ; ❌ Always executes regardless of condition!
-  (print "else")) ; ❌ Always executes regardless of condition!
-```
-
-**What happens:** The parser treats everything after the condition as a single sequence in the then-branch. There's no way to specify an else-branch.
-
-### ✅ Do: Use the result variable pattern
-
-```lisp
-; Store condition result in a variable
-(set success bool (compile_test file))
-
-; Then-branch: only executes if true
-(if success
-  (print "✓ passed")
-  (set passed int (add passed 1)))
-
-; Else-branch: only executes if false
-(if (not success)
-  (print "✗ failed"))
-```
-
-**Why this works:** Each `if` is independent, and we control which one executes by using `(not ...)`.
-
-### Alternative: Use result variable with multiple actions
-
-```lisp
-; Set a default value
-(set message string "failed")
-
-; Override if condition is true
+; Simple if
 (if (gt x 5)
-  (set message string "success")
-  (set x int 0))
+  (print "greater than 5"))
 
-; message is now either "failed" or "success"
+; If-else
+(if (gt x 5)
+  (print "greater")
+  (else
+    (print "not greater")))
+
+; Multiple statements in both branches
+(if (gt x 0)
+  (set result string "positive")
+  (set count int (add count 1))
+  (else
+    (set result string "non-positive")
+    (set count int (sub count 1))))
+
+; Nested if-else
+(if (gt x 0)
+  (set result string "positive")
+  (else
+    (if (lt x 0)
+      (set result string "negative")
+      (else
+        (set result string "zero")))))
+```
+
+**The `(else ...)` block must be the LAST element** inside the if body.
+
+**The result variable pattern is still valid** and sometimes cleaner for simple cases:
+
+```lisp
+(set message string "failed")
+(if (gt x 5)
+  (set message string "success"))
 (print message)
 ```
-
-**Status:** This is a known parser limitation. The documented syntax `(if condition then_expr else_expr)` from AISL-AGENT.md is not yet implemented. Use the workarounds above.
 
 ---
 
@@ -992,7 +962,6 @@ AISL has a built-in test framework. Add tests to verify behavior:
 **Common functions that require imports:**
 - String ops (split, trim, replace) → `(import string_utils)`
 - JSON ops (json_parse, json_stringify) → `(import json_utils)`
-- Result type (ok, err, is_ok) → `(import result)`
 - Base64 (base64_encode, base64_decode) → `(import base64)`
 - Regex (regex_compile, regex_match, regex_find) → `(import regex)`
 
@@ -1292,7 +1261,7 @@ AISL is designed for predictable performance:
 - **Repository**: [Link to be added]
 - **Documentation**: This directory (`*.md` files)
 - **Examples**: `examples/` directory (working programs)
-- **Tests**: `tests/` directory (119 test files)
+- **Tests**: `tests/` directory (126 test files)
 - **Issues**: [Link to be added]
 
 ---

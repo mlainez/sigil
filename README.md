@@ -147,8 +147,13 @@ process  ; Process handle (for DB, subprocesses)
 (while condition statements...)   ; While loop
 (loop statements...)              ; Infinite loop
 (if condition statements...)      ; Conditional
+(if condition then... (else ...)) ; If-else conditional
+(for-each var type collection     ; For-each iteration
+  statements...)
 (break)                           ; Exit loop
 (continue)                        ; Next iteration
+(and expr1 expr2)                 ; Short-circuit AND
+(or expr1 expr2)                  ; Short-circuit OR
 
 ; Core constructs (available for complex control flow)
 (label name)                      ; Jump target
@@ -189,7 +194,7 @@ process  ; Process handle (for DB, subprocesses)
 
 **AI Decision:** Operations panic on error with clear messages. LLM regenerates with checks (file_exists, etc.) when panics occur.
 
-## Standard Library (14 Modules in Pure AISL)
+## Standard Library (13 Modules in Pure AISL)
 
 All stdlib modules are implemented **in pure AISL**, not native code. This enforces our philosophy: "If it CAN be written in AISL, it MUST be written in AISL."
 
@@ -212,16 +217,15 @@ All stdlib modules are implemented **in pure AISL**, not native code. This enfor
 ### Crypto (1 module)
 - **hash** - Cryptographic hashing (SHA256, MD5)
 
-### System (4 modules)
+### System (3 modules)
 - **time** - Time operations
 - **process** - Process management
 - **sleep** - Sleep/delay
-- **ffi** - Foreign function interface
 
 ### Database (1 module)
 - **sqlite** - SQLite database (via process spawning)
 
-**Plus 180+ built-in operations** for arithmetic, comparisons, I/O, TCP/TLS networking, WebSocket protocol, file system, arrays, maps, and more.
+**Plus 180+ built-in operations** for arithmetic, comparisons, I/O, TCP/TLS networking, WebSocket protocol, file system, arrays, maps, string formatting, and more.
 
 ## Examples
 
@@ -262,11 +266,31 @@ All stdlib modules are implemented **in pure AISL**, not native code. This enfor
     (ret 0)))
 ```
 
+### For-Each Loop
+
+```lisp
+(module foreach_demo
+  (fn sum_array arr array -> int
+    (set total int 0)
+    (for-each val int arr
+      (set total int (add total val)))
+    (ret total))
+
+  (fn main -> int
+    (set nums array (array_new))
+    (array_push nums 10)
+    (array_push nums 20)
+    (array_push nums 30)
+    (set result int (sum_array nums))
+    (print result)  ; Prints: 60
+    (ret 0)))
+```
+
 See [examples/](examples/) for 22 complete working examples including a real-time WebSocket chat app and a TODO app with SQLite.
 
 ## Testing
 
-AISL has **119 passing tests** covering all language features. All tests use the `test-spec` structure:
+AISL has **126 passing tests** covering all language features. All tests use the `test-spec` structure:
 
 ```lisp
 (module test_addition
@@ -304,22 +328,22 @@ aisl/
 |   +-- parser.ml               # Recursive descent parser
 |   +-- types.ml                # Type kind definitions
 |   +-- ast.ml                  # AST node types
-|   +-- interpreter.ml          # Evaluator + 180+ builtins (~1640 lines)
+|   +-- interpreter.ml          # Evaluator + 180+ builtins (~1930 lines)
 |   +-- vm.ml                   # Entry point
 |   +-- dune / dune-project     # Build configuration
 |   +-- _build/                 # Build output
 |
-+-- stdlib/                     # Standard library (14 modules, pure AISL!)
++-- stdlib/                     # Standard library (13 modules, pure AISL!)
 |   +-- core/                   # Core modules (string_utils, conversion, channel)
 |   +-- data/                   # Data formats (json_utils, base64)
 |   +-- net/                    # Networking (http, websocket)
 |   +-- pattern/                # Pattern matching (regex)
 |   +-- crypto/                 # Cryptography (hash)
-|   +-- sys/                    # System (time, process, sleep, ffi)
+|   +-- sys/                    # System (time, process, sleep)
 |   +-- db/                     # Databases (sqlite)
 |   +-- README.md               # Stdlib documentation
 |
-+-- tests/                      # Test suite (119 tests, all passing)
++-- tests/                      # Test suite (126 tests, all passing)
 |   +-- test_*.aisl             # Unit tests
 |   +-- README.md
 |
@@ -440,7 +464,7 @@ dune build
 ## Running Tests
 
 ```bash
-# Run all 119 tests
+# Run all 126 tests
 cd interpreter
 eval $(opam env)
 total=0; passed=0
@@ -466,7 +490,7 @@ echo "$passed/$total"
 AISL is currently in active development. All changes must:
 
 1. Maintain zero ambiguity (ONE WAY ONLY)
-2. Pass all 119 tests
+2. Pass all 126 tests
 3. Update machine-readable docs (`.aisl.grammar`, `.aisl.meta`)
 4. Write new stdlib modules in pure AISL
 5. Follow the "frozen Core IR" principle
@@ -476,7 +500,7 @@ AISL is currently in active development. All changes must:
 - **LLM-Optimized** - Designed for reliable AI code generation
 - **Zero Ambiguity** - Every construct has exactly one meaning
 - **Stable Target** - Core IR frozen forever
-- **Batteries Included** - 180+ built-in operations, 14 stdlib modules
+- **Batteries Included** - 180+ built-in operations, 13 stdlib modules
 - **Fast Startup** - Direct interpretation, <10ms
 - **Easy to Parse** - S-expression syntax
 - **Explicit Everything** - No surprises, no hidden behavior
