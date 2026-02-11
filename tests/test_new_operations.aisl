@@ -1,0 +1,159 @@
+(module test_new_operations
+  (fn sort_integers -> int
+    (set arr array (array_new))
+    (array_push arr 3)
+    (array_push arr 1)
+    (array_push arr 4)
+    (array_push arr 1)
+    (array_push arr 5)
+    (array_sort arr)
+    (ret (array_get arr 0)))
+
+  (fn sort_strings -> string
+    (set arr array (array_new))
+    (array_push arr "banana")
+    (array_push arr "apple")
+    (array_push arr "cherry")
+    (array_sort arr)
+    (ret (array_get arr 0)))
+
+  (fn reverse_array -> int
+    (set arr array (array_new))
+    (array_push arr 1)
+    (array_push arr 2)
+    (array_push arr 3)
+    (array_reverse arr)
+    (ret (array_get arr 0)))
+
+  (fn contains_found -> bool
+    (set arr array (array_new))
+    (array_push arr 10)
+    (array_push arr 20)
+    (array_push arr 30)
+    (ret (array_contains arr 20)))
+
+  (fn contains_not_found -> bool
+    (set arr array (array_new))
+    (array_push arr 10)
+    (array_push arr 20)
+    (ret (array_contains arr 99)))
+
+  (fn index_of_found -> int
+    (set arr array (array_new))
+    (array_push arr "a")
+    (array_push arr "b")
+    (array_push arr "c")
+    (ret (array_index_of arr "b")))
+
+  (fn index_of_not_found -> int
+    (set arr array (array_new))
+    (array_push arr "a")
+    (array_push arr "b")
+    (ret (array_index_of arr "z")))
+
+  (fn to_upper -> string
+    (ret (string_to_upper "hello world")))
+
+  (fn to_lower -> string
+    (ret (string_to_lower "HELLO WORLD")))
+
+  (fn split_string -> int
+    (set parts array (string_split "a,b,c" ","))
+    (ret (array_length parts)))
+
+  (fn split_string_value -> string
+    (set parts array (string_split "hello world" " "))
+    (ret (array_get parts 1)))
+
+  (fn join_strings -> string
+    (set arr array (array_new))
+    (array_push arr "one")
+    (array_push arr "two")
+    (array_push arr "three")
+    (ret (string_join arr ", ")))
+
+  (fn map_entries_count -> int
+    (set m map (map_new))
+    (map_set m "x" 1)
+    (map_set m "y" 2)
+    (set entries array (map_entries m))
+    (ret (array_length entries)))
+
+  (fn map_entries_key -> string
+    (set m map (map_new))
+    (map_set m "name" "Alice")
+    (set entries array (map_entries m))
+    (set entry map (array_get entries 0))
+    (ret (map_get entry "key")))
+
+  (test-spec sort_integers
+    (case "sort puts smallest first"
+      (input)
+      (expect 1)))
+
+  (test-spec sort_strings
+    (case "sort puts apple before banana"
+      (input)
+      (expect "apple")))
+
+  (test-spec reverse_array
+    (case "reverse puts last element first"
+      (input)
+      (expect 3)))
+
+  (test-spec contains_found
+    (case "contains returns true when element exists"
+      (input)
+      (expect true)))
+
+  (test-spec contains_not_found
+    (case "contains returns false when element missing"
+      (input)
+      (expect false)))
+
+  (test-spec index_of_found
+    (case "index_of returns correct position"
+      (input)
+      (expect 1)))
+
+  (test-spec index_of_not_found
+    (case "index_of returns -1 when not found"
+      (input)
+      (expect -1)))
+
+  (test-spec to_upper
+    (case "converts string to uppercase"
+      (input)
+      (expect "HELLO WORLD")))
+
+  (test-spec to_lower
+    (case "converts string to lowercase"
+      (input)
+      (expect "hello world")))
+
+  (test-spec split_string
+    (case "split creates correct number of parts"
+      (input)
+      (expect 3)))
+
+  (test-spec split_string_value
+    (case "split extracts correct part"
+      (input)
+      (expect "world")))
+
+  (test-spec join_strings
+    (case "join concatenates with delimiter"
+      (input)
+      (expect "one, two, three")))
+
+  (test-spec map_entries_count
+    (case "entries returns correct count"
+      (input)
+      (expect 2)))
+
+  (test-spec map_entries_key
+    (case "entry has key field"
+      (input)
+      (expect "name")))
+
+  (meta-note "Tests new operations: array_sort, array_reverse, array_contains, array_index_of, string_to_upper, string_to_lower, string_split, string_join, map_entries"))

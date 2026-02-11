@@ -1174,6 +1174,69 @@ and eval_block env exprs =
             end
         | _ -> raise (RuntimeError "Invalid arguments to string_find"))
 
+   | "string_to_upper" ->
+       (match arg_vals with
+        | [VString s] -> VString (String.uppercase_ascii s)
+        | _ -> raise (RuntimeError "Invalid arguments to string_to_upper"))
+
+   | "string_to_lower" ->
+       (match arg_vals with
+        | [VString s] -> VString (String.lowercase_ascii s)
+        | _ -> raise (RuntimeError "Invalid arguments to string_to_lower"))
+
+   | "string_split" ->
+       (match arg_vals with
+        | [VString s; VString delim] ->
+            if String.length delim = 0 then
+              VArray (ref (Array.of_list (List.map (fun c -> VString (String.make 1 c)) (List.of_seq (String.to_seq s)))))
+            else
+              let parts = String.split_on_char delim.[0] s in
+              if String.length delim = 1 then
+                VArray (ref (Array.of_list (List.map (fun p -> VString p) parts)))
+              else begin
+                let results = ref [] in
+                let remaining = ref s in
+                let dlen = String.length delim in
+                let continue_loop = ref true in
+                while !continue_loop do
+                  match String.split_on_char delim.[0] !remaining with
+                  | [] -> continue_loop := false
+                  | _ ->
+                    let pos = ref (-1) in
+                    let rlen = String.length !remaining in
+                    let i = ref 0 in
+                    while !i <= rlen - dlen && !pos = -1 do
+                      if String.sub !remaining !i dlen = delim then
+                        pos := !i
+                      else
+                        i := !i + 1
+                    done;
+                    if !pos = -1 then begin
+                      results := VString !remaining :: !results;
+                      continue_loop := false
+                    end else begin
+                      results := VString (String.sub !remaining 0 !pos) :: !results;
+                      remaining := String.sub !remaining (!pos + dlen) (rlen - !pos - dlen)
+                    end
+                done;
+                VArray (ref (Array.of_list (List.rev !results)))
+              end
+        | _ -> raise (RuntimeError "Invalid arguments to string_split"))
+
+   | "string_join" ->
+       (match arg_vals with
+        | [VArray arr; VString delim] ->
+            let parts = Array.to_list !arr |> List.map (fun v ->
+              match v with
+              | VString s -> s
+              | VInt n -> Int64.to_string n
+              | VFloat f -> string_of_float f
+              | VBool b -> string_of_bool b
+              | _ -> raise (RuntimeError "string_join: array contains non-stringifiable value")
+            ) in
+            VString (String.concat delim parts)
+        | _ -> raise (RuntimeError "Invalid arguments to string_join"))
+
   (* Array operations *)
   | "array_new" | "ArrayNew" ->
       VArray (ref [||])
@@ -1217,6 +1280,52 @@ and eval_block env exprs =
         | [VArray _ as v] -> deep_copy_value v
         | _ -> raise (RuntimeError "Invalid arguments to array_copy"))
 
+   | "array_sort" ->
+       (match arg_vals with
+        | [VArray arr] ->
+            let compare_values a b =
+              match a, b with
+              | VInt x, VInt y -> Int64.compare x y
+              | VFloat x, VFloat y -> compare x y
+              | VString x, VString y -> String.compare x y
+              | VDecimal x, VDecimal y -> bigdecimal_compare x y
+              | VBool x, VBool y -> compare x y
+              | _ -> raise (RuntimeError "array_sort: cannot compare mixed types")
+            in
+            let sorted = Array.copy !arr in
+            Array.sort compare_values sorted;
+            arr := sorted;
+            VArray arr
+        | _ -> raise (RuntimeError "Invalid arguments to array_sort"))
+
+   | "array_reverse" ->
+       (match arg_vals with
+        | [VArray arr] ->
+            let len = Array.length !arr in
+            let reversed = Array.init len (fun i -> !arr.(len - 1 - i)) in
+            arr := reversed;
+            VArray arr
+        | _ -> raise (RuntimeError "Invalid arguments to array_reverse"))
+
+   | "array_contains" ->
+       (match arg_vals with
+        | [VArray arr; v] ->
+            VBool (Array.exists (fun elem -> values_equal elem v) !arr)
+        | _ -> raise (RuntimeError "Invalid arguments to array_contains"))
+
+   | "array_index_of" ->
+       (match arg_vals with
+        | [VArray arr; v] ->
+            let len = Array.length !arr in
+            let found = ref (-1) in
+            let i = ref 0 in
+            while !i < len && !found = -1 do
+              if values_equal !arr.(!i) v then found := !i;
+              i := !i + 1
+            done;
+            VInt (Int64.of_int !found)
+        | _ -> raise (RuntimeError "Invalid arguments to array_index_of"))
+
    (* Map operations *)
   | "map_new" | "MapNew" ->
       make_vmap ()
@@ -1257,6 +1366,20 @@ and eval_block env exprs =
        (match arg_vals with
         | [VMap _ as v] -> deep_copy_value v
         | _ -> raise (RuntimeError "Invalid arguments to map_copy"))
+
+   | "map_entries" ->
+       (match arg_vals with
+        | [VMap (m, keys)] ->
+            let entries = List.map (fun k ->
+              let v = Hashtbl.find m k in
+              let entry = Hashtbl.create 2 in
+              let entry_keys = ref [] in
+              vmap_set entry entry_keys "key" (VString k);
+              vmap_set entry entry_keys "value" v;
+              VMap (entry, entry_keys)
+            ) !keys in
+            VArray (ref (Array.of_list entries))
+        | _ -> raise (RuntimeError "Invalid arguments to map_entries"))
 
    (* Helper: read entire file *)
    | "file_read" ->
