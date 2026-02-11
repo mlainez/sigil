@@ -1,10 +1,10 @@
-# AISL - AI-Optimized Systems Language
+# Sigil - Sigil
 
 **A programming language designed by AI, for AI code generation.**
 
-AISL (AI-Optimized Systems Language) is a modern systems programming language specifically engineered to eliminate the ambiguities and complexities that make traditional languages difficult for Large Language Models (LLMs) to generate reliably. Every design decision prioritizes **predictability, explicitness, and zero ambiguity**.
+Sigil is a modern systems programming language specifically engineered to eliminate the ambiguities and complexities that make traditional languages difficult for Large Language Models (LLMs) to generate reliably. Every design decision prioritizes **predictability, explicitness, and zero ambiguity**.
 
-## The Problem AISL Solves
+## The Problem Sigil Solves
 
 **Traditional languages are hard for LLMs because:**
 - Operator precedence creates ambiguity (`a + b * c` - which operation first?)
@@ -13,7 +13,7 @@ AISL (AI-Optimized Systems Language) is a modern systems programming language sp
 - Complex control flow nesting requires careful state tracking
 - Hundreds of type-specific operations to memorize
 
-**AISL fixes this:**
+**Sigil fixes this:**
 - **Zero operator precedence** - all operations are explicit function calls
 - **Zero implicit conversions** - types are always explicit
 - **One canonical form** - only ONE way to do everything
@@ -23,18 +23,18 @@ AISL (AI-Optimized Systems Language) is a modern systems programming language sp
 
 ## Architecture: The Two-Layer Innovation
 
-AISL's killer feature is its **two-layer architecture** that prevents language entropy over time:
+Sigil's killer feature is its **two-layer architecture** that prevents language entropy over time:
 
 ```
 +---------------------------------------------+
-|         AISL-Agent (Surface)                |
+|         Sigil-Agent (Surface)                |
 |  What LLMs Write: while, loop, break       |
 |  Ergonomic, can evolve over time            |
 +---------------------+-----------------------+
                       |
                       v
 +---------------------------------------------+
-|          AISL-Core (IR)                     |
+|          Sigil-Core (IR)                     |
 |  Concepts: set, goto, label, ifnot, ret     |
 |  Minimal, frozen forever (5 statements)     |
 +---------------------------------------------+
@@ -57,7 +57,7 @@ AISL's killer feature is its **two-layer architecture** that prevents language e
 ```lisp
 (module hello
   (fn main -> int
-    (print "Hello, AISL!")
+    (print "Hello, Sigil!")
     (ret 0)))
 ```
 
@@ -73,8 +73,8 @@ dune build
 ### Run
 
 ```bash
-# Run AISL source directly (single step, no compilation)
-./interpreter/_build/default/vm.exe hello.aisl
+# Run Sigil source directly (single step, no compilation)
+./interpreter/_build/default/vm.exe hello.sigil
 ```
 
 ## Language Philosophy
@@ -95,17 +95,17 @@ These design decisions were made during collaborative AI-human development to ma
 
 6. **Frozen Core IR** - The 5 Core statements (`set`, `label`, `goto`, `ifnot`, `ret`) will never change. Future-proof.
 
-7. **No Comments** - AISL intentionally has no comment syntax. Use descriptive names and `meta-note` in tests. Forces clarity.
+7. **No Comments** - Sigil intentionally has no comment syntax. Use descriptive names and `meta-note` in tests. Forces clarity.
 
-8. **Eating Our Own Dog Food** - All tooling, utilities, and stdlib modules are written in pure AISL. If AISL can't express something, we fix AISL, not reach for Python.
+8. **Eating Our Own Dog Food** - All tooling, utilities, and stdlib modules are written in pure Sigil. If Sigil can't express something, we fix Sigil, not reach for Python.
 
 9. **Panic-Based Errors** - Operations fail with clear panic messages. LLM regenerates with checks when needed.
 
-10. **Machine-Readable First** - Documentation prioritizes machine-readable formats (`.aisl.grammar`, `.aisl.meta`) over prose. LLMs read these first.
+10. **Machine-Readable First** - Documentation prioritizes machine-readable formats (`.sigil.grammar`, `.sigil.meta`) over prose. LLMs read these first.
 
 ## Use Cases
 
-### What AISL is FOR
+### What Sigil is FOR
 
 - **AI Code Generation** - Primary design goal
 - **Web Services** - HTTP servers, REST APIs, WebSocket servers
@@ -114,7 +114,7 @@ These design decisions were made during collaborative AI-human development to ma
 - **Data Processing** - JSON/CSV parsing, transformations
 - **System Integration** - Process spawning, IPC, database clients
 
-### What AISL is NOT FOR
+### What Sigil is NOT FOR
 
 - **Real-time Systems** - Tree-walking interpreter overhead
 - **Low-level System Programming** - No manual memory management, no pointers
@@ -194,9 +194,9 @@ process  ; Process handle (for DB, subprocesses)
 
 **AI Decision:** Operations panic on error with clear messages. LLM regenerates with checks (file_exists, etc.) when panics occur.
 
-## Standard Library (14 Modules in Pure AISL)
+## Standard Library (14 Modules in Pure Sigil)
 
-All stdlib modules are implemented **in pure AISL**, not native code. This enforces our philosophy: "If it CAN be written in AISL, it MUST be written in AISL."
+All stdlib modules are implemented **in pure Sigil**, not native code. This enforces our philosophy: "If it CAN be written in Sigil, it MUST be written in Sigil."
 
 ### Core (9 modules)
 - **string_utils** - String operations (`split`, `trim`, `contains`, `replace`, `starts_with`, `ends_with`, `to_upper`, `to_lower`)
@@ -251,7 +251,7 @@ All stdlib modules are implemented **in pure AISL**, not native code. This enfor
 (module web_server
   (fn handle_request client_sock string -> int
     (set request string (tcp_receive client_sock 4096))
-    (set response string "HTTP/1.1 200 OK\r\n\r\nHello from AISL!")
+    (set response string "HTTP/1.1 200 OK\r\n\r\nHello from Sigil!")
     (tcp_send client_sock response)
     (tcp_close client_sock)
     (ret 0))
@@ -289,7 +289,7 @@ See [examples/](examples/) for complete working examples including a real-time W
 
 ## Testing
 
-AISL has **138 passing tests** covering all language features. All tests use the `test-spec` structure:
+Sigil has **138 passing tests** covering all language features. All tests use the `test-spec` structure:
 
 ```lisp
 (module test_addition
@@ -312,14 +312,14 @@ AISL has **138 passing tests** covering all language features. All tests use the
 ## Project Structure
 
 ```
-aisl/
+sigil/
 +-- README.md                   # This file
 +-- AGENTS.md                   # LLM quick reference (8K tokens)
 +-- LANGUAGE_SPEC.md            # Complete language specification
-+-- AISL-CORE.md                # Core IR specification (frozen forever)
-+-- AISL-AGENT.md               # Agent surface language
-+-- .aisl.grammar               # Machine-readable grammar (~1600 tokens)
-+-- .aisl.analysis              # Deep architectural analysis
++-- SIGIL-CORE.md                # Core IR specification (frozen forever)
++-- SIGIL-AGENT.md               # Agent surface language
++-- .sigil.grammar               # Machine-readable grammar (~1600 tokens)
++-- .sigil.analysis              # Deep architectural analysis
 |
 +-- interpreter/                # OCaml tree-walking interpreter
 |   +-- lexer.ml                # S-expression tokenizer
@@ -331,7 +331,7 @@ aisl/
 |   +-- dune / dune-project     # Build configuration
 |   +-- _build/                 # Build output
 |
-+-- stdlib/                     # Standard library (17 modules, pure AISL!)
++-- stdlib/                     # Standard library (17 modules, pure Sigil!)
 |   +-- core/                   # Core modules (string_utils, conversion, array_utils, math, math_extended, filesystem, network, text_utils, validation)
 |   +-- crypto/                 # Cryptography (base64, hash, hmac)
 |   +-- data/                   # Data formats (json_utils)
@@ -342,31 +342,31 @@ aisl/
 |   +-- README.md               # Stdlib documentation
 |
 +-- tests/                      # Test suite (138 tests, all passing)
-|   +-- test_*.aisl             # Unit tests
+|   +-- test_*.sigil             # Unit tests
 |   +-- README.md
 |
 +-- examples/                   # Example programs
-|   +-- hello_world.aisl
+|   +-- hello_world.sigil
 |   +-- chat_app/               # Real-time WebSocket chat application
 |   +-- todo_app/               # TODO app with SQLite backend
 ```
 
 ## Documentation Hierarchy (For LLMs)
 
-**When generating AISL code, LLMs should consult in this order:**
+**When generating Sigil code, LLMs should consult in this order:**
 
-1. **`.aisl.grammar`** (~800 tokens) - Complete syntax reference, CONSULT FIRST
-2. **`.aisl.analysis`** (detailed) - Design decisions, known issues
+1. **`.sigil.grammar`** (~800 tokens) - Complete syntax reference, CONSULT FIRST
+2. **`.sigil.analysis`** (detailed) - Design decisions, known issues
 3. **`AGENTS.md`** (8K tokens) - LLM-optimized quick reference with examples
 4. **`LANGUAGE_SPEC.md`** (full) - Complete specification for deep dives
 
-**Why this order?** Token efficiency. `.aisl.grammar` is 10x more efficient than prose documentation.
+**Why this order?** Token efficiency. `.sigil.grammar` is 10x more efficient than prose documentation.
 
 ## Key Design Decisions Explained
 
 ### 1. Why No Comments?
 
-**Decision:** AISL intentionally has no comment syntax (no `;`, `//`, `#`, `/* */`).
+**Decision:** Sigil intentionally has no comment syntax (no `;`, `//`, `#`, `/* */`).
 
 **Rationale:**
 - Forces descriptive variable and function names
@@ -427,16 +427,16 @@ aisl/
 - Declarative test structure easier for LLMs to generate
 - Prevents mixing test logic with test execution
 
-### 7. Why Pure AISL Stdlib?
+### 7. Why Pure Sigil Stdlib?
 
-**Decision:** All stdlib modules must be written in pure AISL.
+**Decision:** All stdlib modules must be written in pure Sigil.
 
 **Rationale:**
 - Eating our own dog food - discovers language limitations immediately
 - Stdlib modules become learning examples for LLMs
 - No FFI/dependency hellscape
-- Forces AISL to be complete and self-sufficient
-- If AISL can't express something, we extend AISL
+- Forces Sigil to be complete and self-sufficient
+- If Sigil can't express something, we extend Sigil
 
 ## Building from Source
 
@@ -457,7 +457,7 @@ dune build
 cd interpreter
 eval $(opam env)
 total=0; passed=0
-for f in ../tests/test_*.aisl; do
+for f in ../tests/test_*.sigil; do
   total=$((total+1))
   timeout 5 ./_build/default/vm.exe "$f" >/dev/null 2>&1 && passed=$((passed+1))
 done
@@ -472,16 +472,16 @@ echo "$passed/$total"
 - **Cold start:** Minimal overhead (no bytecode generation, no JIT warmup)
 - **WebSocket:** Native binary frame encoding/decoding with SHA-1 handshake
 
-**Not designed for:** Number-crunching inner loops. Use C/Rust for hot paths, AISL for glue code.
+**Not designed for:** Number-crunching inner loops. Use C/Rust for hot paths, Sigil for glue code.
 
 ## Contributing
 
-AISL is currently in active development. All changes must:
+Sigil is currently in active development. All changes must:
 
 1. Maintain zero ambiguity (ONE WAY ONLY)
 2. Pass all 138 tests
-3. Update machine-readable docs (`.aisl.grammar`, `.aisl.meta`)
-4. Write new stdlib modules in pure AISL
+3. Update machine-readable docs (`.sigil.grammar`, `.sigil.meta`)
+4. Write new stdlib modules in pure Sigil
 5. Follow the "frozen Core IR" principle
 
 ## Strengths
@@ -515,18 +515,18 @@ AISL is currently in active development. All changes must:
 - [ ] Bytecode compiler for performance
 - [ ] WebAssembly target
 - [ ] Parallel execution model
-- [ ] Native compilation (AISL -> C)
+- [ ] Native compilation (Sigil -> C)
 
 ---
 
 ## About the Name
 
-**AISL** = **A**I-Optimized **S**ystems **L**anguage
+**Sigil** - A symbolic language for AI code generation
 
-Also: "AISL" sounds like "aisle" - a clear path forward for AI code generation.
+Also: Sigil: a symbolic mark with power.
 
 ---
 
-**AISL - Designed by AI, for AI. Built for Everyone.**
+**Sigil - Designed for AI, Built for Everyone.**
 
 *Created through collaborative AI-human design to solve the hard problem: making LLMs generate correct code, reliably.*

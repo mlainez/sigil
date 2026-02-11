@@ -1,6 +1,6 @@
 @(critical-directive-tooling)
 
-**ALL UTILITY SCRIPTS MUST BE WRITTEN IN AISL**
+**ALL UTILITY SCRIPTS MUST BE WRITTEN IN Sigil**
 
 This is NON-NEGOTIABLE. Never use Python, Bash, or any other language.
 
@@ -8,23 +8,23 @@ Why:
 1. Eating our own dog food - discovers language gaps immediately
 2. Scripts become examples for LLMs
 3. No external dependencies
-4. Forces us to make AISL complete
-5. If AISL can't do it, ADD IT TO AISL
+4. Forces us to make Sigil complete
+5. If Sigil can't do it, ADD IT TO Sigil
 
 Process when you need a script:
 1. Check stdlib/ for available modules (string_utils, json_utils, conversion, etc.)
-2. If missing, ADD IT TO AISL (extend interpreter runtime)
-3. Write the script in pure AISL
-4. If you wrote Python/Bash, DELETE IT and rewrite in AISL
+2. If missing, ADD IT TO Sigil (extend interpreter runtime)
+3. Write the script in pure Sigil
+4. If you wrote Python/Bash, DELETE IT and rewrite in Sigil
 
-Examples of what should be AISL:
-- convert_syntax.aisl (converts test syntax)
-- test runners (already in AISL)
-- build scripts -> TODO: rewrite in AISL
-- code generators -> TODO: write in AISL
-- documentation generators -> TODO: write in AISL
+Examples of what should be Sigil:
+- convert_syntax.sigil (converts test syntax)
+- test runners (already in Sigil)
+- build scripts -> TODO: rewrite in Sigil
+- code generators -> TODO: write in Sigil
+- documentation generators -> TODO: write in Sigil
 
-**If you catch yourself writing Python, STOP and use AISL instead**
+**If you catch yourself writing Python, STOP and use Sigil instead**
 
 @(always-check-stdlib)
 
@@ -32,7 +32,7 @@ Examples of what should be AISL:
 
 Available modules:
 
-stdlib/ (17 pure AISL implementations):
+stdlib/ (17 pure Sigil implementations):
 - core/: string_utils, conversion, array_utils, math, math_extended, filesystem, network, text_utils, validation
 - data/: json_utils
 - net/: http
@@ -43,11 +43,11 @@ stdlib/ (17 pure AISL implementations):
 
 Note: Many string ops are now BOTH builtins AND in stdlib:
 - Builtins (always available): string_contains, string_trim, string_replace, string_starts_with, string_ends_with
-- Stdlib string_utils: split, to_upper, to_lower (plus AISL implementations of the above)
+- Stdlib string_utils: split, to_upper, to_lower (plus Sigil implementations of the above)
 
 Process:
 1. List stdlib/ directory to see available modules
-2. Check module manifest (.aisl.manifest) for function signatures
+2. Check module manifest (.sigil.manifest) for function signatures
 3. Import module with: (import <module_name>)
 4. Use available functions
 
@@ -63,9 +63,9 @@ Example:
 
 **ALWAYS CONSULT AND UPDATE MACHINE-READABLE FORMATS FIRST**
 
-When working on AISL, the order of consultation is:
-1. FIRST: .aisl.grammar (syntax reference, ~196 lines, ~1600 tokens)
-2. SECOND: .aisl.analysis (design decisions, this file)
+When working on Sigil, the order of consultation is:
+1. FIRST: .sigil.grammar (syntax reference, ~196 lines, ~1600 tokens)
+2. SECOND: .sigil.analysis (design decisions, this file)
 3. LAST: AGENTS.md and other markdown (human docs, 8000+ tokens)
 
 Why this order:
@@ -76,17 +76,17 @@ Why this order:
 - Updated more frequently with discoveries
 
 **CRITICAL**: After ANY change to language behavior or discovering usage patterns:
-1. Update .aisl.grammar @(note ...) section FIRST
-2. Update .aisl.analysis with @(tag) entries SECOND
+1. Update .sigil.grammar @(note ...) section FIRST
+2. Update .sigil.analysis with @(tag) entries SECOND
 3. Only then update AGENTS.md if humans need it
 4. Never duplicate info - keep it in ONE canonical place
 
 Machine format rules:
-- .aisl.grammar: Syntax rules, ops, types, critical notes (s-expr format)
-- .aisl.analysis: Design decisions, directives, discovered issues (tagged sections)
+- .sigil.grammar: Syntax rules, ops, types, critical notes (s-expr format)
+- .sigil.analysis: Design decisions, directives, discovered issues (tagged sections)
 
 Markdown format rules:
-- AGENTS.md: Human-readable guide for LLMs generating AISL
+- AGENTS.md: Human-readable guide for LLMs generating Sigil
 - LANGUAGE_SPEC.md: Complete language reference for humans
 - README.md: Project overview for humans
 
@@ -99,7 +99,7 @@ Markdown format rules:
 Three rules:
 
 1. **Always Update Docs After Code Changes**
-   - Changed syntax? Update AGENTS.md, LANGUAGE_SPEC.md, .aisl.grammar
+   - Changed syntax? Update AGENTS.md, LANGUAGE_SPEC.md, .sigil.grammar
    - Added feature? Document in all relevant places
    - Changed behavior? Update examples
    - NEVER commit code without updating docs
@@ -108,16 +108,16 @@ Three rules:
 2. **Only Keep User-Facing Documentation**
    - KEEP: Language reference, API docs, user guides
    - REMOVE: Implementation plans, thinking process, session notes
-   - Store internal notes in .aisl.* files (compressed format)
+   - Store internal notes in .sigil.* files (compressed format)
    - Delete: *-PLAN.md, *-SUMMARY.md, *-ANALYSIS.md (human-readable thinking)
-   - Keep: .aisl.grammar, .aisl.analysis (machine-readable context)
+   - Keep: .sigil.grammar, .sigil.analysis (machine-readable context)
 
 3. **NEVER Create Implementation Status Files**
    - NO: IMPLEMENTATION-STATUS.md, ROADMAP.md, TODO.md, CHANGES.md
    - NO: Any markdown files tracking progress, plans, or internal state
-   - YES: Put ALL relevant context in .aisl.* files (machine-readable)
-   - YES: Only keep README.md, AGENTS.md, LANGUAGE_SPEC.md, AISL-CORE.md, AISL-AGENT.md
-   - If you need to track something, add it to .aisl.analysis with @(tag)
+   - YES: Put ALL relevant context in .sigil.* files (machine-readable)
+   - YES: Only keep README.md, AGENTS.md, LANGUAGE_SPEC.md, SIGIL-CORE.md, SIGIL-AGENT.md
+   - If you need to track something, add it to .sigil.analysis with @(tag)
 
 Process:
 1. After ANY code change, update docs immediately
@@ -131,14 +131,14 @@ Process:
 **DIRECTIVE: Fix bugs in the language when discovered during use**
 
 Process:
-1. When writing AISL code, if you hit a bug or limitation
+1. When writing Sigil code, if you hit a bug or limitation
 2. FIX IT immediately in the interpreter
 3. Don't work around it - fix the root cause
 4. Update documentation with the fix
 5. Add test case for the bug
 
 This directive ensures:
-- AISL improves through actual use
+- Sigil improves through actual use
 - No accumulated workarounds
 - Language becomes more robust over time
 - Real usage drives development
@@ -321,7 +321,7 @@ Components:
 - vm.ml - Entry point: reads file, tokenizes, parses, executes
 
 Build: cd interpreter && eval $(opam env) && dune build
-Run: ./interpreter/_build/default/vm.exe program.aisl
+Run: ./interpreter/_build/default/vm.exe program.sigil
 
 Libraries: unix, str, ssl (OpenSSL bindings)
 
@@ -556,7 +556,7 @@ Five string operations are now builtins in addition to being available via `(imp
 - `(string_trim text)` → string — trims spaces, tabs, newlines, carriage returns from both ends
 - `(string_replace text old new)` → string — replaces ALL occurrences of old with new
 
-These work without any import. The stdlib `string_utils` module still provides AISL implementations of these plus `split`, `to_upper`, `to_lower`.
+These work without any import. The stdlib `string_utils` module still provides Sigil implementations of these plus `split`, `to_upper`, `to_lower`.
 
 @(argv-builtins)
 
@@ -575,4 +575,4 @@ Example:
   (ret 0))
 ```
 
-Running: `./vm.exe program.aisl foo bar` → args = ["foo", "bar"], count = 2
+Running: `./vm.exe program.sigil foo bar` → args = ["foo", "bar"], count = 2

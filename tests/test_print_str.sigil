@@ -8,9 +8,9 @@
       (mock (io_print_str "Hello, ") 0)
       (input "Hello, ")
       (expect 0))
-    (case "print AISL"
-      (mock (io_print_str "AISL!") 0)
-      (input "AISL!")
+    (case "print Sigil"
+      (mock (io_print_str "Sigil!") 0)
+      (input "Sigil!")
       (expect 0))
     (case "print newline"
       (mock (io_print_str "\n") 0)

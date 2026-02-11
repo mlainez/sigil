@@ -5,8 +5,8 @@
   (import text_utils)
   
   (fn test_file_operations -> int
-    (set test_file string "/tmp/aisl_test.txt")
-    (set success bool (write_file_safe test_file "Hello AISL!"))
+    (set test_file string "/tmp/sigil_test.txt")
+    (set success bool (write_file_safe test_file "Hello Sigil!"))
     (if (not success)
       (ret 0))
     (set content string (read_file_safe test_file))
@@ -52,8 +52,8 @@
     (ret 0))
   
   (fn test_reverse_string -> int
-    (set reversed string (reverse_string "AISL"))
-    (set expected string "LSIA")
+    (set reversed string (reverse_string "Sigil"))
+    (set expected string "ligiS")
     (set matches bool (string_equals reversed expected))
     (if matches
       (ret 1))
@@ -102,7 +102,7 @@
       (expect 1)))
   
   (test-spec test_reverse_string
-    (case "reverses AISL to LSIA"
+    (case "reverses Sigil to ligiS"
       (input)
       (expect 1)))
   

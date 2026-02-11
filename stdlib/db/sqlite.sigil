@@ -68,18 +68,18 @@
       (ret schema))
     (ret ""))
   
-  (meta-note "Pure AISL SQLite implementation using process spawning
+  (meta-note "Pure Sigil SQLite implementation using process spawning
   
   Implementation strategy:
   - Spawns 'sqlite3 <database>' as a subprocess
-  - Communicates via stdin/stdout using AISL process primitives
+  - Communicates via stdin/stdout using Sigil process primitives
   - Uses '.mode list' and '.separator |' for structured output
   - Uses string_utils stdlib module for parsing output
   
   Advantages:
-  - 100% pure AISL (no C code, no FFI complexity)
-  - Uses only AISL process management primitives
-  - Eating our own dog food: demonstrates AISL capabilities
+  - 100% pure Sigil (no C code, no FFI complexity)
+  - Uses only Sigil process management primitives
+  - Eating our own dog food: demonstrates Sigil capabilities
   - No memory management issues with opaque pointers
   - Works with any system that has sqlite3 CLI installed
   

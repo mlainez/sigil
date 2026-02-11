@@ -1,12 +1,12 @@
-# AISL Examples
+# Sigil Examples
 
-Practical examples demonstrating AISL capabilities.
+Practical examples demonstrating Sigil capabilities.
 
 ## Available Examples
 
 ### Basic Examples
 
-- **hello_world.aisl** - Classic "Hello, World!" program
+- **hello_world.sigil** - Classic "Hello, World!" program
 
 ### Web Applications
 
@@ -26,17 +26,17 @@ Practical examples demonstrating AISL capabilities.
 Run any example directly:
 
 ```bash
-./interpreter/_build/default/vm.exe examples/hello_world.aisl
+./interpreter/_build/default/vm.exe examples/hello_world.sigil
 ```
 
 For web applications:
 
 ```bash
 # Run TODO app
-./interpreter/_build/default/vm.exe examples/todo_app/todo_app.aisl
+./interpreter/_build/default/vm.exe examples/todo_app/todo_app.sigil
 
 # Run chat server
-./interpreter/_build/default/vm.exe examples/chat_app/chat_server.aisl
+./interpreter/_build/default/vm.exe examples/chat_app/chat_server.sigil
 ```
 
 ## Contributing Examples

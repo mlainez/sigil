@@ -139,8 +139,8 @@
       (input "[0-9]+" "a1b22c333" "X")
       (expect "aXbXcX"))
     (case "replaces specific word"
-      (input "world" "hello world" "AISL")
-      (expect "hello AISL"))
+      (input "world" "hello world" "Sigil")
+      (expect "hello Sigil"))
     (case "replaces whitespace"
       (input "[ \t]+" "hello   world" " ")
       (expect "hello world"))

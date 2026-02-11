@@ -1,5 +1,5 @@
 (module hello
   (fn main -> int
-    (print "Hello from AISL!\n")
+    (print "Hello from Sigil!\n")
     (ret 0)))
 

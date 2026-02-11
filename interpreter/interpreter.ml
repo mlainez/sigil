@@ -1,4 +1,4 @@
-(* AISL Tree-Walking Interpreter *)
+(* Sigil Tree-Walking Interpreter *)
 
 open Types
 open Ast
@@ -570,7 +570,7 @@ let ws_server_handshake transport =
 
 (* Client-side handshake *)
 let ws_client_handshake transport host path =
-  let ws_key = base64_encode "aisl-ws-key-0000" in
+  let ws_key = base64_encode "sigil-ws-key-000" in
   let req = "GET " ^ path ^ " HTTP/1.1\r\n" ^
             "Host: " ^ host ^ "\r\n" ^
             "Upgrade: websocket\r\n" ^
@@ -2497,7 +2497,7 @@ let load_module module_name =
   let search_paths = compute_stdlib_paths () in
   let found_path = ref None in
   List.iter (fun base_path ->
-    let file_path = base_path ^ module_name ^ ".aisl" in
+    let file_path = base_path ^ module_name ^ ".sigil" in
     if Sys.file_exists file_path then begin
       found_path := Some file_path
     end

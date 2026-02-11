@@ -1,6 +1,6 @@
-# AISL Tests
+# Sigil Tests
 
-Test files for AISL language features and standard library.
+Test files for Sigil language features and standard library.
 
 ## Test Status
 
@@ -36,13 +36,13 @@ Test files for AISL language features and standard library.
 Individual test:
 
 ```bash
-./interpreter/_build/default/vm.exe tests/test_add.aisl
+./interpreter/_build/default/vm.exe tests/test_add.sigil
 ```
 
 All tests:
 
 ```bash
-total=0; passed=0; for f in tests/test_*.aisl; do total=$((total+1)); timeout 5 ./interpreter/_build/default/vm.exe "$f" >/dev/null 2>&1 && passed=$((passed+1)); done; echo "$passed/$total"
+total=0; passed=0; for f in tests/test_*.sigil; do total=$((total+1)); timeout 5 ./interpreter/_build/default/vm.exe "$f" >/dev/null 2>&1 && passed=$((passed+1)); done; echo "$passed/$total"
 ```
 
 ## Test Format

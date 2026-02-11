@@ -154,7 +154,7 @@
     
     (ret result))
   
-  (meta-note "Pure AISL HTTP client using TCP/TLS primitives
+  (meta-note "Pure Sigil HTTP client using TCP/TLS primitives
 
 Usage:
   (import http)
@@ -178,4 +178,4 @@ Implementation notes:
   - Uses tcp_tls_connect for https:// URLs
   - Builds HTTP/1.1 requests manually
   - Parses responses using string operations
-  - No external dependencies - pure AISL!"))
+  - No external dependencies - pure Sigil!"))

@@ -1,4 +1,4 @@
-(* AISL VM Runner *)
+(* Sigil VM Runner *)
 
 open Lexer
 open Parser
@@ -41,7 +41,7 @@ let run_file filename =
 
 let () =
   if Array.length Sys.argv < 2 then begin
-    Printf.eprintf "Usage: %s <file.aisl>\n" Sys.argv.(0);
+    Printf.eprintf "Usage: %s <file.sigil>\n" Sys.argv.(0);
     exit 1
   end;
 

@@ -9,7 +9,7 @@
       (input "apple,banana,cherry" ",")
       (expect "apple"))
     (case "split by space first element"
-      (input "hello world from AISL" " ")
+      (input "hello world from Sigil" " ")
       (expect "hello"))
     (case "split by double colon first element"
       (input "one::two::three" "::")
@@ -23,7 +23,7 @@
       (input "apple,banana,cherry" ",")
       (expect 3))
     (case "split by space count"
-      (input "hello world from AISL" " ")
+      (input "hello world from Sigil" " ")
       (expect 4))
     (case "split by double colon count"
       (input "one::two::three" "::")

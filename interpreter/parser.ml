@@ -1,4 +1,4 @@
-(* S-Expression Parser for AISL *)
+(* S-Expression Parser for Sigil *)
 
 open Lexer
 open Types

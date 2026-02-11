@@ -4,9 +4,9 @@
     (ret (replace text old_str new_str)))
   
   (test-spec do_replace
-    (case "replace world with AISL"
-      (input "hello world" "world" "AISL")
-      (expect "hello AISL"))
+    (case "replace world with Sigil"
+      (input "hello world" "world" "Sigil")
+      (expect "hello Sigil"))
     (case "replace all foo with X"
       (input "foo bar foo baz foo" "foo" "X")
       (expect "X bar X baz X"))

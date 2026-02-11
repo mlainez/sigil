@@ -1,16 +1,16 @@
 (module test_file_io
   (fn test_write_and_read -> int
-    (set path string "/tmp/aisl_test_file_io.txt")
-    (file_write path "Hello from AISL!")
+    (set path string "/tmp/sigil_test_file_io.txt")
+    (file_write path "Hello from Sigil!")
     (set content string (file_read path))
-    (set matches bool (string_equals content "Hello from AISL!"))
+    (set matches bool (string_equals content "Hello from Sigil!"))
     (file_delete path)
     (if matches
       (ret 1))
     (ret 0))
 
   (fn test_file_exists_after_write -> int
-    (set path string "/tmp/aisl_test_exists.txt")
+    (set path string "/tmp/sigil_test_exists.txt")
     (file_write path "test")
     (set exists bool (file_exists path))
     (file_delete path)
@@ -19,7 +19,7 @@
     (ret 0))
 
   (fn test_file_delete -> int
-    (set path string "/tmp/aisl_test_delete.txt")
+    (set path string "/tmp/sigil_test_delete.txt")
     (file_write path "temp")
     (file_delete path)
     (set exists bool (file_exists path))
@@ -28,7 +28,7 @@
     (ret 0))
 
   (fn test_file_append -> int
-    (set path string "/tmp/aisl_test_append.txt")
+    (set path string "/tmp/sigil_test_append.txt")
     (file_write path "line1")
     (file_append path "\nline2")
     (set content string (file_read path))

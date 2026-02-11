@@ -3,7 +3,7 @@
   (fn start_ws_server port int -> channel
     (set vm_path string "./interpreter/_build/default/vm.exe")
     (set server_args array (array_new))
-    (array_push server_args "tests/ws_echo_server.aisl")
+    (array_push server_args "tests/ws_echo_server.sigil")
     (set server channel (process_spawn vm_path server_args))
     (set port_str string (string_from_int port))
     (set port_line string (string_concat port_str "\n"))

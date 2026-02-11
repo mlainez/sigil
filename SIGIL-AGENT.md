@@ -1,17 +1,17 @@
-# AISL-Agent Specification v1.0
+# Sigil-Agent Specification v1.0
 
 **Status**: STABLE  
 **Last Updated**: 2026-02-11
 
 ## Philosophy
 
-AISL-Agent is the **ergonomic surface language** for writing AISL programs. It is:
+Sigil-Agent is the **ergonomic surface language** for writing Sigil programs. It is:
 - **High-level**: Structured control flow (while, loop, break, continue, if-else, cond, for-each)
 - **LLM-friendly**: Natural syntax that LLMs understand
 - **Directly evaluated**: The interpreter handles Agent constructs natively during evaluation
 - **Extensible**: Can add new constructs without changing Core
 
-AISL-Agent is what LLMs should write. The interpreter handles Agent constructs directly during evaluation.
+Sigil-Agent is what LLMs should write. The interpreter handles Agent constructs directly during evaluation.
 
 ## Agent Constructs
 
@@ -277,7 +277,7 @@ Agent code uses **short names** for operations. The interpreter resolves these t
 (mul x 2)      ; Interpreter infers mul_int, mul_float, or mul_decimal
 ```
 
-See AISL-CORE.md for full list of polymorphic operations.
+See SIGIL-CORE.md for full list of polymorphic operations.
 
 ## Control Flow Legality
 

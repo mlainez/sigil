@@ -1,17 +1,17 @@
-# AISL-Core Specification v1.0
+# Sigil-Core Specification v1.0
 
 **Status**: FROZEN  
 **Last Updated**: 2026-02-06
 
 ## Philosophy
 
-AISL-Core is the **frozen intermediate representation** of the AISL language. It is:
+Sigil-Core is the **frozen intermediate representation** of the Sigil language. It is:
 - **Minimal**: Only 5 statement types
 - **Stable**: Will not change once frozen
 - **Complete**: Can express any computation
 - **Low-level**: Direct mapping to interpreter evaluation
 
-AISL-Core is NOT meant for humans to write directly. It is the target for AISL-Agent, which the interpreter handles directly.
+Sigil-Core is NOT meant for humans to write directly. It is the target for Sigil-Agent, which the interpreter handles directly.
 
 ## Core Statements (FROZEN)
 
@@ -190,7 +190,7 @@ Example:
 
 ## What's NOT in Core
 
-These constructs are **AISL-Agent** features that desugar to Core:
+These constructs are **Sigil-Agent** features that desugar to Core:
 - `while` loops
 - `loop` (infinite loops)
 - `break` statements
@@ -201,7 +201,7 @@ These constructs are **AISL-Agent** features that desugar to Core:
 - `match` expressions
 - `for` loops
 
-See AISL-AGENT.md for Agent layer specification.
+See SIGIL-AGENT.md for Agent layer specification.
 
 ## Implementation
 

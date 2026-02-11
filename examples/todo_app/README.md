@@ -1,10 +1,10 @@
-# AISL Todo Application
+# Sigil Todo Application
 
-Complete web-based TODO application with SQLite database backend, built in pure AISL using non-blocking event-driven architecture.
+Complete web-based TODO application with SQLite database backend, built in pure Sigil using non-blocking event-driven architecture.
 
 ## Files
 
-- `todo_app.aisl` - AISL backend server (227 lines) - non-blocking event loop
+- `todo_app.sigil` - Sigil backend server (227 lines) - non-blocking event loop
 - `index.html` - HTML/CSS/JavaScript frontend template
 - `todos.db` - SQLite database (created at runtime)
 
@@ -12,7 +12,7 @@ Complete web-based TODO application with SQLite database backend, built in pure 
 
 ```bash
 # Run
-./interpreter/_build/default/vm.exe examples/todo_app/todo_app.aisl
+./interpreter/_build/default/vm.exe examples/todo_app/todo_app.sigil
 
 # Open browser
 http://localhost:8080
@@ -27,7 +27,7 @@ http://localhost:8080
 - Data persists across server restarts
 - Modern, responsive interface
 - Starts with empty database - add your own tasks!
-- Clean separation: HTML template in `index.html`, logic in AISL
+- Clean separation: HTML template in `index.html`, logic in Sigil
 - Uses `socket_select` for efficient I/O multiplexing
 
 ## Implementation
@@ -75,11 +75,11 @@ The HTML template uses a placeholder `__TODOS_DATA__` which is replaced with the
 // In index.html
 let t=__TODOS_DATA__;
 
-// At runtime, AISL replaces this with:
+// At runtime, Sigil replaces this with:
 let t=[{"id":1,"text":"Buy milk","done":false}];
 ```
 
-This allows easy customization of the UI without modifying AISL code.
+This allows easy customization of the UI without modifying Sigil code.
 
 ## API Endpoints
 
@@ -100,7 +100,7 @@ CREATE TABLE todos (
 
 ## Technical Stack
 
-- Language: AISL
+- Language: Sigil
 - Database: SQLite (via process handle)
 - Server: TCP sockets (via socket handle)
 - Frontend: Vanilla JavaScript
@@ -134,7 +134,7 @@ CREATE TABLE todos (
     (ret 0)))
 ```
 
-This demonstrates AISL's ability to build production-ready web applications with:
+This demonstrates Sigil's ability to build production-ready web applications with:
 - Non-blocking I/O and event-driven architecture
 - Database persistence
 - Concurrent request handling

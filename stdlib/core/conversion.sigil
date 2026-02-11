@@ -109,4 +109,4 @@
     (set result float (div adjusted 1.8))
     (ret result))
   
-  (meta-note "Conversion utilities: string_from_int, string_from_float, string_from_bool, bool_to_int, int_to_bool, distance/temperature conversions - pure AISL implementations"))
+  (meta-note "Conversion utilities: string_from_int, string_from_float, string_from_bool, bool_to_int, int_to_bool, distance/temperature conversions - pure Sigil implementations"))

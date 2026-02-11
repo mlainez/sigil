@@ -1,4 +1,4 @@
-(* AISL Abstract Syntax Tree *)
+(* Sigil Abstract Syntax Tree *)
 
 open Types
 

@@ -1,12 +1,12 @@
-# AISL Language Specification
+# Sigil Language Specification
 
-AISL (AI-Optimized Systems Language) - A two-layer programming language designed for LLM code generation with explicit syntax, zero ambiguity, and stable IR.
+Sigil - A two-layer programming language designed for LLM code generation with explicit syntax, zero ambiguity, and stable IR.
 
 ## Architecture: Two Layers
 
-AISL consists of two distinct layers:
+Sigil consists of two distinct layers:
 
-### AISL-Core (IR Layer)
+### Sigil-Core (IR Layer)
 The minimal, stable intermediate representation. This layer is **frozen** - it will never change. Core consists of only 5 statement types:
 - `set` - Variable binding
 - `label` - Jump targets
@@ -14,14 +14,14 @@ The minimal, stable intermediate representation. This layer is **frozen** - it w
 - `ifnot` - Conditional jumps
 - `ret` - Return from function
 
-### AISL-Agent (Surface Layer)
+### Sigil-Agent (Surface Layer)
 The ergonomic surface language that LLMs generate. Agent code includes structured control flow (`while`, `loop`, `break`, `continue`) and type-directed operations (`add` instead of `add`). The interpreter handles Agent code directly — no separate compilation step.
 
 **LLMs write Agent code. The interpreter runs it directly.**
 
 ---
 
-## AISL-Agent Grammar (Surface Language)
+## Sigil-Agent Grammar (Surface Language)
 
 This is what you write and what LLMs generate.
 
@@ -386,51 +386,51 @@ Functions can call themselves:
 
 ## Standard Library
 
-AISL provides 180+ built-in functions. All use direct call syntax: `(function arg1 arg2)`.
+Sigil provides 180+ built-in functions. All use direct call syntax: `(function arg1 arg2)`.
 
 ### Standard Library Modules
 
-Many high-level operations are now implemented in **pure AISL stdlib modules** instead of built-in opcodes. This follows AISL's philosophy: "If it CAN be written in AISL, it MUST be written in AISL."
+Many high-level operations are now implemented in **pure Sigil stdlib modules** instead of built-in opcodes. This follows Sigil's philosophy: "If it CAN be written in Sigil, it MUST be written in Sigil."
 
 **Available stdlib modules (17 total):**
 
 **Core (9 modules):**
-- `stdlib/core/string_utils.aisl` - Advanced string operations (split, trim, contains, replace, starts_with, ends_with, to_upper, to_lower)
-- `stdlib/core/conversion.aisl` - Type conversion (string_from_int, bool_to_int, kilometers_to_miles)
-- `stdlib/core/array_utils.aisl` - Array utilities (array_sum, array_product, array_find, array_contains, array_min, array_max, array_reverse, array_fill, array_range)
-- `stdlib/core/math.aisl` - Math operations (abs, abs_float, min, max, min_float, max_float)
-- `stdlib/core/math_extended.aisl` - Extended math (clamp, sign, lerp, is_even, is_odd, square, cube)
-- `stdlib/core/filesystem.aisl` - File utilities (read_file_safe, write_file_safe, delete_if_exists, copy_file, read_lines, count_lines)
-- `stdlib/core/network.aisl` - Network utilities (is_valid_port, normalize_path, build_url, build_query_string, parse_url, extract_domain)
-- `stdlib/core/text_utils.aisl` - Text utilities (repeat_string, pad_left, pad_right, truncate, word_count, reverse_string, is_empty)
-- `stdlib/core/validation.aisl` - Validation (in_range, is_positive, is_negative, is_zero, is_divisible_by)
+- `stdlib/core/string_utils.sigil` - Advanced string operations (split, trim, contains, replace, starts_with, ends_with, to_upper, to_lower)
+- `stdlib/core/conversion.sigil` - Type conversion (string_from_int, bool_to_int, kilometers_to_miles)
+- `stdlib/core/array_utils.sigil` - Array utilities (array_sum, array_product, array_find, array_contains, array_min, array_max, array_reverse, array_fill, array_range)
+- `stdlib/core/math.sigil` - Math operations (abs, abs_float, min, max, min_float, max_float)
+- `stdlib/core/math_extended.sigil` - Extended math (clamp, sign, lerp, is_even, is_odd, square, cube)
+- `stdlib/core/filesystem.sigil` - File utilities (read_file_safe, write_file_safe, delete_if_exists, copy_file, read_lines, count_lines)
+- `stdlib/core/network.sigil` - Network utilities (is_valid_port, normalize_path, build_url, build_query_string, parse_url, extract_domain)
+- `stdlib/core/text_utils.sigil` - Text utilities (repeat_string, pad_left, pad_right, truncate, word_count, reverse_string, is_empty)
+- `stdlib/core/validation.sigil` - Validation (in_range, is_positive, is_negative, is_zero, is_divisible_by)
 
 **Data (1 module):**
-- `stdlib/data/json_utils.aisl` - JSON parsing and manipulation (parse, stringify, new_object, new_array, get, set, has, delete, push, length, type)
+- `stdlib/data/json_utils.sigil` - JSON parsing and manipulation (parse, stringify, new_object, new_array, get, set, has, delete, push, length, type)
 
 **Net (1 module):**
-- `stdlib/net/http.aisl` - HTTP client operations (get, post, put, delete, parse_response, build_request)
+- `stdlib/net/http.sigil` - HTTP client operations (get, post, put, delete, parse_response, build_request)
 
 **Pattern (1 module):**
-- `stdlib/pattern/regex.aisl` - Regular expression operations (compile, match, find, find_all, replace)
+- `stdlib/pattern/regex.sigil` - Regular expression operations (compile, match, find, find_all, replace)
 
 **Database (1 module):**
-- `stdlib/db/sqlite.aisl` - SQLite database operations (open, close, exec, query, prepare, bind, step, column, finalize, last_insert_id, changes, error_msg)
+- `stdlib/db/sqlite.sigil` - SQLite database operations (open, close, exec, query, prepare, bind, step, column, finalize, last_insert_id, changes, error_msg)
 
 **System (1 module):**
-- `stdlib/sys/process.aisl` - Process management (spawn, wait, kill, exit, get_pid, get_env, set_env)
+- `stdlib/sys/process.sigil` - Process management (spawn, wait, kill, exit, get_pid, get_env, set_env)
 
 **Crypto (3 modules):**
-- `stdlib/crypto/base64.aisl` - Base64 encoding/decoding (base64_encode, base64_decode)
-- `stdlib/crypto/hash.aisl` - Cryptographic hashes (sha256, md5) — pure AISL using bitwise builtins
-- `stdlib/crypto/hmac.aisl` - HMAC authentication (hmac_sha256) — pure AISL using hash module
+- `stdlib/crypto/base64.sigil` - Base64 encoding/decoding (base64_encode, base64_decode)
+- `stdlib/crypto/hash.sigil` - Cryptographic hashes (sha256, md5) — pure Sigil using bitwise builtins
+- `stdlib/crypto/hmac.sigil` - HMAC authentication (hmac_sha256) — pure Sigil using hash module
 
 **Importing stdlib modules:**
 
 ```scheme
 (module my_program
-  (import json_utils) ; Import from stdlib/data/json_utils.aisl
-  (import regex)      ; Import from stdlib/pattern/regex.aisl
+  (import json_utils) ; Import from stdlib/data/json_utils.sigil
+  (import regex)      ; Import from stdlib/pattern/regex.sigil
   
   (fn main -> int
     ; Use imported functions
@@ -534,7 +534,7 @@ The interpreter automatically selects the correct operation based on variable ty
 
 ### Regular Expression Operations
 
-**AISL has full regex support built-in** using POSIX Extended Regular Expression syntax:
+**Sigil has full regex support built-in** using POSIX Extended Regular Expression syntax:
 
 ```scheme
 ; Compile a pattern into a regex object
@@ -604,7 +604,7 @@ The interpreter automatically selects the correct operation based on variable ty
 
 ### Error Handling
 
-AISL supports **try/catch** for recoverable error handling, alongside **guard checks** for predictable errors.
+Sigil supports **try/catch** for recoverable error handling, alongside **guard checks** for predictable errors.
 
 #### Try/Catch
 
@@ -815,7 +815,7 @@ This server demonstrates:
 
 ### No Closures (By Design)
 
-AISL functions deliberately do **not** capture their defining scope. When a function is called, only other function definitions are visible — regular variables from the outer scope are NOT accessible.
+Sigil functions deliberately do **not** capture their defining scope. When a function is called, only other function definitions are visible — regular variables from the outer scope are NOT accessible.
 
 ```scheme
 (module scope_example
@@ -886,13 +886,13 @@ This is intentional for LLM code generation:
 ## Execution
 
 ```bash
-# Run AISL program directly (single-step: parse and execute)
-./interpreter/_build/default/vm.exe program.aisl
+# Run Sigil program directly (single-step: parse and execute)
+./interpreter/_build/default/vm.exe program.sigil
 ```
 
 ## Test Framework
 
-**CRITICAL:** All test files in `tests/` directory matching `test_*.aisl` MUST use the test framework.
+**CRITICAL:** All test files in `tests/` directory matching `test_*.sigil` MUST use the test framework.
 
 ### Required Structure
 
@@ -928,7 +928,7 @@ Every test file must include:
 - Only print output without returning verifiable values
 - Return 0 unconditionally without testing anything
 - Lack `test-spec` declarations
-- Use comments (AISL doesn't support comments)
+- Use comments (Sigil doesn't support comments)
 
 ### Test Framework Keywords
 
@@ -940,4 +940,4 @@ Every test file must include:
 
 ## File Extensions
 
-- `.aisl` - AISL source files
+- `.sigil` - Sigil source files

@@ -151,7 +151,7 @@
     (ret new_buffer))
   
   (fn main -> int
-    (print "Initializing AISL Todo App...")
+    (print "Initializing Sigil Todo App...")
     (set db process (open "todos.db"))
     (exec db "CREATE TABLE IF NOT EXISTS todos (id INTEGER PRIMARY KEY, text TEXT, done INTEGER DEFAULT 0);")
     (print "Database initialized")

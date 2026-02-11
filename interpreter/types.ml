@@ -1,4 +1,4 @@
-(* AISL Type System *)
+(* Sigil Type System *)
 
 type type_kind =
   | TInt

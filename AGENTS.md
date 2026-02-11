@@ -1,4 +1,4 @@
-# AISL for AI Agents: A Complete Guide
+# Sigil for AI Agents: A Complete Guide
 
 **Target Audience**: LLMs, AI Agents, Code Generation Systems
 
@@ -11,64 +11,64 @@
 **This document is human-readable prose with examples.**  
 **For token-optimized LLM consumption, use these instead:**
 
-- **`.aisl.grammar`** - Complete language reference in 196 lines (~1600 tokens) - **CONSULT FIRST**
-- **`.aisl.analysis`** - Deep architectural analysis + runtime discoveries
+- **`.sigil.grammar`** - Complete language reference in 196 lines (~1600 tokens) - **CONSULT FIRST**
+- **`.sigil.analysis`** - Deep architectural analysis + runtime discoveries
 
 **Token efficiency:**
 - This file: ~700 lines = ~8,000 tokens
-- `.aisl.grammar`: ~196 lines = ~1,600 tokens
+- `.sigil.grammar`: ~196 lines = ~1,600 tokens
 - **5x more efficient for context loading**
 
 **Consultation order for AI agents:**
-1. **FIRST**: `.aisl.grammar` - syntax, operations, critical notes
-2. **SECOND**: `.aisl.analysis` - design decisions, discovered issues
+1. **FIRST**: `.sigil.grammar` - syntax, operations, critical notes
+2. **SECOND**: `.sigil.analysis` - design decisions, discovered issues
 3. **LAST**: This file (AGENTS.md) - only if you need detailed examples
 
 **When to use each:**
-- **Generating AISL code**: Load `.aisl.grammar` ONLY
-- **Fixing bugs/issues**: Check `.aisl.analysis` for known issues
-- **Learning AISL deeply**: Read this file (AGENTS.md)
-- **Understanding design**: Read `.aisl.analysis`
+- **Generating Sigil code**: Load `.sigil.grammar` ONLY
+- **Fixing bugs/issues**: Check `.sigil.analysis` for known issues
+- **Learning Sigil deeply**: Read this file (AGENTS.md)
+- **Understanding design**: Read `.sigil.analysis`
 
 **Critical rule**: Machine-readable formats are the source of truth. Markdown is for human reference only.
 
 ---
 
-## 🚨 CRITICAL: NO COMMENTS IN AISL CODE
+## 🚨 CRITICAL: NO COMMENTS IN Sigil CODE
 
-**AISL DOES NOT SUPPORT COMMENTS.** Do not use `;`, `//`, `#`, or any other comment syntax.
+**Sigil DOES NOT SUPPORT COMMENTS.** Do not use `;`, `//`, `#`, or any other comment syntax.
 
 If you need to document code:
 - Use the `meta-note` construct in test specs
 - Use descriptive variable names
 - Write separate documentation files
 
-**This is the #1 cause of parse errors when generating AISL code.**
+**This is the #1 cause of parse errors when generating Sigil code.**
 
 ---
 
-## 🚨 CRITICAL: ALWAYS USE AISL FOR TOOLING
+## 🚨 CRITICAL: ALWAYS USE Sigil FOR TOOLING
 
-**ALL utility scripts, converters, and tools MUST be written in pure AISL.**
+**ALL utility scripts, converters, and tools MUST be written in pure Sigil.**
 
-**NEVER use Python, Bash, or any other language for AISL-related scripts.**
+**NEVER use Python, Bash, or any other language for Sigil-related scripts.**
 
 Why this matters:
 - Eating our own dog food - discovers language limitations immediately
 - Scripts become working examples for LLMs to learn from
 - No external dependencies (Python, npm, etc.)
-- Forces AISL to be complete and self-sufficient
-- If AISL lacks a feature, ADD IT instead of working around it
+- Forces Sigil to be complete and self-sufficient
+- If Sigil lacks a feature, ADD IT instead of working around it
 
 Process:
-1. Check if AISL has needed operations (it probably does!)
-2. If truly missing, extend AISL (add to VM/runtime/stdlib)
-3. Write script in pure AISL
-4. If you wrote Python/Bash, DELETE IT and rewrite in AISL
+1. Check if Sigil has needed operations (it probably does!)
+2. If truly missing, extend Sigil (add to VM/runtime/stdlib)
+3. Write script in pure Sigil
+4. If you wrote Python/Bash, DELETE IT and rewrite in Sigil
 
 Examples:
 ```lisp
-; ✅ CORRECT - Pure AISL converter script
+; ✅ CORRECT - Pure Sigil converter script
 (module convert_syntax
   (fn convert_file path string -> int
     (set content string (file_read path))
@@ -82,13 +82,13 @@ Examples:
 #         ...
 ```
 
-**If you catch yourself reaching for Python, STOP and use AISL.**
+**If you catch yourself reaching for Python, STOP and use Sigil.**
 
 ---
 
 ## 🚨 CRITICAL: ALL TEST FILES MUST USE THE TEST FRAMEWORK
 
-**ALL files in the `tests/` directory with names matching `test_*.aisl` MUST use the test framework.**
+**ALL files in the `tests/` directory with names matching `test_*.sigil` MUST use the test framework.**
 
 Every test file must include:
 - `test-spec` declarations with `case`, `input`, and `expect`
@@ -124,8 +124,8 @@ Every test file must include:
 **When you discover bugs, inconsistencies, or undocumented behavior, UPDATE DOCS IMMEDIATELY.**
 
 Documentation update order:
-1. **FIRST**: Update `.aisl.grammar` - add critical notes in `@(note ...)` section
-2. **SECOND**: Update `.aisl.analysis` - document the discovery with `@(tag-name)` section
+1. **FIRST**: Update `.sigil.grammar` - add critical notes in `@(note ...)` section
+2. **SECOND**: Update `.sigil.analysis` - document the discovery with `@(tag-name)` section
 3. **THIRD**: Update `AGENTS.md` (this file) - if LLMs need to know to avoid errors
 4. **LAST**: Update other markdown files if humans need it
 
@@ -137,7 +137,7 @@ Examples of what requires immediate documentation:
 
 Process when discovering inconsistency:
 1. Verify the actual behavior (test it)
-2. Update machine-readable formats (`.aisl.grammar`, `.aisl.analysis`)
+2. Update machine-readable formats (`.sigil.grammar`, `.sigil.analysis`)
 3. Update human docs (AGENTS.md, LANGUAGE_SPEC.md)
 4. Add test case if it's a bug
 5. Fix the bug if possible, or document workaround
@@ -146,11 +146,11 @@ Process when discovering inconsistency:
 
 ---
 
-## What is AISL?
+## What is Sigil?
 
-AISL (AI-Optimized Systems Language) is a programming language specifically designed for **code generation by AI systems**. It eliminates the ambiguities and complexities that make traditional languages difficult for LLMs to generate reliably.
+Sigil is a programming language specifically designed for **code generation by AI systems**. It eliminates the ambiguities and complexities that make traditional languages difficult for LLMs to generate reliably.
 
-### The Core Problem AISL Solves
+### The Core Problem Sigil Solves
 
 **Traditional languages are hard for LLMs because:**
 - Operator precedence creates ambiguity (is `a + b * c` parsed as `(a + b) * c` or `a + (b * c)`?)
@@ -159,7 +159,7 @@ AISL (AI-Optimized Systems Language) is a programming language specifically desi
 - Control flow nesting requires careful tracking
 - Built-in explosion: hundreds of type-specific operations to remember
 
-**AISL fixes this by:**
+**Sigil fixes this by:**
 - Zero operator precedence - all operations are explicit function calls
 - No implicit conversions - types are always explicit
 - One canonical form for each construct
@@ -170,18 +170,18 @@ AISL (AI-Optimized Systems Language) is a programming language specifically desi
 
 ## Two-Layer Architecture: The Key Innovation
 
-AISL uses a **two-layer design** that prevents entropy over time:
+Sigil uses a **two-layer design** that prevents entropy over time:
 
 ```
 ┌─────────────────────────────────────────┐
-│         AISL-Agent (Surface)            │
+│         Sigil-Agent (Surface)            │
 │  What LLMs Write: while, loop, break    │
 │  Ergonomic, evolves over time           │
 └───────────────┬─────────────────────────┘
                 │ Interpretation
                 ▼
 ┌─────────────────────────────────────────┐
-│          AISL-Core (IR)                 │
+│          Sigil-Core (IR)                 │
 │  What Runs: set, call, goto, label      │
 │  Minimal, frozen forever                │
 └─────────────────────────────────────────┘
@@ -206,7 +206,7 @@ This means:
 
 ### Module Structure
 
-Every AISL program is a module with functions:
+Every Sigil program is a module with functions:
 
 ```lisp
 (module module_name
@@ -219,12 +219,12 @@ Every AISL program is a module with functions:
 
 ### Entry Point
 
-**Every AISL program must have a `main` function as its entry point:**
+**Every Sigil program must have a `main` function as its entry point:**
 
 ```lisp
 (module my_program
   (fn main -> int
-    (print "Hello, AISL!")
+    (print "Hello, Sigil!")
     (ret 0)))
 ```
 
@@ -483,7 +483,7 @@ Generate these - the interpreter handles them directly:
 
 **CRITICAL: Many operations that were previously built-in opcodes are now implemented in stdlib modules.**
 
-AISL follows the philosophy: **"If it CAN be written in AISL, it MUST be written in AISL."** However, commonly-used string operations are available as both builtins and stdlib implementations.
+Sigil follows the philosophy: **"If it CAN be written in Sigil, it MUST be written in Sigil."** However, commonly-used string operations are available as both builtins and stdlib implementations.
 
 ### Operations That Require Stdlib Import
 
@@ -500,9 +500,9 @@ AISL follows the philosophy: **"If it CAN be written in AISL, it MUST be written
 ```lisp
 (module my_program
   ; Result type removed - use panic-based error handling
-  (import string_utils)             ; From stdlib/core/string_utils.aisl
-  (import json_utils)               ; From stdlib/data/json_utils.aisl
-  (import regex)                    ; From stdlib/pattern/regex.aisl
+  (import string_utils)             ; From stdlib/core/string_utils.sigil
+  (import json_utils)               ; From stdlib/data/json_utils.sigil
+  (import regex)                    ; From stdlib/pattern/regex.sigil
   
   (fn main -> int
     ; Your code here
@@ -553,8 +553,8 @@ AISL follows the philosophy: **"If it CAN be written in AISL, it MUST be written
 
 **Crypto (3):**
 - `base64` - Base64 encoding/decoding (base64_encode, base64_decode)
-- `hash` - Cryptographic hashes (sha256, md5) — pure AISL using bitwise builtins
-- `hmac` - HMAC authentication (hmac_sha256) — pure AISL using hash module
+- `hash` - Cryptographic hashes (sha256, md5) — pure Sigil using bitwise builtins
+- `hmac` - HMAC authentication (hmac_sha256) — pure Sigil using hash module
 
 
 ### When to Use Stdlib vs Built-in
@@ -596,7 +596,7 @@ AISL follows the philosophy: **"If it CAN be written in AISL, it MUST be written
 
 **BEFORE IMPLEMENTING: Check stdlib/ for available modules**
 
-stdlib/ (pure AISL implementations):
+stdlib/ (pure Sigil implementations):
 - `string_utils` - trim, split, contains, replace
 - `conversion` - string_from_int, bool_to_int
 - `json_utils` - parse, stringify
@@ -616,7 +616,7 @@ stdlib/ (pure AISL implementations):
 
 **Process:**
 1. List `stdlib/` directory to see available modules
-2. Check module manifest (.aisl.manifest) for function signatures
+2. Check module manifest (.sigil.manifest) for function signatures
 3. Import: `(import module_name)`
 4. Use available functions
 
@@ -628,8 +628,8 @@ stdlib/ (pure AISL implementations):
 
 3. **Use the correct import syntax:**
    - Simple import: `(import module_name)` - Module loader automatically searches `stdlib/core/`, `stdlib/data/`, `stdlib/net/`, `stdlib/sys/`, `stdlib/crypto/`, `stdlib/db/`, `stdlib/pattern/`
-   - Example: `(import json_utils)` automatically finds `stdlib/data/json_utils.aisl`
-   - Example: `(import http)` automatically finds `stdlib/net/http.aisl`
+   - Example: `(import json_utils)` automatically finds `stdlib/data/json_utils.sigil`
+   - Example: `(import http)` automatically finds `stdlib/net/http.sigil`
    - **NOTE**: The `(import module_name from subdir)` syntax is NOT supported!
 
 4. **Function names match module names** - After importing `json_utils`, use `json_parse`, `json_stringify`, etc. (not shortened names).
@@ -794,7 +794,7 @@ stdlib/ (pure AISL implementations):
 
 ## Testing Your Generated Code
 
-AISL has a built-in test framework. Add tests to verify behavior:
+Sigil has a built-in test framework. Add tests to verify behavior:
 
 ```lisp
 (module my_module
@@ -818,9 +818,9 @@ AISL has a built-in test framework. Add tests to verify behavior:
 
 | File | Purpose | Read When |
 |------|---------|-----------|
-| **AGENTS.md** | This file - LLM quick reference | Generating AISL code |
-| **AISL-CORE.md** | Frozen IR specification | Understanding internals |
-| **AISL-AGENT.md** | Surface language spec | Learning Agent constructs |
+| **AGENTS.md** | This file - LLM quick reference | Generating Sigil code |
+| **SIGIL-CORE.md** | Frozen IR specification | Understanding internals |
+| **SIGIL-AGENT.md** | Surface language spec | Learning Agent constructs |
 | **LANGUAGE_SPEC.md** | Complete language reference | Full syntax and stdlib |
 | **README.md** | Project overview | First time here |
 
@@ -840,9 +840,9 @@ AISL has a built-in test framework. Add tests to verify behavior:
 ### Quick Lookups
 
 - **Syntax questions**: See LANGUAGE_SPEC.md sections 1-3
-- **Control flow**: See AISL-AGENT.md examples
+- **Control flow**: See SIGIL-AGENT.md examples
 - **Built-in functions**: See LANGUAGE_SPEC.md section 5 (180+ functions)
-- **Type system**: See AISL-CORE.md section "Types"
+- **Type system**: See SIGIL-CORE.md section "Types"
 - **Error handling**: Use try/catch for recoverable errors, guard checks for predictable ones. See LANGUAGE_SPEC.md.
 
 ---
@@ -851,7 +851,7 @@ AISL has a built-in test framework. Add tests to verify behavior:
 
 ### ⚠️ CRITICAL: Reserved keyword conflicts with variable names
 
-**PARSER BUG:** Certain keywords used in AISL's test-spec framework are reserved and CANNOT be used as variable names anywhere in your code, even outside of test contexts.
+**PARSER BUG:** Certain keywords used in Sigil's test-spec framework are reserved and CANNOT be used as variable names anywhere in your code, even outside of test contexts.
 
 **Reserved keywords that cause parse errors:**
 - `input` - Used in test-spec `(input ...)` clauses
@@ -1213,7 +1213,7 @@ Core IR constructs like `label`, `goto`, and `ifnot` are special syntax, not fun
 
 ## Performance Characteristics
 
-AISL is designed for predictable performance:
+Sigil is designed for predictable performance:
 
 - **Type-directed dispatch**: Interpreter resolves operations based on argument types
 - **No GC pauses**: OCaml's garbage collector is generational and incremental
@@ -1258,7 +1258,7 @@ AISL is designed for predictable performance:
 
 ---
 
-## Summary: AISL in 10 Points
+## Summary: Sigil in 10 Points
 
 1. **Two layers**: Agent (what you write) desugars to Core (what runs)
 2. **Explicit everything**: Types, control flow - no hidden behavior
@@ -1283,6 +1283,6 @@ AISL is designed for predictable performance:
 
 ---
 
-**AISL - Designed for AI, Built for Everyone.**
+**Sigil - Designed for AI, Built for Everyone.**
 
-*For detailed technical specifications, see AISL-CORE.md and AISL-AGENT.md.*
+*For detailed technical specifications, see SIGIL-CORE.md and SIGIL-AGENT.md.*

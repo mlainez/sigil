@@ -1,11 +1,11 @@
-# AISL Chat App
+# Sigil Chat App
 
-A real-time chat application built with AISL featuring WebSocket communication and a modern web interface.
+A real-time chat application built with Sigil featuring WebSocket communication and a modern web interface.
 
 ## Files
 
-- `chat_server.aisl` - WebSocket chat server that handles multiple clients and broadcasts messages
-- `chat_client.aisl` - Web-based chat client with HTTP bridge to WebSocket server
+- `chat_server.sigil` - WebSocket chat server that handles multiple clients and broadcasts messages
+- `chat_client.sigil` - Web-based chat client with HTTP bridge to WebSocket server
 - `chat.html` - HTML/CSS/JavaScript frontend with Tailwind CSS
 
 ## Architecture
@@ -29,7 +29,7 @@ A real-time chat application built with AISL featuring WebSocket communication a
 ### 1. Start the Chat Server
 
 ```bash
-./interpreter/_build/default/vm.exe examples/chat_app/chat_server.aisl
+./interpreter/_build/default/vm.exe examples/chat_app/chat_server.sigil
 ```
 
 The server listens on port 8080 for WebSocket connections.
@@ -40,17 +40,17 @@ Each client needs its own HTTP port to avoid conflicts.
 
 **First Client (port 3000):**
 ```bash
-HTTP_PORT=3000 ./interpreter/_build/default/vm.exe examples/chat_app/chat_client.aisl
+HTTP_PORT=3000 ./interpreter/_build/default/vm.exe examples/chat_app/chat_client.sigil
 ```
 
 **Second Client (port 3001):**
 ```bash
-HTTP_PORT=3001 ./interpreter/_build/default/vm.exe examples/chat_app/chat_client.aisl
+HTTP_PORT=3001 ./interpreter/_build/default/vm.exe examples/chat_app/chat_client.sigil
 ```
 
 **Third Client (port 3002):**
 ```bash
-HTTP_PORT=3002 ./interpreter/_build/default/vm.exe examples/chat_app/chat_client.aisl
+HTTP_PORT=3002 ./interpreter/_build/default/vm.exe examples/chat_app/chat_client.sigil
 ```
 
 ### 3. Open in Browser
@@ -69,7 +69,7 @@ All clients see the same chatroom and can communicate in real-time!
 ### Connecting to Remote Chat Server
 
 ```bash
-CHAT_HOST=192.168.1.100 HTTP_PORT=3000 ./interpreter/_build/default/vm.exe examples/chat_app/chat_client.aisl
+CHAT_HOST=192.168.1.100 HTTP_PORT=3000 ./interpreter/_build/default/vm.exe examples/chat_app/chat_client.sigil
 ```
 
 ## Features
@@ -125,19 +125,19 @@ The chat client uses a sophisticated event loop that monitors three types of soc
 
 **Terminal 1 - Server:**
 ```bash
-./interpreter/_build/default/vm.exe examples/chat_app/chat_server.aisl
+./interpreter/_build/default/vm.exe examples/chat_app/chat_server.sigil
 # WebSocket chat server running on port 8080
 ```
 
 **Terminal 2 - Alice's Client:**
 ```bash
-HTTP_PORT=3000 ./interpreter/_build/default/vm.exe examples/chat_app/chat_client.aisl
+HTTP_PORT=3000 ./interpreter/_build/default/vm.exe examples/chat_app/chat_client.sigil
 # HTTP interface running on http://localhost:3000
 ```
 
 **Terminal 3 - Bob's Client:**
 ```bash
-HTTP_PORT=3001 ./interpreter/_build/default/vm.exe examples/chat_app/chat_client.aisl
+HTTP_PORT=3001 ./interpreter/_build/default/vm.exe examples/chat_app/chat_client.sigil
 # HTTP interface running on http://localhost:3001
 ```
 
@@ -147,7 +147,7 @@ HTTP_PORT=3001 ./interpreter/_build/default/vm.exe examples/chat_app/chat_client
 - Type messages in either window
 - See them appear in both windows in real-time!
 
-## Demonstrating AISL's Capabilities
+## Demonstrating Sigil's Capabilities
 
 This chat application showcases:
 - **WebSocket protocol** with `ws_accept`, `ws_connect`, `ws_send`, `ws_receive`

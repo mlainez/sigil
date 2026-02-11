@@ -1,4 +1,4 @@
-(* S-Expression Lexer for AISL *)
+(* S-Expression Lexer for Sigil *)
 
 type token =
   | LParen

@@ -1,8 +1,8 @@
-# AISL Standard Library
+# Sigil Standard Library
 
-The AISL Standard Library provides high-level functionality implemented in **pure AISL code**. This follows AISL's core philosophy: **"If it CAN be written in AISL, it MUST be written in AISL."**
+The Sigil Standard Library provides high-level functionality implemented in **pure Sigil code**. This follows Sigil's core philosophy: **"If it CAN be written in Sigil, it MUST be written in Sigil."**
 
-All stdlib modules are written in AISL and interpreted directly, making them:
+All stdlib modules are written in Sigil and interpreted directly, making them:
 - **Readable** - Easy to understand and modify
 - **Maintainable** - Written in the same language as user code
 - **Self-documenting** - Working examples for LLMs to learn from
@@ -11,12 +11,12 @@ All stdlib modules are written in AISL and interpreted directly, making them:
 ## Import Syntax
 
 ```lisp
-(import string_utils)     ; stdlib/core/string_utils.aisl
-(import json_utils)        ; stdlib/data/json_utils.aisl
-(import http)              ; stdlib/net/http.aisl
-(import sqlite)            ; stdlib/db/sqlite.aisl
-(import regex)             ; stdlib/pattern/regex.aisl
-(import process)           ; stdlib/sys/process.aisl
+(import string_utils)     ; stdlib/core/string_utils.sigil
+(import json_utils)        ; stdlib/data/json_utils.sigil
+(import http)              ; stdlib/net/http.sigil
+(import sqlite)            ; stdlib/db/sqlite.sigil
+(import regex)             ; stdlib/pattern/regex.sigil
+(import process)           ; stdlib/sys/process.sigil
 ```
 
 The module loader automatically searches all stdlib subdirectories (`core/`, `data/`, `net/`, `sys/`, `db/`, `pattern/`, `crypto/`).
@@ -50,9 +50,9 @@ The module loader automatically searches all stdlib subdirectories (`core/`, `da
 - **sqlite** - SQLite database operations (open, close, exec, query, prepare, bind, step, column, finalize, last_insert_id, changes, error_msg)
 
 ### Crypto (3 modules)
-- **base64** - Base64 encoding/decoding (base64_encode, base64_decode) — pure AISL, no external dependencies
-- **hash** - Cryptographic hash functions (sha256, md5) — pure AISL using bitwise builtins
-- **hmac** - HMAC message authentication (hmac_sha256) — pure AISL using hash module
+- **base64** - Base64 encoding/decoding (base64_encode, base64_decode) — pure Sigil, no external dependencies
+- **hash** - Cryptographic hash functions (sha256, md5) — pure Sigil using bitwise builtins
+- **hmac** - HMAC message authentication (hmac_sha256) — pure Sigil using hash module
 
 ## Module Structure
 
@@ -69,4 +69,4 @@ stdlib/
 
 ---
 
-**AISL Standard Library - Pure AISL, Zero Dependencies, Maximum Clarity**
+**Sigil Standard Library - Pure Sigil, Zero Dependencies, Maximum Clarity**
