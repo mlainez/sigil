@@ -1,64 +1,5 @@
 (module http
   
-  (fn string_from_int n int -> string
-    (set is_negative bool (lt n 0))
-    (set abs_n int n)
-    (if is_negative
-      (set abs_n int (sub 0 n)))
-    
-    (set is_zero bool (eq abs_n 0))
-    (if is_zero
-      (ret "0"))
-    
-    (set digits array (array_new))
-    (set remaining int abs_n)
-    
-    (while (gt remaining 0)
-      (set digit int (mod remaining 10))
-      (set remaining int (div remaining 10))
-      
-      (set digit_char string "0")
-      (if (eq digit 1) (set digit_char string "1"))
-      (if (eq digit 2) (set digit_char string "2"))
-      (if (eq digit 3) (set digit_char string "3"))
-      (if (eq digit 4) (set digit_char string "4"))
-      (if (eq digit 5) (set digit_char string "5"))
-      (if (eq digit 6) (set digit_char string "6"))
-      (if (eq digit 7) (set digit_char string "7"))
-      (if (eq digit 8) (set digit_char string "8"))
-      (if (eq digit 9) (set digit_char string "9"))
-      
-      (array_push digits digit_char))
-    
-    (set result string "")
-    (set len int (array_length digits))
-    (set i int (sub len 1))
-    
-    (while (ge i 0)
-      (set digit_str string (array_get digits i))
-      (set result string (string_concat result digit_str))
-      (set i int (sub i 1)))
-    
-    (if is_negative
-      (set result string (string_concat "-" result)))
-    
-    (ret result))
-  
-  (fn string_starts_with text string prefix string -> bool
-    (set text_len int (string_length text))
-    (set prefix_len int (string_length prefix))
-    (if (lt text_len prefix_len)
-      (ret false))
-    (set i int 0)
-    (while (lt i prefix_len)
-      (set text_ch string (string_slice text i (add i 1)))
-      (set prefix_ch string (string_slice prefix i (add i 1)))
-      (set matches bool (string_equals text_ch prefix_ch))
-      (if (not matches)
-        (ret false))
-      (set i int (add i 1)))
-    (ret true))
-  
   (fn parse_url url string -> array
     (set arr array (array_new))
     
@@ -71,15 +12,15 @@
     
     (set url_no_proto string url)
     (if is_https
-      (set url_no_proto string (string_slice url 8 (string_length url))))
+      (set url_no_proto string (string_slice url 8 (sub (string_length url) 8))))
     (if is_http
-      (set url_no_proto string (string_slice url 7 (string_length url))))
+      (set url_no_proto string (string_slice url 7 (sub (string_length url) 7))))
     
     (set slash_pos int -1)
     (set i int 0)
     (set url_len int (string_length url_no_proto))
     (while (lt i url_len)
-      (set ch string (string_slice url_no_proto i (add i 1)))
+      (set ch string (string_slice url_no_proto i 1))
       (set is_slash bool (string_equals ch "/"))
       (if is_slash
         (set slash_pos int i)
@@ -90,7 +31,7 @@
     (set path string "/")
     (if (ge slash_pos 0)
       (set host string (string_slice url_no_proto 0 slash_pos))
-      (set path string (string_slice url_no_proto slash_pos url_len)))
+      (set path string (string_slice url_no_proto slash_pos (sub url_len slash_pos))))
     
     (array_push arr host)
     
@@ -130,7 +71,7 @@
     (set i int 0)
     (set raw_len int (string_length raw))
     (while (lt i (sub raw_len 3))
-      (set substr string (string_slice raw i (add i 4)))
+      (set substr string (string_slice raw i 4))
       (set is_crlf bool (string_equals substr "\r\n\r\n"))
       (if is_crlf
         (set header_end int i)
@@ -140,7 +81,7 @@
     (set body string "")
     (if (ge header_end 0)
       (set body_start int (add header_end 4))
-      (set body string (string_slice raw body_start raw_len)))
+      (set body string (string_slice raw body_start (sub raw_len body_start))))
     
     (map_set response "body" body)
     (map_set response "status" 200)
@@ -216,7 +157,7 @@
   (meta-note "Pure AISL HTTP client using TCP/TLS primitives
 
 Usage:
-  (import http_pure)
+  (import http)
   (set response map (get \"https://example.com/api\"))
   (set body string (map_get response \"body\"))
   (set status string (map_get response \"status\"))
@@ -229,9 +170,8 @@ Functions:
   - post(url body) -> map
 
 Dependencies:
-  - tcp_connect / tcp_tls_connect (C primitives)
-  - string_utils (stdlib)
-  - conversion (stdlib)
+  - tcp_connect / tcp_tls_connect (builtins)
+  - string_starts_with, string_from_int (builtins)
 
 Implementation notes:
   - Uses tcp_connect for http:// URLs
