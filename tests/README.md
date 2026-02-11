@@ -4,7 +4,7 @@ Test files for AISL language features and standard library.
 
 ## Test Status
 
-**126 tests - All passing, all use test-spec format**
+**138 tests - All passing, all use test-spec format**
 
 ## Test Categories
 
@@ -30,8 +30,6 @@ Test files for AISL language features and standard library.
 - Math functions
 - String utilities
 - Regex operations (POSIX extended via OCaml Str)
-- Base64 encoding/decoding
-- Cryptographic hashing
 
 ## Running Tests
 

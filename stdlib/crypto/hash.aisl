@@ -1,0 +1,369 @@
+(module hash
+
+  (fn mask32 val int -> int
+    (ret (bit_and val 4294967295)))
+
+  (fn rotr32 val int n int -> int
+    (set masked int (mask32 val))
+    (set right int (bit_shift_right masked n))
+    (set left int (bit_shift_left masked (sub 32 n)))
+    (ret (mask32 (bit_or right left))))
+
+  (fn shr val int n int -> int
+    (ret (bit_shift_right (mask32 val) n)))
+
+  (fn ch x int y int z int -> int
+    (ret (mask32 (bit_xor (bit_and x y) (bit_and (mask32 (bit_not x)) z)))))
+
+  (fn maj x int y int z int -> int
+    (ret (mask32 (bit_xor (bit_xor (bit_and x y) (bit_and x z)) (bit_and y z)))))
+
+  (fn big_sigma0 x int -> int
+    (set a int (rotr32 x 2))
+    (set b int (rotr32 x 13))
+    (set c int (rotr32 x 22))
+    (ret (mask32 (bit_xor (bit_xor a b) c))))
+
+  (fn big_sigma1 x int -> int
+    (set a int (rotr32 x 6))
+    (set b int (rotr32 x 11))
+    (set c int (rotr32 x 25))
+    (ret (mask32 (bit_xor (bit_xor a b) c))))
+
+  (fn small_sigma0 x int -> int
+    (set a int (rotr32 x 7))
+    (set b int (rotr32 x 18))
+    (set c int (shr x 3))
+    (ret (mask32 (bit_xor (bit_xor a b) c))))
+
+  (fn small_sigma1 x int -> int
+    (set a int (rotr32 x 17))
+    (set b int (rotr32 x 19))
+    (set c int (shr x 10))
+    (ret (mask32 (bit_xor (bit_xor a b) c))))
+
+  (fn sha256_get_k idx int -> int
+    (set k_vals array [
+      1116352408 1899447441 3049323471 3921009573
+      961987163 1508970993 2453635748 2870763221
+      3624381080 310598401 607225278 1426881987
+      1925078388 2162078206 2614888103 3248222580
+      3835390401 4022224774 264347078 604807628
+      770255983 1249150122 1555081692 1996064986
+      2554220882 2821834349 2952996808 3210313671
+      3336571891 3584528711 113926993 338241895
+      666307205 773529912 1294757372 1396182291
+      1695183700 1986661051 2177026350 2456956037
+      2730485921 2820302411 3259730800 3345764771
+      3516065817 3600352804 4094571909 275423344
+      430227734 506948616 659060556 883997877
+      958139571 1322822218 1537002063 1747873779
+      1955562222 2024104815 2227730452 2361852424
+      2428436474 2756734187 3204031479 3329325298])
+    (ret (array_get k_vals idx)))
+
+  (fn hex_byte val int -> string
+    (set hex_chars string "0123456789abcdef")
+    (set high int (bit_and (bit_shift_right val 4) 15))
+    (set low int (bit_and val 15))
+    (set h string (string_slice hex_chars high 1))
+    (set l string (string_slice hex_chars low 1))
+    (ret (string_concat h l)))
+
+  (fn hex_word32 val int -> string
+    (set b0 int (bit_and (bit_shift_right val 24) 255))
+    (set b1 int (bit_and (bit_shift_right val 16) 255))
+    (set b2 int (bit_and (bit_shift_right val 8) 255))
+    (set b3 int (bit_and val 255))
+    (set result string (hex_byte b0))
+    (set result string (string_concat result (hex_byte b1)))
+    (set result string (string_concat result (hex_byte b2)))
+    (set result string (string_concat result (hex_byte b3)))
+    (ret result))
+
+  (fn sha256_pad msg string -> array
+    (set msg_len int (string_length msg))
+    (set bit_len int (mul msg_len 8))
+
+    (set padded string msg)
+    (set padded string (string_concat padded (char_from_code 128)))
+
+    (set current_len int (add msg_len 1))
+    (set target int (mod current_len 64))
+    (while (ne target 56)
+      (set padded string (string_concat padded (char_from_code 0)))
+      (set current_len int (add current_len 1))
+      (set target int (mod current_len 64)))
+
+    (set i int 7)
+    (while (ge i 0)
+      (set shift_amt int (mul i 8))
+      (set byte_val int (bit_and (bit_shift_right bit_len shift_amt) 255))
+      (set padded string (string_concat padded (char_from_code byte_val)))
+      (set i int (sub i 1)))
+
+    (set padded_len int (string_length padded))
+    (set num_blocks int (div padded_len 64))
+    (set blocks array (array_new))
+
+    (set blk int 0)
+    (while (lt blk num_blocks)
+      (set block_start int (mul blk 64))
+      (set words array (array_new))
+      (set w_idx int 0)
+      (while (lt w_idx 16)
+        (set byte_offset int (add block_start (mul w_idx 4)))
+        (set b0 int (string_get padded byte_offset))
+        (set b1 int (string_get padded (add byte_offset 1)))
+        (set b2 int (string_get padded (add byte_offset 2)))
+        (set b3 int (string_get padded (add byte_offset 3)))
+        (set word int (mask32 (add (add (add (bit_shift_left b0 24) (bit_shift_left b1 16)) (bit_shift_left b2 8)) b3)))
+        (array_push words word)
+        (set w_idx int (add w_idx 1)))
+      (array_push blocks words)
+      (set blk int (add blk 1)))
+
+    (ret blocks))
+
+  (fn sha256 msg string -> string
+    (set blocks array (sha256_pad msg))
+    (set num_blocks int (array_length blocks))
+
+    (set h0 int 1779033703)
+    (set h1 int 3144134277)
+    (set h2 int 1013904242)
+    (set h3 int 2773480762)
+    (set h4 int 1359893119)
+    (set h5 int 2600822924)
+    (set h6 int 528734635)
+    (set h7 int 1541459225)
+
+    (set blk int 0)
+    (while (lt blk num_blocks)
+      (set w_init array (array_get blocks blk))
+      (set w array (array_new))
+
+      (set wi int 0)
+      (while (lt wi 16)
+        (array_push w (array_get w_init wi))
+        (set wi int (add wi 1)))
+
+      (set wi int 16)
+      (while (lt wi 64)
+        (set s0 int (small_sigma0 (array_get w (sub wi 15))))
+        (set s1 int (small_sigma1 (array_get w (sub wi 2))))
+        (set w16 int (array_get w (sub wi 16)))
+        (set w7 int (array_get w (sub wi 7)))
+        (set new_w int (mask32 (add (add (add w16 s0) w7) s1)))
+        (array_push w new_w)
+        (set wi int (add wi 1)))
+
+      (set a int h0)
+      (set b int h1)
+      (set c int h2)
+      (set d int h3)
+      (set e int h4)
+      (set f int h5)
+      (set g int h6)
+      (set h int h7)
+
+      (set round int 0)
+      (while (lt round 64)
+        (set s1 int (big_sigma1 e))
+        (set ch_val int (ch e f g))
+        (set k_val int (sha256_get_k round))
+        (set w_val int (array_get w round))
+        (set temp1 int (mask32 (add (add (add (add h s1) ch_val) k_val) w_val)))
+        (set s0 int (big_sigma0 a))
+        (set maj_val int (maj a b c))
+        (set temp2 int (mask32 (add s0 maj_val)))
+
+        (set h int g)
+        (set g int f)
+        (set f int e)
+        (set e int (mask32 (add d temp1)))
+        (set d int c)
+        (set c int b)
+        (set b int a)
+        (set a int (mask32 (add temp1 temp2)))
+
+        (set round int (add round 1)))
+
+      (set h0 int (mask32 (add h0 a)))
+      (set h1 int (mask32 (add h1 b)))
+      (set h2 int (mask32 (add h2 c)))
+      (set h3 int (mask32 (add h3 d)))
+      (set h4 int (mask32 (add h4 e)))
+      (set h5 int (mask32 (add h5 f)))
+      (set h6 int (mask32 (add h6 g)))
+      (set h7 int (mask32 (add h7 h)))
+
+      (set blk int (add blk 1)))
+
+    (set digest string (hex_word32 h0))
+    (set digest string (string_concat digest (hex_word32 h1)))
+    (set digest string (string_concat digest (hex_word32 h2)))
+    (set digest string (string_concat digest (hex_word32 h3)))
+    (set digest string (string_concat digest (hex_word32 h4)))
+    (set digest string (string_concat digest (hex_word32 h5)))
+    (set digest string (string_concat digest (hex_word32 h6)))
+    (set digest string (string_concat digest (hex_word32 h7)))
+
+    (ret digest))
+
+  (fn md5_f x int y int z int -> int
+    (ret (mask32 (bit_or (bit_and x y) (bit_and (mask32 (bit_not x)) z)))))
+
+  (fn md5_g x int y int z int -> int
+    (ret (mask32 (bit_or (bit_and x z) (bit_and y (mask32 (bit_not z)))))))
+
+  (fn md5_h x int y int z int -> int
+    (ret (mask32 (bit_xor (bit_xor x y) z))))
+
+  (fn md5_i x int y int z int -> int
+    (ret (mask32 (bit_xor y (bit_or x (mask32 (bit_not z)))))))
+
+  (fn rotl32 val int n int -> int
+    (set masked int (mask32 val))
+    (set left int (bit_shift_left masked n))
+    (set right int (bit_shift_right masked (sub 32 n)))
+    (ret (mask32 (bit_or left right))))
+
+  (fn md5_get_s idx int -> int
+    (set s_vals array [
+      7 12 17 22 7 12 17 22 7 12 17 22 7 12 17 22
+      5 9 14 20 5 9 14 20 5 9 14 20 5 9 14 20
+      4 11 16 23 4 11 16 23 4 11 16 23 4 11 16 23
+      6 10 15 21 6 10 15 21 6 10 15 21 6 10 15 21])
+    (ret (array_get s_vals idx)))
+
+  (fn md5_get_k idx int -> int
+    (set k_vals array [
+      3614090360 3905402710 606105819 3250441966
+      4118548399 1200080426 2821735955 4249261313
+      1770035416 2336552879 4294925233 2304563134
+      1804603682 4254626195 2792965006 1236535329
+      4129170786 3225465664 643717713 3921069994
+      3593408605 38016083 3634488961 3889429448
+      568446438 3275163606 4107603335 1163531501
+      2850285829 4243563512 1735328473 2368359562
+      4294588738 2272392833 1839030562 4259657740
+      2763975236 1272893353 4139469664 3200236656
+      681279174 3936430074 3572445317 76029189
+      3654602809 3873151461 530742520 3299628645
+      4096336452 1126891415 2878612391 4237533241
+      1700485571 2399980690 4293915773 2240044497
+      1873313359 4264355552 2734768916 1309151649
+      4149444226 3174756917 718787259 3951481745])
+    (ret (array_get k_vals idx)))
+
+  (fn md5 msg string -> string
+    (set msg_len int (string_length msg))
+    (set bit_len int (mul msg_len 8))
+
+    (set padded string msg)
+    (set padded string (string_concat padded (char_from_code 128)))
+    (set current_len int (add msg_len 1))
+    (set target int (mod current_len 64))
+    (while (ne target 56)
+      (set padded string (string_concat padded (char_from_code 0)))
+      (set current_len int (add current_len 1))
+      (set target int (mod current_len 64)))
+
+    (set i int 0)
+    (while (lt i 8)
+      (set shift_amt int (mul i 8))
+      (set byte_val int (bit_and (bit_shift_right bit_len shift_amt) 255))
+      (set padded string (string_concat padded (char_from_code byte_val)))
+      (set i int (add i 1)))
+
+    (set padded_len int (string_length padded))
+    (set num_blocks int (div padded_len 64))
+
+    (set a0 int 1732584193)
+    (set b0 int 4023233417)
+    (set c0 int 2562383102)
+    (set d0 int 271733878)
+
+    (set blk int 0)
+    (while (lt blk num_blocks)
+      (set block_start int (mul blk 64))
+
+      (set m_arr array (array_new))
+      (set mi int 0)
+      (while (lt mi 16)
+        (set byte_offset int (add block_start (mul mi 4)))
+        (set b0_byte int (string_get padded byte_offset))
+        (set b1_byte int (string_get padded (add byte_offset 1)))
+        (set b2_byte int (string_get padded (add byte_offset 2)))
+        (set b3_byte int (string_get padded (add byte_offset 3)))
+        (set word int (mask32 (add (add (add b0_byte (bit_shift_left b1_byte 8)) (bit_shift_left b2_byte 16)) (bit_shift_left b3_byte 24))))
+        (array_push m_arr word)
+        (set mi int (add mi 1)))
+
+      (set a_val int a0)
+      (set b_val int b0)
+      (set c_val int c0)
+      (set d_val int d0)
+
+      (set round int 0)
+      (while (lt round 64)
+        (set f_val int 0)
+        (set g_val int 0)
+
+        (if (lt round 16)
+          (set f_val int (md5_f b_val c_val d_val))
+          (set g_val int round))
+
+        (if (and (ge round 16) (lt round 32))
+          (set f_val int (md5_g b_val c_val d_val))
+          (set g_val int (mod (add (mul 5 round) 1) 16)))
+
+        (if (and (ge round 32) (lt round 48))
+          (set f_val int (md5_h b_val c_val d_val))
+          (set g_val int (mod (add (mul 3 round) 5) 16)))
+
+        (if (ge round 48)
+          (set f_val int (md5_i b_val c_val d_val))
+          (set g_val int (mod (mul 7 round) 16)))
+
+        (set k_val int (md5_get_k round))
+        (set s_val int (md5_get_s round))
+        (set m_val int (array_get m_arr g_val))
+
+        (set temp int (mask32 (add (add (add a_val f_val) k_val) m_val)))
+        (set temp int (mask32 (add b_val (rotl32 temp s_val))))
+
+        (set a_val int d_val)
+        (set d_val int c_val)
+        (set c_val int b_val)
+        (set b_val int temp)
+
+        (set round int (add round 1)))
+
+      (set a0 int (mask32 (add a0 a_val)))
+      (set b0 int (mask32 (add b0 b_val)))
+      (set c0 int (mask32 (add c0 c_val)))
+      (set d0 int (mask32 (add d0 d_val)))
+
+      (set blk int (add blk 1)))
+
+    (set result string "")
+    (set word_idx int 0)
+    (while (lt word_idx 4)
+      (set current_word int 0)
+      (if (eq word_idx 0) (set current_word int a0))
+      (if (eq word_idx 1) (set current_word int b0))
+      (if (eq word_idx 2) (set current_word int c0))
+      (if (eq word_idx 3) (set current_word int d0))
+
+      (set byte_idx int 0)
+      (while (lt byte_idx 4)
+        (set shift_amt int (mul byte_idx 8))
+        (set byte_val int (bit_and (bit_shift_right current_word shift_amt) 255))
+        (set result string (string_concat result (hex_byte byte_val)))
+        (set byte_idx int (add byte_idx 1)))
+
+      (set word_idx int (add word_idx 1)))
+
+    (ret result)))

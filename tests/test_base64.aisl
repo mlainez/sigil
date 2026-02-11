@@ -1,0 +1,63 @@
+(module test_base64
+  (import base64)
+
+  (fn test_encode data string -> string
+    (ret (base64_encode data)))
+
+  (fn test_decode encoded string -> string
+    (ret (base64_decode encoded)))
+
+  (fn test_roundtrip data string -> string
+    (set encoded string (base64_encode data))
+    (set decoded string (base64_decode encoded))
+    (ret decoded))
+
+  (test-spec test_encode
+    (case "encode empty string"
+      (input "")
+      (expect ""))
+    (case "encode single char"
+      (input "A")
+      (expect "QQ=="))
+    (case "encode two chars"
+      (input "AB")
+      (expect "QUI="))
+    (case "encode three chars"
+      (input "ABC")
+      (expect "QUJD"))
+    (case "encode Hello"
+      (input "Hello")
+      (expect "SGVsbG8="))
+    (case "encode Hello, World!"
+      (input "Hello, World!")
+      (expect "SGVsbG8sIFdvcmxkIQ==")))
+
+  (test-spec test_decode
+    (case "decode empty string"
+      (input "")
+      (expect ""))
+    (case "decode single char with padding"
+      (input "QQ==")
+      (expect "A"))
+    (case "decode two chars with padding"
+      (input "QUI=")
+      (expect "AB"))
+    (case "decode three chars no padding"
+      (input "QUJD")
+      (expect "ABC"))
+    (case "decode Hello"
+      (input "SGVsbG8=")
+      (expect "Hello"))
+    (case "decode Hello, World!"
+      (input "SGVsbG8sIFdvcmxkIQ==")
+      (expect "Hello, World!")))
+
+  (test-spec test_roundtrip
+    (case "roundtrip simple text"
+      (input "The quick brown fox")
+      (expect "The quick brown fox"))
+    (case "roundtrip with special chars"
+      (input "key=value&foo=bar")
+      (expect "key=value&foo=bar")))
+
+  (meta-note "Tests base64 encoding and decoding with padding variants and roundtrip"))

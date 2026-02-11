@@ -1,5 +1,5 @@
 @(grammar aisl-agent)
-@(stat tests:134 examples:4 stdlib:14)
+@(stat tests:138 examples:4 stdlib:17)
 @(impl ocaml tree-walking-interpreter)
 @(syn
   (prog (module name imp* fn* test-spec* meta-note?))
@@ -25,6 +25,13 @@
     (floor a:float -> int)
     (ceil a:float -> int)
     (round a:float -> int))
+  (bitwise
+    (bit_and a:int b:int -> int)
+    (bit_or a:int b:int -> int)
+    (bit_xor a:int b:int -> int)
+    (bit_not a:int -> int)
+    (bit_shift_left a:int n:int -> int)
+    (bit_shift_right a:int n:int -> int "logical/unsigned shift"))
   (cmp
     (eq a b -> bool "int|float|decimal|bool|string|array|map - structural equality")
     (ne a b -> bool)
@@ -185,14 +192,15 @@
     ((eq x 0) (set result string "zero"))
     (true (set result string "positive"))))
 @(mod
-  (stdlib-modules "14 modules in pure AISL")
+  (stdlib-modules "17 modules in pure AISL")
   (core "string_utils conversion array_utils math math_extended filesystem network text_utils validation")
   (data "json_utils")
   (net "http")
   (pattern "regex")
   (sys "process")
   (db "sqlite")
-  (paths "stdlib/core/ stdlib/data/ stdlib/net/ stdlib/sys/ stdlib/pattern/ stdlib/db/")
+  (crypto "base64 hash hmac")
+  (paths "stdlib/core/ stdlib/data/ stdlib/net/ stdlib/sys/ stdlib/pattern/ stdlib/db/ stdlib/crypto/")
   (import-syntax "(import module_name) - auto-searches stdlib subdirs"))
 @(note
   (no-comments "AISL has NO comment syntax - no ; // # or any other form")

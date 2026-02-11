@@ -98,7 +98,7 @@ Every test file must include:
 **Example structure:**
 ```lisp
 (module test_example
-  (fn add_numbers ((a int) (b int)) -> int
+  (fn add_numbers a int b int -> int
     (ret (add a b)))
   
   (test-spec add_numbers
@@ -523,7 +523,7 @@ AISL follows the philosophy: **"If it CAN be written in AISL, it MUST be written
 
 ```
 
-### Complete List of 14 Stdlib Modules
+### Complete List of 17 Stdlib Modules
 
 **Core (9):**
 - `string_utils` - String ops (split, trim, contains, replace, starts_with, ends_with, to_upper, to_lower)
@@ -551,6 +551,11 @@ AISL follows the philosophy: **"If it CAN be written in AISL, it MUST be written
 **Database (1):**
 - `sqlite` - SQLite database operations
 
+**Crypto (3):**
+- `base64` - Base64 encoding/decoding (base64_encode, base64_decode)
+- `hash` - Cryptographic hashes (sha256, md5) — pure AISL using bitwise builtins
+- `hmac` - HMAC authentication (hmac_sha256) — pure AISL using hash module
+
 
 ### When to Use Stdlib vs Built-in
 
@@ -567,14 +572,18 @@ AISL follows the philosophy: **"If it CAN be written in AISL, it MUST be written
 - ✅ Text utilities (pad, truncate, word count)
 - ✅ Validation (in_range, is_positive)
 - ✅ Process management
+- ✅ Base64 encoding/decoding (base64_encode, base64_decode)
+- ✅ Cryptographic hashing (sha256, md5)
+- ✅ HMAC authentication (hmac_sha256)
 
 **Use built-in operations for:**
 - ✅ Arithmetic (add, sub, mul, div, mod)
 - ✅ Comparisons (eq, ne, lt, gt, le, ge)
 - ✅ Basic math (abs, min, max, sqrt, pow, floor, ceil, round)
+- ✅ Bitwise ops (bit_and, bit_or, bit_xor, bit_not, bit_shift_left, bit_shift_right)
 - ✅ Type conversions (cast_int_float, cast_int_decimal, cast_decimal_int, cast_float_decimal, cast_decimal_float, string_from_int, etc.)
 - ✅ String ops (string_length, string_concat, string_slice, string_format, string_find, string_contains, string_trim, string_replace, string_starts_with, string_ends_with, string_split)
-- ✅ I/O (print, print_ln, read_line)
+- ✅ I/O (print, println, read_line)
 - ✅ File operations (file_read, file_write, file_exists)
 - ✅ Arrays (array_new, array_push, array_get, array_set, array_length) + array literals `[1 2 3]`
 - ✅ Maps (map_new, map_set, map_get, map_has, map_delete) + map literals `{"key" "value"}`
@@ -601,6 +610,9 @@ stdlib/ (pure AISL implementations):
 - `validation` - in_range, is_positive
 - `process` - spawn, wait
 - `sqlite` - open, exec
+- `base64` - base64_encode, base64_decode
+- `hash` - sha256, md5
+- `hmac` - hmac_sha256
 
 **Process:**
 1. List `stdlib/` directory to see available modules
@@ -622,7 +634,7 @@ stdlib/ (pure AISL implementations):
 
 4. **Function names match module names** - After importing `json_utils`, use `json_parse`, `json_stringify`, etc. (not shortened names).
 
-5. **Documentation location:** See `stdlib/README.md` for complete documentation of all 14 modules.
+5. **Documentation location:** See `stdlib/README.md` for complete documentation of all 17 modules.
 
 ---
 
@@ -822,7 +834,7 @@ AISL has a built-in test framework. Add tests to verify behavior:
 | `interpreter/ast.ml` | AST node types |
 | `interpreter/types.ml` | Type kind definitions |
 | `interpreter/vm.ml` | Entry point |
-| `tests/` | 134 test files with examples |
+| `tests/` | 138 test files with examples |
 | `examples/` | Complete working programs |
 
 ### Quick Lookups
@@ -1266,7 +1278,7 @@ AISL is designed for predictable performance:
 - **Repository**: [Link to be added]
 - **Documentation**: This directory (`*.md` files)
 - **Examples**: `examples/` directory (working programs)
-- **Tests**: `tests/` directory (134 test files)
+- **Tests**: `tests/` directory (138 test files)
 - **Issues**: [Link to be added]
 
 ---

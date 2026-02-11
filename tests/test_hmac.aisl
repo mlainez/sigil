@@ -1,0 +1,15 @@
+(module test_hmac
+  (import hmac)
+
+  (fn test_hmac_sha256 key string message string -> string
+    (ret (hmac_sha256 key message)))
+
+  (test-spec test_hmac_sha256
+    (case "HMAC-SHA256 empty key and message"
+      (input "" "")
+      (expect "b613679a0814d9ec772f95d778c35fc5ff1697c493715653c6c712144292c5ad"))
+    (case "HMAC-SHA256 with key and message"
+      (input "key" "The quick brown fox jumps over the lazy dog")
+      (expect "f7bc83f430538424b13298e6aa6fb143ef4d59a14946175997479dbc2d1a3cd8")))
+
+  (meta-note "Tests HMAC-SHA256 against known test vectors"))

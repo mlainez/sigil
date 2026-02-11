@@ -6,7 +6,7 @@
 ## Philosophy
 
 AISL-Core is the **frozen intermediate representation** of the AISL language. It is:
-- **Minimal**: Only 6 statement types
+- **Minimal**: Only 5 statement types
 - **Stable**: Will not change once frozen
 - **Complete**: Can express any computation
 - **Low-level**: Direct mapping to interpreter evaluation
@@ -14,6 +14,8 @@ AISL-Core is the **frozen intermediate representation** of the AISL language. It
 AISL-Core is NOT meant for humans to write directly. It is the target for AISL-Agent, which the interpreter handles directly.
 
 ## Core Statements (FROZEN)
+
+**Note:** Function invocation uses implicit syntax `(func arg1 arg2 ...)` and is not a separate statement type. It is the default when the first element of an expression is neither a keyword nor a Core statement.
 
 ### 1. `set` - Variable binding
 ```
@@ -30,41 +32,21 @@ Example:
 (set result bool (lt x 100))
 ```
 
-### 2. `call` - Function invocation
-```
-(call func arg1 arg2 ...)
-```
-- Invokes function `func` with arguments
-- Functions can be:
-  - User-defined functions
-  - Built-in operations (resolved via type-directed dispatch)
-  - Core constructs (label, goto, ifnot)
-- Returns: function result
-
-Examples:
-```lisp
-(add x y)              ; Type-directed: resolves to add_int or add_float
-(my_function 10 20)    ; User function
-(label loop_start)     ; Core construct
-```
-
-### 3. `label` - Jump target marker
+### 2. `label` - Jump target marker
 ```
 (label name)
 ```
 - Marks a position in the instruction stream
-- Does not emit bytecode (virtual construct)
 - Must be unique within function scope
 - Returns: unit
 
 Example:
 ```lisp
 (label loop_start)
-; ... code ...
 (goto loop_start)
 ```
 
-### 4. `goto` - Unconditional jump
+### 3. `goto` - Unconditional jump
 ```
 (goto target)
 ```
@@ -77,7 +59,7 @@ Example:
 (goto loop_end)
 ```
 
-### 5. `ifnot` - Conditional jump
+### 4. `ifnot` - Conditional jump
 ```
 (ifnot condition target)
 ```
@@ -92,7 +74,7 @@ Example:
 (ifnot cond loop_end)
 ```
 
-### 6. `ret` - Return from function
+### 5. `ret` - Return from function
 ```
 (ret expr)
 ```
@@ -185,7 +167,7 @@ Example:
 
 ### Simple loop (Core IR)
 ```lisp
-(fn count_to_five () -> int
+(fn count_to_five -> int
   (set n int 0)
   (label loop_start)
   (set cond bool (lt n 5))
@@ -198,11 +180,11 @@ Example:
 
 ### Conditional (Core IR)
 ```lisp
-(fn max ((a int) (b int)) -> int
-  (set cond bool (call gt a b))
-  (call ifnot cond else_branch)
+(fn max a int b int -> int
+  (set cond bool (gt a b))
+  (ifnot cond else_branch)
   (ret a)
-  (call label else_branch)
+  (label else_branch)
   (ret b))
 ```
 
@@ -223,7 +205,7 @@ See AISL-AGENT.md for Agent layer specification.
 
 ## Implementation
 
-- **Interpreter**: `interpreter/interpreter.ml` — Tree-walking interpreter (~1930 lines)
+- **Interpreter**: `interpreter/interpreter.ml` — Tree-walking interpreter (~2500 lines)
 - **Parser**: `interpreter/parser.ml` — Recursive descent S-expression parser
 - **Lexer**: `interpreter/lexer.ml` — Tokenizer
 - **AST**: `interpreter/ast.ml` — AST node types
@@ -235,6 +217,6 @@ The interpreter handles Agent constructs (while, loop, break, continue, if, if-e
 ## Version History
 
 - **v1.0** (2026-02-06): Initial frozen specification
-  - 6 core statements: set, call, label, goto, ifnot, ret
+  - 5 core statements: set, label, goto, ifnot, ret
   - Type-directed dispatch for built-ins
   - Function-scoped labels with jump patching

@@ -1,0 +1,114 @@
+(module base64
+
+  (fn base64_char_at_index idx int -> string
+    (set alphabet string "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/")
+    (ret (string_slice alphabet idx 1)))
+
+  (fn base64_index_of_char ch int -> int
+    (if (and (ge ch 65) (le ch 90))
+      (ret (sub ch 65)))
+    (if (and (ge ch 97) (le ch 122))
+      (ret (add (sub ch 97) 26)))
+    (if (and (ge ch 48) (le ch 57))
+      (ret (add (sub ch 48) 52)))
+    (if (eq ch 43)
+      (ret 62))
+    (if (eq ch 47)
+      (ret 63))
+    (ret -1))
+
+  (fn base64_encode data string -> string
+    (set data_len int (string_length data))
+    (set result string "")
+    (set i int 0)
+
+    (while (lt i data_len)
+      (set remaining int (sub data_len i))
+
+      (set b0 int (string_get data i))
+      (set b1 int 0)
+      (set b2 int 0)
+
+      (if (ge remaining 2)
+        (set b1 int (string_get data (add i 1))))
+      (if (ge remaining 3)
+        (set b2 int (string_get data (add i 2))))
+
+      (set combined int (add (add (bit_shift_left b0 16) (bit_shift_left b1 8)) b2))
+
+      (set idx0 int (bit_and (bit_shift_right combined 18) 63))
+      (set idx1 int (bit_and (bit_shift_right combined 12) 63))
+      (set idx2 int (bit_and (bit_shift_right combined 6) 63))
+      (set idx3 int (bit_and combined 63))
+
+      (set c0 string (base64_char_at_index idx0))
+      (set c1 string (base64_char_at_index idx1))
+      (set result string (string_concat result c0))
+      (set result string (string_concat result c1))
+
+      (if (ge remaining 2)
+        (set result string (string_concat result (base64_char_at_index idx2)))
+        (else
+          (set result string (string_concat result "="))))
+
+      (if (ge remaining 3)
+        (set result string (string_concat result (base64_char_at_index idx3)))
+        (else
+          (set result string (string_concat result "="))))
+
+      (set i int (add i 3)))
+
+    (ret result))
+
+  (fn base64_decode encoded string -> string
+    (set encoded_len int (string_length encoded))
+    (set result string "")
+    (set i int 0)
+
+    (while (lt i encoded_len)
+      (set c0 int (string_get encoded i))
+      (set c1 int (string_get encoded (add i 1)))
+      (set c2_char int 0)
+      (set c3_char int 0)
+      (set pad2 bool false)
+      (set pad3 bool false)
+
+      (if (lt (add i 2) encoded_len)
+        (set c2_char int (string_get encoded (add i 2)))
+        (if (eq c2_char 61)
+          (set pad2 bool true))
+        (else
+          (set pad2 bool true)))
+
+      (if (lt (add i 3) encoded_len)
+        (set c3_char int (string_get encoded (add i 3)))
+        (if (eq c3_char 61)
+          (set pad3 bool true))
+        (else
+          (set pad3 bool true)))
+
+      (set v0 int (base64_index_of_char c0))
+      (set v1 int (base64_index_of_char c1))
+      (set v2 int 0)
+      (set v3 int 0)
+      (if (not pad2)
+        (set v2 int (base64_index_of_char c2_char)))
+      (if (not pad3)
+        (set v3 int (base64_index_of_char c3_char)))
+
+      (set combined int (add (add (add (bit_shift_left v0 18) (bit_shift_left v1 12)) (bit_shift_left v2 6)) v3))
+
+      (set byte0 int (bit_and (bit_shift_right combined 16) 255))
+      (set result string (string_concat result (char_from_code byte0)))
+
+      (if (not pad2)
+        (set byte1 int (bit_and (bit_shift_right combined 8) 255))
+        (set result string (string_concat result (char_from_code byte1))))
+
+      (if (not pad3)
+        (set byte2 int (bit_and combined 255))
+        (set result string (string_concat result (char_from_code byte2))))
+
+      (set i int (add i 4)))
+
+    (ret result)))

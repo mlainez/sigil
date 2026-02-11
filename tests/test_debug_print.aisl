@@ -1,6 +1,16 @@
-(module test_debug
-  (fn main -> int
-    (set x int 5)
-    (print x)
-    (print "\n")
-    (ret 0)))
+(module test_debug_print
+  (fn identity_int x int -> int
+    (ret x))
+
+  (test-spec identity_int
+    (case "returns positive integer"
+      (input 5)
+      (expect 5))
+    (case "returns zero"
+      (input 0)
+      (expect 0))
+    (case "returns negative integer"
+      (input -42)
+      (expect -42)))
+
+  (meta-note "Tests that integer values are correctly passed through and returned"))

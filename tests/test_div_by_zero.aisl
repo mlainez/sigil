@@ -1,14 +1,45 @@
 (module test_div_by_zero
-
   (fn safe_div a int b int -> int
-    (ret (div a b)))
+    (set result int 0)
+    (try
+      (set result int (div a b))
+      (catch err string
+        (set result int -999)))
+    (ret result))
 
   (fn safe_mod a int b int -> int
-    (ret (mod a b)))
+    (set result int 0)
+    (try
+      (set result int (mod a b))
+      (catch err string
+        (set result int -999)))
+    (ret result))
 
-  (fn main -> int
-    (set result int (div 10 2))
-    (print result)
-    (ret 0))
+  (fn normal_div a int b int -> int
+    (ret (div a b)))
 
-  (meta-note "Tests that division by zero raises proper error instead of crashing"))
+  (test-spec safe_div
+    (case "normal division works"
+      (input 10 2)
+      (expect 5))
+    (case "division by zero caught"
+      (input 10 0)
+      (expect -999))
+    (case "zero divided by non-zero"
+      (input 0 5)
+      (expect 0)))
+
+  (test-spec safe_mod
+    (case "normal modulo works"
+      (input 10 3)
+      (expect 1))
+    (case "modulo by zero caught"
+      (input 10 0)
+      (expect -999)))
+
+  (test-spec normal_div
+    (case "basic division"
+      (input 20 4)
+      (expect 5)))
+
+  (meta-note "Tests that division and modulo by zero raise errors caught by try/catch"))

@@ -1,0 +1,32 @@
+(module test_hash
+  (import hash)
+
+  (fn test_sha256 msg string -> string
+    (ret (sha256 msg)))
+
+  (fn test_md5 msg string -> string
+    (ret (md5 msg)))
+
+  (test-spec test_sha256
+    (case "SHA-256 of empty string"
+      (input "")
+      (expect "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"))
+    (case "SHA-256 of abc"
+      (input "abc")
+      (expect "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"))
+    (case "SHA-256 of hello"
+      (input "hello")
+      (expect "2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824")))
+
+  (test-spec test_md5
+    (case "MD5 of empty string"
+      (input "")
+      (expect "d41d8cd98f00b204e9800998ecf8427e"))
+    (case "MD5 of abc"
+      (input "abc")
+      (expect "900150983cd24fb0d6963f7d28e17f72"))
+    (case "MD5 of hello"
+      (input "hello")
+      (expect "5d41402abc4b2a76b9719d911017c592")))
+
+  (meta-note "Tests SHA-256 and MD5 hash functions against known test vectors"))

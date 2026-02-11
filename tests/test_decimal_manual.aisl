@@ -1,28 +1,48 @@
 (module test_decimal_manual
-  (fn main -> int
-    (set a decimal (cast_int_decimal 10))
-    (set b decimal (cast_int_decimal 5))
-    
-    (print "a = ")
-    (print a)
-    (print "\nb = ")
-    (print b)
-    
-    (set sum decimal (add a b))
-    (print "\na + b = ")
-    (print sum)
-    
-    (set diff decimal (sub a b))
-    (print "\na - b = ")
-    (print diff)
-    
-    (set prod decimal (mul a b))
-    (print "\na * b = ")
-    (print prod)
-    
-    (set quot decimal (div a b))
-    (print "\na / b = ")
-    (print quot)
-    
-    (print "\n")
-    (ret 0)))
+  (fn decimal_add a_val int b_val int -> decimal
+    (set a decimal (cast_int_decimal a_val))
+    (set b decimal (cast_int_decimal b_val))
+    (ret (add a b)))
+
+  (fn decimal_sub a_val int b_val int -> decimal
+    (set a decimal (cast_int_decimal a_val))
+    (set b decimal (cast_int_decimal b_val))
+    (ret (sub a b)))
+
+  (fn decimal_mul a_val int b_val int -> decimal
+    (set a decimal (cast_int_decimal a_val))
+    (set b decimal (cast_int_decimal b_val))
+    (ret (mul a b)))
+
+  (fn decimal_div a_val int b_val int -> decimal
+    (set a decimal (cast_int_decimal a_val))
+    (set b decimal (cast_int_decimal b_val))
+    (ret (div a b)))
+
+  (test-spec decimal_add
+    (case "adds 10 + 5"
+      (input 10 5)
+      (expect (cast_int_decimal 15)))
+    (case "adds 0 + 0"
+      (input 0 0)
+      (expect (cast_int_decimal 0))))
+
+  (test-spec decimal_sub
+    (case "subtracts 10 - 5"
+      (input 10 5)
+      (expect (cast_int_decimal 5)))
+    (case "subtracts 5 - 10"
+      (input 5 10)
+      (expect (cast_int_decimal -5))))
+
+  (test-spec decimal_mul
+    (case "multiplies 10 * 5"
+      (input 10 5)
+      (expect (cast_int_decimal 50))))
+
+  (test-spec decimal_div
+    (case "divides 10 / 5"
+      (input 10 5)
+      (expect (cast_int_decimal 2))))
+
+  (meta-note "Tests decimal arithmetic operations: addition, subtraction, multiplication, division"))

@@ -961,13 +961,44 @@ and eval_block env exprs =
            else VInt (Int64.rem a b)
        | _ -> raise (RuntimeError "Invalid arguments to mod"))
   
-  | "neg" ->
-      (match arg_vals with
-       | [VInt a] -> VInt (Int64.neg a)
-       | [VFloat a] -> VFloat (a *. -1.0)
-       | [VDecimal a] ->
-            VDecimal (bigdecimal_neg a)
-        | _ -> raise (RuntimeError "Invalid arguments to neg"))
+   (* Bitwise operations - int only *)
+   | "bit_and" ->
+       (match arg_vals with
+        | [VInt a; VInt b] -> VInt (Int64.logand a b)
+        | _ -> raise (RuntimeError "Invalid arguments to bit_and"))
+
+   | "bit_or" ->
+       (match arg_vals with
+        | [VInt a; VInt b] -> VInt (Int64.logor a b)
+        | _ -> raise (RuntimeError "Invalid arguments to bit_or"))
+
+   | "bit_xor" ->
+       (match arg_vals with
+        | [VInt a; VInt b] -> VInt (Int64.logxor a b)
+        | _ -> raise (RuntimeError "Invalid arguments to bit_xor"))
+
+   | "bit_not" ->
+       (match arg_vals with
+        | [VInt a] -> VInt (Int64.lognot a)
+        | _ -> raise (RuntimeError "Invalid arguments to bit_not"))
+
+   | "bit_shift_left" ->
+       (match arg_vals with
+        | [VInt a; VInt b] -> VInt (Int64.shift_left a (Int64.to_int b))
+        | _ -> raise (RuntimeError "Invalid arguments to bit_shift_left"))
+
+   | "bit_shift_right" ->
+       (match arg_vals with
+        | [VInt a; VInt b] -> VInt (Int64.shift_right_logical a (Int64.to_int b))
+        | _ -> raise (RuntimeError "Invalid arguments to bit_shift_right"))
+
+   | "neg" ->
+       (match arg_vals with
+        | [VInt a] -> VInt (Int64.neg a)
+        | [VFloat a] -> VFloat (a *. -1.0)
+        | [VDecimal a] ->
+             VDecimal (bigdecimal_neg a)
+         | _ -> raise (RuntimeError "Invalid arguments to neg"))
 
   | "abs" ->
       (match arg_vals with
@@ -1506,7 +1537,14 @@ and eval_block env exprs =
               let len = Unix.lseek fd 0 Unix.SEEK_END in
               let _ = Unix.lseek fd 0 Unix.SEEK_SET in
               let buf = Bytes.create len in
-              let _ = Unix.read fd buf 0 len in
+              let rec read_all offset remaining =
+                if remaining <= 0 then ()
+                else
+                  let n = Unix.read fd buf offset remaining in
+                  if n = 0 then ()
+                  else read_all (offset + n) (remaining - n)
+              in
+              read_all 0 len;
               Unix.close fd;
               VString (Bytes.to_string buf)
             with Unix.Unix_error _ ->
@@ -1780,7 +1818,7 @@ and eval_block env exprs =
               end
             ) valid_fds;
             VArray result
-        | _ -> VInt 0L)
+         | _ -> raise (RuntimeError "Invalid arguments to socket_select"))
 
   (* Channel operations *)
   | "channel_new" ->
@@ -1790,12 +1828,19 @@ and eval_block env exprs =
    | "channel_send" ->
        (match arg_vals with
         | [VChannel (_, write_fd, _); v] ->
-            let data = string_of_value v in
-            let len = String.length data in
+            (* Tagged serialization: prepend type tag for channel_recv *)
+            let tagged_data = match v with
+              | VInt n -> "i" ^ Int64.to_string n
+              | VFloat f -> "f" ^ string_of_float f
+              | VBool b -> "b" ^ (if b then "true" else "false")
+              | VString s -> "s" ^ s
+              | _ -> "s" ^ string_of_value v
+            in
+            let len = String.length tagged_data in
             let len_bytes = Bytes.create 4 in
             Bytes.set_int32_le len_bytes 0 (Int32.of_int len);
             ignore (Unix.write write_fd len_bytes 0 4);
-            let bytes = Bytes.of_string data in
+            let bytes = Bytes.of_string tagged_data in
             ignore (Unix.write write_fd bytes 0 len);
             VUnit
         | _ -> raise (RuntimeError "Invalid arguments to channel_send"))
@@ -1810,14 +1855,22 @@ and eval_block env exprs =
            let received = Unix.read read_fd buf 0 len in
            if received > 0 then
              let s = Bytes.sub_string buf 0 received in
-             (* Try to coerce back to original type *)
-             (try VInt (Int64.of_string s)
-              with _ ->
-                try VFloat (float_of_string s)
-                with _ ->
-                  if s = "true" then VBool true
-                  else if s = "false" then VBool false
-                  else VString s)
+             (* Tagged deserialization: first char is type tag *)
+             if String.length s >= 2 then
+               let tag = s.[0] in
+               let payload = String.sub s 1 (String.length s - 1) in
+               match tag with
+               | 'i' -> (try VInt (Int64.of_string payload)
+                         with _ -> VString s)
+               | 'f' -> (try VFloat (float_of_string payload)
+                         with _ -> VString s)
+               | 'b' -> if payload = "true" then VBool true
+                        else if payload = "false" then VBool false
+                        else VString s
+               | 's' -> VString payload
+               | _ -> VString s  (* Unknown tag, return raw *)
+             else
+               VString s
            else
              VUnit
        | _ -> raise (RuntimeError "Invalid arguments to channel_recv"))
@@ -1867,7 +1920,8 @@ and eval_block env exprs =
                done
              with Not_found -> ());
              VArray (ref (Array.of_list (List.rev !results)))
-           with _ -> VArray (ref [||]))
+           with Failure msg -> raise (RuntimeError ("Invalid regex pattern: " ^ msg))
+              | Invalid_argument msg -> raise (RuntimeError ("regex_find_all error: " ^ msg)))
        | _ -> raise (RuntimeError "Invalid arguments to regex_find_all"))
 
    | "regex_replace" ->
@@ -1894,15 +1948,21 @@ and eval_block env exprs =
   | "dir_create" ->
       (match arg_vals with
        | [VString path] ->
-           Unix.mkdir path 0o755;
-           VBool true
+           (try
+             Unix.mkdir path 0o755;
+             VBool true
+           with Unix.Unix_error (e, _, _) ->
+             raise (RuntimeError ("dir_create failed: " ^ Unix.error_message e)))
        | _ -> raise (RuntimeError "Invalid arguments to dir_create"))
 
   | "dir_delete" ->
       (match arg_vals with
        | [VString path] ->
-           Unix.rmdir path;
-           VBool true
+           (try
+             Unix.rmdir path;
+             VBool true
+           with Unix.Unix_error (e, _, _) ->
+             raise (RuntimeError ("dir_delete failed: " ^ Unix.error_message e)))
        | _ -> raise (RuntimeError "Invalid arguments to dir_delete"))
 
    (* JSON operations - implemented using maps and arrays *)
@@ -1919,7 +1979,7 @@ and eval_block env exprs =
             let s = String.trim s in
             let rec parse_json_value str pos =
               let pos = skip_whitespace str pos in
-              if pos >= String.length str then (VUnit, pos)
+              if pos >= String.length str then raise (RuntimeError "Unexpected end of JSON input")
               else match str.[pos] with
               | '{' -> parse_json_object str (pos + 1)
               | '[' -> parse_json_array str (pos + 1)
@@ -1931,7 +1991,7 @@ and eval_block env exprs =
               | 'n' when pos + 3 < String.length str && String.sub str pos 4 = "null" ->
                   (VUnit, pos + 4)
               | c when c = '-' || (c >= '0' && c <= '9') -> parse_json_number str pos
-              | _ -> (VUnit, pos)
+              | _ -> raise (RuntimeError (Printf.sprintf "Unexpected character '%c' at position %d in JSON" str.[pos] pos))
             and skip_whitespace str pos =
               if pos >= String.length str then pos
               else match str.[pos] with
@@ -1968,10 +2028,10 @@ and eval_block env exprs =
               let num_str = String.sub str start (end_pos - start) in
               if !is_float then
                 (try (VFloat (float_of_string num_str), end_pos)
-                 with _ -> (VInt 0L, end_pos))
+                 with _ -> raise (RuntimeError ("Invalid JSON number: " ^ num_str)))
               else
                 (try (VInt (Int64.of_string num_str), end_pos)
-                 with _ -> (VInt 0L, end_pos))
+                 with _ -> raise (RuntimeError ("Invalid JSON number: " ^ num_str)))
             and parse_json_object str pos =
               let m = Hashtbl.create 16 in
               let keys = ref [] in
@@ -2194,9 +2254,12 @@ and eval_block env exprs =
             let ctx = Ssl.create_context Ssl.TLSv1_2 Ssl.Client_context in
             ignore (Ssl.set_default_verify_paths ctx);
             let host_addr = (Unix.gethostbyname host).Unix.h_addr_list.(0) in
-            let addr = Unix.ADDR_INET (host_addr, Int64.to_int port) in
-            let ssl_sock = Ssl.open_connection_with_context ctx addr in
+            let sockaddr = Unix.ADDR_INET (host_addr, Int64.to_int port) in
+            let sock = Unix.socket Unix.PF_INET Unix.SOCK_STREAM 0 in
+            Unix.connect sock sockaddr;
+            let ssl_sock = Ssl.embed_socket sock ctx in
             Ssl.set_client_SNI_hostname ssl_sock host;
+            Ssl.connect ssl_sock;
             VTlsSocket ssl_sock
         | _ -> raise (RuntimeError "Invalid arguments to tcp_tls_connect"))
 

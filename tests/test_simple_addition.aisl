@@ -1,0 +1,13 @@
+(module test_simple_addition
+  (fn add_two a int b int -> int
+    (ret (add a b)))
+
+  (test-spec add_two
+    (case "adds two positive numbers"
+      (input 2 3)
+      (expect 5))
+    (case "adds with zero"
+      (input 0 7)
+      (expect 7)))
+
+  (meta-note "Tests simple integer addition"))

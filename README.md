@@ -35,8 +35,8 @@ AISL's killer feature is its **two-layer architecture** that prevents language e
                       v
 +---------------------------------------------+
 |          AISL-Core (IR)                     |
-|  Concepts: set, call, goto, label           |
-|  Minimal, frozen forever (6 statements)     |
+|  Concepts: set, goto, label, ifnot, ret     |
+|  Minimal, frozen forever (5 statements)     |
 +---------------------------------------------+
 ```
 
@@ -93,7 +93,7 @@ These design decisions were made during collaborative AI-human development to ma
 
 5. **S-Expression Syntax** - Uniform, parenthesized Lisp-style syntax. Trivial to parse, generate, and validate.
 
-6. **Frozen Core IR** - The 6 Core statements (`set`, `call`, `label`, `goto`, `ifnot`, `ret`) will never change. Future-proof.
+6. **Frozen Core IR** - The 5 Core statements (`set`, `label`, `goto`, `ifnot`, `ret`) will never change. Future-proof.
 
 7. **No Comments** - AISL intentionally has no comment syntax. Use descriptive names and `meta-note` in tests. Forces clarity.
 
@@ -194,33 +194,32 @@ process  ; Process handle (for DB, subprocesses)
 
 **AI Decision:** Operations panic on error with clear messages. LLM regenerates with checks (file_exists, etc.) when panics occur.
 
-## Standard Library (13 Modules in Pure AISL)
+## Standard Library (14 Modules in Pure AISL)
 
 All stdlib modules are implemented **in pure AISL**, not native code. This enforces our philosophy: "If it CAN be written in AISL, it MUST be written in AISL."
 
-### Core (3 modules)
-- **string_utils** - String operations (`split`, `trim`, `contains`, `replace`, `starts_with`, `ends_with`)
+### Core (9 modules)
+- **string_utils** - String operations (`split`, `trim`, `contains`, `replace`, `starts_with`, `ends_with`, `to_upper`, `to_lower`)
 - **conversion** - Type conversion (`string_from_int`, `bool_to_int`, `kilometers_to_miles`)
-- **channel** - Channel operations
+- **array_utils** - Array utilities (`array_sum`, `array_product`, `array_find`, `array_contains`, `array_reverse`)
+- **math** - Math operations (`abs`, `min`, `max`)
+- **math_extended** - Extended math (`clamp`, `sign`, `lerp`, `is_even`, `is_odd`)
+- **filesystem** - File utilities (`read_file_safe`, `write_file_safe`, `copy_file`, `read_lines`)
+- **network** - Network utilities (`is_valid_port`, `build_url`, `parse_url`, `extract_domain`)
+- **text_utils** - Text utilities (`repeat_string`, `pad_left`, `pad_right`, `truncate`, `word_count`)
+- **validation** - Validation (`in_range`, `is_positive`, `is_negative`, `is_zero`)
 
-### Data (2 modules)
+### Data (1 module)
 - **json_utils** - JSON parsing and generation
-- **base64** - Base64 encoding/decoding
 
-### Net (2 modules)
+### Net (1 module)
 - **http** - HTTP client (GET, POST, PUT, DELETE)
-- **websocket** - WebSocket client
 
 ### Pattern (1 module)
 - **regex** - Regular expressions
 
-### Crypto (1 module)
-- **hash** - Cryptographic hashing (SHA256, MD5)
-
-### System (3 modules)
-- **time** - Time operations
+### System (1 module)
 - **process** - Process management
-- **sleep** - Sleep/delay
 
 ### Database (1 module)
 - **sqlite** - SQLite database (via process spawning)
@@ -286,11 +285,11 @@ All stdlib modules are implemented **in pure AISL**, not native code. This enfor
     (ret 0)))
 ```
 
-See [examples/](examples/) for 22 complete working examples including a real-time WebSocket chat app and a TODO app with SQLite.
+See [examples/](examples/) for complete working examples including a real-time WebSocket chat app and a TODO app with SQLite.
 
 ## Testing
 
-AISL has **126 passing tests** covering all language features. All tests use the `test-spec` structure:
+AISL has **138 passing tests** covering all language features. All tests use the `test-spec` structure:
 
 ```lisp
 (module test_addition
@@ -319,8 +318,7 @@ aisl/
 +-- LANGUAGE_SPEC.md            # Complete language specification
 +-- AISL-CORE.md                # Core IR specification (frozen forever)
 +-- AISL-AGENT.md               # Agent surface language
-+-- .aisl.grammar               # Machine-readable grammar (~800 tokens)
-+-- .aisl.meta                  # Project context (compressed s-expr)
++-- .aisl.grammar               # Machine-readable grammar (~1600 tokens)
 +-- .aisl.analysis              # Deep architectural analysis
 |
 +-- interpreter/                # OCaml tree-walking interpreter
@@ -328,37 +326,29 @@ aisl/
 |   +-- parser.ml               # Recursive descent parser
 |   +-- types.ml                # Type kind definitions
 |   +-- ast.ml                  # AST node types
-|   +-- interpreter.ml          # Evaluator + 180+ builtins (~1930 lines)
+|   +-- interpreter.ml          # Evaluator + 180+ builtins (~2500 lines)
 |   +-- vm.ml                   # Entry point
 |   +-- dune / dune-project     # Build configuration
 |   +-- _build/                 # Build output
 |
-+-- stdlib/                     # Standard library (13 modules, pure AISL!)
-|   +-- core/                   # Core modules (string_utils, conversion, channel)
-|   +-- data/                   # Data formats (json_utils, base64)
-|   +-- net/                    # Networking (http, websocket)
++-- stdlib/                     # Standard library (17 modules, pure AISL!)
+|   +-- core/                   # Core modules (string_utils, conversion, array_utils, math, math_extended, filesystem, network, text_utils, validation)
+|   +-- crypto/                 # Cryptography (base64, hash, hmac)
+|   +-- data/                   # Data formats (json_utils)
+|   +-- net/                    # Networking (http)
 |   +-- pattern/                # Pattern matching (regex)
-|   +-- crypto/                 # Cryptography (hash)
-|   +-- sys/                    # System (time, process, sleep)
+|   +-- sys/                    # System (process)
 |   +-- db/                     # Databases (sqlite)
 |   +-- README.md               # Stdlib documentation
 |
-+-- tests/                      # Test suite (126 tests, all passing)
++-- tests/                      # Test suite (138 tests, all passing)
 |   +-- test_*.aisl             # Unit tests
 |   +-- README.md
 |
-+-- examples/                   # Example programs (22 examples)
++-- examples/                   # Example programs
 |   +-- hello_world.aisl
-|   +-- sinatra_demo.aisl       # Web server with routing
 |   +-- chat_app/               # Real-time WebSocket chat application
 |   +-- todo_app/               # TODO app with SQLite backend
-|   +-- ...
-|
-+-- tools/                      # Utilities (written in pure AISL!)
-|   +-- fix_tests.aisl          # Test file converter
-|   +-- test_runner.aisl        # Test harness
-|
-+-- modules/                    # Additional modules (12 modules)
 ```
 
 ## Documentation Hierarchy (For LLMs)
@@ -366,10 +356,9 @@ aisl/
 **When generating AISL code, LLMs should consult in this order:**
 
 1. **`.aisl.grammar`** (~800 tokens) - Complete syntax reference, CONSULT FIRST
-2. **`.aisl.meta`** (compressed) - Project context
-3. **`.aisl.analysis`** (detailed) - Design decisions, known issues
-4. **`AGENTS.md`** (8K tokens) - LLM-optimized quick reference with examples
-5. **`LANGUAGE_SPEC.md`** (full) - Complete specification for deep dives
+2. **`.aisl.analysis`** (detailed) - Design decisions, known issues
+3. **`AGENTS.md`** (8K tokens) - LLM-optimized quick reference with examples
+4. **`LANGUAGE_SPEC.md`** (full) - Complete specification for deep dives
 
 **Why this order?** Token efficiency. `.aisl.grammar` is 10x more efficient than prose documentation.
 
@@ -419,7 +408,7 @@ aisl/
 
 ### 5. Why Frozen Core IR?
 
-**Decision:** The 6 Core statements will never change, ever.
+**Decision:** The 5 Core statements will never change, ever.
 
 **Rationale:**
 - LLM training data never becomes outdated
@@ -464,7 +453,7 @@ dune build
 ## Running Tests
 
 ```bash
-# Run all 126 tests
+# Run all 138 tests
 cd interpreter
 eval $(opam env)
 total=0; passed=0
@@ -490,7 +479,7 @@ echo "$passed/$total"
 AISL is currently in active development. All changes must:
 
 1. Maintain zero ambiguity (ONE WAY ONLY)
-2. Pass all 126 tests
+2. Pass all 138 tests
 3. Update machine-readable docs (`.aisl.grammar`, `.aisl.meta`)
 4. Write new stdlib modules in pure AISL
 5. Follow the "frozen Core IR" principle
@@ -500,7 +489,7 @@ AISL is currently in active development. All changes must:
 - **LLM-Optimized** - Designed for reliable AI code generation
 - **Zero Ambiguity** - Every construct has exactly one meaning
 - **Stable Target** - Core IR frozen forever
-- **Batteries Included** - 180+ built-in operations, 13 stdlib modules
+- **Batteries Included** - 180+ built-in operations, 17 stdlib modules
 - **Fast Startup** - Direct interpretation, <10ms
 - **Easy to Parse** - S-expression syntax
 - **Explicit Everything** - No surprises, no hidden behavior

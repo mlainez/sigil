@@ -392,7 +392,7 @@ AISL provides 180+ built-in functions. All use direct call syntax: `(function ar
 
 Many high-level operations are now implemented in **pure AISL stdlib modules** instead of built-in opcodes. This follows AISL's philosophy: "If it CAN be written in AISL, it MUST be written in AISL."
 
-**Available stdlib modules (14 total):**
+**Available stdlib modules (17 total):**
 
 **Core (9 modules):**
 - `stdlib/core/string_utils.aisl` - Advanced string operations (split, trim, contains, replace, starts_with, ends_with, to_upper, to_lower)
@@ -419,6 +419,11 @@ Many high-level operations are now implemented in **pure AISL stdlib modules** i
 
 **System (1 module):**
 - `stdlib/sys/process.aisl` - Process management (spawn, wait, kill, exit, get_pid, get_env, set_env)
+
+**Crypto (3 modules):**
+- `stdlib/crypto/base64.aisl` - Base64 encoding/decoding (base64_encode, base64_decode)
+- `stdlib/crypto/hash.aisl` - Cryptographic hashes (sha256, md5) — pure AISL using bitwise builtins
+- `stdlib/crypto/hmac.aisl` - HMAC authentication (hmac_sha256) — pure AISL using hash module
 
 **Importing stdlib modules:**
 
@@ -673,20 +678,20 @@ For predictable errors, guard checks are simpler and more explicit:
 (tcp_close socket)          ; Close socket
 ```
 
-### HTTP Operations
+### Bitwise Operations
 
 ```scheme
-(http_get url)              ; GET -> response
-(http_post url body)        ; POST -> response
-(http_put url body)         ; PUT -> response
-(http_delete url)           ; DELETE -> response
-(http_get_status response)  ; Status code -> int
-(http_get_body response)    ; Body -> string
+(bit_and a b)               ; Bitwise AND -> int
+(bit_or a b)                ; Bitwise OR -> int
+(bit_xor a b)               ; Bitwise XOR -> int
+(bit_not a)                 ; Bitwise NOT -> int
+(bit_shift_left a n)        ; Logical shift left -> int
+(bit_shift_right a n)       ; Logical shift right (unsigned) -> int
 ```
 
 ### JSON Operations
 
-**All JSON operations require `(import json_utils)` from stdlib:**
+**JSON operations are built-in** (no import required):
 
 ```scheme
 (json_parse text)                    ; Parse JSON string -> json
@@ -759,39 +764,26 @@ For predictable errors, guard checks are simpler and more explicit:
 (string_from_bool value)    ; bool -> string
 ```
 
-### Conditional Functions
-
-```scheme
-(if_int condition then else)       ; Conditional int
-(if_float condition then else)     ; Conditional float
-(if_string condition then else)    ; Conditional string
-```
-
-### Garbage Collection
-
-```scheme
-(gc_collect)                ; Force collection
-(gc_stats)                  ; GC statistics
-```
-
 ---
 
 ## Complete Example: Web Server
 
 ```scheme
-(module sinatra
+(module web_server
   (fn handle_connection client_sock string -> int
-    (set request string (tcp_receive client_sock 4096))
-    (set has_json bool (string_contains request "GET /hello.json "))
-    (set has_html bool (string_contains request "GET /hello "))
+    (set request_data string (tcp_receive client_sock 4096))
+    (set has_json bool (string_contains request_data "GET /hello.json "))
+    (set has_html bool (string_contains request_data "GET /hello "))
     
     (set json_resp string "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\n\r\n{\"status\":\"ok\"}")
     (set html_resp string "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n<h1>Hello</h1>")
     (set not_found string "HTTP/1.1 404 Not Found\r\n\r\nNot Found")
     
     (set response string not_found)
-    (set response string (if_string has_html html_resp response))
-    (set response string (if_string has_json json_resp response))
+    (if has_html
+      (set response string html_resp))
+    (if has_json
+      (set response string json_resp))
     
     (tcp_send client_sock response)
     (tcp_close client_sock)
@@ -815,7 +807,7 @@ This server demonstrates:
 - Type-directed operations (no `_int` suffixes needed for comparison)
 - String operations
 - TCP networking
-- Conditional routing with `if_string`
+- Conditional routing with `if` statements
 
 ---
 

@@ -1,0 +1,69 @@
+(module hmac
+  (import hash)
+
+  (fn xor_pad key_bytes string pad_byte int block_size int -> string
+    (set result string "")
+    (set key_len int (string_length key_bytes))
+    (set i int 0)
+    (while (lt i block_size)
+      (set key_byte int 0)
+      (if (lt i key_len)
+        (set key_byte int (string_get key_bytes i)))
+      (set xored int (bit_xor key_byte pad_byte))
+      (set result string (string_concat result (char_from_code xored)))
+      (set i int (add i 1)))
+    (ret result))
+
+  (fn hmac_sha256 key string message string -> string
+    (set block_size int 64)
+    (set key_bytes string key)
+
+    (set key_len int (string_length key_bytes))
+    (if (gt key_len block_size)
+      (set hashed string (sha256 key_bytes))
+      (set key_bytes string "")
+      (set hi int 0)
+      (while (lt hi 32)
+        (set hex_offset int (mul hi 2))
+        (set hex_pair string (string_slice hashed hex_offset 2))
+        (set byte_val int (hex_to_int hex_pair))
+        (set key_bytes string (string_concat key_bytes (char_from_code byte_val)))
+        (set hi int (add hi 1))))
+
+    (set ipad string (xor_pad key_bytes 54 block_size))
+    (set opad string (xor_pad key_bytes 92 block_size))
+
+    (set inner_data string (string_concat ipad message))
+    (set inner_hash_hex string (sha256 inner_data))
+
+    (set inner_hash_bytes string "")
+    (set hi int 0)
+    (while (lt hi 32)
+      (set hex_offset int (mul hi 2))
+      (set hex_pair string (string_slice inner_hash_hex hex_offset 2))
+      (set byte_val int (hex_to_int hex_pair))
+      (set inner_hash_bytes string (string_concat inner_hash_bytes (char_from_code byte_val)))
+      (set hi int (add hi 1)))
+
+    (set outer_data string (string_concat opad inner_hash_bytes))
+    (ret (sha256 outer_data)))
+
+  (fn hex_char_to_int ch int -> int
+    (if (and (ge ch 48) (le ch 57))
+      (ret (sub ch 48)))
+    (if (and (ge ch 97) (le ch 102))
+      (ret (add (sub ch 97) 10)))
+    (if (and (ge ch 65) (le ch 70))
+      (ret (add (sub ch 65) 10)))
+    (ret 0))
+
+  (fn hex_to_int hex_str string -> int
+    (set len int (string_length hex_str))
+    (set result int 0)
+    (set i int 0)
+    (while (lt i len)
+      (set ch int (string_get hex_str i))
+      (set digit int (hex_char_to_int ch))
+      (set result int (add (mul result 16) digit))
+      (set i int (add i 1)))
+    (ret result)))

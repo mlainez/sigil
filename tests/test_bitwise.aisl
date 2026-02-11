@@ -1,0 +1,68 @@
+(module test_bitwise
+  (fn test_bit_and a int b int -> int
+    (ret (bit_and a b)))
+
+  (fn test_bit_or a int b int -> int
+    (ret (bit_or a b)))
+
+  (fn test_bit_xor a int b int -> int
+    (ret (bit_xor a b)))
+
+  (fn test_bit_not a int -> int
+    (ret (bit_not a)))
+
+  (fn test_bit_shift_left a int n int -> int
+    (ret (bit_shift_left a n)))
+
+  (fn test_bit_shift_right a int n int -> int
+    (ret (bit_shift_right a n)))
+
+  (test-spec test_bit_and
+    (case "AND of 0xFF and 0x0F"
+      (input 255 15)
+      (expect 15))
+    (case "AND of 12 and 10"
+      (input 12 10)
+      (expect 8))
+    (case "AND with zero"
+      (input 42 0)
+      (expect 0)))
+
+  (test-spec test_bit_or
+    (case "OR of 12 and 10"
+      (input 12 10)
+      (expect 14))
+    (case "OR with zero"
+      (input 42 0)
+      (expect 42)))
+
+  (test-spec test_bit_xor
+    (case "XOR of 12 and 10"
+      (input 12 10)
+      (expect 6))
+    (case "XOR with self"
+      (input 42 42)
+      (expect 0)))
+
+  (test-spec test_bit_not
+    (case "NOT of 0"
+      (input 0)
+      (expect -1)))
+
+  (test-spec test_bit_shift_left
+    (case "shift 1 left by 8"
+      (input 1 8)
+      (expect 256))
+    (case "shift 5 left by 2"
+      (input 5 2)
+      (expect 20)))
+
+  (test-spec test_bit_shift_right
+    (case "shift 256 right by 8"
+      (input 256 8)
+      (expect 1))
+    (case "shift 20 right by 2"
+      (input 20 2)
+      (expect 5)))
+
+  (meta-note "Tests bitwise operations: AND, OR, XOR, NOT, shift left, shift right"))
