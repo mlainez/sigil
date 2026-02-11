@@ -291,9 +291,16 @@ Generate these - the interpreter handles them directly:
   (print "in range"))
 (if (or (eq x 0) (eq y 0))
   (print "at least one zero"))
+
+; Try/catch - recoverable error handling
+(try
+  (set result int (div 10 0))
+  (catch err string
+    (print "Caught: ")
+    (print err)))
 ```
 
-**Note**: `if` is the primary conditional construct. It supports an optional `(else ...)` block. `and`/`or` are short-circuit special forms (not function calls) - the second expression is not evaluated if the result is determined by the first.
+**Note**: `if` is the primary conditional construct. It supports an optional `(else ...)` block. `and`/`or` are short-circuit special forms (not function calls) - the second expression is not evaluated if the result is determined by the first. `try/catch` catches RuntimeError exceptions and binds the error message as a string to the catch variable.
 
 ---
 
@@ -826,7 +833,7 @@ AISL has a built-in test framework. Add tests to verify behavior:
 - **Control flow**: See AISL-AGENT.md examples
 - **Built-in functions**: See LANGUAGE_SPEC.md section 5 (180+ functions)
 - **Type system**: See AISL-CORE.md section "Types"
-- **Error handling**: Operations panic on error. Use (file_exists) to check before operations.
+- **Error handling**: Use try/catch for recoverable errors, guard checks for predictable ones. See LANGUAGE_SPEC.md.
 
 ---
 
@@ -1211,7 +1218,8 @@ AISL is designed for predictable performance:
 
 ### Design Decisions
 
-- **No exceptions**: Operations panic on error
+- **Try/catch for recovery**: Operations panic on error by default; use `(try ... (catch ...))` for recoverable errors
+- **No closures**: Functions do not capture outer scope variables — all data must be passed as parameters
 - **No null**: Variables must be initialized
 - **No undefined behavior**: All operations have defined semantics
 - **No operator overloading**: One operation name = one meaning

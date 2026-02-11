@@ -1,11 +1,11 @@
 @(grammar aisl-agent)
-@(stat tests:126 examples:22 stdlib:13)
+@(stat tests:129 examples:22 stdlib:13)
 @(impl ocaml tree-walking-interpreter)
 @(syn
   (prog (module name imp* fn*))
   (imp (import name))
   (fn (fn name p* -> ty s*))
-  (s (set v ty e) | (f a*) | (ret e) | (while e s*) | (loop s*) | (if e s* (else s*)?) | (for-each v ty e s*) | (break) | (cont))
+  (s (set v ty e) | (f a*) | (ret e) | (while e s*) | (loop s*) | (if e s* (else s*)?) | (for-each v ty e s*) | (try s* (catch v ty s*)) | (break) | (cont))
   (e lit | var | (f a*) | (and e e) | (or e e))
   (lit int | float | str | true | false)
   (ty int|float|decimal|bool|str|arr|map|json|regex|process|socket|file|ws_socket|channel))
@@ -25,7 +25,8 @@
   (cast int_float float_int int_str str_int int_decimal decimal_int float_decimal decimal_float string_to_int))
 @(special-forms
   (and "short-circuit: (and e1 e2) - returns false immediately if e1 is false, e2 not evaluated")
-  (or "short-circuit: (or e1 e2) - returns true immediately if e1 is true, e2 not evaluated"))
+  (or "short-circuit: (or e1 e2) - returns true immediately if e1 is true, e2 not evaluated")
+  (try-catch "(try body... (catch var type handler...)) - catches RuntimeError, binds error message as string to var"))
 @(ex
   (fn add a int b int -> int (ret (add a b)))
   (fn fact n int -> int 
@@ -100,4 +101,10 @@
   (build-command "cd interpreter && eval $(opam env) && dune build")
   (websocket-builtins "ws_accept ws_connect ws_send ws_receive ws_close - native builtins not stdlib")
   (string-to-int "string_to_int is a builtin - do not reimplement in AISL")
-  (getenv "getenv builtin returns string, empty string if not found"))
+  (getenv "getenv builtin returns string, empty string if not found")
+  (try-catch "error handling: (try body... (catch var type handler...)) - catches RuntimeError, error message bound as string")
+  (try-catch-nesting "try/catch blocks can be nested - inner catch handles inner errors, outer catch handles outer errors")
+  (try-catch-catch-type "catch variable type must be string - error messages are always strings")
+  (no-closures "functions do NOT capture defining scope - only VFunction values copied into function env, NOT variables")
+  (no-closures-design "intentional for LLM explicitness: all data must be passed as parameters, no hidden state")
+  (no-closures-implication "inner functions see other functions but NOT variables from outer scope - pass data explicitly"))

@@ -318,7 +318,7 @@ Components:
 - parser.ml - Recursive descent parser, produces AST
 - types.ml - Type kind definitions
 - ast.ml - AST node types
-- interpreter.ml - ~1930 lines: eval, eval_call (all builtins), eval_block, test framework, import system, WebSocket helpers, special forms (And, Or, ForEach)
+- interpreter.ml - ~2420 lines: eval, eval_call (all builtins), eval_block, test framework, import system, WebSocket helpers, special forms (And, Or, ForEach), try/catch, structural equality, deep copy, BigDecimal
 - vm.ml - Entry point: reads file, tokenizes, parses, executes
 
 Build: cd interpreter && eval $(opam env) && dune build
@@ -384,3 +384,82 @@ Verified: `(and false (gt (div 1 0) 0))` does NOT divide by zero.
 The interpreter walks up from the source file directory to find the project root containing `stdlib/`.
 Falls back to executable directory, then current working directory.
 This eliminates hardcoded absolute paths that break on different machines.
+
+@(try-catch-error-handling)
+
+**Try/catch for recoverable error handling**
+
+Syntax: `(try body... (catch var type handler...))`
+
+How it works:
+- Evaluates body statements sequentially
+- If a RuntimeError is raised (division by zero, array bounds, etc.), jumps to catch block
+- The error message (string) is bound to the catch variable
+- Catch variable type must be `string`
+- After catch block completes, execution continues after the try/catch
+
+Implementation details (interpreter.ml ~line 864):
+- Uses OCaml's `try...with` to catch `RuntimeError` exceptions
+- Body statements are evaluated in order; first RuntimeError triggers catch
+- Catch block gets a fresh binding for the error variable
+- Try/catch blocks can be nested - inner catch handles inner errors
+
+Parser details (parser.ml `parse_try` function, ~lines 186-220):
+- Scans body expressions until it finds `(catch ...)` as the last form
+- Catch clause must be the last element inside try
+- Validates catch has variable name and type
+
+Examples:
+```
+(try
+  (set result int (div 10 0))
+  (catch err string
+    (print err)))
+
+(try
+  (set val int (array_get arr 999))
+  (catch err string
+    (set val int -1)))
+```
+
+Use cases:
+- Catching division by zero without guard checks
+- Handling array/map access errors gracefully
+- Wrapping file I/O that might fail
+- Any operation that panics with RuntimeError
+
+Note: This does NOT replace guard checks for simple cases. Use `(if (eq b 0) ...)` for known-risky operations. Use try/catch when the error source is less predictable.
+
+@(no-closures-design)
+
+**Functions deliberately do NOT capture their defining scope**
+
+When a user-defined function is called (interpreter.ml ~lines 2207-2213), only `VFunction` values from the parent environment are copied into the new function's environment. Regular variables (VInt, VString, VArray, etc.) are NOT copied.
+
+This means:
+- Functions can call other functions (VFunction values are available)
+- Functions CANNOT access variables from the scope where they were defined
+- All data a function operates on MUST be passed explicitly as parameters
+- No hidden state, no implicit captures, no closures
+
+Why this is intentional:
+1. LLM explicitness: Function behavior is fully determined by its signature + body
+2. No hidden dependencies: Reading the function signature tells you ALL its inputs
+3. Predictable: No spooky action at a distance from captured variables
+4. Debuggable: No need to trace what was captured when the function was created
+
+Implementation:
+```ocaml
+(* Only copy VFunction values into new env *)
+Hashtbl.iter (fun k v ->
+  match v with
+  | VFunction _ -> Hashtbl.replace new_env k v
+  | _ -> ()
+) parent_env
+```
+
+Implications for LLM code generation:
+- ALWAYS pass data as function parameters
+- NEVER rely on outer scope variables being visible
+- Functions are pure transforms: params in, return value out
+- Use module-level functions for shared behavior, not nested scopes

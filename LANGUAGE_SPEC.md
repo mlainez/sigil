@@ -47,6 +47,7 @@ statement ::= (set <var> <type> <expr>)
             | (loop <statement>*)
             | (if <bool_expr> <statement>* [(else <statement>*)])
             | (for-each <var> <type> <collection_expr> <statement>*)
+            | (try <statement>* (catch <var> <type> <statement>*))
             | (break)
             | (continue)
             | (ret <expr>)
@@ -531,7 +532,52 @@ The interpreter automatically selects the correct operation based on variable ty
 
 ### Error Handling
 
-**AISL uses panic-based error handling.** Operations fail with clear panic messages. Use guard checks to prevent panics:
+AISL supports **try/catch** for recoverable error handling, alongside **guard checks** for predictable errors.
+
+#### Try/Catch
+
+**Syntax:** `(try <body-statements>... (catch <var> <type> <handler-statements>...))`
+
+Catches `RuntimeError` exceptions (division by zero, array out of bounds, file not found, etc.) and binds the error message to the catch variable as a string.
+
+```scheme
+; Catch division by zero
+(try
+  (set result int (div 10 0))
+  (catch err string
+    (print "Caught error: ")
+    (print err)))
+
+; Use catch to provide fallback values
+(set val int 0)
+(try
+  (set val int (array_get arr 999))
+  (catch err string
+    (set val int -1)))
+
+; Nested try/catch
+(try
+  (try
+    (set x int (div 1 0))
+    (catch inner_err string
+      (print "Inner caught: ")
+      (print inner_err)))
+  (print "Outer continues")
+  (catch outer_err string
+    (print "Outer caught: ")
+    (print outer_err)))
+```
+
+**Rules:**
+- The `(catch ...)` clause must be the **last element** inside the `(try ...)` block
+- Catch variable type must be `string` (error messages are always strings)
+- Try/catch blocks can be nested — inner catch handles inner errors
+- After the catch block completes, execution continues after the try/catch
+- If no error occurs, the catch block is skipped entirely
+
+#### Guard Checks (Still Recommended for Simple Cases)
+
+For predictable errors, guard checks are simpler and more explicit:
 
 ```scheme
 (fn safe_divide a int b int -> int
@@ -545,7 +591,9 @@ The interpreter automatically selects the correct operation based on variable ty
   (ret (file_read path)))
 ```
 
-**Philosophy:** LLMs regenerate code with appropriate checks when panics occur. No Result/Option type machinery needed.
+**When to use which:**
+- **Guard checks**: When you know exactly what might fail (division by zero, missing file)
+- **Try/catch**: When the error source is less predictable, or when wrapping complex operations that might fail in multiple ways
 
 ### TCP Networking
 
@@ -708,6 +756,63 @@ This server demonstrates:
 
 ---
 
+## Functions & Scope
+
+### No Closures (By Design)
+
+AISL functions deliberately do **not** capture their defining scope. When a function is called, only other function definitions are visible — regular variables from the outer scope are NOT accessible.
+
+```scheme
+(module scope_example
+  (fn helper x int -> int
+    (ret (mul x 2)))
+  
+  (fn main -> int
+    (set multiplier int 10)
+    
+    ; helper can be called (functions are visible)
+    (set result int (helper 5))       ; Works: returns 10
+    
+    ; But if helper tried to access 'multiplier', it would fail
+    ; Functions only see: their parameters + other functions
+    (ret 0)))
+```
+
+### Why No Closures?
+
+This is intentional for LLM code generation:
+
+1. **Explicitness**: Function behavior is fully determined by its signature + body
+2. **No hidden dependencies**: Reading the function signature tells you ALL its inputs
+3. **Predictability**: No spooky action at a distance from captured variables
+4. **Debuggability**: No need to trace what was captured when the function was created
+
+### Rules for Function Scope
+
+- Functions **can** call other functions defined in the same module
+- Functions **cannot** access variables from outer scopes
+- All data must be passed **explicitly as parameters**
+- Functions are pure transforms: parameters in, return value out
+
+```scheme
+; ❌ WRONG - Trying to use outer variable
+(fn main -> int
+  (set factor int 5)
+  (set result int (apply_factor 10))  ; apply_factor can't see 'factor'!
+  (ret result))
+
+; ✅ CORRECT - Pass data explicitly
+(fn apply_factor x int factor int -> int
+  (ret (mul x factor)))
+
+(fn main -> int
+  (set factor int 5)
+  (set result int (apply_factor 10 factor))  ; Pass factor as argument
+  (ret result))
+```
+
+---
+
 ## Key Design Principles
 
 1. **Two-Layer Architecture** - Core IR is frozen; Agent layer adds ergonomics
@@ -715,7 +820,7 @@ This server demonstrates:
 3. **Type-Directed Dispatch** - Interpreter infers operation types automatically
 4. **Flat Structure** - No complex nested expressions
 5. **Structured Control** - `while`/`loop`/`for-each` handled directly by interpreter
-6. **Panic-Based Errors** - Operations panic with clear messages; use guard checks
+6. **Try/Catch + Guard Checks** - Try/catch for recoverable errors; guard checks for predictable ones
 7. **Function Calls** - All operations use explicit `call` syntax
 8. **No Operator Precedence** - Everything is a function call
 9. **S-Expression Syntax** - Lisp-style parenthesized syntax
