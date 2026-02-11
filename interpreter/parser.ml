@@ -90,6 +90,7 @@ and parse_sexpr state =
   | "label" -> parse_label state
   | "goto" -> parse_goto state
   | "ifnot" -> parse_ifnot state
+  | "try" -> parse_try state
   | _ -> parse_call sym state
 
 and parse_set state =
@@ -183,6 +184,41 @@ and parse_ifnot state =
   let (label_name, state) = expect_symbol state in
   let state = expect_token RParen state in
   (IfNot (cond, label_name), state)
+
+and parse_try state =
+  (* Parse body expressions until we hit (catch ...) *)
+  let rec parse_try_body state acc =
+    match peek state with
+    | RParen ->
+        (* No catch block found - error *)
+        raise (ParseError "try block requires a (catch ...) clause")
+    | LParen ->
+        (* Check if this is (catch ...) *)
+        let tok_at_pos_plus_1 =
+          if state.pos + 1 < List.length state.tokens then
+            Some (List.nth state.tokens (state.pos + 1))
+          else None
+        in
+        (match tok_at_pos_plus_1 with
+         | Some (Symbol "catch") ->
+             (* Parse catch block *)
+             let state = expect_token LParen state in
+             let state = expect_token (Symbol "catch") state in
+             let (catch_var, state) = expect_symbol state in
+             check_not_type_keyword catch_var "catch variable name";
+             let (catch_type, state) = parse_type state in
+             let (catch_body, state) = parse_body_until_rparen state [] in
+             let state = expect_token RParen state in  (* close the try *)
+             (List.rev acc, catch_var, catch_type, catch_body, state)
+         | _ ->
+             let (expr, state) = parse_expr state in
+             parse_try_body state (expr :: acc))
+    | _ ->
+        let (expr, state) = parse_expr state in
+        parse_try_body state (expr :: acc)
+  in
+  let (try_body, catch_var, catch_type, catch_body, state) = parse_try_body state [] in
+  (Try (try_body, catch_var, catch_type, catch_body), state)
 
 and parse_call func_name state =
   let (args, state) = parse_args state [] in

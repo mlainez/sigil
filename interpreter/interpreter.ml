@@ -861,6 +861,13 @@ let rec eval env expr =
            with Break -> VUnit)
        | _ -> raise (RuntimeError "for-each requires an array or map"))
 
+  | Try (try_body, catch_var, _catch_type, catch_body) ->
+      (try
+        eval_block env try_body
+      with RuntimeError msg ->
+        env_set env catch_var (VString msg);
+        eval_block env catch_body)
+
 and eval_block env exprs =
   let arr = Array.of_list exprs in
   let len = Array.length arr in

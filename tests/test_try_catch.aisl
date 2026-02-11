@@ -1,0 +1,76 @@
+(module test_try_catch
+  (fn catch_div_zero -> string
+    (set result string "no error")
+    (try
+      (set x int (div 10 0))
+      (set result string (string_from_int x))
+      (catch err string
+        (set result string "caught")))
+    (ret result))
+
+  (fn try_no_error -> int
+    (set result int 0)
+    (try
+      (set result int (add 10 20))
+      (catch err string
+        (set result int -1)))
+    (ret result))
+
+  (fn catch_error_message -> string
+    (set msg string "none")
+    (try
+      (set x int (div 5 0))
+      (set msg string (string_from_int x))
+      (catch err string
+        (set msg string err)))
+    (ret msg))
+
+  (fn nested_try_catch -> string
+    (set result string "none")
+    (try
+      (try
+        (set x int (div 1 0))
+        (set result string (string_from_int x))
+        (catch inner_err string
+          (set result string "inner")))
+      (catch outer_err string
+        (set result string "outer")))
+    (ret result))
+
+  (fn try_catch_array_bounds -> string
+    (set result string "no error")
+    (set arr array (array_new))
+    (array_push arr 10)
+    (try
+      (set val int (array_get arr 5))
+      (set result string (string_from_int val))
+      (catch err string
+        (set result string "caught bounds")))
+    (ret result))
+
+  (test-spec catch_div_zero
+    (case "catches division by zero"
+      (input)
+      (expect "caught")))
+
+  (test-spec try_no_error
+    (case "try body succeeds without error"
+      (input)
+      (expect 30)))
+
+  (test-spec catch_error_message
+    (case "error message is accessible in catch"
+      (input)
+      (expect "Division by zero")))
+
+  (test-spec nested_try_catch
+    (case "inner try catches error first"
+      (input)
+      (expect "inner")))
+
+  (test-spec try_catch_array_bounds
+    (case "catches array index out of bounds"
+      (input)
+      (expect "caught bounds")))
+
+  (meta-note "Tests try/catch error handling: catching runtime errors, no-error path, error messages, nesting, and array bounds"))
