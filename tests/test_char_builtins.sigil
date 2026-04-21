@@ -1,0 +1,155 @@
+(module test_char_builtins
+  (fn test_is_digit_true ch int -> bool
+    (ret (is_digit ch)))
+
+  (test-spec test_is_digit_true
+    (case "0"
+      (input 48)
+      (expect true))
+    (case "9"
+      (input 57)
+      (expect true))
+    (case "5"
+      (input 53)
+      (expect true)))
+
+  (fn test_is_digit_false ch int -> bool
+    (ret (is_digit ch)))
+
+  (test-spec test_is_digit_false
+    (case "A"
+      (input 65)
+      (expect false))
+    (case "space"
+      (input 32)
+      (expect false)))
+
+  (fn test_is_alpha_true ch int -> bool
+    (ret (is_alpha ch)))
+
+  (test-spec test_is_alpha_true
+    (case "A"
+      (input 65)
+      (expect true))
+    (case "Z"
+      (input 90)
+      (expect true))
+    (case "a"
+      (input 97)
+      (expect true))
+    (case "z"
+      (input 122)
+      (expect true)))
+
+  (fn test_is_alpha_false ch int -> bool
+    (ret (is_alpha ch)))
+
+  (test-spec test_is_alpha_false
+    (case "0"
+      (input 48)
+      (expect false))
+    (case "space"
+      (input 32)
+      (expect false)))
+
+  (fn test_is_upper_true ch int -> bool
+    (ret (is_upper ch)))
+
+  (test-spec test_is_upper_true
+    (case "A"
+      (input 65)
+      (expect true))
+    (case "Z"
+      (input 90)
+      (expect true)))
+
+  (fn test_is_lower_true ch int -> bool
+    (ret (is_lower ch)))
+
+  (test-spec test_is_lower_true
+    (case "a"
+      (input 97)
+      (expect true))
+    (case "z"
+      (input 122)
+      (expect true)))
+
+  (fn test_is_whitespace_true ch int -> bool
+    (ret (is_whitespace ch)))
+
+  (test-spec test_is_whitespace_true
+    (case "space"
+      (input 32)
+      (expect true))
+    (case "tab"
+      (input 9)
+      (expect true))
+    (case "newline"
+      (input 10)
+      (expect true))
+    (case "carriage return"
+      (input 13)
+      (expect true)))
+
+  (fn test_is_whitespace_false ch int -> bool
+    (ret (is_whitespace ch)))
+
+  (test-spec test_is_whitespace_false
+    (case "A"
+      (input 65)
+      (expect false))
+    (case "0"
+      (input 48)
+      (expect false)))
+
+  (fn test_to_upper_char ch int -> int
+    (ret (to_upper_char ch)))
+
+  (test-spec test_to_upper_char
+    (case "a -> A"
+      (input 97)
+      (expect 65))
+    (case "z -> Z"
+      (input 122)
+      (expect 90))
+    (case "A stays A"
+      (input 65)
+      (expect 65))
+    (case "0 stays 0"
+      (input 48)
+      (expect 48)))
+
+  (fn test_to_lower_char ch int -> int
+    (ret (to_lower_char ch)))
+
+  (test-spec test_to_lower_char
+    (case "A -> a"
+      (input 65)
+      (expect 97))
+    (case "Z -> z"
+      (input 90)
+      (expect 122))
+    (case "a stays a"
+      (input 97)
+      (expect 97))
+    (case "5 stays 5"
+      (input 53)
+      (expect 53)))
+
+  (fn test_is_digit_string -> bool
+    (ret (is_digit "5")))
+
+  (test-spec test_is_digit_string
+    (case "single char string"
+      (input)
+      (expect true)))
+
+  (fn test_to_upper_string -> string
+    (ret (to_upper_char "a")))
+
+  (test-spec test_to_upper_string
+    (case "string mode a -> A"
+      (input)
+      (expect "A")))
+
+  (meta-note "Tests is_digit, is_alpha, is_upper, is_lower, is_whitespace, to_upper_char, to_lower_char builtins"))

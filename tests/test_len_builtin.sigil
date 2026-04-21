@@ -1,0 +1,43 @@
+(module test_len_builtin
+  (fn test_len_string s string -> int
+    (ret (len s)))
+
+  (test-spec test_len_string
+    (case "hello"
+      (input "hello")
+      (expect 5))
+    (case "empty"
+      (input "")
+      (expect 0))
+    (case "one char"
+      (input "x")
+      (expect 1)))
+
+  (fn test_len_array -> int
+    (set arr array [10 20 30 40])
+    (ret (len arr)))
+
+  (test-spec test_len_array
+    (case "4 elements"
+      (input)
+      (expect 4)))
+
+  (fn test_len_empty_array -> int
+    (set arr array (array_new))
+    (ret (len arr)))
+
+  (test-spec test_len_empty_array
+    (case "empty array"
+      (input)
+      (expect 0)))
+
+  (fn test_len_map -> int
+    (set m map {"a" "1" "b" "2" "c" "3"})
+    (ret (len m)))
+
+  (test-spec test_len_map
+    (case "3 keys"
+      (input)
+      (expect 3)))
+
+  (meta-note "Tests len builtin for polymorphic length on string, array, map"))

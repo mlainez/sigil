@@ -1,0 +1,62 @@
+(module test_string_chars
+  (fn test_chars_length s string -> int
+    (set chars array (string_chars s))
+    (ret (len chars)))
+
+  (test-spec test_chars_length
+    (case "hello has 5 chars"
+      (input "hello")
+      (expect 5))
+    (case "empty has 0 chars"
+      (input "")
+      (expect 0))
+    (case "one char"
+      (input "x")
+      (expect 1)))
+
+  (fn test_chars_first s string -> string
+    (set chars array (string_chars s))
+    (ret (array_get chars 0)))
+
+  (test-spec test_chars_first
+    (case "first char of hello"
+      (input "hello")
+      (expect "h"))
+    (case "first char of ABC"
+      (input "ABC")
+      (expect "A")))
+
+  (fn test_chars_join s string -> string
+    (set chars array (string_chars s))
+    (set result string "")
+    (for-each ch string chars
+      (set result (string_concat result ch)))
+    (ret result))
+
+  (test-spec test_chars_join
+    (case "round-trip hello"
+      (input "hello")
+      (expect "hello"))
+    (case "round-trip with spaces"
+      (input "a b c")
+      (expect "a b c")))
+
+  (fn test_count_upper s string -> int
+    (set count int 0)
+    (for-each ch string (string_chars s)
+      (if (is_upper ch)
+        (set count (add count 1))))
+    (ret count))
+
+  (test-spec test_count_upper
+    (case "Hello World has 2 uppers"
+      (input "Hello World")
+      (expect 2))
+    (case "all lower"
+      (input "abc")
+      (expect 0))
+    (case "ALL UPPER"
+      (input "ABC")
+      (expect 3)))
+
+  (meta-note "Tests string_chars builtin and integration with for-each and char builtins"))

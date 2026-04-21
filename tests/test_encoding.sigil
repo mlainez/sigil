@@ -1,0 +1,97 @@
+(module test_encoding
+  (import encoding)
+
+  (fn test_int_to_hex n int -> string
+    (ret (int_to_hex n)))
+
+  (test-spec test_int_to_hex
+    (case "0"
+      (input 0)
+      (expect "0"))
+    (case "255"
+      (input 255)
+      (expect "ff"))
+    (case "16"
+      (input 16)
+      (expect "10"))
+    (case "10"
+      (input 10)
+      (expect "a"))
+    (case "256"
+      (input 256)
+      (expect "100")))
+
+  (fn test_hex_to_int s string -> int
+    (ret (hex_to_int s)))
+
+  (test-spec test_hex_to_int
+    (case "ff"
+      (input "ff")
+      (expect 255))
+    (case "10"
+      (input "10")
+      (expect 16))
+    (case "0"
+      (input "0")
+      (expect 0))
+    (case "a"
+      (input "a")
+      (expect 10)))
+
+  (fn test_int_to_binary n int -> string
+    (ret (int_to_binary n)))
+
+  (test-spec test_int_to_binary
+    (case "0"
+      (input 0)
+      (expect "0"))
+    (case "5"
+      (input 5)
+      (expect "101"))
+    (case "8"
+      (input 8)
+      (expect "1000"))
+    (case "255"
+      (input 255)
+      (expect "11111111")))
+
+  (fn test_binary_to_int s string -> int
+    (ret (binary_to_int s)))
+
+  (test-spec test_binary_to_int
+    (case "101"
+      (input "101")
+      (expect 5))
+    (case "1000"
+      (input "1000")
+      (expect 8))
+    (case "0"
+      (input "0")
+      (expect 0))
+    (case "11111111"
+      (input "11111111")
+      (expect 255)))
+
+  (fn test_int_to_base_octal n int -> string
+    (ret (int_to_base n 8)))
+
+  (test-spec test_int_to_base_octal
+    (case "8 in octal"
+      (input 8)
+      (expect "10"))
+    (case "255 in octal"
+      (input 255)
+      (expect "377")))
+
+  (fn test_roundtrip n int -> int
+    (ret (hex_to_int (int_to_hex n))))
+
+  (test-spec test_roundtrip
+    (case "roundtrip 42"
+      (input 42)
+      (expect 42))
+    (case "roundtrip 1000"
+      (input 1000)
+      (expect 1000)))
+
+  (meta-note "Tests encoding stdlib module: hex, binary, base conversion"))

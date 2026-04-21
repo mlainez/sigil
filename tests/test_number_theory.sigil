@@ -1,0 +1,134 @@
+(module test_number_theory
+  (import number_theory)
+
+  (fn test_is_prime n int -> bool
+    (ret (is_prime n)))
+
+  (test-spec test_is_prime
+    (case "2 is prime"
+      (input 2)
+      (expect true))
+    (case "3 is prime"
+      (input 3)
+      (expect true))
+    (case "4 is not prime"
+      (input 4)
+      (expect false))
+    (case "17 is prime"
+      (input 17)
+      (expect true))
+    (case "1 is not prime"
+      (input 1)
+      (expect false))
+    (case "0 is not prime"
+      (input 0)
+      (expect false))
+    (case "97 is prime"
+      (input 97)
+      (expect true)))
+
+  (fn test_gcd a int b int -> int
+    (ret (gcd a b)))
+
+  (test-spec test_gcd
+    (case "gcd(12,8)=4"
+      (input 12 8)
+      (expect 4))
+    (case "gcd(7,3)=1"
+      (input 7 3)
+      (expect 1))
+    (case "gcd(100,75)=25"
+      (input 100 75)
+      (expect 25)))
+
+  (fn test_lcm a int b int -> int
+    (ret (lcm a b)))
+
+  (test-spec test_lcm
+    (case "lcm(4,6)=12"
+      (input 4 6)
+      (expect 12))
+    (case "lcm(3,5)=15"
+      (input 3 5)
+      (expect 15)))
+
+  (fn test_factorial n int -> int
+    (ret (factorial n)))
+
+  (test-spec test_factorial
+    (case "0!=1"
+      (input 0)
+      (expect 1))
+    (case "1!=1"
+      (input 1)
+      (expect 1))
+    (case "5!=120"
+      (input 5)
+      (expect 120))
+    (case "10!=3628800"
+      (input 10)
+      (expect 3628800)))
+
+  (fn test_fibonacci n int -> int
+    (ret (fibonacci n)))
+
+  (test-spec test_fibonacci
+    (case "fib(0)=0"
+      (input 0)
+      (expect 0))
+    (case "fib(1)=1"
+      (input 1)
+      (expect 1))
+    (case "fib(10)=55"
+      (input 10)
+      (expect 55)))
+
+  (fn test_sum_digits n int -> int
+    (ret (sum_digits n)))
+
+  (test-spec test_sum_digits
+    (case "123 -> 6"
+      (input 123)
+      (expect 6))
+    (case "0 -> 0"
+      (input 0)
+      (expect 0))
+    (case "999 -> 27"
+      (input 999)
+      (expect 27)))
+
+  (fn test_count_digits n int -> int
+    (ret (count_digits n)))
+
+  (test-spec test_count_digits
+    (case "123 -> 3"
+      (input 123)
+      (expect 3))
+    (case "0 -> 1"
+      (input 0)
+      (expect 1))
+    (case "1000 -> 4"
+      (input 1000)
+      (expect 4)))
+
+  (fn test_is_power_of_2 n int -> bool
+    (ret (is_power_of_2 n)))
+
+  (test-spec test_is_power_of_2
+    (case "1"
+      (input 1)
+      (expect true))
+    (case "2"
+      (input 2)
+      (expect true))
+    (case "16"
+      (input 16)
+      (expect true))
+    (case "3"
+      (input 3)
+      (expect false))
+    (case "0"
+      (input 0)
+      (expect false)))
+
+  (meta-note "Tests number_theory stdlib module"))

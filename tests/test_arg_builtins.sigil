@@ -1,0 +1,46 @@
+(module test_arg_builtins
+  (fn test_str_int n int -> string
+    (ret (str n)))
+
+  (test-spec test_str_int
+    (case "positive int"
+      (input 42)
+      (expect "42"))
+    (case "negative int"
+      (input -7)
+      (expect "-7"))
+    (case "zero"
+      (input 0)
+      (expect "0")))
+
+  (fn test_str_float f float -> string
+    (ret (str f)))
+
+  (test-spec test_str_float
+    (case "positive float"
+      (input 3.14)
+      (expect "3.14"))
+    (case "zero float"
+      (input 0.0)
+      (expect "0.")))
+
+  (fn test_str_bool b bool -> string
+    (ret (str b)))
+
+  (test-spec test_str_bool
+    (case "true"
+      (input true)
+      (expect "true"))
+    (case "false"
+      (input false)
+      (expect "false")))
+
+  (fn test_str_string s string -> string
+    (ret (str s)))
+
+  (test-spec test_str_string
+    (case "passthrough"
+      (input "hello")
+      (expect "hello")))
+
+  (meta-note "Tests str builtin for polymorphic to-string conversion"))
