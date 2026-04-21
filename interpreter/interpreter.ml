@@ -739,8 +739,26 @@ let rec eval env expr =
   | Call (func_name, args) ->
       eval_call env func_name args
   
-  | Set (var_name, var_type, value_expr) ->
+  | Set (var_name, var_type_opt, value_expr) ->
       let value = eval env value_expr in
+      let var_type = match var_type_opt with
+        | Some t -> t
+        | None ->
+            (* Type-free reassignment: infer type from existing variable *)
+            (try
+              let existing = env_get env var_name in
+              match existing with
+              | VInt _ -> TInt | VFloat _ -> TFloat | VDecimal _ -> TDecimal
+              | VString _ -> TString | VBool _ -> TBool | VUnit -> TUnit
+              | VArray _ -> TArray TUnit | VMap _ -> TMap (TUnit, TUnit)
+              | VFunction _ -> TFunction ([], TUnit)
+              | VSocket _ | VTlsSocket _ | VWsSocket _ -> TSocket
+              | VChannel _ -> TSocket | VProcess _ -> TProcess
+            with RuntimeError _ ->
+              raise (RuntimeError (
+                "Type-free set requires variable '" ^ var_name ^
+                "' to already be declared. Use (set " ^ var_name ^ " <type> <expr>) for first declaration.")))
+      in
       if not (type_matches var_type value) then
         raise (RuntimeError (
           "Type mismatch: variable '" ^ var_name ^
@@ -841,6 +859,25 @@ let rec eval env expr =
            | Continue -> loop ()
       in
       loop ()
+
+  | For (var_name, start_expr, end_expr, body) ->
+      let start_val = eval env start_expr in
+      let end_val = eval env end_expr in
+      (match start_val, end_val with
+       | VInt s, VInt e ->
+           let i = ref s in
+           env_set env var_name (VInt !i);
+           (try
+             while Int64.compare !i e < 0 do
+               env_set env var_name (VInt !i);
+               (try
+                 let _ = eval_block env body in ()
+               with Continue -> ());
+               i := Int64.add !i 1L
+             done;
+             VUnit
+           with Break -> VUnit)
+       | _ -> raise (RuntimeError "for loop start and end must be integers"))
 
   | ForEach (var_name, var_type, collection_expr, body) ->
       let coll = eval env collection_expr in

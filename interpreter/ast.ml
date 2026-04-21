@@ -19,8 +19,9 @@ type expr =
   | Or of expr * expr   (* short-circuit or *)
   | Break
   | Continue
+  | For of string * expr * expr * expr list  (* var, start, end_exclusive, body *)
   | ForEach of string * type_kind * expr * expr list  (* var, type, collection, body *)
-  | Set of string * type_kind * expr  (* var, type, value *)
+  | Set of string * type_kind option * expr  (* var, type (None for reassignment), value *)
   | Return of expr
   (* Core IR constructs *)
   | Label of string
@@ -95,11 +96,16 @@ let rec string_of_expr = function
   | Or (a, b) -> "(or " ^ string_of_expr a ^ " " ^ string_of_expr b ^ ")"
   | Break -> "(break)"
   | Continue -> "(continue)"
+  | For (var, start_e, end_e, body) ->
+      let body_str = String.concat " " (List.map string_of_expr body) in
+      "(for " ^ var ^ " " ^ string_of_expr start_e ^ " " ^ string_of_expr end_e ^ " " ^ body_str ^ ")"
   | ForEach (var, ty, coll, body) ->
       let body_str = String.concat " " (List.map string_of_expr body) in
       "(for-each " ^ var ^ " " ^ string_of_type ty ^ " " ^ string_of_expr coll ^ " " ^ body_str ^ ")"
-  | Set (var, ty, value) ->
+  | Set (var, Some ty, value) ->
       "(set " ^ var ^ " " ^ string_of_type ty ^ " " ^ string_of_expr value ^ ")"
+  | Set (var, None, value) ->
+      "(set " ^ var ^ " " ^ string_of_expr value ^ ")"
   | Return expr -> "(ret " ^ string_of_expr expr ^ ")"
   | Label name -> "(label " ^ name ^ ")"
   | Goto name -> "(goto " ^ name ^ ")"

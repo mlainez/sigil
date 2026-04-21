@@ -84,6 +84,7 @@ and parse_sexpr state =
   | "if" -> parse_if state
   | "while" -> parse_while state
   | "loop" -> parse_loop state
+  | "for" -> parse_for state
   | "for-each" -> parse_foreach state
   | "and" -> parse_and state
   | "or" -> parse_or state
@@ -99,10 +100,21 @@ and parse_sexpr state =
 and parse_set state =
   let (var_name, state) = expect_symbol state in
   check_not_type_keyword var_name "variable name";
-  let (var_type, state) = parse_type state in
-  let (value_expr, state) = parse_expr state in
-  let state = expect_token RParen state in
-  (Set (var_name, var_type, value_expr), state)
+  (* Check if next token is a type keyword — if so, this is a declaration *)
+  let has_type = match peek state with
+    | Symbol s -> is_type_keyword s
+    | _ -> false
+  in
+  if has_type then begin
+    let (var_type, state) = parse_type state in
+    let (value_expr, state) = parse_expr state in
+    let state = expect_token RParen state in
+    (Set (var_name, Some var_type, value_expr), state)
+  end else begin
+    let (value_expr, state) = parse_expr state in
+    let state = expect_token RParen state in
+    (Set (var_name, None, value_expr), state)
+  end
 
 and parse_return state =
   let (expr, state) = parse_expr state in
@@ -138,6 +150,14 @@ and parse_while state =
 and parse_loop state =
   let (body, state) = parse_body_until_rparen state [] in
   (Loop body, state)
+
+and parse_for state =
+  let (var_name, state) = expect_symbol state in
+  check_not_type_keyword var_name "for loop variable name";
+  let (start_expr, state) = parse_expr state in
+  let (end_expr, state) = parse_expr state in
+  let (body, state) = parse_body_until_rparen state [] in
+  (For (var_name, start_expr, end_expr, body), state)
 
 and parse_foreach state =
   let (var_name, state) = expect_symbol state in
