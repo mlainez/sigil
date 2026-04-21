@@ -4,12 +4,12 @@
   (fn extract_param query_string string param_name string -> string
     (set parts array (split query_string "&"))
     (set i int 0)
-    (set len int (array_length parts))
+    (set len int (len parts))
     (set result string "")
     (while (lt i len)
       (set part string (array_get parts i))
       (set kv array (split part "="))
-      (set kv_len int (array_length kv))
+      (set kv_len int (len kv))
       (if (ge kv_len 2)
         (set key string (array_get kv 0))
         (set is_match bool (string_equals key param_name))
@@ -29,7 +29,7 @@
 
   (fn extract_query path string -> string
     (set parts array (split path "?"))
-    (set len int (array_length parts))
+    (set len int (len parts))
     (set query string "")
     (if (ge len 2)
       (set query string (array_get parts 1)))
@@ -37,7 +37,7 @@
 
   (fn parse_first_line req string -> string
     (set lines array (split req "\r\n"))
-    (set len int (array_length lines))
+    (set len int (len lines))
     (set first_line string "")
     (if (gt len 0)
       (set first_line string (array_get lines 0)))
@@ -45,7 +45,7 @@
 
   (fn extract_path first_line string -> string
     (set parts array (split first_line " "))
-    (set len int (array_length parts))
+    (set len int (len parts))
     (set path string "/")
     (if (ge len 2)
       (set path string (array_get parts 1)))
@@ -58,13 +58,13 @@
   (fn main -> int
     (set default_port string "3000")
     (set port_str string (getenv "HTTP_PORT"))
-    (if (eq (string_length port_str) 0)
+    (if (eq (len port_str) 0)
       (set port_str string default_port))
     (set http_port int (string_to_int port_str))
 
     (set default_host string "localhost")
     (set chat_host string (getenv "CHAT_HOST"))
-    (if (eq (string_length chat_host) 0)
+    (if (eq (len chat_host) 0)
       (set chat_host string default_host))
 
     (set chat_ws socket (ws_connect chat_host 8080 "/"))
@@ -86,7 +86,7 @@
       (array_push select_inputs http_server)
       (array_push select_inputs chat_ws)
 
-      (set client_count int (array_length http_clients))
+      (set client_count int (len http_clients))
       (set j int 0)
       (while (lt j client_count)
         (set http_client socket (array_get http_clients j))
@@ -94,7 +94,7 @@
         (set j int (add j 1)))
 
       (set ready array (socket_select select_inputs))
-      (set ready_len int (array_length ready))
+      (set ready_len int (len ready))
       (set k int 0)
 
       (while (lt k ready_len)
@@ -107,7 +107,7 @@
 
         (if (eq idx 1)
           (set ws_msg string (ws_receive chat_ws))
-          (set ws_msg_len int (string_length ws_msg))
+          (set ws_msg_len int (len ws_msg))
           (if (gt ws_msg_len 0)
             (array_push messages ws_msg)))
 
@@ -116,7 +116,7 @@
           (set http_client socket (array_get http_clients client_idx))
           (set prev_buffer string (array_get http_buffers client_idx))
           (set chunk string (tcp_receive http_client 4096))
-          (set chunk_len int (string_length chunk))
+          (set chunk_len int (len chunk))
 
           (set should_remove bool false)
 
@@ -155,8 +155,8 @@
               (if is_poll
                 (set last_str string (extract_param query "last"))
                 (set last_idx int 0)
-                (set msg_count int (array_length messages))
-                (if (gt (string_length last_str) 0)
+                (set msg_count int (len messages))
+                (if (gt (len last_str) 0)
                   (set last_idx int (string_to_int last_str)))
 
                 (set poll_body string "NONE")
@@ -180,7 +180,7 @@
               (array_set http_buffers client_idx new_buffer)))
 
           (if should_remove
-            (set last_idx int (sub (array_length http_clients) 1))
+            (set last_idx int (sub (len http_clients) 1))
             (if (ne client_idx last_idx)
               (set last_client socket (array_get http_clients last_idx))
               (array_set http_clients client_idx last_client)

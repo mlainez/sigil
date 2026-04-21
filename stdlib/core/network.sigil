@@ -10,7 +10,7 @@
     (ret path))
 
   (fn build_url host string port int path string -> string
-    (ret (string_format "http://{}:{}{}" host (string_from_int port) (normalize_path path))))
+    (ret (string_format "http://{}:{}{}" host (str port) (normalize_path path))))
 
   (fn build_query_string key1 string val1 string -> string
     (ret (string_format "{}={}" key1 val1)))
@@ -28,6 +28,6 @@
     (if (not (contains url "://"))
       (ret url))
     (set parts array (split url "://"))
-    (if (gt (array_length parts) 1)
+    (if (gt (len parts) 1)
       (ret (array_get parts 1)))
     (ret url)))

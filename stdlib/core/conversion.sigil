@@ -17,7 +17,7 @@
       (array_push digits (char_from_code (add 48 digit))))
 
     (set result string "")
-    (set i int (sub (array_length digits) 1))
+    (set i int (sub (len digits) 1))
     (while (ge i 0)
       (set result (string_concat result (array_get digits i)))
       (set i (sub i 1)))
@@ -34,13 +34,13 @@
       (set abs_f (sub 0.0 f)))
 
     (set int_part int (cast_float_int abs_f))
-    (set int_str string (string_from_int int_part))
+    (set int_str string (str int_part))
 
     (set float_part float (sub abs_f (cast_int_float int_part)))
     (set frac_part int (cast_float_int (mul float_part 1000.0)))
 
-    (set frac_str string (string_from_int frac_part))
-    (set frac_len int (string_length frac_str))
+    (set frac_str string (str frac_part))
+    (set frac_len int (len frac_str))
 
     (if (eq frac_len 1)
       (set frac_str (string_concat "00" frac_str)))

@@ -25,14 +25,14 @@
     (set output string (process_read db))
 
     (set results array (array_new))
-    (if (eq (string_length output) 0)
+    (if (eq (len output) 0)
       (ret results))
 
     (set lines array (split output "\n"))
-    (set len int (array_length lines))
-    (for i 0 len
+    (set num_lines int (len lines))
+    (for i 0 num_lines
       (set line string (array_get lines i))
-      (if (gt (string_length line) 0)
+      (if (gt (len line) 0)
         (array_push results (split line "|"))))
     (ret results))
 
@@ -44,7 +44,7 @@
 
   (fn get_schema db process table_name string -> string
     (set results array (query db (string_format "SELECT sql FROM sqlite_master WHERE name='{}'" table_name)))
-    (if (gt (array_length results) 0)
+    (if (gt (len results) 0)
       (ret (array_get (array_get results 0) 0)))
     (ret ""))
 

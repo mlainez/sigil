@@ -22,4 +22,4 @@
     (ret (string_split (file_read path) "\n")))
 
   (fn count_lines path string -> int
-    (ret (array_length (read_lines path)))))
+    (ret (len (read_lines path)))))

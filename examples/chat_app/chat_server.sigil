@@ -11,12 +11,12 @@
       (set select_inputs array (array_new))
       (array_push select_inputs server)
 
-      (set client_count int (array_length clients))
+      (set client_count int (len clients))
       (for j 0 client_count
         (array_push select_inputs (array_get clients j)))
 
       (set ready array (socket_select select_inputs))
-      (set ready_len int (array_length ready))
+      (set ready_len int (len ready))
 
       (for k 0 ready_len
         (set idx int (array_get ready k))
@@ -31,8 +31,8 @@
           (set client_idx int (sub idx 1))
           (set ws_client socket (array_get clients client_idx))
           (set msg string (ws_receive ws_client))
-          (if (gt (string_length msg) 0)
-            (set num_clients int (array_length clients))
+          (if (gt (len msg) 0)
+            (set num_clients int (len clients))
             (for m 0 num_clients
               (ws_send (array_get clients m) msg))))))
 

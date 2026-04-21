@@ -10,12 +10,12 @@
 
     (set url_no_proto string url)
     (if is_https
-      (set url_no_proto (string_slice url 8 (sub (string_length url) 8))))
+      (set url_no_proto (string_slice url 8 (sub (len url) 8))))
     (if (string_starts_with url "http://")
-      (set url_no_proto (string_slice url 7 (sub (string_length url) 7))))
+      (set url_no_proto (string_slice url 7 (sub (len url) 7))))
 
     (set slash_pos int -1)
-    (set url_len int (string_length url_no_proto))
+    (set url_len int (len url_no_proto))
     (for i 0 url_len
       (if (string_equals (string_slice url_no_proto i 1) "/")
         (set slash_pos i)
@@ -40,9 +40,9 @@
   (fn build_request method string host string path string body string -> string
     (set req string (string_format "{} {} HTTP/1.1\r\nHost: {}\r\nConnection: close\r\n" method path host))
 
-    (set body_len int (string_length body))
+    (set body_len int (len body))
     (if (gt body_len 0)
-      (set req (string_concat req (string_format "Content-Length: {}\r\n\r\n{}" (string_from_int body_len) body))))
+      (set req (string_concat req (string_format "Content-Length: {}\r\n\r\n{}" (str body_len) body))))
 
     (set req (string_concat req "\r\n"))
     (ret req))
@@ -51,7 +51,7 @@
     (set response map (map_new))
 
     (set header_end int -1)
-    (set raw_len int (string_length raw))
+    (set raw_len int (len raw))
     (for i 0 (sub raw_len 3)
       (if (string_equals (string_slice raw i 4) "\r\n\r\n")
         (set header_end i)
@@ -101,7 +101,7 @@
     (ret (parse_response raw)))
 
   (fn get_status_text code int -> string
-    (set code_str string (string_from_int code))
+    (set code_str string (str code))
     (cond
       ((eq code 200) (ret (string_concat code_str " OK")))
       ((eq code 201) (ret (string_concat code_str " Created")))

@@ -16,7 +16,7 @@
     (ret -1))
 
   (fn base64_encode data string -> string
-    (set data_len int (string_length data))
+    (set data_len int (len data))
     (set result string "")
     (set i int 0)
 
@@ -57,7 +57,7 @@
     (ret result))
 
   (fn base64_decode encoded string -> string
-    (set encoded_len int (string_length encoded))
+    (set encoded_len int (len encoded))
     (set result string "")
     (set i int 0)
 

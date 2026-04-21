@@ -3,7 +3,7 @@
 
   (fn xor_pad key_bytes string pad_byte int block_size int -> string
     (set result string "")
-    (set key_len int (string_length key_bytes))
+    (set key_len int (len key_bytes))
     (for i 0 block_size
       (set key_byte int 0)
       (if (lt i key_len)
@@ -15,7 +15,7 @@
     (set block_size int 64)
     (set key_bytes string key)
 
-    (set key_len int (string_length key_bytes))
+    (set key_len int (len key_bytes))
     (if (gt key_len block_size)
       (set hashed string (sha256 key_bytes))
       (set key_bytes "")
@@ -45,7 +45,7 @@
     (ret 0))
 
   (fn hex_to_int hex_str string -> int
-    (set len int (string_length hex_str))
+    (set len int (len hex_str))
     (set result int 0)
     (for i 0 len
       (set result (add (mul result 16) (hex_char_to_int (string_get hex_str i)))))

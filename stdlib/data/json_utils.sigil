@@ -1,15 +1,14 @@
 (module json_utils
   (fn skip_whitespace text string pos int -> int
-    (set len int (string_length text))
-    (while (lt pos len)
-      (set ch int (string_get text pos))
-      (if (not (or (eq ch 32) (or (eq ch 9) (or (eq ch 10) (eq ch 13)))))
+    (set text_len int (len text))
+    (while (lt pos text_len)
+      (if (not (is_whitespace (string_get text pos)))
         (break))
       (set pos (add pos 1)))
     (ret pos))
 
   (fn parse_string text string pos int -> map
-    (set len int (string_length text))
+    (set len int (len text))
     (set result string "")
     (set pos (add pos 1))
 
@@ -35,7 +34,7 @@
     (ret err))
 
   (fn parse_number text string pos int -> map
-    (set len int (string_length text))
+    (set len int (len text))
     (set num_str string "")
 
     (while (lt pos len)
@@ -156,7 +155,7 @@
   (fn json_stringify value map -> string
     (set result string "{")
     (set keys array (map_keys value))
-    (set len int (array_length keys))
+    (set len int (len keys))
     (for i 0 len
       (set key string (array_get keys i))
       (set result (string_concat result (string_format "\"{}\":\"{}\"" key (map_get value key))))
@@ -181,7 +180,7 @@
     (ret arr))
 
   (fn json_length value array -> int
-    (ret (array_length value)))
+    (ret (len value)))
 
   (fn json_type value map -> string
     (if (map_has value "type")
@@ -216,7 +215,7 @@
 
   (fn array_to_string arr array -> string
     (set result string "[")
-    (set len int (array_length arr))
+    (set len int (len arr))
     (for i 0 len
       (set result (string_concat result (string_format "\"{}\"" (array_get arr i))))
       (if (lt i (sub len 1))

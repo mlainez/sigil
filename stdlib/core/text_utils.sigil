@@ -6,7 +6,7 @@
     (ret result))
 
   (fn pad_left text string width int pad_char string -> string
-    (set len int (string_length text))
+    (set len int (len text))
     (set result string text)
     (while (lt len width)
       (set result (string_concat pad_char result))
@@ -14,7 +14,7 @@
     (ret result))
 
   (fn pad_right text string width int pad_char string -> string
-    (set len int (string_length text))
+    (set len int (len text))
     (set result string text)
     (while (lt len width)
       (set result (string_concat result pad_char))
@@ -22,15 +22,15 @@
     (ret result))
 
   (fn truncate text string max_len int -> string
-    (if (gt (string_length text) max_len)
+    (if (gt (len text) max_len)
       (ret (string_slice text 0 max_len)))
     (ret text))
 
   (fn word_count text string -> int
-    (ret (array_length (string_split text " "))))
+    (ret (len (string_split text " "))))
 
   (fn reverse_string text string -> string
-    (set len int (string_length text))
+    (set len int (len text))
     (set result string "")
     (set i int (sub len 1))
     (while (ge i 0)
@@ -39,4 +39,4 @@
     (ret result))
 
   (fn is_empty text string -> bool
-    (ret (eq (string_length text) 0))))
+    (ret (eq (len text) 0))))

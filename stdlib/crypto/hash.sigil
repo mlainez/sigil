@@ -60,7 +60,7 @@
     (ret result))
 
   (fn sha256_pad msg string -> array
-    (set msg_len int (string_length msg))
+    (set msg_len int (len msg))
     (set bit_len int (mul msg_len 8))
 
     (set padded string (string_concat msg (char_from_code 128)))
@@ -76,7 +76,7 @@
       (set padded (string_concat padded (char_from_code (bit_and (bit_shift_right bit_len (mul i 8)) 255))))
       (set i (sub i 1)))
 
-    (set num_blocks int (div (string_length padded) 64))
+    (set num_blocks int (div (len padded) 64))
     (set blocks array (array_new))
 
     (for blk 0 num_blocks
@@ -95,7 +95,7 @@
 
   (fn sha256 msg string -> string
     (set blocks array (sha256_pad msg))
-    (set num_blocks int (array_length blocks))
+    (set num_blocks int (len blocks))
 
     (set h0 int 1779033703)
     (set h1 int 3144134277)
@@ -205,7 +205,7 @@
     (ret (array_get k_vals idx)))
 
   (fn md5 msg string -> string
-    (set msg_len int (string_length msg))
+    (set msg_len int (len msg))
     (set bit_len int (mul msg_len 8))
 
     (set padded string (string_concat msg (char_from_code 128)))
@@ -219,7 +219,7 @@
     (for i 0 8
       (set padded (string_concat padded (char_from_code (bit_and (bit_shift_right bit_len (mul i 8)) 255)))))
 
-    (set num_blocks int (div (string_length padded) 64))
+    (set num_blocks int (div (len padded) 64))
 
     (set a0 int 1732584193)
     (set b0 int 4023233417)
