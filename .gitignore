@@ -9,3 +9,4 @@ interpreter/_build/
 
 # local databases
 *.db
+benchmark/.env
