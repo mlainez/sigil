@@ -1,0 +1,114 @@
+(module test_stdlib_rewrites
+  (import string_utils)
+  (import array_utils)
+  (import math_extended)
+  (import validation)
+  (import text_utils)
+  (import network)
+
+  (fn test_trim_whitespace text string -> string
+    (ret (trim text)))
+
+  (test-spec test_trim_whitespace
+    (case "trims spaces"
+      (input "  hello  ")
+      (expect "hello"))
+    (case "trims tabs and newlines"
+      (input "\t\nhello\n\t")
+      (expect "hello"))
+    (case "no-op on clean string"
+      (input "hello")
+      (expect "hello")))
+
+  (fn test_to_upper_lower text string -> string
+    (ret (to_upper text)))
+
+  (test-spec test_to_upper_lower
+    (case "uppercase"
+      (input "hello")
+      (expect "HELLO")))
+
+  (fn test_array_sum_via_for arr array len int -> int
+    (ret (array_sum arr len)))
+
+  (test-spec test_array_sum_via_for
+    (case "sum of [1,2,3,4,5]"
+      (input [1 2 3 4 5] 5)
+      (expect 15))
+    (case "sum of empty"
+      (input [] 0)
+      (expect 0)))
+
+  (fn test_array_find_via_for arr array target int len int -> int
+    (ret (array_find arr target len)))
+
+  (test-spec test_array_find_via_for
+    (case "finds 3 at index 2"
+      (input [1 2 3 4 5] 3 5)
+      (expect 2))
+    (case "returns -1 when not found"
+      (input [1 2 3] 99 3)
+      (expect -1)))
+
+  (fn test_clamp x int -> int
+    (ret (clamp x 0 100)))
+
+  (test-spec test_clamp
+    (case "clamps below min"
+      (input -5)
+      (expect 0))
+    (case "clamps above max"
+      (input 200)
+      (expect 100))
+    (case "in range passes through"
+      (input 50)
+      (expect 50)))
+
+  (fn test_in_range x int -> bool
+    (ret (in_range x 1 10)))
+
+  (test-spec test_in_range
+    (case "5 in [1,10]"
+      (input 5)
+      (expect true))
+    (case "0 not in [1,10]"
+      (input 0)
+      (expect false))
+    (case "10 in [1,10]"
+      (input 10)
+      (expect true)))
+
+  (fn test_repeat_string text string count int -> string
+    (ret (repeat_string text count)))
+
+  (test-spec test_repeat_string
+    (case "repeat abc 3 times"
+      (input "abc" 3)
+      (expect "abcabcabc"))
+    (case "repeat 0 times"
+      (input "abc" 0)
+      (expect "")))
+
+  (fn test_is_valid_port port int -> bool
+    (ret (is_valid_port port)))
+
+  (test-spec test_is_valid_port
+    (case "port 80 valid"
+      (input 80)
+      (expect true))
+    (case "port 0 invalid"
+      (input 0)
+      (expect false))
+    (case "port 70000 invalid"
+      (input 70000)
+      (expect false)))
+
+  (fn test_build_url -> string
+    (ret (build_url "localhost" 8080 "/api")))
+
+  (test-spec test_build_url
+    (case "builds correct URL"
+      (input)
+      (expect "http://localhost:8080/api")))
+
+  (meta-note "Tests rewritten stdlib modules using for loops, type-free set, and string_format"))

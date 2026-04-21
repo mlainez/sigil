@@ -1,0 +1,102 @@
+(module test_typefree_set_edge
+  (fn decimal_reassign -> decimal
+    (set d decimal 10.5d)
+    (set d (add d 1.5d))
+    (ret d))
+
+  (test-spec decimal_reassign
+    (case "decimal add without type"
+      (input)
+      (expect 12d)))
+
+  (fn map_reassign -> string
+    (set m map {"name" "Alice"})
+    (map_set m "name" "Bob")
+    (ret (map_get m "name")))
+
+  (test-spec map_reassign
+    (case "map value updated"
+      (input)
+      (expect "Bob")))
+
+  (fn reassign_in_if flag bool -> int
+    (set x int 0)
+    (if flag
+      (set x 42))
+    (ret x))
+
+  (test-spec reassign_in_if
+    (case "reassign in true branch"
+      (input true)
+      (expect 42))
+    (case "no reassign in false branch"
+      (input false)
+      (expect 0)))
+
+  (fn reassign_in_if_else flag bool -> string
+    (set s string "init")
+    (if flag
+      (set s "yes")
+      (else
+        (set s "no")))
+    (ret s))
+
+  (test-spec reassign_in_if_else
+    (case "true branch"
+      (input true)
+      (expect "yes"))
+    (case "false branch"
+      (input false)
+      (expect "no")))
+
+  (fn typefree_in_for -> int
+    (set total int 0)
+    (for i 0 5
+      (set total (add total (mul i i))))
+    (ret total))
+
+  (test-spec typefree_in_for
+    (case "sum of squares 0+1+4+9+16=30"
+      (input)
+      (expect 30)))
+
+  (fn undeclared_var_panics -> string
+    (try
+      (set nonexistent (add 1 2))
+      (ret "no error")
+      (catch err string
+        (ret "caught"))))
+
+  (test-spec undeclared_var_panics
+    (case "type-free set on undeclared variable is caught"
+      (input)
+      (expect "caught")))
+
+  (fn type_mismatch_panics -> string
+    (set x int 10)
+    (try
+      (set x "hello")
+      (ret "no error")
+      (catch err string
+        (ret "caught"))))
+
+  (test-spec type_mismatch_panics
+    (case "assigning string to int variable is caught"
+      (input)
+      (expect "caught")))
+
+  (fn multiple_reassigns -> int
+    (set a int 1)
+    (set b int 2)
+    (set c int 3)
+    (set a (add a b))
+    (set b (add b c))
+    (set c (add a b))
+    (ret c))
+
+  (test-spec multiple_reassigns
+    (case "a=3, b=5, c=8"
+      (input)
+      (expect 8)))
+
+  (meta-note "Edge case tests for type-free set including error cases"))

@@ -1,20 +1,77 @@
 (module test_for_loop
-  (fn sum_recursive start int end int -> int
-    (if (ge start end)
-      (ret 0))
-    (set next int (add start 1))
-    (set rest int (sum_recursive next end))
-    (ret (add start rest)))
-  
-  (test-spec sum_recursive
-    (case "sum 0 to 10"
-      (input 0 10)
-      (expect 45))
-    (case "sum 1 to 5"
-      (input 1 5)
+  (fn sum_range start int end_val int -> int
+    (set total int 0)
+    (for i start end_val
+      (set total (add total i)))
+    (ret total))
+
+  (test-spec sum_range
+    (case "sum 0 to 5 exclusive"
+      (input 0 5)
       (expect 10))
-    (case "sum 0 to 0"
-      (input 0 0)
+    (case "sum 1 to 4 exclusive"
+      (input 1 4)
+      (expect 6))
+    (case "empty range when start equals end"
+      (input 5 5)
+      (expect 0))
+    (case "empty range when start greater than end"
+      (input 10 5)
       (expect 0)))
-  
-  (meta-note "Tests for-loop-like behavior using recursive summation with if statements"))
+
+  (fn count_iterations n int -> int
+    (set count int 0)
+    (for i 0 n
+      (set count (add count 1)))
+    (ret count))
+
+  (test-spec count_iterations
+    (case "10 iterations"
+      (input 10)
+      (expect 10))
+    (case "0 iterations"
+      (input 0)
+      (expect 0))
+    (case "1 iteration"
+      (input 1)
+      (expect 1)))
+
+  (fn for_with_break -> int
+    (set result int 0)
+    (for i 0 100
+      (if (eq i 5)
+        (break))
+      (set result (add result i)))
+    (ret result))
+
+  (test-spec for_with_break
+    (case "break at i=5, sum 0+1+2+3+4=10"
+      (input)
+      (expect 10)))
+
+  (fn for_with_continue -> int
+    (set total int 0)
+    (for i 0 10
+      (if (eq (mod i 2) 1)
+        (continue))
+      (set total (add total i)))
+    (ret total))
+
+  (test-spec for_with_continue
+    (case "sum even numbers 0-9: 0+2+4+6+8=20"
+      (input)
+      (expect 20)))
+
+  (fn nested_for -> int
+    (set total int 0)
+    (for i 0 3
+      (for j 0 3
+        (set total (add total 1))))
+    (ret total))
+
+  (test-spec nested_for
+    (case "3x3 nested loop = 9 iterations"
+      (input)
+      (expect 9)))
+
+  (meta-note "Tests for counting for-loop construct"))

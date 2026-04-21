@@ -1,0 +1,73 @@
+(module test_typefree_set
+  (fn counter_update -> int
+    (set x int 0)
+    (set x (add x 1))
+    (set x (add x 1))
+    (set x (add x 1))
+    (ret x))
+
+  (test-spec counter_update
+    (case "three increments from 0"
+      (input)
+      (expect 3)))
+
+  (fn string_reassign -> string
+    (set s string "hello")
+    (set s (string_concat s " world"))
+    (ret s))
+
+  (test-spec string_reassign
+    (case "concat without type"
+      (input)
+      (expect "hello world")))
+
+  (fn mixed_types -> int
+    (set a int 10)
+    (set b float 3.14)
+    (set a (add a 5))
+    (set b (add b 1.0))
+    (ret a))
+
+  (test-spec mixed_types
+    (case "int reassign after float declaration"
+      (input)
+      (expect 15)))
+
+  (fn array_reassign -> int
+    (set arr array [1 2 3])
+    (array_push arr 4)
+    (set len int (array_length arr))
+    (ret len))
+
+  (test-spec array_reassign
+    (case "array after push has length 4"
+      (input)
+      (expect 4)))
+
+  (fn loop_with_typefree n int -> int
+    (set total int 0)
+    (set i int 0)
+    (while (lt i n)
+      (set total (add total i))
+      (set i (add i 1)))
+    (ret total))
+
+  (test-spec loop_with_typefree
+    (case "sum 0..4 = 10"
+      (input 5)
+      (expect 10))
+    (case "sum 0..0 = 0"
+      (input 0)
+      (expect 0)))
+
+  (fn bool_reassign -> bool
+    (set flag bool true)
+    (set flag false)
+    (ret flag))
+
+  (test-spec bool_reassign
+    (case "flip from true to false"
+      (input)
+      (expect false)))
+
+  (meta-note "Tests type-free reassignment of already-declared variables"))
