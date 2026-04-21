@@ -1637,6 +1637,140 @@ and eval_block env exprs =
        let count = max 0 (Array.length Sys.argv - 2) in
        VInt (Int64.of_int count)
 
+   | "arg_int" ->
+       (match arg_vals with
+        | [VInt n] ->
+            let i = Int64.to_int n in
+            let args = Array.to_list Sys.argv in
+            let script_args = (match args with _ :: _ :: rest -> rest | _ -> []) in
+            let arr = Array.of_list script_args in
+            if i < 0 || i >= Array.length arr then
+              raise (RuntimeError ("arg_int: index " ^ string_of_int i ^ " out of bounds"))
+            else VInt (Int64.of_string arr.(i))
+        | _ -> raise (RuntimeError "arg_int takes 1 int argument"))
+
+   | "arg_str" ->
+       (match arg_vals with
+        | [VInt n] ->
+            let i = Int64.to_int n in
+            let args = Array.to_list Sys.argv in
+            let script_args = (match args with _ :: _ :: rest -> rest | _ -> []) in
+            let arr = Array.of_list script_args in
+            if i < 0 || i >= Array.length arr then
+              raise (RuntimeError ("arg_str: index " ^ string_of_int i ^ " out of bounds"))
+            else VString arr.(i)
+        | _ -> raise (RuntimeError "arg_str takes 1 int argument"))
+
+   | "arg_float" ->
+       (match arg_vals with
+        | [VInt n] ->
+            let i = Int64.to_int n in
+            let args = Array.to_list Sys.argv in
+            let script_args = (match args with _ :: _ :: rest -> rest | _ -> []) in
+            let arr = Array.of_list script_args in
+            if i < 0 || i >= Array.length arr then
+              raise (RuntimeError ("arg_float: index " ^ string_of_int i ^ " out of bounds"))
+            else VFloat (float_of_string arr.(i))
+        | _ -> raise (RuntimeError "arg_float takes 1 int argument"))
+
+   | "str" ->
+       (match arg_vals with
+        | [VInt n] -> VString (Int64.to_string n)
+        | [VFloat f] -> VString (string_of_float f)
+        | [VBool b] -> VString (if b then "true" else "false")
+        | [VDecimal s] -> VString s
+        | [VString s] -> VString s
+        | _ -> raise (RuntimeError "str takes 1 argument (int, float, bool, decimal, or string)"))
+
+   | "len" ->
+       (match arg_vals with
+        | [VString s] -> VInt (Int64.of_int (String.length s))
+        | [VArray arr] -> VInt (Int64.of_int (Array.length !arr))
+        | [VMap (m, _)] -> VInt (Int64.of_int (Hashtbl.length m))
+        | _ -> raise (RuntimeError "len takes 1 argument (string, array, or map)"))
+
+   | "string_chars" ->
+       (match arg_vals with
+        | [VString s] ->
+            let n = String.length s in
+            let chars = List.init n (fun i -> VString (String.make 1 s.[i])) in
+            VArray (ref (Array.of_list chars))
+        | _ -> raise (RuntimeError "string_chars takes 1 string argument"))
+
+   | "is_digit" ->
+       (match arg_vals with
+        | [VInt code] ->
+            let c = Int64.to_int code in
+            VBool (c >= 48 && c <= 57)
+        | [VString s] when String.length s = 1 ->
+            let c = Char.code s.[0] in
+            VBool (c >= 48 && c <= 57)
+        | _ -> raise (RuntimeError "is_digit takes 1 argument (int char code or single-char string)"))
+
+   | "is_alpha" ->
+       (match arg_vals with
+        | [VInt code] ->
+            let c = Int64.to_int code in
+            VBool ((c >= 65 && c <= 90) || (c >= 97 && c <= 122))
+        | [VString s] when String.length s = 1 ->
+            let c = Char.code s.[0] in
+            VBool ((c >= 65 && c <= 90) || (c >= 97 && c <= 122))
+        | _ -> raise (RuntimeError "is_alpha takes 1 argument (int char code or single-char string)"))
+
+   | "is_upper" ->
+       (match arg_vals with
+        | [VInt code] ->
+            let c = Int64.to_int code in
+            VBool (c >= 65 && c <= 90)
+        | [VString s] when String.length s = 1 ->
+            let c = Char.code s.[0] in
+            VBool (c >= 65 && c <= 90)
+        | _ -> raise (RuntimeError "is_upper takes 1 argument (int char code or single-char string)"))
+
+   | "is_lower" ->
+       (match arg_vals with
+        | [VInt code] ->
+            let c = Int64.to_int code in
+            VBool (c >= 97 && c <= 122)
+        | [VString s] when String.length s = 1 ->
+            let c = Char.code s.[0] in
+            VBool (c >= 97 && c <= 122)
+        | _ -> raise (RuntimeError "is_lower takes 1 argument (int char code or single-char string)"))
+
+   | "is_whitespace" ->
+       (match arg_vals with
+        | [VInt code] ->
+            let c = Int64.to_int code in
+            VBool (c = 9 || c = 10 || c = 13 || c = 32)
+        | [VString s] when String.length s = 1 ->
+            let c = Char.code s.[0] in
+            VBool (c = 9 || c = 10 || c = 13 || c = 32)
+        | _ -> raise (RuntimeError "is_whitespace takes 1 argument (int char code or single-char string)"))
+
+   | "to_upper_char" ->
+       (match arg_vals with
+        | [VInt code] ->
+            let c = Int64.to_int code in
+            if c >= 97 && c <= 122 then VInt (Int64.of_int (c - 32))
+            else VInt code
+        | [VString s] when String.length s = 1 ->
+            let c = Char.code s.[0] in
+            if c >= 97 && c <= 122 then VString (String.make 1 (Char.chr (c - 32)))
+            else VString s
+        | _ -> raise (RuntimeError "to_upper_char takes 1 argument (int char code or single-char string)"))
+
+   | "to_lower_char" ->
+       (match arg_vals with
+        | [VInt code] ->
+            let c = Int64.to_int code in
+            if c >= 65 && c <= 90 then VInt (Int64.of_int (c + 32))
+            else VInt code
+        | [VString s] when String.length s = 1 ->
+            let c = Char.code s.[0] in
+            if c >= 65 && c <= 90 then VString (String.make 1 (Char.chr (c + 32)))
+            else VString s
+        | _ -> raise (RuntimeError "to_lower_char takes 1 argument (int char code or single-char string)"))
+
    (* I/O *)
    | "print" ->
        (match arg_vals with
