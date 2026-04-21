@@ -242,7 +242,7 @@ You rarely write these directly - they're what Agent code desugars to:
 
 | Statement | Syntax | Purpose |
 |-----------|--------|---------|
-| `set` | `(set var type expr)` | Variable binding |
+| `set` | `(set var type expr)` or `(set var expr)` | Variable declaration / reassignment |
 | `call` | `(func arg1 arg2)` | Function invocation |
 | `label` | `(label name)` | Mark jump target |
 | `goto` | `(goto target)` | Unconditional jump |
@@ -266,7 +266,11 @@ Generate these - the interpreter handles them directly:
 
 ; While loop - iterate while condition holds
 (while (lt i 10)
-  (set i int (add i 1)))
+  (set i (add i 1)))
+
+; Counting for loop - prefer over while for index iteration
+(for i 0 10
+  (print i))
 
 ; For-each loop - iterate collections
 (for-each val int my_array
@@ -334,15 +338,18 @@ Generate these - the interpreter handles them directly:
 
 ### Type Annotations
 
-**Every variable must have an explicit type:**
+**Declaration requires type. Reassignment omits it:**
 
 ```lisp
-(set count int 0)              ; Integer counter
-(set price decimal 19.99)      ; Decimal price (financial precision)
-(set pi float 3.14159)         ; Float (scientific precision)
-(set name string "Alice")      ; String
-(set active bool true)         ; Boolean
+(set count int 0)              ; Declaration — type required
+(set price decimal 19.99)      ; Declaration
+(set name string "Alice")      ; Declaration
+
+(set count (add count 1))      ; Reassignment — type omitted
+(set name (string_concat name " Smith"))  ; Reassignment
 ```
+
+Using `(set var expr)` on an undeclared variable is a runtime error.
 
 **No implicit conversions - be explicit:**
 
@@ -640,41 +647,50 @@ stdlib/ (pure Sigil implementations):
 
 ## Control Flow Patterns
 
-### Pattern 1: While Loop
+### Pattern 1: Counting For Loop (preferred for index iteration)
+
+```lisp
+(fn sum_array arr array -> int
+  (set total int 0)
+  (set len int (array_length arr))
+  (for i 0 len
+    (set total (add total (array_get arr i))))
+  (ret total))
+```
+
+### Pattern 2: While Loop (condition-based)
 
 ```lisp
 (fn countdown n int -> int
   (while (gt n 0)
     (print n)
-    (set n int (sub n 1)))
+    (set n (sub n 1)))
   (ret 0))
 ```
 
-### Pattern 2: Infinite Loop with Break
+### Pattern 3: Infinite Loop with Break
 
 ```lisp
-(fn find_first arr string target int -> int
+(fn find_first arr array target int -> int
   (set i int 0)
   (loop
     (set val int (array_get arr i))
     (if (eq val target)
       (break))
-    (set i int (add i 1)))
+    (set i (add i 1)))
   (ret i))
 ```
 
-### Pattern 3: Skip with Continue
+### Pattern 4: Skip with Continue
 
 ```lisp
-(fn count_positive arr string len int -> int
-  (set i int 0)
+(fn count_positive arr array len int -> int
   (set count int 0)
-  (while (lt i len)
+  (for i 0 len
     (set val int (array_get arr i))
-    (set i int (add i 1))
     (if (le val 0)
       (continue))
-    (set count int (add count 1)))
+    (set count (add count 1)))
   (ret count))
 ```
 
@@ -705,14 +721,12 @@ stdlib/ (pure Sigil implementations):
 ### Accumulator Pattern
 
 ```lisp
-(fn sum arr string n int -> int
-  (set sum int 0)
-  (set i int 0)
-  (while (lt i n)
+(fn sum arr array n int -> int
+  (set total int 0)
+  (for i 0 n
     (set val int (array_get arr i))
-    (set sum int (add sum val))
-    (set i int (add i 1)))
-  (ret sum))
+    (set total (add total val)))
+  (ret total))
 ```
 
 ### Recursive Pattern
@@ -721,63 +735,52 @@ stdlib/ (pure Sigil implementations):
 (fn factorial n int -> int
   (if (eq n 0)
     (ret 1))
-  (set n_minus_1 int (sub n 1))
-  (set result int (factorial n_minus_1))
-  (ret (mul n result)))
+  (set prev int (factorial (sub n 1)))
+  (ret (mul n prev)))
 ```
 
 ### Search Pattern
 
 ```lisp
-(fn find arr string target int len int -> int
-  (set i int 0)
-  (while (lt i len)
+(fn find arr array target int len int -> int
+  (for i 0 len
     (set val int (array_get arr i))
     (if (eq val target)
-      (ret i))
-    (set i int (add i 1)))
-  (ret -1))  ; Not found
+      (ret i)))
+  (ret -1))
 ```
 
 ### Filter Pattern
 
 ```lisp
-(fn filter_evens arr string len int -> string
-  (set result string (array_new))
-  (set i int 0)
-  (while (lt i len)
+(fn filter_evens arr array len int -> array
+  (set result array (array_new))
+  (for i 0 len
     (set val int (array_get arr i))
-    (set remainder int (mod val 2))
-    (set is_even bool (eq remainder 0))
-    (if is_even
-      (array_push result val))
-    (set i int (add i 1)))
+    (if (eq (mod val 2) 0)
+      (array_push result val)))
   (ret result))
 ```
 
 ### Financial Calculation Pattern (Decimal Type)
 
 ```lisp
-(fn calculate_total prices string tax_rate decimal -> decimal
+(fn calculate_total prices array tax_rate decimal -> decimal
   (set total decimal (cast_int_decimal 0))
-  (set i int 0)
   (set len int (array_length prices))
-  (while (lt i len)
+  (for i 0 len
     (set price decimal (array_get prices i))
-    (set total decimal (add total price))
-    (set i int (add i 1)))
-  
-  ; Apply tax
+    (set total (add total price)))
   (set tax decimal (mul total tax_rate))
   (set total_with_tax decimal (add total tax))
   (ret total_with_tax))
 
 (fn main -> int
-  (set prices string (array_new))
+  (set prices array (array_new))
   (array_push prices (cast_float_decimal 19.99))
   (array_push prices (cast_float_decimal 29.99))
   
-  (set tax_rate decimal (cast_float_decimal 0.08))  ; 8% tax
+  (set tax_rate decimal (cast_float_decimal 0.08))
   (set total decimal (calculate_total prices tax_rate))
   
   (print "Total with tax: ")

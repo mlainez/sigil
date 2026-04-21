@@ -92,14 +92,19 @@ Test files using the `test-spec` framework don't require a `main` function.
 
 ### Type Annotations
 
-Variables must be explicitly typed:
+Variable declarations must be explicitly typed. Reassignments can omit the type:
 
 ```scheme
 (set count int 42)
 (set name string "Alice")
 (set active bool true)
 (set price float 19.99)
+
+(set count (add count 1))    ; reassignment — type omitted, inferred from existing variable
+(set name (string_concat name " Smith"))  ; reassignment
 ```
+
+Rule: `(set var type expr)` for first declaration, `(set var expr)` for reassignment. Using `(set var expr)` on an undeclared variable is a runtime error.
 
 ---
 
@@ -225,6 +230,22 @@ Executes forever. Use for server loops.
     (set sum int (add sum val)))
   (ret sum))
 ```
+
+### Counting For Loop
+
+**For**: `(for <var> <start> <end> <statements>...)`
+
+Iterates `var` from `start` (inclusive) to `end` (exclusive), incrementing by 1. Both must be integers. Prefer `for` over `while` for index-based iteration.
+
+```scheme
+(fn sum_range n int -> int
+  (set total int 0)
+  (for i 0 n
+    (set total (add total i)))
+  (ret total))
+```
+
+Supports `break` and `continue`. Empty range (start >= end) executes zero iterations.
 
 ### For-Each Loop
 

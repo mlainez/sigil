@@ -193,13 +193,14 @@ Example:
 These constructs are **Sigil-Agent** features that desugar to Core:
 - `while` loops
 - `loop` (infinite loops)
+- `for` counting loops (`(for var start end body...)`)
 - `break` statements
 - `continue` statements
 - `if/else` conditionals
 - `for-each` iteration
 - `and`/`or` short-circuit boolean operators
-- `match` expressions
-- `for` loops
+- Type-free `set` reassignment (`(set var expr)` when var already declared)
+- `match` expressions (planned)
 
 See SIGIL-AGENT.md for Agent layer specification.
 
@@ -212,7 +213,7 @@ See SIGIL-AGENT.md for Agent layer specification.
 - **Types**: `interpreter/types.ml` — Type kind definitions
 - **Entry Point**: `interpreter/vm.ml` — Reads file, tokenizes, parses, executes
 
-The interpreter handles Agent constructs (while, loop, break, continue, if, if-else, for-each, and, or) directly during evaluation — there is no separate desugaring pass or bytecode compilation step.
+The interpreter handles Agent constructs (while, loop, for, break, continue, if, if-else, for-each, and, or, type-free set) directly during evaluation — there is no separate desugaring pass or bytecode compilation step.
 
 ## Version History
 

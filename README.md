@@ -146,6 +146,7 @@ process  ; Process handle (for DB, subprocesses)
 ```lisp
 (while condition statements...)   ; While loop
 (loop statements...)              ; Infinite loop
+(for var start end statements...) ; Counting loop [start, end)
 (if condition statements...)      ; Conditional
 (if condition then... (else ...)) ; If-else conditional
 (for-each var type collection     ; For-each iteration
@@ -265,6 +266,22 @@ All stdlib modules are implemented **in pure Sigil**, not native code. This enfo
     (ret 0)))
 ```
 
+### Counting For Loop
+
+```lisp
+(module for_demo
+  (fn sum_range n int -> int
+    (set total int 0)
+    (for i 0 n
+      (set total (add total i)))
+    (ret total))
+
+  (fn main -> int
+    (set result int (sum_range 10))
+    (print result)  ; Prints: 45
+    (ret 0)))
+```
+
 ### For-Each Loop
 
 ```lisp
@@ -272,14 +289,11 @@ All stdlib modules are implemented **in pure Sigil**, not native code. This enfo
   (fn sum_array arr array -> int
     (set total int 0)
     (for-each val int arr
-      (set total int (add total val)))
+      (set total (add total val)))
     (ret total))
 
   (fn main -> int
-    (set nums array (array_new))
-    (array_push nums 10)
-    (array_push nums 20)
-    (array_push nums 30)
+    (set nums array [10 20 30])
     (set result int (sum_array nums))
     (print result)  ; Prints: 60
     (ret 0)))

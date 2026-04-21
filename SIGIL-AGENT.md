@@ -359,10 +359,48 @@ Agent constructs should be tested via the test framework:
       (expect 10))))
 ```
 
+### 10. `for` - Counting loop
+
+```lisp
+(for var start end body...)
+```
+
+Iterates `var` from `start` (inclusive) to `end` (exclusive), incrementing by 1 each iteration. Both `start` and `end` must evaluate to integers.
+
+Semantically equivalent to:
+```lisp
+(set var int start)
+(while (lt var end)
+  body...
+  (set var int (add var 1)))
+```
+
+Example:
+```lisp
+(fn sum_range n int -> int
+  (set total int 0)
+  (for i 0 n
+    (set total (add total i)))
+  (ret total))
+```
+
+Supports `break` and `continue`. Prefer `for` over `while` for index-based iteration.
+
+### 11. Type-free reassignment
+
+When a variable has already been declared with a type, subsequent reassignments can omit the type:
+
+```lisp
+(set x int 0)       ; declaration — type required
+(set x (add x 1))   ; reassignment — type omitted, inferred from existing variable
+(set x (add x 1))   ; reassignment again
+```
+
+Rule: use `(set var type expr)` for first declaration, `(set var expr)` for reassignment. Using `(set var expr)` on an undeclared variable is a runtime error.
+
 ## Future Extensions
 
 Potential Agent constructs to add:
-- `for` loops with ranges
 - `match` expressions (pattern matching)
 - `defer` statements
 - List comprehensions
@@ -380,9 +418,11 @@ All future extensions will be evaluated directly by the interpreter — Core rem
 | `continue` | Implemented | interpreter.ml — Continue exception |
 | `if/else` | Implemented | interpreter.ml — eval/eval_block |
 | `cond` | Implemented | interpreter.ml — eval/eval_block |
+| `for` | Implemented | interpreter.ml — eval (counting loop) |
 | `for-each` | Implemented | interpreter.ml — eval/eval_block |
 | `and/or` | Implemented | interpreter.ml — eval (short-circuit) |
 | `try/catch` | Implemented | interpreter.ml — eval/eval_block |
+| Type-free `set` | Implemented | interpreter.ml — eval (Set with None type) |
 
 ## Version History
 
@@ -393,4 +433,6 @@ All future extensions will be evaluated directly by the interpreter — Core rem
 - **v1.1** (2026-02-11): Updated to match implementation
   - Fixed all examples to use correct syntax (no `(call ...)`, flat params, lowercase types)
   - Documented if-else, cond, for-each, and/or, try/catch
-  - Updated implementation status table
+- **v1.2** (2026-04-21): Token optimization
+  - Added `for` counting loop (exclusive upper bound, int only)
+  - Added type-free reassignment: `(set var expr)` when variable already declared

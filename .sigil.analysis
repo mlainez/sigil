@@ -325,7 +325,44 @@ Run: ./interpreter/_build/default/vm.exe program.sigil
 
 Libraries: unix, str, ssl (OpenSSL bindings)
 
-No separate desugaring pass - interpreter handles Agent constructs (while, loop, if, if-else, for-each, break, continue, and, or) directly in eval_block.
+No separate desugaring pass - interpreter handles Agent constructs (while, loop, for, if, if-else, for-each, break, continue, and, or) directly in eval_block.
+
+@(for-counting-loop)
+
+**for counting loop iterates integer range [start, end)**
+
+Syntax: `(for var start end body...)`
+
+- `start` and `end` must evaluate to int
+- Exclusive upper bound (matches `lt` semantics)
+- Step is always 1, ascending only
+- Supports `break` and `continue`
+- Prefer `for` over `while` for index-based iteration
+
+Example:
+```
+(set total int 0)
+(for i 0 10
+  (set total (add total i)))
+```
+
+@(type-free-reassignment)
+
+**set without type for reassignment of existing variables**
+
+Syntax: `(set var expr)` — variable must already be declared with `(set var type expr)`
+
+- Parser checks if token after variable name is a type keyword
+- If type keyword present: `Set(name, Some type, expr)` — declaration
+- If no type keyword: `Set(name, None, expr)` — reassignment
+- Interpreter infers type from existing variable value at runtime
+- Runtime error if variable not previously declared
+
+Example:
+```
+(set x int 0)        ; declaration
+(set x (add x 1))    ; reassignment — type inferred from existing x
+```
 
 @(for-each-loop)
 

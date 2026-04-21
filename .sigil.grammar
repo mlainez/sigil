@@ -5,7 +5,7 @@
   (prog (module name imp* fn* test-spec* meta-note?))
   (imp (import name))
   (fn (fn name p* -> ty s*))
-  (s (set v ty e) | (f a*) | (ret e) | (while e s*) | (loop s*) | (if e s* (else s*)?) | (for-each v ty e s*) | (try s* (catch v ty s*)) | (cond (e s*)*) | (break) | (continue))
+  (s (set v ty e) | (set v e "reassign: v must exist") | (f a*) | (ret e) | (while e s*) | (loop s*) | (for v e e s* "counting loop, exclusive upper bound") | (if e s* (else s*)?) | (for-each v ty e s*) | (try s* (catch v ty s*)) | (cond (e s*)*) | (break) | (continue))
   (e lit | var | (f a*) | (and e e) | (or e e) | [e*] | {e*})
   (lit int | float | decimal-suffix | str | true | false)
   (ty int|float|decimal|bool|string|array|map|json|regex|process|socket|channel|unit))
@@ -177,13 +177,19 @@
   (try-catch "(try body... (catch var type handler...)) - catches RuntimeError, message bound as string"))
 @(ex
   (fn add a int b int -> int (ret (add a b)))
-  (fn fact n int -> int 
+  (fn fact n int -> int
     (if (eq n 0) (ret 1))
     (ret (mul n (fact (sub n 1)))))
+  (fn sum_for arr array -> int
+    (set s int 0)
+    (set len int (array_length arr))
+    (for i 0 len
+      (set s (add s (array_get arr i))))
+    (ret s))
   (fn sum_foreach arr array -> int
     (set s int 0)
     (for-each val int arr
-      (set s int (add s val)))
+      (set s (add s val)))
     (ret s))
   (set nums array [1 2 3 4 5])
   (set config map {"name" "Alice" "age" 30})
@@ -204,7 +210,7 @@
   (import-syntax "(import module_name) - auto-searches stdlib subdirs"))
 @(note
   (no-comments "Sigil has NO comment syntax - no ; // # or any other form")
-  (explicit-types "every variable must have type annotation: (set x int 0)")
+  (explicit-types "first declaration requires type: (set x int 0). Reassignment omits type: (set x (add x 1))")
   (no-implicit-conv "use cast_int_float etc - no auto-coercion")
   (type-dispatch "write (add x y) - interpreter infers add_int|add_float|add_decimal from x type")
   (module-keyword "use (module ...) NOT (mod ...) - mod is modulo")
@@ -215,6 +221,7 @@
   (entry-point "fn main -> int required for programs - test files with test-spec don't need main")
   (if-else "(if cond then... (else else...)) - else block optional, must be last")
   (cond-construct "(cond (cond1 body1...) (cond2 body2...) (true default...)) - flat multi-branch, replaces nested if-else")
+  (for-loop "(for var start end body...) - counting loop, i in [start, end), exclusive upper bound, int only")
   (for-each "(for-each var type collection body...) - iterates array elements or map keys")
   (try-catch "(try body... (catch var string handler...)) - catch type must be string")
   (no-closures "functions do NOT capture outer scope variables - pass all data as parameters")
@@ -222,6 +229,7 @@
   (and-or-special "and/or are AST-level short-circuit forms, NOT function calls")
   (decimal-type "arbitrary precision: 0.1 + 0.2 = 0.3 exactly - use for money")
   (decimal-suffix "19.99d creates decimal literal directly")
+  (prefer-string-format "use (string_format \"id:{} name:{}\" id name) over string_concat chains for multi-part strings")
   (print-polymorphic "(print x) works for int float bool string decimal array map")
   (run "./interpreter/_build/default/vm.exe program.sigil")
   (build "cd interpreter && eval $(opam env) && dune build"))
