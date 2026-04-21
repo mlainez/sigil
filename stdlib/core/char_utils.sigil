@@ -1,0 +1,24 @@
+(module char_utils
+  (fn is_vowel ch int -> bool
+    (set lower int ch)
+    (if (and (ge ch 65) (le ch 90))
+      (set lower (add ch 32)))
+    (ret (or (eq lower 97) (or (eq lower 101) (or (eq lower 105) (or (eq lower 111) (eq lower 117)))))))
+
+  (fn is_alphanumeric ch int -> bool
+    (ret (or (is_alpha ch) (is_digit ch))))
+
+  (fn is_hex_digit ch int -> bool
+    (ret (or (is_digit ch) (or (and (ge ch 65) (le ch 70)) (and (ge ch 97) (le ch 102))))))
+
+  (fn char_to_digit ch int -> int
+    (if (and (ge ch 48) (le ch 57))
+      (ret (sub ch 48)))
+    (ret -1))
+
+  (fn digit_to_char d int -> string
+    (if (and (ge d 0) (le d 9))
+      (ret (char_from_code (add d 48))))
+    (ret "?"))
+
+  (meta-note "Character utilities: is_vowel, is_alphanumeric, is_hex_digit, char_to_digit, digit_to_char. Uses builtins is_digit, is_alpha, is_upper, is_lower, is_whitespace, to_upper_char, to_lower_char."))

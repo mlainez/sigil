@@ -1,0 +1,81 @@
+(module encoding
+  (fn int_to_hex n int -> string
+    (if (eq n 0) (ret "0"))
+    (set is_neg bool (lt n 0))
+    (set x int (abs n))
+    (set hex_digits string "0123456789abcdef")
+    (set result string "")
+    (while (gt x 0)
+      (set result (string_concat (string_slice hex_digits (mod x 16) 1) result))
+      (set x (div x 16)))
+    (if is_neg
+      (set result (string_concat "-" result)))
+    (ret result))
+
+  (fn hex_to_int s string -> int
+    (set result int 0)
+    (set chars array (string_chars s))
+    (set n int (len chars))
+    (set start int 0)
+    (set is_neg bool false)
+    (if (and (gt n 0) (string_equals (array_get chars 0) "-"))
+      (set is_neg true)
+      (set start 1))
+    (for i start n
+      (set code int (string_get (array_get chars i) 0))
+      (set digit int 0)
+      (cond
+        ((is_digit code) (set digit (sub code 48)))
+        ((and (ge code 97) (le code 102)) (set digit (add (sub code 97) 10)))
+        ((and (ge code 65) (le code 70)) (set digit (add (sub code 65) 10))))
+      (set result (add (mul result 16) digit)))
+    (if is_neg (set result (neg result)))
+    (ret result))
+
+  (fn int_to_binary n int -> string
+    (if (eq n 0) (ret "0"))
+    (set is_neg bool (lt n 0))
+    (set x int (abs n))
+    (set result string "")
+    (while (gt x 0)
+      (if (eq (mod x 2) 1)
+        (set result (string_concat "1" result))
+        (else
+          (set result (string_concat "0" result))))
+      (set x (div x 2)))
+    (if is_neg
+      (set result (string_concat "-" result)))
+    (ret result))
+
+  (fn binary_to_int s string -> int
+    (set result int 0)
+    (set chars array (string_chars s))
+    (set n int (len chars))
+    (set start int 0)
+    (set is_neg bool false)
+    (if (and (gt n 0) (string_equals (array_get chars 0) "-"))
+      (set is_neg true)
+      (set start 1))
+    (for i start n
+      (set bit int 0)
+      (if (string_equals (array_get chars i) "1")
+        (set bit 1))
+      (set result (add (mul result 2) bit)))
+    (if is_neg (set result (neg result)))
+    (ret result))
+
+  (fn int_to_base n int base int -> string
+    (if (or (lt base 2) (gt base 36)) (ret ""))
+    (if (eq n 0) (ret "0"))
+    (set is_neg bool (lt n 0))
+    (set x int (abs n))
+    (set digits string "0123456789abcdefghijklmnopqrstuvwxyz")
+    (set result string "")
+    (while (gt x 0)
+      (set result (string_concat (string_slice digits (mod x base) 1) result))
+      (set x (div x base)))
+    (if is_neg
+      (set result (string_concat "-" result)))
+    (ret result))
+
+  (meta-note "Encoding: int_to_hex, hex_to_int, int_to_binary, binary_to_int, int_to_base"))

@@ -1,0 +1,65 @@
+(module number_theory
+  (fn is_prime n int -> bool
+    (if (le n 1) (ret false))
+    (if (le n 3) (ret true))
+    (if (eq (mod n 2) 0) (ret false))
+    (if (eq (mod n 3) 0) (ret false))
+    (set i int 5)
+    (while (le (mul i i) n)
+      (if (eq (mod n i) 0) (ret false))
+      (if (eq (mod n (add i 2)) 0) (ret false))
+      (set i (add i 6)))
+    (ret true))
+
+  (fn gcd a int b int -> int
+    (while (ne b 0)
+      (set temp int b)
+      (set b (mod a b))
+      (set a temp))
+    (ret a))
+
+  (fn lcm a int b int -> int
+    (if (eq a 0) (ret 0))
+    (if (eq b 0) (ret 0))
+    (ret (div (mul (abs a) (abs b)) (gcd a b))))
+
+  (fn factorial n int -> int
+    (if (le n 1) (ret 1))
+    (set result int 1)
+    (for i 2 (add n 1)
+      (set result (mul result i)))
+    (ret result))
+
+  (fn fibonacci n int -> int
+    (if (le n 0) (ret 0))
+    (if (eq n 1) (ret 1))
+    (set a int 0)
+    (set b int 1)
+    (for i 2 (add n 1)
+      (set temp int b)
+      (set b (add a b))
+      (set a temp))
+    (ret b))
+
+  (fn sum_digits n int -> int
+    (set x int (abs n))
+    (set total int 0)
+    (while (gt x 0)
+      (set total (add total (mod x 10)))
+      (set x (div x 10)))
+    (ret total))
+
+  (fn count_digits n int -> int
+    (if (eq n 0) (ret 1))
+    (set x int (abs n))
+    (set count int 0)
+    (while (gt x 0)
+      (set count (add count 1))
+      (set x (div x 10)))
+    (ret count))
+
+  (fn is_power_of_2 n int -> bool
+    (if (le n 0) (ret false))
+    (ret (eq (bit_and n (sub n 1)) 0)))
+
+  (meta-note "Number theory: is_prime, gcd, lcm, factorial, fibonacci, sum_digits, count_digits, is_power_of_2"))
