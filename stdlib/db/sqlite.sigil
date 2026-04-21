@@ -1,6 +1,6 @@
 (module sqlite
   (import string_utils)
-  
+
   (fn open path string -> process
     (set args array (array_new))
     (array_push args path)
@@ -10,92 +10,42 @@
     (process_write proc ".separator |\n")
     (process_read proc)
     (ret proc))
-  
+
   (fn close db process -> int
     (process_write db ".quit\n")
-    (set exit_code int (process_wait db))
-    (ret exit_code))
-  
+    (ret (process_wait db)))
+
   (fn exec db process sql string -> bool
-    (set sql_with_semi string (string_concat sql ";\n"))
-    (set written bool (process_write db sql_with_semi))
+    (set written bool (process_write db (string_concat sql ";\n")))
     (process_read db)
     (ret written))
-  
+
   (fn query db process sql string -> array
-    (set sql_with_semi string (string_concat sql ";\n"))
-    (process_write db sql_with_semi)
+    (process_write db (string_concat sql ";\n"))
     (set output string (process_read db))
-    (set output_len int (string_length output))
-    
+
     (set results array (array_new))
-    
-    (if (eq output_len 0)
+    (if (eq (string_length output) 0)
       (ret results))
-    
+
     (set lines array (split output "\n"))
-    (set i int 0)
     (set len int (array_length lines))
-    (while (lt i len)
+    (for i 0 len
       (set line string (array_get lines i))
-      (set line_len int (string_length line))
-      (if (gt line_len 0)
-        (set row array (split line "|"))
-        (array_push results row))
-      (set i int (add i 1)))
+      (if (gt (string_length line) 0)
+        (array_push results (split line "|"))))
     (ret results))
-  
+
   (fn execute_file db process filepath string -> bool
-    (set read_cmd string ".read ")
-    (set full_cmd string (string_concat read_cmd filepath))
-    (set cmd_with_newline string (string_concat full_cmd "\n"))
-    (set written bool (process_write db cmd_with_newline))
-    (ret written))
-  
+    (ret (process_write db (string_format ".read {}\n" filepath))))
+
   (fn get_tables db process -> array
-    (set sql string "SELECT name FROM sqlite_master WHERE type='table';")
-    (ret (query db sql)))
-  
+    (ret (query db "SELECT name FROM sqlite_master WHERE type='table'")))
+
   (fn get_schema db process table_name string -> string
-    (set sql_start string "SELECT sql FROM sqlite_master WHERE name='")
-    (set sql_mid string (string_concat sql_start table_name))
-    (set sql string (string_concat sql_mid "';"))
-    (set results array (query db sql))
-    (set count int (array_length results))
-    (if (gt count 0)
-      (set first_row array (array_get results 0))
-      (set schema string (array_get first_row 0))
-      (ret schema))
+    (set results array (query db (string_format "SELECT sql FROM sqlite_master WHERE name='{}'" table_name)))
+    (if (gt (array_length results) 0)
+      (ret (array_get (array_get results 0) 0)))
     (ret ""))
-  
-  (meta-note "Pure Sigil SQLite implementation using process spawning
-  
-  Implementation strategy:
-  - Spawns 'sqlite3 <database>' as a subprocess
-  - Communicates via stdin/stdout using Sigil process primitives
-  - Uses '.mode list' and '.separator |' for structured output
-  - Uses string_utils stdlib module for parsing output
-  
-  Advantages:
-  - 100% pure Sigil (no C code, no FFI complexity)
-  - Uses only Sigil process management primitives
-  - Eating our own dog food: demonstrates Sigil capabilities
-  - No memory management issues with opaque pointers
-  - Works with any system that has sqlite3 CLI installed
-  
-  API:
-  - open(path) -> db handle (process)
-  - close(db) -> exit code
-  - exec(db, sql) -> success boolean
-  - query(db, sql) -> array of row arrays
-  - execute_file(db, filepath) -> success boolean
-  - get_tables(db) -> array of table names
-  - get_schema(db, table_name) -> CREATE TABLE statement
-  
-  Example usage:
-    (import sqlite)
-     (set db process (open \"mydb.sqlite\"))
-    (exec db \"CREATE TABLE users(id INTEGER, name TEXT)\")
-    (exec db \"INSERT INTO users VALUES(1, 'Alice')\")
-    (set rows array (query db \"SELECT * FROM users\"))
-    (close db)"))
+
+  (meta-note "Pure Sigil SQLite implementation using process spawning"))

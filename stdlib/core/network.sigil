@@ -2,56 +2,32 @@
   (import string_utils)
 
   (fn is_valid_port port int -> bool
-    (set result bool false)
-    (set gt_zero bool (gt port 0))
-    (if gt_zero
-      (set lt_max bool (lt port 65536))
-      (set result bool lt_max))
-    (ret result))
+    (ret (and (gt port 0) (lt port 65536))))
 
   (fn normalize_path path string -> string
-    (set result string path)
-    (set starts_slash bool (contains path "/"))
-    (set needs_slash bool true)
-    (if starts_slash
-      (set needs_slash bool false))
-    (if needs_slash
-      (set result string (string_concat "/" path)))
-    (ret result))
+    (if (not (contains path "/"))
+      (ret (string_concat "/" path)))
+    (ret path))
 
   (fn build_url host string port int path string -> string
-    (set result string "http://")
-    (set result string (string_concat result host))
-    (set result string (string_concat result ":"))
-    (set port_str string (string_from_int port))
-    (set result string (string_concat result port_str))
-    (set norm_path string (normalize_path path))
-    (set result string (string_concat result norm_path))
-    (ret result))
+    (ret (string_format "http://{}:{}{}" host (string_from_int port) (normalize_path path))))
 
   (fn build_query_string key1 string val1 string -> string
-    (set result string key1)
-    (set result string (string_concat result "="))
-    (set result string (string_concat result val1))
-    (ret result))
+    (ret (string_format "{}={}" key1 val1)))
 
   (fn parse_url url string -> array
-    (set has_https bool (contains url "https://"))
     (set protocol string "http")
-    (if has_https
-      (set protocol string "https"))
+    (if (contains url "https://")
+      (set protocol "https"))
     (set parts array (array_new))
     (array_push parts protocol)
     (array_push parts url)
     (ret parts))
 
   (fn extract_domain url string -> string
-    (set has_proto bool (contains url "://"))
-    (set result string url)
-    (if has_proto
-      (set parts array (split url "://"))
-      (set len int (array_length parts))
-      (set has_parts bool (gt len 1))
-      (if has_parts
-        (set result string (array_get parts 1))))
-    (ret result)))
+    (if (not (contains url "://"))
+      (ret url))
+    (set parts array (split url "://"))
+    (if (gt (array_length parts) 1)
+      (ret (array_get parts 1)))
+    (ret url)))

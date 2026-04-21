@@ -1,112 +1,82 @@
 (module conversion
   (fn string_from_int n int -> string
+    (if (eq n 0)
+      (ret "0"))
+
     (set is_negative bool (lt n 0))
     (set abs_n int n)
     (if is_negative
-      (set abs_n int (sub 0 n)))
-    
-    (set is_zero bool (eq abs_n 0))
-    (if is_zero
-      (ret "0"))
-    
+      (set abs_n (sub 0 n)))
+
     (set digits array (array_new))
     (set remaining int abs_n)
-    
+
     (while (gt remaining 0)
       (set digit int (mod remaining 10))
-      (set remaining int (div remaining 10))
-      
-      (set digit_char string "0")
-      (if (eq digit 1) (set digit_char string "1"))
-      (if (eq digit 2) (set digit_char string "2"))
-      (if (eq digit 3) (set digit_char string "3"))
-      (if (eq digit 4) (set digit_char string "4"))
-      (if (eq digit 5) (set digit_char string "5"))
-      (if (eq digit 6) (set digit_char string "6"))
-      (if (eq digit 7) (set digit_char string "7"))
-      (if (eq digit 8) (set digit_char string "8"))
-      (if (eq digit 9) (set digit_char string "9"))
-      
-      (array_push digits digit_char))
-    
+      (set remaining (div remaining 10))
+      (array_push digits (char_from_code (add 48 digit))))
+
     (set result string "")
-    (set len int (array_length digits))
-    (set i int (sub len 1))
-    
+    (set i int (sub (array_length digits) 1))
     (while (ge i 0)
-      (set digit_str string (array_get digits i))
-      (set result string (string_concat result digit_str))
-      (set i int (sub i 1)))
-    
+      (set result (string_concat result (array_get digits i)))
+      (set i (sub i 1)))
+
     (if is_negative
-      (set result string (string_concat "-" result)))
-    
+      (set result (string_concat "-" result)))
+
     (ret result))
-  
+
   (fn string_from_float f float -> string
     (set is_negative bool (lt f 0.0))
     (set abs_f float f)
     (if is_negative
-      (set abs_f float (sub 0.0 f)))
-    
+      (set abs_f (sub 0.0 f)))
+
     (set int_part int (cast_float_int abs_f))
     (set int_str string (string_from_int int_part))
-    
+
     (set float_part float (sub abs_f (cast_int_float int_part)))
-    (set scaled float (mul float_part 1000.0))
-    (set frac_part int (cast_float_int scaled))
-    
-    (set result string int_str)
-    (set result string (string_concat result "."))
-    
+    (set frac_part int (cast_float_int (mul float_part 1000.0)))
+
     (set frac_str string (string_from_int frac_part))
     (set frac_len int (string_length frac_str))
-    
-    (if (lt frac_len 3)
-      (if (eq frac_len 1)
-        (set frac_str string (string_concat "00" frac_str)))
-      (if (eq frac_len 2)
-        (set frac_str string (string_concat "0" frac_str))))
-    
-    (set result string (string_concat result frac_str))
-    
+
+    (if (eq frac_len 1)
+      (set frac_str (string_concat "00" frac_str)))
+    (if (eq frac_len 2)
+      (set frac_str (string_concat "0" frac_str)))
+
+    (set result string (string_concat int_str (string_concat "." frac_str)))
+
     (if is_negative
-      (set result string (string_concat "-" result)))
-    
+      (set result (string_concat "-" result)))
+
     (ret result))
-  
+
   (fn string_from_bool b bool -> string
     (if b
       (ret "true"))
     (ret "false"))
-  
+
   (fn bool_to_int b bool -> int
     (if b
       (ret 1))
     (ret 0))
-  
+
   (fn int_to_bool n int -> bool
-    (set is_nonzero bool (ne n 0))
-    (ret is_nonzero))
-  
+    (ret (ne n 0)))
+
   (fn kilometers_to_miles km float -> float
-    (set miles_per_km float 0.621371)
-    (set result float (mul km miles_per_km))
-    (ret result))
-  
+    (ret (mul km 0.621371)))
+
   (fn miles_to_kilometers miles float -> float
-    (set km_per_mile float 1.60934)
-    (set result float (mul miles km_per_mile))
-    (ret result))
-  
+    (ret (mul miles 1.60934)))
+
   (fn celsius_to_fahrenheit c float -> float
-    (set scaled float (mul c 1.8))
-    (set result float (add scaled 32.0))
-    (ret result))
-  
+    (ret (add (mul c 1.8) 32.0)))
+
   (fn fahrenheit_to_celsius f float -> float
-    (set adjusted float (sub f 32.0))
-    (set result float (div adjusted 1.8))
-    (ret result))
-  
+    (ret (div (sub f 32.0) 1.8)))
+
   (meta-note "Conversion utilities: string_from_int, string_from_float, string_from_bool, bool_to_int, int_to_bool, distance/temperature conversions - pure Sigil implementations"))

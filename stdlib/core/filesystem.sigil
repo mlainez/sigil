@@ -1,39 +1,25 @@
 (module filesystem
   (fn read_file_safe path string -> string
-    (set exists bool (file_exists path))
-    (set result string "")
-    (if exists
-      (set result string (file_read path)))
-    (ret result))
+    (if (not (file_exists path))
+      (ret ""))
+    (ret (file_read path)))
 
   (fn write_file_safe path string content string -> bool
-    (set success bool false)
     (file_write path content)
-    (set exists bool (file_exists path))
-    (if exists
-      (set success bool true))
-    (ret success))
+    (ret (file_exists path)))
 
   (fn delete_if_exists path string -> bool
-    (set exists bool (file_exists path))
-    (set result bool false)
-    (if exists
-      (file_delete path)
-      (set result bool true))
-    (ret result))
+    (if (not (file_exists path))
+      (ret false))
+    (file_delete path)
+    (ret true))
 
   (fn copy_file src string dst string -> bool
-    (set content string (file_read src))
-    (file_write dst content)
-    (set exists bool (file_exists dst))
-    (ret exists))
+    (file_write dst (file_read src))
+    (ret (file_exists dst)))
 
   (fn read_lines path string -> array
-    (set content string (file_read path))
-    (set lines array (string_split content "\n"))
-    (ret lines))
+    (ret (string_split (file_read path) "\n")))
 
   (fn count_lines path string -> int
-    (set lines array (read_lines path))
-    (set count int (array_length lines))
-    (ret count)))
+    (ret (array_length (read_lines path)))))

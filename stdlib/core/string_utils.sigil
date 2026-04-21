@@ -5,177 +5,104 @@
     (set delim_len int (string_length delimiter))
     (set start int 0)
     (set i int 0)
-    
+
     (while (lt i text_len)
       (set matches bool false)
-      (set can_match bool (le (add i delim_len) text_len))
-      
-      (if can_match
-        (set substring string (string_slice text i delim_len))
-        (set matches bool (string_equals substring delimiter)))
-      
+      (if (le (add i delim_len) text_len)
+        (set matches (string_equals (string_slice text i delim_len) delimiter)))
+
       (if matches
-        (set part_len int (sub i start))
-        (set part string (string_slice text start part_len))
-        (array_push result part)
-        (set i int (add i delim_len))
-        (set start int i))
-      
+        (array_push result (string_slice text start (sub i start)))
+        (set i (add i delim_len))
+        (set start i))
+
       (if (not matches)
-        (set i int (add i 1))))
-    
-    (set final_len int (sub text_len start))
-    (set final string (string_slice text start final_len))
-    (array_push result final)
+        (set i (add i 1))))
+
+    (array_push result (string_slice text start (sub text_len start)))
     (ret result))
-  
+
   (fn trim text string -> string
     (set len int (string_length text))
     (set start int 0)
-    (set end int len)
-    
-    (while (lt start end)
+    (set end_pos int len)
+
+    (while (lt start end_pos)
       (set ch int (string_get text start))
-      (set is_space bool (eq ch 32))
-      (set is_tab bool (eq ch 9))
-      (set is_newline bool (eq ch 10))
-      (set is_cr bool (eq ch 13))
-      (set is_ws bool false)
-      (if is_space
-        (set is_ws bool true))
-      (if is_tab
-        (set is_ws bool true))
-      (if is_newline
-        (set is_ws bool true))
-      (if is_cr
-        (set is_ws bool true))
-      (if (not is_ws)
+      (if (not (or (eq ch 32) (or (eq ch 9) (or (eq ch 10) (eq ch 13)))))
         (break))
-      (set start int (add start 1)))
-    
-    (while (gt end start)
-      (set ch int (string_get text (sub end 1)))
-      (set is_space bool (eq ch 32))
-      (set is_tab bool (eq ch 9))
-      (set is_newline bool (eq ch 10))
-      (set is_cr bool (eq ch 13))
-      (set is_ws bool false)
-      (if is_space
-        (set is_ws bool true))
-      (if is_tab
-        (set is_ws bool true))
-      (if is_newline
-        (set is_ws bool true))
-      (if is_cr
-        (set is_ws bool true))
-      (if (not is_ws)
+      (set start (add start 1)))
+
+    (while (gt end_pos start)
+      (set ch int (string_get text (sub end_pos 1)))
+      (if (not (or (eq ch 32) (or (eq ch 9) (or (eq ch 10) (eq ch 13)))))
         (break))
-      (set end int (sub end 1)))
-    
-    (set trim_len int (sub end start))
-    (ret (string_slice text start trim_len)))
-  
+      (set end_pos (sub end_pos 1)))
+
+    (ret (string_slice text start (sub end_pos start))))
+
   (fn contains haystack string needle string -> bool
     (set haystack_len int (string_length haystack))
     (set needle_len int (string_length needle))
     (set max_pos int (sub haystack_len needle_len))
     (set i int 0)
-    
+
     (while (le i max_pos)
-      (set substring string (string_slice haystack i needle_len))
-      (set matches bool (string_equals substring needle))
-      (if matches
+      (if (string_equals (string_slice haystack i needle_len) needle)
         (ret true))
-      (set i int (add i 1)))
-    
+      (set i (add i 1)))
+
     (ret false))
-  
+
   (fn replace text string old string new string -> string
     (set parts array (split text old))
     (set result string "")
     (set parts_len int (array_length parts))
-    (set i int 0)
-    
-    (while (lt i parts_len)
-      (set part string (array_get parts i))
-      (set result string (string_concat result part))
-      (set is_last bool (eq i (sub parts_len 1)))
-      (set not_last bool (not is_last))
-      (if not_last
-        (set result string (string_concat result new)))
-      (set i int (add i 1)))
-    
+
+    (for i 0 parts_len
+      (set result (string_concat result (array_get parts i)))
+      (if (lt i (sub parts_len 1))
+        (set result (string_concat result new))))
+
     (ret result))
-  
+
   (fn starts_with text string prefix string -> bool
-    (set text_len int (string_length text))
-    (set prefix_len int (string_length prefix))
-    (set too_long bool (gt prefix_len text_len))
-    (if too_long
+    (if (gt (string_length prefix) (string_length text))
       (ret false))
-    (set start string (string_slice text 0 prefix_len))
-    (ret (string_equals start prefix)))
-  
+    (ret (string_equals (string_slice text 0 (string_length prefix)) prefix)))
+
   (fn ends_with text string suffix string -> bool
     (set text_len int (string_length text))
     (set suffix_len int (string_length suffix))
-    (set too_long bool (gt suffix_len text_len))
-    (if too_long
+    (if (gt suffix_len text_len)
       (ret false))
-    (set start int (sub text_len suffix_len))
-    (set end_part string (string_slice text start suffix_len))
-    (ret (string_equals end_part suffix)))
-  
+    (ret (string_equals (string_slice text (sub text_len suffix_len) suffix_len) suffix)))
+
   (fn to_upper text string -> string
     (set len int (string_length text))
     (set result string "")
-    (set i int 0)
-    
-    (while (lt i len)
+    (for i 0 len
       (set ch int (string_get text i))
-      (set ge_lower bool (ge ch 97))
-      (set le_upper_lower bool (le ch 122))
-      (set is_lower bool false)
-      (if ge_lower
-        (if le_upper_lower
-          (set is_lower bool true)))
-      (if is_lower
-        (set ch int (sub ch 32)))
-      (set ch_str string (char_from_code ch))
-      (set result string (string_concat result ch_str))
-      (set i int (add i 1)))
-    
+      (if (and (ge ch 97) (le ch 122))
+        (set ch (sub ch 32)))
+      (set result (string_concat result (char_from_code ch))))
     (ret result))
-  
+
   (fn to_lower text string -> string
     (set len int (string_length text))
     (set result string "")
-    (set i int 0)
-    
-    (while (lt i len)
+    (for i 0 len
       (set ch int (string_get text i))
-      (set ge_upper bool (ge ch 65))
-      (set le_upper_z bool (le ch 90))
-      (set is_upper bool false)
-      (if ge_upper
-        (if le_upper_z
-          (set is_upper bool true)))
-      (if is_upper
-        (set ch int (add ch 32)))
-      (set ch_str string (char_from_code ch))
-      (set result string (string_concat result ch_str))
-      (set i int (add i 1)))
-    
+      (if (and (ge ch 65) (le ch 90))
+        (set ch (add ch 32)))
+      (set result (string_concat result (char_from_code ch))))
     (ret result))
-  
+
   (fn reverse text string -> string
     (set len int (string_length text))
     (set result string "")
     (set i int (sub len 1))
-    
     (while (ge i 0)
-      (set ch string (string_slice text i 1))
-      (set result string (string_concat result ch))
-      (set i int (sub i 1)))
-    
+      (set result (string_concat result (string_slice text i 1)))
+      (set i (sub i 1)))
     (ret result)))

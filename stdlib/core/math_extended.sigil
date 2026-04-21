@@ -1,60 +1,41 @@
 (module math_extended
   (fn clamp x int min_val int max_val int -> int
-    (set result int x)
-    (if (lt x min_val)
-      (set result int min_val))
-    (if (gt x max_val)
-      (set result int max_val))
-    (ret result))
-  
+    (if (lt x min_val) (ret min_val))
+    (if (gt x max_val) (ret max_val))
+    (ret x))
+
   (fn clamp_float x float min_val float max_val float -> float
-    (set result float x)
-    (if (lt x min_val)
-      (set result float min_val))
-    (if (gt x max_val)
-      (set result float max_val))
-    (ret result))
-  
+    (if (lt x min_val) (ret min_val))
+    (if (gt x max_val) (ret max_val))
+    (ret x))
+
   (fn sign x int -> int
-    (set result int 0)
-    (if (lt x 0)
-      (set result int -1))
-    (if (gt x 0)
-      (set result int 1))
-    (ret result))
-  
+    (if (lt x 0) (ret -1))
+    (if (gt x 0) (ret 1))
+    (ret 0))
+
   (fn sign_float x float -> int
-    (set result int 0)
-    (if (lt x 0.0)
-      (set result int -1))
-    (if (gt x 0.0)
-      (set result int 1))
-    (ret result))
-  
+    (if (lt x 0.0) (ret -1))
+    (if (gt x 0.0) (ret 1))
+    (ret 0))
+
   (fn lerp a float b float t float -> float
-    (set one_minus_t float (sub 1.0 t))
-    (set term1 float (mul a one_minus_t))
-    (set term2 float (mul b t))
-    (ret (add term1 term2)))
-  
+    (ret (add (mul a (sub 1.0 t)) (mul b t))))
+
   (fn is_even x int -> bool
-    (set remainder int (mod x 2))
-    (ret (eq remainder 0)))
-  
+    (ret (eq (mod x 2) 0)))
+
   (fn is_odd x int -> bool
-    (set remainder int (mod x 2))
-    (ret (ne remainder 0)))
-  
+    (ret (ne (mod x 2) 0)))
+
   (fn square x int -> int
     (ret (mul x x)))
-  
+
   (fn square_float x float -> float
     (ret (mul x x)))
-  
+
   (fn cube x int -> int
-    (set x_squared int (mul x x))
-    (ret (mul x_squared x)))
-  
+    (ret (mul x (mul x x))))
+
   (fn cube_float x float -> float
-    (set x_squared float (mul x x))
-    (ret (mul x_squared x))))
+    (ret (mul x (mul x x)))))

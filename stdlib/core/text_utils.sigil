@@ -1,51 +1,42 @@
 (module text_utils
   (fn repeat_string text string count int -> string
     (set result string "")
-    (set i int 0)
-    (while (lt i count)
-      (set result string (string_concat result text))
-      (set i int (add i 1)))
+    (for i 0 count
+      (set result (string_concat result text)))
     (ret result))
 
   (fn pad_left text string width int pad_char string -> string
     (set len int (string_length text))
     (set result string text)
     (while (lt len width)
-      (set result string (string_concat pad_char result))
-      (set len int (add len 1)))
+      (set result (string_concat pad_char result))
+      (set len (add len 1)))
     (ret result))
 
   (fn pad_right text string width int pad_char string -> string
     (set len int (string_length text))
     (set result string text)
     (while (lt len width)
-      (set result string (string_concat result pad_char))
-      (set len int (add len 1)))
+      (set result (string_concat result pad_char))
+      (set len (add len 1)))
     (ret result))
 
   (fn truncate text string max_len int -> string
-    (set len int (string_length text))
-    (set result string text)
-    (set too_long bool (gt len max_len))
-    (if too_long
-      (set result string (string_slice text 0 max_len)))
-    (ret result))
+    (if (gt (string_length text) max_len)
+      (ret (string_slice text 0 max_len)))
+    (ret text))
 
   (fn word_count text string -> int
-    (set words array (string_split text " "))
-    (set count int (array_length words))
-    (ret count))
+    (ret (array_length (string_split text " "))))
 
   (fn reverse_string text string -> string
     (set len int (string_length text))
     (set result string "")
     (set i int (sub len 1))
     (while (ge i 0)
-      (set c string (string_slice text i 1))
-      (set result string (string_concat result c))
-      (set i int (sub i 1)))
+      (set result (string_concat result (string_slice text i 1)))
+      (set i (sub i 1)))
     (ret result))
 
   (fn is_empty text string -> bool
-    (set len int (string_length text))
-    (ret (eq len 0))))
+    (ret (eq (string_length text) 0))))

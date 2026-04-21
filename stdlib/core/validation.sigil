@@ -1,19 +1,9 @@
 (module validation
   (fn in_range val_num int min_val int max_val int -> bool
-    (set result bool false)
-    (set ge_min bool (ge val_num min_val))
-    (if ge_min
-      (set le_max bool (le val_num max_val))
-      (set result bool le_max))
-    (ret result))
+    (ret (and (ge val_num min_val) (le val_num max_val))))
 
   (fn in_range_float val_num float min_val float max_val float -> bool
-    (set result bool false)
-    (set ge_min bool (ge val_num min_val))
-    (if ge_min
-      (set le_max bool (le val_num max_val))
-      (set result bool le_max))
-    (ret result))
+    (ret (and (ge val_num min_val) (le val_num max_val))))
 
   (fn is_positive i int -> bool
     (ret (gt i 0)))
@@ -34,5 +24,4 @@
     (ret (eq f 0.0)))
 
   (fn is_divisible_by n int divisor int -> bool
-    (set remainder int (mod n divisor))
-    (ret (eq remainder 0))))
+    (ret (eq (mod n divisor) 0))))

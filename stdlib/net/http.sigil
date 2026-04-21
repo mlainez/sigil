@@ -1,181 +1,116 @@
 (module http
-  
+
   (fn parse_url url string -> array
     (set arr array (array_new))
-    
+
     (set is_https bool (string_starts_with url "https://"))
-    (set is_http bool (string_starts_with url "http://"))
-    
     (if is_https
       (array_push arr "https")
       (array_push arr "http"))
-    
+
     (set url_no_proto string url)
     (if is_https
-      (set url_no_proto string (string_slice url 8 (sub (string_length url) 8))))
-    (if is_http
-      (set url_no_proto string (string_slice url 7 (sub (string_length url) 7))))
-    
+      (set url_no_proto (string_slice url 8 (sub (string_length url) 8))))
+    (if (string_starts_with url "http://")
+      (set url_no_proto (string_slice url 7 (sub (string_length url) 7))))
+
     (set slash_pos int -1)
-    (set i int 0)
     (set url_len int (string_length url_no_proto))
-    (while (lt i url_len)
-      (set ch string (string_slice url_no_proto i 1))
-      (set is_slash bool (string_equals ch "/"))
-      (if is_slash
-        (set slash_pos int i)
-        (break))
-      (set i int (add i 1)))
-    
+    (for i 0 url_len
+      (if (string_equals (string_slice url_no_proto i 1) "/")
+        (set slash_pos i)
+        (break)))
+
     (set host string url_no_proto)
     (set path string "/")
     (if (ge slash_pos 0)
-      (set host string (string_slice url_no_proto 0 slash_pos))
-      (set path string (string_slice url_no_proto slash_pos (sub url_len slash_pos))))
-    
+      (set host (string_slice url_no_proto 0 slash_pos))
+      (set path (string_slice url_no_proto slash_pos (sub url_len slash_pos))))
+
     (array_push arr host)
-    
+
     (set port int 80)
     (if is_https
-      (set port int 443))
+      (set port 443))
     (array_push arr port)
-    
+
     (array_push arr path)
     (ret arr))
-  
+
   (fn build_request method string host string path string body string -> string
-    (set req string method)
-    (set req string (string_concat req " "))
-    (set req string (string_concat req path))
-    (set req string (string_concat req " HTTP/1.1\r\n"))
-    (set req string (string_concat req "Host: "))
-    (set req string (string_concat req host))
-    (set req string (string_concat req "\r\n"))
-    (set req string (string_concat req "Connection: close\r\n"))
-    
+    (set req string (string_format "{} {} HTTP/1.1\r\nHost: {}\r\nConnection: close\r\n" method path host))
+
     (set body_len int (string_length body))
     (if (gt body_len 0)
-      (set req string (string_concat req "Content-Length: "))
-      (set len_str string (string_from_int body_len))
-      (set req string (string_concat req len_str))
-      (set req string (string_concat req "\r\n\r\n"))
-      (set req string (string_concat req body)))
-    
-    (set req string (string_concat req "\r\n"))
+      (set req (string_concat req (string_format "Content-Length: {}\r\n\r\n{}" (string_from_int body_len) body))))
+
+    (set req (string_concat req "\r\n"))
     (ret req))
-  
+
   (fn parse_response raw string -> map
     (set response map (map_new))
-    
+
     (set header_end int -1)
-    (set i int 0)
     (set raw_len int (string_length raw))
-    (while (lt i (sub raw_len 3))
-      (set substr string (string_slice raw i 4))
-      (set is_crlf bool (string_equals substr "\r\n\r\n"))
-      (if is_crlf
-        (set header_end int i)
-        (break))
-      (set i int (add i 1)))
-    
+    (for i 0 (sub raw_len 3)
+      (if (string_equals (string_slice raw i 4) "\r\n\r\n")
+        (set header_end i)
+        (break)))
+
     (set body string "")
     (if (ge header_end 0)
       (set body_start int (add header_end 4))
-      (set body string (string_slice raw body_start (sub raw_len body_start))))
-    
+      (set body (string_slice raw body_start (sub raw_len body_start))))
+
     (map_set response "body" body)
     (map_set response "status" 200)
     (ret response))
-  
+
   (fn get url string -> map
     (set parts array (parse_url url))
     (set protocol string (array_get parts 0))
     (set host string (array_get parts 1))
     (set port int (array_get parts 2))
     (set path string (array_get parts 3))
-    
+
     (set sock string "")
-    (set is_https bool (string_equals protocol "https"))
-    (if is_https
-      (set sock string (tcp_tls_connect host port))
-      (set sock string (tcp_connect host port)))
-    
-    (set req string (build_request "GET" host path ""))
-    (tcp_send sock req)
-    
+    (if (string_equals protocol "https")
+      (set sock (tcp_tls_connect host port))
+      (set sock (tcp_connect host port)))
+
+    (tcp_send sock (build_request "GET" host path ""))
     (set raw string (tcp_receive sock 8192))
     (tcp_close sock)
-    
     (ret (parse_response raw)))
-  
+
   (fn post url string body string -> map
     (set parts array (parse_url url))
     (set protocol string (array_get parts 0))
     (set host string (array_get parts 1))
     (set port int (array_get parts 2))
     (set path string (array_get parts 3))
-    
+
     (set sock string "")
-    (set is_https bool (string_equals protocol "https"))
-    (if is_https
-      (set sock string (tcp_tls_connect host port))
-      (set sock string (tcp_connect host port)))
-    
-    (set req string (build_request "POST" host path body))
-    (tcp_send sock req)
-    
+    (if (string_equals protocol "https")
+      (set sock (tcp_tls_connect host port))
+      (set sock (tcp_connect host port)))
+
+    (tcp_send sock (build_request "POST" host path body))
     (set raw string (tcp_receive sock 8192))
     (tcp_close sock)
-    
     (ret (parse_response raw)))
-  
+
   (fn get_status_text code int -> string
     (set code_str string (string_from_int code))
-    (set result string code_str)
-    
-    (if (eq code 200)
-      (set result string (string_concat code_str " OK")))
-    (if (eq code 201)
-      (set result string (string_concat code_str " Created")))
-    (if (eq code 204)
-      (set result string (string_concat code_str " No Content")))
-    (if (eq code 400)
-      (set result string (string_concat code_str " Bad Request")))
-    (if (eq code 401)
-      (set result string (string_concat code_str " Unauthorized")))
-    (if (eq code 403)
-      (set result string (string_concat code_str " Forbidden")))
-    (if (eq code 404)
-      (set result string (string_concat code_str " Not Found")))
-    (if (eq code 500)
-      (set result string (string_concat code_str " Internal Server Error")))
-    (if (eq code 999)
-      (set result string "Unknown Status"))
-    
-    (ret result))
-  
-  (meta-note "Pure Sigil HTTP client using TCP/TLS primitives
+    (cond
+      ((eq code 200) (ret (string_concat code_str " OK")))
+      ((eq code 201) (ret (string_concat code_str " Created")))
+      ((eq code 204) (ret (string_concat code_str " No Content")))
+      ((eq code 400) (ret (string_concat code_str " Bad Request")))
+      ((eq code 401) (ret (string_concat code_str " Unauthorized")))
+      ((eq code 403) (ret (string_concat code_str " Forbidden")))
+      ((eq code 404) (ret (string_concat code_str " Not Found")))
+      ((eq code 500) (ret (string_concat code_str " Internal Server Error")))
+      (true (ret "Unknown Status"))))
 
-Usage:
-  (import http)
-  (set response map (get \"https://example.com/api\"))
-  (set body string (map_get response \"body\"))
-  (set status string (map_get response \"status\"))
-
-Functions:
-  - parse_url(url) -> array [protocol host port path]
-  - build_request(method host path body) -> string
-  - parse_response(raw) -> map with keys: status body
-  - get(url) -> map
-  - post(url body) -> map
-
-Dependencies:
-  - tcp_connect / tcp_tls_connect (builtins)
-  - string_starts_with, string_from_int (builtins)
-
-Implementation notes:
-  - Uses tcp_connect for http:// URLs
-  - Uses tcp_tls_connect for https:// URLs
-  - Builds HTTP/1.1 requests manually
-  - Parses responses using string operations
-  - No external dependencies - pure Sigil!"))
+  (meta-note "Pure Sigil HTTP client using TCP/TLS primitives"))
