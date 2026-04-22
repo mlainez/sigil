@@ -22,7 +22,7 @@
       (expect "3.14"))
     (case "zero float"
       (input 0.0)
-      (expect "0.")))
+      (expect "0.0")))
 
   (fn test_str_bool b bool -> string
     (ret (str b)))

@@ -1748,7 +1748,7 @@ and eval_block env exprs =
    | "str" ->
        (match arg_vals with
         | [VInt n] -> VString (Int64.to_string n)
-        | [VFloat f] -> VString (string_of_float f)
+        | [VFloat f] -> VString (format_float_string f)
         | [VBool b] -> VString (if b then "true" else "false")
         | [VDecimal s] -> VString s
         | [VString s] -> VString s
