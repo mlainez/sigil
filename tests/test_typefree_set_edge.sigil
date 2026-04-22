@@ -60,17 +60,14 @@
       (input)
       (expect 30)))
 
-  (fn undeclared_var_panics -> string
-    (try
-      (set nonexistent (add 1 2))
-      (ret "no error")
-      (catch err string
-        (ret "caught"))))
+  (fn typefree_infer_new -> int
+    (set nonexistent (add 1 2))
+    (ret nonexistent))
 
-  (test-spec undeclared_var_panics
-    (case "type-free set on undeclared variable is caught"
+  (test-spec typefree_infer_new
+    (case "type-free set on new variable infers type from value"
       (input)
-      (expect "caught")))
+      (expect 3)))
 
   (fn type_mismatch_panics -> string
     (set x int 10)

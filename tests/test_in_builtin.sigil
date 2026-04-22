@@ -1,0 +1,46 @@
+(module test_in_builtin
+  (fn string_in haystack string needle string -> bool
+    (ret (in needle haystack)))
+
+  (test-spec string_in
+    (case "vowel check hit"
+      (input "aeiou" "e")
+      (expect true))
+    (case "vowel check miss"
+      (input "aeiou" "x")
+      (expect false))
+    (case "substring hit"
+      (input "hello world" "world")
+      (expect true))
+    (case "substring miss"
+      (input "hello world" "xyz")
+      (expect false))
+    (case "empty needle always hits"
+      (input "abc" "")
+      (expect true)))
+
+  (fn array_in target int -> bool
+    (set nums array [1 2 3 4 5])
+    (ret (in target nums)))
+
+  (test-spec array_in
+    (case "element present"
+      (input 3)
+      (expect true))
+    (case "element absent"
+      (input 99)
+      (expect false)))
+
+  (fn map_key_in key string -> bool
+    (set m map {"a" "1" "b" "2"})
+    (ret (in key m)))
+
+  (test-spec map_key_in
+    (case "key present"
+      (input "a")
+      (expect true))
+    (case "key absent"
+      (input "z")
+      (expect false)))
+
+  (meta-note "Tests polymorphic in builtin for strings, arrays, maps"))

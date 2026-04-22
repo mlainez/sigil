@@ -1,0 +1,46 @@
+(module test_optional_types
+  (fn infer_int_declaration -> int
+    (set n (add 40 2))
+    (ret n))
+
+  (test-spec infer_int_declaration
+    (case "infer int from add result"
+      (input)
+      (expect 42)))
+
+  (fn infer_string_declaration -> string
+    (set s (string_concat "hello" " world"))
+    (ret s))
+
+  (test-spec infer_string_declaration
+    (case "infer string from concat"
+      (input)
+      (expect "hello world")))
+
+  (fn infer_float_declaration -> float
+    (set f (mul 3.0 2.0))
+    (ret f))
+
+  (test-spec infer_float_declaration
+    (case "infer float from mul"
+      (input)
+      (expect 6.0)))
+
+  (fn infer_bool_declaration -> bool
+    (set b (lt 3 5))
+    (ret b))
+
+  (test-spec infer_bool_declaration
+    (case "infer bool from comparison"
+      (input)
+      (expect true)))
+
+  (fn implicit_main_return -> int
+    (ret 0))
+
+  (test-spec implicit_main_return
+    (case "main returns 0 by convention"
+      (input)
+      (expect 0)))
+
+  (meta-note "Tests optional type inference on set declarations from value type"))

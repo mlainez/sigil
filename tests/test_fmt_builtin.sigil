@@ -1,0 +1,46 @@
+(module test_fmt_builtin
+  (fn greet name string age int -> string
+    (ret (fmt "Hello, {name}! You are {age} years old.")))
+
+  (test-spec greet
+    (case "alice 30"
+      (input "Alice" 30)
+      (expect "Hello, Alice! You are 30 years old.")))
+
+  (fn format_point x int y int -> string
+    (ret (fmt "({x}, {y})")))
+
+  (test-spec format_point
+    (case "origin"
+      (input 0 0)
+      (expect "(0, 0)"))
+    (case "negative"
+      (input -3 7)
+      (expect "(-3, 7)")))
+
+  (fn mixed_types n int f float b bool s string -> string
+    (ret (fmt "int={n} float={f} bool={b} str={s}")))
+
+  (test-spec mixed_types
+    (case "all types"
+      (input 42 3.14 true "hi")
+      (expect "int=42 float=3.14 bool=true str=hi")))
+
+  (fn escape_braces -> string
+    (set x int 5)
+    (ret (fmt "literal {{ and }} with value {x}")))
+
+  (test-spec escape_braces
+    (case "brace escaping"
+      (input)
+      (expect "literal { and } with value 5")))
+
+  (fn mixed_named_positional name string val int -> string
+    (ret (fmt "{name} = {}" val)))
+
+  (test-spec mixed_named_positional
+    (case "mixing {name} and {}"
+      (input "count" 42)
+      (expect "count = 42")))
+
+  (meta-note "Tests fmt builtin for named and positional string interpolation"))
