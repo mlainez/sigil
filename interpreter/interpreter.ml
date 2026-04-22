@@ -1845,14 +1845,24 @@ and eval_block env exprs =
 
    (* I/O *)
    | "print" ->
+       (* Variadic: multiple args joined with space *)
        (match arg_vals with
+        | [] -> VUnit
         | [v] -> print_string (string_of_value v); VUnit
-        | _ -> raise (RuntimeError "print takes 1 argument"))
-  
+        | vs ->
+            let strs = List.map string_of_value vs in
+            print_string (String.concat " " strs);
+            VUnit)
+
   | "println" ->
+      (* Variadic: multiple args joined with space, trailing newline *)
       (match arg_vals with
+       | [] -> print_newline (); VUnit
        | [v] -> print_endline (string_of_value v); VUnit
-       | _ -> raise (RuntimeError "println takes 1 argument"))
+       | vs ->
+           let strs = List.map string_of_value vs in
+           print_endline (String.concat " " strs);
+           VUnit)
 
   | "read_line" ->
       VString (read_line ())
