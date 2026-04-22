@@ -1,0 +1,55 @@
+(module test_collection_ops
+  (fn test_parse_ints_default_sep -> int
+    (set nums (parse_ints "1 2 3 4 5"))
+    (ret (len nums)))
+
+  (test-spec test_parse_ints_default_sep
+    (case "default space sep"
+      (input)
+      (expect 5)))
+
+  (fn test_parse_ints_custom_sep -> int
+    (set nums (parse_ints "10,20,30" ","))
+    (ret (array_get nums 1)))
+
+  (test-spec test_parse_ints_custom_sep
+    (case "custom comma sep"
+      (input)
+      (expect 20)))
+
+  (fn test_sum_ints -> int
+    (ret (sum (parse_ints "1 2 3 4 5"))))
+
+  (test-spec test_sum_ints
+    (case "sum 1..5 = 15"
+      (input)
+      (expect 15)))
+
+  (fn test_sum_floats -> float
+    (set arr array [1.5 2.5 3.0])
+    (ret (sum arr)))
+
+  (test-spec test_sum_floats
+    (case "sum of floats"
+      (input)
+      (expect 7.0)))
+
+  (fn test_count_in_chars -> int
+    (ret (count_in "hello world" "aeiou")))
+
+  (test-spec test_count_in_chars
+    (case "count vowels in hello world"
+      (input)
+      (expect 3)))
+
+  (fn test_count_in_arrays -> int
+    (set needles array [1 3 5])
+    (set haystack array [1 2 3 4 5 6])
+    (ret (count_in needles haystack)))
+
+  (test-spec test_count_in_arrays
+    (case "count array elements present"
+      (input)
+      (expect 3)))
+
+  (meta-note "Tests parse_ints, sum, count_in builtins"))

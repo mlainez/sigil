@@ -1,0 +1,61 @@
+(module test_map_helpers
+  (fn test_map_inc -> int
+    (set m map (map_new))
+    (map_inc m "a")
+    (map_inc m "a")
+    (map_inc m "b")
+    (map_inc m "a")
+    (ret (map_get m "a")))
+
+  (test-spec test_map_inc
+    (case "increment key a three times"
+      (input)
+      (expect 3)))
+
+  (fn test_map_inc_new_key -> int
+    (set m map (map_new))
+    (map_inc m "x")
+    (ret (map_get m "x")))
+
+  (test-spec test_map_inc_new_key
+    (case "first inc of missing key sets to 1"
+      (input)
+      (expect 1)))
+
+  (fn test_get_or_map_hit -> int
+    (set m map {"a" "10" "b" "20"})
+    (ret (string_to_int (get_or m "a" "0"))))
+
+  (test-spec test_get_or_map_hit
+    (case "existing key returns value"
+      (input)
+      (expect 10)))
+
+  (fn test_get_or_map_miss -> int
+    (set m map {"a" "10"})
+    (ret (string_to_int (get_or m "missing" "99"))))
+
+  (test-spec test_get_or_map_miss
+    (case "missing key returns default"
+      (input)
+      (expect 99)))
+
+  (fn test_get_or_array_hit -> int
+    (set arr array [10 20 30])
+    (ret (get_or arr 1 -1)))
+
+  (test-spec test_get_or_array_hit
+    (case "in-bounds returns element"
+      (input)
+      (expect 20)))
+
+  (fn test_get_or_array_oob -> int
+    (set arr array [10 20 30])
+    (ret (get_or arr 99 -1)))
+
+  (test-spec test_get_or_array_oob
+    (case "out-of-bounds returns default"
+      (input)
+      (expect -1)))
+
+  (meta-note "Tests map_inc and get_or builtins"))
