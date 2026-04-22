@@ -162,7 +162,15 @@ and parse_for state =
 and parse_foreach state =
   let (var_name, state) = expect_symbol state in
   check_not_type_keyword var_name "for-each variable name";
-  let (var_type, state) = parse_type state in
+  (* Type is optional — infer from collection element type if omitted *)
+  let has_type = match peek state with
+    | Symbol s -> is_type_keyword s
+    | _ -> false
+  in
+  let (var_type, state) =
+    if has_type then parse_type state
+    else (TUnit, state)  (* TUnit = "any", interpreter skips type check *)
+  in
   let (collection_expr, state) = parse_expr state in
   let (body, state) = parse_body_until_rparen state [] in
   (ForEach (var_name, var_type, collection_expr, body), state)
@@ -459,6 +467,39 @@ let parse_module state =
   in
   parse_items state [] [] [] None
 
+(* Script mode: wrap top-level expressions into an implicit main function *)
+let parse_script tokens =
+  let state = { tokens; pos = 0 } in
+  let rec parse_body state acc =
+    match peek state with
+    | EOF -> (List.rev acc, state)
+    | _ ->
+        let (expr, state) = parse_expr state in
+        parse_body state (expr :: acc)
+  in
+  let (body, _) = parse_body state [] in
+  let main_fn = {
+    func_name = "main";
+    func_params = [];
+    func_return_type = TInt;
+    func_body = body;
+  } in
+  { module_name = "__script__";
+    module_imports = [];
+    module_functions = [main_fn];
+    module_tests = [];
+    module_note = None }
+
 let parse tokens =
   let state = { tokens; pos = 0 } in
-  parse_module state
+  (* Detect: if the first non-whitespace thing is (module ...), parse as module.
+     Otherwise, treat as a script and wrap into implicit main. *)
+  match peek state with
+  | LParen ->
+      let tok2 = if state.pos + 1 < List.length state.tokens
+                 then Some (List.nth state.tokens (state.pos + 1))
+                 else None in
+      (match tok2 with
+       | Some (Symbol "module") -> parse_module state
+       | _ -> parse_script tokens)
+  | _ -> parse_script tokens

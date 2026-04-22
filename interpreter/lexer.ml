@@ -104,6 +104,18 @@ let tokenize input =
       | '"' ->
           let (str, next_pos) = read_string input (pos + 1) in
           loop next_pos (StringLit str :: acc)
+      | '$' when pos + 1 < String.length input && is_digit input.[pos + 1] ->
+          (* $N -> (arg_str N) *)
+          let (num_str, next_pos) = read_number input (pos + 1) in
+          let n = Int64.of_string num_str in
+          let tokens = [LParen; Symbol "arg_str"; IntLit n; RParen] in
+          loop next_pos (List.rev_append tokens acc)
+      | '#' when pos + 1 < String.length input && is_digit input.[pos + 1] ->
+          (* #N -> (arg_int N) *)
+          let (num_str, next_pos) = read_number input (pos + 1) in
+          let n = Int64.of_string num_str in
+          let tokens = [LParen; Symbol "arg_int"; IntLit n; RParen] in
+          loop next_pos (List.rev_append tokens acc)
       | '-' when pos + 1 < String.length input && is_digit input.[pos + 1] ->
            let (num_str, next_pos) = read_number input pos in
            (* Check for 'd' suffix -> decimal literal *)
