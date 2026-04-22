@@ -1,6 +1,6 @@
 (module test
   (fn new_array_length -> int
-    (ret (array_length (array_new))))
+    (ret (len (array_new))))
   
   (test-spec new_array_length
     (case "create array returns length 0"

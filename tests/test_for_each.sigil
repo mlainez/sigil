@@ -43,7 +43,7 @@
   (fn collect_map_keys data map -> string
     (set result string "")
     (for-each k string data
-      (if (gt (string_length result) 0)
+      (if (gt (len result) 0)
         (set result string (string_concat result ",")))
       (set result string (string_concat result k)))
     (ret result))

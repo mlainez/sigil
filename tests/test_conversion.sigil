@@ -2,10 +2,10 @@
   (import conversion)
   
   (fn test_string_from_int n int -> string
-    (ret (string_from_int n)))
+    (ret (str n)))
   
   (fn test_string_from_bool b bool -> string
-    (ret (string_from_bool b)))
+    (ret (str b)))
   
   (test-spec test_string_from_int
     (case "converts zero"

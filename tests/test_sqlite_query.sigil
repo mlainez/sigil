@@ -7,7 +7,7 @@
     (exec db "INSERT INTO users VALUES(1, 'Alice')")
     (exec db "INSERT INTO users VALUES(2, 'Bob')")
     (set results array (query db "SELECT * FROM users"))
-    (set row_count int (array_length results))
+    (set row_count int (len results))
     (close db)
     (ret row_count))
   
@@ -16,7 +16,7 @@
     (exec db "CREATE TABLE users(id INTEGER, name TEXT)")
     (exec db "CREATE TABLE posts(id INTEGER, title TEXT)")
     (set tables array (get_tables db))
-    (set table_count int (array_length tables))
+    (set table_count int (len tables))
     (close db)
     (ret table_count))
   
@@ -24,7 +24,7 @@
     (set db process (open ":memory:"))
     (exec db "CREATE TABLE test(id INTEGER)")
     (set results array (query db "SELECT * FROM test"))
-    (set count int (array_length results))
+    (set count int (len results))
     (close db)
     (ret count))
   

@@ -1,6 +1,6 @@
 (module test
   (fn strlen s string -> int
-    (ret (string_length s)))
+    (ret (len s)))
   
   (test-spec strlen
     (case "length of Hello"

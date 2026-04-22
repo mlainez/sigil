@@ -1,6 +1,6 @@
 (module test
   (fn map_length_after_sets k1 string v1 int k2 string v2 int k3 string v3 int -> int
-    (ret (map_length (map_set (map_set (map_set (map_new) k1 v1) k2 v2) k3 v3))))
+    (ret (len (map_set (map_set (map_set (map_new) k1 v1) k2 v2) k3 v3))))
   
   (test-spec map_length_after_sets
     (case "three entries"

@@ -9,13 +9,13 @@
   (fn test_array arr string -> int
     (array_push arr 42)
     (array_push arr 99)
-    (set size int (array_length arr))
+    (set size int (len arr))
     (print size)
     (set val int (array_get arr 0))
     (ret val))
 
   (fn test_string s string -> int
-    (set length int (string_length s))
+    (set length int (len s))
     (print length)
     (ret length))
 

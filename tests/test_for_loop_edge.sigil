@@ -11,7 +11,7 @@
       (expect 4)))
 
   (fn early_return_from_for arr array target int -> int
-    (set len int (array_length arr))
+    (set len int (len arr))
     (for i 0 len
       (if (eq (array_get arr i) target)
         (ret i)))
@@ -45,7 +45,7 @@
     (set arrs array [[1 2] [3 4] [5 6]])
     (set total int 0)
     (for-each sub_arr array arrs
-      (set sub_len int (array_length sub_arr))
+      (set sub_len int (len sub_arr))
       (for j 0 sub_len
         (set total (add total (array_get sub_arr j)))))
     (ret total))

@@ -5,7 +5,7 @@
     (set db process (open ":memory:"))
     (exec db "CREATE TABLE test (id INTEGER, val TEXT);")
     (set rows array (query db "SELECT * FROM test;"))
-    (set count int (array_length rows))
+    (set count int (len rows))
     (close db)
     (ret count))
   
@@ -15,7 +15,7 @@
     (exec db "INSERT INTO test VALUES (1, 'Alice');")
     (exec db "INSERT INTO test VALUES (2, 'Bob');")
     (set rows array (query db "SELECT * FROM test;"))
-    (set count int (array_length rows))
+    (set count int (len rows))
     (close db)
     (ret count))
   

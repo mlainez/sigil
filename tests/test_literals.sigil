@@ -2,7 +2,7 @@
 
   (fn test_array_literal_length -> int
     (set nums array [1 2 3 4 5])
-    (ret (array_length nums)))
+    (ret (len nums)))
 
   (fn test_array_literal_get idx int -> int
     (set nums array [10 20 30])
@@ -10,7 +10,7 @@
 
   (fn test_array_literal_empty -> int
     (set arr array [])
-    (ret (array_length arr)))
+    (ret (len arr)))
 
   (fn test_array_literal_strings -> string
     (set words array ["hello" "world"])
@@ -19,7 +19,7 @@
   (fn test_array_literal_mixed_ops -> int
     (set nums array [1 2 3])
     (array_push nums 4)
-    (ret (array_length nums)))
+    (ret (len nums)))
 
   (fn test_map_literal_get key_name string -> string
     (set person map {"name" "Alice" "city" "Paris"})
@@ -27,11 +27,11 @@
 
   (fn test_map_literal_length -> int
     (set data map {"a" 1 "b" 2 "c" 3})
-    (ret (map_length data)))
+    (ret (len data)))
 
   (fn test_map_literal_empty -> int
     (set empty_map map {})
-    (ret (map_length empty_map)))
+    (ret (len empty_map)))
 
   (fn test_map_literal_has key_name string -> bool
     (set data map {"x" 10 "y" 20})

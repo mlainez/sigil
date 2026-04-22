@@ -3,7 +3,7 @@
   
   (fn get_string_length -> int
     (set text string "hello")
-    (set len int (string_length text))
+    (set len int (len text))
     (ret len))
   
   (test-spec get_string_length

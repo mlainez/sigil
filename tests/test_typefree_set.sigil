@@ -36,7 +36,7 @@
   (fn array_reassign -> int
     (set arr array [1 2 3])
     (array_push arr 4)
-    (set len int (array_length arr))
+    (set len int (len arr))
     (ret len))
 
   (test-spec array_reassign

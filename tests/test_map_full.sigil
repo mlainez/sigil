@@ -1,6 +1,6 @@
 (module test
   (fn map_ops_length -> int
-    (ret (map_length (map_set (map_set (map_set (map_new) "a" 100) "b" 200) "c" 300))))
+    (ret (len (map_set (map_set (map_set (map_new) "a" 100) "b" 200) "c" 300))))
   
   (test-spec map_ops_length
     (case "three entries"
@@ -22,7 +22,7 @@
       (expect false)))
   
   (fn map_delete_then_length -> int
-    (ret (map_length (map_delete (map_set (map_set (map_set (map_new) "a" 100) "b" 200) "c" 300) "b"))))
+    (ret (len (map_delete (map_set (map_set (map_set (map_new) "a" 100) "b" 200) "c" 300) "b"))))
   
   (test-spec map_delete_then_length
     (case "delete one entry"

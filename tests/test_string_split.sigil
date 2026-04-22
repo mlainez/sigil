@@ -16,7 +16,7 @@
       (expect "one")))
   
   (fn count_split_parts text_input string delim string -> int
-    (ret (array_length (split text_input delim))))
+    (ret (len (split text_input delim))))
   
   (test-spec count_split_parts
     (case "split by comma count"

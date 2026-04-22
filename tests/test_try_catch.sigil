@@ -3,7 +3,7 @@
     (set result string "no error")
     (try
       (set x int (div 10 0))
-      (set result string (string_from_int x))
+      (set result string (str x))
       (catch err string
         (set result string "caught")))
     (ret result))
@@ -20,7 +20,7 @@
     (set msg string "none")
     (try
       (set x int (div 5 0))
-      (set msg string (string_from_int x))
+      (set msg string (str x))
       (catch err string
         (set msg string err)))
     (ret msg))
@@ -30,7 +30,7 @@
     (try
       (try
         (set x int (div 1 0))
-        (set result string (string_from_int x))
+        (set result string (str x))
         (catch inner_err string
           (set result string "inner")))
       (catch outer_err string
@@ -43,7 +43,7 @@
     (array_push arr 10)
     (try
       (set val int (array_get arr 5))
-      (set result string (string_from_int val))
+      (set result string (str val))
       (catch err string
         (set result string "caught bounds")))
     (ret result))

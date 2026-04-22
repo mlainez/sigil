@@ -6,7 +6,7 @@
     (array_push original 3)
     (set copied array (array_copy original))
     (array_push copied 4)
-    (set orig_len int (array_length original))
+    (set orig_len int (len original))
     (ret (eq orig_len 3)))
 
   (fn array_copy_has_same_values -> bool
@@ -25,7 +25,7 @@
     (set inner_ref array (array_get original 0))
     (array_push inner_ref 99)
     (set copied_inner array (array_get copied 0))
-    (set copied_inner_len int (array_length copied_inner))
+    (set copied_inner_len int (len copied_inner))
     (ret (eq copied_inner_len 1)))
 
   (fn map_copy_is_independent -> bool
@@ -53,7 +53,7 @@
     (set inner_ref array (map_get original "data"))
     (array_push inner_ref 99)
     (set copied_data array (map_get copied "data"))
-    (set copied_data_len int (array_length copied_data))
+    (set copied_data_len int (len copied_data))
     (ret (eq copied_data_len 1)))
 
   (test-spec array_copy_is_independent

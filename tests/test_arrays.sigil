@@ -1,6 +1,6 @@
 (module test
   (fn array_ops_length -> int
-    (ret (array_length (array_push (array_push (array_push (array_new) 42) 100) 7))))
+    (ret (len (array_push (array_push (array_push (array_new) 42) 100) 7))))
   
   (test-spec array_ops_length
     (case "three elements"

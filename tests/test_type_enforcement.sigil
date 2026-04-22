@@ -23,7 +23,7 @@
     (set arr array (array_new))
     (array_push arr 1)
     (array_push arr 2)
-    (ret (array_length arr)))
+    (ret (len arr)))
   
   (fn test_map_type -> bool
     (set m map (map_new))

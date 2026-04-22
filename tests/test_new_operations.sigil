@@ -59,7 +59,7 @@
 
   (fn split_string -> int
     (set parts array (string_split "a,b,c" ","))
-    (ret (array_length parts)))
+    (ret (len parts)))
 
   (fn split_string_value -> string
     (set parts array (string_split "hello world" " "))
@@ -77,7 +77,7 @@
     (map_set m "x" 1)
     (map_set m "y" 2)
     (set entries array (map_entries m))
-    (ret (array_length entries)))
+    (ret (len entries)))
 
   (fn map_entries_key -> string
     (set m map (map_new))

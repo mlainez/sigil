@@ -9,7 +9,7 @@
     (set ws_conn socket (ws_accept client_tcp))
     (loop
       (set msg string (ws_receive ws_conn))
-      (set msg_len int (string_length msg))
+      (set msg_len int (len msg))
       (if (eq msg_len 0)
         (break))
       (ws_send ws_conn msg))

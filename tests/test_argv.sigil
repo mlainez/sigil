@@ -5,7 +5,7 @@
 
   (fn test_argv_empty -> int
     (set args array (argv))
-    (ret (array_length args)))
+    (ret (len args)))
 
   (test-spec test_argv_count_no_args
     (case "returns 0 when no extra args"

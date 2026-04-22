@@ -1,6 +1,6 @@
 (module test_string_conversion
   (fn i32_to_string x int -> string
-    (ret (string_from_int x)))
+    (ret (str x)))
   
   (test-spec i32_to_string
     (case "convert 42 to string"
@@ -14,7 +14,7 @@
       (expect "-100")))
   
   (fn i64_to_string x int -> string
-    (ret (string_from_int x)))
+    (ret (str x)))
   
   (test-spec i64_to_string
     (case "convert large int to string"
@@ -25,7 +25,7 @@
       (expect "0")))
   
   (fn f32_to_string x float -> string
-    (ret (string_from_float x)))
+    (ret (str x)))
   
   (test-spec f32_to_string
     (case "convert 3.14 to string"
@@ -36,7 +36,7 @@
       (expect "0.0")))
   
   (fn f64_to_string x float -> string
-    (ret (string_from_float x)))
+    (ret (str x)))
   
   (test-spec f64_to_string
     (case "convert 2.71828 to string"
@@ -47,7 +47,7 @@
       (expect "0.0")))
   
   (fn concat_i32_string prefix string num int -> string
-    (ret (string_concat prefix (string_from_int num))))
+    (ret (string_concat prefix (str num))))
   
   (test-spec concat_i32_string
     (case "concat with 100"
