@@ -735,29 +735,77 @@ let rec eval env expr =
    | LitUnit -> VUnit
 
    | Var name -> env_get env name
-  
+
+  | Call ("fmt", fmt_args) when (match fmt_args with LitString _ :: _ -> true | _ -> false) ->
+      (* Special form: scan template for {var} (scope lookup) and {} (positional from args).
+         First arg is the template, remaining args fill {} placeholders in order. *)
+      let (template, extra_args) = match fmt_args with
+        | LitString t :: rest -> (t, List.map (eval env) rest)
+        | _ -> assert false
+      in
+      let buf = Buffer.create (String.length template) in
+      let len = String.length template in
+      let i = ref 0 in
+      let positional = ref extra_args in
+      while !i < len do
+        let c = template.[!i] in
+        if c = '{' && !i + 1 < len && template.[!i + 1] = '{' then begin
+          Buffer.add_char buf '{';
+          i := !i + 2
+        end else if c = '}' && !i + 1 < len && template.[!i + 1] = '}' then begin
+          Buffer.add_char buf '}';
+          i := !i + 2
+        end else if c = '{' then begin
+          let close = try String.index_from template (!i + 1) '}' with Not_found -> -1 in
+          if close = -1 then begin
+            Buffer.add_char buf c;
+            incr i
+          end else begin
+            let name = String.sub template (!i + 1) (close - !i - 1) in
+            if name = "" then begin
+              (* Positional: consume from extra args *)
+              (match !positional with
+               | v :: rest ->
+                   Buffer.add_string buf (string_of_value v);
+                   positional := rest
+               | [] -> raise (RuntimeError "fmt: not enough positional args for {} placeholder"))
+            end else begin
+              (* Named: look up in scope *)
+              let v = env_get env name in
+              Buffer.add_string buf (string_of_value v)
+            end;
+            i := close + 1
+          end
+        end else begin
+          Buffer.add_char buf c;
+          incr i
+        end
+      done;
+      VString (Buffer.contents buf)
+
   | Call (func_name, args) ->
       eval_call env func_name args
   
   | Set (var_name, var_type_opt, value_expr) ->
       let value = eval env value_expr in
+      let type_of_value v = match v with
+        | VInt _ -> TInt | VFloat _ -> TFloat | VDecimal _ -> TDecimal
+        | VString _ -> TString | VBool _ -> TBool | VUnit -> TUnit
+        | VArray _ -> TArray TUnit | VMap _ -> TMap (TUnit, TUnit)
+        | VFunction _ -> TFunction ([], TUnit)
+        | VSocket _ | VTlsSocket _ | VWsSocket _ -> TSocket
+        | VChannel _ -> TSocket | VProcess _ -> TProcess
+      in
       let var_type = match var_type_opt with
         | Some t -> t
         | None ->
-            (* Type-free reassignment: infer type from existing variable *)
+            (* Try reassignment first (use existing variable's type) *)
             (try
               let existing = env_get env var_name in
-              match existing with
-              | VInt _ -> TInt | VFloat _ -> TFloat | VDecimal _ -> TDecimal
-              | VString _ -> TString | VBool _ -> TBool | VUnit -> TUnit
-              | VArray _ -> TArray TUnit | VMap _ -> TMap (TUnit, TUnit)
-              | VFunction _ -> TFunction ([], TUnit)
-              | VSocket _ | VTlsSocket _ | VWsSocket _ -> TSocket
-              | VChannel _ -> TSocket | VProcess _ -> TProcess
+              type_of_value existing
             with RuntimeError _ ->
-              raise (RuntimeError (
-                "Type-free set requires variable '" ^ var_name ^
-                "' to already be declared. Use (set " ^ var_name ^ " <type> <expr>) for first declaration.")))
+              (* New declaration: infer from the value itself *)
+              type_of_value value)
       in
       if not (type_matches var_type value) then
         raise (RuntimeError (
@@ -881,6 +929,8 @@ let rec eval env expr =
 
   | ForEach (var_name, var_type, collection_expr, body) ->
       let coll = eval env collection_expr in
+      (* TUnit means "no type annotation given" — skip the element type check *)
+      let skip_check = (var_type = TUnit) in
       (match coll with
        | VArray arr ->
            let len = Array.length !arr in
@@ -888,7 +938,7 @@ let rec eval env expr =
            (try
              while !i < len do
                let elem = !arr.(!i) in
-               if not (type_matches var_type elem) then
+               if (not skip_check) && not (type_matches var_type elem) then
                  raise (RuntimeError (
                    "Type mismatch in for-each: variable '" ^ var_name ^
                    "' declared as " ^ string_of_type_kind var_type ^
@@ -1383,6 +1433,28 @@ and eval_block env exprs =
             end
         | _ -> raise (RuntimeError "Invalid arguments to string_contains: expects (string, string) -> bool"))
 
+   | "in" ->
+       (match arg_vals with
+        | [VString needle; VString haystack] ->
+            let hlen = String.length haystack in
+            let nlen = String.length needle in
+            if nlen = 0 then VBool true
+            else if nlen > hlen then VBool false
+            else begin
+              let found = ref false in
+              let i = ref 0 in
+              while not !found && !i <= hlen - nlen do
+                if String.sub haystack !i nlen = needle then found := true
+                else i := !i + 1
+              done;
+              VBool !found
+            end
+        | [v; VArray arr] ->
+            VBool (Array.exists (fun x -> values_equal x v) !arr)
+        | [VString key; VMap (m, _)] ->
+            VBool (Hashtbl.mem m key)
+        | _ -> raise (RuntimeError "in: expects (string, string) for substring, (value, array) for element, or (key, map)"))
+
    | "string_trim" ->
        (match arg_vals with
         | [VString s] ->
@@ -1796,6 +1868,102 @@ and eval_block env exprs =
          VString (Buffer.contents buf)
        with End_of_file ->
          VString (Buffer.contents buf))
+
+  (* ===== Short aliases for verbose builtins ===== *)
+  | "split" ->
+      (* Multi-char separator split, matching stdlib/core/string_utils.sigil behavior *)
+      (match arg_vals with
+       | [VString s; VString sep] ->
+           if sep = "" then VArray (ref [|VString s|])
+           else begin
+             let slen = String.length s in
+             let seplen = String.length sep in
+             let parts = ref [] in
+             let start = ref 0 in
+             let i = ref 0 in
+             while !i <= slen - seplen do
+               if String.sub s !i seplen = sep then begin
+                 parts := String.sub s !start (!i - !start) :: !parts;
+                 i := !i + seplen;
+                 start := !i
+               end else
+                 i := !i + 1
+             done;
+             parts := String.sub s !start (slen - !start) :: !parts;
+             VArray (ref (Array.of_list (List.rev_map (fun p -> VString p) !parts)))
+           end
+       | _ -> raise (RuntimeError "split takes (string, string)"))
+
+  | "join" ->
+      (match arg_vals with
+       | [VArray arr; VString sep] ->
+           let strs = Array.to_list !arr |> List.map (fun v ->
+             match v with VString s -> s | _ -> string_of_value v) in
+           VString (String.concat sep strs)
+       | _ -> raise (RuntimeError "join takes (array, string)"))
+
+  | "push" ->
+      (match arg_vals with
+       | [VArray arr; v] ->
+           arr := Array.append !arr [|v|];
+           VArray arr
+       | _ -> raise (RuntimeError "push takes (array, value)"))
+
+  | "chars" ->
+      (match arg_vals with
+       | [VString s] ->
+           let n = String.length s in
+           let chars = List.init n (fun i -> VString (String.make 1 s.[i])) in
+           VArray (ref (Array.of_list chars))
+       | _ -> raise (RuntimeError "chars takes 1 string"))
+
+  | "sort" ->
+      (match arg_vals with
+       | [VArray arr] ->
+           let sorted = Array.copy !arr in
+           Array.sort (fun a b ->
+             match a, b with
+             | VInt x, VInt y -> Int64.compare x y
+             | VFloat x, VFloat y -> compare x y
+             | VString x, VString y -> compare x y
+             | _ -> compare a b
+           ) sorted;
+           arr := sorted;
+           VArray arr
+       | _ -> raise (RuntimeError "sort takes 1 array"))
+
+  | "lower" ->
+      (match arg_vals with
+       | [VString s] -> VString (String.lowercase_ascii s)
+       | _ -> raise (RuntimeError "lower takes 1 string"))
+
+  | "upper" ->
+      (match arg_vals with
+       | [VString s] -> VString (String.uppercase_ascii s)
+       | _ -> raise (RuntimeError "upper takes 1 string"))
+
+  | "trim" ->
+      (match arg_vals with
+       | [VString s] -> VString (String.trim s)
+       | _ -> raise (RuntimeError "trim takes 1 string"))
+
+  | "int" ->
+      (match arg_vals with
+       | [VString s] ->
+           (try VInt (Int64.of_string (String.trim s))
+            with Failure _ -> raise (RuntimeError ("int: cannot parse: " ^ s)))
+       | [VFloat f] -> VInt (Int64.of_float f)
+       | [VInt n] -> VInt n
+       | _ -> raise (RuntimeError "int takes 1 string/float/int"))
+
+  | "float" ->
+      (match arg_vals with
+       | [VString s] ->
+           (try VFloat (float_of_string (String.trim s))
+            with Failure _ -> raise (RuntimeError ("float: cannot parse: " ^ s)))
+       | [VInt n] -> VFloat (Int64.to_float n)
+       | [VFloat f] -> VFloat f
+       | _ -> raise (RuntimeError "float takes 1 string/int/float"))
 
   (* Time operations *)
   | "time_now" ->
@@ -2551,7 +2719,8 @@ and eval_block env exprs =
              ) params arg_vals;
              (try
                let _ = eval_block func_env body in
-               VUnit
+               (* Implicit (ret 0) for main: if main finishes without explicit return, return 0 *)
+               if func_name = "main" then VInt 0L else VUnit
              with Return v -> v)
           | _ -> raise (RuntimeError (func_name ^ " is not a function"))
         with Not_found ->
