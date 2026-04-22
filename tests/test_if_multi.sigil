@@ -1,9 +1,9 @@
 (module test_if_multi
   (fn test_multi x int -> bool
-    (set result bool false)
+    (set result false)
     (set check bool (gt x 0))
     (if check
-      (set temp bool true)
+      (set temp true)
       (set result bool temp))
     (ret result))
   

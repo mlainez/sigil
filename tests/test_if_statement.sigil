@@ -1,36 +1,36 @@
 (module test_if_statement
   (fn test_if_true -> int
-    (set result int 0)
+    (set result 0)
     (if (eq 1 1)
-      (set result int 42))
+      (set result 42))
     (ret result))
   
   (fn test_if_false -> int
-    (set result int 0)
+    (set result 0)
     (if (eq 1 2)
-      (set result int 42))
+      (set result 42))
     (ret result))
   
   (fn test_if_with_gt -> int
-    (set x int 10)
-    (set y int 5)
-    (set result int 0)
+    (set x 10)
+    (set y 5)
+    (set result 0)
     (if (gt x y)
-      (set result int 1))
+      (set result 1))
     (ret result))
   
   (fn test_if_with_lt -> int
-    (set x int 3)
-    (set y int 7)
-    (set result int 0)
+    (set x 3)
+    (set y 7)
+    (set result 0)
     (if (lt x y)
-      (set result int 1))
+      (set result 1))
     (ret result))
   
   (fn test_if_multiple_statements -> int
-    (set result int 0)
+    (set result 0)
     (if (eq 5 5)
-      (set result int 1)
+      (set result 1)
       (set result int (add result 9)))
     (ret result))
   

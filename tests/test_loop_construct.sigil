@@ -1,6 +1,6 @@
 (module test_loop
   (fn test_loop -> int
-    (set count int 0)
+    (set count 0)
     (loop
       (print "In loop")
       (set count int (add count 1))

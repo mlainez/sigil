@@ -1,25 +1,25 @@
 (module test_for_each
 
   (fn sum_array nums array -> int
-    (set total int 0)
+    (set total 0)
     (for-each n int nums
       (set total int (add total n)))
     (ret total))
 
   (fn count_elements items array -> int
-    (set count int 0)
+    (set count 0)
     (for-each item string items
       (set count int (add count 1)))
     (ret count))
 
   (fn concat_strings items array -> string
-    (set result string "")
+    (set result "")
     (for-each item string items
       (set result string (string_concat result item)))
     (ret result))
 
   (fn sum_with_break nums array -> int
-    (set total int 0)
+    (set total 0)
     (for-each n int nums
       (if (eq n 99)
         (break))
@@ -27,7 +27,7 @@
     (ret total))
 
   (fn skip_negatives nums array -> int
-    (set total int 0)
+    (set total 0)
     (for-each n int nums
       (if (lt n 0)
         (continue))
@@ -35,13 +35,13 @@
     (ret total))
 
   (fn count_map_keys data map -> int
-    (set count int 0)
+    (set count 0)
     (for-each k string data
       (set count int (add count 1)))
     (ret count))
 
   (fn collect_map_keys data map -> string
-    (set result string "")
+    (set result "")
     (for-each k string data
       (if (gt (len result) 0)
         (set result string (string_concat result ",")))
@@ -49,7 +49,7 @@
     (ret result))
 
   (fn empty_array_sum nums array -> int
-    (set total int 0)
+    (set total 0)
     (for-each n int nums
       (set total int (add total n)))
     (ret total))

@@ -1,23 +1,23 @@
 (module test_try_catch
   (fn catch_div_zero -> string
-    (set result string "no error")
+    (set result "no error")
     (try
       (set x int (div 10 0))
       (set result string (str x))
       (catch err string
-        (set result string "caught")))
+        (set result "caught")))
     (ret result))
 
   (fn try_no_error -> int
-    (set result int 0)
+    (set result 0)
     (try
       (set result int (add 10 20))
       (catch err string
-        (set result int -1)))
+        (set result -1)))
     (ret result))
 
   (fn catch_error_message -> string
-    (set msg string "none")
+    (set msg "none")
     (try
       (set x int (div 5 0))
       (set msg string (str x))
@@ -26,26 +26,26 @@
     (ret msg))
 
   (fn nested_try_catch -> string
-    (set result string "none")
+    (set result "none")
     (try
       (try
         (set x int (div 1 0))
         (set result string (str x))
         (catch inner_err string
-          (set result string "inner")))
+          (set result "inner")))
       (catch outer_err string
-        (set result string "outer")))
+        (set result "outer")))
     (ret result))
 
   (fn try_catch_array_bounds -> string
-    (set result string "no error")
+    (set result "no error")
     (set arr array (array_new))
     (array_push arr 10)
     (try
       (set val int (array_get arr 5))
       (set result string (str val))
       (catch err string
-        (set result string "caught bounds")))
+        (set result "caught bounds")))
     (ret result))
 
   (test-spec catch_div_zero

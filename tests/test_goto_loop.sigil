@@ -1,6 +1,6 @@
 (module test_goto_loop
   (fn count_to_five -> int
-    (set n int 0)
+    (set n 0)
     (label loop_start)
     (set n int (add n 1))
     (ifnot (lt n 5) loop_end)

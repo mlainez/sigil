@@ -1,6 +1,6 @@
 (module test
   (fn count_with_side_effect limit int -> int
-    (set counter int 0)
+    (set counter 0)
     (if (lt counter limit)
       (set counter int (add counter 1)))
     (if (lt counter limit)

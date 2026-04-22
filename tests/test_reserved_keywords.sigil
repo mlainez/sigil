@@ -1,6 +1,6 @@
 (module test_reserved_keywords
   (fn test_json_keyword -> int
-    (set json_str string "valid")
+    (set json_str "valid")
     (print json_str)
     (ret 0))
   

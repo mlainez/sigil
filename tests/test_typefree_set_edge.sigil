@@ -1,6 +1,6 @@
 (module test_typefree_set_edge
   (fn decimal_reassign -> decimal
-    (set d decimal 10.5d)
+    (set d 10.5d)
     (set d (add d 1.5d))
     (ret d))
 
@@ -20,7 +20,7 @@
       (expect "Bob")))
 
   (fn reassign_in_if flag bool -> int
-    (set x int 0)
+    (set x 0)
     (if flag
       (set x 42))
     (ret x))
@@ -34,7 +34,7 @@
       (expect 0)))
 
   (fn reassign_in_if_else flag bool -> string
-    (set s string "init")
+    (set s "init")
     (if flag
       (set s "yes")
       (else
@@ -50,7 +50,7 @@
       (expect "no")))
 
   (fn typefree_in_for -> int
-    (set total int 0)
+    (set total 0)
     (for i 0 5
       (set total (add total (mul i i))))
     (ret total))
@@ -70,7 +70,7 @@
       (expect 3)))
 
   (fn type_mismatch_panics -> string
-    (set x int 10)
+    (set x 10)
     (try
       (set x "hello")
       (ret "no error")
@@ -83,9 +83,9 @@
       (expect "caught")))
 
   (fn multiple_reassigns -> int
-    (set a int 1)
-    (set b int 2)
-    (set c int 3)
+    (set a 1)
+    (set b 2)
+    (set c 3)
     (set a (add a b))
     (set b (add b c))
     (set c (add a b))

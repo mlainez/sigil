@@ -2,7 +2,7 @@
   (import math)
   
   (fn get_string_length -> int
-    (set text string "hello")
+    (set text "hello")
     (set len int (len text))
     (ret len))
   

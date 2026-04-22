@@ -1,6 +1,6 @@
 (module test_simple_break
   (fn test_simple -> int
-    (set i int 0)
+    (set i 0)
     (loop
       (set i int (add i 1))
       (if (eq i 3)

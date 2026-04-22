@@ -28,7 +28,7 @@
 
   (fn test_chars_join s string -> string
     (set chars array (string_chars s))
-    (set result string "")
+    (set result "")
     (for-each ch string chars
       (set result (string_concat result ch)))
     (ret result))
@@ -42,7 +42,7 @@
       (expect "a b c")))
 
   (fn test_count_upper s string -> int
-    (set count int 0)
+    (set count 0)
     (for-each ch string (string_chars s)
       (if (is_upper ch)
         (set count (add count 1))))

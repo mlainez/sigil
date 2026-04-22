@@ -1,11 +1,11 @@
 (module test_tcp_loopback
 
   (fn test_tcp_send_receive -> int
-    (set port int 18701)
+    (set port 18701)
     (set server socket (tcp_listen port))
     (set client socket (tcp_connect "127.0.0.1" port))
     (set accepted socket (tcp_accept server))
-    (set msg string "hello from client")
+    (set msg "hello from client")
     (tcp_send client msg)
     (set received string (tcp_receive accepted 1024))
     (tcp_close client)
@@ -16,11 +16,11 @@
     (ret 0))
 
   (fn test_tcp_server_to_client -> int
-    (set port int 18702)
+    (set port 18702)
     (set server socket (tcp_listen port))
     (set client socket (tcp_connect "127.0.0.1" port))
     (set accepted socket (tcp_accept server))
-    (set msg string "hello from server")
+    (set msg "hello from server")
     (tcp_send accepted msg)
     (set received string (tcp_receive client 1024))
     (tcp_close client)
@@ -31,14 +31,14 @@
     (ret 0))
 
   (fn test_tcp_bidirectional -> int
-    (set port int 18703)
+    (set port 18703)
     (set server socket (tcp_listen port))
     (set client socket (tcp_connect "127.0.0.1" port))
     (set accepted socket (tcp_accept server))
-    (set msg1 string "ping")
+    (set msg1 "ping")
     (tcp_send client msg1)
     (set got1 string (tcp_receive accepted 1024))
-    (set msg2 string "pong")
+    (set msg2 "pong")
     (tcp_send accepted msg2)
     (set got2 string (tcp_receive client 1024))
     (tcp_close client)
@@ -52,20 +52,20 @@
     (ret 0))
 
   (fn test_tcp_large_message -> int
-    (set port int 18704)
+    (set port 18704)
     (set server socket (tcp_listen port))
     (set client socket (tcp_connect "127.0.0.1" port))
     (set accepted socket (tcp_accept server))
-    (set msg string "ABCDEFGHIJ")
+    (set msg "ABCDEFGHIJ")
     (set big_msg string msg)
-    (set i int 0)
+    (set i 0)
     (while (lt i 6)
       (set big_msg string (string_concat big_msg big_msg))
       (set i int (add i 1)))
     (set expected_len int (len big_msg))
     (tcp_send client big_msg)
-    (set received string "")
-    (set total_len int 0)
+    (set received "")
+    (set total_len 0)
     (while (lt total_len expected_len)
       (set chunk string (tcp_receive accepted 4096))
       (set chunk_len int (len chunk))
@@ -83,11 +83,11 @@
     (ret 0))
 
   (fn test_tcp_socket_select -> int
-    (set port int 18705)
+    (set port 18705)
     (set server socket (tcp_listen port))
     (set client socket (tcp_connect "127.0.0.1" port))
     (set accepted socket (tcp_accept server))
-    (set msg string "select test")
+    (set msg "select test")
     (tcp_send client msg)
     (sleep 20)
     (set inputs array (array_new))
@@ -102,7 +102,7 @@
     (ret 0))
 
   (fn test_tcp_close_detection -> int
-    (set port int 18706)
+    (set port 18706)
     (set server socket (tcp_listen port))
     (set client socket (tcp_connect "127.0.0.1" port))
     (set accepted socket (tcp_accept server))

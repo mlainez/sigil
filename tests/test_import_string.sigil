@@ -2,7 +2,7 @@
   (import string_utils)
   
   (fn get_length -> int
-    (set text string "hello world")
+    (set text "hello world")
     (set len int (len text))
     (ret len))
   

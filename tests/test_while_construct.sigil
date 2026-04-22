@@ -1,6 +1,6 @@
 (module test_while
   (fn test_while -> int
-    (set count int 0)
+    (set count 0)
     (while (lt count 3)
       (print "In while loop")
       (set count int (add count 1)))

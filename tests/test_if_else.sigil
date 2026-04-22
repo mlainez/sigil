@@ -1,11 +1,11 @@
 (module test_if_else
   (fn classify_sign n int -> string
-    (set result string "zero")
+    (set result "zero")
     (if (gt n 0)
-      (set result string "positive")
+      (set result "positive")
       (else
         (if (lt n 0)
-          (set result string "negative"))))
+          (set result "negative"))))
     (ret result))
 
   (fn abs_value n int -> int
@@ -21,24 +21,24 @@
         (ret b))))
 
   (fn if_else_with_set flag bool -> int
-    (set result int 0)
+    (set result 0)
     (if flag
-      (set result int 1)
+      (set result 1)
       (set result int (add result 10))
       (else
-        (set result int 2)
+        (set result 2)
         (set result int (add result 20))))
     (ret result))
 
   (fn nested_if_else x int -> string
-    (set result string "unknown")
+    (set result "unknown")
     (if (gt x 100)
-      (set result string "large")
+      (set result "large")
       (else
         (if (gt x 10)
-          (set result string "medium")
+          (set result "medium")
           (else
-            (set result string "small")))))
+            (set result "small")))))
     (ret result))
 
   (test-spec classify_sign

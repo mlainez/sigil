@@ -1,12 +1,12 @@
 (module test_tcp_accept_init
   
   (fn test_socket_fields sock socket -> int
-    (set result int 1)
+    (set result 1)
     (ret result))
   
   (fn test_multiple_accepts -> int
     (set server socket (tcp_listen 19999))
-    (set count int 0)
+    (set count 0)
     (ret count))
   
   (test-spec test_socket_fields

@@ -1,14 +1,14 @@
 (module test_websocket_loopback
 
   (fn start_ws_server port int -> channel
-    (set vm_path string "./interpreter/_build/default/vm.exe")
+    (set vm_path "./interpreter/_build/default/vm.exe")
     (set server_args array (array_new))
     (array_push server_args "tests/ws_echo_server.sigil")
     (set server channel (process_spawn vm_path server_args))
     (set port_str string (str port))
     (set port_line string (string_concat port_str "\n"))
     (process_write server port_line)
-    (set attempts int 0)
+    (set attempts 0)
     (while (lt attempts 50)
       (set line string (process_read server))
       (set line_len int (len line))
@@ -19,10 +19,10 @@
     (ret server))
 
   (fn test_ws_echo -> int
-    (set port int 18801)
+    (set port 18801)
     (set server channel (start_ws_server port))
     (set ws socket (ws_connect "127.0.0.1" port "/"))
-    (set msg string "hello websocket")
+    (set msg "hello websocket")
     (ws_send ws msg)
     (set received string (ws_receive ws))
     (ws_close ws)
@@ -32,16 +32,16 @@
     (ret 0))
 
   (fn test_ws_multiple_messages -> int
-    (set port int 18802)
+    (set port 18802)
     (set server channel (start_ws_server port))
     (set ws socket (ws_connect "127.0.0.1" port "/"))
-    (set msg1 string "first message")
+    (set msg1 "first message")
     (ws_send ws msg1)
     (set got1 string (ws_receive ws))
-    (set msg2 string "second message")
+    (set msg2 "second message")
     (ws_send ws msg2)
     (set got2 string (ws_receive ws))
-    (set msg3 string "third message")
+    (set msg3 "third message")
     (ws_send ws msg3)
     (set got3 string (ws_receive ws))
     (ws_close ws)
@@ -56,11 +56,11 @@
     (ret 0))
 
   (fn test_ws_large_message -> int
-    (set port int 18803)
+    (set port 18803)
     (set server channel (start_ws_server port))
     (set ws socket (ws_connect "127.0.0.1" port "/"))
-    (set msg string "ABCDEFGHIJ")
-    (set i int 0)
+    (set msg "ABCDEFGHIJ")
+    (set i 0)
     (while (lt i 6)
       (set msg string (string_concat msg msg))
       (set i int (add i 1)))

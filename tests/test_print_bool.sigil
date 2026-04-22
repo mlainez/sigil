@@ -1,6 +1,6 @@
 (module test_print_bool
   (fn returns_true -> int
-    (set val bool true)
+    (set val true)
     (if val
       (ret 1))
     (ret 0))
@@ -11,7 +11,7 @@
       (expect 1)))
   
   (fn returns_false -> int
-    (set val bool false)
+    (set val false)
     (if val
       (ret 1))
     (ret 0))

@@ -2,7 +2,7 @@
   
   (fn test_tls_connect_google -> int
     (set sock socket (tcp_tls_connect "www.google.com" 443))
-    (set request string "GET / HTTP/1.1\r\nHost: www.google.com\r\nConnection: close\r\n\r\n")
+    (set request "GET / HTTP/1.1\r\nHost: www.google.com\r\nConnection: close\r\n\r\n")
     (set sent int (tcp_send sock request))
     (if (lt sent 0)
       (ret 0))

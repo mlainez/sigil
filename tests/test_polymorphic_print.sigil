@@ -1,22 +1,22 @@
 (module test_polymorphic_print
   (fn test_print_string -> string
-    (set s string "hello")
+    (set s "hello")
     (ret s))
   
   (fn test_print_i32 -> int
-    (set x int 42)
+    (set x 42)
     (ret x))
   
   (fn test_print_i64 -> int
-    (set x int 9999999999)
+    (set x 9999999999)
     (ret x))
   
   (fn test_print_f32 -> float
-    (set x float 3.14)
+    (set x 3.14)
     (ret x))
   
   (fn test_print_f64 -> float
-    (set x float 2.718)
+    (set x 2.718)
     (ret x))
   
   (fn test_print_bool_true -> bool

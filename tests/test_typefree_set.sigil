@@ -1,6 +1,6 @@
 (module test_typefree_set
   (fn counter_update -> int
-    (set x int 0)
+    (set x 0)
     (set x (add x 1))
     (set x (add x 1))
     (set x (add x 1))
@@ -12,7 +12,7 @@
       (expect 3)))
 
   (fn string_reassign -> string
-    (set s string "hello")
+    (set s "hello")
     (set s (string_concat s " world"))
     (ret s))
 
@@ -22,8 +22,8 @@
       (expect "hello world")))
 
   (fn mixed_types -> int
-    (set a int 10)
-    (set b float 3.14)
+    (set a 10)
+    (set b 3.14)
     (set a (add a 5))
     (set b (add b 1.0))
     (ret a))
@@ -45,8 +45,8 @@
       (expect 4)))
 
   (fn loop_with_typefree n int -> int
-    (set total int 0)
-    (set i int 0)
+    (set total 0)
+    (set i 0)
     (while (lt i n)
       (set total (add total i))
       (set i (add i 1)))
@@ -61,7 +61,7 @@
       (expect 0)))
 
   (fn bool_reassign -> bool
-    (set flag bool true)
+    (set flag true)
     (set flag false)
     (ret flag))
 

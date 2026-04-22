@@ -27,7 +27,7 @@
       (expect "int=42 float=3.14 bool=true str=hi")))
 
   (fn escape_braces -> string
-    (set x int 5)
+    (set x 5)
     (ret (fmt "literal {{ and }} with value {x}")))
 
   (test-spec escape_braces

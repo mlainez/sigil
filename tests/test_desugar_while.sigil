@@ -1,6 +1,6 @@
 (module test_desugar_while
   (fn count_to_five -> int
-    (set n int 0)
+    (set n 0)
     (while (lt n 5)
       (set n int (add n 1)))
     (ret n))
@@ -11,7 +11,7 @@
       (expect 5)))
   
   (fn count_to_target target int -> int
-    (set n int 0)
+    (set n 0)
     (while (lt n target)
       (set n int (add n 1)))
     (ret n))

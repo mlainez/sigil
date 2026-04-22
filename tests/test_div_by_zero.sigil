@@ -1,18 +1,18 @@
 (module test_div_by_zero
   (fn safe_div a int b int -> int
-    (set result int 0)
+    (set result 0)
     (try
       (set result int (div a b))
       (catch err string
-        (set result int -999)))
+        (set result -999)))
     (ret result))
 
   (fn safe_mod a int b int -> int
-    (set result int 0)
+    (set result 0)
     (try
       (set result int (mod a b))
       (catch err string
-        (set result int -999)))
+        (set result -999)))
     (ret result))
 
   (fn normal_div a int b int -> int

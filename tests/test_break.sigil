@@ -1,7 +1,7 @@
 (module test_break
   (fn test_break_in_while -> int
-    (set i int 0)
-    (set sum int 0)
+    (set i 0)
+    (set sum 0)
     (while (lt i 100)
       (set sum int (add sum i))
       (set i int (add i 1))
@@ -15,7 +15,7 @@
       (expect 10)))
 
   (fn test_break_in_loop -> int
-    (set count int 0)
+    (set count 0)
     (loop
       (set count int (add count 1))
       (if (gt count 10)

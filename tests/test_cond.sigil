@@ -1,33 +1,33 @@
 (module test_cond
 
   (fn classify_number n int -> string
-    (set result string "unknown")
+    (set result "unknown")
     (cond
       ((lt n 0)
-        (set result string "negative"))
+        (set result "negative"))
       ((eq n 0)
-        (set result string "zero"))
+        (set result "zero"))
       ((lt n 10)
-        (set result string "small"))
+        (set result "small"))
       ((lt n 100)
-        (set result string "medium"))
+        (set result "medium"))
       (true
-        (set result string "large")))
+        (set result "large")))
     (ret result))
 
   (fn grade_score score int -> string
-    (set result string "F")
+    (set result "F")
     (cond
       ((ge score 90)
-        (set result string "A"))
+        (set result "A"))
       ((ge score 80)
-        (set result string "B"))
+        (set result "B"))
       ((ge score 70)
-        (set result string "C"))
+        (set result "C"))
       ((ge score 60)
-        (set result string "D"))
+        (set result "D"))
       (true
-        (set result string "F")))
+        (set result "F")))
     (ret result))
 
   (fn abs_value n int -> int
@@ -40,10 +40,10 @@
     (ret result))
 
   (fn no_match_returns_unit flag bool -> int
-    (set result int 0)
+    (set result 0)
     (cond
       (false
-        (set result int 99)))
+        (set result 99)))
     (ret result))
 
   (test-spec classify_number
