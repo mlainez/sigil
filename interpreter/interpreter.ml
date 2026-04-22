@@ -2017,6 +2017,60 @@ and eval_block env exprs =
            end
        | _ -> raise (RuntimeError "sum takes 1 array"))
 
+  | "filter" ->
+      (* (filter arr fn) -- keep elements where fn(elem) returns true *)
+      (match arg_vals with
+       | [VArray arr; VFunction (_, params, _, body)] ->
+           if List.length params <> 1 then
+             raise (RuntimeError "filter: predicate must take exactly 1 argument");
+           let kept = ref [] in
+           Array.iter (fun elem ->
+             let func_env = env_create () in
+             Hashtbl.iter (fun k v -> match v with VFunction _ -> env_set func_env k v | _ -> ()) env;
+             env_set func_env (List.hd params).param_name elem;
+             let result = try eval_block func_env body
+               with Return v -> v in
+             match result with
+             | VBool true -> kept := elem :: !kept
+             | _ -> ()
+           ) !arr;
+           VArray (ref (Array.of_list (List.rev !kept)))
+       | _ -> raise (RuntimeError "filter takes (array, function)"))
+
+  | "map_arr" ->
+      (* (map_arr arr fn) -- apply fn to each element, return new array *)
+      (match arg_vals with
+       | [VArray arr; VFunction (_, params, _, body)] ->
+           if List.length params <> 1 then
+             raise (RuntimeError "map_arr: function must take exactly 1 argument");
+           let mapped = Array.map (fun elem ->
+             let func_env = env_create () in
+             Hashtbl.iter (fun k v -> match v with VFunction _ -> env_set func_env k v | _ -> ()) env;
+             env_set func_env (List.hd params).param_name elem;
+             try eval_block func_env body
+             with Return v -> v
+           ) !arr in
+           VArray (ref mapped)
+       | _ -> raise (RuntimeError "map_arr takes (array, function)"))
+
+  | "reduce" ->
+      (* (reduce arr fn init) -- left fold *)
+      (match arg_vals with
+       | [VArray arr; VFunction (_, params, _, body); init] ->
+           if List.length params <> 2 then
+             raise (RuntimeError "reduce: function must take exactly 2 arguments (acc, elem)");
+           let acc_param = (List.nth params 0).param_name in
+           let elem_param = (List.nth params 1).param_name in
+           Array.fold_left (fun acc elem ->
+             let func_env = env_create () in
+             Hashtbl.iter (fun k v -> match v with VFunction _ -> env_set func_env k v | _ -> ()) env;
+             env_set func_env acc_param acc;
+             env_set func_env elem_param elem;
+             try eval_block func_env body
+             with Return v -> v
+           ) init !arr
+       | _ -> raise (RuntimeError "reduce takes (array, function, init)"))
+
   | "count_in" ->
       (* Count chars in string s that appear in string charset, or elements of array1 in array2 *)
       (match arg_vals with
@@ -2708,6 +2762,7 @@ and eval_block env exprs =
         | [VArray _] -> VString "array"
         | [VMap _] -> VString "map"
         | [VUnit] -> VString "unit"
+        | [VFunction _] -> VString "function"
         | _ -> VString "unknown")
 
    | "is_array" ->
@@ -2813,9 +2868,9 @@ and eval_block env exprs =
                env_set func_env param.param_name arg_val
              ) params arg_vals;
              (try
-               let _ = eval_block func_env body in
-               (* Implicit (ret 0) for main: if main finishes without explicit return, return 0 *)
-               if func_name = "main" then VInt 0L else VUnit
+               let last_result = eval_block func_env body in
+               (* main: implicit (ret 0); other functions: implicit return of last expression value *)
+               if func_name = "main" then VInt 0L else last_result
              with Return v -> v)
           | _ -> raise (RuntimeError (func_name ^ " is not a function"))
         with Not_found ->
@@ -2843,10 +2898,8 @@ and execute_tests env tests =
              List.iter2 (fun param arg_val ->
                env_set func_env param.param_name arg_val
              ) params arg_vals;
-            let result = 
-              try
-                let _ = eval_block func_env body in
-                VUnit
+            let result =
+              try eval_block func_env body
               with Return v -> v
             in
              let expected = eval env case.test_expected in

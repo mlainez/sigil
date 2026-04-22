@@ -1,0 +1,63 @@
+(module test_higher_order
+  (fn even? n int -> bool (eq (mod n 2) 0))
+  (fn double n int -> int (mul n 2))
+  (fn add_acc acc int n int -> int (add acc n))
+  (fn longer? s string -> bool (gt (len s) 3))
+
+  (fn test_filter_ints -> int
+    (set arr array [1 2 3 4 5 6])
+    (set evens (filter arr even?))
+    (ret (len evens)))
+
+  (test-spec test_filter_ints
+    (case "3 evens in 1..6"
+      (input)
+      (expect 3)))
+
+  (fn test_filter_strings -> int
+    (set words array ["hi" "hello" "x" "world"])
+    (set long (filter words longer?))
+    (ret (len long)))
+
+  (test-spec test_filter_strings
+    (case "2 strings longer than 3 chars"
+      (input)
+      (expect 2)))
+
+  (fn test_map_arr -> int
+    (set arr array [1 2 3])
+    (set doubled (map_arr arr double))
+    (ret (array_get doubled 2)))
+
+  (test-spec test_map_arr
+    (case "third element of doubled is 6"
+      (input)
+      (expect 6)))
+
+  (fn test_reduce_sum -> int
+    (set arr array [1 2 3 4 5])
+    (ret (reduce arr add_acc 0)))
+
+  (test-spec test_reduce_sum
+    (case "reduce sum 1..5 = 15"
+      (input)
+      (expect 15)))
+
+  (fn implicit_return n int -> int
+    (mul n n))
+
+  (test-spec implicit_return
+    (case "implicit return of last expr"
+      (input 7)
+      (expect 49)))
+
+  (fn implicit_return_with_logic n int -> int
+    (set doubled (mul n 2))
+    (add doubled 1))
+
+  (test-spec implicit_return_with_logic
+    (case "implicit return of last expr after set"
+      (input 5)
+      (expect 11)))
+
+  (meta-note "Tests filter, map_arr, reduce higher-order builtins; implicit return of last expression"))
