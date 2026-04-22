@@ -17,6 +17,8 @@ type value =
   | VArray of value array ref
   | VMap of (string, value) Hashtbl.t * string list ref  (* hashtbl + insertion-ordered keys *)
   | VFunction of string * param list * type_kind * expr list
+  | VClosure of string list * expr list * (string * value) list
+      (* params, body, captured-env snapshot (var name + value pairs) *)
   | VSocket of Unix.file_descr
   | VTlsSocket of Ssl.socket
   | VWsSocket of ws_transport
@@ -866,6 +868,16 @@ let rec eval env expr =
       ) pairs;
       VMap (tbl, keys)
 
+  | Lambda (params, body) ->
+      (* Capture the current env as a snapshot. We copy non-function bindings only —
+         functions are global and don't need closure semantics. *)
+      let snapshot = Hashtbl.fold (fun k v acc ->
+        match v with
+        | VFunction _ -> acc  (* skip — already accessible *)
+        | _ -> (k, v) :: acc
+      ) env [] in
+      VClosure (params, body, snapshot)
+
   | And (left, right) ->
       (match eval env left with
        | VBool false -> VBool false
@@ -1000,7 +1012,35 @@ and eval_block env exprs =
   done;
   !result
 
- and eval_call env func_name args =
+and invoke_callable env callable args caller =
+  (* Invoke either a VFunction (named) or VClosure (anonymous lambda). *)
+  match callable with
+  | VFunction (_name, params, _ret_type, body) ->
+      let n_expected = List.length params in
+      let n_given = List.length args in
+      if n_given <> n_expected then
+        raise (RuntimeError (caller ^ ": function expects " ^ string_of_int n_expected ^ " args, got " ^ string_of_int n_given));
+      let func_env = env_create () in
+      Hashtbl.iter (fun k v -> match v with VFunction _ -> env_set func_env k v | _ -> ()) env;
+      List.iter2 (fun param a -> env_set func_env param.param_name a) params args;
+      (try eval_block func_env body with Return v -> v)
+  | VClosure (params, body, snapshot) ->
+      let n_expected = List.length params in
+      let n_given = List.length args in
+      if n_given <> n_expected then
+        raise (RuntimeError (caller ^ ": closure expects " ^ string_of_int n_expected ^ " args, got " ^ string_of_int n_given));
+      let func_env = env_create () in
+      (* Functions from current env *)
+      Hashtbl.iter (fun k v -> match v with VFunction _ -> env_set func_env k v | _ -> ()) env;
+      (* Captured snapshot bindings *)
+      List.iter (fun (k, v) -> env_set func_env k v) snapshot;
+      (* Lambda parameters *)
+      List.iter2 (fun pname a -> env_set func_env pname a) params args;
+      (try eval_block func_env body with Return v -> v)
+  | _ ->
+      raise (RuntimeError (caller ^ ": expected function or closure, got " ^ string_of_value_type callable))
+
+and eval_call env func_name args =
   let arg_vals = List.map (eval env) args in
 
   match func_name with
@@ -1508,12 +1548,40 @@ and eval_block env exprs =
   | "array_get" ->
       (match arg_vals with
        | [VArray arr; VInt idx] ->
+           let n = Array.length !arr in
            let i = Int64.to_int idx in
-           if i >= 0 && i < Array.length !arr then
-             !arr.(i)
+           let actual = if i < 0 then n + i else i in  (* negative indexing from end *)
+           if actual >= 0 && actual < n then
+             !arr.(actual)
            else
              raise (RuntimeError ("Array index out of bounds: " ^ Int64.to_string idx))
        | _ -> raise (RuntimeError "Invalid arguments to array_get"))
+
+  | "first" ->
+      (match arg_vals with
+       | [VArray arr] ->
+           if Array.length !arr = 0 then
+             raise (RuntimeError "first: empty array")
+           else !arr.(0)
+       | [VString s] ->
+           if String.length s = 0 then
+             raise (RuntimeError "first: empty string")
+           else VString (String.make 1 s.[0])
+       | _ -> raise (RuntimeError "first takes (array) or (string)"))
+
+  | "last" ->
+      (match arg_vals with
+       | [VArray arr] ->
+           let n = Array.length !arr in
+           if n = 0 then
+             raise (RuntimeError "last: empty array")
+           else !arr.(n - 1)
+       | [VString s] ->
+           let n = String.length s in
+           if n = 0 then
+             raise (RuntimeError "last: empty string")
+           else VString (String.make 1 s.[n - 1])
+       | _ -> raise (RuntimeError "last takes (array) or (string)"))
 
   | "array_set" ->
       (match arg_vals with
@@ -2018,58 +2086,37 @@ and eval_block env exprs =
        | _ -> raise (RuntimeError "sum takes 1 array"))
 
   | "filter" ->
-      (* (filter arr fn) -- keep elements where fn(elem) returns true *)
+      (* (filter arr fn-or-closure) -- keep elements where pred returns true *)
       (match arg_vals with
-       | [VArray arr; VFunction (_, params, _, body)] ->
-           if List.length params <> 1 then
-             raise (RuntimeError "filter: predicate must take exactly 1 argument");
+       | [VArray arr; pred] ->
            let kept = ref [] in
            Array.iter (fun elem ->
-             let func_env = env_create () in
-             Hashtbl.iter (fun k v -> match v with VFunction _ -> env_set func_env k v | _ -> ()) env;
-             env_set func_env (List.hd params).param_name elem;
-             let result = try eval_block func_env body
-               with Return v -> v in
+             let result = invoke_callable env pred [elem] "filter" in
              match result with
              | VBool true -> kept := elem :: !kept
              | _ -> ()
            ) !arr;
            VArray (ref (Array.of_list (List.rev !kept)))
-       | _ -> raise (RuntimeError "filter takes (array, function)"))
+       | _ -> raise (RuntimeError "filter takes (array, function or closure)"))
 
   | "map_arr" ->
-      (* (map_arr arr fn) -- apply fn to each element, return new array *)
+      (* (map_arr arr fn-or-closure) -- apply to each element, return new array *)
       (match arg_vals with
-       | [VArray arr; VFunction (_, params, _, body)] ->
-           if List.length params <> 1 then
-             raise (RuntimeError "map_arr: function must take exactly 1 argument");
+       | [VArray arr; fn] ->
            let mapped = Array.map (fun elem ->
-             let func_env = env_create () in
-             Hashtbl.iter (fun k v -> match v with VFunction _ -> env_set func_env k v | _ -> ()) env;
-             env_set func_env (List.hd params).param_name elem;
-             try eval_block func_env body
-             with Return v -> v
+             invoke_callable env fn [elem] "map_arr"
            ) !arr in
            VArray (ref mapped)
-       | _ -> raise (RuntimeError "map_arr takes (array, function)"))
+       | _ -> raise (RuntimeError "map_arr takes (array, function or closure)"))
 
   | "reduce" ->
       (* (reduce arr fn init) -- left fold *)
       (match arg_vals with
-       | [VArray arr; VFunction (_, params, _, body); init] ->
-           if List.length params <> 2 then
-             raise (RuntimeError "reduce: function must take exactly 2 arguments (acc, elem)");
-           let acc_param = (List.nth params 0).param_name in
-           let elem_param = (List.nth params 1).param_name in
+       | [VArray arr; fn; init] ->
            Array.fold_left (fun acc elem ->
-             let func_env = env_create () in
-             Hashtbl.iter (fun k v -> match v with VFunction _ -> env_set func_env k v | _ -> ()) env;
-             env_set func_env acc_param acc;
-             env_set func_env elem_param elem;
-             try eval_block func_env body
-             with Return v -> v
+             invoke_callable env fn [acc; elem] "reduce"
            ) init !arr
-       | _ -> raise (RuntimeError "reduce takes (array, function, init)"))
+       | _ -> raise (RuntimeError "reduce takes (array, function or closure, init)"))
 
   | "count_in" ->
       (* Count chars in string s that appear in string charset, or elements of array1 in array2 *)

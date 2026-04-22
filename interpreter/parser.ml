@@ -95,7 +95,31 @@ and parse_sexpr state =
   | "ifnot" -> parse_ifnot state
   | "try" -> parse_try state
   | "cond" -> parse_cond state
+  | "\\" -> parse_lambda state
   | _ -> parse_call sym state
+
+and parse_lambda state =
+  (* (\x body...) or (\(x y z) body...) *)
+  let (params, state) = match peek state with
+    | LParen ->
+        (* multi-param: (x y z) *)
+        let state = expect_token LParen state in
+        let rec loop state acc =
+          match peek state with
+          | RParen -> (List.rev acc, expect_token RParen state)
+          | Symbol s ->
+              check_not_type_keyword s "lambda parameter";
+              loop (advance state) (s :: acc)
+          | tok -> raise (ParseError ("Expected lambda param or ')' but got " ^ string_of_token tok))
+        in
+        loop state []
+    | Symbol s ->
+        check_not_type_keyword s "lambda parameter";
+        ([s], advance state)
+    | tok -> raise (ParseError ("Expected lambda params but got " ^ string_of_token tok))
+  in
+  let (body, state) = parse_body_until_rparen state [] in
+  (Lambda (params, body), state)
 
 and parse_set state =
   let (var_name, state) = expect_symbol state in

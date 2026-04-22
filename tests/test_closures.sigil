@@ -1,0 +1,62 @@
+(module test_closures
+  (fn test_lambda_filter -> int
+    (set arr array [1 2 3 4 5 6])
+    (set evens (filter arr (\x (eq (mod x 2) 0))))
+    (len evens))
+
+  (test-spec test_lambda_filter
+    (case "lambda filter evens"
+      (input)
+      (expect 3)))
+
+  (fn test_lambda_map -> int
+    (set arr array [1 2 3 4])
+    (set squared (map_arr arr (\x (mul x x))))
+    (array_get squared 3))
+
+  (test-spec test_lambda_map
+    (case "lambda map x*x"
+      (input)
+      (expect 16)))
+
+  (fn test_lambda_reduce -> int
+    (set arr array [1 2 3 4 5])
+    (reduce arr (\(acc x) (add acc x)) 0))
+
+  (test-spec test_lambda_reduce
+    (case "lambda reduce sum"
+      (input)
+      (expect 15)))
+
+  (fn test_closure_captures n int -> int
+    (set arr array [1 2 3 4 5 6 7 8 9])
+    (set above (filter arr (\x (gt x n))))
+    (len above))
+
+  (test-spec test_closure_captures
+    (case "closure captures threshold"
+      (input 5)
+      (expect 4))
+    (case "closure captures threshold 2"
+      (input 7)
+      (expect 2)))
+
+  (fn test_first_last -> int
+    (set arr array [10 20 30 40])
+    (add (first arr) (last arr)))
+
+  (test-spec test_first_last
+    (case "first + last"
+      (input)
+      (expect 50)))
+
+  (fn test_negative_index -> int
+    (set arr array [10 20 30 40])
+    (array_get arr -1))
+
+  (test-spec test_negative_index
+    (case "array_get with -1 returns last"
+      (input)
+      (expect 40)))
+
+  (meta-note "Tests \\x lambda syntax, scope capture, first/last builtins, negative indexing"))

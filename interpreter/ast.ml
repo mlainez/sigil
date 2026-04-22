@@ -31,6 +31,7 @@ type expr =
   | Cond of (expr * expr list) list  (* list of (condition, body) branches *)
   | LitArray of expr list  (* [1 2 3] *)
   | LitMap of (expr * expr) list  (* {"key" "value" "key2" "value2"} *)
+  | Lambda of string list * expr list  (* \x body or \(x y) body — anonymous closure *)
 
 (* Function parameter *)
 type param = {
@@ -125,3 +126,10 @@ let rec string_of_expr = function
   | LitMap pairs ->
       let pair_strs = List.map (fun (k, v) -> string_of_expr k ^ " " ^ string_of_expr v) pairs in
       "{" ^ String.concat " " pair_strs ^ "}"
+  | Lambda (params, body) ->
+      let body_str = String.concat " " (List.map string_of_expr body) in
+      let p = match params with
+        | [single] -> single
+        | many -> "(" ^ String.concat " " many ^ ")"
+      in
+      "(\\" ^ p ^ " " ^ body_str ^ ")"
