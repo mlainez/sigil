@@ -1965,6 +1965,91 @@ and eval_block env exprs =
        | [VFloat f] -> VFloat f
        | _ -> raise (RuntimeError "float takes 1 string/int/float"))
 
+  | "parse_ints" ->
+      (* Split string by separator and parse each piece as int, in one step.
+         Common pattern: "1 2 3 4 5" -> [1 2 3 4 5]. *)
+      (match arg_vals with
+       | [VString s; VString sep] ->
+           let parts = if sep = "" then [s]
+                       else String.split_on_char sep.[0] s in
+           let ints = List.filter_map (fun p ->
+             let p = String.trim p in
+             if p = "" then None
+             else try Some (VInt (Int64.of_string p))
+                  with Failure _ -> raise (RuntimeError ("parse_ints: cannot parse: " ^ p))
+           ) parts in
+           VArray (ref (Array.of_list ints))
+       | [VString s] ->
+           (* Default separator: any whitespace *)
+           let parts = String.split_on_char ' ' s in
+           let ints = List.filter_map (fun p ->
+             let p = String.trim p in
+             if p = "" then None
+             else try Some (VInt (Int64.of_string p))
+                  with Failure _ -> raise (RuntimeError ("parse_ints: cannot parse: " ^ p))
+           ) parts in
+           VArray (ref (Array.of_list ints))
+       | _ -> raise (RuntimeError "parse_ints takes (string) or (string, separator)"))
+
+  | "sum" ->
+      (* Sum an array of ints or floats *)
+      (match arg_vals with
+       | [VArray arr] ->
+           if Array.length !arr = 0 then VInt 0L
+           else begin
+             let all_int = Array.for_all (fun v -> match v with VInt _ -> true | _ -> false) !arr in
+             let all_float = Array.for_all (fun v -> match v with VFloat _ -> true | _ -> false) !arr in
+             if all_int then
+               VInt (Array.fold_left (fun acc v -> match v with VInt n -> Int64.add acc n | _ -> acc) 0L !arr)
+             else if all_float then
+               VFloat (Array.fold_left (fun acc v -> match v with VFloat f -> acc +. f | _ -> acc) 0.0 !arr)
+             else raise (RuntimeError "sum: array must be homogeneous int or float")
+           end
+       | _ -> raise (RuntimeError "sum takes 1 array"))
+
+  | "count_in" ->
+      (* Count chars in string s that appear in string charset, or elements of array1 in array2 *)
+      (match arg_vals with
+       | [VString s; VString charset] ->
+           let count = ref 0 in
+           String.iter (fun c ->
+             if String.contains charset c then incr count
+           ) s;
+           VInt (Int64.of_int !count)
+       | [VArray needles; VArray haystack] ->
+           let hs = !haystack in
+           let count = ref 0 in
+           Array.iter (fun n ->
+             if Array.exists (fun h -> values_equal n h) hs then incr count
+           ) !needles;
+           VInt (Int64.of_int !count)
+       | _ -> raise (RuntimeError "count_in takes (string, charset) or (array, array)"))
+
+  | "map_inc" ->
+      (* (map_inc m k) increments the int at key k, setting to 1 if missing *)
+      (match arg_vals with
+       | [VMap (m, keys); VString k] ->
+           let cur = try Hashtbl.find m k with Not_found -> VInt 0L in
+           (match cur with
+            | VInt n ->
+                let next = VInt (Int64.add n 1L) in
+                if not (Hashtbl.mem m k) then keys := !keys @ [k];
+                Hashtbl.replace m k next;
+                next
+            | _ -> raise (RuntimeError "map_inc: existing value at key is not int"))
+       | _ -> raise (RuntimeError "map_inc takes (map, string)"))
+
+  | "get_or" ->
+      (* (get_or coll key_or_idx default) — get with fallback *)
+      (match arg_vals with
+       | [VMap (m, _); VString k; default] ->
+           (try Hashtbl.find m k with Not_found -> default)
+       | [VArray arr; VInt i; default] ->
+           let idx = Int64.to_int i in
+           if idx < 0 || idx >= Array.length !arr then default
+           else !arr.(idx)
+       | _ -> raise (RuntimeError "get_or takes (map, string, default) or (array, int, default)"))
+
   (* Time operations *)
   | "time_now" ->
       VInt (Int64.of_float (Unix.time ()))

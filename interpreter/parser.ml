@@ -467,17 +467,29 @@ let parse_module state =
   in
   parse_items state [] [] [] None
 
-(* Script mode: wrap top-level expressions into an implicit main function *)
+(* Script mode: top-level (fn ...) definitions become module functions;
+   other top-level expressions become body of an implicit main. *)
 let parse_script tokens =
   let state = { tokens; pos = 0 } in
-  let rec parse_body state acc =
+  let rec parse_items state funcs body =
     match peek state with
-    | EOF -> (List.rev acc, state)
+    | EOF -> (List.rev funcs, List.rev body)
+    | LParen ->
+        let tok2 = if state.pos + 1 < List.length state.tokens
+                   then Some (List.nth state.tokens (state.pos + 1))
+                   else None in
+        (match tok2 with
+         | Some (Symbol "fn") ->
+             let (fn_def, state) = parse_function state in
+             parse_items state (fn_def :: funcs) body
+         | _ ->
+             let (expr, state) = parse_expr state in
+             parse_items state funcs (expr :: body))
     | _ ->
         let (expr, state) = parse_expr state in
-        parse_body state (expr :: acc)
+        parse_items state funcs (expr :: body)
   in
-  let (body, _) = parse_body state [] in
+  let (funcs, body) = parse_items state [] [] in
   let main_fn = {
     func_name = "main";
     func_params = [];
@@ -486,7 +498,7 @@ let parse_script tokens =
   } in
   { module_name = "__script__";
     module_imports = [];
-    module_functions = [main_fn];
+    module_functions = funcs @ [main_fn];
     module_tests = [];
     module_note = None }
 
