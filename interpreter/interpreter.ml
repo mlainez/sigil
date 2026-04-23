@@ -2180,6 +2180,42 @@ and eval_call env func_name args =
            VInt (Int64.of_int c)
        | _ -> raise (RuntimeError "count takes (string, string) or (array, value)"))
 
+  | "enumerate" ->
+      (* (enumerate arr) — Python enumerate(): array of [index, value] pairs. *)
+      (match arg_vals with
+       | [VArray arr] ->
+           let pairs = Array.mapi (fun i v ->
+             VArray (ref [| VInt (Int64.of_int i); v |])
+           ) !arr in
+           VArray (ref pairs)
+       | _ -> raise (RuntimeError "enumerate takes 1 array"))
+
+  | "scan" ->
+      (* (scan arr fn init) — Haskell scanl / Python itertools.accumulate.
+         Returns an array of accumulator states AFTER each step.
+         Output length = input length. Init is the seed (not prepended). *)
+      (match arg_vals with
+       | [VArray arr; fn; init] ->
+           let acc = ref init in
+           let out = Array.map (fun elem ->
+             acc := invoke_callable env fn [!acc; elem] "scan";
+             !acc
+           ) !arr in
+           VArray (ref out)
+       | _ -> raise (RuntimeError "scan takes (array, function, init)"))
+
+  | "map_kv" ->
+      (* (map_kv m fn) — Python [fn(k, v) for k, v in m.items()].
+         fn is called with (key, value) as two positional args, so a
+         2-arg closure (\\(k v) body) destructures naturally without array_get. *)
+      (match arg_vals with
+       | [VMap (m, keys); fn] ->
+           let out = List.map (fun k ->
+             invoke_callable env fn [VString k; Hashtbl.find m k] "map_kv"
+           ) !keys in
+           VArray (ref (Array.of_list out))
+       | _ -> raise (RuntimeError "map_kv takes (map, function)"))
+
   | "diff" ->
       (* (diff a b) — elements in a not in b, preserving order of a. *)
       (match arg_vals with

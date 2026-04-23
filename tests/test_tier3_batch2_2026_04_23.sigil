@@ -201,4 +201,71 @@
       (input)
       (expect "the,and,cat,dog")))
 
-  (meta-note "Tests for diff/inter/union/fmt_float/slice/merge/range and multi-key sort_by — added 2026-04-23"))
+  (fn enumerate_basic -> string
+    (set es (enumerate ["a" "b" "c"]))
+    (ret (join (map_arr es (\p (fmt "{}:{}" (array_get p 0) (array_get p 1)))) ",")))
+
+  (test-spec enumerate_basic
+    (case "index + value pairs"
+      (input)
+      (expect "0:a,1:b,2:c")))
+
+  (fn enumerate_empty -> int
+    (ret (len (enumerate []))))
+
+  (test-spec enumerate_empty
+    (case "empty array → empty enumeration"
+      (input)
+      (expect 0)))
+
+  (fn scan_sum -> string
+    (ret (join (scan [1 2 3 4] (\(a x) (add a x)) 0) ",")))
+
+  (test-spec scan_sum
+    (case "prefix sums"
+      (input)
+      (expect "1,3,6,10")))
+
+  (fn scan_with_seed -> string
+    (ret (join (scan [5 10 15] (\(a x) (add a x)) 100) ",")))
+
+  (test-spec scan_with_seed
+    (case "init is seed but not prepended"
+      (input)
+      (expect "105,115,130")))
+
+  (fn scan_empty -> int
+    (ret (len (scan [] (\(a x) (add a x)) 0))))
+
+  (test-spec scan_empty
+    (case "empty input → empty output"
+      (input)
+      (expect 0)))
+
+  (fn scan_max_running -> string
+    (ret (join (scan [3 1 4 1 5 9 2 6] (\(a x) (max a x)) 0) ",")))
+
+  (test-spec scan_max_running
+    (case "running maximum"
+      (input)
+      (expect "3,3,4,4,5,9,9,9")))
+
+  (fn map_kv_fmt -> string
+    (set m {"x" "1" "y" "2"})
+    (ret (join (map_kv m (\(k v) (fmt "{}={}" k v))) ",")))
+
+  (test-spec map_kv_fmt
+    (case "fn receives k and v as separate args"
+      (input)
+      (expect "x=1,y=2")))
+
+  (fn map_kv_counts_upper -> string
+    (set c (counter ["a" "b" "a" "c" "a" "b"]))
+    (ret (join (map_kv c (\(k n) (fmt "{}*{}" (upper k) n))) " ")))
+
+  (test-spec map_kv_counts_upper
+    (case "works on counter output"
+      (input)
+      (expect "A*3 B*2 C*1")))
+
+  (meta-note "Tests for diff/inter/union/fmt_float/slice/merge/range/entries/enumerate/scan/map_kv and multi-key sort_by — added 2026-04-23"))

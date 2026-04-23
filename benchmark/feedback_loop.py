@@ -88,7 +88,8 @@ Rules — follow STRICTLY for minimum tokens:
    int, float, lower, upper, trim, first, last, filter, map_arr, reduce,
    parse_ints, sum, count, count_in, map_inc, get_or, rev, swapcase, title,
    uniq, max_by, min_by, digits, counter, sort_by, group_by, transpose,
-   diff, inter, union, fmt_float, slice, merge, range
+   diff, inter, union, fmt_float, slice, merge, range, entries, enumerate,
+   scan, map_kv
 8. Empty collections: use [] and {{}} — NEVER (array_new) or (map_new)
 9. (push arr v), (map_set m k v), (sort arr), (rev arr) MUTATE in place.
    Call them directly, do NOT wrap in (set arr ...).
@@ -119,6 +120,14 @@ Rules — follow STRICTLY for minimum tokens:
     Use this with sort_by for ranked maps:
       (sort_by (entries (counter words)) (\\e [(neg (array_get e 1)) (array_get e 0)]))
     NOTE: do NOT confuse with map_entries — that returns maps {"key","value"}.
+16. (enumerate arr) — Python enumerate(): array of [i, v] pairs. Use with
+    map_arr / filter when you need the index alongside the value.
+17. (scan arr fn init) — Python itertools.accumulate / Haskell scanl.
+    Returns all intermediate accumulator states. For prefix sums use
+    (scan nums (\\(a x) (add a x)) 0) → [n0, n0+n1, n0+n1+n2, ...].
+18. (map_kv m fn) — fn receives (k, v) as TWO args; 2-arg closures
+    destructure naturally: (map_kv m (\\(k v) body)). Avoids array_get
+    when iterating map pairs. Replaces (map_arr (entries m) (\\e ...)).
 11. Variadic println prints space-separated: (println a b c)
 12. Index with (array_get a i) — supports negatives like Python
 13. Comparisons are prefix: (gt a b), (lt a b), (eq a b)
