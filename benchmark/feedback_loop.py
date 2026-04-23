@@ -74,16 +74,33 @@ Example: when called with args {example_args}, output must be exactly:
 
 Rules — follow STRICTLY for minimum tokens:
 1. Use script mode, NO (module ...) wrapper, NO (fn main ...), top-level only
-2. Use $0 / #0 for CLI args (NOT arg_str / arg_int / argv)
+2. CLI args are zero-indexed from the FIRST user arg:
+   - $0 = first user arg as string, $1 = second, etc.
+   - #0 = first user arg as int, #1 = second as int
+   (Python's sys.argv[1] == Sigil $0; Python's sys.argv[2] == Sigil $1)
 3. OMIT type annotations on (set ...) and (for-each ...) — they are optional
 4. PREFER functional pipelines over for-each+set accumulator:
-   (sum (map_arr (\\x ...) arr))  is better than  (for-each ... (set tot ...))
+   (sum (map_arr arr (\\x ...)))  is better than  (for-each ... (set tot ...))
 5. Use lambdas: (\\x expr) for 1 arg, (\\(x y) expr) for multi
-6. Short aliases always: len, str, fmt, split, join, sort, push, chars,
+6. Higher-order arg order:  (filter arr pred),  (map_arr arr fn),
+   (reduce arr fn init) — array FIRST, function SECOND
+7. Short aliases always: len, str, fmt, split, join, sort, push, chars,
    int, float, lower, upper, trim, first, last, filter, map_arr, reduce,
-   parse_ints, sum, count_in, map_inc, get_or
-7. Variadic println prints space-separated: (println a b c)
-8. Index with (array_get a i) — supports negatives like Python
+   parse_ints, sum, count_in, map_inc, get_or, rev, swapcase, title, uniq
+8. Empty collections: use [] and {} — NEVER (array_new) or (map_new)
+9. (push arr v), (map_set m k v), (sort arr), (rev arr) MUTATE in place.
+   Call them directly, do NOT wrap in (set arr ...).
+10. String ops:
+    - (add s1 s2) concatenates strings
+    - (mul s n) repeats s n times
+    - (rev s) reverses a string
+    - (swapcase s) swaps letter case
+    - (title s) capitalizes first letter of each word
+    - (uniq arr) dedupes preserving order
+    - (parse_pairs s outer inner) parses "a=1,b=2" to a map
+11. Variadic println prints space-separated: (println a b c)
+12. Index with (array_get a i) — supports negatives like Python
+13. Comparisons are prefix: (gt a b), (lt a b), (eq a b)
 
 Output ONLY the raw Sigil code. No markdown fences. No explanations. No (module)."""
 
@@ -268,7 +285,211 @@ print(best)''',
     },
 ]
 
-TIERS = {2: TIER_2}
+TIER_3 = [
+    # Harder: hashmaps, nested structures, multi-step algorithms
+    {
+        "id": "word_frequency_top",
+        "desc": "Count word frequencies in a sentence and print them as 'word:count' pairs sorted by count desc (ties by word asc), comma-separated.",
+        "args": ["the cat and the dog and the cat"],
+        "expected": "the:3,and:2,cat:2,dog:1\n",
+        "python": '''import sys
+from collections import Counter
+c = Counter(sys.argv[1].split())
+items = sorted(c.items(), key=lambda x: (-x[1], x[0]))
+print(",".join(f"{k}:{v}" for k, v in items))''',
+    },
+    {
+        "id": "group_anagrams",
+        "desc": "Group words that are anagrams of each other. Output groups separated by ';', words within group space-separated and sorted, groups sorted by first word.",
+        "args": ["eat tea tan ate nat bat"],
+        "expected": "ate eat tea;bat;nat tan\n",
+        "python": '''import sys
+from collections import defaultdict
+g = defaultdict(list)
+for w in sys.argv[1].split():
+    g["".join(sorted(w))].append(w)
+groups = [sorted(v) for v in g.values()]
+groups.sort(key=lambda v: v[0])
+print(";".join(" ".join(g) for g in groups))''',
+    },
+    {
+        "id": "balanced_parens",
+        "desc": "Check if parentheses/brackets/braces in a string are balanced. Print 'yes' or 'no'.",
+        "args": ["({[]})[]"],
+        "expected": "yes\n",
+        "python": '''import sys
+s = sys.argv[1]
+stack = []
+pairs = {")": "(", "]": "[", "}": "{"}
+ok = True
+for c in s:
+    if c in "([{":
+        stack.append(c)
+    elif c in ")]}":
+        if not stack or stack.pop() != pairs[c]:
+            ok = False; break
+print("yes" if ok and not stack else "no")''',
+    },
+    {
+        "id": "matrix_transpose",
+        "desc": "Transpose a matrix given as rows separated by ';' and integers by ','. Output same format.",
+        "args": ["1,2,3;4,5,6"],
+        "expected": "1,4;2,5;3,6\n",
+        "python": '''import sys
+rows = [r.split(",") for r in sys.argv[1].split(";")]
+cols = list(zip(*rows))
+print(";".join(",".join(c) for c in cols))''',
+    },
+    {
+        "id": "flatten_nested",
+        "desc": "Flatten a nested list given as '[1,2,[3,4,[5]],6]' into a single comma-separated list.",
+        "args": ["[1,2,[3,4,[5]],6]"],
+        "expected": "1,2,3,4,5,6\n",
+        "python": '''import sys, re
+# Simple: strip brackets, keep digits + commas, dedupe commas
+s = re.sub(r"[\\[\\]]", "", sys.argv[1])
+s = re.sub(r",+", ",", s).strip(",")
+print(s)''',
+    },
+    {
+        "id": "running_average",
+        "desc": "Compute running averages (as floats with 1 decimal) for space-separated ints. Output space-separated.",
+        "args": ["10 20 30 40"],
+        "expected": "10.0 15.0 20.0 25.0\n",
+        "python": '''import sys
+nums = [int(x) for x in sys.argv[1].split()]
+out = []
+for i in range(1, len(nums) + 1):
+    out.append(f"{sum(nums[:i])/i:.1f}")
+print(" ".join(out))''',
+    },
+    {
+        "id": "interval_merge",
+        "desc": "Merge overlapping intervals. Input: intervals as 'a-b' separated by ','. Output merged intervals in same format, sorted by start.",
+        "args": ["1-3,2-6,8-10,15-18"],
+        "expected": "1-6,8-10,15-18\n",
+        "python": '''import sys
+ivs = sorted(tuple(map(int, p.split("-"))) for p in sys.argv[1].split(","))
+out = [list(ivs[0])]
+for a, b in ivs[1:]:
+    if a <= out[-1][1]:
+        out[-1][1] = max(out[-1][1], b)
+    else:
+        out.append([a, b])
+print(",".join(f"{a}-{b}" for a, b in out))''',
+    },
+    {
+        "id": "kv_update",
+        "desc": "Parse 'k=v,k=v' pairs (first arg), then apply updates in 'k=v,k=v' form (second arg, new or overwrite). Output merged as 'k=v' pairs sorted by key, comma-separated.",
+        "args": ["a=1,b=2,c=3", "b=20,d=4"],
+        "expected": "a=1,b=20,c=3,d=4\n",
+        "python": '''import sys
+def parse(s): return dict(kv.split("=") for kv in s.split(","))
+d = parse(sys.argv[1])
+d.update(parse(sys.argv[2]))
+print(",".join(f"{k}={v}" for k, v in sorted(d.items())))''',
+    },
+    {
+        "id": "prime_sieve",
+        "desc": "Print all primes up to N (inclusive), space-separated.",
+        "args": ["30"],
+        "expected": "2 3 5 7 11 13 17 19 23 29\n",
+        "python": '''import sys
+n = int(sys.argv[1])
+sieve = [True] * (n + 1)
+sieve[0] = sieve[1] = False
+for i in range(2, int(n**0.5) + 1):
+    if sieve[i]:
+        for j in range(i*i, n+1, i):
+            sieve[j] = False
+print(" ".join(str(i) for i in range(n+1) if sieve[i]))''',
+    },
+    {
+        "id": "two_sum",
+        "desc": "Find two indices in an int array that sum to target. Print them as 'i,j' (0-indexed, smaller first). Assume exactly one solution.",
+        "args": ["2 7 11 15", "9"],
+        "expected": "0,1\n",
+        "python": '''import sys
+nums = [int(x) for x in sys.argv[1].split()]
+target = int(sys.argv[2])
+seen = {}
+for i, n in enumerate(nums):
+    if target - n in seen:
+        print(f"{seen[target-n]},{i}")
+        break
+    seen[n] = i''',
+    },
+    {
+        "id": "rle_encode",
+        "desc": "Run-length encode a string. Output char followed by count, e.g. 'aaabbc' -> 'a3b2c1'.",
+        "args": ["aaabbc"],
+        "expected": "a3b2c1\n",
+        "python": '''import sys
+s = sys.argv[1]
+if not s:
+    print("")
+else:
+    out = []
+    prev = s[0]; cnt = 1
+    for c in s[1:]:
+        if c == prev: cnt += 1
+        else: out.append(f"{prev}{cnt}"); prev, cnt = c, 1
+    out.append(f"{prev}{cnt}")
+    print("".join(out))''',
+    },
+    {
+        "id": "diff_sets",
+        "desc": "Given two space-separated lists of words, print words in first but not in second, sorted alphabetically, space-separated.",
+        "args": ["apple banana cherry date", "banana date fig"],
+        "expected": "apple cherry\n",
+        "python": '''import sys
+a = set(sys.argv[1].split())
+b = set(sys.argv[2].split())
+print(" ".join(sorted(a - b)))''',
+    },
+    {
+        "id": "fib_memo",
+        "desc": "Compute the Nth Fibonacci number (0-indexed, fib(0)=0, fib(1)=1).",
+        "args": ["20"],
+        "expected": "6765\n",
+        "python": '''import sys
+n = int(sys.argv[1])
+a, b = 0, 1
+for _ in range(n):
+    a, b = b, a + b
+print(a)''',
+    },
+    {
+        "id": "query_string_parse",
+        "desc": "Parse a URL query string ('k=v&k=v&...') and print values in key-sorted order, one 'k=v' per line.",
+        "args": ["name=alice&age=30&city=paris"],
+        "expected": "age=30\ncity=paris\nname=alice\n",
+        "python": '''import sys
+pairs = dict(kv.split("=") for kv in sys.argv[1].split("&"))
+for k in sorted(pairs):
+    print(f"{k}={pairs[k]}")''',
+    },
+    {
+        "id": "stack_calc",
+        "desc": "Evaluate a postfix (RPN) expression. Tokens are space-separated ints or the operators + - * /. Integer math.",
+        "args": ["3 4 + 2 *"],
+        "expected": "14\n",
+        "python": '''import sys
+stack = []
+for tok in sys.argv[1].split():
+    if tok in "+-*/":
+        b = stack.pop(); a = stack.pop()
+        if tok == "+": stack.append(a + b)
+        elif tok == "-": stack.append(a - b)
+        elif tok == "*": stack.append(a * b)
+        elif tok == "/": stack.append(a // b)
+    else:
+        stack.append(int(tok))
+print(stack[0])''',
+    },
+]
+
+TIERS = {2: TIER_2, 3: TIER_3}
 
 
 def run_task(task: dict) -> dict:

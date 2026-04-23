@@ -1051,6 +1051,7 @@ and eval_call env func_name args =
         | [VFloat a; VFloat b] -> VFloat (a +. b)
         | [VDecimal a; VDecimal b] ->
              VDecimal (bigdecimal_add a b)
+        | [VString a; VString b] -> VString (a ^ b)
          | _ -> raise (RuntimeError ("Invalid arguments to add")))
 
    | "sub" ->
@@ -1067,6 +1068,10 @@ and eval_call env func_name args =
         | [VFloat a; VFloat b] -> VFloat (a *. b)
         | [VDecimal a; VDecimal b] ->
              VDecimal (bigdecimal_mul a b)
+        | [VString s; VInt n] | [VInt n; VString s] ->
+            let n = Int64.to_int n in
+            if n <= 0 then VString ""
+            else VString (String.concat "" (List.init n (fun _ -> s)))
          | _ -> raise (RuntimeError "Invalid arguments to mul"))
 
    | "div" ->
@@ -1622,14 +1627,21 @@ and eval_call env func_name args =
             VArray arr
         | _ -> raise (RuntimeError "Invalid arguments to array_sort"))
 
-   | "array_reverse" ->
+   | "array_reverse" | "rev" ->
        (match arg_vals with
         | [VArray arr] ->
             let len = Array.length !arr in
             let reversed = Array.init len (fun i -> !arr.(len - 1 - i)) in
             arr := reversed;
             VArray arr
-        | _ -> raise (RuntimeError "Invalid arguments to array_reverse"))
+        | [VString s] ->
+            let len = String.length s in
+            let buf = Bytes.create len in
+            for i = 0 to len - 1 do
+              Bytes.set buf i s.[len - 1 - i]
+            done;
+            VString (Bytes.to_string buf)
+        | _ -> raise (RuntimeError "rev takes array or string"))
 
    | "array_contains" ->
        (match arg_vals with
@@ -2024,6 +2036,74 @@ and eval_call env func_name args =
       (match arg_vals with
        | [VString s] -> VString (String.trim s)
        | _ -> raise (RuntimeError "trim takes 1 string"))
+
+  | "swapcase" ->
+      (match arg_vals with
+       | [VString s] ->
+           let buf = Bytes.of_string s in
+           for i = 0 to Bytes.length buf - 1 do
+             let c = Bytes.get buf i in
+             if c >= 'a' && c <= 'z' then
+               Bytes.set buf i (Char.chr (Char.code c - 32))
+             else if c >= 'A' && c <= 'Z' then
+               Bytes.set buf i (Char.chr (Char.code c + 32))
+           done;
+           VString (Bytes.to_string buf)
+       | _ -> raise (RuntimeError "swapcase takes 1 string"))
+
+  | "title" ->
+      (* Capitalize first letter of each whitespace-separated word. *)
+      (match arg_vals with
+       | [VString s] ->
+           let buf = Bytes.of_string s in
+           let n = Bytes.length buf in
+           let at_start = ref true in
+           for i = 0 to n - 1 do
+             let c = Bytes.get buf i in
+             if c = ' ' || c = '\t' || c = '\n' then at_start := true
+             else begin
+               if !at_start && c >= 'a' && c <= 'z' then
+                 Bytes.set buf i (Char.chr (Char.code c - 32))
+               else if (not !at_start) && c >= 'A' && c <= 'Z' then
+                 Bytes.set buf i (Char.chr (Char.code c + 32));
+               at_start := false
+             end
+           done;
+           VString (Bytes.to_string buf)
+       | _ -> raise (RuntimeError "title takes 1 string"))
+
+  | "uniq" ->
+      (* Dedupe array preserving order of first occurrence. *)
+      (match arg_vals with
+       | [VArray arr] ->
+           let seen = ref [] in
+           let keep = ref [] in
+           Array.iter (fun v ->
+             if not (List.exists (fun x -> values_equal x v) !seen) then begin
+               seen := v :: !seen;
+               keep := v :: !keep
+             end
+           ) !arr;
+           VArray (ref (Array.of_list (List.rev !keep)))
+       | _ -> raise (RuntimeError "uniq takes 1 array"))
+
+  | "parse_pairs" ->
+      (* Parse "a=1,b=2" style into map. (parse_pairs str outer inner) *)
+      (match arg_vals with
+       | [VString s; VString outer; VString inner] when outer <> "" && inner <> "" ->
+           let pairs = String.split_on_char outer.[0] s in
+           let tbl = Hashtbl.create (List.length pairs) in
+           let keys = ref [] in
+           List.iter (fun p ->
+             match String.split_on_char inner.[0] p with
+             | k :: rest when rest <> [] ->
+                 let v = String.concat (String.make 1 inner.[0]) rest in
+                 if not (Hashtbl.mem tbl k) then keys := k :: !keys;
+                 Hashtbl.replace tbl k (VString v)
+             | _ -> ()
+           ) pairs;
+           VMap (tbl, ref (List.rev !keys))
+       | _ -> raise (RuntimeError "parse_pairs takes (string, outer:string, inner:string)"))
 
   | "int" ->
       (match arg_vals with
