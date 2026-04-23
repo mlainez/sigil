@@ -1,14 +1,32 @@
 @(grammar sigil-agent)
-@(stat tests:153 examples:4 stdlib:20)
+@(stat tests:155 examples:4 stdlib:20)
 @(impl ocaml tree-walking-interpreter)
-@(syn
-  (prog (module name imp* fn* test-spec* meta-note?) | script-form+ "top-level fn and expressions, no module wrapper needed")
-  (imp (import name))
-  (fn (fn name p* -> ty s*))
-  (s (set v ty e) | (set v e "type optional: inferred from value") | (f a*) | (ret e) | (while e s*) | (loop s*) | (for v e e s* "counting loop, exclusive upper bound") | (if e s* (else s*)?) | (for-each v ty? e s* "type optional") | (try s* (catch v ty s*)) | (cond (e s*)*) | (break) | (continue))
-  (e lit | var | (f a*) | (and e e) | (or e e) | [e*] | {e*} | $N "CLI arg as string" | #N "CLI arg as int")
-  (lit int | float | decimal-suffix | str | true | false)
-  (ty int|float|decimal|bool|string|array|map|json|regex|process|socket|channel|unit))
+@(bnf
+  prog       ::= module | script-form+
+  module     ::= '(' 'module' name imp* fn* test-spec* meta-note? ')'
+  imp        ::= '(' 'import' name ')'
+  fn         ::= '(' 'fn' name param* '->' ty stmt+ ')'
+  lambda     ::= '(' '\' (name | '(' name+ ')') stmt+ ')'
+  param      ::= name ty
+  stmt       ::= set | call | ret | while | loop | for | foreach
+               | if | ifelse | try | cond | break | continue
+  set        ::= '(' 'set' name [ty] expr ')'
+  call       ::= '(' ident expr* ')'
+  ret        ::= '(' 'ret' expr ')'
+  while      ::= '(' 'while' expr stmt+ ')'
+  loop       ::= '(' 'loop' stmt+ ')'
+  for        ::= '(' 'for' name expr expr stmt+ ')'   ; [start, end), int only
+  foreach    ::= '(' 'for-each' name [ty] expr stmt+ ')'
+  if         ::= '(' 'if' expr stmt+ ')'
+  ifelse     ::= '(' 'if' expr stmt+ '(' 'else' stmt+ ')' ')'
+  try        ::= '(' 'try' stmt+ '(' 'catch' name 'string' stmt+ ')' ')'
+  cond       ::= '(' 'cond' ('(' expr stmt+ ')')+ ')'
+  expr       ::= lit | var | call | lambda | '(' 'and' expr expr ')' | '(' 'or' expr expr ')'
+               | '[' expr* ']' | '{' (expr expr)* '}' | argv
+  argv       ::= '$'N | '#'N                           ; $N=arg_str, #N=arg_int
+  lit        ::= int | float | decimal-d | string | 'true' | 'false'
+  ty         ::= 'int'|'float'|'decimal'|'bool'|'string'|'array'|'map'
+               | 'json'|'regex'|'process'|'socket'|'channel'|'unit')
 @(builtins
   (arith
     (add a b -> same "int+int|float+float|decimal+decimal|string+string")
