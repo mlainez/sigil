@@ -1,0 +1,174 @@
+(module test_tier3_batch2
+  (fn diff_strings -> string
+    (ret (join (diff ["a" "b" "c" "d"] ["b" "d"]) ",")))
+
+  (test-spec diff_strings
+    (case "elements in first but not second"
+      (input)
+      (expect "a,c")))
+
+  (fn diff_empty_second -> string
+    (ret (join (diff ["a" "b"] []) ",")))
+
+  (test-spec diff_empty_second
+    (case "diff against empty returns first unchanged"
+      (input)
+      (expect "a,b")))
+
+  (fn diff_ints -> string
+    (ret (join (diff [1 2 3 4 5] [2 4]) ",")))
+
+  (test-spec diff_ints
+    (case "int arrays"
+      (input)
+      (expect "1,3,5")))
+
+  (fn inter_basic -> string
+    (ret (join (inter ["a" "b" "c"] ["b" "c" "d"]) ",")))
+
+  (test-spec inter_basic
+    (case "intersection preserves first-array order"
+      (input)
+      (expect "b,c")))
+
+  (fn inter_no_overlap -> int
+    (ret (len (inter ["a" "b"] ["c" "d"]))))
+
+  (test-spec inter_no_overlap
+    (case "disjoint arrays return empty"
+      (input)
+      (expect 0)))
+
+  (fn inter_dedupes -> string
+    (ret (join (inter ["a" "a" "b"] ["a" "b"]) ",")))
+
+  (test-spec inter_dedupes
+    (case "duplicates in first removed in intersection"
+      (input)
+      (expect "a,b")))
+
+  (fn union_preserves_order -> string
+    (ret (join (union ["a" "b"] ["c" "b" "d"]) ",")))
+
+  (test-spec union_preserves_order
+    (case "union dedupes, preserves first occurrence"
+      (input)
+      (expect "a,b,c,d")))
+
+  (fn fmt_float_basic -> string
+    (ret (fmt_float 1.66667d 2)))
+
+  (test-spec fmt_float_basic
+    (case "decimal with 2 decimal places"
+      (input)
+      (expect "1.67")))
+
+  (fn fmt_float_int_input -> string
+    (ret (fmt_float 10 3)))
+
+  (test-spec fmt_float_int_input
+    (case "int input formats with trailing zeros"
+      (input)
+      (expect "10.000")))
+
+  (fn fmt_float_zero_prec -> string
+    (ret (fmt_float 3.7 0)))
+
+  (test-spec fmt_float_zero_prec
+    (case "zero precision rounds to int"
+      (input)
+      (expect "4")))
+
+  (fn slice_array_basic -> string
+    (ret (join (slice [1 2 3 4 5] 1 4) ",")))
+
+  (test-spec slice_array_basic
+    (case "half-open slice"
+      (input)
+      (expect "2,3,4")))
+
+  (fn slice_negative_start -> string
+    (ret (join (slice [1 2 3 4 5] -2 5) ",")))
+
+  (test-spec slice_negative_start
+    (case "negative start counts from end"
+      (input)
+      (expect "4,5")))
+
+  (fn slice_no_end -> string
+    (ret (join (slice [1 2 3 4 5] 2) ",")))
+
+  (test-spec slice_no_end
+    (case "omit end to take to last"
+      (input)
+      (expect "3,4,5")))
+
+  (fn slice_string_negative -> string
+    (ret (slice "hello world" -5)))
+
+  (test-spec slice_string_negative
+    (case "string slice with negative start"
+      (input)
+      (expect "world")))
+
+  (fn slice_empty -> int
+    (ret (len (slice [1 2 3] 2 1))))
+
+  (test-spec slice_empty
+    (case "empty slice when end < start"
+      (input)
+      (expect 0)))
+
+  (fn merge_rightmost_wins -> string
+    (set m (merge {"a" "1" "b" "2"} {"b" "20" "c" "3"}))
+    (ret (map_get m "b")))
+
+  (test-spec merge_rightmost_wins
+    (case "later maps override"
+      (input)
+      (expect "20")))
+
+  (fn merge_keeps_unique -> int
+    (set m (merge {"a" "1"} {"b" "2"} {"c" "3"}))
+    (ret (len m)))
+
+  (test-spec merge_keeps_unique
+    (case "three disjoint maps combine"
+      (input)
+      (expect 3)))
+
+  (fn range_end -> string
+    (ret (join (range 5) ",")))
+
+  (test-spec range_end
+    (case "range(5) produces 0..4"
+      (input)
+      (expect "0,1,2,3,4")))
+
+  (fn range_start_end -> string
+    (ret (join (range 2 7) ",")))
+
+  (test-spec range_start_end
+    (case "range(2,7) exclusive upper"
+      (input)
+      (expect "2,3,4,5,6")))
+
+  (fn range_empty -> int
+    (ret (len (range 5 3))))
+
+  (test-spec range_empty
+    (case "end < start is empty"
+      (input)
+      (expect 0)))
+
+  (fn multi_key_sort -> string
+    (set pairs [["the" 3] ["cat" 2] ["dog" 1] ["and" 2]])
+    (set sorted (sort_by pairs (\p [ (neg (array_get p 1)) (array_get p 0) ])))
+    (ret (join (map_arr sorted (\p (array_get p 0))) ",")))
+
+  (test-spec multi_key_sort
+    (case "sort by count desc then key asc"
+      (input)
+      (expect "the,and,cat,dog")))
+
+  (meta-note "Tests for diff/inter/union/fmt_float/slice/merge/range and multi-key sort_by — added 2026-04-23"))

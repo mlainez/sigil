@@ -87,7 +87,8 @@ Rules — follow STRICTLY for minimum tokens:
 7. Short aliases always: len, str, fmt, split, join, sort, push, chars,
    int, float, lower, upper, trim, first, last, filter, map_arr, reduce,
    parse_ints, sum, count, count_in, map_inc, get_or, rev, swapcase, title,
-   uniq, max_by, min_by, digits, counter, sort_by, group_by, transpose
+   uniq, max_by, min_by, digits, counter, sort_by, group_by, transpose,
+   diff, inter, union, fmt_float, slice, merge, range
 8. Empty collections: use [] and {{}} — NEVER (array_new) or (map_new)
 9. (push arr v), (map_set m k v), (sort arr), (rev arr) MUTATE in place.
    Call them directly, do NOT wrap in (set arr ...).
@@ -106,6 +107,14 @@ Rules — follow STRICTLY for minimum tokens:
     - (sort_by arr key-fn) stable ascending sort by key; desc via (neg (key x))
     - (group_by arr key-fn) → map from key to array (Python defaultdict)
     - (transpose rows) matrix transpose — array of arrays to array of arrays
+    - (diff a b) / (inter a b) / (union a b) — set ops preserving order of a
+    - (fmt_float x prec) — format number with prec decimal places
+    - (slice coll start end?) — Python-style slice, negative indices supported
+    - (merge m1 m2 ...) — map merge, rightmost key wins
+    - (range n) or (range s e) — int array, exclusive upper bound
+14. Multi-key sort trick — sort_by's key fn can RETURN AN ARRAY for
+    tuple-style sorting: (sort_by pairs (\\p [ (neg (array_get p 1)) (array_get p 0) ]))
+    sorts by count desc, then word asc — mirrors Python's key=lambda x: (-x[1], x[0]).
 11. Variadic println prints space-separated: (println a b c)
 12. Index with (array_get a i) — supports negatives like Python
 13. Comparisons are prefix: (gt a b), (lt a b), (eq a b)

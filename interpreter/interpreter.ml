@@ -2170,6 +2170,111 @@ and eval_call env func_name args =
            VInt (Int64.of_int c)
        | _ -> raise (RuntimeError "count takes (string, string) or (array, value)"))
 
+  | "diff" ->
+      (* (diff a b) — elements in a not in b, preserving order of a. *)
+      (match arg_vals with
+       | [VArray a; VArray b] ->
+           let kept = ref [] in
+           Array.iter (fun v ->
+             if not (Array.exists (fun x -> values_equal x v) !b) then
+               kept := v :: !kept) !a;
+           VArray (ref (Array.of_list (List.rev !kept)))
+       | _ -> raise (RuntimeError "diff takes (array, array)"))
+
+  | "inter" ->
+      (* (inter a b) — elements in both a and b, preserving order of a, deduped. *)
+      (match arg_vals with
+       | [VArray a; VArray b] ->
+           let kept = ref [] in
+           Array.iter (fun v ->
+             if Array.exists (fun x -> values_equal x v) !b &&
+                not (List.exists (fun x -> values_equal x v) !kept) then
+               kept := v :: !kept) !a;
+           VArray (ref (Array.of_list (List.rev !kept)))
+       | _ -> raise (RuntimeError "inter takes (array, array)"))
+
+  | "union" ->
+      (* (union a b) — elements from a then b, deduped, order preserved. *)
+      (match arg_vals with
+       | [VArray a; VArray b] ->
+           let kept = ref [] in
+           let add v = if not (List.exists (fun x -> values_equal x v) !kept) then
+             kept := v :: !kept in
+           Array.iter add !a;
+           Array.iter add !b;
+           VArray (ref (Array.of_list (List.rev !kept)))
+       | _ -> raise (RuntimeError "union takes (array, array)"))
+
+  | "fmt_float" ->
+      (* (fmt_float x prec) — format number with `prec` decimal places.
+         Accepts int, float, or decimal input. *)
+      (match arg_vals with
+       | [VFloat x; VInt p] ->
+           VString (Printf.sprintf "%.*f" (Int64.to_int p) x)
+       | [VInt x; VInt p] ->
+           VString (Printf.sprintf "%.*f" (Int64.to_int p) (Int64.to_float x))
+       | [VDecimal d; VInt p] ->
+           let f = float_of_string d in
+           VString (Printf.sprintf "%.*f" (Int64.to_int p) f)
+       | _ -> raise (RuntimeError "fmt_float takes (number, int-precision)"))
+
+  | "slice" ->
+      (* (slice coll start end) — Python-style half-open slice on string or
+         array. Negative start/end count from the right. If end is omitted
+         (only 2 args), slice to the end. *)
+      let resolve_bounds len s e =
+        let norm i = if i < 0 then max 0 (len + i) else min len i in
+        (norm s, norm e) in
+      (match arg_vals with
+       | [VArray arr; VInt s; VInt e] ->
+           let len = Array.length !arr in
+           let (s, e) = resolve_bounds len (Int64.to_int s) (Int64.to_int e) in
+           if e <= s then VArray (ref [||])
+           else VArray (ref (Array.sub !arr s (e - s)))
+       | [VArray arr; VInt s] ->
+           let len = Array.length !arr in
+           let (s, _) = resolve_bounds len (Int64.to_int s) len in
+           if len <= s then VArray (ref [||])
+           else VArray (ref (Array.sub !arr s (len - s)))
+       | [VString str; VInt s; VInt e] ->
+           let len = String.length str in
+           let (s, e) = resolve_bounds len (Int64.to_int s) (Int64.to_int e) in
+           if e <= s then VString "" else VString (String.sub str s (e - s))
+       | [VString str; VInt s] ->
+           let len = String.length str in
+           let (s, _) = resolve_bounds len (Int64.to_int s) len in
+           if len <= s then VString "" else VString (String.sub str s (len - s))
+       | _ -> raise (RuntimeError "slice takes (string|array, start, end?)"))
+
+  | "merge" ->
+      (* (merge m1 m2 ...) — rightmost key wins; order = keys of m1 then new
+         keys from later maps. *)
+      (match arg_vals with
+       | [] -> raise (RuntimeError "merge takes at least 1 map")
+       | maps ->
+           let tbl = Hashtbl.create 16 in
+           let keys = ref [] in
+           List.iter (fun v ->
+             match v with
+             | VMap (src, src_keys) ->
+                 List.iter (fun k ->
+                   if not (Hashtbl.mem tbl k) then keys := k :: !keys;
+                   Hashtbl.replace tbl k (Hashtbl.find src k)) !src_keys
+             | _ -> raise (RuntimeError "merge takes maps")) maps;
+           VMap (tbl, ref (List.rev !keys)))
+
+  | "range" ->
+      (* (range end) or (range start end) — int array [start, end). *)
+      (match arg_vals with
+       | [VInt e] ->
+           let e = Int64.to_int e in
+           VArray (ref (Array.init (max 0 e) (fun i -> VInt (Int64.of_int i))))
+       | [VInt s; VInt e] ->
+           let s = Int64.to_int s and e = Int64.to_int e in
+           let n = max 0 (e - s) in
+           VArray (ref (Array.init n (fun i -> VInt (Int64.of_int (s + i)))))
+       | _ -> raise (RuntimeError "range takes (end) or (start, end)"))
+
   | "counter" ->
       (* (counter arr) — Python Counter. Returns map of string→int count.
          Keys are stringified via str conversion. *)
