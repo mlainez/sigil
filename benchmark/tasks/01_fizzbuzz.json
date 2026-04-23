@@ -1,0 +1,20 @@
+{
+  "id": "01_fizzbuzz",
+  "name": "FizzBuzz",
+  "tier": 1,
+  "description": "Write a program that takes integer n as first command-line argument and prints numbers from 1 to n, one per line. For multiples of 3 print \"Fizz\", for multiples of 5 print \"Buzz\", for multiples of both print \"FizzBuzz\".",
+  "test_cases": [
+    {
+      "args": ["15"],
+      "expected": "1\n2\nFizz\n4\nBuzz\nFizz\n7\n8\nFizz\nBuzz\n11\nFizz\n13\n14\nFizzBuzz\n"
+    },
+    {
+      "args": ["5"],
+      "expected": "1\n2\nFizz\n4\nBuzz\n"
+    },
+    {
+      "args": ["1"],
+      "expected": "1\n"
+    }
+  ]
+}

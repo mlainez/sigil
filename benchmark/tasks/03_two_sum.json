@@ -1,0 +1,20 @@
+{
+  "id": "03_two_sum",
+  "name": "Two Sum",
+  "tier": 1,
+  "description": "Write a program that takes a target integer as first argument, followed by a list of space-separated integers as second argument. Find two numbers that add up to the target and print their indices (0-based) separated by a space. If no pair exists, print -1. Use the first valid pair found (smallest first index, then smallest second index).",
+  "test_cases": [
+    {
+      "args": ["9", "2 7 11 15"],
+      "expected": "0 1\n"
+    },
+    {
+      "args": ["6", "3 2 4"],
+      "expected": "1 2\n"
+    },
+    {
+      "args": ["10", "1 2 3"],
+      "expected": "-1\n"
+    }
+  ]
+}

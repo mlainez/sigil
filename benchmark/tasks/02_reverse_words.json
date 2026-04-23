@@ -1,0 +1,20 @@
+{
+  "id": "02_reverse_words",
+  "name": "Reverse Words",
+  "tier": 1,
+  "description": "Write a program that takes a sentence as first command-line argument and prints the words in reverse order, separated by spaces. A word is any sequence of non-space characters.",
+  "test_cases": [
+    {
+      "args": ["hello world foo"],
+      "expected": "foo world hello\n"
+    },
+    {
+      "args": ["one"],
+      "expected": "one\n"
+    },
+    {
+      "args": ["the quick brown fox"],
+      "expected": "fox brown quick the\n"
+    }
+  ]
+}

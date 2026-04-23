@@ -1,0 +1,28 @@
+{
+  "id": "10_caesar_cipher",
+  "name": "Caesar Cipher",
+  "tier": 3,
+  "description": "Write a program that takes a mode (\"encode\" or \"decode\"), a shift amount (integer), and a message string as arguments. Apply a Caesar cipher: shift each letter by the given amount, wrapping around the alphabet. Preserve case. Non-letter characters are unchanged. For decode, shift in the opposite direction.",
+  "test_cases": [
+    {
+      "args": ["encode", "3", "Hello World"],
+      "expected": "Khoor Zruog\n"
+    },
+    {
+      "args": ["decode", "3", "Khoor Zruog"],
+      "expected": "Hello World\n"
+    },
+    {
+      "args": ["encode", "13", "ABCxyz"],
+      "expected": "NOPklm\n"
+    },
+    {
+      "args": ["encode", "1", "z"],
+      "expected": "a\n"
+    },
+    {
+      "args": ["encode", "0", "No change!"],
+      "expected": "No change!\n"
+    }
+  ]
+}

@@ -1,0 +1,2869 @@
+{
+  "meta": {
+    "model": "claude-opus-4-7",
+    "provider": "claude-cli",
+    "languages": [
+      "sigil",
+      "python",
+      "javascript",
+      "go"
+    ],
+    "runs_per_combo": 1,
+    "max_retries": 5,
+    "timestamp": "2026-04-21T13:34:13"
+  },
+  "results": [
+    {
+      "task_id": "01_fizzbuzz",
+      "language": "sigil",
+      "model": "claude-opus-4-7",
+      "run_index": 0,
+      "attempts": [
+        {
+          "prompt_tokens": 28430,
+          "completion_tokens": 176,
+          "thinking_tokens": 0,
+          "code": "(module fizzbuzz\n  (fn main -> int\n    (set args array (argv))\n    (set n int (string_to_int (array_get args 0)))\n    (for i 1 (add n 1)\n      (cond\n        ((eq (mod i 15) 0) (println \"FizzBuzz\"))\n        ((eq (mod i 3) 0) (println \"Fizz\"))\n        ((eq (mod i 5) 0) (println \"Buzz\"))\n        (true (println i))))\n    (ret 0)))",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "15"
+              ],
+              "expected": "'1\\n2\\nFizz\\n4\\nBuzz\\nFizz\\n7\\n8\\nFizz\\nBuzz\\n11\\nFizz\\n13\\n14\\nFizzBuzz\\n'",
+              "actual": "'1\\n2\\nFizz\\n4\\nBuzz\\nFizz\\n7\\n8\\nFizz\\nBuzz\\n11\\nFizz\\n13\\n14\\nFizzBuzz\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 1,
+              "args": [
+                "5"
+              ],
+              "expected": "'1\\n2\\nFizz\\n4\\nBuzz\\n'",
+              "actual": "'1\\n2\\nFizz\\n4\\nBuzz\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 2,
+              "args": [
+                "1"
+              ],
+              "expected": "'1\\n'",
+              "actual": "'1\\n'",
+              "stderr": "",
+              "passed": true
+            }
+          ],
+          "error": ""
+        }
+      ],
+      "first_attempt_correct": true,
+      "final_correct": true,
+      "total_prompt_tokens": 28430,
+      "total_completion_tokens": 176,
+      "total_thinking_tokens": 0,
+      "total_tokens": 28606,
+      "attempts_to_correct": 1,
+      "wall_time_s": 5.372036933898926
+    },
+    {
+      "task_id": "01_fizzbuzz",
+      "language": "python",
+      "model": "claude-opus-4-7",
+      "run_index": 0,
+      "attempts": [
+        {
+          "prompt_tokens": 23832,
+          "completion_tokens": 117,
+          "thinking_tokens": 0,
+          "code": "import sys\n\nn = int(sys.argv[1])\nfor i in range(1, n + 1):\n    if i % 15 == 0:\n        print(\"FizzBuzz\")\n    elif i % 3 == 0:\n        print(\"Fizz\")\n    elif i % 5 == 0:\n        print(\"Buzz\")\n    else:\n        print(i)",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "15"
+              ],
+              "expected": "'1\\n2\\nFizz\\n4\\nBuzz\\nFizz\\n7\\n8\\nFizz\\nBuzz\\n11\\nFizz\\n13\\n14\\nFizzBuzz\\n'",
+              "actual": "'1\\n2\\nFizz\\n4\\nBuzz\\nFizz\\n7\\n8\\nFizz\\nBuzz\\n11\\nFizz\\n13\\n14\\nFizzBuzz\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 1,
+              "args": [
+                "5"
+              ],
+              "expected": "'1\\n2\\nFizz\\n4\\nBuzz\\n'",
+              "actual": "'1\\n2\\nFizz\\n4\\nBuzz\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 2,
+              "args": [
+                "1"
+              ],
+              "expected": "'1\\n'",
+              "actual": "'1\\n'",
+              "stderr": "",
+              "passed": true
+            }
+          ],
+          "error": ""
+        }
+      ],
+      "first_attempt_correct": true,
+      "final_correct": true,
+      "total_prompt_tokens": 23832,
+      "total_completion_tokens": 117,
+      "total_thinking_tokens": 0,
+      "total_tokens": 23949,
+      "attempts_to_correct": 1,
+      "wall_time_s": 3.2538928985595703
+    },
+    {
+      "task_id": "01_fizzbuzz",
+      "language": "javascript",
+      "model": "claude-opus-4-7",
+      "run_index": 0,
+      "attempts": [
+        {
+          "prompt_tokens": 23850,
+          "completion_tokens": 130,
+          "thinking_tokens": 0,
+          "code": "const n = parseInt(process.argv[2], 10);\nfor (let i = 1; i <= n; i++) {\n  if (i % 15 === 0) console.log(\"FizzBuzz\");\n  else if (i % 3 === 0) console.log(\"Fizz\");\n  else if (i % 5 === 0) console.log(\"Buzz\");\n  else console.log(i);\n}",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "15"
+              ],
+              "expected": "'1\\n2\\nFizz\\n4\\nBuzz\\nFizz\\n7\\n8\\nFizz\\nBuzz\\n11\\nFizz\\n13\\n14\\nFizzBuzz\\n'",
+              "actual": "'1\\n2\\nFizz\\n4\\nBuzz\\nFizz\\n7\\n8\\nFizz\\nBuzz\\n11\\nFizz\\n13\\n14\\nFizzBuzz\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 1,
+              "args": [
+                "5"
+              ],
+              "expected": "'1\\n2\\nFizz\\n4\\nBuzz\\n'",
+              "actual": "'1\\n2\\nFizz\\n4\\nBuzz\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 2,
+              "args": [
+                "1"
+              ],
+              "expected": "'1\\n'",
+              "actual": "'1\\n'",
+              "stderr": "",
+              "passed": true
+            }
+          ],
+          "error": ""
+        }
+      ],
+      "first_attempt_correct": true,
+      "final_correct": true,
+      "total_prompt_tokens": 23850,
+      "total_completion_tokens": 130,
+      "total_thinking_tokens": 0,
+      "total_tokens": 23980,
+      "attempts_to_correct": 1,
+      "wall_time_s": 4.55396294593811
+    },
+    {
+      "task_id": "01_fizzbuzz",
+      "language": "go",
+      "model": "claude-opus-4-7",
+      "run_index": 0,
+      "attempts": [
+        {
+          "prompt_tokens": 23850,
+          "completion_tokens": 187,
+          "thinking_tokens": 0,
+          "code": "package main\n\nimport (\n\t\"fmt\"\n\t\"os\"\n\t\"strconv\"\n)\n\nfunc main() {\n\tn, _ := strconv.Atoi(os.Args[1])\n\tfor i := 1; i <= n; i++ {\n\t\tswitch {\n\t\tcase i%15 == 0:\n\t\t\tfmt.Println(\"FizzBuzz\")\n\t\tcase i%3 == 0:\n\t\t\tfmt.Println(\"Fizz\")\n\t\tcase i%5 == 0:\n\t\t\tfmt.Println(\"Buzz\")\n\t\tdefault:\n\t\t\tfmt.Println(i)\n\t\t}\n\t}\n}",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "15"
+              ],
+              "expected": "'1\\n2\\nFizz\\n4\\nBuzz\\nFizz\\n7\\n8\\nFizz\\nBuzz\\n11\\nFizz\\n13\\n14\\nFizzBuzz\\n'",
+              "actual": "'1\\n2\\nFizz\\n4\\nBuzz\\nFizz\\n7\\n8\\nFizz\\nBuzz\\n11\\nFizz\\n13\\n14\\nFizzBuzz\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 1,
+              "args": [
+                "5"
+              ],
+              "expected": "'1\\n2\\nFizz\\n4\\nBuzz\\n'",
+              "actual": "'1\\n2\\nFizz\\n4\\nBuzz\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 2,
+              "args": [
+                "1"
+              ],
+              "expected": "'1\\n'",
+              "actual": "'1\\n'",
+              "stderr": "",
+              "passed": true
+            }
+          ],
+          "error": ""
+        }
+      ],
+      "first_attempt_correct": true,
+      "final_correct": true,
+      "total_prompt_tokens": 23850,
+      "total_completion_tokens": 187,
+      "total_thinking_tokens": 0,
+      "total_tokens": 24037,
+      "attempts_to_correct": 1,
+      "wall_time_s": 4.731559753417969
+    },
+    {
+      "task_id": "02_reverse_words",
+      "language": "sigil",
+      "model": "claude-opus-4-7",
+      "run_index": 0,
+      "attempts": [
+        {
+          "prompt_tokens": 28400,
+          "completion_tokens": 251,
+          "thinking_tokens": 0,
+          "code": "(module reverse_words\n  (fn main -> int\n    (set args array (argv))\n    (if (eq (array_length args) 0)\n      (ret 0))\n    (set sentence string (array_get args 0))\n    (set words array (string_split sentence \" \"))\n    (set reversed array (array_reverse words))\n    (set result string (string_join reversed \" \"))\n    (println result)\n    (ret 0)))",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "hello world foo"
+              ],
+              "expected": "'foo world hello\\n'",
+              "actual": "'foo world hello\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 1,
+              "args": [
+                "one"
+              ],
+              "expected": "'one\\n'",
+              "actual": "'one\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 2,
+              "args": [
+                "the quick brown fox"
+              ],
+              "expected": "'fox brown quick the\\n'",
+              "actual": "'fox brown quick the\\n'",
+              "stderr": "",
+              "passed": true
+            }
+          ],
+          "error": ""
+        }
+      ],
+      "first_attempt_correct": true,
+      "final_correct": true,
+      "total_prompt_tokens": 28400,
+      "total_completion_tokens": 251,
+      "total_thinking_tokens": 0,
+      "total_tokens": 28651,
+      "attempts_to_correct": 1,
+      "wall_time_s": 7.818496942520142
+    },
+    {
+      "task_id": "02_reverse_words",
+      "language": "python",
+      "model": "claude-opus-4-7",
+      "run_index": 0,
+      "attempts": [
+        {
+          "prompt_tokens": 23802,
+          "completion_tokens": 41,
+          "thinking_tokens": 0,
+          "code": "import sys\n\nwords = sys.argv[1].split()\nprint(' '.join(reversed(words)))",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "hello world foo"
+              ],
+              "expected": "'foo world hello\\n'",
+              "actual": "'foo world hello\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 1,
+              "args": [
+                "one"
+              ],
+              "expected": "'one\\n'",
+              "actual": "'one\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 2,
+              "args": [
+                "the quick brown fox"
+              ],
+              "expected": "'fox brown quick the\\n'",
+              "actual": "'fox brown quick the\\n'",
+              "stderr": "",
+              "passed": true
+            }
+          ],
+          "error": ""
+        }
+      ],
+      "first_attempt_correct": true,
+      "final_correct": true,
+      "total_prompt_tokens": 23802,
+      "total_completion_tokens": 41,
+      "total_thinking_tokens": 0,
+      "total_tokens": 23843,
+      "attempts_to_correct": 1,
+      "wall_time_s": 5.296655654907227
+    },
+    {
+      "task_id": "02_reverse_words",
+      "language": "javascript",
+      "model": "claude-opus-4-7",
+      "run_index": 0,
+      "attempts": [
+        {
+          "prompt_tokens": 23820,
+          "completion_tokens": 71,
+          "thinking_tokens": 0,
+          "code": "const sentence = process.argv[2] || '';\nconst words = sentence.split(/\\s+/).filter(w => w.length > 0);\nconsole.log(words.reverse().join(' '));",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "hello world foo"
+              ],
+              "expected": "'foo world hello\\n'",
+              "actual": "'foo world hello\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 1,
+              "args": [
+                "one"
+              ],
+              "expected": "'one\\n'",
+              "actual": "'one\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 2,
+              "args": [
+                "the quick brown fox"
+              ],
+              "expected": "'fox brown quick the\\n'",
+              "actual": "'fox brown quick the\\n'",
+              "stderr": "",
+              "passed": true
+            }
+          ],
+          "error": ""
+        }
+      ],
+      "first_attempt_correct": true,
+      "final_correct": true,
+      "total_prompt_tokens": 23820,
+      "total_completion_tokens": 71,
+      "total_thinking_tokens": 0,
+      "total_tokens": 23891,
+      "attempts_to_correct": 1,
+      "wall_time_s": 4.597387075424194
+    },
+    {
+      "task_id": "02_reverse_words",
+      "language": "go",
+      "model": "claude-opus-4-7",
+      "run_index": 0,
+      "attempts": [
+        {
+          "prompt_tokens": 23820,
+          "completion_tokens": 136,
+          "thinking_tokens": 0,
+          "code": "package main\n\nimport (\n\t\"fmt\"\n\t\"os\"\n\t\"strings\"\n)\n\nfunc main() {\n\twords := strings.Fields(os.Args[1])\n\tfor i, j := 0, len(words)-1; i < j; i, j = i+1, j-1 {\n\t\twords[i], words[j] = words[j], words[i]\n\t}\n\tfmt.Println(strings.Join(words, \" \"))\n}",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "hello world foo"
+              ],
+              "expected": "'foo world hello\\n'",
+              "actual": "'foo world hello\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 1,
+              "args": [
+                "one"
+              ],
+              "expected": "'one\\n'",
+              "actual": "'one\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 2,
+              "args": [
+                "the quick brown fox"
+              ],
+              "expected": "'fox brown quick the\\n'",
+              "actual": "'fox brown quick the\\n'",
+              "stderr": "",
+              "passed": true
+            }
+          ],
+          "error": ""
+        }
+      ],
+      "first_attempt_correct": true,
+      "final_correct": true,
+      "total_prompt_tokens": 23820,
+      "total_completion_tokens": 136,
+      "total_thinking_tokens": 0,
+      "total_tokens": 23956,
+      "attempts_to_correct": 1,
+      "wall_time_s": 3.639613628387451
+    },
+    {
+      "task_id": "03_two_sum",
+      "language": "sigil",
+      "model": "claude-opus-4-7",
+      "run_index": 0,
+      "attempts": [
+        {
+          "prompt_tokens": 28445,
+          "completion_tokens": 327,
+          "thinking_tokens": 0,
+          "code": "(module twosum\n  (fn main -> int\n    (set args array (argv))\n    (set target int (string_to_int (array_get args 0)))\n    (set parts array (string_split (array_get args 1) \" \"))\n    (set n int (array_length parts))\n    (set nums array (array_new))\n    (for i 0 n\n      (set nums (array_push nums (string_to_int (array_get parts i)))))\n    (set found bool false)\n    (set fi int 0)\n    (set fj int 0)\n    (for i 0 n\n      (if (not found)\n        (set j int (add i 1))\n        (while (and (lt j n) (not found))\n          (if (eq (add (array_get nums i) (array_get nums j)) target)\n            (set found bool true)\n            (set fi int i)\n            (set fj int j))\n          (set j (add j 1)))))\n    (if found\n      (println (string_format \"{} {}\" fi fj))\n      (else (println \"-1\")))\n    (ret 0)))",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "9",
+                "2 7 11 15"
+              ],
+              "expected": "'0 1\\n'",
+              "actual": "'0 1\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 1,
+              "args": [
+                "6",
+                "3 2 4"
+              ],
+              "expected": "'1 2\\n'",
+              "actual": "'1 2\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 2,
+              "args": [
+                "10",
+                "1 2 3"
+              ],
+              "expected": "'-1\\n'",
+              "actual": "'-1\\n'",
+              "stderr": "",
+              "passed": true
+            }
+          ],
+          "error": ""
+        }
+      ],
+      "first_attempt_correct": true,
+      "final_correct": true,
+      "total_prompt_tokens": 28445,
+      "total_completion_tokens": 327,
+      "total_thinking_tokens": 0,
+      "total_tokens": 28772,
+      "attempts_to_correct": 1,
+      "wall_time_s": 7.190094947814941
+    },
+    {
+      "task_id": "03_two_sum",
+      "language": "python",
+      "model": "claude-opus-4-7",
+      "run_index": 0,
+      "attempts": [
+        {
+          "prompt_tokens": 23847,
+          "completion_tokens": 123,
+          "thinking_tokens": 0,
+          "code": "import sys\n\ntarget = int(sys.argv[1])\nnums = list(map(int, sys.argv[2].split()))\n\nfor i in range(len(nums)):\n    for j in range(i + 1, len(nums)):\n        if nums[i] + nums[j] == target:\n            print(f\"{i} {j}\")\n            sys.exit(0)\n\nprint(-1)",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "9",
+                "2 7 11 15"
+              ],
+              "expected": "'0 1\\n'",
+              "actual": "'0 1\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 1,
+              "args": [
+                "6",
+                "3 2 4"
+              ],
+              "expected": "'1 2\\n'",
+              "actual": "'1 2\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 2,
+              "args": [
+                "10",
+                "1 2 3"
+              ],
+              "expected": "'-1\\n'",
+              "actual": "'-1\\n'",
+              "stderr": "",
+              "passed": true
+            }
+          ],
+          "error": ""
+        }
+      ],
+      "first_attempt_correct": true,
+      "final_correct": true,
+      "total_prompt_tokens": 23847,
+      "total_completion_tokens": 123,
+      "total_thinking_tokens": 0,
+      "total_tokens": 23970,
+      "attempts_to_correct": 1,
+      "wall_time_s": 3.7454965114593506
+    },
+    {
+      "task_id": "03_two_sum",
+      "language": "javascript",
+      "model": "claude-opus-4-7",
+      "run_index": 0,
+      "attempts": [
+        {
+          "prompt_tokens": 23865,
+          "completion_tokens": 167,
+          "thinking_tokens": 0,
+          "code": "const target = parseInt(process.argv[2], 10);\nconst nums = process.argv[3].split(/\\s+/).map(n => parseInt(n, 10));\n\nfor (let i = 0; i < nums.length; i++) {\n  for (let j = i + 1; j < nums.length; j++) {\n    if (nums[i] + nums[j] === target) {\n      console.log(`${i} ${j}`);\n      process.exit(0);\n    }\n  }\n}\n\nconsole.log(-1);",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "9",
+                "2 7 11 15"
+              ],
+              "expected": "'0 1\\n'",
+              "actual": "'0 1\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 1,
+              "args": [
+                "6",
+                "3 2 4"
+              ],
+              "expected": "'1 2\\n'",
+              "actual": "'1 2\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 2,
+              "args": [
+                "10",
+                "1 2 3"
+              ],
+              "expected": "'-1\\n'",
+              "actual": "'-1\\n'",
+              "stderr": "",
+              "passed": true
+            }
+          ],
+          "error": ""
+        }
+      ],
+      "first_attempt_correct": true,
+      "final_correct": true,
+      "total_prompt_tokens": 23865,
+      "total_completion_tokens": 167,
+      "total_thinking_tokens": 0,
+      "total_tokens": 24032,
+      "attempts_to_correct": 1,
+      "wall_time_s": 3.6656785011291504
+    },
+    {
+      "task_id": "03_two_sum",
+      "language": "go",
+      "model": "claude-opus-4-7",
+      "run_index": 0,
+      "attempts": [
+        {
+          "prompt_tokens": 23865,
+          "completion_tokens": 243,
+          "thinking_tokens": 0,
+          "code": "package main\n\nimport (\n\t\"fmt\"\n\t\"os\"\n\t\"strconv\"\n\t\"strings\"\n)\n\nfunc main() {\n\ttarget, _ := strconv.Atoi(os.Args[1])\n\tparts := strings.Fields(os.Args[2])\n\tnums := make([]int, len(parts))\n\tfor i, p := range parts {\n\t\tnums[i], _ = strconv.Atoi(p)\n\t}\n\tfor i := 0; i < len(nums); i++ {\n\t\tfor j := i + 1; j < len(nums); j++ {\n\t\t\tif nums[i]+nums[j] == target {\n\t\t\t\tfmt.Printf(\"%d %d\\n\", i, j)\n\t\t\t\treturn\n\t\t\t}\n\t\t}\n\t}\n\tfmt.Println(-1)\n}",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "9",
+                "2 7 11 15"
+              ],
+              "expected": "'0 1\\n'",
+              "actual": "'0 1\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 1,
+              "args": [
+                "6",
+                "3 2 4"
+              ],
+              "expected": "'1 2\\n'",
+              "actual": "'1 2\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 2,
+              "args": [
+                "10",
+                "1 2 3"
+              ],
+              "expected": "'-1\\n'",
+              "actual": "'-1\\n'",
+              "stderr": "",
+              "passed": true
+            }
+          ],
+          "error": ""
+        }
+      ],
+      "first_attempt_correct": true,
+      "final_correct": true,
+      "total_prompt_tokens": 23865,
+      "total_completion_tokens": 243,
+      "total_thinking_tokens": 0,
+      "total_tokens": 24108,
+      "attempts_to_correct": 1,
+      "wall_time_s": 4.421953916549683
+    },
+    {
+      "task_id": "04_word_frequency",
+      "language": "sigil",
+      "model": "claude-opus-4-7",
+      "run_index": 0,
+      "attempts": [
+        {
+          "prompt_tokens": 28432,
+          "completion_tokens": 1264,
+          "thinking_tokens": 0,
+          "code": "(module word_count\n  (fn main -> int\n    (set args array (argv))\n    (set text string (array_get args 0))\n    (set lower string (string_to_lower text))\n    (set words array (string_split lower \" \"))\n    (set counts map (map_new))\n    (for-each word string words\n      (if (gt (string_length word) 0)\n        (if (map_has counts word)\n          (set counts (map_set counts word (add (map_get counts word) 1)))\n          (else (set counts (map_set counts word 1))))))\n    (set keys array (map_keys counts))\n    (set sorted array (array_sort keys))\n    (for-each k string sorted\n      (println (string_format \"{} {}\" k (map_get counts k))))\n    (ret 0)))",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "the cat sat on the mat"
+              ],
+              "expected": "'cat 1\\nmat 1\\non 1\\nsat 1\\nthe 2\\n'",
+              "actual": "'cat 1\\nmat 1\\non 1\\nsat 1\\nthe 2\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 1,
+              "args": [
+                "hello hello HELLO"
+              ],
+              "expected": "'hello 3\\n'",
+              "actual": "'hello 3\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 2,
+              "args": [
+                "a b c a b a"
+              ],
+              "expected": "'a 3\\nb 2\\nc 1\\n'",
+              "actual": "'a 3\\nb 2\\nc 1\\n'",
+              "stderr": "",
+              "passed": true
+            }
+          ],
+          "error": ""
+        }
+      ],
+      "first_attempt_correct": true,
+      "final_correct": true,
+      "total_prompt_tokens": 28432,
+      "total_completion_tokens": 1264,
+      "total_thinking_tokens": 0,
+      "total_tokens": 29696,
+      "attempts_to_correct": 1,
+      "wall_time_s": 14.774710416793823
+    },
+    {
+      "task_id": "04_word_frequency",
+      "language": "python",
+      "model": "claude-opus-4-7",
+      "run_index": 0,
+      "attempts": [
+        {
+          "prompt_tokens": 23834,
+          "completion_tokens": 80,
+          "thinking_tokens": 0,
+          "code": "import sys\nfrom collections import Counter\n\ntext = sys.argv[1]\nwords = text.lower().split()\ncounts = Counter(words)\nfor word in sorted(counts):\n    print(f\"{word} {counts[word]}\")",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "the cat sat on the mat"
+              ],
+              "expected": "'cat 1\\nmat 1\\non 1\\nsat 1\\nthe 2\\n'",
+              "actual": "'cat 1\\nmat 1\\non 1\\nsat 1\\nthe 2\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 1,
+              "args": [
+                "hello hello HELLO"
+              ],
+              "expected": "'hello 3\\n'",
+              "actual": "'hello 3\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 2,
+              "args": [
+                "a b c a b a"
+              ],
+              "expected": "'a 3\\nb 2\\nc 1\\n'",
+              "actual": "'a 3\\nb 2\\nc 1\\n'",
+              "stderr": "",
+              "passed": true
+            }
+          ],
+          "error": ""
+        }
+      ],
+      "first_attempt_correct": true,
+      "final_correct": true,
+      "total_prompt_tokens": 23834,
+      "total_completion_tokens": 80,
+      "total_thinking_tokens": 0,
+      "total_tokens": 23914,
+      "attempts_to_correct": 1,
+      "wall_time_s": 3.0643672943115234
+    },
+    {
+      "task_id": "04_word_frequency",
+      "language": "javascript",
+      "model": "claude-opus-4-7",
+      "run_index": 0,
+      "attempts": [
+        {
+          "prompt_tokens": 23852,
+          "completion_tokens": 143,
+          "thinking_tokens": 0,
+          "code": "const text = process.argv[2];\nconst words = text.toLowerCase().split(' ').filter(w => w.length > 0);\nconst counts = {};\nfor (const word of words) {\n  counts[word] = (counts[word] || 0) + 1;\n}\nconst sorted = Object.keys(counts).sort();\nfor (const word of sorted) {\n  console.log(`${word} ${counts[word]}`);\n}",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "the cat sat on the mat"
+              ],
+              "expected": "'cat 1\\nmat 1\\non 1\\nsat 1\\nthe 2\\n'",
+              "actual": "'cat 1\\nmat 1\\non 1\\nsat 1\\nthe 2\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 1,
+              "args": [
+                "hello hello HELLO"
+              ],
+              "expected": "'hello 3\\n'",
+              "actual": "'hello 3\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 2,
+              "args": [
+                "a b c a b a"
+              ],
+              "expected": "'a 3\\nb 2\\nc 1\\n'",
+              "actual": "'a 3\\nb 2\\nc 1\\n'",
+              "stderr": "",
+              "passed": true
+            }
+          ],
+          "error": ""
+        }
+      ],
+      "first_attempt_correct": true,
+      "final_correct": true,
+      "total_prompt_tokens": 23852,
+      "total_completion_tokens": 143,
+      "total_thinking_tokens": 0,
+      "total_tokens": 23995,
+      "attempts_to_correct": 1,
+      "wall_time_s": 3.6029751300811768
+    },
+    {
+      "task_id": "04_word_frequency",
+      "language": "go",
+      "model": "claude-opus-4-7",
+      "run_index": 0,
+      "attempts": [
+        {
+          "prompt_tokens": 23852,
+          "completion_tokens": 206,
+          "thinking_tokens": 0,
+          "code": "package main\n\nimport (\n\t\"fmt\"\n\t\"os\"\n\t\"sort\"\n\t\"strings\"\n)\n\nfunc main() {\n\ttext := strings.ToLower(os.Args[1])\n\twords := strings.Fields(text)\n\tcounts := make(map[string]int)\n\tfor _, w := range words {\n\t\tcounts[w]++\n\t}\n\tkeys := make([]string, 0, len(counts))\n\tfor k := range counts {\n\t\tkeys = append(keys, k)\n\t}\n\tsort.Strings(keys)\n\tfor _, k := range keys {\n\t\tfmt.Printf(\"%s %d\\n\", k, counts[k])\n\t}\n}",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "the cat sat on the mat"
+              ],
+              "expected": "'cat 1\\nmat 1\\non 1\\nsat 1\\nthe 2\\n'",
+              "actual": "'cat 1\\nmat 1\\non 1\\nsat 1\\nthe 2\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 1,
+              "args": [
+                "hello hello HELLO"
+              ],
+              "expected": "'hello 3\\n'",
+              "actual": "'hello 3\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 2,
+              "args": [
+                "a b c a b a"
+              ],
+              "expected": "'a 3\\nb 2\\nc 1\\n'",
+              "actual": "'a 3\\nb 2\\nc 1\\n'",
+              "stderr": "",
+              "passed": true
+            }
+          ],
+          "error": ""
+        }
+      ],
+      "first_attempt_correct": true,
+      "final_correct": true,
+      "total_prompt_tokens": 23852,
+      "total_completion_tokens": 206,
+      "total_thinking_tokens": 0,
+      "total_tokens": 24058,
+      "attempts_to_correct": 1,
+      "wall_time_s": 4.469188690185547
+    },
+    {
+      "task_id": "05_balanced_parens",
+      "language": "sigil",
+      "model": "claude-opus-4-7",
+      "run_index": 0,
+      "attempts": [
+        {
+          "prompt_tokens": 28423,
+          "completion_tokens": 1982,
+          "thinking_tokens": 0,
+          "code": "(module balanced\n  (fn main -> int\n    (set args array (argv))\n    (set s string (array_get args 0))\n    (set len int (string_length s))\n    (set stack array (array_new))\n    (set balanced bool true)\n    (set i int 0)\n    (set top int 0)\n    (while (and balanced (lt i len))\n      (set c int (string_get s i))\n      (cond\n        ((or (or (eq c 40) (eq c 91)) (eq c 123))\n          (array_push stack c))\n        ((eq c 41)\n          (cond\n            ((eq (array_length stack) 0) (set balanced false))\n            (true\n              (set top (array_pop stack))\n              (if (ne top 40) (set balanced false)))))\n        ((eq c 93)\n          (cond\n            ((eq (array_length stack) 0) (set balanced false))\n            (true\n              (set top (array_pop stack))\n              (if (ne top 91) (set balanced false)))))\n        ((eq c 125)\n          (cond\n            ((eq (array_length stack) 0) (set balanced false))\n            (true\n              (set top (array_pop stack))\n              (if (ne top 123) (set balanced false))))))\n      (set i (add i 1)))\n    (cond\n      ((and balanced (eq (array_length stack) 0)) (println \"true\"))\n      (true (println \"false\")))\n    (ret 0)))",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "({[]})"
+              ],
+              "expected": "'true\\n'",
+              "actual": "'true\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 1,
+              "args": [
+                "([)]"
+              ],
+              "expected": "'false\\n'",
+              "actual": "'false\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 2,
+              "args": [
+                "((()))"
+              ],
+              "expected": "'true\\n'",
+              "actual": "'true\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 3,
+              "args": [
+                "hello(world)"
+              ],
+              "expected": "'true\\n'",
+              "actual": "'true\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 4,
+              "args": [
+                "{[}]"
+              ],
+              "expected": "'false\\n'",
+              "actual": "'false\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 5,
+              "args": [
+                ""
+              ],
+              "expected": "'true\\n'",
+              "actual": "'true\\n'",
+              "stderr": "",
+              "passed": true
+            }
+          ],
+          "error": ""
+        }
+      ],
+      "first_attempt_correct": true,
+      "final_correct": true,
+      "total_prompt_tokens": 28423,
+      "total_completion_tokens": 1982,
+      "total_thinking_tokens": 0,
+      "total_tokens": 30405,
+      "attempts_to_correct": 1,
+      "wall_time_s": 20.590094089508057
+    },
+    {
+      "task_id": "05_balanced_parens",
+      "language": "python",
+      "model": "claude-opus-4-7",
+      "run_index": 0,
+      "attempts": [
+        {
+          "prompt_tokens": 23825,
+          "completion_tokens": 166,
+          "thinking_tokens": 0,
+          "code": "import sys\n\ns = sys.argv[1]\npairs = {')': '(', ']': '[', '}': '{'}\nopeners = set('([{')\nclosers = set(')]}')\nstack = []\nbalanced = True\nfor c in s:\n    if c in openers:\n        stack.append(c)\n    elif c in closers:\n        if not stack or stack[-1] != pairs[c]:\n            balanced = False\n            break\n        stack.pop()\nprint(\"true\" if balanced and not stack else \"false\")",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "({[]})"
+              ],
+              "expected": "'true\\n'",
+              "actual": "'true\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 1,
+              "args": [
+                "([)]"
+              ],
+              "expected": "'false\\n'",
+              "actual": "'false\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 2,
+              "args": [
+                "((()))"
+              ],
+              "expected": "'true\\n'",
+              "actual": "'true\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 3,
+              "args": [
+                "hello(world)"
+              ],
+              "expected": "'true\\n'",
+              "actual": "'true\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 4,
+              "args": [
+                "{[}]"
+              ],
+              "expected": "'false\\n'",
+              "actual": "'false\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 5,
+              "args": [
+                ""
+              ],
+              "expected": "'true\\n'",
+              "actual": "'true\\n'",
+              "stderr": "",
+              "passed": true
+            }
+          ],
+          "error": ""
+        }
+      ],
+      "first_attempt_correct": true,
+      "final_correct": true,
+      "total_prompt_tokens": 23825,
+      "total_completion_tokens": 166,
+      "total_thinking_tokens": 0,
+      "total_tokens": 23991,
+      "attempts_to_correct": 1,
+      "wall_time_s": 4.086816310882568
+    },
+    {
+      "task_id": "05_balanced_parens",
+      "language": "javascript",
+      "model": "claude-opus-4-7",
+      "run_index": 0,
+      "attempts": [
+        {
+          "prompt_tokens": 23843,
+          "completion_tokens": 222,
+          "thinking_tokens": 0,
+          "code": "const s = process.argv[2] || '';\nconst pairs = { ')': '(', ']': '[', '}': '{' };\nconst opens = new Set(['(', '[', '{']);\nconst closes = new Set([')', ']', '}']);\nconst stack = [];\nlet balanced = true;\nfor (const ch of s) {\n  if (opens.has(ch)) {\n    stack.push(ch);\n  } else if (closes.has(ch)) {\n    if (stack.pop() !== pairs[ch]) {\n      balanced = false;\n      break;\n    }\n  }\n}\nconsole.log(balanced && stack.length === 0 ? 'true' : 'false');",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "({[]})"
+              ],
+              "expected": "'true\\n'",
+              "actual": "'true\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 1,
+              "args": [
+                "([)]"
+              ],
+              "expected": "'false\\n'",
+              "actual": "'false\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 2,
+              "args": [
+                "((()))"
+              ],
+              "expected": "'true\\n'",
+              "actual": "'true\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 3,
+              "args": [
+                "hello(world)"
+              ],
+              "expected": "'true\\n'",
+              "actual": "'true\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 4,
+              "args": [
+                "{[}]"
+              ],
+              "expected": "'false\\n'",
+              "actual": "'false\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 5,
+              "args": [
+                ""
+              ],
+              "expected": "'true\\n'",
+              "actual": "'true\\n'",
+              "stderr": "",
+              "passed": true
+            }
+          ],
+          "error": ""
+        }
+      ],
+      "first_attempt_correct": true,
+      "final_correct": true,
+      "total_prompt_tokens": 23843,
+      "total_completion_tokens": 222,
+      "total_thinking_tokens": 0,
+      "total_tokens": 24065,
+      "attempts_to_correct": 1,
+      "wall_time_s": 4.735370874404907
+    },
+    {
+      "task_id": "05_balanced_parens",
+      "language": "go",
+      "model": "claude-opus-4-7",
+      "run_index": 0,
+      "attempts": [
+        {
+          "prompt_tokens": 23843,
+          "completion_tokens": 256,
+          "thinking_tokens": 0,
+          "code": "package main\n\nimport (\n\t\"fmt\"\n\t\"os\"\n)\n\nfunc main() {\n\ts := os.Args[1]\n\tstack := []rune{}\n\tpairs := map[rune]rune{')': '(', ']': '[', '}': '{'}\n\tfor _, c := range s {\n\t\tswitch c {\n\t\tcase '(', '[', '{':\n\t\t\tstack = append(stack, c)\n\t\tcase ')', ']', '}':\n\t\t\tif len(stack) == 0 || stack[len(stack)-1] != pairs[c] {\n\t\t\t\tfmt.Println(\"false\")\n\t\t\t\treturn\n\t\t\t}\n\t\t\tstack = stack[:len(stack)-1]\n\t\t}\n\t}\n\tif len(stack) == 0 {\n\t\tfmt.Println(\"true\")\n\t} else {\n\t\tfmt.Println(\"false\")\n\t}\n}",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "({[]})"
+              ],
+              "expected": "'true\\n'",
+              "actual": "'true\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 1,
+              "args": [
+                "([)]"
+              ],
+              "expected": "'false\\n'",
+              "actual": "'false\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 2,
+              "args": [
+                "((()))"
+              ],
+              "expected": "'true\\n'",
+              "actual": "'true\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 3,
+              "args": [
+                "hello(world)"
+              ],
+              "expected": "'true\\n'",
+              "actual": "'true\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 4,
+              "args": [
+                "{[}]"
+              ],
+              "expected": "'false\\n'",
+              "actual": "'false\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 5,
+              "args": [
+                ""
+              ],
+              "expected": "'true\\n'",
+              "actual": "'true\\n'",
+              "stderr": "",
+              "passed": true
+            }
+          ],
+          "error": ""
+        }
+      ],
+      "first_attempt_correct": true,
+      "final_correct": true,
+      "total_prompt_tokens": 23843,
+      "total_completion_tokens": 256,
+      "total_thinking_tokens": 0,
+      "total_tokens": 24099,
+      "attempts_to_correct": 1,
+      "wall_time_s": 5.1497392654418945
+    },
+    {
+      "task_id": "06_run_length_encode",
+      "language": "sigil",
+      "model": "claude-opus-4-7",
+      "run_index": 0,
+      "attempts": [
+        {
+          "prompt_tokens": 28419,
+          "completion_tokens": 837,
+          "thinking_tokens": 0,
+          "code": "(module rle\n  (fn main -> int\n    (set args array (argv))\n    (if (eq (array_length args) 0)\n      (ret 0))\n    (set s string (array_get args 0))\n    (set len int (string_length s))\n    (if (eq len 0)\n      (ret 0))\n    (set result string \"\")\n    (set current int (string_get s 0))\n    (set count int 1)\n    (for i 1 len\n      (set c int (string_get s i))\n      (if (eq c current)\n        (set count (add count 1))\n        (else\n          (set result (string_concat result (char_from_code current)))\n          (set result (string_concat result (string_from_int count)))\n          (set current c)\n          (set count 1))))\n    (set result (string_concat result (char_from_code current)))\n    (set result (string_concat result (string_from_int count)))\n    (println result)\n    (ret 0)))",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "aaabbc"
+              ],
+              "expected": "'a3b2c1\\n'",
+              "actual": "'a3b2c1\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 1,
+              "args": [
+                "aaa"
+              ],
+              "expected": "'a3\\n'",
+              "actual": "'a3\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 2,
+              "args": [
+                "abcd"
+              ],
+              "expected": "'a1b1c1d1\\n'",
+              "actual": "'a1b1c1d1\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 3,
+              "args": [
+                "aaAAaa"
+              ],
+              "expected": "'a2A2a2\\n'",
+              "actual": "'a2A2a2\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 4,
+              "args": [
+                "a"
+              ],
+              "expected": "'a1\\n'",
+              "actual": "'a1\\n'",
+              "stderr": "",
+              "passed": true
+            }
+          ],
+          "error": ""
+        }
+      ],
+      "first_attempt_correct": true,
+      "final_correct": true,
+      "total_prompt_tokens": 28419,
+      "total_completion_tokens": 837,
+      "total_thinking_tokens": 0,
+      "total_tokens": 29256,
+      "attempts_to_correct": 1,
+      "wall_time_s": 10.579714059829712
+    },
+    {
+      "task_id": "06_run_length_encode",
+      "language": "python",
+      "model": "claude-opus-4-7",
+      "run_index": 0,
+      "attempts": [
+        {
+          "prompt_tokens": 23821,
+          "completion_tokens": 108,
+          "thinking_tokens": 0,
+          "code": "import sys\n\ns = sys.argv[1]\nresult = []\ni = 0\nwhile i < len(s):\n    c = s[i]\n    count = 1\n    while i + count < len(s) and s[i + count] == c:\n        count += 1\n    result.append(c + str(count))\n    i += count\nprint(''.join(result))",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "aaabbc"
+              ],
+              "expected": "'a3b2c1\\n'",
+              "actual": "'a3b2c1\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 1,
+              "args": [
+                "aaa"
+              ],
+              "expected": "'a3\\n'",
+              "actual": "'a3\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 2,
+              "args": [
+                "abcd"
+              ],
+              "expected": "'a1b1c1d1\\n'",
+              "actual": "'a1b1c1d1\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 3,
+              "args": [
+                "aaAAaa"
+              ],
+              "expected": "'a2A2a2\\n'",
+              "actual": "'a2A2a2\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 4,
+              "args": [
+                "a"
+              ],
+              "expected": "'a1\\n'",
+              "actual": "'a1\\n'",
+              "stderr": "",
+              "passed": true
+            }
+          ],
+          "error": ""
+        }
+      ],
+      "first_attempt_correct": true,
+      "final_correct": true,
+      "total_prompt_tokens": 23821,
+      "total_completion_tokens": 108,
+      "total_thinking_tokens": 0,
+      "total_tokens": 23929,
+      "attempts_to_correct": 1,
+      "wall_time_s": 3.369987964630127
+    },
+    {
+      "task_id": "06_run_length_encode",
+      "language": "javascript",
+      "model": "claude-opus-4-7",
+      "run_index": 0,
+      "attempts": [
+        {
+          "prompt_tokens": 23839,
+          "completion_tokens": 115,
+          "thinking_tokens": 0,
+          "code": "const s = process.argv[2] || '';\nlet result = '';\nlet i = 0;\nwhile (i < s.length) {\n  let count = 1;\n  while (i + count < s.length && s[i + count] === s[i]) {\n    count++;\n  }\n  result += s[i] + count;\n  i += count;\n}\nconsole.log(result);",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "aaabbc"
+              ],
+              "expected": "'a3b2c1\\n'",
+              "actual": "'a3b2c1\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 1,
+              "args": [
+                "aaa"
+              ],
+              "expected": "'a3\\n'",
+              "actual": "'a3\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 2,
+              "args": [
+                "abcd"
+              ],
+              "expected": "'a1b1c1d1\\n'",
+              "actual": "'a1b1c1d1\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 3,
+              "args": [
+                "aaAAaa"
+              ],
+              "expected": "'a2A2a2\\n'",
+              "actual": "'a2A2a2\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 4,
+              "args": [
+                "a"
+              ],
+              "expected": "'a1\\n'",
+              "actual": "'a1\\n'",
+              "stderr": "",
+              "passed": true
+            }
+          ],
+          "error": ""
+        }
+      ],
+      "first_attempt_correct": true,
+      "final_correct": true,
+      "total_prompt_tokens": 23839,
+      "total_completion_tokens": 115,
+      "total_thinking_tokens": 0,
+      "total_tokens": 23954,
+      "attempts_to_correct": 1,
+      "wall_time_s": 3.5517208576202393
+    },
+    {
+      "task_id": "06_run_length_encode",
+      "language": "go",
+      "model": "claude-opus-4-7",
+      "run_index": 0,
+      "attempts": [
+        {
+          "prompt_tokens": 23839,
+          "completion_tokens": 183,
+          "thinking_tokens": 0,
+          "code": "package main\n\nimport (\n\t\"fmt\"\n\t\"os\"\n)\n\nfunc main() {\n\ts := os.Args[1]\n\tif len(s) == 0 {\n\t\treturn\n\t}\n\tcurrent := s[0]\n\tcount := 1\n\tfor i := 1; i < len(s); i++ {\n\t\tif s[i] == current {\n\t\t\tcount++\n\t\t} else {\n\t\t\tfmt.Printf(\"%c%d\", current, count)\n\t\t\tcurrent = s[i]\n\t\t\tcount = 1\n\t\t}\n\t}\n\tfmt.Printf(\"%c%d\", current, count)\n\tfmt.Println()\n}",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "aaabbc"
+              ],
+              "expected": "'a3b2c1\\n'",
+              "actual": "'a3b2c1\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 1,
+              "args": [
+                "aaa"
+              ],
+              "expected": "'a3\\n'",
+              "actual": "'a3\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 2,
+              "args": [
+                "abcd"
+              ],
+              "expected": "'a1b1c1d1\\n'",
+              "actual": "'a1b1c1d1\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 3,
+              "args": [
+                "aaAAaa"
+              ],
+              "expected": "'a2A2a2\\n'",
+              "actual": "'a2A2a2\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 4,
+              "args": [
+                "a"
+              ],
+              "expected": "'a1\\n'",
+              "actual": "'a1\\n'",
+              "stderr": "",
+              "passed": true
+            }
+          ],
+          "error": ""
+        }
+      ],
+      "first_attempt_correct": true,
+      "final_correct": true,
+      "total_prompt_tokens": 23839,
+      "total_completion_tokens": 183,
+      "total_thinking_tokens": 0,
+      "total_tokens": 24022,
+      "attempts_to_correct": 1,
+      "wall_time_s": 4.253006219863892
+    },
+    {
+      "task_id": "07_query_string",
+      "language": "sigil",
+      "model": "claude-opus-4-7",
+      "run_index": 0,
+      "attempts": [
+        {
+          "prompt_tokens": 28425,
+          "completion_tokens": 366,
+          "thinking_tokens": 0,
+          "code": "(module qs\n  (fn main -> int\n    (set args array (argv))\n    (if (eq (array_length args) 0)\n      (ret 0))\n    (set input string (array_get args 0))\n    (if (eq (string_length input) 0)\n      (ret 0))\n    (set parts array (string_split input \"&\"))\n    (array_sort parts)\n    (for-each pair string parts\n      (println pair))\n    (ret 0)))",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "name=alice&age=30&city=paris"
+              ],
+              "expected": "'age=30\\ncity=paris\\nname=alice\\n'",
+              "actual": "'age=30\\ncity=paris\\nname=alice\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 1,
+              "args": [
+                "z=1&a=2"
+              ],
+              "expected": "'a=2\\nz=1\\n'",
+              "actual": "'a=2\\nz=1\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 2,
+              "args": [
+                "single=value"
+              ],
+              "expected": "'single=value\\n'",
+              "actual": "'single=value\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 3,
+              "args": [
+                ""
+              ],
+              "expected": "''",
+              "actual": "''",
+              "stderr": "",
+              "passed": true
+            }
+          ],
+          "error": ""
+        }
+      ],
+      "first_attempt_correct": true,
+      "final_correct": true,
+      "total_prompt_tokens": 28425,
+      "total_completion_tokens": 366,
+      "total_thinking_tokens": 0,
+      "total_tokens": 28791,
+      "attempts_to_correct": 1,
+      "wall_time_s": 8.429546356201172
+    },
+    {
+      "task_id": "07_query_string",
+      "language": "python",
+      "model": "claude-opus-4-7",
+      "run_index": 0,
+      "attempts": [
+        {
+          "prompt_tokens": 23827,
+          "completion_tokens": 124,
+          "thinking_tokens": 0,
+          "code": "import sys\nfrom urllib.parse import parse_qsl\n\nquery = sys.argv[1] if len(sys.argv) > 1 else \"\"\nif query:\n    pairs = parse_qsl(query, keep_blank_values=True)\n    for key, value in sorted(pairs, key=lambda x: x[0]):\n        print(f\"{key}={value}\")",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "name=alice&age=30&city=paris"
+              ],
+              "expected": "'age=30\\ncity=paris\\nname=alice\\n'",
+              "actual": "'age=30\\ncity=paris\\nname=alice\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 1,
+              "args": [
+                "z=1&a=2"
+              ],
+              "expected": "'a=2\\nz=1\\n'",
+              "actual": "'a=2\\nz=1\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 2,
+              "args": [
+                "single=value"
+              ],
+              "expected": "'single=value\\n'",
+              "actual": "'single=value\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 3,
+              "args": [
+                ""
+              ],
+              "expected": "''",
+              "actual": "''",
+              "stderr": "",
+              "passed": true
+            }
+          ],
+          "error": ""
+        }
+      ],
+      "first_attempt_correct": true,
+      "final_correct": true,
+      "total_prompt_tokens": 23827,
+      "total_completion_tokens": 124,
+      "total_thinking_tokens": 0,
+      "total_tokens": 23951,
+      "attempts_to_correct": 1,
+      "wall_time_s": 4.015867710113525
+    },
+    {
+      "task_id": "07_query_string",
+      "language": "javascript",
+      "model": "claude-opus-4-7",
+      "run_index": 0,
+      "attempts": [
+        {
+          "prompt_tokens": 23845,
+          "completion_tokens": 212,
+          "thinking_tokens": 0,
+          "code": "const input = process.argv[2] || '';\nif (input === '') process.exit(0);\nconst pairs = input.split('&').map(p => {\n  const idx = p.indexOf('=');\n  const key = idx === -1 ? p : p.slice(0, idx);\n  const value = idx === -1 ? '' : p.slice(idx + 1);\n  return [key, value];\n});\npairs.sort((a, b) => a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0);\nfor (const [k, v] of pairs) {\n  console.log(`${k}=${v}`);\n}",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "name=alice&age=30&city=paris"
+              ],
+              "expected": "'age=30\\ncity=paris\\nname=alice\\n'",
+              "actual": "'age=30\\ncity=paris\\nname=alice\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 1,
+              "args": [
+                "z=1&a=2"
+              ],
+              "expected": "'a=2\\nz=1\\n'",
+              "actual": "'a=2\\nz=1\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 2,
+              "args": [
+                "single=value"
+              ],
+              "expected": "'single=value\\n'",
+              "actual": "'single=value\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 3,
+              "args": [
+                ""
+              ],
+              "expected": "''",
+              "actual": "''",
+              "stderr": "",
+              "passed": true
+            }
+          ],
+          "error": ""
+        }
+      ],
+      "first_attempt_correct": true,
+      "final_correct": true,
+      "total_prompt_tokens": 23845,
+      "total_completion_tokens": 212,
+      "total_thinking_tokens": 0,
+      "total_tokens": 24057,
+      "attempts_to_correct": 1,
+      "wall_time_s": 4.1038007736206055
+    },
+    {
+      "task_id": "07_query_string",
+      "language": "go",
+      "model": "claude-opus-4-7",
+      "run_index": 0,
+      "attempts": [
+        {
+          "prompt_tokens": 23845,
+          "completion_tokens": 322,
+          "thinking_tokens": 0,
+          "code": "package main\n\nimport (\n\t\"fmt\"\n\t\"os\"\n\t\"sort\"\n\t\"strings\"\n)\n\nfunc main() {\n\tif len(os.Args) < 2 || os.Args[1] == \"\" {\n\t\treturn\n\t}\n\tpairs := strings.Split(os.Args[1], \"&\")\n\ttype kv struct {\n\t\tkey, value string\n\t}\n\tvar kvs []kv\n\tfor _, p := range pairs {\n\t\tif p == \"\" {\n\t\t\tcontinue\n\t\t}\n\t\tidx := strings.Index(p, \"=\")\n\t\tif idx == -1 {\n\t\t\tkvs = append(kvs, kv{p, \"\"})\n\t\t} else {\n\t\t\tkvs = append(kvs, kv{p[:idx], p[idx+1:]})\n\t\t}\n\t}\n\tsort.Slice(kvs, func(i, j int) bool {\n\t\treturn kvs[i].key < kvs[j].key\n\t})\n\tfor _, x := range kvs {\n\t\tfmt.Println(x.key + \"=\" + x.value)\n\t}\n}",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "name=alice&age=30&city=paris"
+              ],
+              "expected": "'age=30\\ncity=paris\\nname=alice\\n'",
+              "actual": "'age=30\\ncity=paris\\nname=alice\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 1,
+              "args": [
+                "z=1&a=2"
+              ],
+              "expected": "'a=2\\nz=1\\n'",
+              "actual": "'a=2\\nz=1\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 2,
+              "args": [
+                "single=value"
+              ],
+              "expected": "'single=value\\n'",
+              "actual": "'single=value\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 3,
+              "args": [
+                ""
+              ],
+              "expected": "''",
+              "actual": "''",
+              "stderr": "",
+              "passed": true
+            }
+          ],
+          "error": ""
+        }
+      ],
+      "first_attempt_correct": true,
+      "final_correct": true,
+      "total_prompt_tokens": 23845,
+      "total_completion_tokens": 322,
+      "total_thinking_tokens": 0,
+      "total_tokens": 24167,
+      "attempts_to_correct": 1,
+      "wall_time_s": 4.945136070251465
+    },
+    {
+      "task_id": "08_stack_calculator",
+      "language": "sigil",
+      "model": "claude-opus-4-7",
+      "run_index": 0,
+      "attempts": [
+        {
+          "prompt_tokens": 28435,
+          "completion_tokens": 3406,
+          "thinking_tokens": 0,
+          "code": "(module rpn\n  (fn is_operator tok string -> bool\n    (or (string_equals tok \"+\")\n      (or (string_equals tok \"-\")\n        (or (string_equals tok \"*\")\n          (string_equals tok \"/\")))))\n\n  (fn apply_op op string a int b int -> int\n    (cond\n      ((string_equals op \"+\") (ret (add a b)))\n      ((string_equals op \"-\") (ret (sub a b)))\n      ((string_equals op \"*\") (ret (mul a b)))\n      (true (ret (div a b)))))\n\n  (fn main -> int\n    (set args array (argv))\n    (set expr string (array_get args 0))\n    (set tokens array (string_split expr \" \"))\n    (set stack array (array_new))\n    (set n int (array_length tokens))\n    (set tok string \"\")\n    (set a int 0)\n    (set b int 0)\n    (set result int 0)\n    (set num int 0)\n    (for i 0 n\n      (set tok (array_get tokens i))\n      (if (is_operator tok)\n        (set b (array_pop stack))\n        (set a (array_pop stack))\n        (set result (apply_op tok a b))\n        (array_push stack result)\n        (else\n          (set num (string_to_int tok))\n          (array_push stack num))))\n    (set final int (array_pop stack))\n    (println final)\n    (ret 0)))",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "3 4 +"
+              ],
+              "expected": "'7\\n'",
+              "actual": "''",
+              "stderr": "Runtime error: If condition must be boolean\n",
+              "passed": false
+            },
+            {
+              "case": 1,
+              "args": [
+                "5 1 2 + 4 * + 3 -"
+              ],
+              "expected": "'14\\n'",
+              "actual": "''",
+              "stderr": "Runtime error: If condition must be boolean\n",
+              "passed": false
+            },
+            {
+              "case": 2,
+              "args": [
+                "2 3 * 4 5 * +"
+              ],
+              "expected": "'26\\n'",
+              "actual": "''",
+              "stderr": "Runtime error: If condition must be boolean\n",
+              "passed": false
+            },
+            {
+              "case": 3,
+              "args": [
+                "10 3 /"
+              ],
+              "expected": "'3\\n'",
+              "actual": "''",
+              "stderr": "Runtime error: If condition must be boolean\n",
+              "passed": false
+            },
+            {
+              "case": 4,
+              "args": [
+                "42"
+              ],
+              "expected": "'42\\n'",
+              "actual": "''",
+              "stderr": "Runtime error: If condition must be boolean\n",
+              "passed": false
+            }
+          ],
+          "error": ""
+        },
+        {
+          "prompt_tokens": 29071,
+          "completion_tokens": 1468,
+          "thinking_tokens": 0,
+          "code": "(module rpn\n  (fn is_operator tok string -> bool\n    (or (string_equals tok \"+\")\n      (or (string_equals tok \"-\")\n        (or (string_equals tok \"*\")\n          (string_equals tok \"/\")))))\n\n  (fn apply_op op string a int b int -> int\n    (cond\n      ((string_equals op \"+\") (ret (add a b)))\n      ((string_equals op \"-\") (ret (sub a b)))\n      ((string_equals op \"*\") (ret (mul a b)))\n      (true (ret (div a b)))))\n\n  (fn main -> int\n    (set args array (argv))\n    (set expr string (array_get args 0))\n    (set tokens array (string_split expr \" \"))\n    (set stack array (array_new))\n    (set n int (array_length tokens))\n    (set tok string \"\")\n    (set a int 0)\n    (set b int 0)\n    (set result int 0)\n    (set num int 0)\n    (for i 0 n\n      (set tok (array_get tokens i))\n      (cond\n        ((is_operator tok)\n          (set b (array_pop stack))\n          (set a (array_pop stack))\n          (set result (apply_op tok a b))\n          (array_push stack result))\n        (true\n          (set num (string_to_int tok))\n          (array_push stack num))))\n    (set final int (array_pop stack))\n    (println final)\n    (ret 0)))",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "3 4 +"
+              ],
+              "expected": "'7\\n'",
+              "actual": "''",
+              "stderr": "Runtime error: Cond branch condition must be boolean\n",
+              "passed": false
+            },
+            {
+              "case": 1,
+              "args": [
+                "5 1 2 + 4 * + 3 -"
+              ],
+              "expected": "'14\\n'",
+              "actual": "''",
+              "stderr": "Runtime error: Cond branch condition must be boolean\n",
+              "passed": false
+            },
+            {
+              "case": 2,
+              "args": [
+                "2 3 * 4 5 * +"
+              ],
+              "expected": "'26\\n'",
+              "actual": "''",
+              "stderr": "Runtime error: Cond branch condition must be boolean\n",
+              "passed": false
+            },
+            {
+              "case": 3,
+              "args": [
+                "10 3 /"
+              ],
+              "expected": "'3\\n'",
+              "actual": "''",
+              "stderr": "Runtime error: Cond branch condition must be boolean\n",
+              "passed": false
+            },
+            {
+              "case": 4,
+              "args": [
+                "42"
+              ],
+              "expected": "'42\\n'",
+              "actual": "''",
+              "stderr": "Runtime error: Cond branch condition must be boolean\n",
+              "passed": false
+            }
+          ],
+          "error": ""
+        },
+        {
+          "prompt_tokens": 29723,
+          "completion_tokens": 1535,
+          "thinking_tokens": 0,
+          "code": "(module rpn\n  (fn is_operator tok string -> bool\n    (cond\n      ((string_equals tok \"+\") (ret true))\n      ((string_equals tok \"-\") (ret true))\n      ((string_equals tok \"*\") (ret true))\n      ((string_equals tok \"/\") (ret true))\n      (true (ret false))))\n\n  (fn apply_op op string a int b int -> int\n    (cond\n      ((string_equals op \"+\") (ret (add a b)))\n      ((string_equals op \"-\") (ret (sub a b)))\n      ((string_equals op \"*\") (ret (mul a b)))\n      (true (ret (div a b)))))\n\n  (fn main -> int\n    (set args array (argv))\n    (set expr string (array_get args 0))\n    (set tokens array (string_split expr \" \"))\n    (set stack array (array_new))\n    (set n int (array_length tokens))\n    (set tok string \"\")\n    (set a int 0)\n    (set b int 0)\n    (set result int 0)\n    (set num int 0)\n    (set is_op bool false)\n    (for i 0 n\n      (set tok (array_get tokens i))\n      (set is_op (is_operator tok))\n      (cond\n        (is_op\n          (set b (array_pop stack))\n          (set a (array_pop stack))\n          (set result (apply_op tok a b))\n          (array_push stack result))\n        (true\n          (set num (string_to_int tok))\n          (array_push stack num))))\n    (set final int (array_pop stack))\n    (println final)\n    (ret 0)))",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "3 4 +"
+              ],
+              "expected": "'7\\n'",
+              "actual": "'7\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 1,
+              "args": [
+                "5 1 2 + 4 * + 3 -"
+              ],
+              "expected": "'14\\n'",
+              "actual": "'14\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 2,
+              "args": [
+                "2 3 * 4 5 * +"
+              ],
+              "expected": "'26\\n'",
+              "actual": "'26\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 3,
+              "args": [
+                "10 3 /"
+              ],
+              "expected": "'3\\n'",
+              "actual": "'3\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 4,
+              "args": [
+                "42"
+              ],
+              "expected": "'42\\n'",
+              "actual": "'42\\n'",
+              "stderr": "",
+              "passed": true
+            }
+          ],
+          "error": ""
+        }
+      ],
+      "first_attempt_correct": false,
+      "final_correct": true,
+      "total_prompt_tokens": 87229,
+      "total_completion_tokens": 6409,
+      "total_thinking_tokens": 0,
+      "total_tokens": 93638,
+      "attempts_to_correct": 3,
+      "wall_time_s": 78.85461783409119
+    },
+    {
+      "task_id": "08_stack_calculator",
+      "language": "python",
+      "model": "claude-opus-4-7",
+      "run_index": 0,
+      "attempts": [
+        {
+          "prompt_tokens": 23844,
+          "completion_tokens": 189,
+          "thinking_tokens": 0,
+          "code": "import sys\n\ndef rpn(expr):\n    stack = []\n    for token in expr.split():\n        if token in '+-*/':\n            b = stack.pop()\n            a = stack.pop()\n            if token == '+':\n                stack.append(a + b)\n            elif token == '-':\n                stack.append(a - b)\n            elif token == '*':\n                stack.append(a * b)\n            elif token == '/':\n                stack.append(int(a / b))\n        else:\n            stack.append(int(token))\n    return stack[0]\n\nprint(rpn(sys.argv[1]))",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "3 4 +"
+              ],
+              "expected": "'7\\n'",
+              "actual": "'7\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 1,
+              "args": [
+                "5 1 2 + 4 * + 3 -"
+              ],
+              "expected": "'14\\n'",
+              "actual": "'14\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 2,
+              "args": [
+                "2 3 * 4 5 * +"
+              ],
+              "expected": "'26\\n'",
+              "actual": "'26\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 3,
+              "args": [
+                "10 3 /"
+              ],
+              "expected": "'3\\n'",
+              "actual": "'3\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 4,
+              "args": [
+                "42"
+              ],
+              "expected": "'42\\n'",
+              "actual": "'42\\n'",
+              "stderr": "",
+              "passed": true
+            }
+          ],
+          "error": ""
+        }
+      ],
+      "first_attempt_correct": true,
+      "final_correct": true,
+      "total_prompt_tokens": 23844,
+      "total_completion_tokens": 189,
+      "total_thinking_tokens": 0,
+      "total_tokens": 24033,
+      "attempts_to_correct": 1,
+      "wall_time_s": 4.763914585113525
+    },
+    {
+      "task_id": "08_stack_calculator",
+      "language": "javascript",
+      "model": "claude-opus-4-7",
+      "run_index": 0,
+      "attempts": [
+        {
+          "prompt_tokens": 23862,
+          "completion_tokens": 246,
+          "thinking_tokens": 0,
+          "code": "const expr = process.argv[2];\nconst tokens = expr.split(/\\s+/).filter(t => t.length > 0);\nconst stack = [];\n\nfor (const token of tokens) {\n  if (token === '+' || token === '-' || token === '*' || token === '/') {\n    const b = stack.pop();\n    const a = stack.pop();\n    let result;\n    switch (token) {\n      case '+': result = a + b; break;\n      case '-': result = a - b; break;\n      case '*': result = a * b; break;\n      case '/': result = Math.trunc(a / b); break;\n    }\n    stack.push(result);\n  } else {\n    stack.push(parseInt(token, 10));\n  }\n}\n\nconsole.log(stack[0]);",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "3 4 +"
+              ],
+              "expected": "'7\\n'",
+              "actual": "'7\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 1,
+              "args": [
+                "5 1 2 + 4 * + 3 -"
+              ],
+              "expected": "'14\\n'",
+              "actual": "'14\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 2,
+              "args": [
+                "2 3 * 4 5 * +"
+              ],
+              "expected": "'26\\n'",
+              "actual": "'26\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 3,
+              "args": [
+                "10 3 /"
+              ],
+              "expected": "'3\\n'",
+              "actual": "'3\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 4,
+              "args": [
+                "42"
+              ],
+              "expected": "'42\\n'",
+              "actual": "'42\\n'",
+              "stderr": "",
+              "passed": true
+            }
+          ],
+          "error": ""
+        }
+      ],
+      "first_attempt_correct": true,
+      "final_correct": true,
+      "total_prompt_tokens": 23862,
+      "total_completion_tokens": 246,
+      "total_thinking_tokens": 0,
+      "total_tokens": 24108,
+      "attempts_to_correct": 1,
+      "wall_time_s": 4.936663866043091
+    },
+    {
+      "task_id": "08_stack_calculator",
+      "language": "go",
+      "model": "claude-opus-4-7",
+      "run_index": 0,
+      "attempts": [
+        {
+          "prompt_tokens": 23862,
+          "completion_tokens": 341,
+          "thinking_tokens": 0,
+          "code": "package main\n\nimport (\n\t\"fmt\"\n\t\"os\"\n\t\"strconv\"\n\t\"strings\"\n)\n\nfunc main() {\n\ttokens := strings.Fields(os.Args[1])\n\tstack := []int{}\n\tfor _, tok := range tokens {\n\t\tswitch tok {\n\t\tcase \"+\", \"-\", \"*\", \"/\":\n\t\t\tb := stack[len(stack)-1]\n\t\t\ta := stack[len(stack)-2]\n\t\t\tstack = stack[:len(stack)-2]\n\t\t\tvar r int\n\t\t\tswitch tok {\n\t\t\tcase \"+\":\n\t\t\t\tr = a + b\n\t\t\tcase \"-\":\n\t\t\t\tr = a - b\n\t\t\tcase \"*\":\n\t\t\t\tr = a * b\n\t\t\tcase \"/\":\n\t\t\t\tr = a / b\n\t\t\t}\n\t\t\tstack = append(stack, r)\n\t\tdefault:\n\t\t\tn, err := strconv.Atoi(tok)\n\t\t\tif err != nil {\n\t\t\t\tfmt.Fprintln(os.Stderr, err)\n\t\t\t\tos.Exit(1)\n\t\t\t}\n\t\t\tstack = append(stack, n)\n\t\t}\n\t}\n\tfmt.Println(stack[len(stack)-1])\n}",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "3 4 +"
+              ],
+              "expected": "'7\\n'",
+              "actual": "'7\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 1,
+              "args": [
+                "5 1 2 + 4 * + 3 -"
+              ],
+              "expected": "'14\\n'",
+              "actual": "'14\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 2,
+              "args": [
+                "2 3 * 4 5 * +"
+              ],
+              "expected": "'26\\n'",
+              "actual": "'26\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 3,
+              "args": [
+                "10 3 /"
+              ],
+              "expected": "'3\\n'",
+              "actual": "'3\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 4,
+              "args": [
+                "42"
+              ],
+              "expected": "'42\\n'",
+              "actual": "'42\\n'",
+              "stderr": "",
+              "passed": true
+            }
+          ],
+          "error": ""
+        }
+      ],
+      "first_attempt_correct": true,
+      "final_correct": true,
+      "total_prompt_tokens": 23862,
+      "total_completion_tokens": 341,
+      "total_thinking_tokens": 0,
+      "total_tokens": 24203,
+      "attempts_to_correct": 1,
+      "wall_time_s": 5.150059700012207
+    },
+    {
+      "task_id": "09_matrix_transpose",
+      "language": "sigil",
+      "model": "claude-opus-4-7",
+      "run_index": 0,
+      "attempts": [
+        {
+          "prompt_tokens": 28433,
+          "completion_tokens": 1919,
+          "thinking_tokens": 0,
+          "code": "(module transpose\n  (fn main -> int\n    (set args array (argv))\n    (set input string (array_get args 0))\n    (set rows array (string_split input \";\"))\n    (set num_rows int (array_length rows))\n\n    (set matrix array (array_new))\n    (set row_str string \"\")\n    (set cols array (array_new))\n    (for i 0 num_rows\n      (set row_str (array_get rows i))\n      (set cols (string_split row_str \",\"))\n      (array_push matrix cols))\n\n    (set first_row array (array_get matrix 0))\n    (set num_cols int (array_length first_row))\n\n    (set out_row array (array_new))\n    (set row array (array_new))\n    (set val string \"\")\n    (for j 0 num_cols\n      (set out_row (array_new))\n      (for i 0 num_rows\n        (set row (array_get matrix i))\n        (set val (array_get row j))\n        (array_push out_row val))\n      (println (string_join out_row \",\")))\n\n    (ret 0)))",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "1,2,3;4,5,6"
+              ],
+              "expected": "'1,4\\n2,5\\n3,6\\n'",
+              "actual": "'1,4\\n2,5\\n3,6\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 1,
+              "args": [
+                "1,2;3,4;5,6"
+              ],
+              "expected": "'1,3,5\\n2,4,6\\n'",
+              "actual": "'1,3,5\\n2,4,6\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 2,
+              "args": [
+                "42"
+              ],
+              "expected": "'42\\n'",
+              "actual": "'42\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 3,
+              "args": [
+                "1,2,3"
+              ],
+              "expected": "'1\\n2\\n3\\n'",
+              "actual": "'1\\n2\\n3\\n'",
+              "stderr": "",
+              "passed": true
+            }
+          ],
+          "error": ""
+        }
+      ],
+      "first_attempt_correct": true,
+      "final_correct": true,
+      "total_prompt_tokens": 28433,
+      "total_completion_tokens": 1919,
+      "total_thinking_tokens": 0,
+      "total_tokens": 30352,
+      "attempts_to_correct": 1,
+      "wall_time_s": 22.979437589645386
+    },
+    {
+      "task_id": "09_matrix_transpose",
+      "language": "python",
+      "model": "claude-opus-4-7",
+      "run_index": 0,
+      "attempts": [
+        {
+          "prompt_tokens": 23835,
+          "completion_tokens": 74,
+          "thinking_tokens": 0,
+          "code": "import sys\n\nmatrix = [row.split(',') for row in sys.argv[1].split(';')]\ntransposed = list(zip(*matrix))\nfor row in transposed:\n    print(','.join(row))",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "1,2,3;4,5,6"
+              ],
+              "expected": "'1,4\\n2,5\\n3,6\\n'",
+              "actual": "'1,4\\n2,5\\n3,6\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 1,
+              "args": [
+                "1,2;3,4;5,6"
+              ],
+              "expected": "'1,3,5\\n2,4,6\\n'",
+              "actual": "'1,3,5\\n2,4,6\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 2,
+              "args": [
+                "42"
+              ],
+              "expected": "'42\\n'",
+              "actual": "'42\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 3,
+              "args": [
+                "1,2,3"
+              ],
+              "expected": "'1\\n2\\n3\\n'",
+              "actual": "'1\\n2\\n3\\n'",
+              "stderr": "",
+              "passed": true
+            }
+          ],
+          "error": ""
+        }
+      ],
+      "first_attempt_correct": true,
+      "final_correct": true,
+      "total_prompt_tokens": 23835,
+      "total_completion_tokens": 74,
+      "total_thinking_tokens": 0,
+      "total_tokens": 23909,
+      "attempts_to_correct": 1,
+      "wall_time_s": 3.2707712650299072
+    },
+    {
+      "task_id": "09_matrix_transpose",
+      "language": "javascript",
+      "model": "claude-opus-4-7",
+      "run_index": 0,
+      "attempts": [
+        {
+          "prompt_tokens": 23853,
+          "completion_tokens": 187,
+          "thinking_tokens": 0,
+          "code": "const input = process.argv[2];\nconst matrix = input.split(';').map(row => row.split(',').map(Number));\nconst rows = matrix.length;\nconst cols = matrix[0].length;\nconst transposed = [];\nfor (let i = 0; i < cols; i++) {\n  const newRow = [];\n  for (let j = 0; j < rows; j++) {\n    newRow.push(matrix[j][i]);\n  }\n  transposed.push(newRow);\n}\nconsole.log(transposed.map(row => row.join(',')).join('\\n'));",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "1,2,3;4,5,6"
+              ],
+              "expected": "'1,4\\n2,5\\n3,6\\n'",
+              "actual": "'1,4\\n2,5\\n3,6\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 1,
+              "args": [
+                "1,2;3,4;5,6"
+              ],
+              "expected": "'1,3,5\\n2,4,6\\n'",
+              "actual": "'1,3,5\\n2,4,6\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 2,
+              "args": [
+                "42"
+              ],
+              "expected": "'42\\n'",
+              "actual": "'42\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 3,
+              "args": [
+                "1,2,3"
+              ],
+              "expected": "'1\\n2\\n3\\n'",
+              "actual": "'1\\n2\\n3\\n'",
+              "stderr": "",
+              "passed": true
+            }
+          ],
+          "error": ""
+        }
+      ],
+      "first_attempt_correct": true,
+      "final_correct": true,
+      "total_prompt_tokens": 23853,
+      "total_completion_tokens": 187,
+      "total_thinking_tokens": 0,
+      "total_tokens": 24040,
+      "attempts_to_correct": 1,
+      "wall_time_s": 4.7192299365997314
+    },
+    {
+      "task_id": "09_matrix_transpose",
+      "language": "go",
+      "model": "claude-opus-4-7",
+      "run_index": 0,
+      "attempts": [
+        {
+          "prompt_tokens": 23853,
+          "completion_tokens": 243,
+          "thinking_tokens": 0,
+          "code": "package main\n\nimport (\n\t\"fmt\"\n\t\"os\"\n\t\"strings\"\n)\n\nfunc main() {\n\tinput := os.Args[1]\n\trowStrs := strings.Split(input, \";\")\n\tmatrix := make([][]string, len(rowStrs))\n\tfor i, r := range rowStrs {\n\t\tmatrix[i] = strings.Split(r, \",\")\n\t}\n\trows := len(matrix)\n\tcols := len(matrix[0])\n\tfor j := 0; j < cols; j++ {\n\t\tparts := make([]string, rows)\n\t\tfor i := 0; i < rows; i++ {\n\t\t\tparts[i] = matrix[i][j]\n\t\t}\n\t\tfmt.Println(strings.Join(parts, \",\"))\n\t}\n}",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "1,2,3;4,5,6"
+              ],
+              "expected": "'1,4\\n2,5\\n3,6\\n'",
+              "actual": "'1,4\\n2,5\\n3,6\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 1,
+              "args": [
+                "1,2;3,4;5,6"
+              ],
+              "expected": "'1,3,5\\n2,4,6\\n'",
+              "actual": "'1,3,5\\n2,4,6\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 2,
+              "args": [
+                "42"
+              ],
+              "expected": "'42\\n'",
+              "actual": "'42\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 3,
+              "args": [
+                "1,2,3"
+              ],
+              "expected": "'1\\n2\\n3\\n'",
+              "actual": "'1\\n2\\n3\\n'",
+              "stderr": "",
+              "passed": true
+            }
+          ],
+          "error": ""
+        }
+      ],
+      "first_attempt_correct": true,
+      "final_correct": true,
+      "total_prompt_tokens": 23853,
+      "total_completion_tokens": 243,
+      "total_thinking_tokens": 0,
+      "total_tokens": 24096,
+      "attempts_to_correct": 1,
+      "wall_time_s": 4.394238233566284
+    },
+    {
+      "task_id": "10_caesar_cipher",
+      "language": "sigil",
+      "model": "claude-opus-4-7",
+      "run_index": 0,
+      "attempts": [
+        {
+          "prompt_tokens": 28463,
+          "completion_tokens": 1483,
+          "thinking_tokens": 0,
+          "code": "(module caesar\n  (fn shift_char c int s int -> int\n    (if (and (ge c 65) (le c 90))\n      (ret (add (mod (add (sub c 65) s) 26) 65)))\n    (if (and (ge c 97) (le c 122))\n      (ret (add (mod (add (sub c 97) s) 26) 97)))\n    (ret c))\n\n  (fn caesar msg string s int -> string\n    (set result string \"\")\n    (set len int (string_length msg))\n    (for i 0 len\n      (set c int (string_get msg i))\n      (set shifted int (shift_char c s))\n      (set result (string_concat result (char_from_code shifted))))\n    (ret result))\n\n  (fn main -> int\n    (set args array (argv))\n    (set mode string (array_get args 0))\n    (set shift_str string (array_get args 1))\n    (set msg string (array_get args 2))\n    (set shift int (string_to_int shift_str))\n    (set normalized int (mod (add (mod shift 26) 26) 26))\n    (if (string_equals mode \"decode\")\n      (set normalized (mod (sub 26 normalized) 26)))\n    (println (caesar msg normalized))\n    (ret 0)))",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "encode",
+                "3",
+                "Hello World"
+              ],
+              "expected": "'Khoor Zruog\\n'",
+              "actual": "'Khoor Zruog\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 1,
+              "args": [
+                "decode",
+                "3",
+                "Khoor Zruog"
+              ],
+              "expected": "'Hello World\\n'",
+              "actual": "'Hello World\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 2,
+              "args": [
+                "encode",
+                "13",
+                "ABCxyz"
+              ],
+              "expected": "'NOPklm\\n'",
+              "actual": "'NOPklm\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 3,
+              "args": [
+                "encode",
+                "1",
+                "z"
+              ],
+              "expected": "'a\\n'",
+              "actual": "'a\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 4,
+              "args": [
+                "encode",
+                "0",
+                "No change!"
+              ],
+              "expected": "'No change!\\n'",
+              "actual": "'No change!\\n'",
+              "stderr": "",
+              "passed": true
+            }
+          ],
+          "error": ""
+        }
+      ],
+      "first_attempt_correct": true,
+      "final_correct": true,
+      "total_prompt_tokens": 28463,
+      "total_completion_tokens": 1483,
+      "total_thinking_tokens": 0,
+      "total_tokens": 29946,
+      "attempts_to_correct": 1,
+      "wall_time_s": 18.601667881011963
+    },
+    {
+      "task_id": "10_caesar_cipher",
+      "language": "python",
+      "model": "claude-opus-4-7",
+      "run_index": 0,
+      "attempts": [
+        {
+          "prompt_tokens": 23865,
+          "completion_tokens": 208,
+          "thinking_tokens": 0,
+          "code": "import sys\n\nmode = sys.argv[1]\nshift = int(sys.argv[2])\nmessage = sys.argv[3]\n\nif mode == \"decode\":\n    shift = -shift\n\nresult = []\nfor ch in message:\n    if 'a' <= ch <= 'z':\n        result.append(chr((ord(ch) - ord('a') + shift) % 26 + ord('a')))\n    elif 'A' <= ch <= 'Z':\n        result.append(chr((ord(ch) - ord('A') + shift) % 26 + ord('A')))\n    else:\n        result.append(ch)\n\nprint(''.join(result))",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "encode",
+                "3",
+                "Hello World"
+              ],
+              "expected": "'Khoor Zruog\\n'",
+              "actual": "'Khoor Zruog\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 1,
+              "args": [
+                "decode",
+                "3",
+                "Khoor Zruog"
+              ],
+              "expected": "'Hello World\\n'",
+              "actual": "'Hello World\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 2,
+              "args": [
+                "encode",
+                "13",
+                "ABCxyz"
+              ],
+              "expected": "'NOPklm\\n'",
+              "actual": "'NOPklm\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 3,
+              "args": [
+                "encode",
+                "1",
+                "z"
+              ],
+              "expected": "'a\\n'",
+              "actual": "'a\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 4,
+              "args": [
+                "encode",
+                "0",
+                "No change!"
+              ],
+              "expected": "'No change!\\n'",
+              "actual": "'No change!\\n'",
+              "stderr": "",
+              "passed": true
+            }
+          ],
+          "error": ""
+        }
+      ],
+      "first_attempt_correct": true,
+      "final_correct": true,
+      "total_prompt_tokens": 23865,
+      "total_completion_tokens": 208,
+      "total_thinking_tokens": 0,
+      "total_tokens": 24073,
+      "attempts_to_correct": 1,
+      "wall_time_s": 3.983412504196167
+    },
+    {
+      "task_id": "10_caesar_cipher",
+      "language": "javascript",
+      "model": "claude-opus-4-7",
+      "run_index": 0,
+      "attempts": [
+        {
+          "prompt_tokens": 23883,
+          "completion_tokens": 260,
+          "thinking_tokens": 0,
+          "code": "const mode = process.argv[2];\nconst shift = parseInt(process.argv[3], 10);\nconst message = process.argv[4];\n\nconst effectiveShift = mode === \"decode\" ? -shift : shift;\n\nlet result = \"\";\nfor (const ch of message) {\n  const code = ch.charCodeAt(0);\n  if (code >= 65 && code <= 90) {\n    result += String.fromCharCode(((code - 65 + effectiveShift) % 26 + 26) % 26 + 65);\n  } else if (code >= 97 && code <= 122) {\n    result += String.fromCharCode(((code - 97 + effectiveShift) % 26 + 26) % 26 + 97);\n  } else {\n    result += ch;\n  }\n}\n\nconsole.log(result);",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "encode",
+                "3",
+                "Hello World"
+              ],
+              "expected": "'Khoor Zruog\\n'",
+              "actual": "'Khoor Zruog\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 1,
+              "args": [
+                "decode",
+                "3",
+                "Khoor Zruog"
+              ],
+              "expected": "'Hello World\\n'",
+              "actual": "'Hello World\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 2,
+              "args": [
+                "encode",
+                "13",
+                "ABCxyz"
+              ],
+              "expected": "'NOPklm\\n'",
+              "actual": "'NOPklm\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 3,
+              "args": [
+                "encode",
+                "1",
+                "z"
+              ],
+              "expected": "'a\\n'",
+              "actual": "'a\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 4,
+              "args": [
+                "encode",
+                "0",
+                "No change!"
+              ],
+              "expected": "'No change!\\n'",
+              "actual": "'No change!\\n'",
+              "stderr": "",
+              "passed": true
+            }
+          ],
+          "error": ""
+        }
+      ],
+      "first_attempt_correct": true,
+      "final_correct": true,
+      "total_prompt_tokens": 23883,
+      "total_completion_tokens": 260,
+      "total_thinking_tokens": 0,
+      "total_tokens": 24143,
+      "attempts_to_correct": 1,
+      "wall_time_s": 5.976064920425415
+    },
+    {
+      "task_id": "10_caesar_cipher",
+      "language": "go",
+      "model": "claude-opus-4-7",
+      "run_index": 0,
+      "attempts": [
+        {
+          "prompt_tokens": 23883,
+          "completion_tokens": 303,
+          "thinking_tokens": 0,
+          "code": "package main\n\nimport (\n\t\"fmt\"\n\t\"os\"\n\t\"strconv\"\n)\n\nfunc main() {\n\tmode := os.Args[1]\n\tshift, _ := strconv.Atoi(os.Args[2])\n\tmessage := os.Args[3]\n\n\tif mode == \"decode\" {\n\t\tshift = -shift\n\t}\n\n\tshift = ((shift % 26) + 26) % 26\n\n\tresult := make([]byte, len(message))\n\tfor i := 0; i < len(message); i++ {\n\t\tc := message[i]\n\t\tswitch {\n\t\tcase c >= 'a' && c <= 'z':\n\t\t\tresult[i] = byte((int(c-'a')+shift)%26) + 'a'\n\t\tcase c >= 'A' && c <= 'Z':\n\t\t\tresult[i] = byte((int(c-'A')+shift)%26) + 'A'\n\t\tdefault:\n\t\t\tresult[i] = c\n\t\t}\n\t}\n\n\tfmt.Println(string(result))\n}",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "encode",
+                "3",
+                "Hello World"
+              ],
+              "expected": "'Khoor Zruog\\n'",
+              "actual": "'Khoor Zruog\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 1,
+              "args": [
+                "decode",
+                "3",
+                "Khoor Zruog"
+              ],
+              "expected": "'Hello World\\n'",
+              "actual": "'Hello World\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 2,
+              "args": [
+                "encode",
+                "13",
+                "ABCxyz"
+              ],
+              "expected": "'NOPklm\\n'",
+              "actual": "'NOPklm\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 3,
+              "args": [
+                "encode",
+                "1",
+                "z"
+              ],
+              "expected": "'a\\n'",
+              "actual": "'a\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 4,
+              "args": [
+                "encode",
+                "0",
+                "No change!"
+              ],
+              "expected": "'No change!\\n'",
+              "actual": "'No change!\\n'",
+              "stderr": "",
+              "passed": true
+            }
+          ],
+          "error": ""
+        }
+      ],
+      "first_attempt_correct": true,
+      "final_correct": true,
+      "total_prompt_tokens": 23883,
+      "total_completion_tokens": 303,
+      "total_thinking_tokens": 0,
+      "total_tokens": 24186,
+      "attempts_to_correct": 1,
+      "wall_time_s": 4.760986089706421
+    }
+  ]
+}

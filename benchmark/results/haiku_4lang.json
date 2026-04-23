@@ -1,0 +1,3889 @@
+{
+  "meta": {
+    "model": "claude-haiku-4-5-20251001",
+    "provider": "claude-cli",
+    "languages": [
+      "sigil",
+      "python",
+      "javascript",
+      "go"
+    ],
+    "runs_per_combo": 1,
+    "max_retries": 5,
+    "timestamp": "2026-04-21T13:04:32"
+  },
+  "results": [
+    {
+      "task_id": "01_fizzbuzz",
+      "language": "sigil",
+      "model": "claude-haiku-4-5-20251001",
+      "run_index": 0,
+      "attempts": [
+        {
+          "prompt_tokens": 10,
+          "completion_tokens": 1441,
+          "thinking_tokens": 0,
+          "code": "(module fizzbuzz\n  (fn main -> int\n    (set args array (argv))\n    (set n int (string_to_int (array_get args 0)))\n    (for i 1 (add n 1)\n      (cond\n        ((eq (mod i 15) 0) (println \"FizzBuzz\"))\n        ((eq (mod i 3) 0) (println \"Fizz\"))\n        ((eq (mod i 5) 0) (println \"Buzz\"))\n        (true (println (string_from_int i)))))\n    (ret 0)))",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "15"
+              ],
+              "expected": "'1\\n2\\nFizz\\n4\\nBuzz\\nFizz\\n7\\n8\\nFizz\\nBuzz\\n11\\nFizz\\n13\\n14\\nFizzBuzz\\n'",
+              "actual": "'1\\n2\\nFizz\\n4\\nBuzz\\nFizz\\n7\\n8\\nFizz\\nBuzz\\n11\\nFizz\\n13\\n14\\nFizzBuzz\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 1,
+              "args": [
+                "5"
+              ],
+              "expected": "'1\\n2\\nFizz\\n4\\nBuzz\\n'",
+              "actual": "'1\\n2\\nFizz\\n4\\nBuzz\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 2,
+              "args": [
+                "1"
+              ],
+              "expected": "'1\\n'",
+              "actual": "'1\\n'",
+              "stderr": "",
+              "passed": true
+            }
+          ],
+          "error": ""
+        }
+      ],
+      "first_attempt_correct": true,
+      "final_correct": true,
+      "total_prompt_tokens": 10,
+      "total_completion_tokens": 1441,
+      "total_thinking_tokens": 0,
+      "total_tokens": 1451,
+      "attempts_to_correct": 1,
+      "wall_time_s": 14.38074779510498
+    },
+    {
+      "task_id": "01_fizzbuzz",
+      "language": "python",
+      "model": "claude-haiku-4-5-20251001",
+      "run_index": 0,
+      "attempts": [
+        {
+          "prompt_tokens": 10,
+          "completion_tokens": 415,
+          "thinking_tokens": 27488,
+          "code": "import sys\n\nn = int(sys.argv[1])\n\nfor i in range(1, n + 1):\n    if i % 15 == 0:\n        print(\"FizzBuzz\")\n    elif i % 3 == 0:\n        print(\"Fizz\")\n    elif i % 5 == 0:\n        print(\"Buzz\")\n    else:\n        print(i)",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "15"
+              ],
+              "expected": "'1\\n2\\nFizz\\n4\\nBuzz\\nFizz\\n7\\n8\\nFizz\\nBuzz\\n11\\nFizz\\n13\\n14\\nFizzBuzz\\n'",
+              "actual": "'1\\n2\\nFizz\\n4\\nBuzz\\nFizz\\n7\\n8\\nFizz\\nBuzz\\n11\\nFizz\\n13\\n14\\nFizzBuzz\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 1,
+              "args": [
+                "5"
+              ],
+              "expected": "'1\\n2\\nFizz\\n4\\nBuzz\\n'",
+              "actual": "'1\\n2\\nFizz\\n4\\nBuzz\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 2,
+              "args": [
+                "1"
+              ],
+              "expected": "'1\\n'",
+              "actual": "'1\\n'",
+              "stderr": "",
+              "passed": true
+            }
+          ],
+          "error": ""
+        }
+      ],
+      "first_attempt_correct": true,
+      "final_correct": true,
+      "total_prompt_tokens": 10,
+      "total_completion_tokens": 415,
+      "total_thinking_tokens": 27488,
+      "total_tokens": 27913,
+      "attempts_to_correct": 1,
+      "wall_time_s": 4.437459230422974
+    },
+    {
+      "task_id": "01_fizzbuzz",
+      "language": "javascript",
+      "model": "claude-haiku-4-5-20251001",
+      "run_index": 0,
+      "attempts": [
+        {
+          "prompt_tokens": 10,
+          "completion_tokens": 492,
+          "thinking_tokens": 27488,
+          "code": "const n = parseInt(process.argv[2]);\n\nfor (let i = 1; i <= n; i++) {\n  if (i % 15 === 0) {\n    console.log('FizzBuzz');\n  } else if (i % 3 === 0) {\n    console.log('Fizz');\n  } else if (i % 5 === 0) {\n    console.log('Buzz');\n  } else {\n    console.log(i);\n  }\n}",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "15"
+              ],
+              "expected": "'1\\n2\\nFizz\\n4\\nBuzz\\nFizz\\n7\\n8\\nFizz\\nBuzz\\n11\\nFizz\\n13\\n14\\nFizzBuzz\\n'",
+              "actual": "'1\\n2\\nFizz\\n4\\nBuzz\\nFizz\\n7\\n8\\nFizz\\nBuzz\\n11\\nFizz\\n13\\n14\\nFizzBuzz\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 1,
+              "args": [
+                "5"
+              ],
+              "expected": "'1\\n2\\nFizz\\n4\\nBuzz\\n'",
+              "actual": "'1\\n2\\nFizz\\n4\\nBuzz\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 2,
+              "args": [
+                "1"
+              ],
+              "expected": "'1\\n'",
+              "actual": "'1\\n'",
+              "stderr": "",
+              "passed": true
+            }
+          ],
+          "error": ""
+        }
+      ],
+      "first_attempt_correct": true,
+      "final_correct": true,
+      "total_prompt_tokens": 10,
+      "total_completion_tokens": 492,
+      "total_thinking_tokens": 27488,
+      "total_tokens": 27990,
+      "attempts_to_correct": 1,
+      "wall_time_s": 10.805034160614014
+    },
+    {
+      "task_id": "01_fizzbuzz",
+      "language": "go",
+      "model": "claude-haiku-4-5-20251001",
+      "run_index": 0,
+      "attempts": [
+        {
+          "prompt_tokens": 10,
+          "completion_tokens": 648,
+          "thinking_tokens": 27488,
+          "code": "package main\n\nimport (\n\t\"fmt\"\n\t\"os\"\n\t\"strconv\"\n)\n\nfunc main() {\n\tif len(os.Args) < 2 {\n\t\treturn\n\t}\n\n\tn, err := strconv.Atoi(os.Args[1])\n\tif err != nil {\n\t\treturn\n\t}\n\n\tfor i := 1; i <= n; i++ {\n\t\tif i%15 == 0 {\n\t\t\tfmt.Println(\"FizzBuzz\")\n\t\t} else if i%3 == 0 {\n\t\t\tfmt.Println(\"Fizz\")\n\t\t} else if i%5 == 0 {\n\t\t\tfmt.Println(\"Buzz\")\n\t\t} else {\n\t\t\tfmt.Println(i)\n\t\t}\n\t}\n}",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "15"
+              ],
+              "expected": "'1\\n2\\nFizz\\n4\\nBuzz\\nFizz\\n7\\n8\\nFizz\\nBuzz\\n11\\nFizz\\n13\\n14\\nFizzBuzz\\n'",
+              "actual": "'1\\n2\\nFizz\\n4\\nBuzz\\nFizz\\n7\\n8\\nFizz\\nBuzz\\n11\\nFizz\\n13\\n14\\nFizzBuzz\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 1,
+              "args": [
+                "5"
+              ],
+              "expected": "'1\\n2\\nFizz\\n4\\nBuzz\\n'",
+              "actual": "'1\\n2\\nFizz\\n4\\nBuzz\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 2,
+              "args": [
+                "1"
+              ],
+              "expected": "'1\\n'",
+              "actual": "'1\\n'",
+              "stderr": "",
+              "passed": true
+            }
+          ],
+          "error": ""
+        }
+      ],
+      "first_attempt_correct": true,
+      "final_correct": true,
+      "total_prompt_tokens": 10,
+      "total_completion_tokens": 648,
+      "total_thinking_tokens": 27488,
+      "total_tokens": 28146,
+      "attempts_to_correct": 1,
+      "wall_time_s": 6.568431377410889
+    },
+    {
+      "task_id": "02_reverse_words",
+      "language": "sigil",
+      "model": "claude-haiku-4-5-20251001",
+      "run_index": 0,
+      "attempts": [
+        {
+          "prompt_tokens": 10,
+          "completion_tokens": 558,
+          "thinking_tokens": 27488,
+          "code": "(module reverse_words\n  (fn main -> int\n    (set args array (argv))\n    (if (eq (array_length args) 0)\n      (ret 1))\n    (set sentence string (array_get args 0))\n    (set words array (string_split sentence \" \"))\n    (set reversed array (array_reverse words))\n    (set result string (string_join reversed \" \"))\n    (println result)\n    (ret 0)))",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "hello world foo"
+              ],
+              "expected": "'foo world hello\\n'",
+              "actual": "'foo world hello\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 1,
+              "args": [
+                "one"
+              ],
+              "expected": "'one\\n'",
+              "actual": "'one\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 2,
+              "args": [
+                "the quick brown fox"
+              ],
+              "expected": "'fox brown quick the\\n'",
+              "actual": "'fox brown quick the\\n'",
+              "stderr": "",
+              "passed": true
+            }
+          ],
+          "error": ""
+        }
+      ],
+      "first_attempt_correct": true,
+      "final_correct": true,
+      "total_prompt_tokens": 10,
+      "total_completion_tokens": 558,
+      "total_thinking_tokens": 27488,
+      "total_tokens": 28056,
+      "attempts_to_correct": 1,
+      "wall_time_s": 6.749354362487793
+    },
+    {
+      "task_id": "02_reverse_words",
+      "language": "python",
+      "model": "claude-haiku-4-5-20251001",
+      "run_index": 0,
+      "attempts": [
+        {
+          "prompt_tokens": 10,
+          "completion_tokens": 216,
+          "thinking_tokens": 27488,
+          "code": "import sys\n\nsentence = sys.argv[1]\nwords = sentence.split()\nprint(' '.join(reversed(words)))",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "hello world foo"
+              ],
+              "expected": "'foo world hello\\n'",
+              "actual": "'foo world hello\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 1,
+              "args": [
+                "one"
+              ],
+              "expected": "'one\\n'",
+              "actual": "'one\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 2,
+              "args": [
+                "the quick brown fox"
+              ],
+              "expected": "'fox brown quick the\\n'",
+              "actual": "'fox brown quick the\\n'",
+              "stderr": "",
+              "passed": true
+            }
+          ],
+          "error": ""
+        }
+      ],
+      "first_attempt_correct": true,
+      "final_correct": true,
+      "total_prompt_tokens": 10,
+      "total_completion_tokens": 216,
+      "total_thinking_tokens": 27488,
+      "total_tokens": 27714,
+      "attempts_to_correct": 1,
+      "wall_time_s": 3.777850866317749
+    },
+    {
+      "task_id": "02_reverse_words",
+      "language": "javascript",
+      "model": "claude-haiku-4-5-20251001",
+      "run_index": 0,
+      "attempts": [
+        {
+          "prompt_tokens": 10,
+          "completion_tokens": 317,
+          "thinking_tokens": 27488,
+          "code": "const sentence = process.argv[2];\nconsole.log(sentence.split(' ').reverse().join(' '));",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "hello world foo"
+              ],
+              "expected": "'foo world hello\\n'",
+              "actual": "'foo world hello\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 1,
+              "args": [
+                "one"
+              ],
+              "expected": "'one\\n'",
+              "actual": "'one\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 2,
+              "args": [
+                "the quick brown fox"
+              ],
+              "expected": "'fox brown quick the\\n'",
+              "actual": "'fox brown quick the\\n'",
+              "stderr": "",
+              "passed": true
+            }
+          ],
+          "error": ""
+        }
+      ],
+      "first_attempt_correct": true,
+      "final_correct": true,
+      "total_prompt_tokens": 10,
+      "total_completion_tokens": 317,
+      "total_thinking_tokens": 27488,
+      "total_tokens": 27815,
+      "attempts_to_correct": 1,
+      "wall_time_s": 4.109393119812012
+    },
+    {
+      "task_id": "02_reverse_words",
+      "language": "go",
+      "model": "claude-haiku-4-5-20251001",
+      "run_index": 0,
+      "attempts": [
+        {
+          "prompt_tokens": 10,
+          "completion_tokens": 1477,
+          "thinking_tokens": 27488,
+          "code": "package main\n\nimport (\n\t\"fmt\"\n\t\"os\"\n\t\"strings\"\n)\n\nfunc main() {\n\tif len(os.Args) < 2 {\n\t\treturn\n\t}\n\n\twords := strings.Fields(os.Args[1])\n\n\tfor i := len(words) - 1; i >= 0; i-- {\n\t\tif i < len(words)-1 {\n\t\t\tfmt.Print(\" \")\n\t\t}\n\t\tfmt.Print(words[i])\n\t}\n\tfmt.Println()\n}",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "hello world foo"
+              ],
+              "expected": "'foo world hello\\n'",
+              "actual": "'foo world hello\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 1,
+              "args": [
+                "one"
+              ],
+              "expected": "'one\\n'",
+              "actual": "'one\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 2,
+              "args": [
+                "the quick brown fox"
+              ],
+              "expected": "'fox brown quick the\\n'",
+              "actual": "'fox brown quick the\\n'",
+              "stderr": "",
+              "passed": true
+            }
+          ],
+          "error": ""
+        }
+      ],
+      "first_attempt_correct": true,
+      "final_correct": true,
+      "total_prompt_tokens": 10,
+      "total_completion_tokens": 1477,
+      "total_thinking_tokens": 27488,
+      "total_tokens": 28975,
+      "attempts_to_correct": 1,
+      "wall_time_s": 11.411351919174194
+    },
+    {
+      "task_id": "03_two_sum",
+      "language": "sigil",
+      "model": "claude-haiku-4-5-20251001",
+      "run_index": 0,
+      "attempts": [
+        {
+          "prompt_tokens": 10,
+          "completion_tokens": 7875,
+          "thinking_tokens": 27488,
+          "code": "(module two-sum\n  (fn main -> int\n    (set args array (argv))\n    (set argc int (argv_count))\n    \n    (if (lt argc 2)\n      (ret 1))\n    \n    (set target int (string_to_int (array_get args 0)))\n    (set nums_str string (array_get args 1))\n    (set num_strs array (string_split nums_str \" \"))\n    \n    (set nums array (array_new))\n    (set len int (array_length num_strs))\n    (for idx 0 len\n      (set num int (string_to_int (array_get num_strs idx)))\n      (set nums (array_push nums num)))\n    \n    (set arr_len int (array_length nums))\n    (set found bool false)\n    (set result_i int -1)\n    (set result_j int -1)\n    \n    (set i int 0)\n    (while (and (lt i arr_len) (not found))\n      (set j int (add i 1))\n      (while (and (lt j arr_len) (not found))\n        (set sum int (add (array_get nums i) (array_get nums j)))\n        (if (eq sum target)\n          (set found true)\n          (set result_i i)\n          (set result_j j))\n        (set j (add j 1)))\n      (set i (add i 1)))\n    \n    (if found\n      (println (string_format \"{} {}\" result_i result_j))\n      (else\n        (println -1)))\n    \n    (ret 0)))",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "9",
+                "2 7 11 15"
+              ],
+              "expected": "'0 1\\n'",
+              "actual": "'0 1\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 1,
+              "args": [
+                "6",
+                "3 2 4"
+              ],
+              "expected": "'1 2\\n'",
+              "actual": "'1 2\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 2,
+              "args": [
+                "10",
+                "1 2 3"
+              ],
+              "expected": "'-1\\n'",
+              "actual": "'-1\\n'",
+              "stderr": "",
+              "passed": true
+            }
+          ],
+          "error": ""
+        }
+      ],
+      "first_attempt_correct": true,
+      "final_correct": true,
+      "total_prompt_tokens": 10,
+      "total_completion_tokens": 7875,
+      "total_thinking_tokens": 27488,
+      "total_tokens": 35373,
+      "attempts_to_correct": 1,
+      "wall_time_s": 43.80037188529968
+    },
+    {
+      "task_id": "03_two_sum",
+      "language": "python",
+      "model": "claude-haiku-4-5-20251001",
+      "run_index": 0,
+      "attempts": [
+        {
+          "prompt_tokens": 10,
+          "completion_tokens": 653,
+          "thinking_tokens": 27488,
+          "code": "import sys\n\ntarget = int(sys.argv[1])\nnumbers = list(map(int, sys.argv[2].split()))\n\nfound = False\nfor i in range(len(numbers)):\n    for j in range(i + 1, len(numbers)):\n        if numbers[i] + numbers[j] == target:\n            print(i, j)\n            found = True\n            break\n    if found:\n        break\n\nif not found:\n    print(-1)",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "9",
+                "2 7 11 15"
+              ],
+              "expected": "'0 1\\n'",
+              "actual": "'0 1\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 1,
+              "args": [
+                "6",
+                "3 2 4"
+              ],
+              "expected": "'1 2\\n'",
+              "actual": "'1 2\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 2,
+              "args": [
+                "10",
+                "1 2 3"
+              ],
+              "expected": "'-1\\n'",
+              "actual": "'-1\\n'",
+              "stderr": "",
+              "passed": true
+            }
+          ],
+          "error": ""
+        }
+      ],
+      "first_attempt_correct": true,
+      "final_correct": true,
+      "total_prompt_tokens": 10,
+      "total_completion_tokens": 653,
+      "total_thinking_tokens": 27488,
+      "total_tokens": 28151,
+      "attempts_to_correct": 1,
+      "wall_time_s": 6.804521799087524
+    },
+    {
+      "task_id": "03_two_sum",
+      "language": "javascript",
+      "model": "claude-haiku-4-5-20251001",
+      "run_index": 0,
+      "attempts": [
+        {
+          "prompt_tokens": 10,
+          "completion_tokens": 1288,
+          "thinking_tokens": 27488,
+          "code": "const target = parseInt(process.argv[2]);\nconst nums = process.argv[3].split(' ').map(Number);\n\nfor (let i = 0; i < nums.length; i++) {\n  for (let j = i + 1; j < nums.length; j++) {\n    if (nums[i] + nums[j] === target) {\n      console.log(i + ' ' + j);\n      process.exit(0);\n    }\n  }\n}\n\nconsole.log(-1);",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "9",
+                "2 7 11 15"
+              ],
+              "expected": "'0 1\\n'",
+              "actual": "'0 1\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 1,
+              "args": [
+                "6",
+                "3 2 4"
+              ],
+              "expected": "'1 2\\n'",
+              "actual": "'1 2\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 2,
+              "args": [
+                "10",
+                "1 2 3"
+              ],
+              "expected": "'-1\\n'",
+              "actual": "'-1\\n'",
+              "stderr": "",
+              "passed": true
+            }
+          ],
+          "error": ""
+        }
+      ],
+      "first_attempt_correct": true,
+      "final_correct": true,
+      "total_prompt_tokens": 10,
+      "total_completion_tokens": 1288,
+      "total_thinking_tokens": 27488,
+      "total_tokens": 28786,
+      "attempts_to_correct": 1,
+      "wall_time_s": 9.347354650497437
+    },
+    {
+      "task_id": "03_two_sum",
+      "language": "go",
+      "model": "claude-haiku-4-5-20251001",
+      "run_index": 0,
+      "attempts": [
+        {
+          "prompt_tokens": 10,
+          "completion_tokens": 1854,
+          "thinking_tokens": 27488,
+          "code": "package main\n\nimport (\n\t\"fmt\"\n\t\"os\"\n\t\"strconv\"\n\t\"strings\"\n)\n\nfunc main() {\n\ttarget, _ := strconv.Atoi(os.Args[1])\n\tnumStrs := strings.Fields(os.Args[2])\n\tnums := make([]int, len(numStrs))\n\tfor i, s := range numStrs {\n\t\tnums[i], _ = strconv.Atoi(s)\n\t}\n\t\n\tfor i := 0; i < len(nums); i++ {\n\t\tfor j := i + 1; j < len(nums); j++ {\n\t\t\tif nums[i]+nums[j] == target {\n\t\t\t\tfmt.Println(i, j)\n\t\t\t\treturn\n\t\t\t}\n\t\t}\n\t}\n\t\n\tfmt.Println(-1)\n}",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "9",
+                "2 7 11 15"
+              ],
+              "expected": "'0 1\\n'",
+              "actual": "'0 1\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 1,
+              "args": [
+                "6",
+                "3 2 4"
+              ],
+              "expected": "'1 2\\n'",
+              "actual": "'1 2\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 2,
+              "args": [
+                "10",
+                "1 2 3"
+              ],
+              "expected": "'-1\\n'",
+              "actual": "'-1\\n'",
+              "stderr": "",
+              "passed": true
+            }
+          ],
+          "error": ""
+        }
+      ],
+      "first_attempt_correct": true,
+      "final_correct": true,
+      "total_prompt_tokens": 10,
+      "total_completion_tokens": 1854,
+      "total_thinking_tokens": 27488,
+      "total_tokens": 29352,
+      "attempts_to_correct": 1,
+      "wall_time_s": 11.955687999725342
+    },
+    {
+      "task_id": "04_word_frequency",
+      "language": "sigil",
+      "model": "claude-haiku-4-5-20251001",
+      "run_index": 0,
+      "attempts": [
+        {
+          "prompt_tokens": 10,
+          "completion_tokens": 4022,
+          "thinking_tokens": 27488,
+          "code": "(module word_frequency\n\n(fn main -> int\n  (set args array (argv))\n  \n  (if (eq (array_length args) 0)\n    (ret 1))\n  \n  (set text string (array_get args 0))\n  (set text_lower string (string_to_lower text))\n  \n  (set words array (string_split text_lower \" \"))\n  \n  (set freq map (map_new))\n  \n  (for-each word string words\n    (if (gt (string_length word) 0)\n      (cond\n        ((map_has freq word)\n          (set count int (map_get freq word))\n          (set freq (map_set freq word (add count 1))))\n        (true\n          (set freq (map_set freq word 1))))))\n  \n  (set sorted_words array (map_keys freq))\n  (set sorted_words (array_sort sorted_words))\n  \n  (for-each word string sorted_words\n    (set count int (map_get freq word))\n    (println (string_format \"{} {}\" word (string_from_int count))))\n  \n  (ret 0))\n)",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "the cat sat on the mat"
+              ],
+              "expected": "'cat 1\\nmat 1\\non 1\\nsat 1\\nthe 2\\n'",
+              "actual": "'cat 1\\nmat 1\\non 1\\nsat 1\\nthe 2\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 1,
+              "args": [
+                "hello hello HELLO"
+              ],
+              "expected": "'hello 3\\n'",
+              "actual": "'hello 3\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 2,
+              "args": [
+                "a b c a b a"
+              ],
+              "expected": "'a 3\\nb 2\\nc 1\\n'",
+              "actual": "'a 3\\nb 2\\nc 1\\n'",
+              "stderr": "",
+              "passed": true
+            }
+          ],
+          "error": ""
+        }
+      ],
+      "first_attempt_correct": true,
+      "final_correct": true,
+      "total_prompt_tokens": 10,
+      "total_completion_tokens": 4022,
+      "total_thinking_tokens": 27488,
+      "total_tokens": 31520,
+      "attempts_to_correct": 1,
+      "wall_time_s": 25.64380931854248
+    },
+    {
+      "task_id": "04_word_frequency",
+      "language": "python",
+      "model": "claude-haiku-4-5-20251001",
+      "run_index": 0,
+      "attempts": [
+        {
+          "prompt_tokens": 10,
+          "completion_tokens": 390,
+          "thinking_tokens": 27488,
+          "code": "import sys\n\ntext = sys.argv[1]\nwords = text.lower().split()\n\nword_count = {}\nfor word in words:\n    word_count[word] = word_count.get(word, 0) + 1\n\nfor word in sorted(word_count.keys()):\n    print(f\"{word} {word_count[word]}\")",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "the cat sat on the mat"
+              ],
+              "expected": "'cat 1\\nmat 1\\non 1\\nsat 1\\nthe 2\\n'",
+              "actual": "'cat 1\\nmat 1\\non 1\\nsat 1\\nthe 2\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 1,
+              "args": [
+                "hello hello HELLO"
+              ],
+              "expected": "'hello 3\\n'",
+              "actual": "'hello 3\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 2,
+              "args": [
+                "a b c a b a"
+              ],
+              "expected": "'a 3\\nb 2\\nc 1\\n'",
+              "actual": "'a 3\\nb 2\\nc 1\\n'",
+              "stderr": "",
+              "passed": true
+            }
+          ],
+          "error": ""
+        }
+      ],
+      "first_attempt_correct": true,
+      "final_correct": true,
+      "total_prompt_tokens": 10,
+      "total_completion_tokens": 390,
+      "total_thinking_tokens": 27488,
+      "total_tokens": 27888,
+      "attempts_to_correct": 1,
+      "wall_time_s": 3.9208121299743652
+    },
+    {
+      "task_id": "04_word_frequency",
+      "language": "javascript",
+      "model": "claude-haiku-4-5-20251001",
+      "run_index": 0,
+      "attempts": [
+        {
+          "prompt_tokens": 10,
+          "completion_tokens": 531,
+          "thinking_tokens": 27488,
+          "code": "const text = process.argv[2];\n\nif (!text) {\n  process.exit(0);\n}\n\nconst words = text.toLowerCase().split(/\\s+/).filter(w => w.length > 0);\nconst wordCount = {};\n\nfor (const word of words) {\n  wordCount[word] = (wordCount[word] || 0) + 1;\n}\n\nconst sortedWords = Object.keys(wordCount).sort();\n\nfor (const word of sortedWords) {\n  console.log(`${word} ${wordCount[word]}`);\n}",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "the cat sat on the mat"
+              ],
+              "expected": "'cat 1\\nmat 1\\non 1\\nsat 1\\nthe 2\\n'",
+              "actual": "'cat 1\\nmat 1\\non 1\\nsat 1\\nthe 2\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 1,
+              "args": [
+                "hello hello HELLO"
+              ],
+              "expected": "'hello 3\\n'",
+              "actual": "'hello 3\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 2,
+              "args": [
+                "a b c a b a"
+              ],
+              "expected": "'a 3\\nb 2\\nc 1\\n'",
+              "actual": "'a 3\\nb 2\\nc 1\\n'",
+              "stderr": "",
+              "passed": true
+            }
+          ],
+          "error": ""
+        }
+      ],
+      "first_attempt_correct": true,
+      "final_correct": true,
+      "total_prompt_tokens": 10,
+      "total_completion_tokens": 531,
+      "total_thinking_tokens": 27488,
+      "total_tokens": 28029,
+      "attempts_to_correct": 1,
+      "wall_time_s": 5.001901626586914
+    },
+    {
+      "task_id": "04_word_frequency",
+      "language": "go",
+      "model": "claude-haiku-4-5-20251001",
+      "run_index": 0,
+      "attempts": [
+        {
+          "prompt_tokens": 10,
+          "completion_tokens": 614,
+          "thinking_tokens": 27488,
+          "code": "package main\n\nimport (\n\t\"fmt\"\n\t\"os\"\n\t\"sort\"\n\t\"strings\"\n)\n\nfunc main() {\n\tif len(os.Args) < 2 {\n\t\treturn\n\t}\n\n\ttext := strings.ToLower(os.Args[1])\n\twords := strings.Fields(text)\n\n\twordCount := make(map[string]int)\n\tfor _, word := range words {\n\t\twordCount[word]++\n\t}\n\n\tvar sortedWords []string\n\tfor word := range wordCount {\n\t\tsortedWords = append(sortedWords, word)\n\t}\n\tsort.Strings(sortedWords)\n\n\tfor _, word := range sortedWords {\n\t\tfmt.Printf(\"%s %d\\n\", word, wordCount[word])\n\t}\n}",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "the cat sat on the mat"
+              ],
+              "expected": "'cat 1\\nmat 1\\non 1\\nsat 1\\nthe 2\\n'",
+              "actual": "'cat 1\\nmat 1\\non 1\\nsat 1\\nthe 2\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 1,
+              "args": [
+                "hello hello HELLO"
+              ],
+              "expected": "'hello 3\\n'",
+              "actual": "'hello 3\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 2,
+              "args": [
+                "a b c a b a"
+              ],
+              "expected": "'a 3\\nb 2\\nc 1\\n'",
+              "actual": "'a 3\\nb 2\\nc 1\\n'",
+              "stderr": "",
+              "passed": true
+            }
+          ],
+          "error": ""
+        }
+      ],
+      "first_attempt_correct": true,
+      "final_correct": true,
+      "total_prompt_tokens": 10,
+      "total_completion_tokens": 614,
+      "total_thinking_tokens": 27488,
+      "total_tokens": 28112,
+      "attempts_to_correct": 1,
+      "wall_time_s": 5.601592540740967
+    },
+    {
+      "task_id": "05_balanced_parens",
+      "language": "sigil",
+      "model": "claude-haiku-4-5-20251001",
+      "run_index": 0,
+      "attempts": [
+        {
+          "prompt_tokens": 10,
+          "completion_tokens": 8261,
+          "thinking_tokens": 27488,
+          "code": "(module balanced_brackets\n  (fn is_opening c:int -> bool\n    (ret (or (eq c 40) (or (eq c 91) (eq c 123))))\n  )\n  \n  (fn is_closing c:int -> bool\n    (ret (or (eq c 41) (or (eq c 93) (eq c 125))))\n  )\n  \n  (fn matches opening:int closing:int -> bool\n    (ret (or (and (eq opening 40) (eq closing 41))\n              (or (and (eq opening 91) (eq closing 93))\n                  (and (eq opening 123) (eq closing 125)))))\n  )\n  \n  (fn is_balanced str:string -> bool\n    (set stack array (array_new))\n    (set len int (string_length str))\n    (for i 0 len\n      (set c int (string_get str i))\n      (cond\n        ((is_opening c) (set stack (array_push stack c)))\n        ((is_closing c)\n          (if (eq (array_length stack) 0)\n            (ret false)\n            (else\n              (if (not (matches (array_pop stack) c))\n                (ret false)\n              )\n            )\n          )\n        )\n      )\n    )\n    (ret (eq (array_length stack) 0))\n  )\n  \n  (fn main -> int\n    (set args array (argv))\n    (if (eq (array_length args) 0)\n      (ret 1)\n    )\n    (set input string (array_get args 0))\n    (if (is_balanced input)\n      (println \"true\")\n      (else (println \"false\"))\n    )\n    (ret 0)\n  )\n)",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "({[]})"
+              ],
+              "expected": "'true\\n'",
+              "actual": "''",
+              "stderr": "Lexer error: Unexpected character: :\n",
+              "passed": false
+            },
+            {
+              "case": 1,
+              "args": [
+                "([)]"
+              ],
+              "expected": "'false\\n'",
+              "actual": "''",
+              "stderr": "Lexer error: Unexpected character: :\n",
+              "passed": false
+            },
+            {
+              "case": 2,
+              "args": [
+                "((()))"
+              ],
+              "expected": "'true\\n'",
+              "actual": "''",
+              "stderr": "Lexer error: Unexpected character: :\n",
+              "passed": false
+            },
+            {
+              "case": 3,
+              "args": [
+                "hello(world)"
+              ],
+              "expected": "'true\\n'",
+              "actual": "''",
+              "stderr": "Lexer error: Unexpected character: :\n",
+              "passed": false
+            },
+            {
+              "case": 4,
+              "args": [
+                "{[}]"
+              ],
+              "expected": "'false\\n'",
+              "actual": "''",
+              "stderr": "Lexer error: Unexpected character: :\n",
+              "passed": false
+            },
+            {
+              "case": 5,
+              "args": [
+                ""
+              ],
+              "expected": "'true\\n'",
+              "actual": "''",
+              "stderr": "Lexer error: Unexpected character: :\n",
+              "passed": false
+            }
+          ],
+          "error": ""
+        },
+        {
+          "prompt_tokens": 10,
+          "completion_tokens": 1139,
+          "thinking_tokens": 27488,
+          "code": "(module balanced_brackets\n  (fn is_opening c int -> bool\n    (ret (or (eq c 40) (or (eq c 91) (eq c 123))))\n  )\n  \n  (fn is_closing c int -> bool\n    (ret (or (eq c 41) (or (eq c 93) (eq c 125))))\n  )\n  \n  (fn matches opening int closing int -> bool\n    (ret (or (and (eq opening 40) (eq closing 41))\n              (or (and (eq opening 91) (eq closing 93))\n                  (and (eq opening 123) (eq closing 125)))))\n  )\n  \n  (fn is_balanced str string -> bool\n    (set stack array (array_new))\n    (set len int (string_length str))\n    (for i 0 len\n      (set c int (string_get str i))\n      (cond\n        ((is_opening c) (set stack (array_push stack c)))\n        ((is_closing c)\n          (if (eq (array_length stack) 0)\n            (ret false)\n            (else\n              (if (not (matches (array_pop stack) c))\n                (ret false)\n              )\n            )\n          )\n        )\n      )\n    )\n    (ret (eq (array_length stack) 0))\n  )\n  \n  (fn main -> int\n    (set args array (argv))\n    (if (eq (array_length args) 0)\n      (ret 1)\n    )\n    (set input string (array_get args 0))\n    (if (is_balanced input)\n      (println \"true\")\n      (else (println \"false\"))\n    )\n    (ret 0)\n  )\n)",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "({[]})"
+              ],
+              "expected": "'true\\n'",
+              "actual": "'true\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 1,
+              "args": [
+                "([)]"
+              ],
+              "expected": "'false\\n'",
+              "actual": "'false\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 2,
+              "args": [
+                "((()))"
+              ],
+              "expected": "'true\\n'",
+              "actual": "'true\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 3,
+              "args": [
+                "hello(world)"
+              ],
+              "expected": "'true\\n'",
+              "actual": "'true\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 4,
+              "args": [
+                "{[}]"
+              ],
+              "expected": "'false\\n'",
+              "actual": "'false\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 5,
+              "args": [
+                ""
+              ],
+              "expected": "'true\\n'",
+              "actual": "'true\\n'",
+              "stderr": "",
+              "passed": true
+            }
+          ],
+          "error": ""
+        }
+      ],
+      "first_attempt_correct": false,
+      "final_correct": true,
+      "total_prompt_tokens": 20,
+      "total_completion_tokens": 9400,
+      "total_thinking_tokens": 54976,
+      "total_tokens": 64396,
+      "attempts_to_correct": 2,
+      "wall_time_s": 56.5739643573761
+    },
+    {
+      "task_id": "05_balanced_parens",
+      "language": "python",
+      "model": "claude-haiku-4-5-20251001",
+      "run_index": 0,
+      "attempts": [
+        {
+          "prompt_tokens": 10,
+          "completion_tokens": 776,
+          "thinking_tokens": 27488,
+          "code": "import sys\n\ndef is_balanced(s):\n    stack = []\n    pairs = {'(': ')', '[': ']', '{': '}'}\n    \n    for char in s:\n        if char in '([{':\n            stack.append(char)\n        elif char in ')]}':\n            if not stack:\n                return False\n            if pairs[stack[-1]] != char:\n                return False\n            stack.pop()\n    \n    return len(stack) == 0\n\nif __name__ == \"__main__\":\n    string = sys.argv[1]\n    if is_balanced(string):\n        print(\"true\")\n    else:\n        print(\"false\")",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "({[]})"
+              ],
+              "expected": "'true\\n'",
+              "actual": "'true\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 1,
+              "args": [
+                "([)]"
+              ],
+              "expected": "'false\\n'",
+              "actual": "'false\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 2,
+              "args": [
+                "((()))"
+              ],
+              "expected": "'true\\n'",
+              "actual": "'true\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 3,
+              "args": [
+                "hello(world)"
+              ],
+              "expected": "'true\\n'",
+              "actual": "'true\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 4,
+              "args": [
+                "{[}]"
+              ],
+              "expected": "'false\\n'",
+              "actual": "'false\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 5,
+              "args": [
+                ""
+              ],
+              "expected": "'true\\n'",
+              "actual": "'true\\n'",
+              "stderr": "",
+              "passed": true
+            }
+          ],
+          "error": ""
+        }
+      ],
+      "first_attempt_correct": true,
+      "final_correct": true,
+      "total_prompt_tokens": 10,
+      "total_completion_tokens": 776,
+      "total_thinking_tokens": 27488,
+      "total_tokens": 28274,
+      "attempts_to_correct": 1,
+      "wall_time_s": 12.420365810394287
+    },
+    {
+      "task_id": "05_balanced_parens",
+      "language": "javascript",
+      "model": "claude-haiku-4-5-20251001",
+      "run_index": 0,
+      "attempts": [
+        {
+          "prompt_tokens": 10,
+          "completion_tokens": 592,
+          "thinking_tokens": 27488,
+          "code": "const input = process.argv[2];\n\nconst stack = [];\nconst pairs = {\n  ')': '(',\n  ']': '[',\n  '}': '{'\n};\n\nfor (const char of input) {\n  if (char === '(' || char === '[' || char === '{') {\n    stack.push(char);\n  } else if (char === ')' || char === ']' || char === '}') {\n    if (stack.length === 0 || stack[stack.length - 1] !== pairs[char]) {\n      console.log('false');\n      process.exit(0);\n    }\n    stack.pop();\n  }\n}\n\nconsole.log(stack.length === 0 ? 'true' : 'false');",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "({[]})"
+              ],
+              "expected": "'true\\n'",
+              "actual": "'true\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 1,
+              "args": [
+                "([)]"
+              ],
+              "expected": "'false\\n'",
+              "actual": "'false\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 2,
+              "args": [
+                "((()))"
+              ],
+              "expected": "'true\\n'",
+              "actual": "'true\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 3,
+              "args": [
+                "hello(world)"
+              ],
+              "expected": "'true\\n'",
+              "actual": "'true\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 4,
+              "args": [
+                "{[}]"
+              ],
+              "expected": "'false\\n'",
+              "actual": "'false\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 5,
+              "args": [
+                ""
+              ],
+              "expected": "'true\\n'",
+              "actual": "'true\\n'",
+              "stderr": "",
+              "passed": true
+            }
+          ],
+          "error": ""
+        }
+      ],
+      "first_attempt_correct": true,
+      "final_correct": true,
+      "total_prompt_tokens": 10,
+      "total_completion_tokens": 592,
+      "total_thinking_tokens": 27488,
+      "total_tokens": 28090,
+      "attempts_to_correct": 1,
+      "wall_time_s": 6.1329755783081055
+    },
+    {
+      "task_id": "05_balanced_parens",
+      "language": "go",
+      "model": "claude-haiku-4-5-20251001",
+      "run_index": 0,
+      "attempts": [
+        {
+          "prompt_tokens": 10,
+          "completion_tokens": 885,
+          "thinking_tokens": 27488,
+          "code": "package main\n\nimport (\n\t\"fmt\"\n\t\"os\"\n)\n\nfunc main() {\n\tif len(os.Args) < 2 {\n\t\tfmt.Println(\"false\")\n\t\treturn\n\t}\n\n\ts := os.Args[1]\n\tstack := []rune{}\n\n\tfor _, ch := range s {\n\t\tswitch ch {\n\t\tcase '(', '[', '{':\n\t\t\tstack = append(stack, ch)\n\t\tcase ')':\n\t\t\tif len(stack) == 0 || stack[len(stack)-1] != '(' {\n\t\t\t\tfmt.Println(\"false\")\n\t\t\t\treturn\n\t\t\t}\n\t\t\tstack = stack[:len(stack)-1]\n\t\tcase ']':\n\t\t\tif len(stack) == 0 || stack[len(stack)-1] != '[' {\n\t\t\t\tfmt.Println(\"false\")\n\t\t\t\treturn\n\t\t\t}\n\t\t\tstack = stack[:len(stack)-1]\n\t\tcase '}':\n\t\t\tif len(stack) == 0 || stack[len(stack)-1] != '{' {\n\t\t\t\tfmt.Println(\"false\")\n\t\t\t\treturn\n\t\t\t}\n\t\t\tstack = stack[:len(stack)-1]\n\t\t}\n\t}\n\n\tif len(stack) == 0 {\n\t\tfmt.Println(\"true\")\n\t} else {\n\t\tfmt.Println(\"false\")\n\t}\n}",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "({[]})"
+              ],
+              "expected": "'true\\n'",
+              "actual": "'true\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 1,
+              "args": [
+                "([)]"
+              ],
+              "expected": "'false\\n'",
+              "actual": "'false\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 2,
+              "args": [
+                "((()))"
+              ],
+              "expected": "'true\\n'",
+              "actual": "'true\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 3,
+              "args": [
+                "hello(world)"
+              ],
+              "expected": "'true\\n'",
+              "actual": "'true\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 4,
+              "args": [
+                "{[}]"
+              ],
+              "expected": "'false\\n'",
+              "actual": "'false\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 5,
+              "args": [
+                ""
+              ],
+              "expected": "'true\\n'",
+              "actual": "'true\\n'",
+              "stderr": "",
+              "passed": true
+            }
+          ],
+          "error": ""
+        }
+      ],
+      "first_attempt_correct": true,
+      "final_correct": true,
+      "total_prompt_tokens": 10,
+      "total_completion_tokens": 885,
+      "total_thinking_tokens": 27488,
+      "total_tokens": 28383,
+      "attempts_to_correct": 1,
+      "wall_time_s": 7.304975986480713
+    },
+    {
+      "task_id": "06_run_length_encode",
+      "language": "sigil",
+      "model": "claude-haiku-4-5-20251001",
+      "run_index": 0,
+      "attempts": [
+        {
+          "prompt_tokens": 10,
+          "completion_tokens": 928,
+          "thinking_tokens": 27488,
+          "code": "(module run_length_encoding\n  (fn main -> int\n    (set args array (argv))\n    (if (eq (array_length args) 0)\n      (ret 1))\n    (set input string (array_get args 0))\n    (set result string \"\")\n    (set i int 0)\n    (set len int (string_length input))\n    (while (lt i len)\n      (set current_char string (string_slice input i 1))\n      (set count int 1)\n      (set j int (add i 1))\n      (while (and (lt j len) (string_equals (string_slice input j 1) current_char))\n        (set count (add count 1))\n        (set j (add j 1)))\n      (set result (string_concat result (string_concat current_char (string_from_int count))))\n      (set i j))\n    (println result)\n    (ret 0)))",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "aaabbc"
+              ],
+              "expected": "'a3b2c1\\n'",
+              "actual": "'a3b2c1\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 1,
+              "args": [
+                "aaa"
+              ],
+              "expected": "'a3\\n'",
+              "actual": "'a3\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 2,
+              "args": [
+                "abcd"
+              ],
+              "expected": "'a1b1c1d1\\n'",
+              "actual": "'a1b1c1d1\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 3,
+              "args": [
+                "aaAAaa"
+              ],
+              "expected": "'a2A2a2\\n'",
+              "actual": "'a2A2a2\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 4,
+              "args": [
+                "a"
+              ],
+              "expected": "'a1\\n'",
+              "actual": "'a1\\n'",
+              "stderr": "",
+              "passed": true
+            }
+          ],
+          "error": ""
+        }
+      ],
+      "first_attempt_correct": true,
+      "final_correct": true,
+      "total_prompt_tokens": 10,
+      "total_completion_tokens": 928,
+      "total_thinking_tokens": 27488,
+      "total_tokens": 28426,
+      "attempts_to_correct": 1,
+      "wall_time_s": 7.690701961517334
+    },
+    {
+      "task_id": "06_run_length_encode",
+      "language": "python",
+      "model": "claude-haiku-4-5-20251001",
+      "run_index": 0,
+      "attempts": [
+        {
+          "prompt_tokens": 10,
+          "completion_tokens": 572,
+          "thinking_tokens": 27488,
+          "code": "import sys\n\ndef run_length_encoding(s):\n    if not s:\n        return \"\"\n    \n    result = []\n    current_char = s[0]\n    count = 1\n    \n    for i in range(1, len(s)):\n        if s[i] == current_char:\n            count += 1\n        else:\n            result.append(current_char + str(count))\n            current_char = s[i]\n            count = 1\n    \n    result.append(current_char + str(count))\n    return \"\".join(result)\n\nprint(run_length_encoding(sys.argv[1]))",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "aaabbc"
+              ],
+              "expected": "'a3b2c1\\n'",
+              "actual": "'a3b2c1\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 1,
+              "args": [
+                "aaa"
+              ],
+              "expected": "'a3\\n'",
+              "actual": "'a3\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 2,
+              "args": [
+                "abcd"
+              ],
+              "expected": "'a1b1c1d1\\n'",
+              "actual": "'a1b1c1d1\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 3,
+              "args": [
+                "aaAAaa"
+              ],
+              "expected": "'a2A2a2\\n'",
+              "actual": "'a2A2a2\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 4,
+              "args": [
+                "a"
+              ],
+              "expected": "'a1\\n'",
+              "actual": "'a1\\n'",
+              "stderr": "",
+              "passed": true
+            }
+          ],
+          "error": ""
+        }
+      ],
+      "first_attempt_correct": true,
+      "final_correct": true,
+      "total_prompt_tokens": 10,
+      "total_completion_tokens": 572,
+      "total_thinking_tokens": 27488,
+      "total_tokens": 28070,
+      "attempts_to_correct": 1,
+      "wall_time_s": 4.676984548568726
+    },
+    {
+      "task_id": "06_run_length_encode",
+      "language": "javascript",
+      "model": "claude-haiku-4-5-20251001",
+      "run_index": 0,
+      "attempts": [
+        {
+          "prompt_tokens": 10,
+          "completion_tokens": 465,
+          "thinking_tokens": 27488,
+          "code": "const input = process.argv[2] || '';\nlet result = '';\nlet i = 0;\n\nwhile (i < input.length) {\n    const char = input[i];\n    let count = 1;\n    \n    while (i + count < input.length && input[i + count] === char) {\n        count++;\n    }\n    \n    result += char + count;\n    i += count;\n}\n\nconsole.log(result);",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "aaabbc"
+              ],
+              "expected": "'a3b2c1\\n'",
+              "actual": "'a3b2c1\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 1,
+              "args": [
+                "aaa"
+              ],
+              "expected": "'a3\\n'",
+              "actual": "'a3\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 2,
+              "args": [
+                "abcd"
+              ],
+              "expected": "'a1b1c1d1\\n'",
+              "actual": "'a1b1c1d1\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 3,
+              "args": [
+                "aaAAaa"
+              ],
+              "expected": "'a2A2a2\\n'",
+              "actual": "'a2A2a2\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 4,
+              "args": [
+                "a"
+              ],
+              "expected": "'a1\\n'",
+              "actual": "'a1\\n'",
+              "stderr": "",
+              "passed": true
+            }
+          ],
+          "error": ""
+        }
+      ],
+      "first_attempt_correct": true,
+      "final_correct": true,
+      "total_prompt_tokens": 10,
+      "total_completion_tokens": 465,
+      "total_thinking_tokens": 27488,
+      "total_tokens": 27963,
+      "attempts_to_correct": 1,
+      "wall_time_s": 7.99193263053894
+    },
+    {
+      "task_id": "06_run_length_encode",
+      "language": "go",
+      "model": "claude-haiku-4-5-20251001",
+      "run_index": 0,
+      "attempts": [
+        {
+          "prompt_tokens": 10,
+          "completion_tokens": 739,
+          "thinking_tokens": 27488,
+          "code": "package main\n\nimport (\n\t\"fmt\"\n\t\"os\"\n)\n\nfunc main() {\n\tif len(os.Args) < 2 {\n\t\treturn\n\t}\n\n\ts := os.Args[1]\n\tif len(s) == 0 {\n\t\treturn\n\t}\n\n\tvar result string\n\tcount := 1\n\n\tfor i := 1; i < len(s); i++ {\n\t\tif s[i] == s[i-1] {\n\t\t\tcount++\n\t\t} else {\n\t\t\tresult += string(s[i-1]) + fmt.Sprintf(\"%d\", count)\n\t\t\tcount = 1\n\t\t}\n\t}\n\n\tresult += string(s[len(s)-1]) + fmt.Sprintf(\"%d\", count)\n\tfmt.Print(result)\n}",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "aaabbc"
+              ],
+              "expected": "'a3b2c1\\n'",
+              "actual": "'a3b2c1'",
+              "stderr": "",
+              "passed": false
+            },
+            {
+              "case": 1,
+              "args": [
+                "aaa"
+              ],
+              "expected": "'a3\\n'",
+              "actual": "'a3'",
+              "stderr": "",
+              "passed": false
+            },
+            {
+              "case": 2,
+              "args": [
+                "abcd"
+              ],
+              "expected": "'a1b1c1d1\\n'",
+              "actual": "'a1b1c1d1'",
+              "stderr": "",
+              "passed": false
+            },
+            {
+              "case": 3,
+              "args": [
+                "aaAAaa"
+              ],
+              "expected": "'a2A2a2\\n'",
+              "actual": "'a2A2a2'",
+              "stderr": "",
+              "passed": false
+            },
+            {
+              "case": 4,
+              "args": [
+                "a"
+              ],
+              "expected": "'a1\\n'",
+              "actual": "'a1'",
+              "stderr": "",
+              "passed": false
+            }
+          ],
+          "error": ""
+        },
+        {
+          "prompt_tokens": 10,
+          "completion_tokens": 625,
+          "thinking_tokens": 27488,
+          "code": "package main\n\nimport (\n\t\"fmt\"\n\t\"os\"\n)\n\nfunc main() {\n\tif len(os.Args) < 2 {\n\t\treturn\n\t}\n\n\ts := os.Args[1]\n\tif len(s) == 0 {\n\t\treturn\n\t}\n\n\tvar result string\n\tcount := 1\n\n\tfor i := 1; i < len(s); i++ {\n\t\tif s[i] == s[i-1] {\n\t\t\tcount++\n\t\t} else {\n\t\t\tresult += string(s[i-1]) + fmt.Sprintf(\"%d\", count)\n\t\t\tcount = 1\n\t\t}\n\t}\n\n\tresult += string(s[len(s)-1]) + fmt.Sprintf(\"%d\", count)\n\tfmt.Println(result)\n}",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "aaabbc"
+              ],
+              "expected": "'a3b2c1\\n'",
+              "actual": "'a3b2c1\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 1,
+              "args": [
+                "aaa"
+              ],
+              "expected": "'a3\\n'",
+              "actual": "'a3\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 2,
+              "args": [
+                "abcd"
+              ],
+              "expected": "'a1b1c1d1\\n'",
+              "actual": "'a1b1c1d1\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 3,
+              "args": [
+                "aaAAaa"
+              ],
+              "expected": "'a2A2a2\\n'",
+              "actual": "'a2A2a2\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 4,
+              "args": [
+                "a"
+              ],
+              "expected": "'a1\\n'",
+              "actual": "'a1\\n'",
+              "stderr": "",
+              "passed": true
+            }
+          ],
+          "error": ""
+        }
+      ],
+      "first_attempt_correct": false,
+      "final_correct": true,
+      "total_prompt_tokens": 20,
+      "total_completion_tokens": 1364,
+      "total_thinking_tokens": 54976,
+      "total_tokens": 56360,
+      "attempts_to_correct": 2,
+      "wall_time_s": 14.409679651260376
+    },
+    {
+      "task_id": "07_query_string",
+      "language": "sigil",
+      "model": "claude-haiku-4-5-20251001",
+      "run_index": 0,
+      "attempts": [
+        {
+          "prompt_tokens": 10,
+          "completion_tokens": 9936,
+          "thinking_tokens": 27488,
+          "code": "(module query_parser\n\n  (fn main -> int\n    (set args array (argv))\n    (set arg_count int (argv_count))\n    \n    (if (eq arg_count 0)\n      (ret 0))\n    \n    (set query string (array_get args 0))\n    \n    (if (eq (string_length query) 0)\n      (ret 0))\n    \n    (set pairs array (string_split query \"&\"))\n    (set kv_pairs array (array_new))\n    (set pair_count int (array_length pairs))\n    (set pair string \"\")\n    (set eq_pos int 0)\n    (set key string \"\")\n    (set value string \"\")\n    (set kv array (array_new))\n    \n    (for i 0 pair_count\n      (set pair (array_get pairs i))\n      (set eq_pos (string_find pair \"=\"))\n      (if (ne eq_pos -1)\n        (set key (string_slice pair 0 eq_pos))\n        (set value (string_slice pair (add eq_pos 1) (sub (string_length pair) (add eq_pos 1))))\n        (set kv [key value])\n        (set kv_pairs (array_push kv_pairs kv))))\n    \n    (set sorted_pairs array (sort_pairs kv_pairs))\n    \n    (set sorted_count int (array_length sorted_pairs))\n    (set k string \"\")\n    (set v string \"\")\n    \n    (for i 0 sorted_count\n      (set kv (array_get sorted_pairs i))\n      (set k (array_get kv 0))\n      (set v (array_get kv 1))\n      (println (string_format \"{}={}\" k v)))\n    \n    (ret 0))\n  \n  (fn sort_pairs pairs array -> array\n    (set n int (array_length pairs))\n    (set i int 0)\n    (set j int 0)\n    (set kv1 array (array_new))\n    (set kv2 array (array_new))\n    (set k1 string \"\")\n    (set k2 string \"\")\n    (set temp array (array_new))\n    \n    (while (lt i n)\n      (set j 0)\n      (while (lt j (sub n (add i 1)))\n        (set kv1 (array_get pairs j))\n        (set kv2 (array_get pairs (add j 1)))\n        (set k1 (array_get kv1 0))\n        (set k2 (array_get kv2 0))\n        (if (gt k1 k2)\n          (set temp (array_get pairs j))\n          (set pairs (array_set pairs j (array_get pairs (add j 1))))\n          (set pairs (array_set pairs (add j 1) temp)))\n        (set j (add j 1)))\n      (set i (add i 1)))\n    (ret pairs)))",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "name=alice&age=30&city=paris"
+              ],
+              "expected": "'age=30\\ncity=paris\\nname=alice\\n'",
+              "actual": "''",
+              "stderr": "Runtime error: Invalid arguments to gt\n",
+              "passed": false
+            },
+            {
+              "case": 1,
+              "args": [
+                "z=1&a=2"
+              ],
+              "expected": "'a=2\\nz=1\\n'",
+              "actual": "''",
+              "stderr": "Runtime error: Invalid arguments to gt\n",
+              "passed": false
+            },
+            {
+              "case": 2,
+              "args": [
+                "single=value"
+              ],
+              "expected": "'single=value\\n'",
+              "actual": "'single=value\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 3,
+              "args": [
+                ""
+              ],
+              "expected": "''",
+              "actual": "''",
+              "stderr": "",
+              "passed": true
+            }
+          ],
+          "error": ""
+        },
+        {
+          "prompt_tokens": 10,
+          "completion_tokens": 2313,
+          "thinking_tokens": 27488,
+          "code": "(module query_parser\n\n  (fn main -> int\n    (set args array (argv))\n    (set arg_count int (argv_count))\n    \n    (if (eq arg_count 0)\n      (ret 0))\n    \n    (set query string (array_get args 0))\n    \n    (if (eq (string_length query) 0)\n      (ret 0))\n    \n    (set pairs array (string_split query \"&\"))\n    (set kv_pairs array (array_new))\n    (set pair_count int (array_length pairs))\n    (set pair string \"\")\n    (set eq_pos int 0)\n    (set key string \"\")\n    (set value string \"\")\n    (set kv array (array_new))\n    \n    (for i 0 pair_count\n      (set pair (array_get pairs i))\n      (set eq_pos (string_find pair \"=\"))\n      (if (ne eq_pos -1)\n        (set key (string_slice pair 0 eq_pos))\n        (set value (string_slice pair (add eq_pos 1) (sub (string_length pair) (add eq_pos 1))))\n        (set kv [key value])\n        (set kv_pairs (array_push kv_pairs kv))))\n    \n    (set sorted_pairs array (sort_pairs kv_pairs))\n    \n    (set sorted_count int (array_length sorted_pairs))\n    (set k string \"\")\n    (set v string \"\")\n    \n    (for i 0 sorted_count\n      (set kv (array_get sorted_pairs i))\n      (set k (array_get kv 0))\n      (set v (array_get kv 1))\n      (println (string_format \"{}={}\" k v)))\n    \n    (ret 0))\n  \n  (fn sort_pairs pairs array -> array\n    (set n int (array_length pairs))\n    (set i int 0)\n    (set j int 0)\n    (set kv1 array (array_new))\n    (set kv2 array (array_new))\n    (set k1 string \"\")\n    (set k2 string \"\")\n    (set temp array (array_new))\n    \n    (while (lt i n)\n      (set j 0)\n      (while (lt j (sub n (add i 1)))\n        (set kv1 (array_get pairs j))\n        (set kv2 (array_get pairs (add j 1)))\n        (set k1 (array_get kv1 0))\n        (set k2 (array_get kv2 0))\n        (if (lt k2 k1)\n          (set temp (array_get pairs j))\n          (set pairs (array_set pairs j (array_get pairs (add j 1))))\n          (set pairs (array_set pairs (add j 1) temp)))\n        (set j (add j 1)))\n      (set i (add i 1)))\n    (ret pairs)))",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "name=alice&age=30&city=paris"
+              ],
+              "expected": "'age=30\\ncity=paris\\nname=alice\\n'",
+              "actual": "''",
+              "stderr": "Runtime error: Invalid arguments to lt\n",
+              "passed": false
+            },
+            {
+              "case": 1,
+              "args": [
+                "z=1&a=2"
+              ],
+              "expected": "'a=2\\nz=1\\n'",
+              "actual": "''",
+              "stderr": "Runtime error: Invalid arguments to lt\n",
+              "passed": false
+            },
+            {
+              "case": 2,
+              "args": [
+                "single=value"
+              ],
+              "expected": "'single=value\\n'",
+              "actual": "'single=value\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 3,
+              "args": [
+                ""
+              ],
+              "expected": "''",
+              "actual": "''",
+              "stderr": "",
+              "passed": true
+            }
+          ],
+          "error": ""
+        },
+        {
+          "prompt_tokens": 10,
+          "completion_tokens": 13060,
+          "thinking_tokens": 27488,
+          "code": "(module query_parser\n\n  (fn main -> int\n    (set args array (argv))\n    (set arg_count int (argv_count))\n    \n    (if (eq arg_count 0)\n      (ret 0))\n    \n    (set query string (array_get args 0))\n    \n    (if (eq (string_length query) 0)\n      (ret 0))\n    \n    (set pairs array (string_split query \"&\"))\n    (set kv_pairs array (array_new))\n    (set pair_count int (array_length pairs))\n    (set pair string \"\")\n    (set eq_pos int 0)\n    (set key string \"\")\n    (set value string \"\")\n    (set line string \"\")\n    \n    (for i 0 pair_count\n      (set pair (array_get pairs i))\n      (set eq_pos (string_find pair \"=\"))\n      (if (ne eq_pos -1)\n        (set key (string_slice pair 0 eq_pos))\n        (set value (string_slice pair (add eq_pos 1) (sub (string_length pair) (add eq_pos 1))))\n        (set line (string_format \"{}={}\" key value))\n        (set kv_pairs (array_push kv_pairs line))))\n    \n    (set sorted_pairs array (sort_strings kv_pairs))\n    \n    (set sorted_count int (array_length sorted_pairs))\n    \n    (for i 0 sorted_count\n      (println (array_get sorted_pairs i)))\n    \n    (ret 0))\n  \n  (fn sort_strings arr array -> array\n    (set n int (array_length arr))\n    (set i int 0)\n    (set j int 0)\n    (set s1 string \"\")\n    (set s2 string \"\")\n    (set temp string \"\")\n    \n    (while (lt i n)\n      (set j 0)\n      (while (lt j (sub n (add i 1)))\n        (set s1 (array_get arr j))\n        (set s2 (array_get arr (add j 1)))\n        (if (lt s2 s1)\n          (set temp (array_get arr j))\n          (set arr (array_set arr j (array_get arr (add j 1))))\n          (set arr (array_set arr (add j 1) temp)))\n        (set j (add j 1)))\n      (set i (add i 1)))\n    (ret arr)))",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "name=alice&age=30&city=paris"
+              ],
+              "expected": "'age=30\\ncity=paris\\nname=alice\\n'",
+              "actual": "''",
+              "stderr": "Runtime error: Invalid arguments to lt\n",
+              "passed": false
+            },
+            {
+              "case": 1,
+              "args": [
+                "z=1&a=2"
+              ],
+              "expected": "'a=2\\nz=1\\n'",
+              "actual": "''",
+              "stderr": "Runtime error: Invalid arguments to lt\n",
+              "passed": false
+            },
+            {
+              "case": 2,
+              "args": [
+                "single=value"
+              ],
+              "expected": "'single=value\\n'",
+              "actual": "'single=value\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 3,
+              "args": [
+                ""
+              ],
+              "expected": "''",
+              "actual": "''",
+              "stderr": "",
+              "passed": true
+            }
+          ],
+          "error": ""
+        },
+        {
+          "prompt_tokens": 10,
+          "completion_tokens": 5260,
+          "thinking_tokens": 27488,
+          "code": "(module query_parser\n\n  (fn main -> int\n    (set args array (argv))\n    (set arg_count int (argv_count))\n    \n    (if (eq arg_count 0)\n      (ret 0))\n    \n    (set query string (array_get args 0))\n    \n    (if (eq (string_length query) 0)\n      (ret 0))\n    \n    (set pairs array (string_split query \"&\"))\n    (set kv_pairs array (array_new))\n    (set pair_count int (array_length pairs))\n    (set pair string \"\")\n    (set eq_pos int 0)\n    (set key string \"\")\n    (set value string \"\")\n    (set line string \"\")\n    \n    (for i 0 pair_count\n      (set pair (array_get pairs i))\n      (set eq_pos (string_find pair \"=\"))\n      (if (ne eq_pos -1)\n        (set key (string_slice pair 0 eq_pos))\n        (set value (string_slice pair (add eq_pos 1) (sub (string_length pair) (add eq_pos 1))))\n        (set line (string_format \"{}={}\" key value))\n        (set kv_pairs (array_push kv_pairs line))))\n    \n    (set sorted_pairs array (array_sort kv_pairs))\n    \n    (set sorted_count int (array_length sorted_pairs))\n    \n    (for i 0 sorted_count\n      (println (array_get sorted_pairs i)))\n    \n    (ret 0)))",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "name=alice&age=30&city=paris"
+              ],
+              "expected": "'age=30\\ncity=paris\\nname=alice\\n'",
+              "actual": "'age=30\\ncity=paris\\nname=alice\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 1,
+              "args": [
+                "z=1&a=2"
+              ],
+              "expected": "'a=2\\nz=1\\n'",
+              "actual": "'a=2\\nz=1\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 2,
+              "args": [
+                "single=value"
+              ],
+              "expected": "'single=value\\n'",
+              "actual": "'single=value\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 3,
+              "args": [
+                ""
+              ],
+              "expected": "''",
+              "actual": "''",
+              "stderr": "",
+              "passed": true
+            }
+          ],
+          "error": ""
+        }
+      ],
+      "first_attempt_correct": false,
+      "final_correct": true,
+      "total_prompt_tokens": 40,
+      "total_completion_tokens": 30569,
+      "total_thinking_tokens": 109952,
+      "total_tokens": 140561,
+      "attempts_to_correct": 4,
+      "wall_time_s": 197.97496485710144
+    },
+    {
+      "task_id": "07_query_string",
+      "language": "python",
+      "model": "claude-haiku-4-5-20251001",
+      "run_index": 0,
+      "attempts": [
+        {
+          "prompt_tokens": 10,
+          "completion_tokens": 874,
+          "thinking_tokens": 27488,
+          "code": "import sys\n\nif len(sys.argv) > 1:\n    query_string = sys.argv[1]\n    if query_string:\n        pairs = query_string.split('&')\n        parsed = {}\n        for pair in pairs:\n            if '=' in pair:\n                key, value = pair.split('=', 1)\n                parsed[key] = value\n        \n        for key in sorted(parsed.keys()):\n            print(f\"{key}={parsed[key]}\")",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "name=alice&age=30&city=paris"
+              ],
+              "expected": "'age=30\\ncity=paris\\nname=alice\\n'",
+              "actual": "'age=30\\ncity=paris\\nname=alice\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 1,
+              "args": [
+                "z=1&a=2"
+              ],
+              "expected": "'a=2\\nz=1\\n'",
+              "actual": "'a=2\\nz=1\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 2,
+              "args": [
+                "single=value"
+              ],
+              "expected": "'single=value\\n'",
+              "actual": "'single=value\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 3,
+              "args": [
+                ""
+              ],
+              "expected": "''",
+              "actual": "''",
+              "stderr": "",
+              "passed": true
+            }
+          ],
+          "error": ""
+        }
+      ],
+      "first_attempt_correct": true,
+      "final_correct": true,
+      "total_prompt_tokens": 10,
+      "total_completion_tokens": 874,
+      "total_thinking_tokens": 27488,
+      "total_tokens": 28372,
+      "attempts_to_correct": 1,
+      "wall_time_s": 7.430346965789795
+    },
+    {
+      "task_id": "07_query_string",
+      "language": "javascript",
+      "model": "claude-haiku-4-5-20251001",
+      "run_index": 0,
+      "attempts": [
+        {
+          "prompt_tokens": 10,
+          "completion_tokens": 475,
+          "thinking_tokens": 27488,
+          "code": "const queryString = process.argv[2] || '';\n\nif (!queryString) {\n  process.exit(0);\n}\n\nconst params = new URLSearchParams(queryString);\nconst pairs = Array.from(params.entries())\n  .sort((a, b) => a[0].localeCompare(b[0]))\n  .forEach(([key, value]) => {\n    console.log(`${key}=${value}`);\n  });",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "name=alice&age=30&city=paris"
+              ],
+              "expected": "'age=30\\ncity=paris\\nname=alice\\n'",
+              "actual": "'age=30\\ncity=paris\\nname=alice\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 1,
+              "args": [
+                "z=1&a=2"
+              ],
+              "expected": "'a=2\\nz=1\\n'",
+              "actual": "'a=2\\nz=1\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 2,
+              "args": [
+                "single=value"
+              ],
+              "expected": "'single=value\\n'",
+              "actual": "'single=value\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 3,
+              "args": [
+                ""
+              ],
+              "expected": "''",
+              "actual": "''",
+              "stderr": "",
+              "passed": true
+            }
+          ],
+          "error": ""
+        }
+      ],
+      "first_attempt_correct": true,
+      "final_correct": true,
+      "total_prompt_tokens": 10,
+      "total_completion_tokens": 475,
+      "total_thinking_tokens": 27488,
+      "total_tokens": 27973,
+      "attempts_to_correct": 1,
+      "wall_time_s": 5.1276633739471436
+    },
+    {
+      "task_id": "07_query_string",
+      "language": "go",
+      "model": "claude-haiku-4-5-20251001",
+      "run_index": 0,
+      "attempts": [
+        {
+          "prompt_tokens": 10,
+          "completion_tokens": 2855,
+          "thinking_tokens": 27488,
+          "code": "package main\n\nimport (\n\t\"fmt\"\n\t\"net/url\"\n\t\"os\"\n\t\"sort\"\n)\n\nfunc main() {\n\tif len(os.Args) < 2 || os.Args[1] == \"\" {\n\t\treturn\n\t}\n\n\tvalues, _ := url.ParseQuery(os.Args[1])\n\n\tvar keys []string\n\tfor key := range values {\n\t\tkeys = append(keys, key)\n\t}\n\tsort.Strings(keys)\n\n\tfor _, key := range keys {\n\t\tfor _, val := range values[key] {\n\t\t\tfmt.Printf(\"%s=%s\\n\", key, val)\n\t\t}\n\t}\n}",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "name=alice&age=30&city=paris"
+              ],
+              "expected": "'age=30\\ncity=paris\\nname=alice\\n'",
+              "actual": "'age=30\\ncity=paris\\nname=alice\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 1,
+              "args": [
+                "z=1&a=2"
+              ],
+              "expected": "'a=2\\nz=1\\n'",
+              "actual": "'a=2\\nz=1\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 2,
+              "args": [
+                "single=value"
+              ],
+              "expected": "'single=value\\n'",
+              "actual": "'single=value\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 3,
+              "args": [
+                ""
+              ],
+              "expected": "''",
+              "actual": "''",
+              "stderr": "",
+              "passed": true
+            }
+          ],
+          "error": ""
+        }
+      ],
+      "first_attempt_correct": true,
+      "final_correct": true,
+      "total_prompt_tokens": 10,
+      "total_completion_tokens": 2855,
+      "total_thinking_tokens": 27488,
+      "total_tokens": 30353,
+      "attempts_to_correct": 1,
+      "wall_time_s": 20.20553421974182
+    },
+    {
+      "task_id": "08_stack_calculator",
+      "language": "sigil",
+      "model": "claude-haiku-4-5-20251001",
+      "run_index": 0,
+      "attempts": [
+        {
+          "prompt_tokens": 10,
+          "completion_tokens": 7678,
+          "thinking_tokens": 27488,
+          "code": "(module rpn_calculator\n  (fn main -> int\n    (set args array (argv))\n    (if (eq (array_length args) 0)\n      (ret 1))\n    \n    (set expr string (array_get args 0))\n    (set tokens array (string_split expr \" \"))\n    (set stack array (array_new))\n    \n    (for-each token string tokens\n      (cond\n        ((string_equals token \"+\")\n          (set b int (array_pop stack))\n          (set a int (array_pop stack))\n          (array_push stack (add a b)))\n        ((string_equals token \"-\")\n          (set b int (array_pop stack))\n          (set a int (array_pop stack))\n          (array_push stack (sub a b)))\n        ((string_equals token \"*\")\n          (set b int (array_pop stack))\n          (set a int (array_pop stack))\n          (array_push stack (mul a b)))\n        ((string_equals token \"/\")\n          (set b int (array_pop stack))\n          (set a int (array_pop stack))\n          (array_push stack (div a b)))\n        (true\n          (set num int (string_to_int token))\n          (array_push stack num))))\n    \n    (set result int (array_pop stack))\n    (println result)\n    (ret 0)))",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "3 4 +"
+              ],
+              "expected": "'7\\n'",
+              "actual": "'7\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 1,
+              "args": [
+                "5 1 2 + 4 * + 3 -"
+              ],
+              "expected": "'14\\n'",
+              "actual": "'14\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 2,
+              "args": [
+                "2 3 * 4 5 * +"
+              ],
+              "expected": "'26\\n'",
+              "actual": "'26\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 3,
+              "args": [
+                "10 3 /"
+              ],
+              "expected": "'3\\n'",
+              "actual": "'3\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 4,
+              "args": [
+                "42"
+              ],
+              "expected": "'42\\n'",
+              "actual": "'42\\n'",
+              "stderr": "",
+              "passed": true
+            }
+          ],
+          "error": ""
+        }
+      ],
+      "first_attempt_correct": true,
+      "final_correct": true,
+      "total_prompt_tokens": 10,
+      "total_completion_tokens": 7678,
+      "total_thinking_tokens": 27488,
+      "total_tokens": 35176,
+      "attempts_to_correct": 1,
+      "wall_time_s": 49.69239330291748
+    },
+    {
+      "task_id": "08_stack_calculator",
+      "language": "python",
+      "model": "claude-haiku-4-5-20251001",
+      "run_index": 0,
+      "attempts": [
+        {
+          "prompt_tokens": 10,
+          "completion_tokens": 1103,
+          "thinking_tokens": 27488,
+          "code": "import sys\n\ndef evaluate_rpn(expression):\n    tokens = expression.split()\n    stack = []\n    operators = {'+', '-', '*', '/'}\n    \n    for token in tokens:\n        if token in operators:\n            b = stack.pop()\n            a = stack.pop()\n            \n            if token == '+':\n                result = a + b\n            elif token == '-':\n                result = a - b\n            elif token == '*':\n                result = a * b\n            elif token == '/':\n                result = int(a / b)\n            \n            stack.append(result)\n        else:\n            stack.append(int(token))\n    \n    return stack[0]\n\nif __name__ == '__main__':\n    expression = sys.argv[1]\n    result = evaluate_rpn(expression)\n    print(result)",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "3 4 +"
+              ],
+              "expected": "'7\\n'",
+              "actual": "'7\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 1,
+              "args": [
+                "5 1 2 + 4 * + 3 -"
+              ],
+              "expected": "'14\\n'",
+              "actual": "'14\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 2,
+              "args": [
+                "2 3 * 4 5 * +"
+              ],
+              "expected": "'26\\n'",
+              "actual": "'26\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 3,
+              "args": [
+                "10 3 /"
+              ],
+              "expected": "'3\\n'",
+              "actual": "'3\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 4,
+              "args": [
+                "42"
+              ],
+              "expected": "'42\\n'",
+              "actual": "'42\\n'",
+              "stderr": "",
+              "passed": true
+            }
+          ],
+          "error": ""
+        }
+      ],
+      "first_attempt_correct": true,
+      "final_correct": true,
+      "total_prompt_tokens": 10,
+      "total_completion_tokens": 1103,
+      "total_thinking_tokens": 27488,
+      "total_tokens": 28601,
+      "attempts_to_correct": 1,
+      "wall_time_s": 10.003716230392456
+    },
+    {
+      "task_id": "08_stack_calculator",
+      "language": "javascript",
+      "model": "claude-haiku-4-5-20251001",
+      "run_index": 0,
+      "attempts": [
+        {
+          "prompt_tokens": 10,
+          "completion_tokens": 853,
+          "thinking_tokens": 27488,
+          "code": "const expression = process.argv[2];\nconst tokens = expression.split(' ');\nconst stack = [];\n\nfor (const token of tokens) {\n  if (['+', '-', '*', '/'].includes(token)) {\n    const b = stack.pop();\n    const a = stack.pop();\n    let result;\n    if (token === '+') {\n      result = a + b;\n    } else if (token === '-') {\n      result = a - b;\n    } else if (token === '*') {\n      result = a * b;\n    } else if (token === '/') {\n      result = Math.trunc(a / b);\n    }\n    stack.push(result);\n  } else {\n    stack.push(parseInt(token));\n  }\n}\n\nconsole.log(stack[0]);",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "3 4 +"
+              ],
+              "expected": "'7\\n'",
+              "actual": "'7\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 1,
+              "args": [
+                "5 1 2 + 4 * + 3 -"
+              ],
+              "expected": "'14\\n'",
+              "actual": "'14\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 2,
+              "args": [
+                "2 3 * 4 5 * +"
+              ],
+              "expected": "'26\\n'",
+              "actual": "'26\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 3,
+              "args": [
+                "10 3 /"
+              ],
+              "expected": "'3\\n'",
+              "actual": "'3\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 4,
+              "args": [
+                "42"
+              ],
+              "expected": "'42\\n'",
+              "actual": "'42\\n'",
+              "stderr": "",
+              "passed": true
+            }
+          ],
+          "error": ""
+        }
+      ],
+      "first_attempt_correct": true,
+      "final_correct": true,
+      "total_prompt_tokens": 10,
+      "total_completion_tokens": 853,
+      "total_thinking_tokens": 27488,
+      "total_tokens": 28351,
+      "attempts_to_correct": 1,
+      "wall_time_s": 7.0810582637786865
+    },
+    {
+      "task_id": "08_stack_calculator",
+      "language": "go",
+      "model": "claude-haiku-4-5-20251001",
+      "run_index": 0,
+      "attempts": [
+        {
+          "prompt_tokens": 10,
+          "completion_tokens": 2722,
+          "thinking_tokens": 27488,
+          "code": "package main\n\nimport (\n\t\"fmt\"\n\t\"os\"\n\t\"strconv\"\n\t\"strings\"\n)\n\nfunc main() {\n\ttokens := strings.Fields(os.Args[1])\n\tvar stack []int\n\n\tfor _, token := range tokens {\n\t\tif token == \"+\" || token == \"-\" || token == \"*\" || token == \"/\" {\n\t\t\tb := stack[len(stack)-1]\n\t\t\tstack = stack[:len(stack)-1]\n\t\t\ta := stack[len(stack)-1]\n\t\t\tstack = stack[:len(stack)-1]\n\n\t\t\tvar result int\n\t\t\tswitch token {\n\t\t\tcase \"+\":\n\t\t\t\tresult = a + b\n\t\t\tcase \"-\":\n\t\t\t\tresult = a - b\n\t\t\tcase \"*\":\n\t\t\t\tresult = a * b\n\t\t\tcase \"/\":\n\t\t\t\tresult = a / b\n\t\t\t}\n\t\t\tstack = append(stack, result)\n\t\t} else {\n\t\t\tnum, _ := strconv.Atoi(token)\n\t\t\tstack = append(stack, num)\n\t\t}\n\t}\n\n\tfmt.Println(stack[0])\n}",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "3 4 +"
+              ],
+              "expected": "'7\\n'",
+              "actual": "'7\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 1,
+              "args": [
+                "5 1 2 + 4 * + 3 -"
+              ],
+              "expected": "'14\\n'",
+              "actual": "'14\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 2,
+              "args": [
+                "2 3 * 4 5 * +"
+              ],
+              "expected": "'26\\n'",
+              "actual": "'26\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 3,
+              "args": [
+                "10 3 /"
+              ],
+              "expected": "'3\\n'",
+              "actual": "'3\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 4,
+              "args": [
+                "42"
+              ],
+              "expected": "'42\\n'",
+              "actual": "'42\\n'",
+              "stderr": "",
+              "passed": true
+            }
+          ],
+          "error": ""
+        }
+      ],
+      "first_attempt_correct": true,
+      "final_correct": true,
+      "total_prompt_tokens": 10,
+      "total_completion_tokens": 2722,
+      "total_thinking_tokens": 27488,
+      "total_tokens": 30220,
+      "attempts_to_correct": 1,
+      "wall_time_s": 17.023046016693115
+    },
+    {
+      "task_id": "09_http_response",
+      "language": "sigil",
+      "model": "claude-haiku-4-5-20251001",
+      "run_index": 0,
+      "attempts": [
+        {
+          "prompt_tokens": 10,
+          "completion_tokens": 5441,
+          "thinking_tokens": 27488,
+          "code": "(module http_response\n  (fn main -> int\n    (set args array (argv))\n    \n    (if (ne (array_length args) 3)\n      (println \"Usage: <status_code> <content_type> <body>\")\n      (ret 1))\n    \n    (set status_code string (array_get args 0))\n    (set content_type string (array_get args 1))\n    (set body string (array_get args 2))\n    \n    (set body_length int (string_length body))\n    (set length_str string (string_from_int body_length))\n    \n    (set response string (string_format \"HTTP/1.1 {} OK\\r\\nContent-Type: {}\\r\\nContent-Length: {}\\r\\n\\r\\n{}\" status_code content_type length_str body))\n    \n    (print response)\n    (ret 0)))",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "200",
+                "text/html",
+                "<h1>Hello</h1>"
+              ],
+              "expected": "'HTTP/1.1 200 OK\\r\\nContent-Type: text/html\\r\\nContent-Length: 14\\r\\n\\r\\n<h1>Hello</h1>\\n'",
+              "actual": "'HTTP/1.1 200 OK\\nContent-Type: text/html\\nContent-Length: 14\\n\\n<h1>Hello</h1>'",
+              "stderr": "",
+              "passed": false
+            },
+            {
+              "case": 1,
+              "args": [
+                "404",
+                "text/plain",
+                "Not Found"
+              ],
+              "expected": "'HTTP/1.1 404 Not Found\\r\\nContent-Type: text/plain\\r\\nContent-Length: 9\\r\\n\\r\\nNot Found\\n'",
+              "actual": "'HTTP/1.1 404 OK\\nContent-Type: text/plain\\nContent-Length: 9\\n\\nNot Found'",
+              "stderr": "",
+              "passed": false
+            },
+            {
+              "case": 2,
+              "args": [
+                "200",
+                "application/json",
+                "{\"ok\":true}"
+              ],
+              "expected": "'HTTP/1.1 200 OK\\r\\nContent-Type: application/json\\r\\nContent-Length: 11\\r\\n\\r\\n{\"ok\":true}\\n'",
+              "actual": "'HTTP/1.1 200 OK\\nContent-Type: application/json\\nContent-Length: 11\\n\\n{\"ok\":true}'",
+              "stderr": "",
+              "passed": false
+            }
+          ],
+          "error": ""
+        },
+        {
+          "prompt_tokens": 10,
+          "completion_tokens": 8260,
+          "thinking_tokens": 27488,
+          "code": "(module http_response\n  (fn get_reason_phrase code_str string -> string\n    (cond\n      ((string_equals code_str \"200\") \"OK\")\n      ((string_equals code_str \"201\") \"Created\")\n      ((string_equals code_str \"204\") \"No Content\")\n      ((string_equals code_str \"301\") \"Moved Permanently\")\n      ((string_equals code_str \"302\") \"Found\")\n      ((string_equals code_str \"304\") \"Not Modified\")\n      ((string_equals code_str \"400\") \"Bad Request\")\n      ((string_equals code_str \"401\") \"Unauthorized\")\n      ((string_equals code_str \"403\") \"Forbidden\")\n      ((string_equals code_str \"404\") \"Not Found\")\n      ((string_equals code_str \"500\") \"Internal Server Error\")\n      ((string_equals code_str \"502\") \"Bad Gateway\")\n      ((string_equals code_str \"503\") \"Service Unavailable\")\n      (true \"Unknown\")))\n\n  (fn main -> int\n    (set args array (argv))\n    \n    (if (ne (array_length args) 3)\n      (println \"Usage: <status_code> <content_type> <body>\")\n      (ret 1))\n    \n    (set status_code string (array_get args 0))\n    (set content_type string (array_get args 1))\n    (set body string (array_get args 2))\n    \n    (set body_length int (string_length body))\n    (set length_str string (string_from_int body_length))\n    \n    (set reason_phrase string (get_reason_phrase status_code))\n    \n    (set cr string (char_from_code 13))\n    (set lf string (char_from_code 10))\n    (set crlf string (string_concat cr lf))\n    \n    (set line1 string (string_concat (string_concat (string_concat \"HTTP/1.1 \" status_code) \" \") reason_phrase))\n    (set line2 string (string_concat \"Content-Type: \" content_type))\n    (set line3 string (string_concat \"Content-Length: \" length_str))\n    \n    (set response string \n      (string_concat line1\n        (string_concat crlf\n          (string_concat line2\n            (string_concat crlf\n              (string_concat line3\n                (string_concat crlf\n                  (string_concat crlf\n                    (string_concat body lf)))))))))\n    \n    (print response)\n    (ret 0)))",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "200",
+                "text/html",
+                "<h1>Hello</h1>"
+              ],
+              "expected": "'HTTP/1.1 200 OK\\r\\nContent-Type: text/html\\r\\nContent-Length: 14\\r\\n\\r\\n<h1>Hello</h1>\\n'",
+              "actual": "''",
+              "stderr": "Runtime error: Type mismatch: variable 'reason_phrase' declared as string but got unit\n",
+              "passed": false
+            },
+            {
+              "case": 1,
+              "args": [
+                "404",
+                "text/plain",
+                "Not Found"
+              ],
+              "expected": "'HTTP/1.1 404 Not Found\\r\\nContent-Type: text/plain\\r\\nContent-Length: 9\\r\\n\\r\\nNot Found\\n'",
+              "actual": "''",
+              "stderr": "Runtime error: Type mismatch: variable 'reason_phrase' declared as string but got unit\n",
+              "passed": false
+            },
+            {
+              "case": 2,
+              "args": [
+                "200",
+                "application/json",
+                "{\"ok\":true}"
+              ],
+              "expected": "'HTTP/1.1 200 OK\\r\\nContent-Type: application/json\\r\\nContent-Length: 11\\r\\n\\r\\n{\"ok\":true}\\n'",
+              "actual": "''",
+              "stderr": "Runtime error: Type mismatch: variable 'reason_phrase' declared as string but got unit\n",
+              "passed": false
+            }
+          ],
+          "error": ""
+        },
+        {
+          "prompt_tokens": 10,
+          "completion_tokens": 3880,
+          "thinking_tokens": 27488,
+          "code": "(module http_response\n  (fn get_reason_phrase code_str string -> string\n    (cond\n      ((string_equals code_str \"200\") (ret \"OK\"))\n      ((string_equals code_str \"201\") (ret \"Created\"))\n      ((string_equals code_str \"204\") (ret \"No Content\"))\n      ((string_equals code_str \"301\") (ret \"Moved Permanently\"))\n      ((string_equals code_str \"302\") (ret \"Found\"))\n      ((string_equals code_str \"304\") (ret \"Not Modified\"))\n      ((string_equals code_str \"400\") (ret \"Bad Request\"))\n      ((string_equals code_str \"401\") (ret \"Unauthorized\"))\n      ((string_equals code_str \"403\") (ret \"Forbidden\"))\n      ((string_equals code_str \"404\") (ret \"Not Found\"))\n      ((string_equals code_str \"500\") (ret \"Internal Server Error\"))\n      ((string_equals code_str \"502\") (ret \"Bad Gateway\"))\n      ((string_equals code_str \"503\") (ret \"Service Unavailable\"))\n      (true (ret \"Unknown\"))))\n\n  (fn main -> int\n    (set args array (argv))\n    \n    (if (ne (array_length args) 3)\n      (println \"Usage: <status_code> <content_type> <body>\")\n      (ret 1))\n    \n    (set status_code string (array_get args 0))\n    (set content_type string (array_get args 1))\n    (set body string (array_get args 2))\n    \n    (set body_length int (string_length body))\n    (set length_str string (string_from_int body_length))\n    \n    (set reason_phrase string (get_reason_phrase status_code))\n    \n    (set cr string (char_from_code 13))\n    (set lf string (char_from_code 10))\n    (set crlf string (string_concat cr lf))\n    \n    (set line1 string (string_concat (string_concat (string_concat \"HTTP/1.1 \" status_code) \" \") reason_phrase))\n    (set line2 string (string_concat \"Content-Type: \" content_type))\n    (set line3 string (string_concat \"Content-Length: \" length_str))\n    \n    (set response string \n      (string_concat line1\n        (string_concat crlf\n          (string_concat line2\n            (string_concat crlf\n              (string_concat line3\n                (string_concat crlf\n                  (string_concat crlf\n                    (string_concat body lf)))))))))\n    \n    (print response)\n    (ret 0)))",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "200",
+                "text/html",
+                "<h1>Hello</h1>"
+              ],
+              "expected": "'HTTP/1.1 200 OK\\r\\nContent-Type: text/html\\r\\nContent-Length: 14\\r\\n\\r\\n<h1>Hello</h1>\\n'",
+              "actual": "'HTTP/1.1 200 OK\\nContent-Type: text/html\\nContent-Length: 14\\n\\n<h1>Hello</h1>\\n'",
+              "stderr": "",
+              "passed": false
+            },
+            {
+              "case": 1,
+              "args": [
+                "404",
+                "text/plain",
+                "Not Found"
+              ],
+              "expected": "'HTTP/1.1 404 Not Found\\r\\nContent-Type: text/plain\\r\\nContent-Length: 9\\r\\n\\r\\nNot Found\\n'",
+              "actual": "'HTTP/1.1 404 Not Found\\nContent-Type: text/plain\\nContent-Length: 9\\n\\nNot Found\\n'",
+              "stderr": "",
+              "passed": false
+            },
+            {
+              "case": 2,
+              "args": [
+                "200",
+                "application/json",
+                "{\"ok\":true}"
+              ],
+              "expected": "'HTTP/1.1 200 OK\\r\\nContent-Type: application/json\\r\\nContent-Length: 11\\r\\n\\r\\n{\"ok\":true}\\n'",
+              "actual": "'HTTP/1.1 200 OK\\nContent-Type: application/json\\nContent-Length: 11\\n\\n{\"ok\":true}\\n'",
+              "stderr": "",
+              "passed": false
+            }
+          ],
+          "error": ""
+        },
+        {
+          "prompt_tokens": 10,
+          "completion_tokens": 4655,
+          "thinking_tokens": 27488,
+          "code": "(module http_response\n  (fn get_reason_phrase code_str string -> string\n    (cond\n      ((string_equals code_str \"200\") (ret \"OK\"))\n      ((string_equals code_str \"201\") (ret \"Created\"))\n      ((string_equals code_str \"204\") (ret \"No Content\"))\n      ((string_equals code_str \"301\") (ret \"Moved Permanently\"))\n      ((string_equals code_str \"302\") (ret \"Found\"))\n      ((string_equals code_str \"304\") (ret \"Not Modified\"))\n      ((string_equals code_str \"400\") (ret \"Bad Request\"))\n      ((string_equals code_str \"401\") (ret \"Unauthorized\"))\n      ((string_equals code_str \"403\") (ret \"Forbidden\"))\n      ((string_equals code_str \"404\") (ret \"Not Found\"))\n      ((string_equals code_str \"500\") (ret \"Internal Server Error\"))\n      ((string_equals code_str \"502\") (ret \"Bad Gateway\"))\n      ((string_equals code_str \"503\") (ret \"Service Unavailable\"))\n      (true (ret \"Unknown\"))))\n\n  (fn main -> int\n    (set args array (argv))\n    \n    (if (ne (array_length args) 3)\n      (println \"Usage: <status_code> <content_type> <body>\")\n      (ret 1))\n    \n    (set status_code string (array_get args 0))\n    (set content_type string (array_get args 1))\n    (set body string (array_get args 2))\n    \n    (set body_length int (string_length body))\n    (set length_str string (string_from_int body_length))\n    \n    (set reason_phrase string (get_reason_phrase status_code))\n    \n    (set response string (string_format \"HTTP/1.1 {} {}\\r\\nContent-Type: {}\\r\\nContent-Length: {}\\r\\n\\r\\n{}\\n\" status_code reason_phrase content_type length_str body))\n    \n    (print response)\n    (ret 0)))",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "200",
+                "text/html",
+                "<h1>Hello</h1>"
+              ],
+              "expected": "'HTTP/1.1 200 OK\\r\\nContent-Type: text/html\\r\\nContent-Length: 14\\r\\n\\r\\n<h1>Hello</h1>\\n'",
+              "actual": "'HTTP/1.1 200 OK\\nContent-Type: text/html\\nContent-Length: 14\\n\\n<h1>Hello</h1>\\n'",
+              "stderr": "",
+              "passed": false
+            },
+            {
+              "case": 1,
+              "args": [
+                "404",
+                "text/plain",
+                "Not Found"
+              ],
+              "expected": "'HTTP/1.1 404 Not Found\\r\\nContent-Type: text/plain\\r\\nContent-Length: 9\\r\\n\\r\\nNot Found\\n'",
+              "actual": "'HTTP/1.1 404 Not Found\\nContent-Type: text/plain\\nContent-Length: 9\\n\\nNot Found\\n'",
+              "stderr": "",
+              "passed": false
+            },
+            {
+              "case": 2,
+              "args": [
+                "200",
+                "application/json",
+                "{\"ok\":true}"
+              ],
+              "expected": "'HTTP/1.1 200 OK\\r\\nContent-Type: application/json\\r\\nContent-Length: 11\\r\\n\\r\\n{\"ok\":true}\\n'",
+              "actual": "'HTTP/1.1 200 OK\\nContent-Type: application/json\\nContent-Length: 11\\n\\n{\"ok\":true}\\n'",
+              "stderr": "",
+              "passed": false
+            }
+          ],
+          "error": ""
+        },
+        {
+          "prompt_tokens": 10,
+          "completion_tokens": 1954,
+          "thinking_tokens": 27488,
+          "code": "(module http_response\n  (fn get_reason_phrase code_str string -> string\n    (cond\n      ((string_equals code_str \"200\") (ret \"OK\"))\n      ((string_equals code_str \"201\") (ret \"Created\"))\n      ((string_equals code_str \"204\") (ret \"No Content\"))\n      ((string_equals code_str \"301\") (ret \"Moved Permanently\"))\n      ((string_equals code_str \"302\") (ret \"Found\"))\n      ((string_equals code_str \"304\") (ret \"Not Modified\"))\n      ((string_equals code_str \"400\") (ret \"Bad Request\"))\n      ((string_equals code_str \"401\") (ret \"Unauthorized\"))\n      ((string_equals code_str \"403\") (ret \"Forbidden\"))\n      ((string_equals code_str \"404\") (ret \"Not Found\"))\n      ((string_equals code_str \"500\") (ret \"Internal Server Error\"))\n      ((string_equals code_str \"502\") (ret \"Bad Gateway\"))\n      ((string_equals code_str \"503\") (ret \"Service Unavailable\"))\n      (true (ret \"Unknown\"))))\n\n  (fn main -> int\n    (set args array (argv))\n    \n    (if (ne (array_length args) 3)\n      (println \"Usage: <status_code> <content_type> <body>\")\n      (ret 1))\n    \n    (set status_code string (array_get args 0))\n    (set content_type string (array_get args 1))\n    (set body string (array_get args 2))\n    \n    (set body_length int (string_length body))\n    (set length_str string (string_from_int body_length))\n    \n    (set reason_phrase string (get_reason_phrase status_code))\n    \n    (set cr string (char_from_code 13))\n    (set lf string (char_from_code 10))\n    (set crlf string (string_concat cr lf))\n    \n    (set status_line string (string_concat \"HTTP/1.1 \" (string_concat status_code (string_concat \" \" reason_phrase))))\n    (set content_type_line string (string_concat \"Content-Type: \" content_type))\n    (set content_length_line string (string_concat \"Content-Length: \" length_str))\n    \n    (set response string\n      (string_concat status_line\n        (string_concat crlf\n          (string_concat content_type_line\n            (string_concat crlf\n              (string_concat content_length_line\n                (string_concat crlf\n                  (string_concat crlf\n                    (string_concat body lf)))))))))\n    \n    (print response)\n    (ret 0)))",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "200",
+                "text/html",
+                "<h1>Hello</h1>"
+              ],
+              "expected": "'HTTP/1.1 200 OK\\r\\nContent-Type: text/html\\r\\nContent-Length: 14\\r\\n\\r\\n<h1>Hello</h1>\\n'",
+              "actual": "'HTTP/1.1 200 OK\\nContent-Type: text/html\\nContent-Length: 14\\n\\n<h1>Hello</h1>\\n'",
+              "stderr": "",
+              "passed": false
+            },
+            {
+              "case": 1,
+              "args": [
+                "404",
+                "text/plain",
+                "Not Found"
+              ],
+              "expected": "'HTTP/1.1 404 Not Found\\r\\nContent-Type: text/plain\\r\\nContent-Length: 9\\r\\n\\r\\nNot Found\\n'",
+              "actual": "'HTTP/1.1 404 Not Found\\nContent-Type: text/plain\\nContent-Length: 9\\n\\nNot Found\\n'",
+              "stderr": "",
+              "passed": false
+            },
+            {
+              "case": 2,
+              "args": [
+                "200",
+                "application/json",
+                "{\"ok\":true}"
+              ],
+              "expected": "'HTTP/1.1 200 OK\\r\\nContent-Type: application/json\\r\\nContent-Length: 11\\r\\n\\r\\n{\"ok\":true}\\n'",
+              "actual": "'HTTP/1.1 200 OK\\nContent-Type: application/json\\nContent-Length: 11\\n\\n{\"ok\":true}\\n'",
+              "stderr": "",
+              "passed": false
+            }
+          ],
+          "error": ""
+        }
+      ],
+      "first_attempt_correct": false,
+      "final_correct": false,
+      "total_prompt_tokens": 50,
+      "total_completion_tokens": 24190,
+      "total_thinking_tokens": 137440,
+      "total_tokens": 161680,
+      "attempts_to_correct": 6,
+      "wall_time_s": 150.8152277469635
+    },
+    {
+      "task_id": "09_http_response",
+      "language": "python",
+      "model": "claude-haiku-4-5-20251001",
+      "run_index": 0,
+      "attempts": [
+        {
+          "prompt_tokens": 10,
+          "completion_tokens": 2037,
+          "thinking_tokens": 27488,
+          "code": "import sys\n\nstatus_code = int(sys.argv[1])\ncontent_type = sys.argv[2]\nbody = sys.argv[3]\n\nstatus_reasons = {\n    200: \"OK\",\n    201: \"Created\",\n    204: \"No Content\",\n    301: \"Moved Permanently\",\n    302: \"Found\",\n    304: \"Not Modified\",\n    400: \"Bad Request\",\n    401: \"Unauthorized\",\n    403: \"Forbidden\",\n    404: \"Not Found\",\n    500: \"Internal Server Error\",\n    501: \"Not Implemented\",\n    502: \"Bad Gateway\",\n    503: \"Service Unavailable\",\n}\n\nreason_phrase = status_reasons.get(status_code, \"Unknown\")\ncontent_length = len(body.encode('utf-8'))\n\nresponse = f\"HTTP/1.1 {status_code} {reason_phrase}\\r\\n\"\nresponse += f\"Content-Type: {content_type}\\r\\n\"\nresponse += f\"Content-Length: {content_length}\\r\\n\"\nresponse += \"\\r\\n\"\nresponse += body\n\nprint(response, end='')",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "200",
+                "text/html",
+                "<h1>Hello</h1>"
+              ],
+              "expected": "'HTTP/1.1 200 OK\\r\\nContent-Type: text/html\\r\\nContent-Length: 14\\r\\n\\r\\n<h1>Hello</h1>\\n'",
+              "actual": "'HTTP/1.1 200 OK\\nContent-Type: text/html\\nContent-Length: 14\\n\\n<h1>Hello</h1>'",
+              "stderr": "",
+              "passed": false
+            },
+            {
+              "case": 1,
+              "args": [
+                "404",
+                "text/plain",
+                "Not Found"
+              ],
+              "expected": "'HTTP/1.1 404 Not Found\\r\\nContent-Type: text/plain\\r\\nContent-Length: 9\\r\\n\\r\\nNot Found\\n'",
+              "actual": "'HTTP/1.1 404 Not Found\\nContent-Type: text/plain\\nContent-Length: 9\\n\\nNot Found'",
+              "stderr": "",
+              "passed": false
+            },
+            {
+              "case": 2,
+              "args": [
+                "200",
+                "application/json",
+                "{\"ok\":true}"
+              ],
+              "expected": "'HTTP/1.1 200 OK\\r\\nContent-Type: application/json\\r\\nContent-Length: 11\\r\\n\\r\\n{\"ok\":true}\\n'",
+              "actual": "'HTTP/1.1 200 OK\\nContent-Type: application/json\\nContent-Length: 11\\n\\n{\"ok\":true}'",
+              "stderr": "",
+              "passed": false
+            }
+          ],
+          "error": ""
+        },
+        {
+          "prompt_tokens": 10,
+          "completion_tokens": 2368,
+          "thinking_tokens": 27488,
+          "code": "import sys\n\nstatus_code = int(sys.argv[1])\ncontent_type = sys.argv[2]\nbody = sys.argv[3]\n\nstatus_reasons = {\n    200: \"OK\",\n    201: \"Created\",\n    204: \"No Content\",\n    301: \"Moved Permanently\",\n    302: \"Found\",\n    304: \"Not Modified\",\n    400: \"Bad Request\",\n    401: \"Unauthorized\",\n    403: \"Forbidden\",\n    404: \"Not Found\",\n    500: \"Internal Server Error\",\n    501: \"Not Implemented\",\n    502: \"Bad Gateway\",\n    503: \"Service Unavailable\",\n}\n\nreason_phrase = status_reasons.get(status_code, \"Unknown\")\ncontent_length = len(body.encode('utf-8'))\n\nresponse = f\"HTTP/1.1 {status_code} {reason_phrase}\\r\\n\"\nresponse += f\"Content-Type: {content_type}\\r\\n\"\nresponse += f\"Content-Length: {content_length}\\r\\n\"\nresponse += \"\\r\\n\"\nresponse += body\nresponse += \"\\n\"\n\nsys.stdout.buffer.write(response.encode('utf-8'))",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "200",
+                "text/html",
+                "<h1>Hello</h1>"
+              ],
+              "expected": "'HTTP/1.1 200 OK\\r\\nContent-Type: text/html\\r\\nContent-Length: 14\\r\\n\\r\\n<h1>Hello</h1>\\n'",
+              "actual": "'HTTP/1.1 200 OK\\nContent-Type: text/html\\nContent-Length: 14\\n\\n<h1>Hello</h1>\\n'",
+              "stderr": "",
+              "passed": false
+            },
+            {
+              "case": 1,
+              "args": [
+                "404",
+                "text/plain",
+                "Not Found"
+              ],
+              "expected": "'HTTP/1.1 404 Not Found\\r\\nContent-Type: text/plain\\r\\nContent-Length: 9\\r\\n\\r\\nNot Found\\n'",
+              "actual": "'HTTP/1.1 404 Not Found\\nContent-Type: text/plain\\nContent-Length: 9\\n\\nNot Found\\n'",
+              "stderr": "",
+              "passed": false
+            },
+            {
+              "case": 2,
+              "args": [
+                "200",
+                "application/json",
+                "{\"ok\":true}"
+              ],
+              "expected": "'HTTP/1.1 200 OK\\r\\nContent-Type: application/json\\r\\nContent-Length: 11\\r\\n\\r\\n{\"ok\":true}\\n'",
+              "actual": "'HTTP/1.1 200 OK\\nContent-Type: application/json\\nContent-Length: 11\\n\\n{\"ok\":true}\\n'",
+              "stderr": "",
+              "passed": false
+            }
+          ],
+          "error": ""
+        },
+        {
+          "prompt_tokens": 10,
+          "completion_tokens": 5498,
+          "thinking_tokens": 27488,
+          "code": "import sys\n\nstatus_code = int(sys.argv[1])\ncontent_type = sys.argv[2]\nbody = sys.argv[3]\n\nstatus_reasons = {\n    200: \"OK\",\n    201: \"Created\",\n    204: \"No Content\",\n    301: \"Moved Permanently\",\n    302: \"Found\",\n    304: \"Not Modified\",\n    400: \"Bad Request\",\n    401: \"Unauthorized\",\n    403: \"Forbidden\",\n    404: \"Not Found\",\n    500: \"Internal Server Error\",\n    501: \"Not Implemented\",\n    502: \"Bad Gateway\",\n    503: \"Service Unavailable\",\n}\n\nreason_phrase = status_reasons.get(status_code, \"Unknown\")\ncontent_length = len(body.encode('utf-8'))\n\nresponse = b\"HTTP/1.1 \" + str(status_code).encode() + b\" \" + reason_phrase.encode() + b\"\\r\\n\"\nresponse += b\"Content-Type: \" + content_type.encode() + b\"\\r\\n\"\nresponse += b\"Content-Length: \" + str(content_length).encode() + b\"\\r\\n\"\nresponse += b\"\\r\\n\"\nresponse += body.encode() + b\"\\n\"\n\nsys.stdout.buffer.write(response)",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "200",
+                "text/html",
+                "<h1>Hello</h1>"
+              ],
+              "expected": "'HTTP/1.1 200 OK\\r\\nContent-Type: text/html\\r\\nContent-Length: 14\\r\\n\\r\\n<h1>Hello</h1>\\n'",
+              "actual": "'HTTP/1.1 200 OK\\nContent-Type: text/html\\nContent-Length: 14\\n\\n<h1>Hello</h1>\\n'",
+              "stderr": "",
+              "passed": false
+            },
+            {
+              "case": 1,
+              "args": [
+                "404",
+                "text/plain",
+                "Not Found"
+              ],
+              "expected": "'HTTP/1.1 404 Not Found\\r\\nContent-Type: text/plain\\r\\nContent-Length: 9\\r\\n\\r\\nNot Found\\n'",
+              "actual": "'HTTP/1.1 404 Not Found\\nContent-Type: text/plain\\nContent-Length: 9\\n\\nNot Found\\n'",
+              "stderr": "",
+              "passed": false
+            },
+            {
+              "case": 2,
+              "args": [
+                "200",
+                "application/json",
+                "{\"ok\":true}"
+              ],
+              "expected": "'HTTP/1.1 200 OK\\r\\nContent-Type: application/json\\r\\nContent-Length: 11\\r\\n\\r\\n{\"ok\":true}\\n'",
+              "actual": "'HTTP/1.1 200 OK\\nContent-Type: application/json\\nContent-Length: 11\\n\\n{\"ok\":true}\\n'",
+              "stderr": "",
+              "passed": false
+            }
+          ],
+          "error": ""
+        },
+        {
+          "prompt_tokens": 10,
+          "completion_tokens": 8652,
+          "thinking_tokens": 27488,
+          "code": "import sys\n\nstatus_code = int(sys.argv[1])\ncontent_type = sys.argv[2]\nbody = sys.argv[3]\n\nstatus_reasons = {\n    200: \"OK\",\n    201: \"Created\",\n    204: \"No Content\",\n    301: \"Moved Permanently\",\n    302: \"Found\",\n    304: \"Not Modified\",\n    400: \"Bad Request\",\n    401: \"Unauthorized\",\n    403: \"Forbidden\",\n    404: \"Not Found\",\n    500: \"Internal Server Error\",\n    501: \"Not Implemented\",\n    502: \"Bad Gateway\",\n    503: \"Service Unavailable\",\n}\n\nreason_phrase = status_reasons.get(status_code, \"Unknown\")\nbody_bytes = body.encode('utf-8')\ncontent_length = len(body_bytes)\n\nresponse = b\"HTTP/1.1 \" + str(status_code).encode() + b\" \" + reason_phrase.encode() + b\"\\r\\n\"\nresponse += b\"Content-Type: \" + content_type.encode() + b\"\\r\\n\"\nresponse += b\"Content-Length: \" + str(content_length).encode() + b\"\\r\\n\"\nresponse += b\"\\r\\n\"\nresponse += body_bytes + b\"\\n\"\n\nsys.stdout.buffer.write(response)",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "200",
+                "text/html",
+                "<h1>Hello</h1>"
+              ],
+              "expected": "'HTTP/1.1 200 OK\\r\\nContent-Type: text/html\\r\\nContent-Length: 14\\r\\n\\r\\n<h1>Hello</h1>\\n'",
+              "actual": "'HTTP/1.1 200 OK\\nContent-Type: text/html\\nContent-Length: 14\\n\\n<h1>Hello</h1>\\n'",
+              "stderr": "",
+              "passed": false
+            },
+            {
+              "case": 1,
+              "args": [
+                "404",
+                "text/plain",
+                "Not Found"
+              ],
+              "expected": "'HTTP/1.1 404 Not Found\\r\\nContent-Type: text/plain\\r\\nContent-Length: 9\\r\\n\\r\\nNot Found\\n'",
+              "actual": "'HTTP/1.1 404 Not Found\\nContent-Type: text/plain\\nContent-Length: 9\\n\\nNot Found\\n'",
+              "stderr": "",
+              "passed": false
+            },
+            {
+              "case": 2,
+              "args": [
+                "200",
+                "application/json",
+                "{\"ok\":true}"
+              ],
+              "expected": "'HTTP/1.1 200 OK\\r\\nContent-Type: application/json\\r\\nContent-Length: 11\\r\\n\\r\\n{\"ok\":true}\\n'",
+              "actual": "'HTTP/1.1 200 OK\\nContent-Type: application/json\\nContent-Length: 11\\n\\n{\"ok\":true}\\n'",
+              "stderr": "",
+              "passed": false
+            }
+          ],
+          "error": ""
+        },
+        {
+          "prompt_tokens": 10,
+          "completion_tokens": 7754,
+          "thinking_tokens": 27488,
+          "code": "import sys\nimport os\n\nstatus_code = int(sys.argv[1])\ncontent_type = sys.argv[2]\nbody = sys.argv[3]\n\nstatus_reasons = {\n    200: \"OK\",\n    201: \"Created\",\n    204: \"No Content\",\n    301: \"Moved Permanently\",\n    302: \"Found\",\n    304: \"Not Modified\",\n    400: \"Bad Request\",\n    401: \"Unauthorized\",\n    403: \"Forbidden\",\n    404: \"Not Found\",\n    500: \"Internal Server Error\",\n    501: \"Not Implemented\",\n    502: \"Bad Gateway\",\n    503: \"Service Unavailable\",\n}\n\nreason_phrase = status_reasons.get(status_code, \"Unknown\")\ncontent_length = len(body.encode('utf-8'))\n\nresponse = f\"HTTP/1.1 {status_code} {reason_phrase}\\r\\nContent-Type: {content_type}\\r\\nContent-Length: {content_length}\\r\\n\\r\\n{body}\\n\"\nos.write(1, response.encode('utf-8'))",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "200",
+                "text/html",
+                "<h1>Hello</h1>"
+              ],
+              "expected": "'HTTP/1.1 200 OK\\r\\nContent-Type: text/html\\r\\nContent-Length: 14\\r\\n\\r\\n<h1>Hello</h1>\\n'",
+              "actual": "'HTTP/1.1 200 OK\\nContent-Type: text/html\\nContent-Length: 14\\n\\n<h1>Hello</h1>\\n'",
+              "stderr": "",
+              "passed": false
+            },
+            {
+              "case": 1,
+              "args": [
+                "404",
+                "text/plain",
+                "Not Found"
+              ],
+              "expected": "'HTTP/1.1 404 Not Found\\r\\nContent-Type: text/plain\\r\\nContent-Length: 9\\r\\n\\r\\nNot Found\\n'",
+              "actual": "'HTTP/1.1 404 Not Found\\nContent-Type: text/plain\\nContent-Length: 9\\n\\nNot Found\\n'",
+              "stderr": "",
+              "passed": false
+            },
+            {
+              "case": 2,
+              "args": [
+                "200",
+                "application/json",
+                "{\"ok\":true}"
+              ],
+              "expected": "'HTTP/1.1 200 OK\\r\\nContent-Type: application/json\\r\\nContent-Length: 11\\r\\n\\r\\n{\"ok\":true}\\n'",
+              "actual": "'HTTP/1.1 200 OK\\nContent-Type: application/json\\nContent-Length: 11\\n\\n{\"ok\":true}\\n'",
+              "stderr": "",
+              "passed": false
+            }
+          ],
+          "error": ""
+        }
+      ],
+      "first_attempt_correct": false,
+      "final_correct": false,
+      "total_prompt_tokens": 50,
+      "total_completion_tokens": 26309,
+      "total_thinking_tokens": 137440,
+      "total_tokens": 163799,
+      "attempts_to_correct": 6,
+      "wall_time_s": 178.66345119476318
+    },
+    {
+      "task_id": "09_http_response",
+      "language": "javascript",
+      "model": "claude-haiku-4-5-20251001",
+      "run_index": 0,
+      "attempts": [
+        {
+          "prompt_tokens": 10,
+          "completion_tokens": 1467,
+          "thinking_tokens": 27488,
+          "code": "const statusCode = parseInt(process.argv[2]);\nconst contentType = process.argv[3];\nconst body = process.argv[4];\n\nconst statusMessages = {\n  200: 'OK',\n  201: 'Created',\n  204: 'No Content',\n  301: 'Moved Permanently',\n  302: 'Found',\n  304: 'Not Modified',\n  400: 'Bad Request',\n  401: 'Unauthorized',\n  403: 'Forbidden',\n  404: 'Not Found',\n  500: 'Internal Server Error',\n  502: 'Bad Gateway',\n  503: 'Service Unavailable'\n};\n\nconst statusMessage = statusMessages[statusCode] || 'Unknown';\nconst contentLength = Buffer.byteLength(body);\n\nconst response = `HTTP/1.1 ${statusCode} ${statusMessage}\\r\\nContent-Type: ${contentType}\\r\\nContent-Length: ${contentLength}\\r\\n\\r\\n${body}`;\n\nprocess.stdout.write(response);",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "200",
+                "text/html",
+                "<h1>Hello</h1>"
+              ],
+              "expected": "'HTTP/1.1 200 OK\\r\\nContent-Type: text/html\\r\\nContent-Length: 14\\r\\n\\r\\n<h1>Hello</h1>\\n'",
+              "actual": "'HTTP/1.1 200 OK\\nContent-Type: text/html\\nContent-Length: 14\\n\\n<h1>Hello</h1>'",
+              "stderr": "",
+              "passed": false
+            },
+            {
+              "case": 1,
+              "args": [
+                "404",
+                "text/plain",
+                "Not Found"
+              ],
+              "expected": "'HTTP/1.1 404 Not Found\\r\\nContent-Type: text/plain\\r\\nContent-Length: 9\\r\\n\\r\\nNot Found\\n'",
+              "actual": "'HTTP/1.1 404 Not Found\\nContent-Type: text/plain\\nContent-Length: 9\\n\\nNot Found'",
+              "stderr": "",
+              "passed": false
+            },
+            {
+              "case": 2,
+              "args": [
+                "200",
+                "application/json",
+                "{\"ok\":true}"
+              ],
+              "expected": "'HTTP/1.1 200 OK\\r\\nContent-Type: application/json\\r\\nContent-Length: 11\\r\\n\\r\\n{\"ok\":true}\\n'",
+              "actual": "'HTTP/1.1 200 OK\\nContent-Type: application/json\\nContent-Length: 11\\n\\n{\"ok\":true}'",
+              "stderr": "",
+              "passed": false
+            }
+          ],
+          "error": ""
+        },
+        {
+          "prompt_tokens": 10,
+          "completion_tokens": 2900,
+          "thinking_tokens": 27488,
+          "code": "const statusCode = parseInt(process.argv[2]);\nconst contentType = process.argv[3];\nconst body = process.argv[4];\n\nconst statusMessages = {\n  200: 'OK',\n  201: 'Created',\n  204: 'No Content',\n  301: 'Moved Permanently',\n  302: 'Found',\n  304: 'Not Modified',\n  400: 'Bad Request',\n  401: 'Unauthorized',\n  403: 'Forbidden',\n  404: 'Not Found',\n  500: 'Internal Server Error',\n  502: 'Bad Gateway',\n  503: 'Service Unavailable'\n};\n\nconst statusMessage = statusMessages[statusCode] || 'Unknown';\nconst contentLength = Buffer.byteLength(body);\n\nconst lines = [\n  `HTTP/1.1 ${statusCode} ${statusMessage}`,\n  `Content-Type: ${contentType}`,\n  `Content-Length: ${contentLength}`,\n  '',\n  body\n];\n\nconst response = lines.join('\\r\\n') + '\\n';\nprocess.stdout.write(response);",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "200",
+                "text/html",
+                "<h1>Hello</h1>"
+              ],
+              "expected": "'HTTP/1.1 200 OK\\r\\nContent-Type: text/html\\r\\nContent-Length: 14\\r\\n\\r\\n<h1>Hello</h1>\\n'",
+              "actual": "'HTTP/1.1 200 OK\\nContent-Type: text/html\\nContent-Length: 14\\n\\n<h1>Hello</h1>\\n'",
+              "stderr": "",
+              "passed": false
+            },
+            {
+              "case": 1,
+              "args": [
+                "404",
+                "text/plain",
+                "Not Found"
+              ],
+              "expected": "'HTTP/1.1 404 Not Found\\r\\nContent-Type: text/plain\\r\\nContent-Length: 9\\r\\n\\r\\nNot Found\\n'",
+              "actual": "'HTTP/1.1 404 Not Found\\nContent-Type: text/plain\\nContent-Length: 9\\n\\nNot Found\\n'",
+              "stderr": "",
+              "passed": false
+            },
+            {
+              "case": 2,
+              "args": [
+                "200",
+                "application/json",
+                "{\"ok\":true}"
+              ],
+              "expected": "'HTTP/1.1 200 OK\\r\\nContent-Type: application/json\\r\\nContent-Length: 11\\r\\n\\r\\n{\"ok\":true}\\n'",
+              "actual": "'HTTP/1.1 200 OK\\nContent-Type: application/json\\nContent-Length: 11\\n\\n{\"ok\":true}\\n'",
+              "stderr": "",
+              "passed": false
+            }
+          ],
+          "error": ""
+        },
+        {
+          "prompt_tokens": 10,
+          "completion_tokens": 10686,
+          "thinking_tokens": 27488,
+          "code": "const statusCode = parseInt(process.argv[2]);\nconst contentType = process.argv[3];\nconst body = process.argv[4];\n\nconst statusMessages = {\n  200: 'OK',\n  201: 'Created',\n  204: 'No Content',\n  301: 'Moved Permanently',\n  302: 'Found',\n  304: 'Not Modified',\n  400: 'Bad Request',\n  401: 'Unauthorized',\n  403: 'Forbidden',\n  404: 'Not Found',\n  500: 'Internal Server Error',\n  502: 'Bad Gateway',\n  503: 'Service Unavailable'\n};\n\nconst statusMessage = statusMessages[statusCode] || 'Unknown';\nconst contentLength = Buffer.byteLength(body);\n\nconst response = `HTTP/1.1 ${statusCode} ${statusMessage}\\r\\nContent-Type: ${contentType}\\r\\nContent-Length: ${contentLength}\\r\\n\\r\\n${body}\\n`;\n\nprocess.stdout.write(Buffer.from(response, 'utf-8'));",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "200",
+                "text/html",
+                "<h1>Hello</h1>"
+              ],
+              "expected": "'HTTP/1.1 200 OK\\r\\nContent-Type: text/html\\r\\nContent-Length: 14\\r\\n\\r\\n<h1>Hello</h1>\\n'",
+              "actual": "'HTTP/1.1 200 OK\\nContent-Type: text/html\\nContent-Length: 14\\n\\n<h1>Hello</h1>\\n'",
+              "stderr": "",
+              "passed": false
+            },
+            {
+              "case": 1,
+              "args": [
+                "404",
+                "text/plain",
+                "Not Found"
+              ],
+              "expected": "'HTTP/1.1 404 Not Found\\r\\nContent-Type: text/plain\\r\\nContent-Length: 9\\r\\n\\r\\nNot Found\\n'",
+              "actual": "'HTTP/1.1 404 Not Found\\nContent-Type: text/plain\\nContent-Length: 9\\n\\nNot Found\\n'",
+              "stderr": "",
+              "passed": false
+            },
+            {
+              "case": 2,
+              "args": [
+                "200",
+                "application/json",
+                "{\"ok\":true}"
+              ],
+              "expected": "'HTTP/1.1 200 OK\\r\\nContent-Type: application/json\\r\\nContent-Length: 11\\r\\n\\r\\n{\"ok\":true}\\n'",
+              "actual": "'HTTP/1.1 200 OK\\nContent-Type: application/json\\nContent-Length: 11\\n\\n{\"ok\":true}\\n'",
+              "stderr": "",
+              "passed": false
+            }
+          ],
+          "error": ""
+        },
+        {
+          "prompt_tokens": 10,
+          "completion_tokens": 7670,
+          "thinking_tokens": 27488,
+          "code": "const statusCode = parseInt(process.argv[2]);\nconst contentType = process.argv[3];\nconst body = process.argv[4];\n\nconst statusMessages = {\n  200: 'OK',\n  201: 'Created',\n  204: 'No Content',\n  301: 'Moved Permanently',\n  302: 'Found',\n  304: 'Not Modified',\n  400: 'Bad Request',\n  401: 'Unauthorized',\n  403: 'Forbidden',\n  404: 'Not Found',\n  500: 'Internal Server Error',\n  502: 'Bad Gateway',\n  503: 'Service Unavailable'\n};\n\nconst statusMessage = statusMessages[statusCode] || 'Unknown';\nconst contentLength = Buffer.byteLength(body);\n\nconst CR = String.fromCharCode(13);\nconst LF = String.fromCharCode(10);\n\nconst response =\n  `HTTP/1.1 ${statusCode} ${statusMessage}${CR}${LF}` +\n  `Content-Type: ${contentType}${CR}${LF}` +\n  `Content-Length: ${contentLength}${CR}${LF}` +\n  `${CR}${LF}` +\n  `${body}${LF}`;\n\nprocess.stdout.write(response);",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "200",
+                "text/html",
+                "<h1>Hello</h1>"
+              ],
+              "expected": "'HTTP/1.1 200 OK\\r\\nContent-Type: text/html\\r\\nContent-Length: 14\\r\\n\\r\\n<h1>Hello</h1>\\n'",
+              "actual": "'HTTP/1.1 200 OK\\nContent-Type: text/html\\nContent-Length: 14\\n\\n<h1>Hello</h1>\\n'",
+              "stderr": "",
+              "passed": false
+            },
+            {
+              "case": 1,
+              "args": [
+                "404",
+                "text/plain",
+                "Not Found"
+              ],
+              "expected": "'HTTP/1.1 404 Not Found\\r\\nContent-Type: text/plain\\r\\nContent-Length: 9\\r\\n\\r\\nNot Found\\n'",
+              "actual": "'HTTP/1.1 404 Not Found\\nContent-Type: text/plain\\nContent-Length: 9\\n\\nNot Found\\n'",
+              "stderr": "",
+              "passed": false
+            },
+            {
+              "case": 2,
+              "args": [
+                "200",
+                "application/json",
+                "{\"ok\":true}"
+              ],
+              "expected": "'HTTP/1.1 200 OK\\r\\nContent-Type: application/json\\r\\nContent-Length: 11\\r\\n\\r\\n{\"ok\":true}\\n'",
+              "actual": "'HTTP/1.1 200 OK\\nContent-Type: application/json\\nContent-Length: 11\\n\\n{\"ok\":true}\\n'",
+              "stderr": "",
+              "passed": false
+            }
+          ],
+          "error": ""
+        },
+        {
+          "prompt_tokens": 10,
+          "completion_tokens": 8577,
+          "thinking_tokens": 27488,
+          "code": "const statusCode = parseInt(process.argv[2]);\nconst contentType = process.argv[3];\nconst body = process.argv[4];\n\nconst statusMessages = {\n  200: 'OK',\n  201: 'Created',\n  204: 'No Content',\n  301: 'Moved Permanently',\n  302: 'Found',\n  304: 'Not Modified',\n  400: 'Bad Request',\n  401: 'Unauthorized',\n  403: 'Forbidden',\n  404: 'Not Found',\n  500: 'Internal Server Error',\n  502: 'Bad Gateway',\n  503: 'Service Unavailable'\n};\n\nconst statusMessage = statusMessages[statusCode] || 'Unknown';\nconst contentLength = Buffer.byteLength(body);\n\nprocess.stdout.write(`HTTP/1.1 ${statusCode} ${statusMessage}\\r\\nContent-Type: ${contentType}\\r\\nContent-Length: ${contentLength}\\r\\n\\r\\n${body}\\n`);",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "200",
+                "text/html",
+                "<h1>Hello</h1>"
+              ],
+              "expected": "'HTTP/1.1 200 OK\\r\\nContent-Type: text/html\\r\\nContent-Length: 14\\r\\n\\r\\n<h1>Hello</h1>\\n'",
+              "actual": "'HTTP/1.1 200 OK\\nContent-Type: text/html\\nContent-Length: 14\\n\\n<h1>Hello</h1>\\n'",
+              "stderr": "",
+              "passed": false
+            },
+            {
+              "case": 1,
+              "args": [
+                "404",
+                "text/plain",
+                "Not Found"
+              ],
+              "expected": "'HTTP/1.1 404 Not Found\\r\\nContent-Type: text/plain\\r\\nContent-Length: 9\\r\\n\\r\\nNot Found\\n'",
+              "actual": "'HTTP/1.1 404 Not Found\\nContent-Type: text/plain\\nContent-Length: 9\\n\\nNot Found\\n'",
+              "stderr": "",
+              "passed": false
+            },
+            {
+              "case": 2,
+              "args": [
+                "200",
+                "application/json",
+                "{\"ok\":true}"
+              ],
+              "expected": "'HTTP/1.1 200 OK\\r\\nContent-Type: application/json\\r\\nContent-Length: 11\\r\\n\\r\\n{\"ok\":true}\\n'",
+              "actual": "'HTTP/1.1 200 OK\\nContent-Type: application/json\\nContent-Length: 11\\n\\n{\"ok\":true}\\n'",
+              "stderr": "",
+              "passed": false
+            }
+          ],
+          "error": ""
+        }
+      ],
+      "first_attempt_correct": false,
+      "final_correct": false,
+      "total_prompt_tokens": 50,
+      "total_completion_tokens": 31300,
+      "total_thinking_tokens": 137440,
+      "total_tokens": 168790,
+      "attempts_to_correct": 6,
+      "wall_time_s": 209.2921166419983
+    },
+    {
+      "task_id": "09_http_response",
+      "language": "go",
+      "model": "claude-haiku-4-5-20251001",
+      "run_index": 0,
+      "attempts": [
+        {
+          "prompt_tokens": 10,
+          "completion_tokens": 1658,
+          "thinking_tokens": 27488,
+          "code": "package main\n\nimport (\n\t\"fmt\"\n\t\"os\"\n\t\"strconv\"\n)\n\nfunc main() {\n\tstatusCode := os.Args[1]\n\tcontentType := os.Args[2]\n\tbody := os.Args[3]\n\n\tstatusCodeInt, _ := strconv.Atoi(statusCode)\n\treasonPhrase := getReasonPhrase(statusCodeInt)\n\n\tcontentLength := len(body)\n\n\tresponse := fmt.Sprintf(\"HTTP/1.1 %s %s\\r\\n\", statusCode, reasonPhrase)\n\tresponse += fmt.Sprintf(\"Content-Type: %s\\r\\n\", contentType)\n\tresponse += fmt.Sprintf(\"Content-Length: %d\\r\\n\", contentLength)\n\tresponse += \"\\r\\n\"\n\tresponse += body\n\n\tfmt.Print(response)\n}\n\nfunc getReasonPhrase(code int) string {\n\tphrases := map[int]string{\n\t\t200: \"OK\",\n\t\t201: \"Created\",\n\t\t204: \"No Content\",\n\t\t301: \"Moved Permanently\",\n\t\t302: \"Found\",\n\t\t304: \"Not Modified\",\n\t\t400: \"Bad Request\",\n\t\t401: \"Unauthorized\",\n\t\t403: \"Forbidden\",\n\t\t404: \"Not Found\",\n\t\t500: \"Internal Server Error\",\n\t\t501: \"Not Implemented\",\n\t\t502: \"Bad Gateway\",\n\t\t503: \"Service Unavailable\",\n\t}\n\tif phrase, ok := phrases[code]; ok {\n\t\treturn phrase\n\t}\n\treturn \"Unknown\"\n}",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "200",
+                "text/html",
+                "<h1>Hello</h1>"
+              ],
+              "expected": "'HTTP/1.1 200 OK\\r\\nContent-Type: text/html\\r\\nContent-Length: 14\\r\\n\\r\\n<h1>Hello</h1>\\n'",
+              "actual": "'HTTP/1.1 200 OK\\nContent-Type: text/html\\nContent-Length: 14\\n\\n<h1>Hello</h1>'",
+              "stderr": "",
+              "passed": false
+            },
+            {
+              "case": 1,
+              "args": [
+                "404",
+                "text/plain",
+                "Not Found"
+              ],
+              "expected": "'HTTP/1.1 404 Not Found\\r\\nContent-Type: text/plain\\r\\nContent-Length: 9\\r\\n\\r\\nNot Found\\n'",
+              "actual": "'HTTP/1.1 404 Not Found\\nContent-Type: text/plain\\nContent-Length: 9\\n\\nNot Found'",
+              "stderr": "",
+              "passed": false
+            },
+            {
+              "case": 2,
+              "args": [
+                "200",
+                "application/json",
+                "{\"ok\":true}"
+              ],
+              "expected": "'HTTP/1.1 200 OK\\r\\nContent-Type: application/json\\r\\nContent-Length: 11\\r\\n\\r\\n{\"ok\":true}\\n'",
+              "actual": "'HTTP/1.1 200 OK\\nContent-Type: application/json\\nContent-Length: 11\\n\\n{\"ok\":true}'",
+              "stderr": "",
+              "passed": false
+            }
+          ],
+          "error": ""
+        },
+        {
+          "prompt_tokens": 10,
+          "completion_tokens": 8904,
+          "thinking_tokens": 27488,
+          "code": "package main\n\nimport (\n\t\"fmt\"\n\t\"os\"\n\t\"strconv\"\n)\n\nfunc main() {\n\tstatusCode := os.Args[1]\n\tcontentType := os.Args[2]\n\tbody := os.Args[3]\n\n\tstatusCodeInt, _ := strconv.Atoi(statusCode)\n\treasonPhrase := getReasonPhrase(statusCodeInt)\n\n\tcontentLength := len(body)\n\n\tresponse := \"HTTP/1.1 \" + statusCode + \" \" + reasonPhrase + \"\\r\\n\" +\n\t\t\"Content-Type: \" + contentType + \"\\r\\n\" +\n\t\t\"Content-Length: \" + strconv.Itoa(contentLength) + \"\\r\\n\" +\n\t\t\"\\r\\n\" +\n\t\tbody + \"\\n\"\n\n\tfmt.Print(response)\n}\n\nfunc getReasonPhrase(code int) string {\n\tphrases := map[int]string{\n\t\t200: \"OK\",\n\t\t201: \"Created\",\n\t\t204: \"No Content\",\n\t\t301: \"Moved Permanently\",\n\t\t302: \"Found\",\n\t\t304: \"Not Modified\",\n\t\t400: \"Bad Request\",\n\t\t401: \"Unauthorized\",\n\t\t403: \"Forbidden\",\n\t\t404: \"Not Found\",\n\t\t500: \"Internal Server Error\",\n\t\t501: \"Not Implemented\",\n\t\t502: \"Bad Gateway\",\n\t\t503: \"Service Unavailable\",\n\t}\n\tif phrase, ok := phrases[code]; ok {\n\t\treturn phrase\n\t}\n\treturn \"Unknown\"\n}",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "200",
+                "text/html",
+                "<h1>Hello</h1>"
+              ],
+              "expected": "'HTTP/1.1 200 OK\\r\\nContent-Type: text/html\\r\\nContent-Length: 14\\r\\n\\r\\n<h1>Hello</h1>\\n'",
+              "actual": "'HTTP/1.1 200 OK\\nContent-Type: text/html\\nContent-Length: 14\\n\\n<h1>Hello</h1>\\n'",
+              "stderr": "",
+              "passed": false
+            },
+            {
+              "case": 1,
+              "args": [
+                "404",
+                "text/plain",
+                "Not Found"
+              ],
+              "expected": "'HTTP/1.1 404 Not Found\\r\\nContent-Type: text/plain\\r\\nContent-Length: 9\\r\\n\\r\\nNot Found\\n'",
+              "actual": "'HTTP/1.1 404 Not Found\\nContent-Type: text/plain\\nContent-Length: 9\\n\\nNot Found\\n'",
+              "stderr": "",
+              "passed": false
+            },
+            {
+              "case": 2,
+              "args": [
+                "200",
+                "application/json",
+                "{\"ok\":true}"
+              ],
+              "expected": "'HTTP/1.1 200 OK\\r\\nContent-Type: application/json\\r\\nContent-Length: 11\\r\\n\\r\\n{\"ok\":true}\\n'",
+              "actual": "'HTTP/1.1 200 OK\\nContent-Type: application/json\\nContent-Length: 11\\n\\n{\"ok\":true}\\n'",
+              "stderr": "",
+              "passed": false
+            }
+          ],
+          "error": ""
+        },
+        {
+          "prompt_tokens": 10,
+          "completion_tokens": 12047,
+          "thinking_tokens": 27488,
+          "code": "package main\n\nimport (\n\t\"fmt\"\n\t\"os\"\n\t\"strconv\"\n)\n\nfunc main() {\n\tstatusCode := os.Args[1]\n\tcontentType := os.Args[2]\n\tbody := os.Args[3]\n\n\tstatusCodeInt, _ := strconv.Atoi(statusCode)\n\treasonPhrase := getReasonPhrase(statusCodeInt)\n\n\tcontentLength := len(body)\n\n\tfmt.Fprint(os.Stdout, \"HTTP/1.1 \", statusCode, \" \", reasonPhrase, \"\\r\\n\")\n\tfmt.Fprint(os.Stdout, \"Content-Type: \", contentType, \"\\r\\n\")\n\tfmt.Fprint(os.Stdout, \"Content-Length: \", contentLength, \"\\r\\n\")\n\tfmt.Fprint(os.Stdout, \"\\r\\n\")\n\tfmt.Fprint(os.Stdout, body, \"\\n\")\n}\n\nfunc getReasonPhrase(code int) string {\n\tphrases := map[int]string{\n\t\t200: \"OK\",\n\t\t201: \"Created\",\n\t\t204: \"No Content\",\n\t\t301: \"Moved Permanently\",\n\t\t302: \"Found\",\n\t\t304: \"Not Modified\",\n\t\t400: \"Bad Request\",\n\t\t401: \"Unauthorized\",\n\t\t403: \"Forbidden\",\n\t\t404: \"Not Found\",\n\t\t500: \"Internal Server Error\",\n\t\t501: \"Not Implemented\",\n\t\t502: \"Bad Gateway\",\n\t\t503: \"Service Unavailable\",\n\t}\n\tif phrase, ok := phrases[code]; ok {\n\t\treturn phrase\n\t}\n\treturn \"Unknown\"\n}",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "200",
+                "text/html",
+                "<h1>Hello</h1>"
+              ],
+              "expected": "'HTTP/1.1 200 OK\\r\\nContent-Type: text/html\\r\\nContent-Length: 14\\r\\n\\r\\n<h1>Hello</h1>\\n'",
+              "actual": "'HTTP/1.1 200 OK\\nContent-Type: text/html\\nContent-Length: 14\\n\\n<h1>Hello</h1>\\n'",
+              "stderr": "",
+              "passed": false
+            },
+            {
+              "case": 1,
+              "args": [
+                "404",
+                "text/plain",
+                "Not Found"
+              ],
+              "expected": "'HTTP/1.1 404 Not Found\\r\\nContent-Type: text/plain\\r\\nContent-Length: 9\\r\\n\\r\\nNot Found\\n'",
+              "actual": "'HTTP/1.1 404 Not Found\\nContent-Type: text/plain\\nContent-Length: 9\\n\\nNot Found\\n'",
+              "stderr": "",
+              "passed": false
+            },
+            {
+              "case": 2,
+              "args": [
+                "200",
+                "application/json",
+                "{\"ok\":true}"
+              ],
+              "expected": "'HTTP/1.1 200 OK\\r\\nContent-Type: application/json\\r\\nContent-Length: 11\\r\\n\\r\\n{\"ok\":true}\\n'",
+              "actual": "'HTTP/1.1 200 OK\\nContent-Type: application/json\\nContent-Length: 11\\n\\n{\"ok\":true}\\n'",
+              "stderr": "",
+              "passed": false
+            }
+          ],
+          "error": ""
+        },
+        {
+          "prompt_tokens": 10,
+          "completion_tokens": 7577,
+          "thinking_tokens": 27488,
+          "code": "package main\n\nimport (\n\t\"fmt\"\n\t\"os\"\n\t\"strconv\"\n)\n\nfunc main() {\n\tstatusCode := os.Args[1]\n\tcontentType := os.Args[2]\n\tbody := os.Args[3]\n\n\tstatusCodeInt, _ := strconv.Atoi(statusCode)\n\treasonPhrase := getReasonPhrase(statusCodeInt)\n\n\tcontentLength := len(body)\n\n\tresponse := \"HTTP/1.1 \" + statusCode + \" \" + reasonPhrase + \"\\r\\nContent-Type: \" + contentType + \"\\r\\nContent-Length: \" + strconv.Itoa(contentLength) + \"\\r\\n\\r\\n\" + body + \"\\n\"\n\tfmt.Print(response)\n}\n\nfunc getReasonPhrase(code int) string {\n\tphrases := map[int]string{\n\t\t200: \"OK\",\n\t\t201: \"Created\",\n\t\t204: \"No Content\",\n\t\t301: \"Moved Permanently\",\n\t\t302: \"Found\",\n\t\t304: \"Not Modified\",\n\t\t400: \"Bad Request\",\n\t\t401: \"Unauthorized\",\n\t\t403: \"Forbidden\",\n\t\t404: \"Not Found\",\n\t\t500: \"Internal Server Error\",\n\t\t501: \"Not Implemented\",\n\t\t502: \"Bad Gateway\",\n\t\t503: \"Service Unavailable\",\n\t}\n\tif phrase, ok := phrases[code]; ok {\n\t\treturn phrase\n\t}\n\treturn \"Unknown\"\n}",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "200",
+                "text/html",
+                "<h1>Hello</h1>"
+              ],
+              "expected": "'HTTP/1.1 200 OK\\r\\nContent-Type: text/html\\r\\nContent-Length: 14\\r\\n\\r\\n<h1>Hello</h1>\\n'",
+              "actual": "'HTTP/1.1 200 OK\\nContent-Type: text/html\\nContent-Length: 14\\n\\n<h1>Hello</h1>\\n'",
+              "stderr": "",
+              "passed": false
+            },
+            {
+              "case": 1,
+              "args": [
+                "404",
+                "text/plain",
+                "Not Found"
+              ],
+              "expected": "'HTTP/1.1 404 Not Found\\r\\nContent-Type: text/plain\\r\\nContent-Length: 9\\r\\n\\r\\nNot Found\\n'",
+              "actual": "'HTTP/1.1 404 Not Found\\nContent-Type: text/plain\\nContent-Length: 9\\n\\nNot Found\\n'",
+              "stderr": "",
+              "passed": false
+            },
+            {
+              "case": 2,
+              "args": [
+                "200",
+                "application/json",
+                "{\"ok\":true}"
+              ],
+              "expected": "'HTTP/1.1 200 OK\\r\\nContent-Type: application/json\\r\\nContent-Length: 11\\r\\n\\r\\n{\"ok\":true}\\n'",
+              "actual": "'HTTP/1.1 200 OK\\nContent-Type: application/json\\nContent-Length: 11\\n\\n{\"ok\":true}\\n'",
+              "stderr": "",
+              "passed": false
+            }
+          ],
+          "error": ""
+        },
+        {
+          "prompt_tokens": 10,
+          "completion_tokens": 8229,
+          "thinking_tokens": 27488,
+          "code": "package main\n\nimport (\n\t\"fmt\"\n\t\"os\"\n\t\"strconv\"\n)\n\nfunc main() {\n\tstatusCode := os.Args[1]\n\tcontentType := os.Args[2]\n\tbody := os.Args[3]\n\n\tstatusCodeInt, _ := strconv.Atoi(statusCode)\n\treasonPhrase := getReasonPhrase(statusCodeInt)\n\n\tcontentLength := len(body)\n\n\tresponse := \"HTTP/1.1 \" + statusCode + \" \" + reasonPhrase + \"\\r\\nContent-Type: \" + contentType + \"\\r\\nContent-Length: \" + strconv.Itoa(contentLength) + \"\\r\\n\\r\\n\" + body + \"\\n\"\n\tfmt.Print(response)\n}\n\nfunc getReasonPhrase(code int) string {\n\tphrases := map[int]string{\n\t\t200: \"OK\",\n\t\t201: \"Created\",\n\t\t204: \"No Content\",\n\t\t301: \"Moved Permanently\",\n\t\t302: \"Found\",\n\t\t304: \"Not Modified\",\n\t\t400: \"Bad Request\",\n\t\t401: \"Unauthorized\",\n\t\t403: \"Forbidden\",\n\t\t404: \"Not Found\",\n\t\t500: \"Internal Server Error\",\n\t\t501: \"Not Implemented\",\n\t\t502: \"Bad Gateway\",\n\t\t503: \"Service Unavailable\",\n\t}\n\tif phrase, ok := phrases[code]; ok {\n\t\treturn phrase\n\t}\n\treturn \"Unknown\"\n}",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "200",
+                "text/html",
+                "<h1>Hello</h1>"
+              ],
+              "expected": "'HTTP/1.1 200 OK\\r\\nContent-Type: text/html\\r\\nContent-Length: 14\\r\\n\\r\\n<h1>Hello</h1>\\n'",
+              "actual": "'HTTP/1.1 200 OK\\nContent-Type: text/html\\nContent-Length: 14\\n\\n<h1>Hello</h1>\\n'",
+              "stderr": "",
+              "passed": false
+            },
+            {
+              "case": 1,
+              "args": [
+                "404",
+                "text/plain",
+                "Not Found"
+              ],
+              "expected": "'HTTP/1.1 404 Not Found\\r\\nContent-Type: text/plain\\r\\nContent-Length: 9\\r\\n\\r\\nNot Found\\n'",
+              "actual": "'HTTP/1.1 404 Not Found\\nContent-Type: text/plain\\nContent-Length: 9\\n\\nNot Found\\n'",
+              "stderr": "",
+              "passed": false
+            },
+            {
+              "case": 2,
+              "args": [
+                "200",
+                "application/json",
+                "{\"ok\":true}"
+              ],
+              "expected": "'HTTP/1.1 200 OK\\r\\nContent-Type: application/json\\r\\nContent-Length: 11\\r\\n\\r\\n{\"ok\":true}\\n'",
+              "actual": "'HTTP/1.1 200 OK\\nContent-Type: application/json\\nContent-Length: 11\\n\\n{\"ok\":true}\\n'",
+              "stderr": "",
+              "passed": false
+            }
+          ],
+          "error": ""
+        }
+      ],
+      "first_attempt_correct": false,
+      "final_correct": false,
+      "total_prompt_tokens": 50,
+      "total_completion_tokens": 38415,
+      "total_thinking_tokens": 137440,
+      "total_tokens": 175905,
+      "attempts_to_correct": 6,
+      "wall_time_s": 250.03335547447205
+    },
+    {
+      "task_id": "10_caesar_cipher",
+      "language": "sigil",
+      "model": "claude-haiku-4-5-20251001",
+      "run_index": 0,
+      "attempts": [
+        {
+          "prompt_tokens": 10,
+          "completion_tokens": 7287,
+          "thinking_tokens": 27488,
+          "code": "(module caesar\n\n(fn main -> int\n  (set args array (argv))\n  (set argc int (argv_count))\n  \n  (if (ne argc 3)\n    (println \"Usage: caesar <encode|decode> <shift> <message>\")\n    (ret 1))\n  \n  (set mode string (array_get args 0))\n  (set shift_str string (array_get args 1))\n  (set message string (array_get args 2))\n  \n  (set shift int (string_to_int shift_str))\n  \n  (if (string_equals mode \"decode\")\n    (set shift (neg shift)))\n  \n  (set result string (process_message message shift))\n  (println result)\n  (ret 0))\n\n(fn process_message msg:string shift:int -> string\n  (set result string \"\")\n  (set len int (string_length msg))\n  (set i int 0)\n  (while (lt i len)\n    (set char_code int (string_get msg i))\n    \n    (cond\n      ((and (ge char_code 65) (le char_code 90))\n        (set pos int (sub char_code 65))\n        (set pos (add pos shift))\n        (set pos (mod pos 26))\n        (set pos (add pos 26))\n        (set pos (mod pos 26))\n        (set result (string_concat result (char_from_code (add pos 65)))))\n      \n      ((and (ge char_code 97) (le char_code 122))\n        (set pos int (sub char_code 97))\n        (set pos (add pos shift))\n        (set pos (mod pos 26))\n        (set pos (add pos 26))\n        (set pos (mod pos 26))\n        (set result (string_concat result (char_from_code (add pos 97)))))\n      \n      (true\n        (set result (string_concat result (char_from_code char_code)))))\n    \n    (set i (add i 1)))\n  \n  (ret result))\n)",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "encode",
+                "3",
+                "Hello World"
+              ],
+              "expected": "'Khoor Zruog\\n'",
+              "actual": "''",
+              "stderr": "Lexer error: Unexpected character: :\n",
+              "passed": false
+            },
+            {
+              "case": 1,
+              "args": [
+                "decode",
+                "3",
+                "Khoor Zruog"
+              ],
+              "expected": "'Hello World\\n'",
+              "actual": "''",
+              "stderr": "Lexer error: Unexpected character: :\n",
+              "passed": false
+            },
+            {
+              "case": 2,
+              "args": [
+                "encode",
+                "13",
+                "ABCxyz"
+              ],
+              "expected": "'NOPklm\\n'",
+              "actual": "''",
+              "stderr": "Lexer error: Unexpected character: :\n",
+              "passed": false
+            },
+            {
+              "case": 3,
+              "args": [
+                "encode",
+                "1",
+                "z"
+              ],
+              "expected": "'a\\n'",
+              "actual": "''",
+              "stderr": "Lexer error: Unexpected character: :\n",
+              "passed": false
+            },
+            {
+              "case": 4,
+              "args": [
+                "encode",
+                "0",
+                "No change!"
+              ],
+              "expected": "'No change!\\n'",
+              "actual": "''",
+              "stderr": "Lexer error: Unexpected character: :\n",
+              "passed": false
+            }
+          ],
+          "error": ""
+        },
+        {
+          "prompt_tokens": 10,
+          "completion_tokens": 1295,
+          "thinking_tokens": 27488,
+          "code": "(module caesar\n\n(fn main -> int\n  (set args array (argv))\n  (set argc int (argv_count))\n  \n  (if (ne argc 3)\n    (println \"Usage: caesar <encode|decode> <shift> <message>\")\n    (ret 1))\n  \n  (set mode string (array_get args 0))\n  (set shift_str string (array_get args 1))\n  (set message string (array_get args 2))\n  \n  (set shift int (string_to_int shift_str))\n  \n  (if (string_equals mode \"decode\")\n    (set shift (neg shift)))\n  \n  (set result string (process_message message shift))\n  (println result)\n  (ret 0))\n\n(fn process_message msg string shift int -> string\n  (set result string \"\")\n  (set len int (string_length msg))\n  (set i int 0)\n  (while (lt i len)\n    (set char_code int (string_get msg i))\n    \n    (cond\n      ((and (ge char_code 65) (le char_code 90))\n        (set pos int (sub char_code 65))\n        (set pos (add pos shift))\n        (set pos (mod pos 26))\n        (set pos (add pos 26))\n        (set pos (mod pos 26))\n        (set result (string_concat result (char_from_code (add pos 65)))))\n      \n      ((and (ge char_code 97) (le char_code 122))\n        (set pos int (sub char_code 97))\n        (set pos (add pos shift))\n        (set pos (mod pos 26))\n        (set pos (add pos 26))\n        (set pos (mod pos 26))\n        (set result (string_concat result (char_from_code (add pos 97)))))\n      \n      (true\n        (set result (string_concat result (char_from_code char_code)))))\n    \n    (set i (add i 1)))\n  \n  (ret result))\n)",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "encode",
+                "3",
+                "Hello World"
+              ],
+              "expected": "'Khoor Zruog\\n'",
+              "actual": "'Khoor Zruog\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 1,
+              "args": [
+                "decode",
+                "3",
+                "Khoor Zruog"
+              ],
+              "expected": "'Hello World\\n'",
+              "actual": "'Hello World\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 2,
+              "args": [
+                "encode",
+                "13",
+                "ABCxyz"
+              ],
+              "expected": "'NOPklm\\n'",
+              "actual": "'NOPklm\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 3,
+              "args": [
+                "encode",
+                "1",
+                "z"
+              ],
+              "expected": "'a\\n'",
+              "actual": "'a\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 4,
+              "args": [
+                "encode",
+                "0",
+                "No change!"
+              ],
+              "expected": "'No change!\\n'",
+              "actual": "'No change!\\n'",
+              "stderr": "",
+              "passed": true
+            }
+          ],
+          "error": ""
+        }
+      ],
+      "first_attempt_correct": false,
+      "final_correct": true,
+      "total_prompt_tokens": 20,
+      "total_completion_tokens": 8582,
+      "total_thinking_tokens": 54976,
+      "total_tokens": 63578,
+      "attempts_to_correct": 2,
+      "wall_time_s": 50.61622405052185
+    },
+    {
+      "task_id": "10_caesar_cipher",
+      "language": "python",
+      "model": "claude-haiku-4-5-20251001",
+      "run_index": 0,
+      "attempts": [
+        {
+          "prompt_tokens": 10,
+          "completion_tokens": 696,
+          "thinking_tokens": 27488,
+          "code": "import sys\n\ndef caesar_cipher(message, shift, decode=False):\n    if decode:\n        shift = -shift\n    \n    result = []\n    for char in message:\n        if char.isalpha():\n            if char.isupper():\n                shifted = chr((ord(char) - ord('A') + shift) % 26 + ord('A'))\n            else:\n                shifted = chr((ord(char) - ord('a') + shift) % 26 + ord('a'))\n            result.append(shifted)\n        else:\n            result.append(char)\n    \n    return ''.join(result)\n\nmode = sys.argv[1]\nshift = int(sys.argv[2])\nmessage = sys.argv[3]\n\nis_decode = (mode == \"decode\")\noutput = caesar_cipher(message, shift, is_decode)\nprint(output)",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "encode",
+                "3",
+                "Hello World"
+              ],
+              "expected": "'Khoor Zruog\\n'",
+              "actual": "'Khoor Zruog\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 1,
+              "args": [
+                "decode",
+                "3",
+                "Khoor Zruog"
+              ],
+              "expected": "'Hello World\\n'",
+              "actual": "'Hello World\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 2,
+              "args": [
+                "encode",
+                "13",
+                "ABCxyz"
+              ],
+              "expected": "'NOPklm\\n'",
+              "actual": "'NOPklm\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 3,
+              "args": [
+                "encode",
+                "1",
+                "z"
+              ],
+              "expected": "'a\\n'",
+              "actual": "'a\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 4,
+              "args": [
+                "encode",
+                "0",
+                "No change!"
+              ],
+              "expected": "'No change!\\n'",
+              "actual": "'No change!\\n'",
+              "stderr": "",
+              "passed": true
+            }
+          ],
+          "error": ""
+        }
+      ],
+      "first_attempt_correct": true,
+      "final_correct": true,
+      "total_prompt_tokens": 10,
+      "total_completion_tokens": 696,
+      "total_thinking_tokens": 27488,
+      "total_tokens": 28194,
+      "attempts_to_correct": 1,
+      "wall_time_s": 5.558843374252319
+    },
+    {
+      "task_id": "10_caesar_cipher",
+      "language": "javascript",
+      "model": "claude-haiku-4-5-20251001",
+      "run_index": 0,
+      "attempts": [
+        {
+          "prompt_tokens": 10,
+          "completion_tokens": 1014,
+          "thinking_tokens": 27488,
+          "code": "const mode = process.argv[2];\nconst shift = parseInt(process.argv[3], 10);\nconst message = process.argv[4];\n\nfunction caesarCipher(text, shiftAmount, isEncode) {\n  if (!isEncode) {\n    shiftAmount = -shiftAmount;\n  }\n  \n  return text.split('').map(char => {\n    if (char >= 'A' && char <= 'Z') {\n      const charCode = char.charCodeAt(0) - 'A'.charCodeAt(0);\n      const shifted = (charCode + shiftAmount) % 26;\n      const normalized = shifted < 0 ? shifted + 26 : shifted;\n      return String.fromCharCode(normalized + 'A'.charCodeAt(0));\n    } else if (char >= 'a' && char <= 'z') {\n      const charCode = char.charCodeAt(0) - 'a'.charCodeAt(0);\n      const shifted = (charCode + shiftAmount) % 26;\n      const normalized = shifted < 0 ? shifted + 26 : shifted;\n      return String.fromCharCode(normalized + 'a'.charCodeAt(0));\n    } else {\n      return char;\n    }\n  }).join('');\n}\n\nconst isEncode = mode === 'encode';\nconst result = caesarCipher(message, shift, isEncode);\nconsole.log(result);",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "encode",
+                "3",
+                "Hello World"
+              ],
+              "expected": "'Khoor Zruog\\n'",
+              "actual": "'Khoor Zruog\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 1,
+              "args": [
+                "decode",
+                "3",
+                "Khoor Zruog"
+              ],
+              "expected": "'Hello World\\n'",
+              "actual": "'Hello World\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 2,
+              "args": [
+                "encode",
+                "13",
+                "ABCxyz"
+              ],
+              "expected": "'NOPklm\\n'",
+              "actual": "'NOPklm\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 3,
+              "args": [
+                "encode",
+                "1",
+                "z"
+              ],
+              "expected": "'a\\n'",
+              "actual": "'a\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 4,
+              "args": [
+                "encode",
+                "0",
+                "No change!"
+              ],
+              "expected": "'No change!\\n'",
+              "actual": "'No change!\\n'",
+              "stderr": "",
+              "passed": true
+            }
+          ],
+          "error": ""
+        }
+      ],
+      "first_attempt_correct": true,
+      "final_correct": true,
+      "total_prompt_tokens": 10,
+      "total_completion_tokens": 1014,
+      "total_thinking_tokens": 27488,
+      "total_tokens": 28512,
+      "attempts_to_correct": 1,
+      "wall_time_s": 7.140723943710327
+    },
+    {
+      "task_id": "10_caesar_cipher",
+      "language": "go",
+      "model": "claude-haiku-4-5-20251001",
+      "run_index": 0,
+      "attempts": [
+        {
+          "prompt_tokens": 10,
+          "completion_tokens": 1071,
+          "thinking_tokens": 27488,
+          "code": "package main\n\nimport (\n\t\"fmt\"\n\t\"os\"\n\t\"strconv\"\n)\n\nfunc main() {\n\tif len(os.Args) < 4 {\n\t\tos.Exit(1)\n\t}\n\n\tmode := os.Args[1]\n\tshift, err := strconv.Atoi(os.Args[2])\n\tif err != nil {\n\t\tos.Exit(1)\n\t}\n\tmessage := os.Args[3]\n\n\tif mode == \"decode\" {\n\t\tshift = -shift\n\t}\n\n\tresult := \"\"\n\tfor _, ch := range message {\n\t\tif ch >= 'a' && ch <= 'z' {\n\t\t\tshifted := (int(ch-'a') + shift) % 26\n\t\t\tif shifted < 0 {\n\t\t\t\tshifted += 26\n\t\t\t}\n\t\t\tresult += string(rune('a' + shifted))\n\t\t} else if ch >= 'A' && ch <= 'Z' {\n\t\t\tshifted := (int(ch-'A') + shift) % 26\n\t\t\tif shifted < 0 {\n\t\t\t\tshifted += 26\n\t\t\t}\n\t\t\tresult += string(rune('A' + shifted))\n\t\t} else {\n\t\t\tresult += string(ch)\n\t\t}\n\t}\n\n\tfmt.Print(result)\n}",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "encode",
+                "3",
+                "Hello World"
+              ],
+              "expected": "'Khoor Zruog\\n'",
+              "actual": "'Khoor Zruog'",
+              "stderr": "",
+              "passed": false
+            },
+            {
+              "case": 1,
+              "args": [
+                "decode",
+                "3",
+                "Khoor Zruog"
+              ],
+              "expected": "'Hello World\\n'",
+              "actual": "'Hello World'",
+              "stderr": "",
+              "passed": false
+            },
+            {
+              "case": 2,
+              "args": [
+                "encode",
+                "13",
+                "ABCxyz"
+              ],
+              "expected": "'NOPklm\\n'",
+              "actual": "'NOPklm'",
+              "stderr": "",
+              "passed": false
+            },
+            {
+              "case": 3,
+              "args": [
+                "encode",
+                "1",
+                "z"
+              ],
+              "expected": "'a\\n'",
+              "actual": "'a'",
+              "stderr": "",
+              "passed": false
+            },
+            {
+              "case": 4,
+              "args": [
+                "encode",
+                "0",
+                "No change!"
+              ],
+              "expected": "'No change!\\n'",
+              "actual": "'No change!'",
+              "stderr": "",
+              "passed": false
+            }
+          ],
+          "error": ""
+        },
+        {
+          "prompt_tokens": 10,
+          "completion_tokens": 573,
+          "thinking_tokens": 27488,
+          "code": "package main\n\nimport (\n\t\"fmt\"\n\t\"os\"\n\t\"strconv\"\n)\n\nfunc main() {\n\tif len(os.Args) < 4 {\n\t\tos.Exit(1)\n\t}\n\n\tmode := os.Args[1]\n\tshift, err := strconv.Atoi(os.Args[2])\n\tif err != nil {\n\t\tos.Exit(1)\n\t}\n\tmessage := os.Args[3]\n\n\tif mode == \"decode\" {\n\t\tshift = -shift\n\t}\n\n\tresult := \"\"\n\tfor _, ch := range message {\n\t\tif ch >= 'a' && ch <= 'z' {\n\t\t\tshifted := (int(ch-'a') + shift) % 26\n\t\t\tif shifted < 0 {\n\t\t\t\tshifted += 26\n\t\t\t}\n\t\t\tresult += string(rune('a' + shifted))\n\t\t} else if ch >= 'A' && ch <= 'Z' {\n\t\t\tshifted := (int(ch-'A') + shift) % 26\n\t\t\tif shifted < 0 {\n\t\t\t\tshifted += 26\n\t\t\t}\n\t\t\tresult += string(rune('A' + shifted))\n\t\t} else {\n\t\t\tresult += string(ch)\n\t\t}\n\t}\n\n\tfmt.Println(result)\n}",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "encode",
+                "3",
+                "Hello World"
+              ],
+              "expected": "'Khoor Zruog\\n'",
+              "actual": "'Khoor Zruog\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 1,
+              "args": [
+                "decode",
+                "3",
+                "Khoor Zruog"
+              ],
+              "expected": "'Hello World\\n'",
+              "actual": "'Hello World\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 2,
+              "args": [
+                "encode",
+                "13",
+                "ABCxyz"
+              ],
+              "expected": "'NOPklm\\n'",
+              "actual": "'NOPklm\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 3,
+              "args": [
+                "encode",
+                "1",
+                "z"
+              ],
+              "expected": "'a\\n'",
+              "actual": "'a\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 4,
+              "args": [
+                "encode",
+                "0",
+                "No change!"
+              ],
+              "expected": "'No change!\\n'",
+              "actual": "'No change!\\n'",
+              "stderr": "",
+              "passed": true
+            }
+          ],
+          "error": ""
+        }
+      ],
+      "first_attempt_correct": false,
+      "final_correct": true,
+      "total_prompt_tokens": 20,
+      "total_completion_tokens": 1644,
+      "total_thinking_tokens": 54976,
+      "total_tokens": 56640,
+      "attempts_to_correct": 2,
+      "wall_time_s": 11.736983060836792
+    }
+  ]
+}

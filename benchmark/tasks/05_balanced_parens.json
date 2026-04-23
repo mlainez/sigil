@@ -1,0 +1,32 @@
+{
+  "id": "05_balanced_parens",
+  "name": "Balanced Parentheses",
+  "tier": 2,
+  "description": "Write a program that takes a string as first argument containing characters (, ), [, ], {, }. Print \"true\" if the brackets are balanced and properly nested, \"false\" otherwise. The string may also contain other characters which should be ignored.",
+  "test_cases": [
+    {
+      "args": ["({[]})"],
+      "expected": "true\n"
+    },
+    {
+      "args": ["([)]"],
+      "expected": "false\n"
+    },
+    {
+      "args": ["((()))"],
+      "expected": "true\n"
+    },
+    {
+      "args": ["hello(world)"],
+      "expected": "true\n"
+    },
+    {
+      "args": ["{[}]"],
+      "expected": "false\n"
+    },
+    {
+      "args": [""],
+      "expected": "true\n"
+    }
+  ]
+}

@@ -1,0 +1,28 @@
+{
+  "id": "08_stack_calculator",
+  "name": "Stack Calculator",
+  "tier": 3,
+  "description": "Write a program that evaluates a reverse Polish notation (RPN) expression. Take the expression as first argument with tokens separated by spaces. Supported operators: +, -, *, /. Division is integer division (truncated toward zero). Print the final result as an integer.",
+  "test_cases": [
+    {
+      "args": ["3 4 +"],
+      "expected": "7\n"
+    },
+    {
+      "args": ["5 1 2 + 4 * + 3 -"],
+      "expected": "14\n"
+    },
+    {
+      "args": ["2 3 * 4 5 * +"],
+      "expected": "26\n"
+    },
+    {
+      "args": ["10 3 /"],
+      "expected": "3\n"
+    },
+    {
+      "args": ["42"],
+      "expected": "42\n"
+    }
+  ]
+}

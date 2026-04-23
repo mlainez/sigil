@@ -1,0 +1,24 @@
+{
+  "id": "07_query_string",
+  "name": "Parse and Build Query String",
+  "tier": 2,
+  "description": "Write a program that takes a query string as first argument (e.g. \"key1=val1&key2=val2\") and prints each key-value pair on a separate line as \"key=value\", sorted alphabetically by key. If the input is empty, print nothing.",
+  "test_cases": [
+    {
+      "args": ["name=alice&age=30&city=paris"],
+      "expected": "age=30\ncity=paris\nname=alice\n"
+    },
+    {
+      "args": ["z=1&a=2"],
+      "expected": "a=2\nz=1\n"
+    },
+    {
+      "args": ["single=value"],
+      "expected": "single=value\n"
+    },
+    {
+      "args": [""],
+      "expected": ""
+    }
+  ]
+}

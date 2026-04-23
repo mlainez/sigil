@@ -10,3 +10,6 @@ interpreter/_build/
 # local databases
 *.db
 benchmark/.env
+
+# Generated corpus (local-only, often bulk-written)
+examples/corpus/

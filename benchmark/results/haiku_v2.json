@@ -1,0 +1,3192 @@
+{
+  "meta": {
+    "model": "claude-haiku-4-5-20251001",
+    "provider": "claude-cli",
+    "languages": [
+      "sigil",
+      "python",
+      "javascript",
+      "go"
+    ],
+    "runs_per_combo": 1,
+    "max_retries": 5,
+    "timestamp": "2026-04-21T13:18:35"
+  },
+  "results": [
+    {
+      "task_id": "01_fizzbuzz",
+      "language": "sigil",
+      "model": "claude-haiku-4-5-20251001",
+      "run_index": 0,
+      "attempts": [
+        {
+          "prompt_tokens": 36496,
+          "completion_tokens": 993,
+          "thinking_tokens": 0,
+          "code": "(module fizzbuzz\n  (fn main -> int\n    (set args array (argv))\n    (set n int (string_to_int (array_get args 0)))\n    (for i 1 (add n 1)\n      (if (eq (mod i 15) 0)\n        (println \"FizzBuzz\")\n        (else\n          (if (eq (mod i 3) 0)\n            (println \"Fizz\")\n            (else\n              (if (eq (mod i 5) 0)\n                (println \"Buzz\")\n                (else\n                  (println (string_from_int i)))))))))\n    (ret 0)))",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "15"
+              ],
+              "expected": "'1\\n2\\nFizz\\n4\\nBuzz\\nFizz\\n7\\n8\\nFizz\\nBuzz\\n11\\nFizz\\n13\\n14\\nFizzBuzz\\n'",
+              "actual": "'1\\n2\\nFizz\\n4\\nBuzz\\nFizz\\n7\\n8\\nFizz\\nBuzz\\n11\\nFizz\\n13\\n14\\nFizzBuzz\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 1,
+              "args": [
+                "5"
+              ],
+              "expected": "'1\\n2\\nFizz\\n4\\nBuzz\\n'",
+              "actual": "'1\\n2\\nFizz\\n4\\nBuzz\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 2,
+              "args": [
+                "1"
+              ],
+              "expected": "'1\\n'",
+              "actual": "'1\\n'",
+              "stderr": "",
+              "passed": true
+            }
+          ],
+          "error": ""
+        }
+      ],
+      "first_attempt_correct": true,
+      "final_correct": true,
+      "total_prompt_tokens": 36496,
+      "total_completion_tokens": 993,
+      "total_thinking_tokens": 0,
+      "total_tokens": 37489,
+      "attempts_to_correct": 1,
+      "wall_time_s": 8.142936944961548
+    },
+    {
+      "task_id": "01_fizzbuzz",
+      "language": "python",
+      "model": "claude-haiku-4-5-20251001",
+      "run_index": 0,
+      "attempts": [
+        {
+          "prompt_tokens": 32814,
+          "completion_tokens": 444,
+          "thinking_tokens": 0,
+          "code": "import sys\n\nn = int(sys.argv[1])\n\nfor i in range(1, n + 1):\n    if i % 15 == 0:\n        print(\"FizzBuzz\")\n    elif i % 3 == 0:\n        print(\"Fizz\")\n    elif i % 5 == 0:\n        print(\"Buzz\")\n    else:\n        print(i)",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "15"
+              ],
+              "expected": "'1\\n2\\nFizz\\n4\\nBuzz\\nFizz\\n7\\n8\\nFizz\\nBuzz\\n11\\nFizz\\n13\\n14\\nFizzBuzz\\n'",
+              "actual": "'1\\n2\\nFizz\\n4\\nBuzz\\nFizz\\n7\\n8\\nFizz\\nBuzz\\n11\\nFizz\\n13\\n14\\nFizzBuzz\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 1,
+              "args": [
+                "5"
+              ],
+              "expected": "'1\\n2\\nFizz\\n4\\nBuzz\\n'",
+              "actual": "'1\\n2\\nFizz\\n4\\nBuzz\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 2,
+              "args": [
+                "1"
+              ],
+              "expected": "'1\\n'",
+              "actual": "'1\\n'",
+              "stderr": "",
+              "passed": true
+            }
+          ],
+          "error": ""
+        }
+      ],
+      "first_attempt_correct": true,
+      "final_correct": true,
+      "total_prompt_tokens": 32814,
+      "total_completion_tokens": 444,
+      "total_thinking_tokens": 0,
+      "total_tokens": 33258,
+      "attempts_to_correct": 1,
+      "wall_time_s": 4.3385984897613525
+    },
+    {
+      "task_id": "01_fizzbuzz",
+      "language": "javascript",
+      "model": "claude-haiku-4-5-20251001",
+      "run_index": 0,
+      "attempts": [
+        {
+          "prompt_tokens": 32827,
+          "completion_tokens": 551,
+          "thinking_tokens": 0,
+          "code": "const n = parseInt(process.argv[2]);\n\nfor (let i = 1; i <= n; i++) {\n  if (i % 15 === 0) {\n    console.log('FizzBuzz');\n  } else if (i % 3 === 0) {\n    console.log('Fizz');\n  } else if (i % 5 === 0) {\n    console.log('Buzz');\n  } else {\n    console.log(i);\n  }\n}",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "15"
+              ],
+              "expected": "'1\\n2\\nFizz\\n4\\nBuzz\\nFizz\\n7\\n8\\nFizz\\nBuzz\\n11\\nFizz\\n13\\n14\\nFizzBuzz\\n'",
+              "actual": "'1\\n2\\nFizz\\n4\\nBuzz\\nFizz\\n7\\n8\\nFizz\\nBuzz\\n11\\nFizz\\n13\\n14\\nFizzBuzz\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 1,
+              "args": [
+                "5"
+              ],
+              "expected": "'1\\n2\\nFizz\\n4\\nBuzz\\n'",
+              "actual": "'1\\n2\\nFizz\\n4\\nBuzz\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 2,
+              "args": [
+                "1"
+              ],
+              "expected": "'1\\n'",
+              "actual": "'1\\n'",
+              "stderr": "",
+              "passed": true
+            }
+          ],
+          "error": ""
+        }
+      ],
+      "first_attempt_correct": true,
+      "final_correct": true,
+      "total_prompt_tokens": 32827,
+      "total_completion_tokens": 551,
+      "total_thinking_tokens": 0,
+      "total_tokens": 33378,
+      "attempts_to_correct": 1,
+      "wall_time_s": 5.175125598907471
+    },
+    {
+      "task_id": "01_fizzbuzz",
+      "language": "go",
+      "model": "claude-haiku-4-5-20251001",
+      "run_index": 0,
+      "attempts": [
+        {
+          "prompt_tokens": 32829,
+          "completion_tokens": 644,
+          "thinking_tokens": 0,
+          "code": "package main\n\nimport (\n\t\"fmt\"\n\t\"os\"\n\t\"strconv\"\n)\n\nfunc main() {\n\tif len(os.Args) < 2 {\n\t\treturn\n\t}\n\n\tn, err := strconv.Atoi(os.Args[1])\n\tif err != nil {\n\t\treturn\n\t}\n\n\tfor i := 1; i <= n; i++ {\n\t\tif i%15 == 0 {\n\t\t\tfmt.Println(\"FizzBuzz\")\n\t\t} else if i%3 == 0 {\n\t\t\tfmt.Println(\"Fizz\")\n\t\t} else if i%5 == 0 {\n\t\t\tfmt.Println(\"Buzz\")\n\t\t} else {\n\t\t\tfmt.Println(i)\n\t\t}\n\t}\n}",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "15"
+              ],
+              "expected": "'1\\n2\\nFizz\\n4\\nBuzz\\nFizz\\n7\\n8\\nFizz\\nBuzz\\n11\\nFizz\\n13\\n14\\nFizzBuzz\\n'",
+              "actual": "'1\\n2\\nFizz\\n4\\nBuzz\\nFizz\\n7\\n8\\nFizz\\nBuzz\\n11\\nFizz\\n13\\n14\\nFizzBuzz\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 1,
+              "args": [
+                "5"
+              ],
+              "expected": "'1\\n2\\nFizz\\n4\\nBuzz\\n'",
+              "actual": "'1\\n2\\nFizz\\n4\\nBuzz\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 2,
+              "args": [
+                "1"
+              ],
+              "expected": "'1\\n'",
+              "actual": "'1\\n'",
+              "stderr": "",
+              "passed": true
+            }
+          ],
+          "error": ""
+        }
+      ],
+      "first_attempt_correct": true,
+      "final_correct": true,
+      "total_prompt_tokens": 32829,
+      "total_completion_tokens": 644,
+      "total_thinking_tokens": 0,
+      "total_tokens": 33473,
+      "attempts_to_correct": 1,
+      "wall_time_s": 5.844592094421387
+    },
+    {
+      "task_id": "02_reverse_words",
+      "language": "sigil",
+      "model": "claude-haiku-4-5-20251001",
+      "run_index": 0,
+      "attempts": [
+        {
+          "prompt_tokens": 36468,
+          "completion_tokens": 1305,
+          "thinking_tokens": 0,
+          "code": "(module reverse-words\n  (fn main -> int\n    (set args array (argv))\n    (if (eq (array_length args) 0)\n      (ret 0))\n    (set sentence string (array_get args 0))\n    (set words array (string_split sentence \" \"))\n    (set reversed array (array_reverse words))\n    (set result string (string_join reversed \" \"))\n    (println result)\n    (ret 0)))",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "hello world foo"
+              ],
+              "expected": "'foo world hello\\n'",
+              "actual": "'foo world hello\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 1,
+              "args": [
+                "one"
+              ],
+              "expected": "'one\\n'",
+              "actual": "'one\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 2,
+              "args": [
+                "the quick brown fox"
+              ],
+              "expected": "'fox brown quick the\\n'",
+              "actual": "'fox brown quick the\\n'",
+              "stderr": "",
+              "passed": true
+            }
+          ],
+          "error": ""
+        }
+      ],
+      "first_attempt_correct": true,
+      "final_correct": true,
+      "total_prompt_tokens": 36468,
+      "total_completion_tokens": 1305,
+      "total_thinking_tokens": 0,
+      "total_tokens": 37773,
+      "attempts_to_correct": 1,
+      "wall_time_s": 12.356221914291382
+    },
+    {
+      "task_id": "02_reverse_words",
+      "language": "python",
+      "model": "claude-haiku-4-5-20251001",
+      "run_index": 0,
+      "attempts": [
+        {
+          "prompt_tokens": 32786,
+          "completion_tokens": 237,
+          "thinking_tokens": 0,
+          "code": "import sys\n\nsentence = sys.argv[1]\nwords = sentence.split()\nprint(' '.join(words[::-1]))",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "hello world foo"
+              ],
+              "expected": "'foo world hello\\n'",
+              "actual": "'foo world hello\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 1,
+              "args": [
+                "one"
+              ],
+              "expected": "'one\\n'",
+              "actual": "'one\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 2,
+              "args": [
+                "the quick brown fox"
+              ],
+              "expected": "'fox brown quick the\\n'",
+              "actual": "'fox brown quick the\\n'",
+              "stderr": "",
+              "passed": true
+            }
+          ],
+          "error": ""
+        }
+      ],
+      "first_attempt_correct": true,
+      "final_correct": true,
+      "total_prompt_tokens": 32786,
+      "total_completion_tokens": 237,
+      "total_thinking_tokens": 0,
+      "total_tokens": 33023,
+      "attempts_to_correct": 1,
+      "wall_time_s": 3.495502471923828
+    },
+    {
+      "task_id": "02_reverse_words",
+      "language": "javascript",
+      "model": "claude-haiku-4-5-20251001",
+      "run_index": 0,
+      "attempts": [
+        {
+          "prompt_tokens": 32799,
+          "completion_tokens": 2659,
+          "thinking_tokens": 0,
+          "code": "const sentence = process.argv[2] || '';\nconsole.log(sentence.trim().split(/\\s+/).reverse().join(' '));",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "hello world foo"
+              ],
+              "expected": "'foo world hello\\n'",
+              "actual": "'foo world hello\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 1,
+              "args": [
+                "one"
+              ],
+              "expected": "'one\\n'",
+              "actual": "'one\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 2,
+              "args": [
+                "the quick brown fox"
+              ],
+              "expected": "'fox brown quick the\\n'",
+              "actual": "'fox brown quick the\\n'",
+              "stderr": "",
+              "passed": true
+            }
+          ],
+          "error": ""
+        }
+      ],
+      "first_attempt_correct": true,
+      "final_correct": true,
+      "total_prompt_tokens": 32799,
+      "total_completion_tokens": 2659,
+      "total_thinking_tokens": 0,
+      "total_tokens": 35458,
+      "attempts_to_correct": 1,
+      "wall_time_s": 20.98144769668579
+    },
+    {
+      "task_id": "02_reverse_words",
+      "language": "go",
+      "model": "claude-haiku-4-5-20251001",
+      "run_index": 0,
+      "attempts": [
+        {
+          "prompt_tokens": 32801,
+          "completion_tokens": 503,
+          "thinking_tokens": 0,
+          "code": "package main\n\nimport (\n\t\"fmt\"\n\t\"os\"\n\t\"strings\"\n)\n\nfunc main() {\n\tif len(os.Args) < 2 {\n\t\treturn\n\t}\n\n\tsentence := os.Args[1]\n\twords := strings.Fields(sentence)\n\n\tfor i, j := 0, len(words)-1; i < j; i, j = i+1, j-1 {\n\t\twords[i], words[j] = words[j], words[i]\n\t}\n\n\tfmt.Println(strings.Join(words, \" \"))\n}",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "hello world foo"
+              ],
+              "expected": "'foo world hello\\n'",
+              "actual": "'foo world hello\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 1,
+              "args": [
+                "one"
+              ],
+              "expected": "'one\\n'",
+              "actual": "'one\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 2,
+              "args": [
+                "the quick brown fox"
+              ],
+              "expected": "'fox brown quick the\\n'",
+              "actual": "'fox brown quick the\\n'",
+              "stderr": "",
+              "passed": true
+            }
+          ],
+          "error": ""
+        }
+      ],
+      "first_attempt_correct": true,
+      "final_correct": true,
+      "total_prompt_tokens": 32801,
+      "total_completion_tokens": 503,
+      "total_thinking_tokens": 0,
+      "total_tokens": 33304,
+      "attempts_to_correct": 1,
+      "wall_time_s": 4.762499809265137
+    },
+    {
+      "task_id": "03_two_sum",
+      "language": "sigil",
+      "model": "claude-haiku-4-5-20251001",
+      "run_index": 0,
+      "attempts": [
+        {
+          "prompt_tokens": 36505,
+          "completion_tokens": 3950,
+          "thinking_tokens": 0,
+          "code": "(module two_sum_finder\n  (fn main -> int\n    (set args array (argv))\n    (set target int (string_to_int (array_get args 0)))\n    (set nums_str string (array_get args 1))\n    (set nums array (string_split nums_str \" \"))\n    \n    (set len int (array_length nums))\n    (set found bool false)\n    (set result_i int -1)\n    (set result_j int -1)\n    \n    (for i 0 len\n      (if found (break))\n      (for j (add i 1) len\n        (set num_i int (string_to_int (array_get nums i)))\n        (set num_j int (string_to_int (array_get nums j)))\n        (if (eq (add num_i num_j) target)\n          (set found true)\n          (set result_i i)\n          (set result_j j)\n          (break))))\n    \n    (if found\n      (println (string_format \"{} {}\" result_i result_j))\n      (println -1))\n    \n    (ret 0)))",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "9",
+                "2 7 11 15"
+              ],
+              "expected": "'0 1\\n'",
+              "actual": "'0 1\\n-1\\n'",
+              "stderr": "",
+              "passed": false
+            },
+            {
+              "case": 1,
+              "args": [
+                "6",
+                "3 2 4"
+              ],
+              "expected": "'1 2\\n'",
+              "actual": "'1 2\\n-1\\n'",
+              "stderr": "",
+              "passed": false
+            },
+            {
+              "case": 2,
+              "args": [
+                "10",
+                "1 2 3"
+              ],
+              "expected": "'-1\\n'",
+              "actual": "''",
+              "stderr": "",
+              "passed": false
+            }
+          ],
+          "error": ""
+        },
+        {
+          "prompt_tokens": 36918,
+          "completion_tokens": 1500,
+          "thinking_tokens": 0,
+          "code": "(module two_sum_finder\n  (fn main -> int\n    (set args array (argv))\n    (set target int (string_to_int (array_get args 0)))\n    (set nums_str string (array_get args 1))\n    (set nums array (string_split nums_str \" \"))\n    \n    (set len int (array_length nums))\n    (set found bool false)\n    (set result_i int -1)\n    (set result_j int -1)\n    \n    (for i 0 len\n      (if found (break))\n      (for j (add i 1) len\n        (set num_i int (string_to_int (array_get nums i)))\n        (set num_j int (string_to_int (array_get nums j)))\n        (if (eq (add num_i num_j) target)\n          (set found true)\n          (set result_i i)\n          (set result_j j)\n          (break))))\n    \n    (if found\n      (println (string_format \"{} {}\" result_i result_j))\n      (else\n        (println -1)))\n    \n    (ret 0)))",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "9",
+                "2 7 11 15"
+              ],
+              "expected": "'0 1\\n'",
+              "actual": "'0 1\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 1,
+              "args": [
+                "6",
+                "3 2 4"
+              ],
+              "expected": "'1 2\\n'",
+              "actual": "'1 2\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 2,
+              "args": [
+                "10",
+                "1 2 3"
+              ],
+              "expected": "'-1\\n'",
+              "actual": "'-1\\n'",
+              "stderr": "",
+              "passed": true
+            }
+          ],
+          "error": ""
+        }
+      ],
+      "first_attempt_correct": false,
+      "final_correct": true,
+      "total_prompt_tokens": 73423,
+      "total_completion_tokens": 5450,
+      "total_thinking_tokens": 0,
+      "total_tokens": 78873,
+      "attempts_to_correct": 2,
+      "wall_time_s": 36.57851314544678
+    },
+    {
+      "task_id": "03_two_sum",
+      "language": "python",
+      "model": "claude-haiku-4-5-20251001",
+      "run_index": 0,
+      "attempts": [
+        {
+          "prompt_tokens": 32823,
+          "completion_tokens": 4558,
+          "thinking_tokens": 0,
+          "code": "import sys\n\ntarget = int(sys.argv[1])\nnumbers = list(map(int, sys.argv[2].split()))\n\nseen = {}\nresult = None\n\nfor i, num in enumerate(numbers):\n    complement = target - num\n    if complement in seen:\n        result = (seen[complement], i)\n        break\n    if num not in seen:\n        seen[num] = i\n\nif result:\n    print(result[0], result[1])\nelse:\n    print(-1)",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "9",
+                "2 7 11 15"
+              ],
+              "expected": "'0 1\\n'",
+              "actual": "'0 1\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 1,
+              "args": [
+                "6",
+                "3 2 4"
+              ],
+              "expected": "'1 2\\n'",
+              "actual": "'1 2\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 2,
+              "args": [
+                "10",
+                "1 2 3"
+              ],
+              "expected": "'-1\\n'",
+              "actual": "'-1\\n'",
+              "stderr": "",
+              "passed": true
+            }
+          ],
+          "error": ""
+        }
+      ],
+      "first_attempt_correct": true,
+      "final_correct": true,
+      "total_prompt_tokens": 32823,
+      "total_completion_tokens": 4558,
+      "total_thinking_tokens": 0,
+      "total_tokens": 37381,
+      "attempts_to_correct": 1,
+      "wall_time_s": 27.900514841079712
+    },
+    {
+      "task_id": "03_two_sum",
+      "language": "javascript",
+      "model": "claude-haiku-4-5-20251001",
+      "run_index": 0,
+      "attempts": [
+        {
+          "prompt_tokens": 32836,
+          "completion_tokens": 3674,
+          "thinking_tokens": 0,
+          "code": "const target = parseInt(process.argv[2]);\nconst nums = process.argv[3].split(' ').map(Number);\n\nconst seen = new Map();\n\nfor (let i = 0; i < nums.length; i++) {\n  const complement = target - nums[i];\n  if (seen.has(complement)) {\n    console.log(seen.get(complement) + ' ' + i);\n    process.exit(0);\n  }\n  seen.set(nums[i], i);\n}\n\nconsole.log(-1);",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "9",
+                "2 7 11 15"
+              ],
+              "expected": "'0 1\\n'",
+              "actual": "'0 1\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 1,
+              "args": [
+                "6",
+                "3 2 4"
+              ],
+              "expected": "'1 2\\n'",
+              "actual": "'1 2\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 2,
+              "args": [
+                "10",
+                "1 2 3"
+              ],
+              "expected": "'-1\\n'",
+              "actual": "'-1\\n'",
+              "stderr": "",
+              "passed": true
+            }
+          ],
+          "error": ""
+        }
+      ],
+      "first_attempt_correct": true,
+      "final_correct": true,
+      "total_prompt_tokens": 32836,
+      "total_completion_tokens": 3674,
+      "total_thinking_tokens": 0,
+      "total_tokens": 36510,
+      "attempts_to_correct": 1,
+      "wall_time_s": 27.74760413169861
+    },
+    {
+      "task_id": "03_two_sum",
+      "language": "go",
+      "model": "claude-haiku-4-5-20251001",
+      "run_index": 0,
+      "attempts": [
+        {
+          "prompt_tokens": 32838,
+          "completion_tokens": 2108,
+          "thinking_tokens": 0,
+          "code": "package main\n\nimport (\n\t\"fmt\"\n\t\"os\"\n\t\"strconv\"\n\t\"strings\"\n)\n\nfunc main() {\n\ttarget, _ := strconv.Atoi(os.Args[1])\n\tnums := []int{}\n\tfor _, s := range strings.Fields(os.Args[2]) {\n\t\tnum, _ := strconv.Atoi(s)\n\t\tnums = append(nums, num)\n\t}\n\t\n\tfor i := 0; i < len(nums); i++ {\n\t\tfor j := i + 1; j < len(nums); j++ {\n\t\t\tif nums[i]+nums[j] == target {\n\t\t\t\tfmt.Printf(\"%d %d\\n\", i, j)\n\t\t\t\treturn\n\t\t\t}\n\t\t}\n\t}\n\t\n\tfmt.Println(\"-1\")\n}",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "9",
+                "2 7 11 15"
+              ],
+              "expected": "'0 1\\n'",
+              "actual": "'0 1\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 1,
+              "args": [
+                "6",
+                "3 2 4"
+              ],
+              "expected": "'1 2\\n'",
+              "actual": "'1 2\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 2,
+              "args": [
+                "10",
+                "1 2 3"
+              ],
+              "expected": "'-1\\n'",
+              "actual": "'-1\\n'",
+              "stderr": "",
+              "passed": true
+            }
+          ],
+          "error": ""
+        }
+      ],
+      "first_attempt_correct": true,
+      "final_correct": true,
+      "total_prompt_tokens": 32838,
+      "total_completion_tokens": 2108,
+      "total_thinking_tokens": 0,
+      "total_tokens": 34946,
+      "attempts_to_correct": 1,
+      "wall_time_s": 13.196677207946777
+    },
+    {
+      "task_id": "04_word_frequency",
+      "language": "sigil",
+      "model": "claude-haiku-4-5-20251001",
+      "run_index": 0,
+      "attempts": [
+        {
+          "prompt_tokens": 36492,
+          "completion_tokens": 3800,
+          "thinking_tokens": 0,
+          "code": "(module word_freq\n  (fn main -> int\n    (set args array (argv))\n    (if (eq (array_length args) 0)\n      (ret 1))\n    \n    (set text string (array_get args 0))\n    (set words array (string_split text \" \"))\n    \n    (set freq map (map_new))\n    \n    (for-each word string words\n      (if (gt (string_length word) 0)\n        (set lower_word string (string_to_lower word))\n        (if (map_has freq lower_word)\n          (set count int (map_get freq lower_word))\n          (set freq (map_set freq lower_word (add count 1)))\n          (else\n            (set freq (map_set freq lower_word 1))))))\n    \n    (set keys array (map_keys freq))\n    (set sorted_keys array (array_sort keys))\n    \n    (for-each key string sorted_keys\n      (set count int (map_get freq key))\n      (println (string_format \"{} {}\" key (string_from_int count))))\n    \n    (ret 0)))",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "the cat sat on the mat"
+              ],
+              "expected": "'cat 1\\nmat 1\\non 1\\nsat 1\\nthe 2\\n'",
+              "actual": "'cat 1\\nmat 1\\non 1\\nsat 1\\nthe 2\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 1,
+              "args": [
+                "hello hello HELLO"
+              ],
+              "expected": "'hello 3\\n'",
+              "actual": "'hello 3\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 2,
+              "args": [
+                "a b c a b a"
+              ],
+              "expected": "'a 3\\nb 2\\nc 1\\n'",
+              "actual": "'a 3\\nb 2\\nc 1\\n'",
+              "stderr": "",
+              "passed": true
+            }
+          ],
+          "error": ""
+        }
+      ],
+      "first_attempt_correct": true,
+      "final_correct": true,
+      "total_prompt_tokens": 36492,
+      "total_completion_tokens": 3800,
+      "total_thinking_tokens": 0,
+      "total_tokens": 40292,
+      "attempts_to_correct": 1,
+      "wall_time_s": 24.215848445892334
+    },
+    {
+      "task_id": "04_word_frequency",
+      "language": "python",
+      "model": "claude-haiku-4-5-20251001",
+      "run_index": 0,
+      "attempts": [
+        {
+          "prompt_tokens": 32810,
+          "completion_tokens": 337,
+          "thinking_tokens": 0,
+          "code": "import sys\nfrom collections import Counter\n\ntext = sys.argv[1]\nwords = text.lower().split()\nword_counts = Counter(words)\n\nfor word in sorted(word_counts.keys()):\n    print(f\"{word} {word_counts[word]}\")",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "the cat sat on the mat"
+              ],
+              "expected": "'cat 1\\nmat 1\\non 1\\nsat 1\\nthe 2\\n'",
+              "actual": "'cat 1\\nmat 1\\non 1\\nsat 1\\nthe 2\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 1,
+              "args": [
+                "hello hello HELLO"
+              ],
+              "expected": "'hello 3\\n'",
+              "actual": "'hello 3\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 2,
+              "args": [
+                "a b c a b a"
+              ],
+              "expected": "'a 3\\nb 2\\nc 1\\n'",
+              "actual": "'a 3\\nb 2\\nc 1\\n'",
+              "stderr": "",
+              "passed": true
+            }
+          ],
+          "error": ""
+        }
+      ],
+      "first_attempt_correct": true,
+      "final_correct": true,
+      "total_prompt_tokens": 32810,
+      "total_completion_tokens": 337,
+      "total_thinking_tokens": 0,
+      "total_tokens": 33147,
+      "attempts_to_correct": 1,
+      "wall_time_s": 3.5274105072021484
+    },
+    {
+      "task_id": "04_word_frequency",
+      "language": "javascript",
+      "model": "claude-haiku-4-5-20251001",
+      "run_index": 0,
+      "attempts": [
+        {
+          "prompt_tokens": 32823,
+          "completion_tokens": 752,
+          "thinking_tokens": 0,
+          "code": "const text = process.argv[2] || '';\n\nconst words = text.split(/\\s+/).filter(word => word.length > 0).map(word => word.toLowerCase());\n\nconst frequency = {};\nfor (const word of words) {\n  frequency[word] = (frequency[word] || 0) + 1;\n}\n\nconst sortedWords = Object.keys(frequency).sort();\n\nfor (const word of sortedWords) {\n  console.log(`${word} ${frequency[word]}`);\n}",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "the cat sat on the mat"
+              ],
+              "expected": "'cat 1\\nmat 1\\non 1\\nsat 1\\nthe 2\\n'",
+              "actual": "'cat 1\\nmat 1\\non 1\\nsat 1\\nthe 2\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 1,
+              "args": [
+                "hello hello HELLO"
+              ],
+              "expected": "'hello 3\\n'",
+              "actual": "'hello 3\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 2,
+              "args": [
+                "a b c a b a"
+              ],
+              "expected": "'a 3\\nb 2\\nc 1\\n'",
+              "actual": "'a 3\\nb 2\\nc 1\\n'",
+              "stderr": "",
+              "passed": true
+            }
+          ],
+          "error": ""
+        }
+      ],
+      "first_attempt_correct": true,
+      "final_correct": true,
+      "total_prompt_tokens": 32823,
+      "total_completion_tokens": 752,
+      "total_thinking_tokens": 0,
+      "total_tokens": 33575,
+      "attempts_to_correct": 1,
+      "wall_time_s": 7.498667240142822
+    },
+    {
+      "task_id": "04_word_frequency",
+      "language": "go",
+      "model": "claude-haiku-4-5-20251001",
+      "run_index": 0,
+      "attempts": [
+        {
+          "prompt_tokens": 32825,
+          "completion_tokens": 580,
+          "thinking_tokens": 0,
+          "code": "package main\n\nimport (\n\t\"fmt\"\n\t\"os\"\n\t\"sort\"\n\t\"strings\"\n)\n\nfunc main() {\n\tif len(os.Args) < 2 {\n\t\treturn\n\t}\n\n\ttext := os.Args[1]\n\n\twords := strings.Fields(strings.ToLower(text))\n\n\twordCount := make(map[string]int)\n\tfor _, word := range words {\n\t\twordCount[word]++\n\t}\n\n\tvar sortedWords []string\n\tfor word := range wordCount {\n\t\tsortedWords = append(sortedWords, word)\n\t}\n\tsort.Strings(sortedWords)\n\n\tfor _, word := range sortedWords {\n\t\tfmt.Printf(\"%s %d\\n\", word, wordCount[word])\n\t}\n}",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "the cat sat on the mat"
+              ],
+              "expected": "'cat 1\\nmat 1\\non 1\\nsat 1\\nthe 2\\n'",
+              "actual": "'cat 1\\nmat 1\\non 1\\nsat 1\\nthe 2\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 1,
+              "args": [
+                "hello hello HELLO"
+              ],
+              "expected": "'hello 3\\n'",
+              "actual": "'hello 3\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 2,
+              "args": [
+                "a b c a b a"
+              ],
+              "expected": "'a 3\\nb 2\\nc 1\\n'",
+              "actual": "'a 3\\nb 2\\nc 1\\n'",
+              "stderr": "",
+              "passed": true
+            }
+          ],
+          "error": ""
+        }
+      ],
+      "first_attempt_correct": true,
+      "final_correct": true,
+      "total_prompt_tokens": 32825,
+      "total_completion_tokens": 580,
+      "total_thinking_tokens": 0,
+      "total_tokens": 33405,
+      "attempts_to_correct": 1,
+      "wall_time_s": 5.221163988113403
+    },
+    {
+      "task_id": "05_balanced_parens",
+      "language": "sigil",
+      "model": "claude-haiku-4-5-20251001",
+      "run_index": 0,
+      "attempts": [
+        {
+          "prompt_tokens": 36484,
+          "completion_tokens": 3718,
+          "thinking_tokens": 0,
+          "code": "(module bracket_checker\n  (fn get_char s string idx int -> string\n    (ret (char_from_code (string_get s idx))))\n  \n  (fn is_opening c string -> bool\n    (or (eq c \"(\") (or (eq c \"[\") (eq c \"{\"))))\n  \n  (fn is_closing c string -> bool\n    (or (eq c \")\") (or (eq c \"]\") (eq c \"}\"))))\n  \n  (fn matches open_b string close_b string -> bool\n    (or (and (eq open_b \"(\") (eq close_b \")\"))\n        (or (and (eq open_b \"[\") (eq close_b \"]\"))\n            (and (eq open_b \"{\") (eq close_b \"}\")))))\n  \n  (fn is_balanced input string -> bool\n    (set stack array (array_new))\n    (set len int (string_length input))\n    (for i 0 len\n      (set ch string (get_char input i))\n      (if (is_opening ch)\n        (set stack (array_push stack ch))\n      )\n      (if (is_closing ch)\n        (if (eq (array_length stack) 0)\n          (ret false)\n        )\n        (set top string (array_get stack (sub (array_length stack) 1)))\n        (if (not (matches top ch))\n          (ret false)\n        )\n        (set stack (array_pop stack))\n      )\n    )\n    (ret (eq (array_length stack) 0))\n  )\n  \n  (fn main -> int\n    (set args array (argv))\n    (if (eq (array_length args) 0)\n      (ret 1)\n    )\n    (set input string (array_get args 0))\n    (if (is_balanced input)\n      (println \"true\")\n    (else\n      (println \"false\")\n    ))\n    (ret 0)\n  )\n)",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "({[]})"
+              ],
+              "expected": "'true\\n'",
+              "actual": "''",
+              "stderr": "Runtime error: If condition must be boolean\n",
+              "passed": false
+            },
+            {
+              "case": 1,
+              "args": [
+                "([)]"
+              ],
+              "expected": "'false\\n'",
+              "actual": "''",
+              "stderr": "Runtime error: If condition must be boolean\n",
+              "passed": false
+            },
+            {
+              "case": 2,
+              "args": [
+                "((()))"
+              ],
+              "expected": "'true\\n'",
+              "actual": "''",
+              "stderr": "Runtime error: If condition must be boolean\n",
+              "passed": false
+            },
+            {
+              "case": 3,
+              "args": [
+                "hello(world)"
+              ],
+              "expected": "'true\\n'",
+              "actual": "''",
+              "stderr": "Runtime error: If condition must be boolean\n",
+              "passed": false
+            },
+            {
+              "case": 4,
+              "args": [
+                "{[}]"
+              ],
+              "expected": "'false\\n'",
+              "actual": "''",
+              "stderr": "Runtime error: If condition must be boolean\n",
+              "passed": false
+            },
+            {
+              "case": 5,
+              "args": [
+                ""
+              ],
+              "expected": "'true\\n'",
+              "actual": "'true\\n'",
+              "stderr": "",
+              "passed": true
+            }
+          ],
+          "error": ""
+        },
+        {
+          "prompt_tokens": 37081,
+          "completion_tokens": 9675,
+          "thinking_tokens": 0,
+          "code": "(module bracket_checker\n  (fn get_char s string idx int -> string\n    (ret (char_from_code (string_get s idx))))\n  \n  (fn is_opening c string -> bool\n    (cond\n      ((eq c \"(\") (ret true))\n      ((eq c \"[\") (ret true))\n      ((eq c \"{\") (ret true))\n      (true (ret false))))\n  \n  (fn is_closing c string -> bool\n    (cond\n      ((eq c \")\") (ret true))\n      ((eq c \"]\") (ret true))\n      ((eq c \"}\") (ret true))\n      (true (ret false))))\n  \n  (fn matches open_b string close_b string -> bool\n    (cond\n      ((eq open_b \"(\") (ret (eq close_b \")\")))\n      ((eq open_b \"[\") (ret (eq close_b \"]\")))\n      ((eq open_b \"{\") (ret (eq close_b \"}\")))\n      (true (ret false))))\n  \n  (fn is_balanced input string -> bool\n    (set stack array (array_new))\n    (set len int (string_length input))\n    (for i 0 len\n      (set ch string (get_char input i))\n      (if (is_opening ch)\n        (set stack (array_push stack ch)))\n      (if (is_closing ch)\n        (if (eq (array_length stack) 0)\n          (ret false))\n        (set top string (array_get stack (sub (array_length stack) 1)))\n        (if (not (matches top ch))\n          (ret false))\n        (set stack (array_pop stack))))\n    (ret (eq (array_length stack) 0)))\n  \n  (fn main -> int\n    (set args array (argv))\n    (if (eq (array_length args) 0)\n      (ret 1))\n    (set input string (array_get args 0))\n    (if (is_balanced input)\n      (println \"true\")\n      (else\n        (println \"false\")))\n    (ret 0)))",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "({[]})"
+              ],
+              "expected": "'true\\n'",
+              "actual": "''",
+              "stderr": "Runtime error: Type mismatch: variable 'stack' declared as array but got string\n",
+              "passed": false
+            },
+            {
+              "case": 1,
+              "args": [
+                "([)]"
+              ],
+              "expected": "'false\\n'",
+              "actual": "'false\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 2,
+              "args": [
+                "((()))"
+              ],
+              "expected": "'true\\n'",
+              "actual": "''",
+              "stderr": "Runtime error: Type mismatch: variable 'stack' declared as array but got string\n",
+              "passed": false
+            },
+            {
+              "case": 3,
+              "args": [
+                "hello(world)"
+              ],
+              "expected": "'true\\n'",
+              "actual": "''",
+              "stderr": "Runtime error: Type mismatch: variable 'stack' declared as array but got string\n",
+              "passed": false
+            },
+            {
+              "case": 4,
+              "args": [
+                "{[}]"
+              ],
+              "expected": "'false\\n'",
+              "actual": "'false\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 5,
+              "args": [
+                ""
+              ],
+              "expected": "'true\\n'",
+              "actual": "'true\\n'",
+              "stderr": "",
+              "passed": true
+            }
+          ],
+          "error": ""
+        },
+        {
+          "prompt_tokens": 37745,
+          "completion_tokens": 1619,
+          "thinking_tokens": 0,
+          "code": "(module bracket_checker\n  (fn get_char s string idx int -> string\n    (ret (char_from_code (string_get s idx))))\n  \n  (fn is_opening c string -> bool\n    (cond\n      ((eq c \"(\") (ret true))\n      ((eq c \"[\") (ret true))\n      ((eq c \"{\") (ret true))\n      (true (ret false))))\n  \n  (fn is_closing c string -> bool\n    (cond\n      ((eq c \")\") (ret true))\n      ((eq c \"]\") (ret true))\n      ((eq c \"}\") (ret true))\n      (true (ret false))))\n  \n  (fn matches open_b string close_b string -> bool\n    (cond\n      ((eq open_b \"(\") (ret (eq close_b \")\")))\n      ((eq open_b \"[\") (ret (eq close_b \"]\")))\n      ((eq open_b \"{\") (ret (eq close_b \"}\")))\n      (true (ret false))))\n  \n  (fn is_balanced input string -> bool\n    (set stack array (array_new))\n    (set len int (string_length input))\n    (for i 0 len\n      (set ch string (get_char input i))\n      (if (is_opening ch)\n        (set stack (array_push stack ch)))\n      (if (is_closing ch)\n        (if (eq (array_length stack) 0)\n          (ret false))\n        (set top string (array_get stack (sub (array_length stack) 1)))\n        (if (not (matches top ch))\n          (ret false))\n        (set stack (array_remove stack (sub (array_length stack) 1)))))\n    (ret (eq (array_length stack) 0)))\n  \n  (fn main -> int\n    (set args array (argv))\n    (if (eq (array_length args) 0)\n      (ret 1))\n    (set input string (array_get args 0))\n    (if (is_balanced input)\n      (println \"true\")\n      (else\n        (println \"false\")))\n    (ret 0)))",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "({[]})"
+              ],
+              "expected": "'true\\n'",
+              "actual": "'true\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 1,
+              "args": [
+                "([)]"
+              ],
+              "expected": "'false\\n'",
+              "actual": "'false\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 2,
+              "args": [
+                "((()))"
+              ],
+              "expected": "'true\\n'",
+              "actual": "'true\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 3,
+              "args": [
+                "hello(world)"
+              ],
+              "expected": "'true\\n'",
+              "actual": "'true\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 4,
+              "args": [
+                "{[}]"
+              ],
+              "expected": "'false\\n'",
+              "actual": "'false\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 5,
+              "args": [
+                ""
+              ],
+              "expected": "'true\\n'",
+              "actual": "'true\\n'",
+              "stderr": "",
+              "passed": true
+            }
+          ],
+          "error": ""
+        }
+      ],
+      "first_attempt_correct": false,
+      "final_correct": true,
+      "total_prompt_tokens": 111310,
+      "total_completion_tokens": 15012,
+      "total_thinking_tokens": 0,
+      "total_tokens": 126322,
+      "attempts_to_correct": 3,
+      "wall_time_s": 102.9617772102356
+    },
+    {
+      "task_id": "05_balanced_parens",
+      "language": "python",
+      "model": "claude-haiku-4-5-20251001",
+      "run_index": 0,
+      "attempts": [
+        {
+          "prompt_tokens": 32802,
+          "completion_tokens": 673,
+          "thinking_tokens": 0,
+          "code": "import sys\n\ndef is_balanced(s):\n    stack = []\n    bracket_map = {'(': ')', '[': ']', '{': '}'}\n    opening = set(bracket_map.keys())\n    closing = set(bracket_map.values())\n    \n    for char in s:\n        if char in opening:\n            stack.append(char)\n        elif char in closing:\n            if not stack or bracket_map[stack.pop()] != char:\n                return False\n    \n    return len(stack) == 0\n\nresult = is_balanced(sys.argv[1])\nprint(\"true\" if result else \"false\")",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "({[]})"
+              ],
+              "expected": "'true\\n'",
+              "actual": "'true\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 1,
+              "args": [
+                "([)]"
+              ],
+              "expected": "'false\\n'",
+              "actual": "'false\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 2,
+              "args": [
+                "((()))"
+              ],
+              "expected": "'true\\n'",
+              "actual": "'true\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 3,
+              "args": [
+                "hello(world)"
+              ],
+              "expected": "'true\\n'",
+              "actual": "'true\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 4,
+              "args": [
+                "{[}]"
+              ],
+              "expected": "'false\\n'",
+              "actual": "'false\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 5,
+              "args": [
+                ""
+              ],
+              "expected": "'true\\n'",
+              "actual": "'true\\n'",
+              "stderr": "",
+              "passed": true
+            }
+          ],
+          "error": ""
+        }
+      ],
+      "first_attempt_correct": true,
+      "final_correct": true,
+      "total_prompt_tokens": 32802,
+      "total_completion_tokens": 673,
+      "total_thinking_tokens": 0,
+      "total_tokens": 33475,
+      "attempts_to_correct": 1,
+      "wall_time_s": 6.202027082443237
+    },
+    {
+      "task_id": "05_balanced_parens",
+      "language": "javascript",
+      "model": "claude-haiku-4-5-20251001",
+      "run_index": 0,
+      "attempts": [
+        {
+          "prompt_tokens": 32815,
+          "completion_tokens": 655,
+          "thinking_tokens": 0,
+          "code": "const str = process.argv[2] || '';\n\nconst stack = [];\nconst pairs = {\n  ')': '(',\n  ']': '[',\n  '}': '{'\n};\n\nfor (const char of str) {\n  if (char === '(' || char === '[' || char === '{') {\n    stack.push(char);\n  } else if (char === ')' || char === ']' || char === '}') {\n    if (stack.length === 0 || stack[stack.length - 1] !== pairs[char]) {\n      console.log('false');\n      process.exit(0);\n    }\n    stack.pop();\n  }\n}\n\nconsole.log(stack.length === 0 ? 'true' : 'false');",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "({[]})"
+              ],
+              "expected": "'true\\n'",
+              "actual": "'true\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 1,
+              "args": [
+                "([)]"
+              ],
+              "expected": "'false\\n'",
+              "actual": "'false\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 2,
+              "args": [
+                "((()))"
+              ],
+              "expected": "'true\\n'",
+              "actual": "'true\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 3,
+              "args": [
+                "hello(world)"
+              ],
+              "expected": "'true\\n'",
+              "actual": "'true\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 4,
+              "args": [
+                "{[}]"
+              ],
+              "expected": "'false\\n'",
+              "actual": "'false\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 5,
+              "args": [
+                ""
+              ],
+              "expected": "'true\\n'",
+              "actual": "'true\\n'",
+              "stderr": "",
+              "passed": true
+            }
+          ],
+          "error": ""
+        }
+      ],
+      "first_attempt_correct": true,
+      "final_correct": true,
+      "total_prompt_tokens": 32815,
+      "total_completion_tokens": 655,
+      "total_thinking_tokens": 0,
+      "total_tokens": 33470,
+      "attempts_to_correct": 1,
+      "wall_time_s": 6.516244888305664
+    },
+    {
+      "task_id": "05_balanced_parens",
+      "language": "go",
+      "model": "claude-haiku-4-5-20251001",
+      "run_index": 0,
+      "attempts": [
+        {
+          "prompt_tokens": 32817,
+          "completion_tokens": 1225,
+          "thinking_tokens": 0,
+          "code": "package main\n\nimport (\n\t\"fmt\"\n\t\"os\"\n)\n\nfunc main() {\n\tif len(os.Args) < 2 {\n\t\tfmt.Println(\"false\")\n\t\treturn\n\t}\n\n\ts := os.Args[1]\n\tstack := []rune{}\n\n\tfor _, ch := range s {\n\t\tswitch ch {\n\t\tcase '(', '[', '{':\n\t\t\tstack = append(stack, ch)\n\t\tcase ')':\n\t\t\tif len(stack) == 0 || stack[len(stack)-1] != '(' {\n\t\t\t\tfmt.Println(\"false\")\n\t\t\t\treturn\n\t\t\t}\n\t\t\tstack = stack[:len(stack)-1]\n\t\tcase ']':\n\t\t\tif len(stack) == 0 || stack[len(stack)-1] != '[' {\n\t\t\t\tfmt.Println(\"false\")\n\t\t\t\treturn\n\t\t\t}\n\t\t\tstack = stack[:len(stack)-1]\n\t\tcase '}':\n\t\t\tif len(stack) == 0 || stack[len(stack)-1] != '{' {\n\t\t\t\tfmt.Println(\"false\")\n\t\t\t\treturn\n\t\t\t}\n\t\t\tstack = stack[:len(stack)-1]\n\t\t}\n\t}\n\n\tif len(stack) == 0 {\n\t\tfmt.Println(\"true\")\n\t} else {\n\t\tfmt.Println(\"false\")\n\t}\n}",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "({[]})"
+              ],
+              "expected": "'true\\n'",
+              "actual": "'true\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 1,
+              "args": [
+                "([)]"
+              ],
+              "expected": "'false\\n'",
+              "actual": "'false\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 2,
+              "args": [
+                "((()))"
+              ],
+              "expected": "'true\\n'",
+              "actual": "'true\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 3,
+              "args": [
+                "hello(world)"
+              ],
+              "expected": "'true\\n'",
+              "actual": "'true\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 4,
+              "args": [
+                "{[}]"
+              ],
+              "expected": "'false\\n'",
+              "actual": "'false\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 5,
+              "args": [
+                ""
+              ],
+              "expected": "'true\\n'",
+              "actual": "'true\\n'",
+              "stderr": "",
+              "passed": true
+            }
+          ],
+          "error": ""
+        }
+      ],
+      "first_attempt_correct": true,
+      "final_correct": true,
+      "total_prompt_tokens": 32817,
+      "total_completion_tokens": 1225,
+      "total_thinking_tokens": 0,
+      "total_tokens": 34042,
+      "attempts_to_correct": 1,
+      "wall_time_s": 9.208739519119263
+    },
+    {
+      "task_id": "06_run_length_encode",
+      "language": "sigil",
+      "model": "claude-haiku-4-5-20251001",
+      "run_index": 0,
+      "attempts": [
+        {
+          "prompt_tokens": 36485,
+          "completion_tokens": 3896,
+          "thinking_tokens": 0,
+          "code": "(module run_length_encode\n  (fn main -> int\n    (set args array (argv))\n    \n    (if (eq (argv_count) 0)\n      (ret 1))\n    \n    (set input string (array_get args 0))\n    (set len int (string_length input))\n    \n    (if (eq len 0)\n      (ret 0))\n    \n    (set result string \"\")\n    (set i int 0)\n    \n    (while (lt i len)\n      (set current_char string (string_slice input i 1))\n      (set count int 1)\n      \n      (while (and (lt (add i count) len) (string_equals (string_slice input (add i count) 1) current_char))\n        (set count (add count 1)))\n      \n      (set result (string_concat result (string_concat current_char (string_from_int count))))\n      (set i (add i count)))\n    \n    (println result)\n    (ret 0)))",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "aaabbc"
+              ],
+              "expected": "'a3b2c1\\n'",
+              "actual": "'a3b2c1\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 1,
+              "args": [
+                "aaa"
+              ],
+              "expected": "'a3\\n'",
+              "actual": "'a3\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 2,
+              "args": [
+                "abcd"
+              ],
+              "expected": "'a1b1c1d1\\n'",
+              "actual": "'a1b1c1d1\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 3,
+              "args": [
+                "aaAAaa"
+              ],
+              "expected": "'a2A2a2\\n'",
+              "actual": "'a2A2a2\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 4,
+              "args": [
+                "a"
+              ],
+              "expected": "'a1\\n'",
+              "actual": "'a1\\n'",
+              "stderr": "",
+              "passed": true
+            }
+          ],
+          "error": ""
+        }
+      ],
+      "first_attempt_correct": true,
+      "final_correct": true,
+      "total_prompt_tokens": 36485,
+      "total_completion_tokens": 3896,
+      "total_thinking_tokens": 0,
+      "total_tokens": 40381,
+      "attempts_to_correct": 1,
+      "wall_time_s": 24.409762859344482
+    },
+    {
+      "task_id": "06_run_length_encode",
+      "language": "python",
+      "model": "claude-haiku-4-5-20251001",
+      "run_index": 0,
+      "attempts": [
+        {
+          "prompt_tokens": 32803,
+          "completion_tokens": 632,
+          "thinking_tokens": 0,
+          "code": "import sys\nfrom itertools import groupby\n\ns = sys.argv[1]\nresult = ''.join(char + str(len(list(group))) for char, group in groupby(s))\nprint(result)",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "aaabbc"
+              ],
+              "expected": "'a3b2c1\\n'",
+              "actual": "'a3b2c1\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 1,
+              "args": [
+                "aaa"
+              ],
+              "expected": "'a3\\n'",
+              "actual": "'a3\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 2,
+              "args": [
+                "abcd"
+              ],
+              "expected": "'a1b1c1d1\\n'",
+              "actual": "'a1b1c1d1\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 3,
+              "args": [
+                "aaAAaa"
+              ],
+              "expected": "'a2A2a2\\n'",
+              "actual": "'a2A2a2\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 4,
+              "args": [
+                "a"
+              ],
+              "expected": "'a1\\n'",
+              "actual": "'a1\\n'",
+              "stderr": "",
+              "passed": true
+            }
+          ],
+          "error": ""
+        }
+      ],
+      "first_attempt_correct": true,
+      "final_correct": true,
+      "total_prompt_tokens": 32803,
+      "total_completion_tokens": 632,
+      "total_thinking_tokens": 0,
+      "total_tokens": 33435,
+      "attempts_to_correct": 1,
+      "wall_time_s": 6.963340520858765
+    },
+    {
+      "task_id": "06_run_length_encode",
+      "language": "javascript",
+      "model": "claude-haiku-4-5-20251001",
+      "run_index": 0,
+      "attempts": [
+        {
+          "prompt_tokens": 32816,
+          "completion_tokens": 538,
+          "thinking_tokens": 0,
+          "code": "const input = process.argv[2];\n\nif (!input) {\n  process.exit(0);\n}\n\nlet result = '';\nlet i = 0;\n\nwhile (i < input.length) {\n  const char = input[i];\n  let count = 1;\n  \n  while (i + count < input.length && input[i + count] === char) {\n    count++;\n  }\n  \n  result += char + count;\n  i += count;\n}\n\nconsole.log(result);",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "aaabbc"
+              ],
+              "expected": "'a3b2c1\\n'",
+              "actual": "'a3b2c1\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 1,
+              "args": [
+                "aaa"
+              ],
+              "expected": "'a3\\n'",
+              "actual": "'a3\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 2,
+              "args": [
+                "abcd"
+              ],
+              "expected": "'a1b1c1d1\\n'",
+              "actual": "'a1b1c1d1\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 3,
+              "args": [
+                "aaAAaa"
+              ],
+              "expected": "'a2A2a2\\n'",
+              "actual": "'a2A2a2\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 4,
+              "args": [
+                "a"
+              ],
+              "expected": "'a1\\n'",
+              "actual": "'a1\\n'",
+              "stderr": "",
+              "passed": true
+            }
+          ],
+          "error": ""
+        }
+      ],
+      "first_attempt_correct": true,
+      "final_correct": true,
+      "total_prompt_tokens": 32816,
+      "total_completion_tokens": 538,
+      "total_thinking_tokens": 0,
+      "total_tokens": 33354,
+      "attempts_to_correct": 1,
+      "wall_time_s": 5.060728311538696
+    },
+    {
+      "task_id": "06_run_length_encode",
+      "language": "go",
+      "model": "claude-haiku-4-5-20251001",
+      "run_index": 0,
+      "attempts": [
+        {
+          "prompt_tokens": 32818,
+          "completion_tokens": 668,
+          "thinking_tokens": 0,
+          "code": "package main\n\nimport (\n\t\"fmt\"\n\t\"os\"\n)\n\nfunc main() {\n\tif len(os.Args) < 2 {\n\t\treturn\n\t}\n\n\ts := os.Args[1]\n\tif len(s) == 0 {\n\t\treturn\n\t}\n\n\tvar result string\n\tcount := 1\n\n\tfor i := 1; i < len(s); i++ {\n\t\tif s[i] == s[i-1] {\n\t\t\tcount++\n\t\t} else {\n\t\t\tresult += string(s[i-1]) + fmt.Sprint(count)\n\t\t\tcount = 1\n\t\t}\n\t}\n\n\tresult += string(s[len(s)-1]) + fmt.Sprint(count)\n\tfmt.Print(result)\n}",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "aaabbc"
+              ],
+              "expected": "'a3b2c1\\n'",
+              "actual": "'a3b2c1'",
+              "stderr": "",
+              "passed": false
+            },
+            {
+              "case": 1,
+              "args": [
+                "aaa"
+              ],
+              "expected": "'a3\\n'",
+              "actual": "'a3'",
+              "stderr": "",
+              "passed": false
+            },
+            {
+              "case": 2,
+              "args": [
+                "abcd"
+              ],
+              "expected": "'a1b1c1d1\\n'",
+              "actual": "'a1b1c1d1'",
+              "stderr": "",
+              "passed": false
+            },
+            {
+              "case": 3,
+              "args": [
+                "aaAAaa"
+              ],
+              "expected": "'a2A2a2\\n'",
+              "actual": "'a2A2a2'",
+              "stderr": "",
+              "passed": false
+            },
+            {
+              "case": 4,
+              "args": [
+                "a"
+              ],
+              "expected": "'a1\\n'",
+              "actual": "'a1'",
+              "stderr": "",
+              "passed": false
+            }
+          ],
+          "error": ""
+        },
+        {
+          "prompt_tokens": 33121,
+          "completion_tokens": 475,
+          "thinking_tokens": 0,
+          "code": "package main\n\nimport (\n\t\"fmt\"\n\t\"os\"\n)\n\nfunc main() {\n\tif len(os.Args) < 2 {\n\t\treturn\n\t}\n\n\ts := os.Args[1]\n\tif len(s) == 0 {\n\t\treturn\n\t}\n\n\tvar result string\n\tcount := 1\n\n\tfor i := 1; i < len(s); i++ {\n\t\tif s[i] == s[i-1] {\n\t\t\tcount++\n\t\t} else {\n\t\t\tresult += string(s[i-1]) + fmt.Sprint(count)\n\t\t\tcount = 1\n\t\t}\n\t}\n\n\tresult += string(s[len(s)-1]) + fmt.Sprint(count)\n\tfmt.Println(result)\n}",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "aaabbc"
+              ],
+              "expected": "'a3b2c1\\n'",
+              "actual": "'a3b2c1\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 1,
+              "args": [
+                "aaa"
+              ],
+              "expected": "'a3\\n'",
+              "actual": "'a3\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 2,
+              "args": [
+                "abcd"
+              ],
+              "expected": "'a1b1c1d1\\n'",
+              "actual": "'a1b1c1d1\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 3,
+              "args": [
+                "aaAAaa"
+              ],
+              "expected": "'a2A2a2\\n'",
+              "actual": "'a2A2a2\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 4,
+              "args": [
+                "a"
+              ],
+              "expected": "'a1\\n'",
+              "actual": "'a1\\n'",
+              "stderr": "",
+              "passed": true
+            }
+          ],
+          "error": ""
+        }
+      ],
+      "first_attempt_correct": false,
+      "final_correct": true,
+      "total_prompt_tokens": 65939,
+      "total_completion_tokens": 1143,
+      "total_thinking_tokens": 0,
+      "total_tokens": 67082,
+      "attempts_to_correct": 2,
+      "wall_time_s": 10.838229894638062
+    },
+    {
+      "task_id": "07_query_string",
+      "language": "sigil",
+      "model": "claude-haiku-4-5-20251001",
+      "run_index": 0,
+      "attempts": [
+        {
+          "prompt_tokens": 36493,
+          "completion_tokens": 10046,
+          "thinking_tokens": 0,
+          "code": "(module query_parser)\n\n(fn main -> int\n  (set args array (argv))\n  \n  (set query_str string \"\")\n  (if (ge (array_length args) 1)\n    (set query_str (array_get args 0)))\n  \n  (if (eq (string_length query_str) 0)\n    (ret 0))\n  \n  (set pairs array (string_split query_str \"&\"))\n  (set keys array (array_new))\n  (set values array (array_new))\n  \n  (for-each pair string pairs\n    (set parts array (string_split pair \"=\"))\n    (if (ge (array_length parts) 2)\n      (set keys (array_push keys (array_get parts 0)))\n      (set values (array_push values (array_get parts 1)))))\n  \n  (set len int (array_length keys))\n  \n  (for i 0 len\n    (for j 0 (sub len (add i 1))\n      (if (gt (array_get keys j) (array_get keys (add j 1)))\n        (set temp_key string (array_get keys j))\n        (set temp_val string (array_get values j))\n        (set keys (array_set keys j (array_get keys (add j 1))))\n        (set values (array_set values j (array_get values (add j 1))))\n        (set keys (array_set keys (add j 1) temp_key))\n        (set values (array_set values (add j 1) temp_val)))))\n  \n  (for i 0 len\n    (println (string_format \"{}={}\" (array_get keys i) (array_get values i))))\n  \n  (ret 0))",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "name=alice&age=30&city=paris"
+              ],
+              "expected": "'age=30\\ncity=paris\\nname=alice\\n'",
+              "actual": "''",
+              "stderr": "Error: No 'main' function found\n",
+              "passed": false
+            },
+            {
+              "case": 1,
+              "args": [
+                "z=1&a=2"
+              ],
+              "expected": "'a=2\\nz=1\\n'",
+              "actual": "''",
+              "stderr": "Error: No 'main' function found\n",
+              "passed": false
+            },
+            {
+              "case": 2,
+              "args": [
+                "single=value"
+              ],
+              "expected": "'single=value\\n'",
+              "actual": "''",
+              "stderr": "Error: No 'main' function found\n",
+              "passed": false
+            },
+            {
+              "case": 3,
+              "args": [
+                ""
+              ],
+              "expected": "''",
+              "actual": "''",
+              "stderr": "Error: No 'main' function found\n",
+              "passed": false
+            }
+          ],
+          "error": ""
+        },
+        {
+          "prompt_tokens": 37083,
+          "completion_tokens": 2005,
+          "thinking_tokens": 0,
+          "code": "(module query_parser\n\n(fn main -> int\n  (set args array (argv))\n  \n  (set query_str string \"\")\n  (if (ge (array_length args) 1)\n    (set query_str (array_get args 0)))\n  \n  (if (eq (string_length query_str) 0)\n    (ret 0))\n  \n  (set pairs array (string_split query_str \"&\"))\n  (set keys array (array_new))\n  (set values array (array_new))\n  \n  (for-each pair string pairs\n    (set parts array (string_split pair \"=\"))\n    (if (ge (array_length parts) 2)\n      (set keys (array_push keys (array_get parts 0)))\n      (set values (array_push values (array_get parts 1)))))\n  \n  (set len int (array_length keys))\n  \n  (for i 0 len\n    (for j 0 (sub len (add i 1))\n      (if (gt (array_get keys j) (array_get keys (add j 1)))\n        (set temp_key string (array_get keys j))\n        (set temp_val string (array_get values j))\n        (set keys (array_set keys j (array_get keys (add j 1))))\n        (set values (array_set values j (array_get values (add j 1))))\n        (set keys (array_set keys (add j 1) temp_key))\n        (set values (array_set values (add j 1) temp_val)))))\n  \n  (for i 0 len\n    (println (string_format \"{}={}\" (array_get keys i) (array_get values i))))\n  \n  (ret 0))\n\n)",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "name=alice&age=30&city=paris"
+              ],
+              "expected": "'age=30\\ncity=paris\\nname=alice\\n'",
+              "actual": "''",
+              "stderr": "Runtime error: Invalid arguments to gt\n",
+              "passed": false
+            },
+            {
+              "case": 1,
+              "args": [
+                "z=1&a=2"
+              ],
+              "expected": "'a=2\\nz=1\\n'",
+              "actual": "''",
+              "stderr": "Runtime error: Invalid arguments to gt\n",
+              "passed": false
+            },
+            {
+              "case": 2,
+              "args": [
+                "single=value"
+              ],
+              "expected": "'single=value\\n'",
+              "actual": "'single=value\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 3,
+              "args": [
+                ""
+              ],
+              "expected": "''",
+              "actual": "''",
+              "stderr": "",
+              "passed": true
+            }
+          ],
+          "error": ""
+        },
+        {
+          "prompt_tokens": 37640,
+          "completion_tokens": 2191,
+          "thinking_tokens": 0,
+          "code": "(module query_parser)\n\n(fn main -> int\n  (set args array (argv))\n  \n  (set query_str string \"\")\n  (if (ge (array_length args) 1)\n    (set query_str (array_get args 0)))\n  \n  (if (eq (string_length query_str) 0)\n    (ret 0))\n  \n  (set pairs array (string_split query_str \"&\"))\n  (set params map (map_new))\n  \n  (for-each pair string pairs\n    (set parts array (string_split pair \"=\"))\n    (if (ge (array_length parts) 2)\n      (set key string (array_get parts 0))\n      (set val string (array_get parts 1))\n      (set params (map_set params key val))))\n  \n  (set keys array (map_keys params))\n  (set sorted_keys array (array_sort keys))\n  \n  (for-each key string sorted_keys\n    (set val string (map_get params key))\n    (println (string_format \"{}={}\" key val)))\n  \n  (ret 0))",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "name=alice&age=30&city=paris"
+              ],
+              "expected": "'age=30\\ncity=paris\\nname=alice\\n'",
+              "actual": "''",
+              "stderr": "Error: No 'main' function found\n",
+              "passed": false
+            },
+            {
+              "case": 1,
+              "args": [
+                "z=1&a=2"
+              ],
+              "expected": "'a=2\\nz=1\\n'",
+              "actual": "''",
+              "stderr": "Error: No 'main' function found\n",
+              "passed": false
+            },
+            {
+              "case": 2,
+              "args": [
+                "single=value"
+              ],
+              "expected": "'single=value\\n'",
+              "actual": "''",
+              "stderr": "Error: No 'main' function found\n",
+              "passed": false
+            },
+            {
+              "case": 3,
+              "args": [
+                ""
+              ],
+              "expected": "''",
+              "actual": "''",
+              "stderr": "Error: No 'main' function found\n",
+              "passed": false
+            }
+          ],
+          "error": ""
+        },
+        {
+          "prompt_tokens": 38074,
+          "completion_tokens": 1064,
+          "thinking_tokens": 0,
+          "code": "(module query_parser\n  (fn main -> int\n    (set args array (argv))\n    \n    (set query_str string \"\")\n    (if (ge (array_length args) 1)\n      (set query_str (array_get args 0)))\n    \n    (if (eq (string_length query_str) 0)\n      (ret 0))\n    \n    (set pairs array (string_split query_str \"&\"))\n    (set params map (map_new))\n    \n    (for-each pair string pairs\n      (set parts array (string_split pair \"=\"))\n      (if (ge (array_length parts) 2)\n        (set key string (array_get parts 0))\n        (set val string (array_get parts 1))\n        (set params (map_set params key val))))\n    \n    (set keys array (map_keys params))\n    (set sorted_keys array (array_sort keys))\n    \n    (for-each key string sorted_keys\n      (set val string (map_get params key))\n      (println (string_format \"{}={}\" key val)))\n    \n    (ret 0)\n  )\n)",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "name=alice&age=30&city=paris"
+              ],
+              "expected": "'age=30\\ncity=paris\\nname=alice\\n'",
+              "actual": "'age=30\\ncity=paris\\nname=alice\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 1,
+              "args": [
+                "z=1&a=2"
+              ],
+              "expected": "'a=2\\nz=1\\n'",
+              "actual": "'a=2\\nz=1\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 2,
+              "args": [
+                "single=value"
+              ],
+              "expected": "'single=value\\n'",
+              "actual": "'single=value\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 3,
+              "args": [
+                ""
+              ],
+              "expected": "''",
+              "actual": "''",
+              "stderr": "",
+              "passed": true
+            }
+          ],
+          "error": ""
+        }
+      ],
+      "first_attempt_correct": false,
+      "final_correct": true,
+      "total_prompt_tokens": 149290,
+      "total_completion_tokens": 15306,
+      "total_thinking_tokens": 0,
+      "total_tokens": 164596,
+      "attempts_to_correct": 4,
+      "wall_time_s": 98.88627362251282
+    },
+    {
+      "task_id": "07_query_string",
+      "language": "python",
+      "model": "claude-haiku-4-5-20251001",
+      "run_index": 0,
+      "attempts": [
+        {
+          "prompt_tokens": 32811,
+          "completion_tokens": 1022,
+          "thinking_tokens": 0,
+          "code": "import sys\n\nif len(sys.argv) > 1 and sys.argv[1]:\n    query_string = sys.argv[1]\n    pairs = query_string.split('&')\n    kv_dict = {}\n    for pair in pairs:\n        if '=' in pair:\n            key, value = pair.split('=', 1)\n            kv_dict[key] = value\n    \n    for key in sorted(kv_dict.keys()):\n        print(f\"{key}={kv_dict[key]}\")",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "name=alice&age=30&city=paris"
+              ],
+              "expected": "'age=30\\ncity=paris\\nname=alice\\n'",
+              "actual": "'age=30\\ncity=paris\\nname=alice\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 1,
+              "args": [
+                "z=1&a=2"
+              ],
+              "expected": "'a=2\\nz=1\\n'",
+              "actual": "'a=2\\nz=1\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 2,
+              "args": [
+                "single=value"
+              ],
+              "expected": "'single=value\\n'",
+              "actual": "'single=value\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 3,
+              "args": [
+                ""
+              ],
+              "expected": "''",
+              "actual": "''",
+              "stderr": "",
+              "passed": true
+            }
+          ],
+          "error": ""
+        }
+      ],
+      "first_attempt_correct": true,
+      "final_correct": true,
+      "total_prompt_tokens": 32811,
+      "total_completion_tokens": 1022,
+      "total_thinking_tokens": 0,
+      "total_tokens": 33833,
+      "attempts_to_correct": 1,
+      "wall_time_s": 8.47057580947876
+    },
+    {
+      "task_id": "07_query_string",
+      "language": "javascript",
+      "model": "claude-haiku-4-5-20251001",
+      "run_index": 0,
+      "attempts": [
+        {
+          "prompt_tokens": 32824,
+          "completion_tokens": 1027,
+          "thinking_tokens": 0,
+          "code": "const queryString = process.argv[2];\n\nif (!queryString) {\n  process.exit(0);\n}\n\nconst pairs = queryString\n  .split('&')\n  .map(pair => pair.split('='))\n  .sort((a, b) => a[0].localeCompare(b[0]));\n\npairs.forEach(([key, value]) => {\n  console.log(`${key}=${value}`);\n});",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "name=alice&age=30&city=paris"
+              ],
+              "expected": "'age=30\\ncity=paris\\nname=alice\\n'",
+              "actual": "'age=30\\ncity=paris\\nname=alice\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 1,
+              "args": [
+                "z=1&a=2"
+              ],
+              "expected": "'a=2\\nz=1\\n'",
+              "actual": "'a=2\\nz=1\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 2,
+              "args": [
+                "single=value"
+              ],
+              "expected": "'single=value\\n'",
+              "actual": "'single=value\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 3,
+              "args": [
+                ""
+              ],
+              "expected": "''",
+              "actual": "''",
+              "stderr": "",
+              "passed": true
+            }
+          ],
+          "error": ""
+        }
+      ],
+      "first_attempt_correct": true,
+      "final_correct": true,
+      "total_prompt_tokens": 32824,
+      "total_completion_tokens": 1027,
+      "total_thinking_tokens": 0,
+      "total_tokens": 33851,
+      "attempts_to_correct": 1,
+      "wall_time_s": 9.060510873794556
+    },
+    {
+      "task_id": "07_query_string",
+      "language": "go",
+      "model": "claude-haiku-4-5-20251001",
+      "run_index": 0,
+      "attempts": [
+        {
+          "prompt_tokens": 32826,
+          "completion_tokens": 657,
+          "thinking_tokens": 0,
+          "code": "package main\n\nimport (\n\t\"fmt\"\n\t\"net/url\"\n\t\"os\"\n\t\"sort\"\n)\n\nfunc main() {\n\tif len(os.Args) < 2 {\n\t\treturn\n\t}\n\n\tquery := os.Args[1]\n\tif query == \"\" {\n\t\treturn\n\t}\n\n\tvalues, err := url.ParseQuery(query)\n\tif err != nil {\n\t\treturn\n\t}\n\n\tvar keys []string\n\tfor key := range values {\n\t\tkeys = append(keys, key)\n\t}\n\tsort.Strings(keys)\n\n\tfor _, key := range keys {\n\t\tfmt.Printf(\"%s=%s\\n\", key, values.Get(key))\n\t}\n}",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "name=alice&age=30&city=paris"
+              ],
+              "expected": "'age=30\\ncity=paris\\nname=alice\\n'",
+              "actual": "'age=30\\ncity=paris\\nname=alice\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 1,
+              "args": [
+                "z=1&a=2"
+              ],
+              "expected": "'a=2\\nz=1\\n'",
+              "actual": "'a=2\\nz=1\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 2,
+              "args": [
+                "single=value"
+              ],
+              "expected": "'single=value\\n'",
+              "actual": "'single=value\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 3,
+              "args": [
+                ""
+              ],
+              "expected": "''",
+              "actual": "''",
+              "stderr": "",
+              "passed": true
+            }
+          ],
+          "error": ""
+        }
+      ],
+      "first_attempt_correct": true,
+      "final_correct": true,
+      "total_prompt_tokens": 32826,
+      "total_completion_tokens": 657,
+      "total_thinking_tokens": 0,
+      "total_tokens": 33483,
+      "attempts_to_correct": 1,
+      "wall_time_s": 7.367993354797363
+    },
+    {
+      "task_id": "08_stack_calculator",
+      "language": "sigil",
+      "model": "claude-haiku-4-5-20251001",
+      "run_index": 0,
+      "attempts": [
+        {
+          "prompt_tokens": 36490,
+          "completion_tokens": 4924,
+          "thinking_tokens": 0,
+          "code": "(module rpn_eval\n  (fn main -> int\n    (set args array (argv))\n    (if (eq (array_length args) 0)\n      (ret 1))\n    \n    (set expr string (array_get args 0))\n    (set tokens array (string_split expr \" \"))\n    (set stack array (array_new))\n    \n    (for-each token string tokens\n      (cond\n        ((eq token \"+\")\n          (set b int (array_pop stack))\n          (set a int (array_pop stack))\n          (array_push stack (add a b)))\n        ((eq token \"-\")\n          (set b int (array_pop stack))\n          (set a int (array_pop stack))\n          (array_push stack (sub a b)))\n        ((eq token \"*\")\n          (set b int (array_pop stack))\n          (set a int (array_pop stack))\n          (array_push stack (mul a b)))\n        ((eq token \"/\")\n          (set b int (array_pop stack))\n          (set a int (array_pop stack))\n          (array_push stack (div a b)))\n        (true\n          (array_push stack (string_to_int token)))))\n    \n    (set result int (array_pop stack))\n    (println result)\n    (ret 0)))",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "3 4 +"
+              ],
+              "expected": "'7\\n'",
+              "actual": "'7\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 1,
+              "args": [
+                "5 1 2 + 4 * + 3 -"
+              ],
+              "expected": "'14\\n'",
+              "actual": "'14\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 2,
+              "args": [
+                "2 3 * 4 5 * +"
+              ],
+              "expected": "'26\\n'",
+              "actual": "'26\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 3,
+              "args": [
+                "10 3 /"
+              ],
+              "expected": "'3\\n'",
+              "actual": "'3\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 4,
+              "args": [
+                "42"
+              ],
+              "expected": "'42\\n'",
+              "actual": "'42\\n'",
+              "stderr": "",
+              "passed": true
+            }
+          ],
+          "error": ""
+        }
+      ],
+      "first_attempt_correct": true,
+      "final_correct": true,
+      "total_prompt_tokens": 36490,
+      "total_completion_tokens": 4924,
+      "total_thinking_tokens": 0,
+      "total_tokens": 41414,
+      "attempts_to_correct": 1,
+      "wall_time_s": 33.757838010787964
+    },
+    {
+      "task_id": "08_stack_calculator",
+      "language": "python",
+      "model": "claude-haiku-4-5-20251001",
+      "run_index": 0,
+      "attempts": [
+        {
+          "prompt_tokens": 32808,
+          "completion_tokens": 1069,
+          "thinking_tokens": 0,
+          "code": "import sys\n\ndef evaluate_rpn(expression):\n    tokens = expression.split()\n    stack = []\n    \n    for token in tokens:\n        if token in ['+', '-', '*', '/']:\n            b = stack.pop()\n            a = stack.pop()\n            \n            if token == '+':\n                result = a + b\n            elif token == '-':\n                result = a - b\n            elif token == '*':\n                result = a * b\n            elif token == '/':\n                result = int(a / b)\n            \n            stack.append(result)\n        else:\n            stack.append(int(token))\n    \n    return stack[0]\n\nif __name__ == '__main__':\n    expression = sys.argv[1]\n    result = evaluate_rpn(expression)\n    print(result)",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "3 4 +"
+              ],
+              "expected": "'7\\n'",
+              "actual": "'7\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 1,
+              "args": [
+                "5 1 2 + 4 * + 3 -"
+              ],
+              "expected": "'14\\n'",
+              "actual": "'14\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 2,
+              "args": [
+                "2 3 * 4 5 * +"
+              ],
+              "expected": "'26\\n'",
+              "actual": "'26\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 3,
+              "args": [
+                "10 3 /"
+              ],
+              "expected": "'3\\n'",
+              "actual": "'3\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 4,
+              "args": [
+                "42"
+              ],
+              "expected": "'42\\n'",
+              "actual": "'42\\n'",
+              "stderr": "",
+              "passed": true
+            }
+          ],
+          "error": ""
+        }
+      ],
+      "first_attempt_correct": true,
+      "final_correct": true,
+      "total_prompt_tokens": 32808,
+      "total_completion_tokens": 1069,
+      "total_thinking_tokens": 0,
+      "total_tokens": 33877,
+      "attempts_to_correct": 1,
+      "wall_time_s": 8.377093076705933
+    },
+    {
+      "task_id": "08_stack_calculator",
+      "language": "javascript",
+      "model": "claude-haiku-4-5-20251001",
+      "run_index": 0,
+      "attempts": [
+        {
+          "prompt_tokens": 32821,
+          "completion_tokens": 1014,
+          "thinking_tokens": 0,
+          "code": "const expression = process.argv[2];\nconst tokens = expression.split(' ');\nconst stack = [];\n\nfor (const token of tokens) {\n  if (token === '+' || token === '-' || token === '*' || token === '/') {\n    const b = stack.pop();\n    const a = stack.pop();\n    let result;\n    \n    switch (token) {\n      case '+':\n        result = a + b;\n        break;\n      case '-':\n        result = a - b;\n        break;\n      case '*':\n        result = a * b;\n        break;\n      case '/':\n        result = Math.trunc(a / b);\n        break;\n    }\n    \n    stack.push(result);\n  } else {\n    stack.push(parseInt(token, 10));\n  }\n}\n\nconsole.log(stack[0]);",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "3 4 +"
+              ],
+              "expected": "'7\\n'",
+              "actual": "'7\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 1,
+              "args": [
+                "5 1 2 + 4 * + 3 -"
+              ],
+              "expected": "'14\\n'",
+              "actual": "'14\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 2,
+              "args": [
+                "2 3 * 4 5 * +"
+              ],
+              "expected": "'26\\n'",
+              "actual": "'26\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 3,
+              "args": [
+                "10 3 /"
+              ],
+              "expected": "'3\\n'",
+              "actual": "'3\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 4,
+              "args": [
+                "42"
+              ],
+              "expected": "'42\\n'",
+              "actual": "'42\\n'",
+              "stderr": "",
+              "passed": true
+            }
+          ],
+          "error": ""
+        }
+      ],
+      "first_attempt_correct": true,
+      "final_correct": true,
+      "total_prompt_tokens": 32821,
+      "total_completion_tokens": 1014,
+      "total_thinking_tokens": 0,
+      "total_tokens": 33835,
+      "attempts_to_correct": 1,
+      "wall_time_s": 8.504496335983276
+    },
+    {
+      "task_id": "08_stack_calculator",
+      "language": "go",
+      "model": "claude-haiku-4-5-20251001",
+      "run_index": 0,
+      "attempts": [
+        {
+          "prompt_tokens": 32823,
+          "completion_tokens": 2023,
+          "thinking_tokens": 0,
+          "code": "package main\n\nimport (\n\t\"fmt\"\n\t\"os\"\n\t\"strconv\"\n\t\"strings\"\n)\n\nfunc main() {\n\ttokens := strings.Fields(os.Args[1])\n\tstack := []int64{}\n\n\tfor _, token := range tokens {\n\t\tswitch token {\n\t\tcase \"+\", \"-\", \"*\", \"/\":\n\t\t\tb := stack[len(stack)-1]\n\t\t\ta := stack[len(stack)-2]\n\t\t\tstack = stack[:len(stack)-2]\n\n\t\t\tvar result int64\n\t\t\tswitch token {\n\t\t\tcase \"+\":\n\t\t\t\tresult = a + b\n\t\t\tcase \"-\":\n\t\t\t\tresult = a - b\n\t\t\tcase \"*\":\n\t\t\t\tresult = a * b\n\t\t\tcase \"/\":\n\t\t\t\tresult = a / b\n\t\t\t}\n\t\t\tstack = append(stack, result)\n\t\tdefault:\n\t\t\tnum, _ := strconv.ParseInt(token, 10, 64)\n\t\t\tstack = append(stack, num)\n\t\t}\n\t}\n\n\tfmt.Println(stack[0])\n}",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "3 4 +"
+              ],
+              "expected": "'7\\n'",
+              "actual": "'7\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 1,
+              "args": [
+                "5 1 2 + 4 * + 3 -"
+              ],
+              "expected": "'14\\n'",
+              "actual": "'14\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 2,
+              "args": [
+                "2 3 * 4 5 * +"
+              ],
+              "expected": "'26\\n'",
+              "actual": "'26\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 3,
+              "args": [
+                "10 3 /"
+              ],
+              "expected": "'3\\n'",
+              "actual": "'3\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 4,
+              "args": [
+                "42"
+              ],
+              "expected": "'42\\n'",
+              "actual": "'42\\n'",
+              "stderr": "",
+              "passed": true
+            }
+          ],
+          "error": ""
+        }
+      ],
+      "first_attempt_correct": true,
+      "final_correct": true,
+      "total_prompt_tokens": 32823,
+      "total_completion_tokens": 2023,
+      "total_thinking_tokens": 0,
+      "total_tokens": 34846,
+      "attempts_to_correct": 1,
+      "wall_time_s": 12.220420837402344
+    },
+    {
+      "task_id": "09_matrix_transpose",
+      "language": "sigil",
+      "model": "claude-haiku-4-5-20251001",
+      "run_index": 0,
+      "attempts": [
+        {
+          "prompt_tokens": 36493,
+          "completion_tokens": 8972,
+          "thinking_tokens": 0,
+          "code": "(module matrix-transpose\n  (fn parse_row row:string -> array\n    (ret (string_split row \",\")))\n  \n  (fn parse_matrix matrix_str:string -> array\n    (set rows array (string_split matrix_str \";\"))\n    (set result array (array_new))\n    (for-each row string rows\n      (set parsed_row array (parse_row row))\n      (set result (array_push result parsed_row)))\n    (ret result))\n  \n  (fn transpose matrix:array -> array\n    (if (eq (array_length matrix) 0)\n      (ret (array_new)))\n    (set first_row array (array_get matrix 0))\n    (set num_cols int (array_length first_row))\n    (set result array (array_new))\n    (for col 0 num_cols\n      (set new_row array (array_new))\n      (for-each row array matrix\n        (set val string (array_get row col))\n        (set new_row (array_push new_row val)))\n      (set result (array_push result new_row)))\n    (ret result))\n  \n  (fn format_matrix matrix:array -> string\n    (set lines array (array_new))\n    (for-each row array matrix\n      (set line string (string_join row \",\"))\n      (set lines (array_push lines line)))\n    (ret (string_join lines \"\\n\")))\n  \n  (fn main -> int\n    (set args array (argv))\n    (if (eq (array_length args) 0)\n      (ret 1))\n    (set matrix_str string (array_get args 0))\n    (set matrix array (parse_matrix matrix_str))\n    (set transposed array (transpose matrix))\n    (set output string (format_matrix transposed))\n    (println output)\n    (ret 0)))",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "1,2,3;4,5,6"
+              ],
+              "expected": "'1,4\\n2,5\\n3,6\\n'",
+              "actual": "''",
+              "stderr": "Lexer error: Unexpected character: :\n",
+              "passed": false
+            },
+            {
+              "case": 1,
+              "args": [
+                "1,2;3,4;5,6"
+              ],
+              "expected": "'1,3,5\\n2,4,6\\n'",
+              "actual": "''",
+              "stderr": "Lexer error: Unexpected character: :\n",
+              "passed": false
+            },
+            {
+              "case": 2,
+              "args": [
+                "42"
+              ],
+              "expected": "'42\\n'",
+              "actual": "''",
+              "stderr": "Lexer error: Unexpected character: :\n",
+              "passed": false
+            },
+            {
+              "case": 3,
+              "args": [
+                "1,2,3"
+              ],
+              "expected": "'1\\n2\\n3\\n'",
+              "actual": "''",
+              "stderr": "Lexer error: Unexpected character: :\n",
+              "passed": false
+            }
+          ],
+          "error": ""
+        },
+        {
+          "prompt_tokens": 37112,
+          "completion_tokens": 1615,
+          "thinking_tokens": 0,
+          "code": "(module matrix-transpose\n  (fn parse_row row string -> array\n    (ret (string_split row \",\")))\n  \n  (fn parse_matrix matrix_str string -> array\n    (set rows array (string_split matrix_str \";\"))\n    (set result array (array_new))\n    (for-each row string rows\n      (set parsed_row array (parse_row row))\n      (set result (array_push result parsed_row)))\n    (ret result))\n  \n  (fn transpose matrix array -> array\n    (if (eq (array_length matrix) 0)\n      (ret (array_new)))\n    (set first_row array (array_get matrix 0))\n    (set num_cols int (array_length first_row))\n    (set result array (array_new))\n    (for col 0 num_cols\n      (set new_row array (array_new))\n      (for-each row array matrix\n        (set val string (array_get row col))\n        (set new_row (array_push new_row val)))\n      (set result (array_push result new_row)))\n    (ret result))\n  \n  (fn format_matrix matrix array -> string\n    (set lines array (array_new))\n    (for-each row array matrix\n      (set line string (string_join row \",\"))\n      (set lines (array_push lines line)))\n    (ret (string_join lines \"\\n\")))\n  \n  (fn main -> int\n    (set args array (argv))\n    (if (eq (array_length args) 0)\n      (ret 1))\n    (set matrix_str string (array_get args 0))\n    (set matrix array (parse_matrix matrix_str))\n    (set transposed array (transpose matrix))\n    (set output string (format_matrix transposed))\n    (println output)\n    (ret 0)))",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "1,2,3;4,5,6"
+              ],
+              "expected": "'1,4\\n2,5\\n3,6\\n'",
+              "actual": "'1,4\\n2,5\\n3,6\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 1,
+              "args": [
+                "1,2;3,4;5,6"
+              ],
+              "expected": "'1,3,5\\n2,4,6\\n'",
+              "actual": "'1,3,5\\n2,4,6\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 2,
+              "args": [
+                "42"
+              ],
+              "expected": "'42\\n'",
+              "actual": "'42\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 3,
+              "args": [
+                "1,2,3"
+              ],
+              "expected": "'1\\n2\\n3\\n'",
+              "actual": "'1\\n2\\n3\\n'",
+              "stderr": "",
+              "passed": true
+            }
+          ],
+          "error": ""
+        }
+      ],
+      "first_attempt_correct": false,
+      "final_correct": true,
+      "total_prompt_tokens": 73605,
+      "total_completion_tokens": 10587,
+      "total_thinking_tokens": 0,
+      "total_tokens": 84192,
+      "attempts_to_correct": 2,
+      "wall_time_s": 65.42651414871216
+    },
+    {
+      "task_id": "09_matrix_transpose",
+      "language": "python",
+      "model": "claude-haiku-4-5-20251001",
+      "run_index": 0,
+      "attempts": [
+        {
+          "prompt_tokens": 32811,
+          "completion_tokens": 491,
+          "thinking_tokens": 0,
+          "code": "import sys\n\nmatrix_str = sys.argv[1]\nrows = matrix_str.split(';')\nmatrix = [row.split(',') for row in rows]\n\ntransposed = list(zip(*matrix))\n\nfor row in transposed:\n    print(','.join(row))",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "1,2,3;4,5,6"
+              ],
+              "expected": "'1,4\\n2,5\\n3,6\\n'",
+              "actual": "'1,4\\n2,5\\n3,6\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 1,
+              "args": [
+                "1,2;3,4;5,6"
+              ],
+              "expected": "'1,3,5\\n2,4,6\\n'",
+              "actual": "'1,3,5\\n2,4,6\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 2,
+              "args": [
+                "42"
+              ],
+              "expected": "'42\\n'",
+              "actual": "'42\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 3,
+              "args": [
+                "1,2,3"
+              ],
+              "expected": "'1\\n2\\n3\\n'",
+              "actual": "'1\\n2\\n3\\n'",
+              "stderr": "",
+              "passed": true
+            }
+          ],
+          "error": ""
+        }
+      ],
+      "first_attempt_correct": true,
+      "final_correct": true,
+      "total_prompt_tokens": 32811,
+      "total_completion_tokens": 491,
+      "total_thinking_tokens": 0,
+      "total_tokens": 33302,
+      "attempts_to_correct": 1,
+      "wall_time_s": 4.298473358154297
+    },
+    {
+      "task_id": "09_matrix_transpose",
+      "language": "javascript",
+      "model": "claude-haiku-4-5-20251001",
+      "run_index": 0,
+      "attempts": [
+        {
+          "prompt_tokens": 32824,
+          "completion_tokens": 709,
+          "thinking_tokens": 0,
+          "code": "const input = process.argv[2];\n\nconst rows = input.split(';');\nconst matrix = rows.map(row => row.split(',').map(Number));\n\nconst numRows = matrix.length;\nconst numCols = matrix[0].length;\n\nconst transposed = [];\nfor (let col = 0; col < numCols; col++) {\n  const newRow = [];\n  for (let row = 0; row < numRows; row++) {\n    newRow.push(matrix[row][col]);\n  }\n  transposed.push(newRow);\n}\n\ntransposed.forEach(row => {\n  console.log(row.join(','));\n});",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "1,2,3;4,5,6"
+              ],
+              "expected": "'1,4\\n2,5\\n3,6\\n'",
+              "actual": "'1,4\\n2,5\\n3,6\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 1,
+              "args": [
+                "1,2;3,4;5,6"
+              ],
+              "expected": "'1,3,5\\n2,4,6\\n'",
+              "actual": "'1,3,5\\n2,4,6\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 2,
+              "args": [
+                "42"
+              ],
+              "expected": "'42\\n'",
+              "actual": "'42\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 3,
+              "args": [
+                "1,2,3"
+              ],
+              "expected": "'1\\n2\\n3\\n'",
+              "actual": "'1\\n2\\n3\\n'",
+              "stderr": "",
+              "passed": true
+            }
+          ],
+          "error": ""
+        }
+      ],
+      "first_attempt_correct": true,
+      "final_correct": true,
+      "total_prompt_tokens": 32824,
+      "total_completion_tokens": 709,
+      "total_thinking_tokens": 0,
+      "total_tokens": 33533,
+      "attempts_to_correct": 1,
+      "wall_time_s": 7.079416513442993
+    },
+    {
+      "task_id": "09_matrix_transpose",
+      "language": "go",
+      "model": "claude-haiku-4-5-20251001",
+      "run_index": 0,
+      "attempts": [
+        {
+          "prompt_tokens": 32826,
+          "completion_tokens": 1303,
+          "thinking_tokens": 0,
+          "code": "package main\n\nimport (\n\t\"fmt\"\n\t\"os\"\n\t\"strings\"\n)\n\nfunc main() {\n\tif len(os.Args) < 2 {\n\t\treturn\n\t}\n\n\tinput := os.Args[1]\n\t\n\t// Parse the matrix\n\trowStrings := strings.Split(input, \";\")\n\tvar matrix [][]string\n\t\n\tfor _, row := range rowStrings {\n\t\tvalues := strings.Split(row, \",\")\n\t\tmatrix = append(matrix, values)\n\t}\n\t\n\t// Transpose\n\tif len(matrix) == 0 {\n\t\treturn\n\t}\n\t\n\tcols := len(matrix[0])\n\t\n\tfor j := 0; j < cols; j++ {\n\t\tvar transposed []string\n\t\tfor i := 0; i < len(matrix); i++ {\n\t\t\ttransposed = append(transposed, matrix[i][j])\n\t\t}\n\t\tfmt.Println(strings.Join(transposed, \",\"))\n\t}\n}",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "1,2,3;4,5,6"
+              ],
+              "expected": "'1,4\\n2,5\\n3,6\\n'",
+              "actual": "'1,4\\n2,5\\n3,6\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 1,
+              "args": [
+                "1,2;3,4;5,6"
+              ],
+              "expected": "'1,3,5\\n2,4,6\\n'",
+              "actual": "'1,3,5\\n2,4,6\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 2,
+              "args": [
+                "42"
+              ],
+              "expected": "'42\\n'",
+              "actual": "'42\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 3,
+              "args": [
+                "1,2,3"
+              ],
+              "expected": "'1\\n2\\n3\\n'",
+              "actual": "'1\\n2\\n3\\n'",
+              "stderr": "",
+              "passed": true
+            }
+          ],
+          "error": ""
+        }
+      ],
+      "first_attempt_correct": true,
+      "final_correct": true,
+      "total_prompt_tokens": 32826,
+      "total_completion_tokens": 1303,
+      "total_thinking_tokens": 0,
+      "total_tokens": 34129,
+      "attempts_to_correct": 1,
+      "wall_time_s": 9.27881145477295
+    },
+    {
+      "task_id": "10_caesar_cipher",
+      "language": "sigil",
+      "model": "claude-haiku-4-5-20251001",
+      "run_index": 0,
+      "attempts": [
+        {
+          "prompt_tokens": 36498,
+          "completion_tokens": 7561,
+          "thinking_tokens": 0,
+          "code": "(module caesar\n  (fn shift_char c int shift int -> int\n    (if (and (ge c 65) (le c 90))\n      (set pos int (sub c 65))\n      (set new_pos int (add pos shift))\n      (set wrapped int (mod (add new_pos 260) 26))\n      (ret (add 65 wrapped)))\n    (if (and (ge c 97) (le c 122))\n      (set pos int (sub c 97))\n      (set new_pos int (add pos shift))\n      (set wrapped int (mod (add new_pos 260) 26))\n      (ret (add 97 wrapped)))\n    (ret c))\n\n  (fn process_message msg string shift int -> string\n    (set result string \"\")\n    (set len int (string_length msg))\n    (set i int 0)\n    (while (lt i len)\n      (set char_code int (string_get msg i))\n      (set shifted_code int (shift_char char_code shift))\n      (set result (string_concat result (char_from_code shifted_code)))\n      (set i (add i 1)))\n    (ret result))\n\n  (fn main -> int\n    (set args array (argv))\n    (set argc int (array_length args))\n    (if (ne argc 3)\n      (ret 1))\n    (set mode string (array_get args 0))\n    (set shift_str string (array_get args 1))\n    (set message string (array_get args 2))\n    (set shift int (string_to_int shift_str))\n    (if (string_equals mode \"decode\")\n      (set shift (neg shift)))\n    (set result string (process_message message shift))\n    (println result)\n    (ret 0)))",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "encode",
+                "3",
+                "Hello World"
+              ],
+              "expected": "'Khoor Zruog\\n'",
+              "actual": "'Khoor Zruog\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 1,
+              "args": [
+                "decode",
+                "3",
+                "Khoor Zruog"
+              ],
+              "expected": "'Hello World\\n'",
+              "actual": "'Hello World\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 2,
+              "args": [
+                "encode",
+                "13",
+                "ABCxyz"
+              ],
+              "expected": "'NOPklm\\n'",
+              "actual": "'NOPklm\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 3,
+              "args": [
+                "encode",
+                "1",
+                "z"
+              ],
+              "expected": "'a\\n'",
+              "actual": "'a\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 4,
+              "args": [
+                "encode",
+                "0",
+                "No change!"
+              ],
+              "expected": "'No change!\\n'",
+              "actual": "'No change!\\n'",
+              "stderr": "",
+              "passed": true
+            }
+          ],
+          "error": ""
+        }
+      ],
+      "first_attempt_correct": true,
+      "final_correct": true,
+      "total_prompt_tokens": 36498,
+      "total_completion_tokens": 7561,
+      "total_thinking_tokens": 0,
+      "total_tokens": 44059,
+      "attempts_to_correct": 1,
+      "wall_time_s": 43.345276832580566
+    },
+    {
+      "task_id": "10_caesar_cipher",
+      "language": "python",
+      "model": "claude-haiku-4-5-20251001",
+      "run_index": 0,
+      "attempts": [
+        {
+          "prompt_tokens": 32816,
+          "completion_tokens": 993,
+          "thinking_tokens": 0,
+          "code": "import sys\n\ndef caesar_cipher(message, shift, encode=True):\n    result = []\n    \n    if not encode:\n        shift = -shift\n    \n    for char in message:\n        if char.isupper():\n            shifted = chr((ord(char) - ord('A') + shift) % 26 + ord('A'))\n            result.append(shifted)\n        elif char.islower():\n            shifted = chr((ord(char) - ord('a') + shift) % 26 + ord('a'))\n            result.append(shifted)\n        else:\n            result.append(char)\n    \n    return ''.join(result)\n\nmode = sys.argv[1]\nshift = int(sys.argv[2])\nmessage = sys.argv[3]\n\nencode = mode.lower() == \"encode\"\nresult = caesar_cipher(message, shift, encode)\nprint(result)",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "encode",
+                "3",
+                "Hello World"
+              ],
+              "expected": "'Khoor Zruog\\n'",
+              "actual": "'Khoor Zruog\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 1,
+              "args": [
+                "decode",
+                "3",
+                "Khoor Zruog"
+              ],
+              "expected": "'Hello World\\n'",
+              "actual": "'Hello World\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 2,
+              "args": [
+                "encode",
+                "13",
+                "ABCxyz"
+              ],
+              "expected": "'NOPklm\\n'",
+              "actual": "'NOPklm\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 3,
+              "args": [
+                "encode",
+                "1",
+                "z"
+              ],
+              "expected": "'a\\n'",
+              "actual": "'a\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 4,
+              "args": [
+                "encode",
+                "0",
+                "No change!"
+              ],
+              "expected": "'No change!\\n'",
+              "actual": "'No change!\\n'",
+              "stderr": "",
+              "passed": true
+            }
+          ],
+          "error": ""
+        }
+      ],
+      "first_attempt_correct": true,
+      "final_correct": true,
+      "total_prompt_tokens": 32816,
+      "total_completion_tokens": 993,
+      "total_thinking_tokens": 0,
+      "total_tokens": 33809,
+      "attempts_to_correct": 1,
+      "wall_time_s": 7.1880457401275635
+    },
+    {
+      "task_id": "10_caesar_cipher",
+      "language": "javascript",
+      "model": "claude-haiku-4-5-20251001",
+      "run_index": 0,
+      "attempts": [
+        {
+          "prompt_tokens": 32829,
+          "completion_tokens": 1981,
+          "thinking_tokens": 0,
+          "code": "const mode = process.argv[2];\nconst shift = parseInt(process.argv[3]);\nconst message = process.argv[4];\n\nconst result = message.split('').map(char => {\n  const dir = mode === 'encode' ? shift : -shift;\n  \n  if (char >= 'A' && char <= 'Z') {\n    return String.fromCharCode(((char.charCodeAt(0) - 65 + dir) % 26 + 26) % 26 + 65);\n  } else if (char >= 'a' && char <= 'z') {\n    return String.fromCharCode(((char.charCodeAt(0) - 97 + dir) % 26 + 26) % 26 + 97);\n  }\n  return char;\n}).join('');\n\nconsole.log(result);",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "encode",
+                "3",
+                "Hello World"
+              ],
+              "expected": "'Khoor Zruog\\n'",
+              "actual": "'Khoor Zruog\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 1,
+              "args": [
+                "decode",
+                "3",
+                "Khoor Zruog"
+              ],
+              "expected": "'Hello World\\n'",
+              "actual": "'Hello World\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 2,
+              "args": [
+                "encode",
+                "13",
+                "ABCxyz"
+              ],
+              "expected": "'NOPklm\\n'",
+              "actual": "'NOPklm\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 3,
+              "args": [
+                "encode",
+                "1",
+                "z"
+              ],
+              "expected": "'a\\n'",
+              "actual": "'a\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 4,
+              "args": [
+                "encode",
+                "0",
+                "No change!"
+              ],
+              "expected": "'No change!\\n'",
+              "actual": "'No change!\\n'",
+              "stderr": "",
+              "passed": true
+            }
+          ],
+          "error": ""
+        }
+      ],
+      "first_attempt_correct": true,
+      "final_correct": true,
+      "total_prompt_tokens": 32829,
+      "total_completion_tokens": 1981,
+      "total_thinking_tokens": 0,
+      "total_tokens": 34810,
+      "attempts_to_correct": 1,
+      "wall_time_s": 12.818423509597778
+    },
+    {
+      "task_id": "10_caesar_cipher",
+      "language": "go",
+      "model": "claude-haiku-4-5-20251001",
+      "run_index": 0,
+      "attempts": [
+        {
+          "prompt_tokens": 32831,
+          "completion_tokens": 1895,
+          "thinking_tokens": 0,
+          "code": "package main\n\nimport (\n\t\"fmt\"\n\t\"os\"\n\t\"strconv\"\n)\n\nfunc main() {\n\tif len(os.Args) < 4 {\n\t\tfmt.Println(\"Usage: program <encode|decode> <shift> <message>\")\n\t\tos.Exit(1)\n\t}\n\n\tmode := os.Args[1]\n\tshift, err := strconv.Atoi(os.Args[2])\n\tif err != nil {\n\t\tfmt.Println(\"Error: shift must be an integer\")\n\t\tos.Exit(1)\n\t}\n\tmessage := os.Args[3]\n\n\tif mode == \"decode\" {\n\t\tshift = -shift\n\t}\n\n\tshift = ((shift % 26) + 26) % 26\n\n\tresult := \"\"\n\tfor _, char := range message {\n\t\tif char >= 'a' && char <= 'z' {\n\t\t\tshifted := (int(char-'a') + shift) % 26\n\t\t\tresult += string(rune('a' + rune(shifted)))\n\t\t} else if char >= 'A' && char <= 'Z' {\n\t\t\tshifted := (int(char-'A') + shift) % 26\n\t\t\tresult += string(rune('A' + rune(shifted)))\n\t\t} else {\n\t\t\tresult += string(char)\n\t\t}\n\t}\n\n\tfmt.Println(result)\n}",
+          "parse_ok": true,
+          "test_results": [
+            {
+              "case": 0,
+              "args": [
+                "encode",
+                "3",
+                "Hello World"
+              ],
+              "expected": "'Khoor Zruog\\n'",
+              "actual": "'Khoor Zruog\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 1,
+              "args": [
+                "decode",
+                "3",
+                "Khoor Zruog"
+              ],
+              "expected": "'Hello World\\n'",
+              "actual": "'Hello World\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 2,
+              "args": [
+                "encode",
+                "13",
+                "ABCxyz"
+              ],
+              "expected": "'NOPklm\\n'",
+              "actual": "'NOPklm\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 3,
+              "args": [
+                "encode",
+                "1",
+                "z"
+              ],
+              "expected": "'a\\n'",
+              "actual": "'a\\n'",
+              "stderr": "",
+              "passed": true
+            },
+            {
+              "case": 4,
+              "args": [
+                "encode",
+                "0",
+                "No change!"
+              ],
+              "expected": "'No change!\\n'",
+              "actual": "'No change!\\n'",
+              "stderr": "",
+              "passed": true
+            }
+          ],
+          "error": ""
+        }
+      ],
+      "first_attempt_correct": true,
+      "final_correct": true,
+      "total_prompt_tokens": 32831,
+      "total_completion_tokens": 1895,
+      "total_thinking_tokens": 0,
+      "total_tokens": 34726,
+      "attempts_to_correct": 1,
+      "wall_time_s": 11.920676231384277
+    }
+  ]
+}

@@ -1,0 +1,28 @@
+{
+  "id": "06_run_length_encode",
+  "name": "Run-Length Encode",
+  "tier": 2,
+  "description": "Write a program that takes a string as first argument and prints its run-length encoding. Each run of consecutive identical characters should be output as the character followed by the count. For example, \"aaabbc\" becomes \"a3b2c1\".",
+  "test_cases": [
+    {
+      "args": ["aaabbc"],
+      "expected": "a3b2c1\n"
+    },
+    {
+      "args": ["aaa"],
+      "expected": "a3\n"
+    },
+    {
+      "args": ["abcd"],
+      "expected": "a1b1c1d1\n"
+    },
+    {
+      "args": ["aaAAaa"],
+      "expected": "a2A2a2\n"
+    },
+    {
+      "args": ["a"],
+      "expected": "a1\n"
+    }
+  ]
+}
