@@ -161,6 +161,36 @@
       (input)
       (expect 0)))
 
+  (fn entries_basic -> int
+    (set m (counter ["a" "b" "a"]))
+    (set es (entries m))
+    (ret (len es)))
+
+  (test-spec entries_basic
+    (case "entries returns one pair per key"
+      (input)
+      (expect 2)))
+
+  (fn entries_pair_shape -> string
+    (set m {"x" "1" "y" "2"})
+    (set e (array_get (entries m) 0))
+    (ret (add (array_get e 0) (add "=" (array_get e 1)))))
+
+  (test-spec entries_pair_shape
+    (case "each entry is a [key value] array"
+      (input)
+      (expect "x=1")))
+
+  (fn entries_ranked_sort -> string
+    (set m (counter ["the" "cat" "the" "dog" "the" "cat"]))
+    (set ranked (sort_by (entries m) (\e [ (neg (array_get e 1)) (array_get e 0) ])))
+    (ret (join (map_arr ranked (\e (fmt "{}:{}" (array_get e 0) (array_get e 1)))) ",")))
+
+  (test-spec entries_ranked_sort
+    (case "counter + entries + multi-key sort"
+      (input)
+      (expect "the:3,cat:2,dog:1")))
+
   (fn multi_key_sort -> string
     (set pairs [["the" 3] ["cat" 2] ["dog" 1] ["and" 2]])
     (set sorted (sort_by pairs (\p [ (neg (array_get p 1)) (array_get p 0) ])))

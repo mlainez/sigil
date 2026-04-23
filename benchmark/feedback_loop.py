@@ -115,6 +115,10 @@ Rules — follow STRICTLY for minimum tokens:
 14. Multi-key sort trick — sort_by's key fn can RETURN AN ARRAY for
     tuple-style sorting: (sort_by pairs (\\p [ (neg (array_get p 1)) (array_get p 0) ]))
     sorts by count desc, then word asc — mirrors Python's key=lambda x: (-x[1], x[0]).
+15. (entries m) returns array of [key, value] pairs (like Python .items()).
+    Use this with sort_by for ranked maps:
+      (sort_by (entries (counter words)) (\\e [(neg (array_get e 1)) (array_get e 0)]))
+    NOTE: do NOT confuse with map_entries — that returns maps {"key","value"}.
 11. Variadic println prints space-separated: (println a b c)
 12. Index with (array_get a i) — supports negatives like Python
 13. Comparisons are prefix: (gt a b), (lt a b), (eq a b)
@@ -604,6 +608,8 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--tier", type=int, default=2)
     parser.add_argument("--limit", type=int, default=None)
+    parser.add_argument("--ids", type=str, default=None,
+                       help="Comma-separated task ids to run (subset of the tier)")
     parser.add_argument("--save-corpus", action="store_true",
                        help="Save successful Sigil programs to examples/corpus/")
     args = parser.parse_args()
@@ -613,7 +619,14 @@ def main():
         print(f"No tasks for tier {args.tier}")
         sys.exit(1)
 
-    if args.limit:
+    if args.ids:
+        wanted = {s.strip() for s in args.ids.split(",") if s.strip()}
+        tasks = [t for t in tasks if t["id"] in wanted]
+        missing = wanted - {t["id"] for t in tasks}
+        if missing:
+            print(f"Unknown task ids: {missing}")
+            sys.exit(1)
+    elif args.limit:
         tasks = tasks[:args.limit]
 
     print(f"=== TIER {args.tier}: {len(tasks)} tasks ===\n")

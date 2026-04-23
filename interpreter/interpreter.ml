@@ -1717,6 +1717,16 @@ and eval_call env func_name args =
             VArray (ref (Array.of_list entries))
         | _ -> raise (RuntimeError "Invalid arguments to map_entries"))
 
+   | "entries" ->
+       (* Python .items() style: array of [key, value] pairs. *)
+       (match arg_vals with
+        | [VMap (m, keys)] ->
+            let pairs = List.map (fun k ->
+              VArray (ref [| VString k; Hashtbl.find m k |])
+            ) !keys in
+            VArray (ref (Array.of_list pairs))
+        | _ -> raise (RuntimeError "entries takes 1 map"))
+
    (* Helper: read entire file *)
    | "file_read" ->
        (match arg_vals with
