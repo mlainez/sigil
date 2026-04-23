@@ -2170,6 +2170,91 @@ and eval_call env func_name args =
            VInt (Int64.of_int c)
        | _ -> raise (RuntimeError "count takes (string, string) or (array, value)"))
 
+  | "counter" ->
+      (* (counter arr) — Python Counter. Returns map of string→int count.
+         Keys are stringified via str conversion. *)
+      (match arg_vals with
+       | [VArray arr] ->
+           let tbl = Hashtbl.create (Array.length !arr) in
+           let keys = ref [] in
+           Array.iter (fun v ->
+             let k = match v with
+               | VString s -> s
+               | VInt n -> Int64.to_string n
+               | _ -> string_of_value v in
+             let cur = try (match Hashtbl.find tbl k with VInt n -> n | _ -> 0L) with Not_found -> 0L in
+             if not (Hashtbl.mem tbl k) then keys := k :: !keys;
+             Hashtbl.replace tbl k (VInt (Int64.add cur 1L))
+           ) !arr;
+           VMap (tbl, ref (List.rev !keys))
+       | _ -> raise (RuntimeError "counter takes 1 array"))
+
+  | "sort_by" ->
+      (* (sort_by arr fn) — stable sort of arr by key fn, ascending.
+         For descending, negate the key: (sort_by arr (\x (neg (fn x)))). *)
+      (match arg_vals with
+       | [VArray arr; fn] ->
+           let n = Array.length !arr in
+           let keyed = Array.init n (fun i ->
+             (i, !arr.(i), invoke_callable env fn [!arr.(i)] "sort_by")
+           ) in
+           let cmp a b = match a, b with
+             | VInt x, VInt y -> Int64.compare x y
+             | VFloat x, VFloat y -> compare x y
+             | VString x, VString y -> compare x y
+             | VArray ax, VArray ay ->
+                 let la = Array.to_list !ax and lb = Array.to_list !ay in
+                 compare la lb
+             | _ -> compare a b in
+           Array.sort (fun (ia, _, ka) (ib, _, kb) ->
+             let c = cmp ka kb in if c <> 0 then c else compare ia ib) keyed;
+           let sorted = Array.map (fun (_, v, _) -> v) keyed in
+           VArray (ref sorted)
+       | _ -> raise (RuntimeError "sort_by takes (array, function)"))
+
+  | "group_by" ->
+      (* (group_by arr fn) — returns map from key (stringified) to array of
+         elements that fn mapped there. *)
+      (match arg_vals with
+       | [VArray arr; fn] ->
+           let tbl = Hashtbl.create 16 in
+           let keys = ref [] in
+           Array.iter (fun v ->
+             let k_val = invoke_callable env fn [v] "group_by" in
+             let k = match k_val with
+               | VString s -> s
+               | VInt n -> Int64.to_string n
+               | _ -> string_of_value k_val in
+             let cur = match Hashtbl.find_opt tbl k with
+               | Some (VArray r) -> r
+               | _ -> let r = ref [||] in
+                      keys := k :: !keys;
+                      Hashtbl.add tbl k (VArray r); r in
+             cur := Array.append !cur [|v|]
+           ) !arr;
+           VMap (tbl, ref (List.rev !keys))
+       | _ -> raise (RuntimeError "group_by takes (array, function)"))
+
+  | "transpose" ->
+      (* (transpose rows) — matrix transpose. rows is an array of arrays.
+         Shorter rows produce a rectangular transpose up to min length. *)
+      (match arg_vals with
+       | [VArray rows] ->
+           let row_arrs = Array.map (fun v ->
+             match v with VArray r -> r
+                       | _ -> raise (RuntimeError "transpose: not a matrix")) !rows in
+           let n_rows = Array.length row_arrs in
+           if n_rows = 0 then VArray (ref [||])
+           else begin
+             let n_cols = Array.fold_left (fun acc r -> min acc (Array.length !r))
+                            (Array.length !(row_arrs.(0))) row_arrs in
+             let cols = Array.init n_cols (fun c ->
+               VArray (ref (Array.init n_rows (fun r -> !(row_arrs.(r)).(c))))
+             ) in
+             VArray (ref cols)
+           end
+       | _ -> raise (RuntimeError "transpose takes (array of arrays)"))
+
   | "max_by" | "min_by" ->
       (* (max_by arr fn) — element of arr maximising fn; ties keep first.
          (min_by arr fn) — same but minimising. *)

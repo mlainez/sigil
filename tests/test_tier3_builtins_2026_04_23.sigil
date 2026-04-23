@@ -1,0 +1,99 @@
+(module test_tier3_builtins
+  (fn counter_basic -> int
+    (set c (counter ["a" "b" "a" "c" "a" "b"]))
+    (ret (map_get c "a")))
+
+  (test-spec counter_basic
+    (case "count of 'a' is 3"
+      (input)
+      (expect 3)))
+
+  (fn counter_missing -> bool
+    (set c (counter ["x" "y"]))
+    (ret (map_has c "z")))
+
+  (test-spec counter_missing
+    (case "missing key is false"
+      (input)
+      (expect false)))
+
+  (fn counter_ints -> int
+    (set c (counter [1 2 1 3 1]))
+    (ret (map_get c "1")))
+
+  (test-spec counter_ints
+    (case "int keys stringified"
+      (input)
+      (expect 3)))
+
+  (fn sort_by_length -> string
+    (ret (join (sort_by ["hello" "a" "bc"] (\w (len w))) ",")))
+
+  (test-spec sort_by_length
+    (case "sort ascending by length"
+      (input)
+      (expect "a,bc,hello")))
+
+  (fn sort_by_negated -> string
+    (ret (join (sort_by ["a" "hello" "bc"] (\w (neg (len w)))) ",")))
+
+  (test-spec sort_by_negated
+    (case "sort descending via negation"
+      (input)
+      (expect "hello,bc,a")))
+
+  (fn sort_by_stable -> string
+    (set tags ["a1" "b2" "a3" "b4" "c5"])
+    (ret (join (sort_by tags (\t (array_get (chars t) 0))) "")))
+
+  (test-spec sort_by_stable
+    (case "stable sort preserves input order within a key"
+      (input)
+      (expect "a1a3b2b4c5")))
+
+  (fn group_by_anagrams -> int
+    (set g (group_by ["eat" "tea" "bat" "ate"] (\w (join (sort (chars w)) ""))))
+    (ret (len g)))
+
+  (test-spec group_by_anagrams
+    (case "three input words have two anagram groups"
+      (input)
+      (expect 2)))
+
+  (fn group_by_values -> string
+    (set g (group_by ["eat" "tea" "bat"] (\w (join (sort (chars w)) ""))))
+    (ret (join (map_get g "aet") "-")))
+
+  (test-spec group_by_values
+    (case "group contents preserved in input order"
+      (input)
+      (expect "eat-tea")))
+
+  (fn transpose_basic -> int
+    (set t (transpose [[1 2 3] [4 5 6]]))
+    (ret (array_get (array_get t 0) 0)))
+
+  (test-spec transpose_basic
+    (case "first element of transpose"
+      (input)
+      (expect 1)))
+
+  (fn transpose_dim -> int
+    (set t (transpose [[1 2 3] [4 5 6]]))
+    (ret (len t)))
+
+  (test-spec transpose_dim
+    (case "2x3 becomes 3x2"
+      (input)
+      (expect 3)))
+
+  (fn transpose_ragged -> int
+    (set t (transpose [[1 2 3 99] [4 5 6]]))
+    (ret (len t)))
+
+  (test-spec transpose_ragged
+    (case "uses min column count when ragged"
+      (input)
+      (expect 3)))
+
+  (meta-note "Tests for counter/sort_by/group_by/transpose builtins — added 2026-04-23"))

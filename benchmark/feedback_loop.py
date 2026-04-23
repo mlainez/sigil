@@ -87,7 +87,7 @@ Rules — follow STRICTLY for minimum tokens:
 7. Short aliases always: len, str, fmt, split, join, sort, push, chars,
    int, float, lower, upper, trim, first, last, filter, map_arr, reduce,
    parse_ints, sum, count, count_in, map_inc, get_or, rev, swapcase, title,
-   uniq, max_by, min_by, digits
+   uniq, max_by, min_by, digits, counter, sort_by, group_by, transpose
 8. Empty collections: use [] and {{}} — NEVER (array_new) or (map_new)
 9. (push arr v), (map_set m k v), (sort arr), (rev arr) MUTATE in place.
    Call them directly, do NOT wrap in (set arr ...).
@@ -102,6 +102,10 @@ Rules — follow STRICTLY for minimum tokens:
     - (count haystack needle) counts occurrences (string or array)
     - (max_by arr key-fn) / (min_by arr key-fn) pick element by key
     - (digits n) int|string → array of digit ints (skips non-digits in string)
+    - (counter arr) frequency map {elem: count} (Python Counter)
+    - (sort_by arr key-fn) stable ascending sort by key; desc via (neg (key x))
+    - (group_by arr key-fn) → map from key to array (Python defaultdict)
+    - (transpose rows) matrix transpose — array of arrays to array of arrays
 11. Variadic println prints space-separated: (println a b c)
 12. Index with (array_get a i) — supports negatives like Python
 13. Comparisons are prefix: (gt a b), (lt a b), (eq a b)
