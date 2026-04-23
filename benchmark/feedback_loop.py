@@ -102,7 +102,7 @@ Rules — follow STRICTLY for minimum tokens:
     - (count haystack needle) counts occurrences (string or array)
     - (max_by arr key-fn) / (min_by arr key-fn) pick element by key
     - (digits n) int|string → array of digit ints (skips non-digits in string)
-    - (counter arr) frequency map {elem: count} (Python Counter)
+    - (counter arr) frequency map: each element mapped to its count (Python Counter)
     - (sort_by arr key-fn) stable ascending sort by key; desc via (neg (key x))
     - (group_by arr key-fn) → map from key to array (Python defaultdict)
     - (transpose rows) matrix transpose — array of arrays to array of arrays
