@@ -89,7 +89,7 @@ Rules — follow STRICTLY for minimum tokens:
    parse_ints, sum, count, count_in, map_inc, get_or, rev, swapcase, title,
    uniq, max_by, min_by, digits, counter, sort_by, group_by, transpose,
    diff, inter, union, fmt_float, slice, merge, range, entries, enumerate,
-   scan, map_kv
+   scan, map_kv, map_pairs
 8. Empty collections: use [] and {{}} — NEVER (array_new) or (map_new)
 9. (push arr v), (map_set m k v), (sort arr), (rev arr) MUTATE in place.
    Call them directly, do NOT wrap in (set arr ...).
@@ -128,6 +128,12 @@ Rules — follow STRICTLY for minimum tokens:
 18. (map_kv m fn) — fn receives (k, v) as TWO args; 2-arg closures
     destructure naturally: (map_kv m (\\(k v) body)). Avoids array_get
     when iterating map pairs. Replaces (map_arr (entries m) (\\e ...)).
+19. (map_pairs arr fn) — like map_kv but over an array of 2-element
+    pair arrays. Use whenever you have the output of enumerate / entries /
+    zip and want both halves without array_get:
+      (map_pairs (enumerate arr) (\\(i v) body))
+      (map_pairs (entries m) (\\(k v) body))
+      (map_pairs (sort_by (entries m) ...) (\\(k v) body))
 11. Variadic println prints space-separated: (println a b c)
 12. Index with (array_get a i) — supports negatives like Python
 13. Comparisons are prefix: (gt a b), (lt a b), (eq a b)

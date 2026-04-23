@@ -259,6 +259,35 @@
       (input)
       (expect "x=1,y=2")))
 
+  (fn map_pairs_enumerate -> string
+    (ret (join (map_pairs (enumerate ["a" "b" "c"]) (\(i v) (fmt "{}:{}" i v))) ",")))
+
+  (test-spec map_pairs_enumerate
+    (case "pair destructuring over enumerate output"
+      (input)
+      (expect "0:a,1:b,2:c")))
+
+  (fn map_pairs_running_avg -> string
+    (set sums (scan [10 20 30 40] (\(a x) (add a x)) 0))
+    (ret (join (map_pairs (enumerate sums) (\(i s) (fmt_float (div (float s) (float (add i 1))) 1))) " ")))
+
+  (test-spec map_pairs_running_avg
+    (case "scan + enumerate + map_pairs = running average"
+      (input)
+      (expect "10.0 15.0 20.0 25.0")))
+
+  (fn map_pairs_rejects_non_pair -> string
+    (try
+      (map_pairs [[1 2] [3]] (\(a b) (add a b)))
+      (ret "no error")
+      (catch err string
+        (ret "caught"))))
+
+  (test-spec map_pairs_rejects_non_pair
+    (case "ragged input is rejected"
+      (input)
+      (expect "caught")))
+
   (fn map_kv_counts_upper -> string
     (set c (counter ["a" "b" "a" "c" "a" "b"]))
     (ret (join (map_kv c (\(k n) (fmt "{}*{}" (upper k) n))) " ")))

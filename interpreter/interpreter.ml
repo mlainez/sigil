@@ -2216,6 +2216,23 @@ and eval_call env func_name args =
            VArray (ref (Array.of_list out))
        | _ -> raise (RuntimeError "map_kv takes (map, function)"))
 
+  | "map_pairs" ->
+      (* (map_pairs arr fn) — map over array of 2-element pair arrays,
+         calling fn with the two elements as positional args. Natural fit
+         for the output of enumerate / entries / zip. A 2-arg closure
+         (\\(a b) body) destructures without array_get. *)
+      (match arg_vals with
+       | [VArray arr; fn] ->
+           let out = Array.map (fun v ->
+             match v with
+             | VArray p when Array.length !p = 2 ->
+                 invoke_callable env fn [!p.(0); !p.(1)] "map_pairs"
+             | _ -> raise (RuntimeError
+                 "map_pairs: every element must be a 2-element array")
+           ) !arr in
+           VArray (ref out)
+       | _ -> raise (RuntimeError "map_pairs takes (array-of-pairs, function)"))
+
   | "diff" ->
       (* (diff a b) — elements in a not in b, preserving order of a. *)
       (match arg_vals with
