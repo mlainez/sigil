@@ -1,0 +1,162 @@
+(module test_new_builtins_2026_04_23
+  (fn rev_string -> string
+    (ret (rev "hello")))
+
+  (test-spec rev_string
+    (case "reverses string"
+      (input)
+      (expect "olleh")))
+
+  (fn rev_string_empty -> string
+    (ret (rev "")))
+
+  (test-spec rev_string_empty
+    (case "reverses empty string"
+      (input)
+      (expect "")))
+
+  (fn rev_string_palindrome -> string
+    (ret (rev "racecar")))
+
+  (test-spec rev_string_palindrome
+    (case "palindrome unchanged"
+      (input)
+      (expect "racecar")))
+
+  (fn rev_array -> int
+    (set a [1 2 3 4])
+    (rev a)
+    (ret (array_get a 0)))
+
+  (test-spec rev_array
+    (case "first becomes last-in-original"
+      (input)
+      (expect 4)))
+
+  (fn swapcase_mixed -> string
+    (ret (swapcase "Hello World")))
+
+  (test-spec swapcase_mixed
+    (case "mixed case flipped"
+      (input)
+      (expect "hELLO wORLD")))
+
+  (fn swapcase_non_alpha -> string
+    (ret (swapcase "abc 123 XYZ!")))
+
+  (test-spec swapcase_non_alpha
+    (case "non-letters untouched"
+      (input)
+      (expect "ABC 123 xyz!")))
+
+  (fn title_plain -> string
+    (ret (title "hello world from sigil")))
+
+  (test-spec title_plain
+    (case "capitalize each word"
+      (input)
+      (expect "Hello World From Sigil")))
+
+  (fn title_mixed -> string
+    (ret (title "hELLO wORLD")))
+
+  (test-spec title_mixed
+    (case "normalizes mid-word case"
+      (input)
+      (expect "Hello World")))
+
+  (fn uniq_basic -> string
+    (set result (uniq ["a" "b" "a" "c" "b" "d" "a"]))
+    (ret (join result ",")))
+
+  (test-spec uniq_basic
+    (case "preserves first-occurrence order"
+      (input)
+      (expect "a,b,c,d")))
+
+  (fn uniq_empty -> int
+    (set result (uniq []))
+    (ret (len result)))
+
+  (test-spec uniq_empty
+    (case "empty array stays empty"
+      (input)
+      (expect 0)))
+
+  (fn uniq_ints -> string
+    (set result (uniq [1 2 1 3 2 4]))
+    (ret (join result "-")))
+
+  (test-spec uniq_ints
+    (case "works on int array"
+      (input)
+      (expect "1-2-3-4")))
+
+  (fn parse_pairs_basic -> string
+    (set m (parse_pairs "name=alice,age=30,city=paris" "," "="))
+    (ret (map_get m "age")))
+
+  (test-spec parse_pairs_basic
+    (case "lookup value"
+      (input)
+      (expect "30")))
+
+  (fn parse_pairs_missing -> bool
+    (set m (parse_pairs "a=1,b=2" "," "="))
+    (ret (map_has m "c")))
+
+  (test-spec parse_pairs_missing
+    (case "missing key returns false"
+      (input)
+      (expect false)))
+
+  (fn parse_pairs_multi -> int
+    (set m (parse_pairs "x=1,y=2,z=3" "," "="))
+    (ret (len m)))
+
+  (test-spec parse_pairs_multi
+    (case "three pairs counted"
+      (input)
+      (expect 3)))
+
+  (fn add_strings -> string
+    (ret (add "foo" "bar")))
+
+  (test-spec add_strings
+    (case "concatenates strings"
+      (input)
+      (expect "foobar")))
+
+  (fn add_empty_string -> string
+    (ret (add "" "hello")))
+
+  (test-spec add_empty_string
+    (case "concat with empty left"
+      (input)
+      (expect "hello")))
+
+  (fn mul_string_repeat -> string
+    (ret (mul "ab" 3)))
+
+  (test-spec mul_string_repeat
+    (case "repeat string N times"
+      (input)
+      (expect "ababab")))
+
+  (fn mul_string_zero -> string
+    (ret (mul "ab" 0)))
+
+  (test-spec mul_string_zero
+    (case "zero count returns empty"
+      (input)
+      (expect "")))
+
+  (fn mul_string_one -> string
+    (ret (mul "x" 1)))
+
+  (test-spec mul_string_one
+    (case "one count returns original"
+      (input)
+      (expect "x")))
+
+  (meta-note "Tests for rev/swapcase/title/uniq/parse_pairs and string support in add/mul — added 2026-04-23"))
