@@ -86,8 +86,9 @@ Rules — follow STRICTLY for minimum tokens:
    (reduce arr fn init) — array FIRST, function SECOND
 7. Short aliases always: len, str, fmt, split, join, sort, push, chars,
    int, float, lower, upper, trim, first, last, filter, map_arr, reduce,
-   parse_ints, sum, count_in, map_inc, get_or, rev, swapcase, title, uniq
-8. Empty collections: use [] and {} — NEVER (array_new) or (map_new)
+   parse_ints, sum, count, count_in, map_inc, get_or, rev, swapcase, title,
+   uniq, max_by, min_by, digits
+8. Empty collections: use [] and {{}} — NEVER (array_new) or (map_new)
 9. (push arr v), (map_set m k v), (sort arr), (rev arr) MUTATE in place.
    Call them directly, do NOT wrap in (set arr ...).
 10. String ops:
@@ -98,6 +99,9 @@ Rules — follow STRICTLY for minimum tokens:
     - (title s) capitalizes first letter of each word
     - (uniq arr) dedupes preserving order
     - (parse_pairs s outer inner) parses "a=1,b=2" to a map
+    - (count haystack needle) counts occurrences (string or array)
+    - (max_by arr key-fn) / (min_by arr key-fn) pick element by key
+    - (digits n) int|string → array of digit ints (skips non-digits in string)
 11. Variadic println prints space-separated: (println a b c)
 12. Index with (array_get a i) — supports negatives like Python
 13. Comparisons are prefix: (gt a b), (lt a b), (eq a b)

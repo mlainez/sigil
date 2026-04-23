@@ -2149,6 +2149,73 @@ and eval_call env func_name args =
            VArray (ref (Array.of_list ints))
        | _ -> raise (RuntimeError "parse_ints takes (string) or (string, separator)"))
 
+  | "count" ->
+      (* (count haystack needle) — Python str.count / list.count semantics. *)
+      (match arg_vals with
+       | [VString s; VString sub] ->
+           if sub = "" then VInt 0L
+           else begin
+             let n = String.length s and m = String.length sub in
+             let c = ref 0 and i = ref 0 in
+             while !i <= n - m do
+               if String.sub s !i m = sub then begin
+                 incr c; i := !i + m
+               end else incr i
+             done;
+             VInt (Int64.of_int !c)
+           end
+       | [VArray arr; v] ->
+           let c = Array.fold_left (fun acc e ->
+             if values_equal e v then acc + 1 else acc) 0 !arr in
+           VInt (Int64.of_int c)
+       | _ -> raise (RuntimeError "count takes (string, string) or (array, value)"))
+
+  | "max_by" | "min_by" ->
+      (* (max_by arr fn) — element of arr maximising fn; ties keep first.
+         (min_by arr fn) — same but minimising. *)
+      (match arg_vals with
+       | [VArray arr; fn] ->
+           let n = Array.length !arr in
+           if n = 0 then raise (RuntimeError (func_name ^ ": empty array"))
+           else begin
+             let cmp a b = match a, b with
+               | VInt x, VInt y -> Int64.compare x y
+               | VFloat x, VFloat y -> compare x y
+               | VString x, VString y -> compare x y
+               | _ -> compare a b in
+             let pick = if func_name = "max_by" then (>) else (<) in
+             let best_idx = ref 0 in
+             let best_key = ref (invoke_callable env fn [!arr.(0)] func_name) in
+             for i = 1 to n - 1 do
+               let k = invoke_callable env fn [!arr.(i)] func_name in
+               if pick (cmp k !best_key) 0 then begin
+                 best_idx := i; best_key := k
+               end
+             done;
+             !arr.(!best_idx)
+           end
+       | _ -> raise (RuntimeError (func_name ^ " takes (array, function)")))
+
+  | "digits" ->
+      (* Digit array of a non-negative int, or of the digit chars of a string. *)
+      (match arg_vals with
+       | [VInt n] ->
+           let n = Int64.to_int n in
+           if n < 0 then raise (RuntimeError "digits: negative int")
+           else if n = 0 then VArray (ref [| VInt 0L |])
+           else begin
+             let rec loop m acc = if m = 0 then acc else loop (m / 10) (VInt (Int64.of_int (m mod 10)) :: acc) in
+             VArray (ref (Array.of_list (loop n [])))
+           end
+       | [VString s] ->
+           let arr = ref [] in
+           String.iter (fun c ->
+             if c >= '0' && c <= '9' then
+               arr := VInt (Int64.of_int (Char.code c - Char.code '0')) :: !arr
+           ) s;
+           VArray (ref (Array.of_list (List.rev !arr)))
+       | _ -> raise (RuntimeError "digits takes 1 int or string"))
+
   | "sum" ->
       (* Sum an array of ints or floats *)
       (match arg_vals with

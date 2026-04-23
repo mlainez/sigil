@@ -1,5 +1,5 @@
 @(grammar sigil-agent)
-@(stat tests:156 examples:4 stdlib:20)
+@(stat tests:157 examples:4 stdlib:20)
 @(impl ocaml tree-walking-interpreter)
 @(bnf
   prog       ::= module | script-form+

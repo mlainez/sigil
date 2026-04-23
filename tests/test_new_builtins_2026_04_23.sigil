@@ -159,4 +159,84 @@
       (input)
       (expect "x")))
 
-  (meta-note "Tests for rev/swapcase/title/uniq/parse_pairs and string support in add/mul — added 2026-04-23"))
+  (fn count_substring -> int
+    (ret (count "mississippi" "s")))
+
+  (test-spec count_substring
+    (case "non-overlapping substring count"
+      (input)
+      (expect 4)))
+
+  (fn count_multichar -> int
+    (ret (count "ababab" "ab")))
+
+  (test-spec count_multichar
+    (case "multi-char substring count"
+      (input)
+      (expect 3)))
+
+  (fn count_missing -> int
+    (ret (count "abc" "z")))
+
+  (test-spec count_missing
+    (case "missing substring returns zero"
+      (input)
+      (expect 0)))
+
+  (fn count_array -> int
+    (ret (count [1 2 1 3 1 2] 1)))
+
+  (test-spec count_array
+    (case "count element in array"
+      (input)
+      (expect 3)))
+
+  (fn max_by_len -> string
+    (ret (max_by ["a" "hello" "bc"] (\w (len w)))))
+
+  (test-spec max_by_len
+    (case "longest string by length"
+      (input)
+      (expect "hello")))
+
+  (fn min_by_len -> string
+    (ret (min_by ["hello" "ab" "c"] (\w (len w)))))
+
+  (test-spec min_by_len
+    (case "shortest string by length"
+      (input)
+      (expect "c")))
+
+  (fn max_by_first_tie -> string
+    (ret (max_by ["ab" "cd" "ef"] (\w (len w)))))
+
+  (test-spec max_by_first_tie
+    (case "ties keep first occurrence"
+      (input)
+      (expect "ab")))
+
+  (fn digits_int -> int
+    (ret (sum (digits 12345))))
+
+  (test-spec digits_int
+    (case "sum of digits of 12345"
+      (input)
+      (expect 15)))
+
+  (fn digits_zero -> int
+    (ret (sum (digits 0))))
+
+  (test-spec digits_zero
+    (case "zero is a single digit"
+      (input)
+      (expect 0)))
+
+  (fn digits_from_string -> int
+    (ret (sum (digits "abc123xyz45"))))
+
+  (test-spec digits_from_string
+    (case "extracts digits from mixed string"
+      (input)
+      (expect 15)))
+
+  (meta-note "Tests for rev/swapcase/title/uniq/parse_pairs/count/max_by/min_by/digits and string support in add/mul — added 2026-04-23"))
