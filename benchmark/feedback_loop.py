@@ -61,7 +61,7 @@ def run_python(code: str, args: list) -> tuple[bool, str, str]:
             os.unlink(f.name)
 
 
-def generate_sigil(desc: str, example_args: list, example_output: str, model: str = "claude-sonnet-4-6") -> str:
+def generate_sigil(desc: str, example_args: list, example_output: str, model: str = "claude-opus-4-7") -> str:
     """Use Claude to write Sigil code for a task. Returns just the code."""
     prompt = f"""{GRAMMAR}
 
@@ -547,7 +547,8 @@ def run_task(task: dict) -> dict:
 
     # Try Sigil up to 3 times
     for attempt in range(3):
-        sigil_code = generate_sigil(task["desc"], task["args"], task["expected"])
+        sigil_code = generate_sigil(task["desc"], task["args"], task["expected"],
+                                    model=task.get("_model", "claude-opus-4-7"))
         if not sigil_code:
             continue
         ok_s, out_s, err_s = run_sigil(sigil_code, task["args"])
@@ -627,6 +628,8 @@ def main():
                        help="Comma-separated task ids to run (subset of the tier)")
     parser.add_argument("--save-corpus", action="store_true",
                        help="Save successful Sigil programs to examples/corpus/")
+    parser.add_argument("--model", type=str, default="claude-opus-4-7",
+                       help="Claude CLI model id (e.g. claude-opus-4-7, claude-sonnet-4-6)")
     args = parser.parse_args()
 
     tasks = TIERS.get(args.tier, [])
@@ -644,7 +647,11 @@ def main():
     elif args.limit:
         tasks = tasks[:args.limit]
 
-    print(f"=== TIER {args.tier}: {len(tasks)} tasks ===\n")
+    # Thread model choice through each task
+    for t in tasks:
+        t["_model"] = args.model
+
+    print(f"=== TIER {args.tier}: {len(tasks)} tasks (model: {args.model}) ===\n")
 
     results = []
     for i, task in enumerate(tasks):
