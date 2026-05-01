@@ -2,38 +2,38 @@
   (import hash)
 
   (fn xor_pad key_bytes string pad_byte int block_size int -> string
-    (set result string "")
-    (set key_len int (len key_bytes))
+    (set result "")
+    (set key_len (len key_bytes))
     (for i 0 block_size
-      (set key_byte int 0)
+      (set key_byte 0)
       (if (lt i key_len)
         (set key_byte (string_get key_bytes i)))
-      (set result (string_concat result (char_from_code (bit_xor key_byte pad_byte)))))
+      (set result (add result (char_from_code (bit_xor key_byte pad_byte)))))
     (ret result))
 
   (fn hmac_sha256 key string message string -> string
-    (set block_size int 64)
-    (set key_bytes string key)
+    (set block_size 64)
+    (set key_bytes key)
 
-    (set key_len int (len key_bytes))
+    (set key_len (len key_bytes))
     (if (gt key_len block_size)
-      (set hashed string (sha256 key_bytes))
+      (set hashed (sha256 key_bytes))
       (set key_bytes "")
       (for hi 0 32
-        (set hex_pair string (string_slice hashed (mul hi 2) 2))
-        (set key_bytes (string_concat key_bytes (char_from_code (hex_to_int hex_pair))))))
+        (set hex_pair (string_slice hashed (mul hi 2) 2))
+        (set key_bytes (add key_bytes (char_from_code (hex_to_int hex_pair))))))
 
-    (set ipad string (xor_pad key_bytes 54 block_size))
-    (set opad string (xor_pad key_bytes 92 block_size))
+    (set ipad (xor_pad key_bytes 54 block_size))
+    (set opad (xor_pad key_bytes 92 block_size))
 
-    (set inner_hash_hex string (sha256 (string_concat ipad message)))
+    (set inner_hash_hex (sha256 (add ipad message)))
 
-    (set inner_hash_bytes string "")
+    (set inner_hash_bytes "")
     (for hi 0 32
-      (set hex_pair string (string_slice inner_hash_hex (mul hi 2) 2))
-      (set inner_hash_bytes (string_concat inner_hash_bytes (char_from_code (hex_to_int hex_pair)))))
+      (set hex_pair (string_slice inner_hash_hex (mul hi 2) 2))
+      (set inner_hash_bytes (add inner_hash_bytes (char_from_code (hex_to_int hex_pair)))))
 
-    (ret (sha256 (string_concat opad inner_hash_bytes))))
+    (ret (sha256 (add opad inner_hash_bytes))))
 
   (fn hex_char_to_int ch int -> int
     (if (and (ge ch 48) (le ch 57))
@@ -45,8 +45,8 @@
     (ret 0))
 
   (fn hex_to_int hex_str string -> int
-    (set len int (len hex_str))
-    (set result int 0)
+    (set len (len hex_str))
+    (set result 0)
     (for i 0 len
       (set result (add (mul result 16) (hex_char_to_int (string_get hex_str i)))))
     (ret result)))

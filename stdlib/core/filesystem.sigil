@@ -19,7 +19,7 @@
     (ret (file_exists dst)))
 
   (fn read_lines path string -> array
-    (ret (string_split (file_read path) "\n")))
+    (ret (split (file_read path) "\n")))
 
   (fn count_lines path string -> int
     (ret (len (read_lines path)))))

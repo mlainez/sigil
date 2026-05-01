@@ -1,6 +1,6 @@
 (module json_utils
   (fn skip_whitespace text string pos int -> int
-    (set text_len int (len text))
+    (set text_len (len text))
     (while (lt pos text_len)
       (if (not (is_whitespace (string_get text pos)))
         (break))
@@ -8,14 +8,14 @@
     (ret pos))
 
   (fn parse_string text string pos int -> map
-    (set len int (len text))
-    (set result string "")
+    (set len (len text))
+    (set result "")
     (set pos (add pos 1))
 
     (while (lt pos len)
-      (set ch int (string_get text pos))
+      (set ch (string_get text pos))
       (if (eq ch 34)
-        (set out map (map_new))
+        (set out {})
         (map_set out "value" result)
         (map_set out "pos" (add pos 1))
         (ret out))
@@ -23,35 +23,35 @@
       (if (eq ch 92)
         (set pos (add pos 1))
         (if (eq (string_get text pos) 110)
-          (set result (string_concat result "\n")))
+          (set result (add result "\n")))
         (else
-          (set result (string_concat result (char_from_code ch)))))
+          (set result (add result (char_from_code ch)))))
 
       (set pos (add pos 1)))
 
-    (set err map (map_new))
+    (set err {})
     (map_set err "error" "unterminated string")
     (ret err))
 
   (fn parse_number text string pos int -> map
-    (set len int (len text))
-    (set num_str string "")
+    (set len (len text))
+    (set num_str "")
 
     (while (lt pos len)
-      (set ch int (string_get text pos))
+      (set ch (string_get text pos))
       (if (not (or (and (ge ch 48) (le ch 57)) (or (eq ch 45) (eq ch 46))))
         (break))
-      (set num_str (string_concat num_str (char_from_code ch)))
+      (set num_str (add num_str (char_from_code ch)))
       (set pos (add pos 1)))
 
-    (set out map (map_new))
+    (set out {})
     (map_set out "value" num_str)
     (map_set out "pos" pos)
     (ret out))
 
   (fn parse_value text string pos int -> map
     (set pos (skip_whitespace text pos))
-    (set ch int (string_get text pos))
+    (set ch (string_get text pos))
 
     (if (eq ch 34)
       (ret (parse_string text pos)))
@@ -63,89 +63,89 @@
       (ret (parse_number text pos)))
 
     (if (eq ch 116)
-      (set out map (map_new))
+      (set out {})
       (map_set out "value" "true")
       (map_set out "pos" (add pos 4))
       (ret out))
     (if (eq ch 102)
-      (set out map (map_new))
+      (set out {})
       (map_set out "value" "false")
       (map_set out "pos" (add pos 5))
       (ret out))
     (if (eq ch 110)
-      (set out map (map_new))
+      (set out {})
       (map_set out "value" "null")
       (map_set out "pos" (add pos 4))
       (ret out))
 
-    (set err map (map_new))
+    (set err {})
     (map_set err "error" "unexpected character")
     (ret err))
 
   (fn parse_object text string pos int -> map
-    (set obj map (map_new))
+    (set obj {})
     (set pos (add pos 1))
     (set pos (skip_whitespace text pos))
 
     (if (eq (string_get text pos) 125)
-      (set out map (map_new))
+      (set out {})
       (map_set out "value" obj)
       (map_set out "pos" (add pos 1))
       (ret out))
 
     (loop
       (set pos (skip_whitespace text pos))
-      (set key_result map (parse_string text pos))
-      (set key string (map_get key_result "value"))
+      (set key_result (parse_string text pos))
+      (set key (map_get key_result "value"))
       (set pos (map_get key_result "pos"))
 
       (set pos (add (skip_whitespace text pos) 1))
 
-      (set val_result map (parse_value text pos))
+      (set val_result (parse_value text pos))
       (map_set obj key (map_get val_result "value"))
       (set pos (map_get val_result "pos"))
 
       (set pos (skip_whitespace text pos))
-      (set ch int (string_get text pos))
+      (set ch (string_get text pos))
       (if (eq ch 44)
         (set pos (add pos 1)))
       (if (eq ch 125)
-        (set out map (map_new))
+        (set out {})
         (map_set out "value" obj)
         (map_set out "pos" (add pos 1))
         (ret out)))
 
-    (set err map (map_new))
+    (set err {})
     (map_set err "error" "unterminated object")
     (ret err))
 
   (fn parse_array text string pos int -> map
-    (set arr array (array_new))
+    (set arr [])
     (set pos (add pos 1))
     (set pos (skip_whitespace text pos))
 
     (if (eq (string_get text pos) 93)
-      (set out map (map_new))
+      (set out {})
       (map_set out "value" arr)
       (map_set out "pos" (add pos 1))
       (ret out))
 
     (loop
-      (set val_result map (parse_value text pos))
-      (array_push arr (map_get val_result "value"))
+      (set val_result (parse_value text pos))
+      (push arr (map_get val_result "value"))
       (set pos (map_get val_result "pos"))
 
       (set pos (skip_whitespace text pos))
-      (set ch int (string_get text pos))
+      (set ch (string_get text pos))
       (if (eq ch 44)
         (set pos (add pos 1)))
       (if (eq ch 93)
-        (set out map (map_new))
+        (set out {})
         (map_set out "value" arr)
         (map_set out "pos" (add pos 1))
         (ret out)))
 
-    (set err map (map_new))
+    (set err {})
     (map_set err "error" "unterminated array")
     (ret err))
 
@@ -153,21 +153,21 @@
     (ret (map_get (parse_value text 0) "value")))
 
   (fn json_stringify value map -> string
-    (set result string "{")
-    (set keys array (map_keys value))
-    (set len int (len keys))
+    (set result "{")
+    (set keys (map_keys value))
+    (set len (len keys))
     (for i 0 len
-      (set key string (array_get keys i))
-      (set result (string_concat result (string_format "\"{}\":\"{}\"" key (map_get value key))))
+      (set key (array_get keys i))
+      (set result (add result (fmt "\"{}\":\"{}\"" key (map_get value key))))
       (if (lt i (sub len 1))
-        (set result (string_concat result ","))))
-    (ret (string_concat result "}")))
+        (set result (add result ","))))
+    (ret (add result "}")))
 
   (fn json_new_object -> map
-    (ret (map_new)))
+    (ret {}))
 
   (fn json_new_array -> array
-    (ret (array_new)))
+    (ret []))
 
   (fn json_set obj map key string value string -> map
     (ret (map_set obj key value)))
@@ -176,14 +176,14 @@
     (ret (map_get obj key)))
 
   (fn json_push arr array value string -> array
-    (array_push arr value)
+    (push arr value)
     (ret arr))
 
   (fn json_length value array -> int
     (ret (len value)))
 
   (fn json_type value map -> string
-    (if (map_has value "type")
+    (if (in "type" value)
       (ret (map_get value "type")))
     (ret "object"))
 
@@ -191,8 +191,8 @@
     (ret (json_set (json_new_object) key value)))
 
   (fn build_array_one value string -> array
-    (set arr array (json_new_array))
-    (array_push arr value)
+    (set arr (json_new_array))
+    (push arr value)
     (ret arr))
 
   (fn to_string value map -> string
@@ -214,10 +214,10 @@
     (ret (json_length value)))
 
   (fn array_to_string arr array -> string
-    (set result string "[")
-    (set len int (len arr))
+    (set result "[")
+    (set len (len arr))
     (for i 0 len
-      (set result (string_concat result (string_format "\"{}\"" (array_get arr i))))
+      (set result (add result (fmt "\"{}\"" (array_get arr i))))
       (if (lt i (sub len 1))
-        (set result (string_concat result ","))))
-    (ret (string_concat result "]"))))
+        (set result (add result ","))))
+    (ret (add result "]"))))

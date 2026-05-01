@@ -1,60 +1,60 @@
 (module conversion
-  (fn string_from_int n int -> string
+  (fn str n int -> string
     (if (eq n 0)
       (ret "0"))
 
-    (set is_negative bool (lt n 0))
-    (set abs_n int n)
+    (set is_negative (lt n 0))
+    (set abs_n n)
     (if is_negative
       (set abs_n (sub 0 n)))
 
-    (set digits array (array_new))
-    (set remaining int abs_n)
+    (set digits [])
+    (set remaining abs_n)
 
     (while (gt remaining 0)
-      (set digit int (mod remaining 10))
+      (set digit (mod remaining 10))
       (set remaining (div remaining 10))
-      (array_push digits (char_from_code (add 48 digit))))
+      (push digits (char_from_code (add 48 digit))))
 
-    (set result string "")
-    (set i int (sub (len digits) 1))
+    (set result "")
+    (set i (sub (len digits) 1))
     (while (ge i 0)
-      (set result (string_concat result (array_get digits i)))
+      (set result (add result (array_get digits i)))
       (set i (sub i 1)))
 
     (if is_negative
-      (set result (string_concat "-" result)))
+      (set result (add "-" result)))
 
     (ret result))
 
-  (fn string_from_float f float -> string
-    (set is_negative bool (lt f 0.0))
-    (set abs_f float f)
+  (fn str f float -> string
+    (set is_negative (lt f 0.0))
+    (set abs_f f)
     (if is_negative
       (set abs_f (sub 0.0 f)))
 
-    (set int_part int (cast_float_int abs_f))
-    (set int_str string (str int_part))
+    (set int_part (cast_float_int abs_f))
+    (set int_str (str int_part))
 
-    (set float_part float (sub abs_f (cast_int_float int_part)))
-    (set frac_part int (cast_float_int (mul float_part 1000.0)))
+    (set float_part (sub abs_f (cast_int_float int_part)))
+    (set frac_part (cast_float_int (mul float_part 1000.0)))
 
-    (set frac_str string (str frac_part))
-    (set frac_len int (len frac_str))
+    (set frac_str (str frac_part))
+    (set frac_len (len frac_str))
 
     (if (eq frac_len 1)
-      (set frac_str (string_concat "00" frac_str)))
+      (set frac_str (add "00" frac_str)))
     (if (eq frac_len 2)
-      (set frac_str (string_concat "0" frac_str)))
+      (set frac_str (add "0" frac_str)))
 
-    (set result string (string_concat int_str (string_concat "." frac_str)))
+    (set result (add int_str (add "." frac_str)))
 
     (if is_negative
-      (set result (string_concat "-" result)))
+      (set result (add "-" result)))
 
     (ret result))
 
-  (fn string_from_bool b bool -> string
+  (fn str b bool -> string
     (if b
       (ret "true"))
     (ret "false"))
@@ -79,4 +79,4 @@
   (fn fahrenheit_to_celsius f float -> float
     (ret (div (sub f 32.0) 1.8)))
 
-  (meta-note "Conversion utilities: string_from_int, string_from_float, string_from_bool, bool_to_int, int_to_bool, distance/temperature conversions - pure Sigil implementations"))
+  (meta-note "Conversion utilities: str, str, str, bool_to_int, int_to_bool, distance/temperature conversions - pure Sigil implementations"))

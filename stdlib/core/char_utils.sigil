@@ -1,6 +1,6 @@
 (module char_utils
   (fn is_vowel ch int -> bool
-    (set lower int ch)
+    (set lower ch)
     (if (and (ge ch 65) (le ch 90))
       (set lower (add ch 32)))
     (ret (or (eq lower 97) (or (eq lower 101) (or (eq lower 105) (or (eq lower 111) (eq lower 117)))))))

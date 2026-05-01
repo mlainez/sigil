@@ -1,12 +1,12 @@
 (module array_utils
   (fn array_sum arr array len int -> int
-    (set sum int 0)
+    (set sum 0)
     (for i 0 len
       (set sum (add sum (array_get arr i))))
     (ret sum))
 
   (fn array_product arr array len int -> int
-    (set product int 1)
+    (set product 1)
     (for i 0 len
       (set product (mul product (array_get arr i))))
     (ret product))
@@ -21,37 +21,37 @@
     (ret (ge (array_find arr target len) 0)))
 
   (fn array_min arr array len int -> int
-    (set min_val int (array_get arr 0))
+    (set min_val (array_get arr 0))
     (for i 1 len
-      (set val int (array_get arr i))
+      (set val (array_get arr i))
       (if (lt val min_val)
         (set min_val val)))
     (ret min_val))
 
   (fn array_max arr array len int -> int
-    (set max_val int (array_get arr 0))
+    (set max_val (array_get arr 0))
     (for i 1 len
-      (set val int (array_get arr i))
+      (set val (array_get arr i))
       (if (gt val max_val)
         (set max_val val)))
     (ret max_val))
 
   (fn array_reverse arr array len int -> array
-    (set result array (array_new))
-    (set i int (sub len 1))
+    (set result [])
+    (set i (sub len 1))
     (while (ge i 0)
-      (array_push result (array_get arr i))
+      (push result (array_get arr i))
       (set i (sub i 1)))
     (ret result))
 
   (fn array_fill fill_value int count int -> array
-    (set arr array (array_new))
+    (set arr [])
     (for i 0 count
-      (array_push arr fill_value))
+      (push arr fill_value))
     (ret arr))
 
   (fn array_range start int end_val int -> array
-    (set arr array (array_new))
+    (set arr [])
     (for i start end_val
-      (array_push arr i))
+      (push arr i))
     (ret arr)))

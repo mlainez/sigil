@@ -1,65 +1,65 @@
 (module http
 
   (fn parse_url url string -> array
-    (set arr array (array_new))
+    (set arr [])
 
-    (set is_https bool (string_starts_with url "https://"))
+    (set is_https (string_starts_with url "https://"))
     (if is_https
-      (array_push arr "https")
-      (array_push arr "http"))
+      (push arr "https")
+      (push arr "http"))
 
-    (set url_no_proto string url)
+    (set url_no_proto url)
     (if is_https
       (set url_no_proto (string_slice url 8 (sub (len url) 8))))
     (if (string_starts_with url "http://")
       (set url_no_proto (string_slice url 7 (sub (len url) 7))))
 
-    (set slash_pos int -1)
-    (set url_len int (len url_no_proto))
+    (set slash_pos -1)
+    (set url_len (len url_no_proto))
     (for i 0 url_len
       (if (string_equals (string_slice url_no_proto i 1) "/")
         (set slash_pos i)
         (break)))
 
-    (set host string url_no_proto)
-    (set path string "/")
+    (set host url_no_proto)
+    (set path "/")
     (if (ge slash_pos 0)
       (set host (string_slice url_no_proto 0 slash_pos))
       (set path (string_slice url_no_proto slash_pos (sub url_len slash_pos))))
 
-    (array_push arr host)
+    (push arr host)
 
-    (set port int 80)
+    (set port 80)
     (if is_https
       (set port 443))
-    (array_push arr port)
+    (push arr port)
 
-    (array_push arr path)
+    (push arr path)
     (ret arr))
 
   (fn build_request method string host string path string body string -> string
-    (set req string (string_format "{} {} HTTP/1.1\r\nHost: {}\r\nConnection: close\r\n" method path host))
+    (set req (fmt "{} {} HTTP/1.1\r\nHost: {}\r\nConnection: close\r\n" method path host))
 
-    (set body_len int (len body))
+    (set body_len (len body))
     (if (gt body_len 0)
-      (set req (string_concat req (string_format "Content-Length: {}\r\n\r\n{}" (str body_len) body))))
+      (set req (add req (fmt "Content-Length: {}\r\n\r\n{}" (str body_len) body))))
 
-    (set req (string_concat req "\r\n"))
+    (set req (add req "\r\n"))
     (ret req))
 
   (fn parse_response raw string -> map
-    (set response map (map_new))
+    (set response {})
 
-    (set header_end int -1)
-    (set raw_len int (len raw))
+    (set header_end -1)
+    (set raw_len (len raw))
     (for i 0 (sub raw_len 3)
       (if (string_equals (string_slice raw i 4) "\r\n\r\n")
         (set header_end i)
         (break)))
 
-    (set body string "")
+    (set body "")
     (if (ge header_end 0)
-      (set body_start int (add header_end 4))
+      (set body_start (add header_end 4))
       (set body (string_slice raw body_start (sub raw_len body_start))))
 
     (map_set response "body" body)
@@ -67,50 +67,50 @@
     (ret response))
 
   (fn get url string -> map
-    (set parts array (parse_url url))
-    (set protocol string (array_get parts 0))
-    (set host string (array_get parts 1))
-    (set port int (array_get parts 2))
-    (set path string (array_get parts 3))
+    (set parts (parse_url url))
+    (set protocol (array_get parts 0))
+    (set host (array_get parts 1))
+    (set port (array_get parts 2))
+    (set path (array_get parts 3))
 
-    (set sock string "")
+    (set sock "")
     (if (string_equals protocol "https")
       (set sock (tcp_tls_connect host port))
       (set sock (tcp_connect host port)))
 
     (tcp_send sock (build_request "GET" host path ""))
-    (set raw string (tcp_receive sock 8192))
+    (set raw (tcp_receive sock 8192))
     (tcp_close sock)
     (ret (parse_response raw)))
 
   (fn post url string body string -> map
-    (set parts array (parse_url url))
-    (set protocol string (array_get parts 0))
-    (set host string (array_get parts 1))
-    (set port int (array_get parts 2))
-    (set path string (array_get parts 3))
+    (set parts (parse_url url))
+    (set protocol (array_get parts 0))
+    (set host (array_get parts 1))
+    (set port (array_get parts 2))
+    (set path (array_get parts 3))
 
-    (set sock string "")
+    (set sock "")
     (if (string_equals protocol "https")
       (set sock (tcp_tls_connect host port))
       (set sock (tcp_connect host port)))
 
     (tcp_send sock (build_request "POST" host path body))
-    (set raw string (tcp_receive sock 8192))
+    (set raw (tcp_receive sock 8192))
     (tcp_close sock)
     (ret (parse_response raw)))
 
   (fn get_status_text code int -> string
-    (set code_str string (str code))
+    (set code_str (str code))
     (cond
-      ((eq code 200) (ret (string_concat code_str " OK")))
-      ((eq code 201) (ret (string_concat code_str " Created")))
-      ((eq code 204) (ret (string_concat code_str " No Content")))
-      ((eq code 400) (ret (string_concat code_str " Bad Request")))
-      ((eq code 401) (ret (string_concat code_str " Unauthorized")))
-      ((eq code 403) (ret (string_concat code_str " Forbidden")))
-      ((eq code 404) (ret (string_concat code_str " Not Found")))
-      ((eq code 500) (ret (string_concat code_str " Internal Server Error")))
+      ((eq code 200) (ret (add code_str " OK")))
+      ((eq code 201) (ret (add code_str " Created")))
+      ((eq code 204) (ret (add code_str " No Content")))
+      ((eq code 400) (ret (add code_str " Bad Request")))
+      ((eq code 401) (ret (add code_str " Unauthorized")))
+      ((eq code 403) (ret (add code_str " Forbidden")))
+      ((eq code 404) (ret (add code_str " Not Found")))
+      ((eq code 500) (ret (add code_str " Internal Server Error")))
       (true (ret "Unknown Status"))))
 
   (meta-note "Pure Sigil HTTP client using TCP/TLS primitives"))

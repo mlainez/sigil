@@ -6,28 +6,28 @@
 
   (fn normalize_path path string -> string
     (if (not (contains path "/"))
-      (ret (string_concat "/" path)))
+      (ret (add "/" path)))
     (ret path))
 
   (fn build_url host string port int path string -> string
-    (ret (string_format "http://{}:{}{}" host (str port) (normalize_path path))))
+    (ret (fmt "http://{}:{}{}" host (str port) (normalize_path path))))
 
   (fn build_query_string key1 string val1 string -> string
-    (ret (string_format "{}={}" key1 val1)))
+    (ret (fmt "{}={}" key1 val1)))
 
   (fn parse_url url string -> array
-    (set protocol string "http")
+    (set protocol "http")
     (if (contains url "https://")
       (set protocol "https"))
-    (set parts array (array_new))
-    (array_push parts protocol)
-    (array_push parts url)
+    (set parts [])
+    (push parts protocol)
+    (push parts url)
     (ret parts))
 
   (fn extract_domain url string -> string
     (if (not (contains url "://"))
       (ret url))
-    (set parts array (split url "://"))
+    (set parts (split url "://"))
     (if (gt (len parts) 1)
       (ret (array_get parts 1)))
     (ret url)))

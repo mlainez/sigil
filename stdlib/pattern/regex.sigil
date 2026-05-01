@@ -2,14 +2,14 @@
   (fn compile pattern string -> string
     (ret (regex_compile pattern)))
   
-  (fn match regex string text string -> bool
-    (ret (regex_match regex text)))
+  (fn match pat string text string -> bool
+    (ret (regex_match pat text)))
   
-  (fn find regex string text string -> string
-    (ret (regex_find regex text)))
+  (fn find pat string text string -> string
+    (ret (regex_find pat text)))
   
-  (fn find_all regex string text string -> array
-    (ret (regex_find_all regex text)))
+  (fn find_all pat string text string -> array
+    (ret (regex_find_all pat text)))
   
-  (fn replace regex string text string replacement string -> string
-    (ret (regex_replace regex text replacement))))
+  (fn replace pat string text string replacement string -> string
+    (ret (regex_replace pat text replacement))))

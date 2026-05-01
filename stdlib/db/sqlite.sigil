@@ -2,8 +2,8 @@
   (import string_utils)
 
   (fn open path string -> process
-    (set args array (array_new))
-    (array_push args path)
+    (set args [])
+    (push args path)
     (set proc process (process_spawn "sqlite3" args))
     (process_write proc ".mode list\n")
     (process_read proc)
@@ -16,34 +16,34 @@
     (ret (process_wait db)))
 
   (fn exec db process sql string -> bool
-    (set written bool (process_write db (string_concat sql ";\n")))
+    (set written (process_write db (add sql ";\n")))
     (process_read db)
     (ret written))
 
   (fn query db process sql string -> array
-    (process_write db (string_concat sql ";\n"))
-    (set output string (process_read db))
+    (process_write db (add sql ";\n"))
+    (set output (process_read db))
 
-    (set results array (array_new))
+    (set results [])
     (if (eq (len output) 0)
       (ret results))
 
-    (set lines array (split output "\n"))
-    (set num_lines int (len lines))
+    (set lines (split output "\n"))
+    (set num_lines (len lines))
     (for i 0 num_lines
-      (set line string (array_get lines i))
+      (set line (array_get lines i))
       (if (gt (len line) 0)
-        (array_push results (split line "|"))))
+        (push results (split line "|"))))
     (ret results))
 
   (fn execute_file db process filepath string -> bool
-    (ret (process_write db (string_format ".read {}\n" filepath))))
+    (ret (process_write db (fmt ".read {}\n" filepath))))
 
   (fn get_tables db process -> array
     (ret (query db "SELECT name FROM sqlite_master WHERE type='table'")))
 
   (fn get_schema db process table_name string -> string
-    (set results array (query db (string_format "SELECT sql FROM sqlite_master WHERE name='{}'" table_name)))
+    (set results (query db (fmt "SELECT sql FROM sqlite_master WHERE name='{}'" table_name)))
     (if (gt (len results) 0)
       (ret (array_get (array_get results 0) 0)))
     (ret ""))

@@ -1,23 +1,23 @@
 (module text_utils
   (fn repeat_string text string count int -> string
-    (set result string "")
+    (set result "")
     (for i 0 count
-      (set result (string_concat result text)))
+      (set result (add result text)))
     (ret result))
 
   (fn pad_left text string width int pad_char string -> string
-    (set len int (len text))
-    (set result string text)
+    (set len (len text))
+    (set result text)
     (while (lt len width)
-      (set result (string_concat pad_char result))
+      (set result (add pad_char result))
       (set len (add len 1)))
     (ret result))
 
   (fn pad_right text string width int pad_char string -> string
-    (set len int (len text))
-    (set result string text)
+    (set len (len text))
+    (set result text)
     (while (lt len width)
-      (set result (string_concat result pad_char))
+      (set result (add result pad_char))
       (set len (add len 1)))
     (ret result))
 
@@ -27,14 +27,14 @@
     (ret text))
 
   (fn word_count text string -> int
-    (ret (len (string_split text " "))))
+    (ret (len (split text " "))))
 
   (fn reverse_string text string -> string
-    (set len int (len text))
-    (set result string "")
-    (set i int (sub len 1))
+    (set len (len text))
+    (set result "")
+    (set i (sub len 1))
     (while (ge i 0)
-      (set result (string_concat result (string_slice text i 1)))
+      (set result (add result (string_slice text i 1)))
       (set i (sub i 1)))
     (ret result))
 

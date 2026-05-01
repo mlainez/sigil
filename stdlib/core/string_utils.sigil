@@ -1,31 +1,31 @@
 (module string_utils
   (fn split text string delimiter string -> array
-    (set result array (array_new))
-    (set text_len int (len text))
-    (set delim_len int (len delimiter))
-    (set start int 0)
-    (set i int 0)
+    (set result [])
+    (set text_len (len text))
+    (set delim_len (len delimiter))
+    (set start 0)
+    (set i 0)
 
     (while (lt i text_len)
-      (set matches bool false)
+      (set matches false)
       (if (le (add i delim_len) text_len)
         (set matches (string_equals (string_slice text i delim_len) delimiter)))
 
       (if matches
-        (array_push result (string_slice text start (sub i start)))
+        (push result (string_slice text start (sub i start)))
         (set i (add i delim_len))
         (set start i))
 
       (if (not matches)
         (set i (add i 1))))
 
-    (array_push result (string_slice text start (sub text_len start)))
+    (push result (string_slice text start (sub text_len start)))
     (ret result))
 
   (fn trim text string -> string
-    (set text_len int (len text))
-    (set start int 0)
-    (set end_pos int text_len)
+    (set text_len (len text))
+    (set start 0)
+    (set end_pos text_len)
 
     (while (lt start end_pos)
       (if (not (is_whitespace (string_get text start)))
@@ -40,10 +40,10 @@
     (ret (string_slice text start (sub end_pos start))))
 
   (fn contains haystack string needle string -> bool
-    (set haystack_len int (len haystack))
-    (set needle_len int (len needle))
-    (set max_pos int (sub haystack_len needle_len))
-    (set i int 0)
+    (set haystack_len (len haystack))
+    (set needle_len (len needle))
+    (set max_pos (sub haystack_len needle_len))
+    (set i 0)
 
     (while (le i max_pos)
       (if (string_equals (string_slice haystack i needle_len) needle)
@@ -53,14 +53,14 @@
     (ret false))
 
   (fn replace text string old string new string -> string
-    (set parts array (split text old))
-    (set result string "")
-    (set parts_len int (len parts))
+    (set parts (split text old))
+    (set result "")
+    (set parts_len (len parts))
 
     (for i 0 parts_len
-      (set result (string_concat result (array_get parts i)))
+      (set result (add result (array_get parts i)))
       (if (lt i (sub parts_len 1))
-        (set result (string_concat result new))))
+        (set result (add result new))))
 
     (ret result))
 
@@ -70,29 +70,29 @@
     (ret (string_equals (string_slice text 0 (len prefix)) prefix)))
 
   (fn ends_with text string suffix string -> bool
-    (set text_len int (len text))
-    (set suffix_len int (len suffix))
+    (set text_len (len text))
+    (set suffix_len (len suffix))
     (if (gt suffix_len text_len)
       (ret false))
     (ret (string_equals (string_slice text (sub text_len suffix_len) suffix_len) suffix)))
 
   (fn to_upper text string -> string
-    (set result string "")
+    (set result "")
     (for-each ch string (string_chars text)
-      (set result (string_concat result (to_upper_char ch))))
+      (set result (add result (to_upper_char ch))))
     (ret result))
 
   (fn to_lower text string -> string
-    (set result string "")
+    (set result "")
     (for-each ch string (string_chars text)
-      (set result (string_concat result (to_lower_char ch))))
+      (set result (add result (to_lower_char ch))))
     (ret result))
 
   (fn reverse text string -> string
-    (set len int (len text))
-    (set result string "")
-    (set i int (sub len 1))
+    (set len (len text))
+    (set result "")
+    (set i (sub len 1))
     (while (ge i 0)
-      (set result (string_concat result (string_slice text i 1)))
+      (set result (add result (string_slice text i 1)))
       (set i (sub i 1)))
     (ret result)))
