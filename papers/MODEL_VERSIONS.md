@@ -6,23 +6,38 @@ Format: each entry has fixed fields so it can be diffed across versions.
 
 ---
 
-## Cloud era (no longer in active use)
+## Cloud era (together.ai LoRA fine-tunes, no longer in active use)
 
-### sigil-v3 (cloud, Qwen3-Coder-30B-A3B)
-- **Why**: First attempt at fine-tuning a model for Sigil. Cloud-only because the local toolchain wasn't ready.
-- **Recipe**: Together.ai fine-tune of Qwen3-Coder-30B-A3B-Instruct.
-- **Result**: Trained, but inference cost made deployment impractical. Performance not formally measured against frontier cloud models.
-- **Lesson**: The cloud-fine-tune path optimises for the wrong axis (capability ceiling) when the hard problem was inference economics. We needed local.
+The cloud era ran 5+ LoRA fine-tunes on together.ai across multiple base models. The driver was `benchmark/finetune.py` (since removed in commit `f46d6a7` when it was clear the path was abandoned). The supported bases were:
 
-### sigil-v4 (cloud)
-- **Why**: Iterate on v3's training data and prompt template.
-- **Result**: Marginal improvements; same deployment problem as v3.
-- **Lesson**: At cloud scale, the language couldn't justify the marginal training gain over its host model's general code ability.
+```
+qwen3-8b           Qwen/Qwen3-8B
+qwen3-coder-30b    Qwen/Qwen3-Coder-30B-A3B-Instruct  (MoE)
+qwen3-4b           Qwen/Qwen3-4B
+qwen2.5-7b         Qwen/Qwen2.5-7B-Instruct
+gemma-4b           google/gemma-3-4b-it
+llama-8b           meta-llama/Meta-Llama-3.1-8B-Instruct-Reference
+```
 
-### sigil-v5 (cloud, Qwen2.5-7B-Instruct)
-- **Why**: Test whether a smaller cloud-trained model could be cost-competitive.
-- **Result**: First model that produced reliable Sigil at acceptable inference cost.
-- **Lesson**: 7B was the sweet spot for cost vs capability — informed all subsequent local work.
+All used together.ai's LoRA fine-tune API with `n_epochs=3-4`, `learning_rate=1e-5`, and a hand-crafted training-data generator (~145 examples in the early days, distinct from the benchmark suite to avoid contamination). The exact lineage of which adapter became "sigil-v1", "v2", etc. is partially lost — the only result file that survives locally is `benchmark/eval_v5_qwen2.5-7b.json`, identifying that adapter as `marclainez_f68b/Qwen2.5-7B-Instruct-sigil-v5-174eb962-3bf78ef7`.
+
+### sigil-v1 / sigil-v2 (cloud, base unknown — likely Qwen3-8B / Qwen3-Coder-30B)
+- **Why**: First attempts at fine-tuning a Coder model on Sigil. The plausible bases (per `finetune.py` ordering) were `Qwen/Qwen3-8B` and `Qwen/Qwen3-Coder-30B-A3B-Instruct`.
+- **Recipe**: Together.ai LoRA, `lr=1e-5`, `n_epochs=3-4`, ~145 hand-crafted training examples.
+- **Result**: No eval JSON survives. The work was superseded by later versions before benchmark infrastructure stabilised. Anecdotal: produced syntactically valid Sigil but with substantial issues on the early task suite.
+- **Lesson**: Hand-crafted training data at this scale is too narrow to teach a 7B-30B model a new syntax. Drove the move to programmatic corpus generation (the precursor to `corpus_extender.py`).
+
+### sigil-v3 / sigil-v4 (cloud, iterations on training data)
+- **Why**: Successive iterations on the corpus and prompt template, after v1/v2 underperformed.
+- **Recipe**: Same together.ai LoRA shape, with corpus rewrites between runs.
+- **Result**: No eval JSON survives. Marginal-or-negative improvements over v1/v2 per anecdotal notes.
+- **Lesson**: Same as v1/v2 — the corpus needed structural change (size, validator-driven generation), not iteration on prompt details. Together with the cloud cost-per-call problem, this was when "abandon cloud" became the right call.
+
+### sigil-v5 (cloud, Qwen2.5-7B-Instruct via together.ai LoRA)
+- **Why**: Test whether a different base (Qwen2.5 was newer than Qwen3 at the time of the original finetune work? actually older — but 7B Instruct was a known-good shape) could rescue the cloud path.
+- **Recipe**: Together.ai LoRA on `Qwen/Qwen2.5-7B-Instruct`, `lr=1e-5`, `n_epochs=3`. Adapter id `marclainez_f68b/Qwen2.5-7B-Instruct-sigil-v5-174eb962-3bf78ef7`.
+- **Result**: **6/45 (13%) on the 45-task benchmark**, broken down 5/15 / 1/15 / 0/15 across tier 1 / 2 / 3. Tier-1 (basic constructs) was passable; tier-2 (collection ops) collapsed; tier-3 (composition) was unusable. Result file: `benchmark/eval_v5_qwen2.5-7b.json`.
+- **Lesson**: The killing blow for cloud LoRA. A small training corpus on a stock cloud LoRA configuration produced a model that costs real money at inference time and only solved 13% of tasks — vastly worse than the un-tuned cloud frontier (Sonnet) at the same cost. Local QLoRA on a smaller corpus *with* a real validator-feedback loop became the only path that justified itself. The cloud-LoRA infrastructure (`finetune.py`) was deleted; together.ai access was retained for one-off Sonnet calls only.
 
 ---
 
@@ -35,15 +50,19 @@ All Qwen-Sigil-* models below are QLoRA fine-tunes of `Qwen/Qwen2.5-Coder-7B-Ins
 - **Base**: `Qwen/Qwen2.5-Coder-3B-Instruct`.
 - **Recipe**: bf16 + nf4 4-bit, fp16 compute path (NaN'd briefly on RDNA3 numerics; resolved by switching to bf16 compute for QLoRA, see Phase 5.1).
 - **Corpus**: ~1977-example `training_corpus.jsonl` v1.
-- **Result**: 240 MB safetensors / 120 MB GGUF. Demonstrated the workflow end-to-end: local fine-tune → GGUF → ollama.
-- **Lesson**: 3B was too small to absorb the full Sigil pattern set; informed the move to 7B. The numerics gotcha (RDNA3 + bf16 + bnb) became Phase 5.1 documentation.
+- **Result**: 240 MB safetensors / 120 MB GGUF.
+  - **Synthetic 100-task A/B (10 iter × 10 tasks): A=43/100 (43%), B=48/100 (48%)** — vs baseline (un-tuned 3B) **A=10/100, B=29/100**. Net **+33 pp on A, +19 pp on B** from fine-tuning. Result files: `benchmark/rag_loop_3b_baseline.json`, `benchmark/rag_loop_3b_finetuned.json`.
+  - End-to-end workflow proven: local fine-tune → GGUF → ollama serve.
+- **Lesson**: 3B was too small to absorb the full Sigil pattern set (final score still 43-48% on the synthetic suite vs the eventual 80%+ of the 7B). Informed the move to 7B. The numerics gotcha (RDNA3 + bf16 + bnb) became Phase 5.1 documentation.
 
 ### qwen-sigil:7b (v1)
 - **Why**: Scale up from 3B once 3B confirmed the workflow.
 - **Recipe**: First successful 7B-on-16GB QLoRA. 4-bit nf4, bf16 compute, lr=1e-4, max_seq=2048, lora_r=16.
 - **Corpus**: same v1 corpus as the 3B run.
-- **Result**: 160 MB safetensors / 80 MB GGUF. 100-task synthetic benchmark passes.
-- **Lesson**: bnb-rocm is workable on RDNA3 with `HSA_OVERRIDE_GFX_VERSION=11.0.0`; also confirmed the OOM gotcha (ollama-loaded models reserve VRAM during training).
+- **Result**: 160 MB safetensors / 80 MB GGUF.
+  - **Synthetic 100-task A/B: A=56/100 (56%), B=74/100 (74%)** — vs baseline (un-tuned 7B) **A=15/100, B=48/100**. Net **+41 pp on A, +26 pp on B**. Result files: `benchmark/rag_loop_7b_baseline.json`, `benchmark/rag_loop_7b_finetuned.json`.
+  - First model that produced reliable Sigil at consumer-hardware cost.
+- **Lesson**: bnb-rocm is workable on RDNA3 with `HSA_OVERRIDE_GFX_VERSION=11.0.0`; also confirmed the OOM gotcha (ollama-loaded models reserve VRAM during training and must be unloaded with `keep_alive=0` first).
 
 ### qwen-sigil-v2:7b (deployment default for months)
 - **Why**: Deeper retrain than v1 with prompt-format and corpus refinements.
@@ -77,18 +96,26 @@ All Qwen-Sigil-* models below are QLoRA fine-tunes of `Qwen/Qwen2.5-Coder-7B-Ins
   - **+ extended seeds (12) + phi ensemble**: **28/30** (93%) — the highest single-corpus result before v5.
 - **Lesson**: RAG retrieval and weight-level training are **complementary, not redundant**. v4's weights didn't internalize new patterns (corpus signal too weak), but RAG retrieval delivered them at inference time. The retrain's only real benefit was making v4 slightly better at *composing* the patterns RAG surfaces (e.g., for `find_max_in_log`, `permission_octal_to_symbolic`).
 
-### qwen-sigil-v5:7b (clean corpus retrain — current)
+### qwen-sigil-v5:7b (clean corpus retrain)
 - **Why**: After v4 confirmed the corpus-signal-too-weak hypothesis, do a thorough corpus rewrite + audit + retrain. This was the user's explicit ask: *"I want a proper corpus consistent with the current state of Sigil"* — meaning the corpus needs to use canonical names, working primitives, no silent training poison.
-- **Recipe**: v3.1-stable recipe (unchanged).
+- **Recipe**: v3.1-stable recipe (unchanged). 822 steps in 9124 s (~2h32m) on the RX 7800 XT.
 - **Corpus**: **2186 entries**, thoroughly cleaned:
   - Phase A — mechanical safe rewrites: `arg_int <int>` → `argv_int <int>` (12 entries), `regex_find_all` → `find_all` (5 entries).
   - Phase B — 114 new verified examples covering canonical names (verified by running each through `vm.exe` and matching expected output).
   - Phase C — if-Lisp-trap fixes (added explicit `(else)` markers in 48 places that had the silent 2-stmt-then trap).
   - Phase D — runtime verification: ran every entry through `vm.exe` to flag undefined-variable / unknown-function references. After fixing the regex bug in Phase C, 0 entries dropped.
   - Plus interpreter additions: `second`/`third`/`string_length` aliases (catches model reaches the corpus had been training on as silent poison).
-  - **`tokens` 1.7%, `find_all` 1.6%, `argv_int` 0.9%** — all above the empirical ~2% internalization threshold.
-- **Status**: Training in progress at the time of this writing (~step 600/822, ~1h remaining).
-- **Hypothesis**: v5 alone (no RAG) should approach v4+RAG numbers (~23/30) because the canonical names are now in the weights, not just the retrieval index. v5+phi ensemble should match or exceed 28/30. If neither holds, the conclusion is "weight-level training has a hard ceiling at this corpus size and we need a different approach."
+  - **`tokens` 1.7%, `find_all` 1.6%, `argv_int` 0.9%** — all above the 0.1% baseline of v4 but still well below the ~5% threshold needed for confident weight-level absorption per the literature.
+- **Result**:
+  - Final running-mean train_loss **0.554** (vs v4's 0.486, v3.1's 0.13). Higher because the corpus now contains the new prelude/canonical patterns the model has to absorb against its strong Python-shaped prior.
+  - **Alone, no RAG: 14/30 (47%)** — virtually identical to v4 alone (13/30). Cleaning the corpus did NOT push canonical names into the weights.
+  - **+ phi-sigil-v1 ensemble (3-attempt): 27/30 (90%)** — slightly below v4+phi's 28/30. Lost 1 task (`shell_argv_count`) that v4 had caught.
+- **Lesson**: The cleaner corpus is **better hygiene but not better accuracy** at this corpus size. The 7B model's strong Python-shape prior dominates over canonical-name signal at 1.7-2% corpus coverage; you'd need either substantially more examples (~5-10%) or full pre-training to shift the default. **The v5 retrain validates the v4 finding rather than overturning it**: weight-level training at this scale shifts which tasks fail, not how many.
+
+  The cleaner corpus pays off in three other ways:
+  1. **Lower silent training poison** — entries calling non-existent `(second arr)` / `(string_length s)` / `arg_int <string>` no longer teach the model bad patterns (those names now work via aliases AND every retained entry is lint+runtime-verified).
+  2. **Reproducibility** — the `corpus_refresh.py` + `cleanup_corpus.py` + `runtime_check_corpus.py` + `refresh_seeds.py` pipeline is documented and re-runnable, so the next retrain (v6) starts from a known-good baseline.
+  3. **Real measured energy data** — the v5+phi Stream C run was the first executed with `amdgpu_top` sampling. Measured workload-attributable energy: **0.370 Wh/task** (vs the 0.382 Wh/task estimate previously used — within 3%). See `papers/PLAN_local_vs_cloud_economics.md` and `benchmark/power_logs/v5_ensemble_stream_c.csv`.
 
 ---
 
