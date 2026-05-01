@@ -38,9 +38,54 @@ PRICING = {
     "claude-opus-4-7": {"input": 15.0, "output": 75.0},
 }
 
-# Power draw estimates (Watts)
-POWER_LOCAL_INFERENCE = 180.0  # GPU during inference
-POWER_LOCAL_IDLE = 50.0
+# =====================================================================
+# Energy estimation — sourced, with explicit uncertainty bounds.
+# Treat the outputs as ORDER-OF-MAGNITUDE; the per-task numbers below
+# carry roughly ±50% uncertainty until calibrated with a real wattmeter.
+# =====================================================================
+#
+# Local GPU power during inference. The RX 7800 XT has a TBP of 263 W (AMD
+# spec). Sustained inference on RDNA3 typically draws 150-200 W during
+# compute-bound generation per third-party power measurements (TechPowerUp,
+# Tom's Hardware reviews; values consistent across Ada/Hopper too at
+# similar perf-per-watt). 180 W is the midpoint we use here. The whole
+# system at the wall adds ~50-80 W (CPU + RAM + motherboard + idle drives);
+# we DO NOT include this — it's effectively a wash with the cloud's
+# baseline machine load.
+POWER_LOCAL_INFERENCE = 180.0  # W; midpoint of published RDNA3 inference draw
+POWER_LOCAL_IDLE = 50.0        # W; not currently used in per-task accounting
+
+# Cloud per-token energy (Wh per 1K tokens). Sources for the ranges:
+#
+# - Luccioni, Jernite, & Strubell (2024), "Power Hungry Processing: Watts
+#   Driving the Cost of AI Deployment" (FAccT '24).
+#   https://arxiv.org/abs/2311.16863
+#   Measured 0.047 Wh/query for 1B models, ~0.4 Wh/query for 11B BLOOM
+#   class on text-gen tasks (input+output combined, batch size 32).
+#
+# - Samsi et al. (2023), "From Words to Watts: Benchmarking the Energy Costs
+#   of LLM Inference." MIT Lincoln Lab.
+#   https://arxiv.org/abs/2310.03003
+#   Measured 0.3-0.5 Wh per 1K generated tokens on H100s for 7B-class
+#   models; closer to 1.5-3 Wh per 1K for 70B-class.
+#
+# - Patterson et al. (2021), "Carbon Emissions and Large Neural Networks"
+#   https://arxiv.org/abs/2104.10350
+#   Establishes that hyperscale datacenter PUE is now 1.10-1.20, so the
+#   compute-energy figures above multiply by ~1.15 to capture cooling and
+#   power distribution. Network/transit energy is small at modern
+#   intensities (Aslan et al. 2018, ~0.06 kWh/GB for residential at the
+#   time, lower now).
+#
+# Sonnet's exact size is undisclosed; Anthropic does not publish per-call
+# energy. We therefore report a RANGE bracketed by the 7B-class lower
+# bound (0.3 Wh/1K out tokens) and the 70B-class upper bound (3 Wh/1K out
+# tokens). For input tokens we use ~0.04 Wh/1K (mostly memory bandwidth,
+# little compute on prefill once cached). PUE 1.15 is folded in.
+CLOUD_INPUT_WH_PER_1K = 0.04   # Wh; lower bound (prefill, cache-hit dominated)
+CLOUD_OUTPUT_WH_LOWER = 0.3    # Wh per 1K output tokens; 7B-class lower bound
+CLOUD_OUTPUT_WH_UPPER = 3.0    # Wh per 1K output tokens; 70B-class upper bound
+CLOUD_PUE_FACTOR      = 1.15   # PUE multiplier (Patterson 2021)
 
 
 PYTHON_SYSTEM = (
@@ -176,11 +221,14 @@ def validator_hint(got_stdout: str, expected: str, got_stderr: str) -> str:
     return " ".join(notes) if notes else f"got {got_stdout!r} expected {expected!r}"
 
 
-def wh_cloud_estimate(in_tok: int, out_tok: int) -> float:
-    """Rough order-of-magnitude estimate. Frontier models are estimated at
-    roughly 0.3 Wh per 1K input tokens + 0.5 Wh per 1K output tokens
-    (compute + DC overhead). Wide error bars."""
-    return (in_tok * 0.3 + out_tok * 0.5) / 1000.0
+def wh_cloud_estimate(in_tok: int, out_tok: int, upper: bool = False) -> float:
+    """Sourced energy estimate per cloud call. See module-level docstring for
+    citations (Luccioni 2024, Samsi 2023, Patterson 2021). Returns either the
+    7B-class lower bound (default) or the 70B-class upper bound (upper=True).
+    Wide uncertainty: report both ends, never a single number, for any claim."""
+    out_wh_per_1k = CLOUD_OUTPUT_WH_UPPER if upper else CLOUD_OUTPUT_WH_LOWER
+    compute_wh = (in_tok * CLOUD_INPUT_WH_PER_1K + out_tok * out_wh_per_1k) / 1000.0
+    return compute_wh * CLOUD_PUE_FACTOR
 
 
 def eval_task_local_sigil(task: dict, model: str, index: dict, max_attempts: int = 3,
