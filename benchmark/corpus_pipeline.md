@@ -1,5 +1,9 @@
 # Sigil Corpus Generation Pipeline
 
+> **See also**: [`llm_generation_strategy.md`](./llm_generation_strategy.md) —
+> the *how and why* of the generation pipeline (ollama → coaching → Sonnet
+> fallback, evidence-based language tweaks, no Opus by default).
+
 Target: **5-10M tokens** of validated Sigil code for continued pretraining + SFT.
 
 Current: ~150K tokens (265 corpus files + 153 tests + 20 stdlib).

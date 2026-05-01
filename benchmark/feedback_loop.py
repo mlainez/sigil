@@ -161,6 +161,146 @@ Output ONLY the raw Sigil code. No markdown fences. No explanations. No (module)
 # Tier definitions
 # ---------------------------------------------------------------------------
 
+TIER_1 = [
+    # 15 common programming constructs. Mirror of multi_lang_compare.py, but
+    # here Opus generates the Sigil code instead of comparing hand-written.
+    {
+        "id": "hello_world",
+        "desc": "Print 'Hello, World!' (exact punctuation, with trailing newline).",
+        "args": [],
+        "expected": "Hello, World!\n",
+        "python": 'print("Hello, World!")',
+    },
+    {
+        "id": "cli_int_echo",
+        "desc": "Read the first CLI arg as an integer and print it.",
+        "args": ["42"],
+        "expected": "42\n",
+        "python": '''import sys
+print(int(sys.argv[1]))''',
+    },
+    {
+        "id": "indexed_loop",
+        "desc": "Read N from first CLI arg and print integers 1 through N, one per line.",
+        "args": ["5"],
+        "expected": "1\n2\n3\n4\n5\n",
+        "python": '''import sys
+n = int(sys.argv[1])
+for i in range(1, n+1):
+    print(i)''',
+    },
+    {
+        "id": "array_sum",
+        "desc": "Sum space-separated integers from the first CLI arg and print total.",
+        "args": ["1 2 3 4 5"],
+        "expected": "15\n",
+        "python": '''import sys
+print(sum(int(x) for x in sys.argv[1].split()))''',
+    },
+    {
+        "id": "string_vowel_count",
+        "desc": "Count vowels (a,e,i,o,u, case-insensitive) in the first CLI arg and print the count.",
+        "args": ["hello world"],
+        "expected": "3\n",
+        "python": '''import sys
+print(sum(1 for c in sys.argv[1].lower() if c in "aeiou"))''',
+    },
+    {
+        "id": "filter_evens",
+        "desc": "Given space-separated ints, print only the even ones, space-separated.",
+        "args": ["1 2 3 4 5 6"],
+        "expected": "2 4 6\n",
+        "python": '''import sys
+nums = sys.argv[1].split()
+print(" ".join(n for n in nums if int(n)%2==0))''',
+    },
+    {
+        "id": "word_frequency",
+        "desc": "Count each word in the first CLI arg and print 'word count' lines sorted by word asc.",
+        "args": ["the cat sat on the mat"],
+        "expected": "cat 1\nmat 1\non 1\nsat 1\nthe 2\n",
+        "python": '''import sys
+from collections import Counter
+words = sys.argv[1].split()
+c = Counter(words)
+for k in sorted(c):
+    print(f"{k} {c[k]}")''',
+    },
+    {
+        "id": "string_build",
+        "desc": "Given a name and an age, print 'Hello, NAME! You are AGE years old.'",
+        "args": ["Alice", "30"],
+        "expected": "Hello, Alice! You are 30 years old.\n",
+        "python": '''import sys
+print(f"Hello, {sys.argv[1]}! You are {sys.argv[2]} years old.")''',
+    },
+    {
+        "id": "safe_divide",
+        "desc": "Divide arg1 by arg2 (integer division) with error handling: print 'error' on divide-by-zero.",
+        "args": ["10", "0"],
+        "expected": "error\n",
+        "python": '''import sys
+try:
+    a, b = int(sys.argv[1]), int(sys.argv[2])
+    print(a // b)
+except Exception:
+    print("error")''',
+    },
+    {
+        "id": "factorial_recursive",
+        "desc": "Compute factorial of N (arg1) recursively and print it.",
+        "args": ["5"],
+        "expected": "120\n",
+        "python": '''import sys
+def factorial(n):
+    return 1 if n <= 1 else n * factorial(n-1)
+print(factorial(int(sys.argv[1])))''',
+    },
+    {
+        "id": "substring_find",
+        "desc": "Print the 0-indexed position of substring (arg2) in string (arg1). -1 if not found.",
+        "args": ["hello world", "world"],
+        "expected": "6\n",
+        "python": '''import sys
+print(sys.argv[1].find(sys.argv[2]))''',
+    },
+    {
+        "id": "sort_ints",
+        "desc": "Sort space-separated integers ascending and print them space-separated.",
+        "args": ["5 2 8 1 9 3"],
+        "expected": "1 2 3 5 8 9\n",
+        "python": '''import sys
+nums = sorted(int(x) for x in sys.argv[1].split())
+print(" ".join(str(n) for n in nums))''',
+    },
+    {
+        "id": "cond_dispatch",
+        "desc": "Given an integer 1-12 (arg1), print the corresponding month name (January..December). Print 'invalid' outside that range.",
+        "args": ["3"],
+        "expected": "March\n",
+        "python": '''import sys
+names = ["January","February","March","April","May","June","July","August","September","October","November","December"]
+m = int(sys.argv[1])
+print(names[m-1] if 1 <= m <= 12 else "invalid")''',
+    },
+    {
+        "id": "json_assemble",
+        "desc": "Given a name (arg1) and age (arg2), print a compact JSON object: {\"name\":\"NAME\",\"age\":AGE}.",
+        "args": ["Alice", "30"],
+        "expected": '{"name":"Alice","age":30}\n',
+        "python": '''import sys, json
+print(json.dumps({"name": sys.argv[1], "age": int(sys.argv[2])}, separators=(",",":")))''',
+    },
+    {
+        "id": "http_response",
+        "desc": "Print an HTTP/1.1 status line with the given status code (arg1) and reason phrase (arg2).",
+        "args": ["200", "OK"],
+        "expected": "HTTP/1.1 200 OK\n",
+        "python": '''import sys
+print(f"HTTP/1.1 {sys.argv[1]} {sys.argv[2]}")''',
+    },
+]
+
 TIER_2 = [
     # Medium complexity: data transformations, string processing, simple parsers
     {
@@ -525,7 +665,7 @@ print(stack[0])''',
     },
 ]
 
-TIERS = {2: TIER_2, 3: TIER_3}
+TIERS = {1: TIER_1, 2: TIER_2, 3: TIER_3}
 
 
 def run_task(task: dict) -> dict:
