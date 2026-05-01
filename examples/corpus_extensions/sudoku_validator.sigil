@@ -1,0 +1,42 @@
+(set raw $0)
+(set rows (split raw "|"))
+(set n (len rows))
+(set sq (cast_float_int (sqrt (cast_int_float n))))
+
+(set grid [])
+(for i 0 n
+  (set grid (push grid (chars (array_get rows i)))))
+
+(set valid true)
+
+(for i 0 n
+  (set seen_r {})
+  (set seen_c {})
+  (for j 0 n
+    (set r (array_get (array_get grid i) j))
+    (set c (array_get (array_get grid j) i))
+    (if (ne r ".")
+      (if (map_has seen_r r)
+        (set valid false)
+        (else (set seen_r (map_set seen_r r true)))))
+    (if (ne c ".")
+      (if (map_has seen_c c)
+        (set valid false)
+        (else (set seen_c (map_set seen_c c true)))))))
+
+(for bi 0 sq
+  (for bj 0 sq
+    (set seen_b {})
+    (for r 0 sq
+      (for c 0 sq
+        (set ri (add (mul bi sq) r))
+        (set ci (add (mul bj sq) c))
+        (set ch (array_get (array_get grid ri) ci))
+        (if (ne ch ".")
+          (if (map_has seen_b ch)
+            (set valid false)
+            (else (set seen_b (map_set seen_b ch true)))))))))
+
+(if valid
+  (println "valid")
+  (else (println "invalid")))

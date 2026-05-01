@@ -1,0 +1,2 @@
+(set result (reduce (range 0 (+ #0 1)) (\(state _) [(+ (first state) (last state)) (* (last state) #1)]) [0 1]))
+(println (first result))

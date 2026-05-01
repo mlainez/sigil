@@ -1,0 +1,20 @@
+(fn lstrip s str -> str
+  (cond
+    ((eq (len s) 0) (ret s))
+    ((or (eq (string_get s 0) 32) (eq (string_get s 0) 9)) (ret (lstrip (slice s 1 (len s)))))
+    (true (ret s))))
+
+(set lines (split $0 "\n"))
+(set n (len lines))
+(if (and (gt n 0) (eq (last lines) ""))
+  (set lines (slice lines 0 (sub n 1))))
+
+(set imports (len (filter lines (\l (or (string_starts_with l "import ") (string_starts_with l "from "))))))
+(set funcs (len (filter lines (\l (string_starts_with l "def ")))))
+(set comments (len (filter lines (\l (string_starts_with (lstrip l) "#")))))
+(set blanks (len (filter lines (\l (eq (len (lstrip l)) 0)))))
+
+(println (fmt "imports: {}" imports))
+(println (fmt "functions: {}" funcs))
+(println (fmt "comments: {}" comments))
+(println (fmt "blanks: {}" blanks))

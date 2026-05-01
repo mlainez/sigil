@@ -1,0 +1,15 @@
+(set s $0)
+(set n (len s))
+(set c 0)
+(for i 0 n
+  (for j i n
+    (set lo i)
+    (set hi j)
+    (set ok true)
+    (while (and (lt lo hi) ok)
+      (if (ne (string_get s lo) (string_get s hi))
+        (set ok false))
+      (set lo (add lo 1))
+      (set hi (sub hi 1)))
+    (if ok (set c (add c 1)))))
+(println c)

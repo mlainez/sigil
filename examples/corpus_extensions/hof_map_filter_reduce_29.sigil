@@ -1,0 +1,1 @@
+(println (sum (filter (map_arr (filter (parse_ints $0) (\x (eq (mod x 2) 0))) (\x (* x x))) (\x (le x 20)))))

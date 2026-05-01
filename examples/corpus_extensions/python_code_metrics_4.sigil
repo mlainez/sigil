@@ -1,0 +1,18 @@
+(set source string $0)
+(set lines array (split source "\n"))
+(set import_count int 0)
+(set function_count int 0)
+(set comment_count int 0)
+(set blank_count int 0)
+
+(for-each line string lines
+  (cond
+    ((and (in "import" line) (not (in "#" line))) (set import_count (+ import_count 1)))
+    ((and (in "def " line) (not (in "#" line))) (set function_count (+ function_count 1)))
+    ((eq line "") (set blank_count (+ blank_count 1)))
+    ((in "#" line) (set comment_count (+ comment_count 1)))))
+
+(println (fmt "imports: {}" import_count))
+(println (fmt "functions: {}" function_count))
+(println (fmt "comments: {}" comment_count))
+(println (fmt "blanks: {}" blank_count))

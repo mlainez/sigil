@@ -1,0 +1,13 @@
+(set stack array [])
+(for-each arg string (argv)
+  (cond
+    ((in arg ["+" "-" "*" "/"])
+     (set b int (pop stack))
+     (set a int (pop stack))
+     (cond
+       ((eq arg "+") (push stack (+ a b)))
+       ((eq arg "-") (push stack (- a b)))
+       ((eq arg "*") (push stack (* a b)))
+       ((eq arg "/") (push stack (/ a b)))))
+    (true (push stack (str->int arg)))))
+(println (first stack))

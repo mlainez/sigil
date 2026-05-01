@@ -1,0 +1,6 @@
+(for-each tok (split $0 ",")
+  (set n (int tok))
+  (set stars "")
+  (for i 0 n
+    (set stars (string_concat stars "*")))
+  (println (fmt "{}: {}" n stars)))

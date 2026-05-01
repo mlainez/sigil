@@ -1,0 +1,13 @@
+(fn cap w string -> string
+  (if (eq (len w) 0) (ret w))
+  (ret (string_concat (upper (string_slice w 0 1)) (string_slice w 1 (sub (len w) 1)))))
+
+(set words (split $0 " "))
+(set lowers ["of" "and" "the" "in"])
+(set result [])
+(for i 0 (len words)
+  (set w (array_get words i))
+  (if (and (gt i 0) (in w lowers))
+    (push result w)
+    (else (push result (cap w)))))
+(println (join result " "))

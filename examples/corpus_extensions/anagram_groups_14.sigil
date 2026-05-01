@@ -1,0 +1,10 @@
+(set words (split $0 " "))
+(set groups {})
+(for-each word words
+  (set key (join (sort (chars word)) ""))
+  (set cur (get_or groups key []))
+  (set groups (json_set groups [key] (push cur word))))
+(set group_entries (entries groups))
+(set sorted_groups (sort_by group_entries (\(kv) (first (sort (last kv))))))
+(for-each g sorted_groups
+  (println (join (sort (last g)) ",")))

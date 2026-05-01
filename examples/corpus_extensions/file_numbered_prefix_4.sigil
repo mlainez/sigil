@@ -1,0 +1,3 @@
+(set lines array (split $0 "\n"))
+(for-each i int (range (len lines))
+  (println (fmt "{}: {}" (+ i 1) (first (slice lines i)))))

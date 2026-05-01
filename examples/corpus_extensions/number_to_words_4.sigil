@@ -1,0 +1,7 @@
+(set ones ["zero" "one" "two" "three" "four" "five" "six" "seven" "eight" "nine" "ten" "eleven" "twelve" "thirteen" "fourteen" "fifteen" "sixteen" "seventeen" "eighteen" "nineteen"])
+(set tens ["" "" "twenty" "thirty" "forty" "fifty" "sixty" "seventy" "eighty" "ninety"])
+(set n #0)
+(cond
+  ((lt n 20) (println (array_get ones n)))
+  ((eq (mod n 10) 0) (println (array_get tens (div n 10))))
+  (true (println (fmt "{}-{}" (array_get tens (div n 10)) (array_get ones (mod n 10))))))

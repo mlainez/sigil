@@ -1,0 +1,4 @@
+(fn fib n int -> int
+  (if (lt n 2) (ret n))
+  (ret (add (fib (sub n 1)) (fib (sub n 2)))))
+(println (fib #0))

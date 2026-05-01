@@ -1,0 +1,3 @@
+(set words (split $0 " "))
+(set keys (map_arr words (\w (join (sort (chars w)) ""))))
+(println (len (uniq keys)))

@@ -1,0 +1,17 @@
+(fn to_roman n int -> string
+  (set vals [1000 900 500 400 100 90 50 40 10 9 5 4 1])
+  (set syms ["M" "CM" "D" "CD" "C" "XC" "L" "XL" "X" "IX" "V" "IV" "I"])
+  (set result "")
+  (set i 0)
+  (while (lt i 13)
+    (set v (array_get vals i))
+    (set s (array_get syms i))
+    (while (ge n v)
+      (set result (string_concat result s))
+      (set n (sub n v)))
+    (set i (add i 1)))
+  (ret result))
+
+(set count (argv_count))
+(for i 0 count
+  (println (to_roman (arg_int i))))

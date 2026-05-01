@@ -1,0 +1,13 @@
+(set arr (parse_ints $0))
+(set target #1)
+(set lo 0)
+(set hi (sub (len arr) 1))
+(set result -1)
+(while (and (le lo hi) (eq result -1))
+  (set mid (div (add lo hi) 2))
+  (set v (array_get arr mid))
+  (cond
+    ((eq v target) (set result mid))
+    ((lt v target) (set lo (add mid 1)))
+    (true (set hi (sub mid 1)))))
+(println result)

@@ -1,0 +1,5 @@
+(set n #0)
+(set nums array [])
+(for i 1 (add n 1)
+  (push nums (str i)))
+(println (join nums ","))

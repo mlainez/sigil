@@ -1,0 +1,8 @@
+(set s $0)
+(set n (len s))
+(set result "")
+(for i 0 n
+  (if (and (gt i 0) (eq (mod (sub n i) 3) 0))
+    (set result (string_concat result ",")))
+  (set result (string_concat result (string_slice s i 1))))
+(println result)

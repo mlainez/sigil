@@ -1,0 +1,11 @@
+(set s $0)
+(set stack [])
+(for-each c (chars s)
+  (cond
+    ((eq c "(") (push stack ")"))
+    ((in c ")")
+      (if (or (eq (len stack) 0) (ne (array_pop stack) c))
+        (println "no")
+        (else (if (eq (len stack) 0) (println "yes")))))))
+(if (gt (len stack) 0)
+  (println "no"))

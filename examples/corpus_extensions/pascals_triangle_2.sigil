@@ -1,0 +1,6 @@
+(set n #0)
+(set row [1])
+(for-each _ (range 0 n)
+  (println (join (map_arr row str) " "))
+  (set tmp (reduce row (\(acc x) [(push (first acc) (+ (last acc) x)) x]) [[] 0]))
+  (set row (push (first tmp) (last tmp))))

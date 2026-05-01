@@ -1,0 +1,8 @@
+(set s1 string $0)
+(set s2 string $1)
+(set n int (len s1))
+(set count int 0)
+(for i 0 n
+  (if (eq (string_get s1 i) (string_get s2 i))
+    (set count (add count 1))))
+(println count)

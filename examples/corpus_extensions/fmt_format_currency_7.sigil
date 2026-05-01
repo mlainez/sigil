@@ -1,0 +1,23 @@
+(fn add_commas s string -> string
+  (set n (len s))
+  (set out "")
+  (for-each i (range n)
+    (set sep (cond
+      ((and (gt i 0) (eq (mod (sub n i) 3) 0)) ",")
+      (true "")))
+    (set c (char_from_code (string_get s i)))
+    (set out (join [out sep c] "")))
+  (ret out))
+
+(set parts (split $0 "."))
+(set int_str (first parts))
+(set frac_str (cond ((gt (len parts) 1) (last parts)) (true "0")))
+(set frac_chars (chars (join [frac_str "000"] "")))
+(set frac3 (join (slice frac_chars 0 3) ""))
+(set frac_int (first (parse_ints frac3)))
+(set int_part (first (parse_ints int_str)))
+(set cents_raw (div (add frac_int 5) 10))
+(set int_final (cond ((ge cents_raw 100) (add int_part 1)) (true int_part)))
+(set cents_final (cond ((ge cents_raw 100) 0) (true cents_raw)))
+(set cents_str (cond ((lt cents_final 10) (join ["0" (str cents_final)] "")) (true (str cents_final))))
+(println (join ["$" (add_commas (str int_final)) "." cents_str] ""))

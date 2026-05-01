@@ -1,0 +1,1 @@
+(println (join (map_arr (filter (split $0 " ") (\w (gt (len w) 0))) (\w (upper (string_slice w 0 1)))) ""))

@@ -1,0 +1,6 @@
+(set input string $0)
+(set start int #1)
+(set end int #2)
+(set tokens array (split input " "))
+(set sliced array (slice tokens start end))
+(println (join sliced " "))

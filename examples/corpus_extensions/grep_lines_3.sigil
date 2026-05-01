@@ -1,0 +1,4 @@
+(set lines (split $0 "\n"))
+(for-each item (enumerate lines)
+  (if (string_contains (last item) $1)
+    (println (fmt "{}:{}" (add (first item) 1) (last item)))))

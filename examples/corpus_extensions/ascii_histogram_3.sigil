@@ -1,0 +1,8 @@
+(set n (argv_count))
+(for i 0 n
+  (set v (arg_int i))
+  (set stars "")
+  (set count (arg_int i))
+  (for j 0 count
+    (set stars (string_concat stars "*")))
+  (println (fmt "{}: {}" (add i 1) stars)))

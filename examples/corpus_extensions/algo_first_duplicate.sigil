@@ -1,0 +1,9 @@
+(set nums (parse_ints $0))
+(set seen {})
+(set result "none")
+(for-each n nums
+  (if (eq result "none")
+    (if (map_has seen (str n))
+      (set result (str n))
+      (else (set seen (map_set seen (str n) true))))))
+(println result)

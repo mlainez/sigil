@@ -1,0 +1,11 @@
+(set log string $0)
+(set n #1)
+(set counts {})
+(for-each line string (split log "\n")
+  (for-each tok string (split line " ")
+    (map_inc counts tok)))
+(set sorted (sort_by (entries counts) (\(k v) (- v))))
+(set result [])
+(for i 0 n
+  (push result (first (array_get sorted i))))
+(println (join result " "))

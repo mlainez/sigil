@@ -1,0 +1,9 @@
+(set arr (parse_ints $0))
+(set seen {})
+(set found false)
+(for-each x arr
+  (if (and (not found) (map_has seen (str x)))
+    (println x)
+    (set found true))
+  (set seen (map_set seen (str x) 1)))
+(if (not found) (println "none"))

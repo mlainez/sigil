@@ -1,0 +1,10 @@
+(set url $0)
+(set key $1)
+(set parts (split url "?"))
+(set query (array_get parts 1))
+(set pairs (split query "&"))
+(set prefix (string_concat key "="))
+(set plen (len prefix))
+(for-each p pairs
+  (if (string_starts_with p prefix)
+    (println (string_slice p plen (sub (len p) plen)))))

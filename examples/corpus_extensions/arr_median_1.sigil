@@ -1,0 +1,8 @@
+(set nums (sort (parse_ints $0)))
+(set n (len nums))
+(set mid (div n 2))
+(if (eq (mod n 2) 1)
+  (println (float (array_get nums mid)))
+  (else
+    (set s (add (array_get nums (sub mid 1)) (array_get nums mid)))
+    (println (div (float s) 2.0))))

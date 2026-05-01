@@ -1,0 +1,1 @@
+(println (sum (range 1 (add #0 1))))

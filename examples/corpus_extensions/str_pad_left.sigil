@@ -1,0 +1,5 @@
+(set s $0)
+(set pad (sub #1 (len s)))
+(set out "")
+(for i 0 pad (set out (string_concat out " ")))
+(println (string_concat out s))

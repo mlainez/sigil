@@ -1,0 +1,5 @@
+(set lines array (split $0 "\n"))
+(set prefix string $1)
+(for-each line string lines
+  (if (string_starts_with line prefix)
+    (println line)))

@@ -1,0 +1,20 @@
+(fn insert tree map parts array -> map
+  (if (eq (len parts) 0) (ret tree))
+  (set head (first parts))
+  (if (not (map_has tree head))
+    (set tree (map_set tree head {})))
+  (set child (insert (map_get tree head) (rest parts)))
+  (ret (map_set tree head child)))
+
+(fn print_tree tree map depth int -> unit
+  (set indent "")
+  (for i 0 depth
+    (set indent (string_concat indent "  ")))
+  (for-each k (sort (map_keys tree))
+    (println (string_concat indent k))
+    (print_tree (map_get tree k) (add depth 1))))
+
+(set tree {})
+(for-each line (split $0 "\n")
+  (set tree (insert tree (split line "/"))))
+(print_tree tree 0)

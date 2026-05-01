@@ -1,0 +1,13 @@
+(set n #0)
+(set parts [])
+(set p 2)
+(while (gt n 1)
+  (set count 0)
+  (while (eq (mod n p) 0)
+    (set n (div n p))
+    (set count (add count 1)))
+  (cond
+    ((gt count 1) (push parts (fmt "{}^{}" p count)))
+    ((eq count 1) (push parts (str p))))
+  (set p (add p 1)))
+(println (join parts " * "))

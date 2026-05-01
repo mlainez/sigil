@@ -1,0 +1,5 @@
+(set csv $0)
+(set idx #1)
+(for-each row (split csv "\n")
+  (if (ne row "")
+    (println (array_get (split row ",") idx))))

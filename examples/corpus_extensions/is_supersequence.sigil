@@ -1,0 +1,16 @@
+(set candidate $0)
+(set target $1)
+(set i 0)
+(set is_supersequence true)
+(for-each c (chars target)
+  (set found false)
+  (for-each j (range i (len candidate))
+    (if (eq c (array_get (chars candidate) j))
+      (begin
+        (set i (+ j 1))
+        (set found true))))
+  (if (not found)
+    (set is_supersequence false)))
+(if is_supersequence
+  (println "yes")
+  (else (println "no")))

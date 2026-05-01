@@ -1,0 +1,6 @@
+(set n #0)
+(cond
+  ((eq (mod n 15) 0) (println "FizzBuzz"))
+  ((eq (mod n 3) 0) (println "Fizz"))
+  ((eq (mod n 5) 0) (println "Buzz"))
+  (true (println n)))

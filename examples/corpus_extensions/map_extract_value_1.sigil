@@ -1,0 +1,8 @@
+(set args string (arg_str 0))
+(set pairs array (split args ","))
+(set b_value string "")
+(for-each pair string pairs
+  (set kv array (split pair "="))
+  (if (eq (first kv) "b")
+    (set b_value (second kv))))
+(println b_value)

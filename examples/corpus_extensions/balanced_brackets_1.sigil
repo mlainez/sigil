@@ -1,0 +1,26 @@
+(set s $0)
+(set stack [])
+(set n (len s))
+(set result "")
+(for i 0 n
+  (cond
+    ((ne result "") (set result result))
+    (true
+      (set c (string_get s i))
+      (cond
+        ((eq c 40) (push stack 41))
+        ((eq c 91) (push stack 93))
+        ((eq c 123) (push stack 125))
+        ((or (eq c 41) (or (eq c 93) (eq c 125)))
+          (cond
+            ((eq (len stack) 0)
+              (set result (fmt "unbalanced at {}" i)))
+            (true
+              (set top (array_pop stack))
+              (if (ne top c)
+                (set result (fmt "unbalanced at {}" i))))))
+        (true (set result result))))))
+(cond
+  ((ne result "") (println result))
+  ((gt (len stack) 0) (println "unbalanced at end"))
+  (true (println "balanced")))

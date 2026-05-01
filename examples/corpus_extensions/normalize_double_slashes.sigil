@@ -1,0 +1,7 @@
+(set path $0)
+(set parts (split path "/"))
+(set stack [])
+(for-each p parts
+  (if (and (ne p "") (ne p "//"))
+    (push stack p)))
+(println (string_concat "/" (join stack "/")))

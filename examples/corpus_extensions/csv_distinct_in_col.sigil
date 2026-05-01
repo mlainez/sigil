@@ -1,0 +1,12 @@
+(set rows (split $0 "\n"))
+(set header (split (first rows) ","))
+(set idx 0)
+(set col_idx 0)
+(for-each h header
+  (if (eq h $1)
+    (set col_idx idx))
+  (set idx (+ idx 1)))
+(set data_rows (slice rows 1 (len rows)))
+(set vals (map_arr data_rows (\r (get (split r ",") col_idx))))
+(for-each v (sort (uniq vals))
+  (println v))

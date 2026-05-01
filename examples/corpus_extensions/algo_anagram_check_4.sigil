@@ -1,0 +1,3 @@
+(set a (sort (chars (string_replace (lower $0) " " ""))))
+(set b (sort (chars (string_replace (lower $1) " " ""))))
+(println (eq a b))

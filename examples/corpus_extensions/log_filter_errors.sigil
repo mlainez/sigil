@@ -1,0 +1,15 @@
+(set log string $0)
+(set lines array (split log "\n"))
+(set error_count int 0)
+
+(for-each line string lines
+  (set tokens array (split line " "))
+  (if (eq (array_get tokens 2) "ERROR")
+    (println (fmt "{}: {}" (+ 1 (array_index_of lines line)) line))
+  )
+  (if (eq (array_get tokens 2) "ERROR")
+    (set error_count (+ error_count 1))
+  )
+)
+
+(println (fmt "Total errors: {}" error_count))

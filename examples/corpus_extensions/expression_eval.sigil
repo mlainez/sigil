@@ -1,0 +1,41 @@
+(set expr $0)
+(set nums [])
+(set ops [])
+(set cur "")
+(for i 0 (len expr)
+  (set c (string_slice expr i 1))
+  (cond
+    ((in c "+-*/")
+     (set nums (push nums (int cur)))
+     (set ops (push ops c))
+     (set cur ""))
+    (true
+     (set cur (string_concat cur c)))))
+(set nums (push nums (int cur)))
+
+(set nums2 [])
+(set nums2 (push nums2 (array_get nums 0)))
+(set ops2 [])
+(for i 0 (len ops)
+  (set op (array_get ops i))
+  (set b (array_get nums (add i 1)))
+  (cond
+    ((eq op "*")
+     (set li (sub (len nums2) 1))
+     (set nums2 (array_set nums2 li (mul (array_get nums2 li) b))))
+    ((eq op "/")
+     (set li (sub (len nums2) 1))
+     (set nums2 (array_set nums2 li (div (array_get nums2 li) b))))
+    (true
+     (set nums2 (push nums2 b))
+     (set ops2 (push ops2 op)))))
+
+(set result (array_get nums2 0))
+(for i 0 (len ops2)
+  (set op (array_get ops2 i))
+  (set b (array_get nums2 (add i 1)))
+  (if (eq op "+")
+    (set result (add result b))
+    (else (set result (sub result b)))))
+
+(println result)

@@ -1,0 +1,9 @@
+(set words (split $0 " "))
+(set groups (json_parse "{}"))
+(for-each word words
+  (set key (join (sort (chars word)) ""))
+  (set groups (json_set groups [key] (push (get_or groups key []) word))))
+(set vals (map_arr (entries groups) (\e (sort (last e)))))
+(set vals (sort_by (sort_by vals (\g (first g))) (\g (neg (len g)))))
+(for-each g vals
+  (println (join g " ")))

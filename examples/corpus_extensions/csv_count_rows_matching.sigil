@@ -1,0 +1,19 @@
+(set csv string $0)
+(set col string $1)
+(set val string $2)
+
+(set lines array (split csv "\n"))
+(set header string (first lines))
+(set data_lines array (slice lines 1 (len lines)))
+
+(set cols array (split header ","))
+(set col_idx int (index_of cols col))
+
+(set count int 0)
+
+(for-each line string data_lines
+  (set fields array (split line ","))
+  (if (eq (array_get fields col_idx) val)
+    (set count (add count 1))))
+
+(println count)

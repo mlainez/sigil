@@ -1,0 +1,12 @@
+(set a $0)
+(set b $1)
+(set i 0)
+(set n (len a))
+(set m (len b))
+(while (and (lt i n) (lt i m))
+  (if (ne (string_get a (sub n (add i 1))) (string_get b (sub m (add i 1)))) (break))
+  (set i (add i 1)))
+(if (ge i 2)
+  (println "yes")
+  (else
+    (println "no")))

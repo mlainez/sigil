@@ -1,0 +1,4 @@
+(set digits (filter (map_arr (chars $0) (\c (int c))) (\d (gt d 0))))
+(if (eq (len digits) 0)
+  (println 0)
+  (else (println (first (sort digits)))))

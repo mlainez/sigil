@@ -1,0 +1,12 @@
+(fn fib n int memo map -> int
+  (if (le n 1) (ret n))
+  (set key (str n))
+  (if (map_has memo key) (ret (map_get memo key)))
+  (set result (add (fib (sub n 1) memo) (fib (sub n 2) memo)))
+  (map_set memo key result)
+  (ret result))
+
+(set memo {})
+(set n #0)
+(for i 0 n
+  (println (fib i memo)))

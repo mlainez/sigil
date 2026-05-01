@@ -1,0 +1,5 @@
+(set arr (parse_ints $0))
+(set pos (filter arr (\x (gt x 0))))
+(set result 1)
+(for-each x pos (set result (mul result x)))
+(println result)

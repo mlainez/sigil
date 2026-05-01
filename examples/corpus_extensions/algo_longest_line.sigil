@@ -1,0 +1,5 @@
+(set lines string $0)
+(set lengths array [])
+(for-each line string (split lines "\n")
+  (push lengths (len line)))
+(println (reduce lengths max 0))

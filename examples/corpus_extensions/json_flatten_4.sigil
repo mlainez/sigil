@@ -1,0 +1,18 @@
+(fn walk j json prefix string acc array -> array
+  (if (is_object j)
+    (set keys (map_keys j))
+    (for-each k keys
+      (set newp string "")
+      (if (eq (len prefix) 0)
+        (set newp k)
+        (else
+          (set newp (fmt "{}.{}" prefix k))))
+      (set acc (walk (json_get j k) newp acc)))
+    (else
+      (set acc (push acc (fmt "{}={}" prefix (json_stringify j))))))
+  (ret acc))
+
+(set obj (json_parse $0))
+(set lines (sort (walk obj "" [])))
+(for-each line lines
+  (println line))

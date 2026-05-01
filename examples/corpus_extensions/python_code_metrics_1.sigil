@@ -1,0 +1,24 @@
+(set source string $0)
+(set lines array (split source "\n"))
+
+(set count_functions int 0)
+(set count_imports int 0)
+(set count_comments int 0)
+(set count_blanks int 0)
+
+(for-each line string lines
+  (set stripped_line string (string_trim line))
+  (cond
+    ((string_starts_with stripped_line "def ")
+     (set count_functions (add count_functions 1)))
+    ((or (string_starts_with stripped_line "import ") (string_starts_with stripped_line "from "))
+     (set count_imports (add count_imports 1)))
+    ((string_starts_with stripped_line "#")
+     (set count_comments (add count_comments 1)))
+    ((eq stripped_line "")
+     (set count_blanks (add count_blanks 1)))))
+
+(println (fmt "functions: {}" count_functions))
+(println (fmt "imports: {}" count_imports))
+(println (fmt "comments: {}" count_comments))
+(println (fmt "blanks: {}" count_blanks))

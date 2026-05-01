@@ -1,0 +1,15 @@
+(fn say n int -> string
+  (set ones ["zero" "one" "two" "three" "four" "five" "six" "seven" "eight" "nine" "ten" "eleven" "twelve" "thirteen" "fourteen" "fifteen" "sixteen" "seventeen" "eighteen" "nineteen"])
+  (set tens ["" "" "twenty" "thirty" "forty" "fifty" "sixty" "seventy" "eighty" "ninety"])
+  (if (lt n 20) (ret (array_get ones n)))
+  (if (lt n 100)
+    (set t (array_get tens (div n 10)))
+    (set r (mod n 10))
+    (if (eq r 0) (ret t))
+    (ret (fmt "{} {}" t (say r))))
+  (set h (array_get ones (div n 100)))
+  (set r (mod n 100))
+  (if (eq r 0) (ret (fmt "{} hundred" h)))
+  (ret (fmt "{} hundred {}" h (say r))))
+
+(println (say #0))

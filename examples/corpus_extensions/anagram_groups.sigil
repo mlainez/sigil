@@ -1,0 +1,9 @@
+(set words (split $0 ","))
+(set groups {})
+(for-each w words
+  (set sig (join (sort (chars w)) ""))
+  (if (in sig groups)
+    (map_set groups sig (push (map_get groups sig) w))
+    (else (map_set groups sig [w]))))
+(for-each k (sort (map_keys groups))
+  (println (fmt "{}: {}" k (join (map_get groups k) ","))))

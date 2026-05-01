@@ -1,0 +1,9 @@
+(set rows (split $0 ";"))
+(set matrix (map_arr rows (\r (split r ","))))
+(set ncols (len (array_get matrix 0)))
+(set nrows (len matrix))
+(for j 0 ncols
+  (set col [])
+  (for i 0 nrows
+    (push col (array_get (array_get matrix i) j)))
+  (println (join col ",")))

@@ -1,0 +1,6 @@
+(set n #0)
+(set c 0)
+(while (and (gt n 0) (eq (mod n 10) 0))
+  (set c (add c 1))
+  (set n (div n 10)))
+(println c)

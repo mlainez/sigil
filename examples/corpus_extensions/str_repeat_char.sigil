@@ -1,0 +1,5 @@
+(set c $0)
+(set n #1)
+(set out "")
+(for i 0 n (set out (string_concat out c)))
+(println out)

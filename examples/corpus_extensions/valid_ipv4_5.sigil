@@ -1,0 +1,12 @@
+(fn valid_octet s string -> bool
+  (if (eq (len s) 0) (ret false))
+  (if (gt (len s) 3) (ret false))
+  (for-each c (chars s)
+    (if (not (is_digit c)) (ret false)))
+  (ret (le (int s) 255)))
+
+(set parts (split $0 "."))
+(set ok (eq (len parts) 4))
+(for-each p parts
+  (if (not (valid_octet p)) (set ok false)))
+(if ok (println "yes") (else (println "no")))

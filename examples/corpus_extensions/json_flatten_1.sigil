@@ -1,0 +1,18 @@
+(fn build_prefix prefix string k string -> string
+  (if (eq (len prefix) 0)
+    (ret k))
+  (ret (fmt "{}.{}" prefix k)))
+
+(fn collect j json prefix string acc array -> array
+  (cond
+    ((is_object j)
+      (for-each k (map_keys j)
+        (set new_prefix (build_prefix prefix k))
+        (set acc (collect (json_get j k) new_prefix acc)))
+      (ret acc))
+    (true
+      (ret (push acc (fmt "{}={}" prefix (json_stringify j)))))))
+
+(set results (sort (collect (json_parse $0) "" [])))
+(for-each line results
+  (println line))

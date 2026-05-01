@@ -1,0 +1,5 @@
+(println (join (map_arr (chars $0) (\c (cond
+  ((is_digit c) "#")
+  ((is_upper c) (lower c))
+  ((is_lower c) (upper c))
+  (true c)))) ""))

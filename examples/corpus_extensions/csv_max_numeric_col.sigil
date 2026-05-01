@@ -1,0 +1,6 @@
+(set csv string $0)
+(set col_name string $1)
+(set rows array (split csv "\n"))
+(set header array (split (first rows) ","))
+(set idx int (array_index_of header col_name))
+(println (last (sort (map_arr (rest rows) (\r (int (array_get (split r ",") idx)))))))

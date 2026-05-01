@@ -1,0 +1,3 @@
+(set s $0)
+(set end (string_find s "]"))
+(println (string_slice s 1 (sub end 1)))

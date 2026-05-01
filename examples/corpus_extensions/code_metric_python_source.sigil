@@ -1,0 +1,19 @@
+(set source string $0)
+(set functions int 0)
+(set imports int 0)
+(set comments int 0)
+(set blanks int 0)
+
+(for-each line string (split source "\n")
+  (cond
+    ((in "def " line) (set functions (add functions 1)))
+    ((in "async def " line) (set functions (add functions 1)))
+    ((in "import " line) (set imports (add imports 1)))
+    ((in "from " line) (set imports (add imports 1)))
+    ((eq line "") (set blanks (add blanks 1)))
+    ((in "#" line) (set comments (add comments 1)))))
+
+(println (fmt "functions: {}" functions))
+(println (fmt "imports: {}" imports))
+(println (fmt "comments: {}" comments))
+(println (fmt "blanks: {}" blanks))

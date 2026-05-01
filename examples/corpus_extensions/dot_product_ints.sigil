@@ -1,0 +1,3 @@
+(set a array (split $0 " "))
+(set b array (split $1 " "))
+(println (sum (map_arr (range 0 (len a)) (\i (mul (int (array_get a i)) (int (array_get b i)))))))

@@ -1,0 +1,8 @@
+(set s $0)
+(set seen {})
+(set found false)
+(for-each c (chars s)
+  (if (in c seen)
+    (set found true)
+    (else (set seen (map_set seen c true)))))
+(println (if found "yes" (else "no")))

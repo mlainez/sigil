@@ -1,0 +1,12 @@
+(set j (json_parse $0))
+(set employees (json_get j ["employees"]))
+(set dept $1)
+(set filtered (filter employees (\e (eq (json_get e ["dept"]) dept))))
+(set sorted (sort_by filtered (\e (neg (json_get e ["salary"])))))
+(for-each emp sorted
+  (println (fmt "{}: ${} ({} years)" (json_get emp ["name"]) (json_get emp ["salary"]) (json_get emp ["years"]))))
+(println "---")
+(set k (len sorted))
+(set salary_sum (sum (map_arr sorted (\e (json_get e ["salary"])))))
+(set avg (div (+ salary_sum (div k 2)) k))
+(println (fmt "{} employees, avg salary: ${}" k avg))

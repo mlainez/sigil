@@ -1,0 +1,7 @@
+(set f (arg_float 0))
+(set scaled (round (mul (mul f 100.0) 100.0)))
+(set whole (div scaled 100))
+(set frac (mod scaled 100))
+(if (lt frac 10)
+  (println (fmt "{}.0{}%" whole frac))
+  (else (println (fmt "{}.{}%" whole frac))))

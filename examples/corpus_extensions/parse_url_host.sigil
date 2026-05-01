@@ -1,0 +1,3 @@
+(set url $0)
+(set after (last (split url "://")))
+(println (first (split after "/")))

@@ -1,0 +1,15 @@
+(fn to_days s string -> int
+  (set parts (split s "-"))
+  (set y (int (array_get parts 0)))
+  (set m (int (array_get parts 1)))
+  (set d (int (array_get parts 2)))
+  (if (le m 2)
+    (set y (sub y 1))
+    (set m (add m 12)))
+  (set era (div y 400))
+  (set yoe (sub y (mul era 400)))
+  (set doy (add (div (add (mul 153 (sub m 3)) 2) 5) (sub d 1)))
+  (set doe (add (sub (add (mul yoe 365) (div yoe 4)) (div yoe 100)) doy))
+  (ret (sub (add (mul era 146097) doe) 719468)))
+
+(println (sub (to_days $1) (to_days $0)))

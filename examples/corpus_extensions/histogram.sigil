@@ -1,0 +1,8 @@
+(set arr (split $0 ","))
+(set c {})
+(for-each x arr (map_inc c x))
+(for-each k (sort (map_keys c))
+  (set n (map_get c k))
+  (set s "")
+  (for i 0 n (set s (add s "*")))
+  (println (fmt "{}: {}" k s)))

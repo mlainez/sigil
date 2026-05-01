@@ -1,0 +1,6 @@
+(set words (split $0 " "))
+(set counts (counter words))
+(set pairs (entries counts))
+(set sorted (sort_by pairs (\p [(neg (last p)) (first p)])))
+(for-each p sorted
+  (println (fmt "{}: {}" (first p) (last p))))

@@ -1,0 +1,8 @@
+(set csv string $0)
+(set lines array (split csv "\n"))
+(set header array (split (first lines) ","))
+(set data array (map_arr (rest lines) (\line (split line ","))))
+(set filtered_data array (filter data (\row (gt (parse_int (first (slice row 2))) 75))))
+(set sorted_data array (sort_by filtered_data (\row (neg (parse_int (first (slice row 2)))))))
+(for-each row sorted_data
+  (println (fmt "{}\t{}" (first row) (parse_int (first (slice row 2))))))

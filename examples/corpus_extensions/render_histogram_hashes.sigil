@@ -1,0 +1,6 @@
+(set nums array (parse_ints $0))
+(for-each n int nums
+  (set bar string "")
+  (for i 0 n
+    (set bar (string_concat bar "#")))
+  (println bar))

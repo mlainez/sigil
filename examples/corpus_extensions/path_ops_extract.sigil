@@ -1,0 +1,13 @@
+(set path string $0)
+(set basename string (last (split path "/")))
+(set parts array (slice (split path "/") 0 (- (len (split path "/")) 1)))
+(set dirname string (join parts "/"))
+(set ext_parts array (split basename "."))
+(cond
+  ((gt (len ext_parts) 1)
+   (set extension string (fmt ".{}" (last ext_parts))))
+  (true
+   (set extension string "")))
+(println (fmt "basename: {}" basename))
+(println (fmt "dirname: {}" dirname))
+(println (fmt "extension: {}" extension))

@@ -1,0 +1,4 @@
+(set m 0)
+(for-each w (split $0 " ")
+  (if (gt (len w) m) (set m (len w))))
+(println m)

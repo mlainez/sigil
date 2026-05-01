@@ -1,0 +1,4 @@
+(set rows (map_arr (split $0 "|") (\r (split r ","))))
+(set cols (len (first rows)))
+(for j 0 cols
+  (println (join (map_arr rows (\r (array_get r j))) " ")))

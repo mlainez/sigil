@@ -1,0 +1,3 @@
+(set lines array (split $0 "\n"))
+(set filtered_lines array (filter (\line (in "error" line)) lines))
+(println (join filtered_lines "\n"))

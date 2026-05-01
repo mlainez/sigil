@@ -1,0 +1,2 @@
+(for-each line (sort_by (split $0 "\n") (\x [(len x) x]))
+  (println line))

@@ -1,0 +1,2 @@
+(set n #0)
+(println (div (mul n (add n 1)) 2))

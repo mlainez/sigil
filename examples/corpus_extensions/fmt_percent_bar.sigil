@@ -1,0 +1,6 @@
+(set p #0)
+(set filled (div p 5))
+(set bar "")
+(for i 0 filled (set bar (string_concat bar "#")))
+(for i filled 20 (set bar (string_concat bar " ")))
+(println (fmt "[{}] {}%" bar p))

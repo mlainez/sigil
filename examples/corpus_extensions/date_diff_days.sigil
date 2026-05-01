@@ -1,0 +1,19 @@
+(fn days yi int m int d int -> int
+  (set y yi)
+  (if (le m 2) (set y (sub y 1)))
+  (set era (div y 400))
+  (set yoe (sub y (mul era 400)))
+  (set ma 0)
+  (if (gt m 2) (set ma (sub m 3)) (else (set ma (add m 9))))
+  (set doy (add (div (add (mul 153 ma) 2) 5) (sub d 1)))
+  (set doe (add (sub (add (mul yoe 365) (div yoe 4)) (div yoe 100)) doy))
+  (ret (add (mul era 146097) (sub doe 719468))))
+
+(fn parse_date s string -> int
+  (set p (split s "-"))
+  (ret (days (int (array_get p 0)) (int (array_get p 1)) (int (array_get p 2)))))
+
+(set s1 $0)
+(set s2 $1)
+(set diff (abs (sub (parse_date s2) (parse_date s1))))
+(println (fmt "Days between {s1} and {s2}: {diff}"))

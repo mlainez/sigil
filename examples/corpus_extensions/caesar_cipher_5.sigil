@@ -1,0 +1,14 @@
+(set shift #0)
+(set text $1)
+(set s (mod (add (mod shift 26) 26) 26))
+(set result "")
+(for i 0 (len text)
+  (set code (string_get text i))
+  (cond
+    ((and (ge code 65) (le code 90))
+      (set result (string_concat result (char_from_code (add 65 (mod (add (sub code 65) s) 26))))))
+    ((and (ge code 97) (le code 122))
+      (set result (string_concat result (char_from_code (add 97 (mod (add (sub code 97) s) 26))))))
+    (true
+      (set result (string_concat result (char_from_code code))))))
+(println result)

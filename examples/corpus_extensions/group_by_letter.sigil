@@ -1,0 +1,9 @@
+(set words (argv))
+(set groups {})
+(for-each w words
+  (set ch (lower (string_slice w 0 1)))
+  (set existing (get_or groups ch []))
+  (push existing w)
+  (set groups (map_set groups ch existing)))
+(for-each k (sort (map_keys groups))
+  (println (fmt "{}: {}" k (join (sort (map_get groups k)) ","))))

@@ -1,0 +1,8 @@
+(fn hanoi n int src string dst string aux string -> int
+  (if (eq n 0) (ret 0))
+  (hanoi (sub n 1) src aux dst)
+  (println (fmt "{}->{}" src dst))
+  (hanoi (sub n 1) aux dst src)
+  (ret 0))
+
+(hanoi #0 "A" "C" "B")

@@ -1,0 +1,7 @@
+(set words (split $0 " "))
+(set c {})
+(for-each w words
+  (set letter (string_slice w 0 1))
+  (map_inc c letter))
+(set keys (sort (map_keys c)))
+(println (join (map_arr keys (\k (fmt "{}:{}" k (map_get c k)))) " "))

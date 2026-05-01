@@ -1,0 +1,13 @@
+(fn shift_char c int n int -> int
+  (cond
+    ((and (ge c 65) (le c 90))
+      (ret (add (mod (add (mod (add (sub c 65) n) 26) 26) 26) 65)))
+    ((and (ge c 97) (le c 122))
+      (ret (add (mod (add (mod (add (sub c 97) n) 26) 26) 26) 97)))
+    (true (ret c))))
+
+(set n #1)
+(set out "")
+(for-each ch (chars $0)
+  (set out (string_concat out (char_from_code (shift_char (string_get ch 0) n)))))
+(println out)

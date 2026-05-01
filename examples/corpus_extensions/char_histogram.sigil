@@ -1,0 +1,3 @@
+(set freqs (counter (chars $0)))
+(for-each entry (sort (entries freqs))
+  (println (fmt "{}: {}" (first entry) (join (map_arr (range (last entry)) (\x "*")) ""))))

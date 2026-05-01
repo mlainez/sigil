@@ -1,0 +1,8 @@
+(set s $0)
+(set c (counter (chars s)))
+(set ks (sort (map_keys c)))
+(set best (first ks))
+(for-each k ks
+  (if (gt (map_get c k) (map_get c best))
+    (set best k)))
+(println best)

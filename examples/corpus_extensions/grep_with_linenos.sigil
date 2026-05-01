@@ -1,0 +1,6 @@
+(set input string $0)
+(set substring string $1)
+(set lines array (split input "\n"))
+(for-each line string lines
+  (if (in substring line)
+    (println (fmt "{}: {}" (+ 1 (index_of lines line)) line))))

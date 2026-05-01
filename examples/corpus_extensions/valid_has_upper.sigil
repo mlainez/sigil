@@ -1,0 +1,4 @@
+(set s $0)
+(if (gt (len (filter (chars s) (\c (is_upper c)))) 0)
+  (println "yes")
+  (else (println "no")))

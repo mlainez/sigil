@@ -1,0 +1,10 @@
+(set fname $0)
+(set n int (len fname))
+(set i int -1)
+(for j 0 n
+  (if (eq (string_get fname j) 46)
+    (set i j)))
+(if (lt i 0)
+  (println fname)
+  (else
+    (println (string_slice fname 0 i))))

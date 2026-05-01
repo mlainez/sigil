@@ -1,0 +1,3 @@
+(set sorted (sort (parse_ints $0)))
+(set distinct (uniq sorted))
+(println (array_get distinct (sub (len distinct) 2)))

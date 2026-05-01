@@ -1,0 +1,4 @@
+(set input string $0)
+(set lower_input string (lower input))
+(set reversed_input string (rev lower_input))
+(println (eq lower_input reversed_input))

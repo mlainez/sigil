@@ -1,0 +1,10 @@
+(set a $0)
+(set b $1)
+(set b_chars (chars b))
+(println (join (filter (chars a) (\c
+  (set idx (array_index_of b_chars c))
+  (if (ne idx -1)
+    (begin
+      (array_remove b_chars idx)))
+  (ret (ne idx -1))))
+  ""))

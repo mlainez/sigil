@@ -1,0 +1,8 @@
+(set tmpl $0)
+(for i 1 (argv_count)
+  (set kv (arg_str i))
+  (set p (string_find kv "="))
+  (set k (string_slice kv 0 p))
+  (set v (string_slice kv (add p 1) (sub (len kv) (add p 1))))
+  (set tmpl (string_replace tmpl (string_concat "{" (string_concat k "}")) v)))
+(println tmpl)

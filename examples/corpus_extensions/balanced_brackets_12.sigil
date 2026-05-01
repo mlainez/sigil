@@ -1,0 +1,23 @@
+(set s $0)
+(set stack [])
+(set ok true)
+(for i 0 (len s)
+  (set c (string_get s i))
+  (cond
+    ((or (eq c 40) (or (eq c 91) (eq c 123)))
+      (push stack c))
+    ((eq c 41)
+      (cond
+        ((eq (len stack) 0) (set ok false))
+        ((ne (array_pop stack) 40) (set ok false))))
+    ((eq c 93)
+      (cond
+        ((eq (len stack) 0) (set ok false))
+        ((ne (array_pop stack) 91) (set ok false))))
+    ((eq c 125)
+      (cond
+        ((eq (len stack) 0) (set ok false))
+        ((ne (array_pop stack) 123) (set ok false))))))
+(if (and ok (eq (len stack) 0))
+  (println "balanced")
+  (else (println "unbalanced")))

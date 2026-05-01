@@ -1,0 +1,1 @@
+(println (first (split $0 "=")))

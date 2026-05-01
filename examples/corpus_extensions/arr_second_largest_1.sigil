@@ -1,0 +1,2 @@
+(set arr (sort (uniq (map_arr (split $0 " ") (\x (int x))))))
+(println (array_get arr (sub (len arr) 2)))

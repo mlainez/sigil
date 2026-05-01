@@ -1,0 +1,9 @@
+(set arr (parse_ints $0))
+(set pos (filter arr (\x (gt x 0))))
+(if (eq (len pos) 0)
+  (println "0.0")
+  (else
+    (set s (sum pos))
+    (set n (len pos))
+    (set avg10 (round (div (cast_int_float (mul s 10)) (cast_int_float n))))
+    (println (fmt "{}.{}" (div avg10 10) (mod avg10 10)))))

@@ -1,0 +1,1 @@
+(println (reduce (parse_ints $0) (\(a b) (mul a b)) 1))

@@ -1,0 +1,7 @@
+(set words (map_arr (split $0 " ") (\w (lower w))))
+(set counts (counter words))
+(set pairs (entries counts))
+(set sorted (sort_by pairs (\p (fmt "{}{}" (sub 10000 (last p)) (first p)))))
+(set top3 (slice sorted 0 3))
+(for-each pair top3
+  (println (fmt "{}: {}" (first pair) (last pair))))

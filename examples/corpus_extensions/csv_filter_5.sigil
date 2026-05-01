@@ -1,0 +1,8 @@
+(set rows (split $0 ";"))
+(set header (first rows))
+(set fields (split header ","))
+(set col_idx (first (first (filter (enumerate fields) (\p (eq (last p) $1))))))
+(println header)
+(for-each row (rest rows)
+  (if (eq (first (slice (split row ",") col_idx (+ col_idx 1))) $2)
+    (println row)))

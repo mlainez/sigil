@@ -1,0 +1,8 @@
+(set lines (split $0 "\n"))
+(set parts (split $1 "="))
+(set header (split (first lines) ","))
+(set idx (array_index_of header (first parts)))
+(set val (array_get parts 1))
+(for-each row (array_slice lines 1 (sub (len lines) 1))
+  (if (eq (array_get (split row ",") idx) val)
+    (println row)))

@@ -1,0 +1,3 @@
+(set email $0)
+(set at (string_find email "@"))
+(println (string_slice email (add at 1) (sub (len email) (add at 1))))

@@ -1,0 +1,2 @@
+(set lines array (split $0 "\n"))
+(println (len (uniq lines)))

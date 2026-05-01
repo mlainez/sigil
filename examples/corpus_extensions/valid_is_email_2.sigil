@@ -1,0 +1,2 @@
+(set pattern (regex_compile "^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$"))
+(println (regex_match pattern $0))

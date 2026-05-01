@@ -1,0 +1,8 @@
+(set pairs (split $0 ","))
+(set key $1)
+(set result "NONE")
+(for-each p pairs
+  (set kv (split p "="))
+  (if (eq (first kv) key)
+    (set result (last kv))))
+(println result)

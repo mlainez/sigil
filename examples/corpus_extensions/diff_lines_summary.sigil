@@ -1,0 +1,17 @@
+(set old_lines array (filter (\x (not (eq x ""))) (split $0 "\n")))
+(set new_lines array (filter (\x (not (eq x ""))) (split $1 "\n")))
+
+(set old_set map (reduce old_lines (\(acc line) (merge acc {line true})) {}))
+(set new_set map (reduce new_lines (\(acc line) (merge acc {line true})) {}))
+
+(set unique_old array (filter (\x (not (in x new_set))) old_lines))
+(set unique_new array (filter (\x (not (in x old_set))) new_lines))
+
+(set common int (len (filter (\x (in x new_set)) old_lines)))
+(set removed int (len unique_old))
+(set added int (len unique_new))
+
+(map_arr (sort unique_old) (\line (println (fmt "- {}" line))))
+(map_arr (sort unique_new) (\line (println (fmt "+ {}" line))))
+
+(println (fmt "common: {}, removed: {}, added: {}" common removed added))

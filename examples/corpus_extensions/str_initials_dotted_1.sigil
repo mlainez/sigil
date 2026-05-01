@@ -1,0 +1,3 @@
+(set parts (split $0 " "))
+(set initials (map_arr parts (\w (upper (string_slice w 0 1)))))
+(println (add (join initials ".") "."))

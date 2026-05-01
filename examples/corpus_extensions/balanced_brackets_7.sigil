@@ -1,0 +1,26 @@
+(fn balanced s string -> bool
+  (set stack [])
+  (for-each c (chars s)
+    (cond
+      ((in c ["(" "[" "{"])
+        (push stack c))
+      ((eq c ")")
+        (if (or (eq (len stack) 0) (ne (last stack) "("))
+          (ret false))
+        (array_pop stack))
+      ((eq c "]")
+        (if (or (eq (len stack) 0) (ne (last stack) "["))
+          (ret false))
+        (array_pop stack))
+      ((eq c "}")
+        (if (or (eq (len stack) 0) (ne (last stack) "{"))
+          (ret false))
+        (array_pop stack))))
+  (ret (eq (len stack) 0)))
+
+(set n (argv_count))
+(for i 0 n
+  (set arg (arg_str i))
+  (if (balanced arg)
+    (println (fmt "{}: yes" arg))
+    (else (println (fmt "{}: no" arg)))))

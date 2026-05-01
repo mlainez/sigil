@@ -1,0 +1,4 @@
+(set nums (parse_ints $0))
+(set d #1)
+(set kept (filter nums (\x (eq (mod x d) 0))))
+(println (join (map_arr kept (\x (str x))) ","))

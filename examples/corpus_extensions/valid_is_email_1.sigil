@@ -1,0 +1,2 @@
+(set pattern (regex_compile "^[^@]+@[^@]+\.[^@]+$"))
+(println (regex_match pattern $0))

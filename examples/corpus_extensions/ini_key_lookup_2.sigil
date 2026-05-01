@@ -1,0 +1,13 @@
+(set config map {})
+(set lines array (split $0 "\n"))
+(for-each line string lines
+  (if (and (not (eq line "")) (not (eq (slice line 0 1) "#")))
+    (set parts array (split line "="))
+    (set key string (array_get parts 0))
+    (set val string (array_get parts 1))
+    (set config (+ config {key val}))))
+
+(set lookup_keys array (split $1 ","))
+(for-each key string lookup_keys
+  (if (in key config)
+    (println (fmt "{}={}" key (get config key)))))

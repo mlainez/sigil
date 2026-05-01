@@ -1,0 +1,6 @@
+(set pat (regex_compile "^[.,!?;:]+|[.,!?;:]+$"))
+(set words (map_arr (split (lower $0) " ") (\w (regex_replace pat w ""))))
+(set freq (counter words))
+(set sorted (sort_by (entries freq) (\e [(neg (last e)) (first e)])))
+(for-each e sorted
+  (println (fmt "{}: {}" (first e) (last e))))

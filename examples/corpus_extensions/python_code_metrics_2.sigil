@@ -1,0 +1,12 @@
+(fn strip_line s string -> string
+  (ret (regex_replace (regex_compile "^\s+") (regex_replace (regex_compile "\s+$") s "") "")))
+(set lines (split $0 "\n"))
+(set stripped (map_arr lines (\l (strip_line l))))
+(set funcs (len (filter stripped (\l (string_starts_with l "def ")))))
+(set imports (len (filter stripped (\l (or (string_starts_with l "import ") (string_starts_with l "from "))))))
+(set comments (len (filter stripped (\l (string_starts_with l "#")))))
+(set blanks (len (filter stripped (\l (eq l "")))))
+(println (join ["functions: " (str funcs)] ""))
+(println (join ["imports: " (str imports)] ""))
+(println (join ["comments: " (str comments)] ""))
+(println (join ["blanks: " (str blanks)] ""))

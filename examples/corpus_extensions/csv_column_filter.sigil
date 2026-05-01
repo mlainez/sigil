@@ -1,0 +1,19 @@
+(set csv string $0)
+(set cols string $1)
+(set filter_col string $2)
+(set filter_val string $3)
+
+(set col_names array (split (first (split csv "\n")) ","))
+(set data_rows array (rest (split csv "\n")))
+
+(set selected_cols array (filter (\col (in col (split cols ","))) col_names))
+(set filter_index int (index_of col_names filter_col))
+
+(set filtered_data array
+  (filter (\row (eq (first (slice row filter_index (+ filter_index 1))) filter_val)) 
+    (map_arr (\line (split line ",")) data_rows)))
+
+(set header string (join selected_cols "\t"))
+(set body string (join (map_arr (\row (join (map_arr (\col (first (slice row (index_of col_names col) (+ (index_of col_names col) 1)))) selected_cols) "\t")) filtered_data) "\n"))
+
+(println (fmt "{}\n{}" header body))

@@ -1,0 +1,12 @@
+(set csv string $0)
+(set col_name string $1)
+
+(set lines array (split csv "\n"))
+(set header string (first lines))
+(set data_lines array (rest lines))
+
+(set cols array (split header ","))
+(set idx int (array_index_of cols col_name))
+
+(for-each row string data_lines
+  (println (array_get (split row ",") idx)))

@@ -1,0 +1,16 @@
+(set config string $0)
+(set key_to_remove string $1)
+
+(fn valid_line line string -> bool
+  (cond
+    ((eq (len line) 0) (ret false))
+    ((string_starts_with line "#") (ret false))
+    ((string_starts_with line "[") (ret false))
+    (true (ret true))))
+
+(set lines array (split config "\n"))
+(set valid_lines array (filter lines valid_line))
+
+(for-each line string valid_lines
+  (if (not (eq (first (split line "=")) key_to_remove))
+    (println line)))

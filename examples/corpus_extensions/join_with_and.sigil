@@ -1,0 +1,11 @@
+(set arr array (split $0 ","))
+(set n int (len arr))
+(if (eq n 0)
+  (println "")
+  (else
+    (set last string (array_get arr (sub n 1)))
+    (set rest array (slice arr 0 (sub n 1)))
+    (if (gt n 1)
+      (println (fmt "{} and {}" (join rest ", ") last))
+      (else
+        (println last)))))

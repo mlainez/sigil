@@ -1,0 +1,1 @@
+(println (join (map_arr (split $0 ",") (\pair (last (split pair "=")))) " "))

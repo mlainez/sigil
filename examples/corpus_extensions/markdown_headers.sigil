@@ -1,0 +1,4 @@
+(set lines (split $0 "\n"))
+(for-each line (filter lines (\line (string_starts_with line "#")))
+  (set parts (split line " "))
+  (println (join ["H" (str (len (first parts))) ": " (join (rest parts) " ")] "")))

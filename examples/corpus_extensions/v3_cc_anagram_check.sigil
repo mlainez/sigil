@@ -1,0 +1,14 @@
+(set a string $0)
+(set b string $1)
+
+(set ac map (counter (chars a)))
+(set bc map (counter (chars b)))
+
+(set common int 0)
+(for-each k string (map_keys ac)
+  (if (in k bc)
+    (set common (add common (min (get_or ac k 0) (get_or bc k 0))))))
+
+(if (ge common 3)
+  (println "yes")
+  (else (println "no")))

@@ -1,0 +1,13 @@
+(set tokens (split $0 " "))
+(set stack [])
+(for-each tok tokens
+  (if (in tok ["+" "-" "*" "/"])
+    (set b (array_pop stack))
+    (set a (array_pop stack))
+    (cond
+      ((eq tok "+") (push stack (add a b)))
+      ((eq tok "-") (push stack (sub a b)))
+      ((eq tok "*") (push stack (mul a b)))
+      ((eq tok "/") (push stack (div a b))))
+    (else (push stack (float tok)))))
+(println (array_pop stack))

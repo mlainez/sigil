@@ -1,0 +1,12 @@
+(set url $0)
+(set key $1)
+(set parts (split url "?"))
+(set result "")
+(if (ge (len parts) 2)
+  (set qs (array_get parts 1))
+  (set pairs (split qs "&"))
+  (for-each p pairs
+    (set kv (split p "="))
+    (if (eq (array_get kv 0) key)
+      (set result (array_get kv 1)))))
+(println result)

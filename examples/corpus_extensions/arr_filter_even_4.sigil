@@ -1,0 +1,4 @@
+(set input string $0)
+(set numbers array (map_arr (split input " ") (\x (str->int x))))
+(set evens array (filter numbers (\n (eq (mod n 2) 0))))
+(println (join (map_arr evens str) " "))

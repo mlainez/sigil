@@ -1,0 +1,18 @@
+(set ws (split $0 " "))
+(set counts {})
+(for-each w ws
+  (map_inc counts w))
+(set keys (sort (map_keys counts)))
+(set max_c 0)
+(for-each k keys
+  (set kc (map_get counts k))
+  (if (gt kc max_c) (set max_c kc)))
+(set printed 0)
+(set n #1)
+(set cur max_c)
+(while (and (gt cur 0) (lt printed n))
+  (for-each k keys
+    (if (and (eq (map_get counts k) cur) (lt printed n))
+      (println (fmt "{} {}" k cur))
+      (set printed (add printed 1))))
+  (set cur (sub cur 1)))

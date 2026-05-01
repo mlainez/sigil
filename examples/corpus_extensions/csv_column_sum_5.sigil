@@ -1,0 +1,7 @@
+(set csv $0)
+(set col $1)
+(set rows (split csv ";"))
+(set headers (split (first rows) ","))
+(set idx (array_index_of headers col))
+(set total (sum (map_arr (rest rows) (\row (int (array_get (split row ",") idx))))))
+(println (fmt "{}: {}" col total))

@@ -1,0 +1,5 @@
+(set w $0)
+(set n #1)
+(set r "")
+(for i 0 n (set r (string_concat r w)))
+(println r)

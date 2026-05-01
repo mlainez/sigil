@@ -1,0 +1,11 @@
+(set n #0)
+(if (le n 1)
+  (println "no")
+  (else
+    (set is_prime bool true)
+    (set i int 2)
+    (while (and is_prime (le (mul i i) n))
+      (if (eq (mod n i) 0)
+        (set is_prime false))
+      (set i (add i 1)))
+    (if is_prime (println "yes") (else (println "no")))))

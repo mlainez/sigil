@@ -1,0 +1,4 @@
+(set code string $0)
+(set lines array (split code "\n"))
+(set comment_count int (len (filter (\line (contains line "#")) lines)))
+(println comment_count)

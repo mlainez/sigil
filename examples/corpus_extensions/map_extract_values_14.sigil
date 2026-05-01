@@ -1,0 +1,4 @@
+(set pairs (split $0 ","))
+(set m (reduce pairs (\(acc pair) (merge acc (json_set {} [(first (split pair "="))] (last (split pair "="))))) {}))
+(set keys (split $1 ","))
+(println (join (map_arr keys (\k (json_get m [k]))) " "))

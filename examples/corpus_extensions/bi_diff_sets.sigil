@@ -1,0 +1,3 @@
+(set a (split $0 " "))
+(set b (split $1 " "))
+(println (join (filter a (\x (not (in x b)))) " "))

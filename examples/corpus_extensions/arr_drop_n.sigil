@@ -1,0 +1,5 @@
+(set input string $0)
+(set n int #1)
+(set parts array (split input " "))
+(set result array (slice parts n (len parts)))
+(println (join result " "))

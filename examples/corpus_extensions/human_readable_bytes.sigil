@@ -1,0 +1,11 @@
+(set n int #0)
+(if (le n 1024)
+  (println (fmt "{} B" n))
+  (else
+    (set units array ["KB" "MB" "GB" "TB"])
+    (set i int 0)
+    (set val float (/ (cast_int_float n) 1024.0))
+    (while (and (ge val 1024.0) (lt i 3))
+      (set val (div val 1024.0))
+      (set i (add i 1)))
+    (println (fmt "{:.2f} {}" val (array_get units i)))))

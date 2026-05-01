@@ -1,0 +1,13 @@
+(fn flatten j json prefix string -> int
+  (if (is_object j)
+    (for-each k (map_keys j)
+      (set new_prefix k)
+      (if (gt (len prefix) 0)
+        (set new_prefix (fmt "{}.{}" prefix k)))
+      (flatten (json_get j k) new_prefix))
+    (else
+      (println (fmt "{}={}" prefix (json_stringify j)))))
+  (ret 0))
+
+(set j (json_parse $0))
+(flatten j "")

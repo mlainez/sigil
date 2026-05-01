@@ -1,0 +1,4 @@
+(set logs string $0)
+(set lines array (split logs "\n"))
+(set filtered_lines array (filter (\line (is_digit (string_get line 0))) lines))
+(println (join filtered_lines "\n"))

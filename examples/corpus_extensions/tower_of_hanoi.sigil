@@ -1,0 +1,7 @@
+(fn hanoi n int src string dst string via string k int -> int
+  (if (eq n 0) (ret k))
+  (set k (hanoi (sub n 1) src via dst k))
+  (println (fmt "{}: {}->{}" k src dst))
+  (ret (hanoi (sub n 1) via dst src (add k 1))))
+
+(hanoi #0 $1 $2 $3 1)

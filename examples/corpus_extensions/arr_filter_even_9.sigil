@@ -1,0 +1,3 @@
+(set nums array (map_arr (\x (str->int x)) (split $0 " ")))
+(set evens array (filter (\x (eq (% x 2) 0)) nums))
+(println (join " " evens))

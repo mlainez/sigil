@@ -1,0 +1,19 @@
+(set log string $0)
+(set level string $1)
+
+(fn filter_logs logs string level string -> array
+  (filter (split logs "\n")
+    (\line string
+      (let parts array (split line " "))
+      (and (ge (len parts) 3) (eq (array_get parts 2) level)))))
+
+(fn format_log log string -> string
+  (let parts array (split log " "))
+  (fmt "[{} {}] {}"
+    (array_get parts 0)
+    (array_get parts 1)
+    (join (slice parts 3 (len parts)) " ")))
+
+(set filtered_logs array (filter_logs log level))
+(for-each line string filtered_logs
+  (println (format_log line)))

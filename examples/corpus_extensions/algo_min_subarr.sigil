@@ -1,0 +1,5 @@
+(set nums (parse_ints $0))
+(set m (first nums))
+(for-each n (rest nums)
+  (if (lt n m) (set m n)))
+(println m)

@@ -1,0 +1,3 @@
+(set rows (split $0 ";"))
+(set row (split (array_get rows #1) ","))
+(println (array_get row #2))

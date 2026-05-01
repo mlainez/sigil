@@ -1,0 +1,12 @@
+(set xs (parse_ints $0))
+(set len (len xs))
+(set threshold (/ len 2))
+(set counter {})
+(for-each x xs
+  (set count (if (map_has counter (str x)) (map_get counter (str x)) 0))
+  (set counter (map_set counter (str x) (+ count 1))))
+(set result "none")
+(for-each k (keys counter)
+  (if (gt (map_get counter k) threshold)
+    (set result k)))
+(println result)

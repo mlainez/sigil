@@ -1,0 +1,5 @@
+(set pairs (split $1 ","))
+(println (reduce pairs (\(acc pair)
+  (set kv (split pair "="))
+  (string_replace acc (join ["{" (first kv) "}"] "") (last kv))
+) $0))

@@ -1,0 +1,8 @@
+(set counts {})
+(for-each w (split $0 " ")
+  (map_inc counts w))
+(set arr (entries counts))
+(set arr (sort_by arr (\e (array_get e 0))))
+(set arr (sort_by arr (\e (neg (array_get e 1)))))
+(for-each p arr
+  (println (fmt "{} {}" (array_get p 0) (array_get p 1))))

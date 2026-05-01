@@ -1,0 +1,7 @@
+(set s $0)
+(set out [])
+(set i 0)
+(while (lt i (len s))
+  (push out (string_slice s i 2))
+  (set i (add i 2)))
+(println (join out " "))

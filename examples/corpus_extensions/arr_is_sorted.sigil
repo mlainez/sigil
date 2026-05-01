@@ -1,0 +1,6 @@
+(set nums (parse_ints $0))
+(set sorted_flag true)
+(for i 1 (len nums)
+  (if (lt (array_get nums i) (array_get nums (sub i 1)))
+    (set sorted_flag false)))
+(if sorted_flag (println "yes") (else (println "no")))

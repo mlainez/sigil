@@ -1,0 +1,4 @@
+(set sentence $0)
+(set words (split sentence " "))
+(set unique_words (uniq words))
+(println (len unique_words))

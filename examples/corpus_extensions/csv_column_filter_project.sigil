@@ -1,0 +1,24 @@
+(set csv string $0)
+(set filter_col string $1)
+(set filter_val string $2)
+(set output_cols array (split $3 ","))
+
+(set rows array (split csv "\n"))
+(set header array (split (first rows) ","))
+(set filtered_rows array [])
+
+(for-each row string (rest rows)
+  (set cols array (split row ","))
+  (set col_index int (index_of header filter_col))
+  (if (eq (array_get cols col_index) filter_val)
+    (push filtered_rows row)))
+
+(println (join output_cols "\t"))
+
+(for-each row string filtered_rows
+  (set cols array (split row ","))
+  (set selected_cols array [])
+  (for-each col string output_cols
+    (set col_index int (index_of header col))
+    (push selected_cols (array_get cols col_index)))
+  (println (join selected_cols "\t")))

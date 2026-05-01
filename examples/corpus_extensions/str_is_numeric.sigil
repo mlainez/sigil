@@ -1,0 +1,5 @@
+(set s $0)
+(set ok true)
+(for-each c (chars s)
+  (if (not (is_digit c)) (set ok false)))
+(if ok (println "yes") (else (println "no")))

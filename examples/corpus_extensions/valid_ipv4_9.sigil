@@ -1,0 +1,9 @@
+(set parts (split $0 "."))
+(set valid (eq (len parts) 4))
+(if valid
+  (for-each p parts
+    (try
+      (set n (int p))
+      (if (or (lt n 0) (gt n 255)) (set valid false))
+      (catch e string (set valid false)))))
+(if valid (println "yes") (else (println "no")))

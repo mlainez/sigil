@@ -1,0 +1,15 @@
+(set n int (argv_count))
+(set ivs array [])
+(for i 0 n
+  (set s string (arg_str i))
+  (set parts array (split s "-"))
+  (set a int (int (array_get parts 0)))
+  (set b int (int (array_get parts 1)))
+  (push ivs [s a b]))
+
+(for i 0 n
+  (set ii array (array_get ivs i))
+  (for j (add i 1) n
+    (set jj array (array_get ivs j))
+    (if (and (le (array_get ii 1) (array_get jj 2)) (le (array_get jj 1) (array_get ii 2)))
+      (println (fmt "{} overlaps {}" (array_get ii 0) (array_get jj 0))))))

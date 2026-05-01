@@ -1,0 +1,3 @@
+(set pairs (split $0 ","))
+(set keys (split $1 ","))
+(println (join (map_arr keys (\k (last (split (first (filter pairs (\p (string_starts_with p (str k "="))))) "=")))) " "))

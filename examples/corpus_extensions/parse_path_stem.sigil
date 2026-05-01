@@ -1,0 +1,9 @@
+(set path $0)
+(set parts (split path "/"))
+(set base (last parts))
+(set dots (split base "."))
+(set n (len dots))
+(if (le n 1)
+  (println base)
+  (else
+    (println (join (slice dots 0 (sub n 1)) "."))))

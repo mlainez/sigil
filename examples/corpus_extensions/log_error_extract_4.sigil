@@ -1,0 +1,5 @@
+(set lines (filter (split $0 "\n") (\l (ne l ""))))
+(for-each line lines
+  (set fields (filter (split line " ") (\s (ne s ""))))
+  (if (eq (first (rest (rest fields))) "ERROR")
+    (println (fmt "%s %s: %s" (first fields) (first (rest fields)) (join (slice fields 3 (len fields)) " ")))))

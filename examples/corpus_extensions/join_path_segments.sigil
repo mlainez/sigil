@@ -1,0 +1,2 @@
+(set parts array (split $0 ","))
+(println (fmt "{}" (join parts "/")))

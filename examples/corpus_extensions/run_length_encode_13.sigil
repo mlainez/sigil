@@ -1,0 +1,17 @@
+(set s $0)
+(set n (len s))
+(if (gt n 0)
+  (set chars (string_chars s))
+  (set cur (array_get chars 0))
+  (set count 1)
+  (set result "")
+  (for i 1 n
+    (set ch (array_get chars i))
+    (if (eq ch cur)
+      (set count (add count 1))
+      (else
+        (set result (fmt "{}{}{}" result cur count))
+        (set cur ch)
+        (set count 1))))
+  (set result (fmt "{}{}{}" result cur count))
+  (println result))

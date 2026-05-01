@@ -1,0 +1,6 @@
+(set n int #0)
+(set s int #1)
+(while (gt n 0)
+  (set n (sub n s))
+  (set n (max n 0)))
+(println (add 1 (div (sub #0 1) s)))

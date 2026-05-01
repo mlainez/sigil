@@ -1,0 +1,14 @@
+(set words (split $0 " "))
+(set hist {})
+(for-each w words
+  (map_inc hist (str (len w))))
+(set lens [])
+(for-each k (map_keys hist)
+  (push lens (int k)))
+(sort lens)
+(for-each l lens
+  (set count (map_get hist (str l)))
+  (set bar "")
+  (for i 0 count
+    (set bar (string_concat bar "#")))
+  (println (fmt "{}: {}" l bar)))

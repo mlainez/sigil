@@ -1,0 +1,6 @@
+(set a #0)
+(set b #1)
+(if (and (> a 0) (> b 0))
+  (println (min a b))
+  (else
+    (println 0)))

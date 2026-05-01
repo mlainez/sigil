@@ -1,0 +1,9 @@
+(set n #0)
+(if (eq n 0)
+  (println "0")
+  (else
+    (set bits "")
+    (while (gt n 0)
+      (set bits (string_concat (str (mod n 2)) bits))
+      (set n (div n 2)))
+    (println bits)))

@@ -1,0 +1,7 @@
+(set nums array (parse_ints $0))
+(set m int (first nums))
+(set out [])
+(for-each n nums
+  (set m (min m n))
+  (push out (str m)))
+(println (join out " "))

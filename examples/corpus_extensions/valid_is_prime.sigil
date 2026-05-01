@@ -1,0 +1,2 @@
+(set n #0)
+(println (and (ge n 2) (eq (len (filter (range 2 n) (\x (eq (mod n x) 0)))) 0)))

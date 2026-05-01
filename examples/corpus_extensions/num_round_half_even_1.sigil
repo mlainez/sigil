@@ -1,0 +1,8 @@
+(set x (float $0))
+(set f (floor x))
+(set d (sub x (cast_int_float f)))
+(cond
+  ((lt d 0.5) (println f))
+  ((gt d 0.5) (println (add f 1)))
+  ((eq (mod f 2) 0) (println f))
+  (true (println (add f 1))))

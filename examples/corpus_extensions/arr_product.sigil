@@ -1,0 +1,4 @@
+(set nums (parse_ints $0))
+(set p 1)
+(for-each n nums (set p (mul p n)))
+(println p)

@@ -1,0 +1,19 @@
+(set source string $0)
+(set lines array (split source "\n"))
+(set imports int 0)
+(set functions int 0)
+(set comments int 0)
+(set blanks int 0)
+
+(for-each line string lines
+  (set stripped string (string_trim line))
+  (cond
+    ((or (string_starts_with stripped "import ") (string_starts_with stripped "from ")) (set imports (add imports 1)))
+    ((string_starts_with stripped "def ") (set functions (add functions 1)))
+    ((string_starts_with stripped "#") (set comments (add comments 1)))
+    ((eq stripped "") (set blanks (add blanks 1)))))
+
+(println (fmt "imports: {}" imports))
+(println (fmt "functions: {}" functions))
+(println (fmt "comments: {}" comments))
+(println (fmt "blanks: {}" blanks))

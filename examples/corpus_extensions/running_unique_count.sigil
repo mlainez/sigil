@@ -1,0 +1,8 @@
+(set words array (split $0 " "))
+(set seen map {})
+(set counts array [])
+(for-each w string words
+  (if (not (in w seen))
+    (set seen (map_set seen w true)))
+  (push counts (len seen)))
+(println (join (map_arr counts str) " "))

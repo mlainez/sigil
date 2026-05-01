@@ -1,0 +1,8 @@
+(set s $0)
+(set depth 0)
+(set max_d 0)
+(for-each c (chars s)
+  (cond
+    ((eq c "(") (set depth (add depth 1)) (if (gt depth max_d) (set max_d depth)))
+    ((eq c ")") (set depth (sub depth 1)))))
+(println max_d)

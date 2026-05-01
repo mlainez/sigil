@@ -1,0 +1,4 @@
+(set lines (split $1 "\n"))
+(for-each line lines
+  (if (string_contains line $0)
+    (println line)))

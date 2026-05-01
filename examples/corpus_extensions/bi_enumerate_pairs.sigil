@@ -1,0 +1,5 @@
+(set words (split $0 " "))
+(set parts [])
+(for i 0 (len words)
+  (push parts (fmt "{}:{}" i (array_get words i))))
+(println (join parts " "))

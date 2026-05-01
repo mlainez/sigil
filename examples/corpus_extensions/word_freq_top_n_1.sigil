@@ -1,0 +1,5 @@
+(set words (split (lower $0) " "))
+(set freq (counter words))
+(set pairs (sort_by (sort_by (entries freq) (\p (first p))) (\p (neg (last p)))))
+(for-each pair (slice pairs 0 #1)
+  (println (fmt "{}: {}" (first pair) (last pair))))

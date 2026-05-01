@@ -1,0 +1,4 @@
+(set nums (parse_ints $0))
+(set odds (filter nums (\x (eq (mod x 2) 1))))
+(set evens (filter nums (\x (eq (mod x 2) 0))))
+(println (fmt "odds:{} | evens:{}" (join odds " ") (join evens " ")))

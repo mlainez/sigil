@@ -1,0 +1,7 @@
+(set v float (float $0))
+(set scaled int (round (mul v 10000.0)))
+(set whole int (div scaled 100))
+(set frac int (mod scaled 100))
+(set frac_str string (str frac))
+(if (lt frac 10) (set frac_str (string_concat "0" frac_str)))
+(println (fmt "{whole}.{frac_str}%"))

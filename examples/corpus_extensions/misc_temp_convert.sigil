@@ -1,0 +1,4 @@
+(set c (arg_float 0))
+(set f (add (mul c 1.8) 32.0))
+(set t (round (mul f 10.0)))
+(println (fmt "{}.{}" (div t 10) (mod t 10)))

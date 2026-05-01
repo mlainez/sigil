@@ -1,0 +1,36 @@
+(set s $0)
+(set n #1)
+(set parts (split s "."))
+(set ip (array_get parts 0))
+(set fp "")
+(if (gt (len parts) 1)
+  (set fp (array_get parts 1)))
+(set flen (len fp))
+
+(cond
+  ((le flen n)
+    (while (lt (len fp) n)
+      (set fp (string_concat fp "0")))
+    (cond
+      ((eq n 0) (println ip))
+      (true (println (fmt "{}.{}" ip fp)))))
+  (true
+    (set combined (int (string_concat ip fp)))
+    (set k (sub flen n))
+    (set half 5)
+    (set i 1)
+    (while (lt i k)
+      (set half (mul half 10))
+      (set i (add i 1)))
+    (set divisor (mul half 2))
+    (set rounded (div (add combined half) divisor))
+    (set rs (str rounded))
+    (cond
+      ((eq n 0) (println rs))
+      (true
+        (while (lt (len rs) (add n 1))
+          (set rs (string_concat "0" rs)))
+        (set rlen (len rs))
+        (set new_ip (string_slice rs 0 (sub rlen n)))
+        (set new_fp (string_slice rs (sub rlen n) n))
+        (println (fmt "{}.{}" new_ip new_fp))))))

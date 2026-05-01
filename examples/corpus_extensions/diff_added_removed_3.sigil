@@ -1,0 +1,11 @@
+(set original_lines array (split $0 "\n"))
+(set new_lines array (split $1 "\n"))
+
+(set diff_original array (filter original_lines (\line (not (in line new_lines)))))
+(set diff_new array (filter new_lines (\line (not (in line original_lines)))))
+
+(for-each line string diff_original
+  (println (fmt "- {}" line)))
+
+(for-each line string diff_new
+  (println (fmt "+ {}" line)))

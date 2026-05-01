@@ -1,0 +1,9 @@
+(set target $0)
+(set total 0)
+(set n (argv_count))
+(for i 1 n
+  (set pair (arg_str i))
+  (set parts (split pair ":"))
+  (if (eq (array_get parts 0) target)
+    (set total (add total (int (array_get parts 1))))))
+(println total)

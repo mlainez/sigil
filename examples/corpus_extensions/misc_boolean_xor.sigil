@@ -1,0 +1,1 @@
+(println (str (ne (eq $0 "true") (eq $1 "true"))))

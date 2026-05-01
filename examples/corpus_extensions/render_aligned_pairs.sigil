@@ -1,0 +1,14 @@
+(set lines array (filter (split $0 "\n") (\line (and (not (eq line "")) (ne (first line) "#")))))
+(set klen int 1)
+(for-each line string lines
+  (set parts array (split line "="))
+  (if (gt (len (first parts)) klen) (set klen (len (first parts)))))
+(set rows array (map_arr lines (\line
+  (set parts array (split line "="))
+  (set key string (first parts))
+  (set val string (last parts))
+  (set ks int (sub klen (len key)))
+  (set padding string "")
+  (for i 0 ks (set padding (string_concat padding " ")))
+  (ret (fmt "{}{}={}" padding key val)))))
+(println (join rows "\n"))

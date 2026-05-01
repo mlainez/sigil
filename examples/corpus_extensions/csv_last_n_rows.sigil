@@ -1,0 +1,4 @@
+(set rows array (split $0 "\n"))
+(set n int #1)
+(set start int (sub (len rows) n))
+(println (join (slice rows start (len rows)) "\n"))

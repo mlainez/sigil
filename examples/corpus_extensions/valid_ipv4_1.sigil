@@ -1,0 +1,11 @@
+(set ip $0)
+(set parts (split ip "."))
+(set ok (eq (len parts) 4))
+(if ok
+  (for-each p parts
+    (try
+      (set n (int p))
+      (if (or (lt n 0) (gt n 255)) (set ok false))
+      (if (ne (str n) p) (set ok false))
+      (catch e string (set ok false)))))
+(if ok (println "yes") (else (println "no")))

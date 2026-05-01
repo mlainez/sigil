@@ -1,0 +1,6 @@
+(set best 0)
+(for-each w (split $0 " ")
+  (set c (lower (string_slice w 0 1)))
+  (if (and (is_alpha c) (not (in c "aeiou")))
+    (if (gt (len w) best) (set best (len w)))))
+(println best)

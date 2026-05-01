@@ -1,0 +1,10 @@
+(set arr (split $0 " "))
+(set maxlen 0)
+(for-each w arr
+  (if (gt (len w) maxlen) (set maxlen (len w))))
+(for-each w arr
+  (set pad "")
+  (for i (len w) maxlen (set pad (string_concat pad " ")))
+  (set hashes "")
+  (for i 0 (len w) (set hashes (string_concat hashes "#")))
+  (println (fmt "{} | {}" (string_concat w pad) hashes)))

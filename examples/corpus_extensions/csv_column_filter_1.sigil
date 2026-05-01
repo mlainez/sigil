@@ -1,0 +1,32 @@
+(set rows (split $0 "\n"))
+(set header (split (first rows) ","))
+(set sel_names (split $1 ","))
+(set filter_col $2)
+(set min_val #3)
+
+(set filter_idx 0)
+(set ci 0)
+(for-each col header
+  (if (eq col filter_col)
+    (set filter_idx ci))
+  (set ci (+ ci 1)))
+
+(set sel_idxs [])
+(for-each name sel_names
+  (set ci2 0)
+  (set found_idx 0)
+  (for-each col header
+    (if (eq col name)
+      (set found_idx ci2))
+    (set ci2 (+ ci2 1)))
+  (set sel_idxs (push sel_idxs found_idx)))
+
+(println (join sel_names "\t"))
+
+(set data_rows (filter (rest rows) (\row
+  (and (gt (len row) 0)
+       (ge (first (parse_ints (get_or (split row ",") filter_idx ""))) min_val)))))
+
+(for-each row data_rows
+  (set fields (split row ","))
+  (println (join (map_arr sel_idxs (\i (get_or fields i ""))) "\t")))

@@ -1,0 +1,7 @@
+(set s #0)
+(cond
+  ((ge s 90) (println "A"))
+  ((ge s 80) (println "B"))
+  ((ge s 70) (println "C"))
+  ((ge s 60) (println "D"))
+  (true (println "F")))

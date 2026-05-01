@@ -1,0 +1,4 @@
+(set input string $0)
+(set words array (split input " "))
+(set count int (len words))
+(println count)

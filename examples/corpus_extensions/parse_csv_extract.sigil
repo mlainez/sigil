@@ -1,0 +1,3 @@
+(set row string $0)
+(set cols array (split row ","))
+(println (get cols 1))

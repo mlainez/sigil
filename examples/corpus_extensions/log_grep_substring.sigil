@@ -1,0 +1,6 @@
+(set logs string $0)
+(set pattern string $1)
+(set lines array (split logs "\n"))
+(for-each line string lines
+  (if (in pattern line)
+    (println line)))

@@ -1,0 +1,10 @@
+(fn flatten j json prefix string -> unit
+  (for-each k (sort (map_keys j))
+    (set v (json_get j k))
+    (set nk k)
+    (if (ne prefix "") (set nk (fmt "{}.{}" prefix k)))
+    (if (is_object v)
+      (flatten v nk)
+      (else (println (fmt "{}={}" nk v))))))
+
+(flatten (json_parse $0) "")

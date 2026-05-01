@@ -1,0 +1,1 @@
+(println (sum (map_arr (split $0 ",") (\p (int (last (split p "=")))))))

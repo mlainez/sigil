@@ -1,0 +1,5 @@
+(set json_str string $0)
+(set path_str string $1)
+(set json_obj json (json_parse json_str))
+(set keys array (split path_str "."))
+(println (str (json_get json_obj keys)))

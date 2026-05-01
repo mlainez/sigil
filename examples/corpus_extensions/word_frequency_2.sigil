@@ -1,0 +1,7 @@
+(set words (split (lower $0) " "))
+(set counts {})
+(for-each w words (map_inc counts w))
+(set keys (sort (map_keys counts)))
+(set keys (sort_by keys (\k (neg (map_get counts k)))))
+(for-each k keys
+  (println (fmt "{}: {}" k (map_get counts k))))

@@ -1,0 +1,9 @@
+(set lines (split $0 "\n"))
+(println "headers:")
+(for-each line lines
+  (if (string_starts_with line "#")
+    (println line)))
+(set matches (regex_find_all (regex_compile "\]\([^)]+\)") $0))
+(println "urls:")
+(for-each m matches
+  (println (slice m 2 (sub (len m) 1))))

@@ -1,0 +1,6 @@
+(set lines (split $0 "\n"))
+(set errors (filter lines (\line (and (gt (len line) 0) (eq (first (slice (split line " ") 2 3)) "ERROR")))))
+(set sorted (sort_by errors (\line (join (slice (split line " ") 0 2) " "))))
+(for-each line sorted
+  (set f (split line " "))
+  (println (fmt "{} {} | {}" (first f) (first (rest f)) (join (slice f 3 (len f)) " "))))

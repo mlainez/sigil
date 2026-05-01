@@ -1,0 +1,3 @@
+(set num string $0)
+(set reversed string (rev num))
+(println (eq num reversed))

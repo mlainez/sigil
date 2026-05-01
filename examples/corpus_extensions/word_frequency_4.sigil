@@ -1,0 +1,10 @@
+(set text $0)
+(set words (split text " "))
+(set counts {})
+(for-each w words
+  (map_inc counts w))
+(set pairs (entries counts))
+(set s1 (sort_by pairs (\p (array_get p 0))))
+(set s2 (sort_by s1 (\p (neg (array_get p 1)))))
+(for-each p s2
+  (println (fmt "{}: {}" (array_get p 0) (array_get p 1))))

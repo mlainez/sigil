@@ -1,0 +1,8 @@
+(set path $0)
+(if (eq path "/")
+  (println "")
+  (do
+    (set parts (split path "/"))
+    (if (gt (len parts) 1)
+      (println (join (slice parts 0 (- (len parts) 1)) "/"))
+      (println ""))))

@@ -1,0 +1,9 @@
+(set counts {})
+(for-each a (argv)
+  (map_inc counts a))
+(set nums (sort (map_arr (map_keys counts) (\k (int k)))))
+(for-each n nums
+  (set bar "")
+  (for i 0 (map_get counts (str n))
+    (set bar (string_concat bar "#")))
+  (println (fmt "{}: {}" n bar)))

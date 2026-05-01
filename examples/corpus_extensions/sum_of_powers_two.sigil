@@ -1,0 +1,2 @@
+(set n int #0)
+(println (sub (bit_shift_left 1 (add n 1)) 1))

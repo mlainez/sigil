@@ -1,0 +1,6 @@
+(set filter_val (last (argv)))
+(set rows (slice (argv) 0 (- (argv_count) 1)))
+(println (first rows))
+(for-each row (rest rows)
+  (if (eq (last (split row ",")) filter_val)
+    (println row)))

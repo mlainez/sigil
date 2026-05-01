@@ -1,0 +1,13 @@
+(set cs (chars $0))
+(set pairs [])
+(set cur "")
+(set cnt 0)
+(for-each c cs
+  (if (and (ne c cur) (ne cur ""))
+    (set pairs (push pairs (join [cur (str cnt)] " "))))
+  (if (ne c cur)
+    (set cnt 0))
+  (set cur c)
+  (set cnt (+ cnt 1)))
+(set pairs (push pairs (join [cur (str cnt)] " ")))
+(println (join pairs " "))

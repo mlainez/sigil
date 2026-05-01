@@ -1,0 +1,14 @@
+(set parts (split $0 "."))
+(set int_str (first parts))
+(set dec_raw (get_or parts 1 ""))
+(set dec_part
+  (cond
+    ((eq (len dec_raw) 0) "00")
+    ((eq (len dec_raw) 1) (join [dec_raw "0"] ""))
+    (true (join (slice (chars dec_raw) 0 2) ""))))
+(set rev_chars (rev (chars int_str)))
+(set n (len rev_chars))
+(set starts (filter (range 0 n) (\i (eq (mod i 3) 0))))
+(set chunks (map_arr starts (\i (join (rev (slice rev_chars i (+ i 3))) ""))))
+(set formatted_int (join (rev chunks) ","))
+(println (join ["$" formatted_int "." dec_part] ""))

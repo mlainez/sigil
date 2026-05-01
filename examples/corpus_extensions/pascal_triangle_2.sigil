@@ -1,0 +1,15 @@
+(set n int #0)
+(fn pascal_row prev array -> array
+  (set row array [1])
+  (for-each i int (range 1 (len prev))
+    (push row (+ (array_get prev i) (array_get prev (- i 1)))))
+  (push row 1)
+  (ret row))
+
+(set triangle array [[1]])
+(for i 1 n
+  (set new_row array (pascal_row (last triangle)))
+  (push triangle new_row))
+
+(for-each row array triangle
+  (println (join (map_arr row str) " ")))

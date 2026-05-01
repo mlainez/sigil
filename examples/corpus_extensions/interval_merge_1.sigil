@@ -1,0 +1,16 @@
+(set parts (split $0 ","))
+(set intervals [])
+(for-each p parts
+  (set ab (split p "-"))
+  (push intervals [(int (first ab)) (int (last ab))]))
+(set intervals (sort_by intervals (\x (first x))))
+(set merged [])
+(for-each iv intervals
+  (cond
+    ((eq (len merged) 0) (push merged iv))
+    ((le (first iv) (add (last (last merged)) 1))
+      (set li (last merged))
+      (array_set merged (sub (len merged) 1) [(first li) (max (last li) (last iv))]))
+    (true (push merged iv))))
+(for-each iv merged
+  (println (fmt "{}-{}" (first iv) (last iv))))

@@ -1,0 +1,3 @@
+(set s string $0)
+(set i int #1)
+(println (string_concat (slice s 0 i) (slice s (add i 1))))

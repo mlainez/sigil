@@ -1,0 +1,2 @@
+(set text string $0)
+(println (string_format "{}\n" (join (split text "foo") "bar")))

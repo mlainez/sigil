@@ -1,0 +1,4 @@
+(set log string $0)
+(set lines array (split log "\n"))
+(set filtered_lines array (filter (\line (in "error" line)) lines))
+(println (join filtered_lines "\n"))

@@ -1,0 +1,11 @@
+(set args (argv))
+(set width 0)
+(for-each s args
+  (if (gt (len s) width) (set width (len s))))
+(for-each s args
+  (set v (string_to_int s))
+  (set pad "")
+  (for j 0 (sub width (len s)) (set pad (string_concat pad " ")))
+  (set bar "")
+  (for j 0 v (set bar (string_concat bar "#")))
+  (println (fmt "{}{}: {}" pad s bar)))

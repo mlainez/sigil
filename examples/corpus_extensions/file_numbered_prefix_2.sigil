@@ -1,0 +1,6 @@
+(set text string $0)
+(set lines array (split text "\n"))
+(set count int 0)
+(for-each line string lines
+  (set count (add count 1))
+  (println (fmt "{}: {}" count line)))

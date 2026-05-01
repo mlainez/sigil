@@ -1,0 +1,19 @@
+(fn words n int -> string
+  (set ones ["zero" "one" "two" "three" "four" "five" "six" "seven" "eight" "nine" "ten" "eleven" "twelve" "thirteen" "fourteen" "fifteen" "sixteen" "seventeen" "eighteen" "nineteen"])
+  (set tens ["" "" "twenty" "thirty" "forty" "fifty" "sixty" "seventy" "eighty" "ninety"])
+  (if (eq n 0) (ret "zero"))
+  (set parts [])
+  (set h (div n 100))
+  (set r (mod n 100))
+  (if (gt h 0)
+    (push parts (array_get ones h))
+    (push parts "hundred"))
+  (if (lt r 20)
+    (if (gt r 0) (push parts (array_get ones r)))
+    (else
+      (push parts (array_get tens (div r 10)))
+      (set u (mod r 10))
+      (if (gt u 0) (push parts (array_get ones u)))))
+  (ret (join parts " ")))
+
+(println (words #0))

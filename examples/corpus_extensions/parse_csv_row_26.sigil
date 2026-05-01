@@ -1,0 +1,1 @@
+(println (get (split (get (split $0 "\n") 0) ",") 2))

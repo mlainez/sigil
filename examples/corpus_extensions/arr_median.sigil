@@ -1,0 +1,2 @@
+(set a (sort (parse_ints $0)))
+(println (array_get a (div (sub (len a) 1) 2)))

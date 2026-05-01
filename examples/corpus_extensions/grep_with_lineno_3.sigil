@@ -1,0 +1,2 @@
+(for-each pair (filter (enumerate (split $1 "\n")) (\p (string_contains (last p) $0)))
+  (println (fmt "{}: {}" (add (first pair) 1) (last pair))))

@@ -1,0 +1,10 @@
+(set a int #0)
+(set b int #1)
+(set c int #2)
+(if (gt (sub a b) c)
+  (println "positive")
+  (else
+    (if (eq (sub a b) c)
+      (println "zero")
+      (else
+        (println "negative")))))

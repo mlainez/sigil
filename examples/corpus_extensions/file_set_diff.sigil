@@ -1,0 +1,14 @@
+(set content1 string $0)
+(set content2 string $1)
+
+(set lines1 array (sort (filter (\x (not (eq x ""))) (split content1 "\n"))))
+(set lines2 array (sort (filter (\x (not (eq x ""))) (split content2 "\n"))))
+
+(set diff1 array (diff lines1 lines2))
+(set diff2 array (diff lines2 lines1))
+
+(for-each line string diff1
+  (println (fmt "- {}" line)))
+
+(for-each line string diff2
+  (println (fmt "+ {}" line)))

@@ -1,0 +1,9 @@
+(set data (json_parse $0))
+(set fparts (split $1 "="))
+(set ffield (first fparts))
+(set fval (last fparts))
+(set filtered (filter data (\obj (eq (json_get obj [ffield]) fval))))
+(set sorted (sort_by filtered (\obj (json_get obj [$2]))))
+(set result (if (eq $3 "desc") (rev sorted) sorted))
+(for-each obj result
+  (println (fmt "{} {}" (json_get obj ["name"]) (json_get obj [$2]))))

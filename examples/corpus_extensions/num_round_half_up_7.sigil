@@ -1,0 +1,4 @@
+(set x (arg_float 0))
+(cond
+  ((ge x 0.0) (println (floor (add x 0.5))))
+  (true (println (ceil (sub x 0.5)))))

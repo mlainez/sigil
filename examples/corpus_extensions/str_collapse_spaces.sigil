@@ -1,0 +1,5 @@
+(set s $0)
+(set s (string_replace s "\t" " "))
+(set s (string_replace s "\n" " "))
+(set s (string_replace s "\r" " "))
+(println (join (filter (\x (gt (len x) 0)) (split s " ")) " "))

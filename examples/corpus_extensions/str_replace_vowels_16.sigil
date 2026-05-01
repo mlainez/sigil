@@ -1,0 +1,4 @@
+(set s string $0)
+(set vowels string "aeiouAEIOU")
+(set result string (join (map_arr (chars s) (\c (if (in c vowels) "*" (else c)))) ""))
+(println result)

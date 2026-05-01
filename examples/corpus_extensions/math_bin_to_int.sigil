@@ -1,0 +1,4 @@
+(set n 0)
+(for-each c (chars $0)
+  (set n (add (mul n 2) (int c))))
+(println n)

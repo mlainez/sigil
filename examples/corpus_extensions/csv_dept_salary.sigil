@@ -1,0 +1,6 @@
+(set rows (rest (split $0 "\n")))
+(set eng_rows (filter rows (\row (eq (get_or (split row ",") 1 "") "engineering"))))
+(for-each row eng_rows
+  (set fields (split row ","))
+  (println (join [(get_or fields 0 "") (get_or fields 2 "")] "\t")))
+(println (join ["Total:" (str (sum (map_arr eng_rows (\row (first (parse_ints (get_or (split row ",") 2 "")))))))] " "))

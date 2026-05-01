@@ -1,0 +1,6 @@
+(for-each s (split $0 ",")
+  (set n (int s))
+  (set out "")
+  (for i 0 n
+    (set out (string_concat out "#")))
+  (println out))

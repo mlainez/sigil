@@ -1,0 +1,7 @@
+(set n int #0)
+(set result int 1)
+(while (gt n 2)
+  (set result (mul result n))
+  (set n (sub n 2)))
+(if (gt n 0) (set result (mul result n)))
+(println result)

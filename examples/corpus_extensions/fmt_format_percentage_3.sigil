@@ -1,0 +1,7 @@
+(set v float (mul (float $0) 100.0))
+(set h int (round (mul v 100.0)))
+(set ip int (div h 100))
+(set fp int (mod h 100))
+(set fps string (str fp))
+(if (lt fp 10) (set fps (string_concat "0" fps)))
+(println (fmt "{}.{}%" ip fps))

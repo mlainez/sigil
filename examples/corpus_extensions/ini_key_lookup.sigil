@@ -1,0 +1,13 @@
+(set config map {})
+(set keys array (split $1 ","))
+
+(for-each line string (split $0 "\n")
+  (if (and (not (in "#" (first line))) (> (len line) 0))
+    (set parts array (split line "="))
+    (set key string (array_get parts 0))
+    (set value string (join (slice parts 1) "="))
+    (set config (merge config {key value}))))
+
+(for-each key string keys
+  (if (in key config)
+    (println (fmt "{}={}" key (get config key)))))

@@ -1,0 +1,6 @@
+(fn gcd a int b int -> int
+  (if (eq b 0) (ret a))
+  (ret (gcd b (mod a b))))
+(set a #0)
+(set b #1)
+(println (div (mul a b) (gcd a b)))

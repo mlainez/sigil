@@ -1,0 +1,6 @@
+(set log string $0)
+(set lines array (split log "\n"))
+(for-each line string lines
+  (set parts array (split line " "))
+  (if (or (eq (first (slice parts 2)) "WARN") (eq (first (slice parts 2)) "ERROR"))
+    (println (fmt "[{}] {}" (first (slice parts 2)) (join (slice parts 3) " ")))))

@@ -1,0 +1,3 @@
+(set fname string $0)
+(set dot int (string_find fname "."))
+(println (fmt "{}.{}" (string_slice fname 0 dot) $1))

@@ -1,0 +1,1 @@
+(println (join (rev (sort (parse_ints $0))) " "))

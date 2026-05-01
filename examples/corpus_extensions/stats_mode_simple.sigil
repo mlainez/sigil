@@ -1,0 +1,16 @@
+(set arr (parse_ints $0))
+(set sorted (sort arr))
+(set best (first sorted))
+(set best_count 0)
+(set cur (first sorted))
+(set cur_count 0)
+(for-each x sorted
+  (if (eq x cur)
+    (set cur_count (add cur_count 1))
+    (else
+      (set cur x)
+      (set cur_count 1)))
+  (if (gt cur_count best_count)
+    (set best_count cur_count)
+    (set best cur)))
+(println best)

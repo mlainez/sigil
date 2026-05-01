@@ -1,0 +1,51 @@
+(fn ones n int -> string
+  (cond
+    ((eq n 1) (ret "one"))
+    ((eq n 2) (ret "two"))
+    ((eq n 3) (ret "three"))
+    ((eq n 4) (ret "four"))
+    ((eq n 5) (ret "five"))
+    ((eq n 6) (ret "six"))
+    ((eq n 7) (ret "seven"))
+    ((eq n 8) (ret "eight"))
+    ((eq n 9) (ret "nine"))
+    ((eq n 10) (ret "ten"))
+    ((eq n 11) (ret "eleven"))
+    ((eq n 12) (ret "twelve"))
+    ((eq n 13) (ret "thirteen"))
+    ((eq n 14) (ret "fourteen"))
+    ((eq n 15) (ret "fifteen"))
+    ((eq n 16) (ret "sixteen"))
+    ((eq n 17) (ret "seventeen"))
+    ((eq n 18) (ret "eighteen"))
+    ((eq n 19) (ret "nineteen"))
+    (true (ret ""))))
+
+(fn tens_word n int -> string
+  (cond
+    ((eq n 2) (ret "twenty"))
+    ((eq n 3) (ret "thirty"))
+    ((eq n 4) (ret "forty"))
+    ((eq n 5) (ret "fifty"))
+    ((eq n 6) (ret "sixty"))
+    ((eq n 7) (ret "seventy"))
+    ((eq n 8) (ret "eighty"))
+    ((eq n 9) (ret "ninety"))
+    (true (ret ""))))
+
+(fn under_hundred n int -> string
+  (if (lt n 20) (ret (ones n)))
+  (set t (div n 10))
+  (set o (mod n 10))
+  (if (eq o 0) (ret (tens_word t)))
+  (ret (fmt "{}-{}" (tens_word t) (ones o))))
+
+(fn to_words n int -> string
+  (if (eq n 0) (ret "zero"))
+  (set h (div n 100))
+  (set rest (mod n 100))
+  (if (eq h 0) (ret (under_hundred rest)))
+  (if (eq rest 0) (ret (fmt "{} hundred" (ones h))))
+  (ret (fmt "{} hundred {}" (ones h) (under_hundred rest))))
+
+(println (to_words #0))

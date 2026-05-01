@@ -1,0 +1,26 @@
+(set csv string $0)
+(set cols_to_retain string $1)
+(set filter_str string $2)
+
+(set header array (split (first (split csv "\n")) ","))
+(set data_rows array (rest (split csv "\n")))
+
+(set col_indices array (map_arr (split cols_to_retain ",") (\x (parse_int x))))
+(set filter_col_name string (first (split filter_str ":")))
+(set filter_value string (last (split filter_str ":")))
+
+(set data_rows array (filter data_rows (\row (> (len row) 0))))
+
+(set filtered_data array
+  (filter data_rows (\row
+    (set row_values array (split row ","))
+    (eq (first (slice row_values (index_of header filter_col_name))) filter_value))))
+
+(set selected_header array (map_arr col_indices (\i (array_get header i))))
+(set selected_data array
+  (map_arr filtered_data (\row
+    (set row_values array (split row ","))
+    (join (map_arr col_indices (\i (array_get row_values i))) ","))))
+
+(println (join selected_header ","))
+(for-each row string selected_data (println row))

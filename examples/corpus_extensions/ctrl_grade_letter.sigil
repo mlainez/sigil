@@ -1,0 +1,7 @@
+(set score int #0)
+(cond
+  ((ge score 90) (println "A"))
+  ((ge score 80) (println "B"))
+  ((ge score 70) (println "C"))
+  ((ge score 60) (println "D"))
+  (true (println "F")))

@@ -1,0 +1,12 @@
+(set words (split $0 " "))
+(set groups {})
+(for-each w words
+  (set key (join (sort (chars w)) ""))
+  (if (not (map_has groups key))
+    (map_set groups key []))
+  (push (map_get groups key) w))
+(set vals (map_values groups))
+(for-each g vals (sort g))
+(set sorted_groups (sort_by vals (\g (first g))))
+(for-each g sorted_groups
+  (println (join g " ")))

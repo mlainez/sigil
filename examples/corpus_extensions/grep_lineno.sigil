@@ -1,0 +1,7 @@
+(set needle $0)
+(set text $1)
+(set lines (split text "\n"))
+(for i 0 (len lines)
+  (set line (array_get lines i))
+  (if (in needle line)
+    (println (fmt "{}:{}" (add i 1) line))))

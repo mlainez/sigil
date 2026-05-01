@@ -1,0 +1,1 @@
+(println (last (split (first (filter (split $0 ",") (\x (string_starts_with x "b=")))) "=")))

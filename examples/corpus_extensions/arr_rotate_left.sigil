@@ -1,0 +1,4 @@
+(set arr (split $0 " "))
+(set n (len arr))
+(set k (mod #1 n))
+(println (join (concat (slice arr k n) (slice arr 0 k)) " "))

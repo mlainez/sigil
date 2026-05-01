@@ -1,0 +1,8 @@
+(set url $0)
+(set key $1)
+(set qstart (string_find url "?"))
+(set qs (string_slice url (add qstart 1) (sub (len url) (add qstart 1))))
+(for-each pair (split qs "&")
+  (set kv (split pair "="))
+  (if (eq (first kv) key)
+    (println (last kv))))

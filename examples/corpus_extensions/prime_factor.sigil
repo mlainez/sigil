@@ -1,0 +1,18 @@
+(fn factor n int -> array
+  (set parts [])
+  (set m int n)
+  (set p int 2)
+  (while (le (mul p p) m)
+    (set e int 0)
+    (while (eq (mod m p) 0)
+      (set m (div m p))
+      (set e (add e 1)))
+    (cond
+      ((eq e 1) (push parts (str p)))
+      ((gt e 1) (push parts (fmt "{}^{}" p e))))
+    (set p (add p 1)))
+  (if (gt m 1)
+    (push parts (str m)))
+  (ret parts))
+
+(println (join (factor #0) " * "))

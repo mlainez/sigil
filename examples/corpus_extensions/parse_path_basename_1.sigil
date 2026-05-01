@@ -1,0 +1,5 @@
+(set fname (last (split $0 "/")))
+(set parts (split fname "."))
+(if (le (len parts) 1)
+  (println fname)
+  (else (println (join (slice parts 0 (sub (len parts) 1)) "."))))

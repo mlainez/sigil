@@ -1,0 +1,7 @@
+(set a string $0)
+(set b string $1)
+(set n int (len a))
+(set result "")
+(for i 0 n
+  (set result (fmt "{}{}{}" result (string_slice a i 1) (string_slice b i 1))))
+(println result)

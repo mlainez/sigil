@@ -1,0 +1,7 @@
+(set log string $0)
+(set level string $1)
+
+(for-each line string (split log "\n")
+  (set parts array (split line " "))
+  (if (eq (array_get parts 2) level)
+    (println (fmt "{} {}: {}" (array_get parts 0) (array_get parts 1) (join (slice parts 3 (len parts)) " ")))))

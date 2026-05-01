@@ -1,0 +1,4 @@
+(set n #0)
+(if (and (gt n 0) (eq (bit_and n (sub n 1)) 0))
+  (println "yes")
+  (else (println "no")))

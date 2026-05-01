@@ -1,0 +1,35 @@
+(fn eval_rpn expr string -> string
+  (set toks (split expr " "))
+  (set stack [])
+  (set used_div false)
+  (for-each tok toks
+    (cond
+      ((eq tok "+")
+        (set b (array_pop stack))
+        (set a (array_pop stack))
+        (array_push stack (add a b)))
+      ((eq tok "-")
+        (set b (array_pop stack))
+        (set a (array_pop stack))
+        (array_push stack (sub a b)))
+      ((eq tok "*")
+        (set b (array_pop stack))
+        (set a (array_pop stack))
+        (array_push stack (mul a b)))
+      ((eq tok "/")
+        (set b (array_pop stack))
+        (set a (array_pop stack))
+        (set used_div true)
+        (array_push stack (div a b)))
+      (true
+        (array_push stack (float tok)))))
+  (set result (array_pop stack))
+  (if used_div
+    (set s (str result))
+    (if (string_ends_with s ".")
+      (ret (string_concat s "0"))
+      (else (ret s))))
+  (ret (str (int result))))
+
+(for i 0 (argv_count)
+  (println (eval_rpn (arg_str i))))

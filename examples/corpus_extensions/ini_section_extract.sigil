@@ -1,0 +1,13 @@
+(set config string $0)
+(set section string $1)
+(set lines array (split config "\n"))
+(set in_section bool false)
+
+(for-each line string lines
+  (if (and (not (eq (slice line 0 1) "#")) (not (eq line "")))
+    (cond
+      ((and (eq (slice line 0 1) "[") (eq (slice line (- (len line) 1) (len line)) "]"))
+        (set section_name string (slice line 1 (- (len line) 1)))
+        (set in_section bool (eq section_name section)))
+      (in_section
+        (println line)))))

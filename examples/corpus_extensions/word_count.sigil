@@ -1,0 +1,4 @@
+(set words (split $0 " "))
+(set counts (counter words))
+(for-each w (uniq words)
+  (println (fmt "{} {}" w (get_or counts w 0))))

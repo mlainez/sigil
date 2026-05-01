@@ -1,0 +1,4 @@
+(set s $0)
+(set w #1)
+(while (lt (len s) w) (set s (string_concat s " ")))
+(println s)

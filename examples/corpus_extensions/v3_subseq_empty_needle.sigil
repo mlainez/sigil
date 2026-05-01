@@ -1,0 +1,15 @@
+(set haystack $0)
+(set needle $1)
+(if (eq needle "")
+  (println "yes")
+  (else
+    (set i 0)
+    (set found false)
+    (for-each c (chars haystack)
+      (if (and (not found) (eq c (string_get needle i)))
+        (begin
+          (set i (add i 1))
+          (if (ge i (len needle)) (set found true)))))
+    (if found
+      (println "yes")
+      (else (println "no")))))

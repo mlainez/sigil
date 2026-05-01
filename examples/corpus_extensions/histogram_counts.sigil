@@ -1,0 +1,12 @@
+(set parts (split $0 ","))
+(set counts {})
+(for-each p parts
+  (map_inc counts p))
+(set ints (map_arr (map_keys counts) (\k (int k))))
+(sort ints)
+(for-each k ints
+  (set c (map_get counts (str k)))
+  (set stars "")
+  (for i 0 c
+    (set stars (string_concat stars "*")))
+  (println (fmt "{}: {}" k stars)))

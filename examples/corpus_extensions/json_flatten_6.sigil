@@ -1,0 +1,15 @@
+(fn walk j json prefix string out array -> unit
+  (if (is_object j)
+    (for-each k string (map_keys j)
+      (set p string "")
+      (if (eq prefix "")
+        (set p k)
+        (else (set p (fmt "{}.{}" prefix k))))
+      (walk (json_get j k) p out))
+    (else
+      (push out (fmt "{}={}" prefix (json_stringify j))))))
+
+(set out array [])
+(walk (json_parse $0) "" out)
+(for-each line string (sort out)
+  (println line))

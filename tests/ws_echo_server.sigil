@@ -1,15 +1,15 @@
 (module ws_echo_server
 
   (fn main -> int
-    (set port_str string (read_line))
-    (set port int (string_to_int port_str))
+    (set port_str (read_line))
+    (set port (int port_str))
     (set server socket (tcp_listen port))
     (println "READY")
     (set client_tcp socket (tcp_accept server))
     (set ws_conn socket (ws_accept client_tcp))
     (loop
-      (set msg string (ws_receive ws_conn))
-      (set msg_len int (len msg))
+      (set msg (ws_receive ws_conn))
+      (set msg_len (len msg))
       (if (eq msg_len 0)
         (break))
       (ws_send ws_conn msg))

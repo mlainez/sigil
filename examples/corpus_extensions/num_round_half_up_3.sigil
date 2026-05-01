@@ -1,0 +1,12 @@
+(set x (float $0))
+(set n #1)
+(set mult 1)
+(for i 0 n (set mult (mul mult 10)))
+(set rounded (floor (add (mul x (float mult)) 0.5)))
+(if (eq n 0)
+  (println rounded)
+  (else
+    (set frac (str (mod rounded mult)))
+    (while (lt (len frac) n)
+      (set frac (string_concat "0" frac)))
+    (println (fmt "{}.{}" (div rounded mult) frac))))

@@ -1,0 +1,42 @@
+(set original_lines array (split $0 "\n"))
+(set modified_lines array (split $1 "\n"))
+
+(set original_set map {})
+(set modified_set map {})
+
+(for-each line string original_lines
+  (set original_set (merge original_set {line true})))
+
+(for-each line string modified_lines
+  (set modified_set (merge modified_set {line true})))
+
+(set removed_lines array [])
+(set added_lines array [])
+
+(for-each line string original_lines
+  (if (not (in line modified_set))
+    (push removed_lines line)))
+
+(for-each line string modified_lines
+  (if (not (in line original_set))
+    (push added_lines line)))
+
+(set len int (min (len removed_lines) (len added_lines)))
+(set i int 0)
+
+(for i 0 len
+  (println (fmt "-{}" (array_get removed_lines i)))
+  (println (fmt "+{}" (array_get added_lines i))))
+
+(if (lt (len removed_lines) (len added_lines))
+  (for j len (len added_lines)
+    (println (fmt "+{}" (array_get added_lines j)))))
+
+(if (gt (len removed_lines) (len added_lines))
+  (for j len (len removed_lines)
+    (println (fmt "-{}" (array_get removed_lines j)))))
+
+(set removed_count int (len removed_lines))
+(set added_count int (len added_lines))
+
+(println (fmt "+{} -{}" added_count removed_count))

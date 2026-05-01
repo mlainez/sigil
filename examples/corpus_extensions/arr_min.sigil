@@ -1,0 +1,1 @@
+(println (first (sort (parse_ints $0))))

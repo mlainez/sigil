@@ -1,0 +1,7 @@
+(set log_blob string $0)
+(set level_filter string $1)
+(set lines array (split log_blob "\n"))
+(for-each line string lines
+  (set parts array (split line " "))
+  (if (eq (array_get parts 2) level_filter)
+    (println line)))

@@ -1,0 +1,10 @@
+(set s $0)
+(set k #1)
+(set counts {})
+(for-each c (chars s)
+  (map_inc counts c))
+(set sorted (sort_by (entries counts) (\(k v) (- v))))
+(set result [])
+(for i 0 k
+  (push result (first (array_get sorted i))))
+(println (join result " "))

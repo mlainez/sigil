@@ -1,0 +1,10 @@
+(set path $0)
+(set parts (split path "/"))
+(set base (last parts))
+(set dot (string_find base "."))
+(set segs (split base "."))
+(if (le (len segs) 1)
+  (println base)
+  (else
+    (set stem (join (slice segs 0 (sub (len segs) 1)) "."))
+    (println stem)))

@@ -1,0 +1,5 @@
+(set s $0)
+(set n (len s))
+(set h (div n 2))
+(set m (sub n (mul 2 h)))
+(println (fmt "{}{}{}" (string_slice s (add h m) h) (string_slice s h m) (string_slice s 0 h)))

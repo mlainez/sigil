@@ -1,0 +1,6 @@
+(set pat (regex_compile "^#{1,6} .+"))
+(set lines (split $0 "\n"))
+(set headers (filter lines (\line (regex_match pat line))))
+(for-each line headers
+  (set sp (string_find line " "))
+  (println (join ["H" (str sp) ": " (slice line (+ sp 1) (len line))] "")))

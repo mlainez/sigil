@@ -1,0 +1,8 @@
+(set sentence $0)
+(set letter $1)
+(set words (split sentence " "))
+(set count 0)
+(for-each word words 
+  (if (eq (last (chars word)) letter)
+    (set count (add count 1))))
+(println count)

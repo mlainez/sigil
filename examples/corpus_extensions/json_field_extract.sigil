@@ -1,0 +1,4 @@
+(set arr (json_parse $0))
+(set field $1)
+(for i 0 (json_length arr)
+  (println (json_get (json_get arr i) field)))

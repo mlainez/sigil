@@ -1,0 +1,18 @@
+(set src $0)
+(set lines (split src "\n"))
+(set funcs 0)
+(set imps 0)
+(set cmts 0)
+(set blanks 0)
+(for-each line lines
+  (set s (trim line))
+  (cond
+    ((eq (len s) 0) (set blanks (+ blanks 1)))
+    ((string_starts_with s "def ") (set funcs (+ funcs 1)))
+    ((string_starts_with s "import ") (set imps (+ imps 1)))
+    ((string_starts_with s "from ") (set imps (+ imps 1)))
+    ((string_starts_with s "#") (set cmts (+ cmts 1)))))
+(println (fmt "functions: {}" funcs))
+(println (fmt "imports: {}" imps))
+(println (fmt "comments: {}" cmts))
+(println (fmt "blank_lines: {}" blanks))

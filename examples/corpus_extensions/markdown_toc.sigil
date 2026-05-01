@@ -1,0 +1,8 @@
+(set lines (split $0 "\n"))
+(set headers (filter lines (\line (string_starts_with line "#"))))
+(for-each header headers
+  (set pos (string_find header " "))
+  (set indent (join (map_arr (range (* (- pos 1) 2)) (\_ " ")) ""))
+  (set text (slice header (+ pos 1) (len header)))
+  (println (join [indent text] "")))
+(println (join ["total: " (str (len headers))] ""))

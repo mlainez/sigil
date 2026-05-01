@@ -1,0 +1,5 @@
+(set s $0)
+(set out [])
+(for i 0 (len s)
+  (push out (str (string_get s i))))
+(println (join out " "))

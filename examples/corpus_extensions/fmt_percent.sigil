@@ -1,0 +1,4 @@
+(set a (cast_int_float #0))
+(set b (cast_int_float #1))
+(set r (round (mul (div a b) 1000.0)))
+(println (fmt "{}.{}%" (div r 10) (mod r 10)))

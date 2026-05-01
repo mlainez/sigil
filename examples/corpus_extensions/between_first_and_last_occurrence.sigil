@@ -1,0 +1,7 @@
+(set s $0)
+(set c $1)
+(set first (string_find s c))
+(set rev_s (join (rev (chars s)) ""))
+(set rev_idx (string_find rev_s c))
+(set last (sub (sub (len s) 1) rev_idx))
+(println (join (slice (chars s) (+ first 1) last) ""))

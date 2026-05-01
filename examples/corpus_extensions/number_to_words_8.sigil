@@ -1,0 +1,15 @@
+(fn to_words n int -> string
+  (set ones ["" "one" "two" "three" "four" "five" "six" "seven" "eight" "nine" "ten" "eleven" "twelve" "thirteen" "fourteen" "fifteen" "sixteen" "seventeen" "eighteen" "nineteen"])
+  (set tens_arr ["" "" "twenty" "thirty" "forty" "fifty" "sixty" "seventy" "eighty" "ninety"])
+  (if (eq n 0) (ret "zero"))
+  (set h (div n 100))
+  (set rem (mod n 100))
+  (set t (div rem 10))
+  (set o (mod rem 10))
+  (set hp (cond ((gt h 0) (join [(get_or ones h "") "hundred"] " ")) (true "")))
+  (set tp (cond ((ge rem 20) (get_or tens_arr t "")) (true "")))
+  (set sp (cond ((and (ge rem 10) (lt rem 20)) (get_or ones rem "")) (true "")))
+  (set op (cond ((and (ge rem 20) (gt o 0)) (get_or ones o "")) ((and (lt rem 10) (gt o 0)) (get_or ones o "")) (true "")))
+  (ret (join (filter [hp tp sp op] (\x (ne x ""))) " ")))
+
+(println (to_words #0))

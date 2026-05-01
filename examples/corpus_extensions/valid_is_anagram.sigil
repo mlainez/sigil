@@ -1,0 +1,10 @@
+(set a string $0)
+(set b string $1)
+
+(fn sort_string s string -> array
+  (sort (chars s)))
+
+(set sorted_a array (sort_string a))
+(set sorted_b array (sort_string b))
+
+(println (eq sorted_a sorted_b))

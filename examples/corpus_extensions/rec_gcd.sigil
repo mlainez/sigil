@@ -1,0 +1,7 @@
+(set a #0)
+(set b #1)
+(while (ne b 0)
+  (set t b)
+  (set b (mod a b))
+  (set a t))
+(println a)

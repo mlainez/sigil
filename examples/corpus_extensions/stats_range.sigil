@@ -1,0 +1,3 @@
+(set nums (parse_ints $0))
+(set s (sort nums))
+(println (sub (last s) (first s)))

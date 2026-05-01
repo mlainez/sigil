@@ -1,0 +1,26 @@
+(set s $0)
+(set pair {")" "(" "]" "[" "}" "{"})
+(set stack [])
+(set chars (chars s))
+(set n (len chars))
+(set bad -1)
+(set i 0)
+(while (and (lt i n) (eq bad -1))
+  (set c (array_get chars i))
+  (cond
+    ((in c "([{") (push stack [c i]))
+    ((map_has pair c)
+      (cond
+        ((eq (len stack) 0) (set bad i))
+        (true
+          (set top (array_pop stack))
+          (if (ne (array_get top 0) (map_get pair c))
+            (set bad i))))))
+  (set i (add i 1)))
+
+(if (and (eq bad -1) (gt (len stack) 0))
+  (set bad (array_get (array_get stack 0) 1)))
+
+(if (eq bad -1)
+  (println "balanced")
+  (else (println (fmt "unbalanced at {}" bad))))

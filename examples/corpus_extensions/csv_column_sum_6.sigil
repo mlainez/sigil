@@ -1,0 +1,10 @@
+(set lines (split $0 "\n"))
+(set headers (split (array_get lines 0) ","))
+(set ncols (len headers))
+(set nlines (len lines))
+(for i 0 ncols
+  (set s 0)
+  (for j 1 nlines
+    (set cells (split (array_get lines j) ","))
+    (set s (add s (int (array_get cells i)))))
+  (println (fmt "{}: {}" (array_get headers i) s)))

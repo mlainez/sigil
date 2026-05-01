@@ -1,0 +1,26 @@
+(fn below_100 n int -> string
+  (set ones ["zero" "one" "two" "three" "four" "five" "six" "seven" "eight" "nine" "ten" "eleven" "twelve" "thirteen" "fourteen" "fifteen" "sixteen" "seventeen" "eighteen" "nineteen"])
+  (if (lt n 20) (ret (array_get ones n)))
+  (set tens ["" "" "twenty" "thirty" "forty" "fifty" "sixty" "seventy" "eighty" "ninety"])
+  (set t (array_get tens (div n 10)))
+  (set r (mod n 10))
+  (if (eq r 0) (ret t))
+  (ret (fmt "{}-{}" t (array_get ones r))))
+
+(fn below_1000 n int -> string
+  (if (lt n 100) (ret (below_100 n)))
+  (set ones ["zero" "one" "two" "three" "four" "five" "six" "seven" "eight" "nine"])
+  (set h (array_get ones (div n 100)))
+  (set r (mod n 100))
+  (if (eq r 0) (ret (fmt "{} hundred" h)))
+  (ret (fmt "{} hundred {}" h (below_100 r))))
+
+(fn to_words n int -> string
+  (if (eq n 0) (ret "zero"))
+  (if (lt n 1000) (ret (below_1000 n)))
+  (set k (div n 1000))
+  (set r (mod n 1000))
+  (if (eq r 0) (ret (fmt "{} thousand" (below_1000 k))))
+  (ret (fmt "{} thousand {}" (below_1000 k) (below_1000 r))))
+
+(println (to_words #0))

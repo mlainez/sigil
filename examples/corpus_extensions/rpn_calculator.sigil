@@ -1,0 +1,11 @@
+(set stack [])
+(set n (argv_count))
+(for i 0 n
+  (set tok (arg_str i))
+  (cond
+    ((eq tok "+") (set b (array_pop stack)) (set a (array_pop stack)) (push stack (add a b)))
+    ((eq tok "-") (set b (array_pop stack)) (set a (array_pop stack)) (push stack (sub a b)))
+    ((eq tok "*") (set b (array_pop stack)) (set a (array_pop stack)) (push stack (mul a b)))
+    ((eq tok "/") (set b (array_pop stack)) (set a (array_pop stack)) (push stack (div a b)))
+    (true (push stack (int tok)))))
+(println (array_pop stack))

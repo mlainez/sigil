@@ -1,0 +1,13 @@
+(set raw json (json_parse $0))
+(set groups map {})
+(set n int (json_length raw))
+(for i 0 n
+  (set obj json (json_get raw i))
+  (set name string (json_get obj "name"))
+  (set dept string (json_get obj "dept"))
+  (if (map_has groups dept)
+    (push (map_get groups dept) name)
+    (else
+      (set groups (map_set groups dept [name])))))
+(for-each k string (sort (map_keys groups))
+  (println (fmt "{}: {}" k (join (map_get groups k) ","))))

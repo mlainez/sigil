@@ -1,0 +1,4 @@
+(set pat $0)
+(for-each pair (enumerate (split $1 ";"))
+  (if (in pat (last pair))
+    (println (fmt "{}: {}" (add (first pair) 1) (last pair)))))

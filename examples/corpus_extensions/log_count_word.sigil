@@ -1,0 +1,15 @@
+(set log string $0)
+(set word string $1)
+(set lines array (split log "\n"))
+(set count int 0)
+
+(for-each line string lines
+  (set words array (split line " "))
+  (for-each w string words
+    (if (eq w word)
+      (set count (+ count 1))
+    )
+  )
+)
+
+(println (fmt "{}\n" count))

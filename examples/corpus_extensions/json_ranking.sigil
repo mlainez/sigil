@@ -1,0 +1,13 @@
+(set j (json_parse $0))
+(set field $1)
+(set n (json_length j))
+(set items [])
+(for i 0 n
+  (set obj (json_get j i))
+  (set v (json_get obj field))
+  (set nm (json_get obj "name"))
+  (push items [v nm]))
+(set sorted (sort_by items (\p (neg (first p)))))
+(for i 0 n
+  (set p (array_get sorted i))
+  (println (fmt "{}. {}: {}" (add i 1) (last p) (first p))))

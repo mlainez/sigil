@@ -1,0 +1,14 @@
+(set source string $0)
+(set lines array (split source "\n"))
+
+(set total int (len lines))
+(set blank int (len (filter (\line (eq line "")) lines)))
+(set comment int (len (filter (\line (string_starts_with (trim line) "#")) lines)))
+(set import int (len (filter (\line (or (string_starts_with line "import ") (string_starts_with line "from "))) lines)))
+(set def int (len (filter (\line (string_starts_with (trim line) "def ")) lines)))
+
+(println (fmt "total: {}" total))
+(println (fmt "blank: {}" blank))
+(println (fmt "comment: {}" comment))
+(println (fmt "import: {}" import))
+(println (fmt "def: {}" def))

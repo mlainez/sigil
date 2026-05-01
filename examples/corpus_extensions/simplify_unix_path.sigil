@@ -1,0 +1,12 @@
+(set path string $0)
+(set parts array (split path "/"))
+(set stack array [])
+(for-each part string parts
+  (cond
+    ((eq part ".") nil)
+    ((and (eq part "..") (> (len stack) 0)) (pop stack))
+    ((not (or (eq part "") (eq part "."))) (push stack part))))
+(set result string (join "/" stack))
+(if (not (eq path "/"))
+  (set result (fmt "/{}" result)))
+(println result)

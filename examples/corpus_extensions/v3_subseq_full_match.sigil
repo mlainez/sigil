@@ -1,0 +1,17 @@
+(set haystack string $0)
+(set needle string $1)
+
+(fn is_subseq h string n string -> bool
+  (set i int 0)
+  (set j int 0)
+  (set hlen int (string_length h))
+  (set nlen int (string_length n))
+  (while (and (lt i hlen) (lt j nlen))
+    (if (eq (string_get h i) (string_get n j))
+      (set j (add j 1)))
+    (set i (add i 1)))
+  (ret (ge j nlen)))
+
+(if (is_subseq haystack needle)
+  (println "yes")
+  (else (println "no")))

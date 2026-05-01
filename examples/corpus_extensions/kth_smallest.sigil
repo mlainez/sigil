@@ -1,0 +1,4 @@
+(set nums (map_arr (split $0 " ") (\x (int x))))
+(set k (sub #1 1))
+(sort nums)
+(println (array_get nums k))

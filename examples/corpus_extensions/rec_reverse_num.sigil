@@ -1,0 +1,1 @@
+(println (int (join (rev (chars $0)) "")))

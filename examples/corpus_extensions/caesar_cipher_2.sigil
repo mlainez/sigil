@@ -1,0 +1,13 @@
+(set s $0)
+(set k (mod (add (mod #1 26) 26) 26))
+(set n (len s))
+(set out "")
+(for i 0 n
+  (set c (string_get s i))
+  (cond
+    ((and (ge c 65) (le c 90))
+      (set out (string_concat out (char_from_code (add 65 (mod (add (sub c 65) k) 26))))))
+    ((and (ge c 97) (le c 122))
+      (set out (string_concat out (char_from_code (add 97 (mod (add (sub c 97) k) 26))))))
+    (true (set out (string_concat out (char_from_code c))))))
+(println out)

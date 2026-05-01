@@ -1,0 +1,7 @@
+(set a #0)
+(set b #1)
+(set s (add (mul a a) (mul b b)))
+(set c (cast_float_int (sqrt (cast_int_float s))))
+(if (eq (mul c c) s)
+  (println c)
+  (else (println -1)))

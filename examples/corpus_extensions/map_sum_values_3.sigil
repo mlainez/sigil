@@ -1,0 +1,6 @@
+(set pairs (split $0 ","))
+(set total 0)
+(for-each p pairs
+  (set kv (split p "="))
+  (set total (add total (int (array_get kv 1)))))
+(println total)

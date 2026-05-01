@@ -1,0 +1,3 @@
+(set lines (slice (argv) 1))
+(for-each pair (filter (enumerate lines) (\p (string_contains (last p) $0)))
+  (println (fmt "{}: {}" (+ (first pair) 1) (last pair))))

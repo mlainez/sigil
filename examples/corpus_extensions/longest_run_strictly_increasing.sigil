@@ -1,0 +1,13 @@
+(set nums array (parse_ints $0))
+(set max_streak int 1)
+(set current_streak int 1)
+
+(for i 1 (len nums)
+  (if (gt (array_get nums i) (array_get nums (- i 1)))
+    (set current_streak (+ current_streak 1))
+    (else
+      (set max_streak (max max_streak current_streak))
+      (set current_streak 1))))
+
+(set max_streak (max max_streak current_streak))
+(println max_streak)

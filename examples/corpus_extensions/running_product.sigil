@@ -1,0 +1,8 @@
+(set nums (parse_ints $0))
+(set n (len nums))
+(set prod int 1)
+(for i 0 n
+  (set prod (mul prod (array_get nums i)))
+  (print prod)
+  (if (lt i (sub n 1)) (print " ")))
+(println)

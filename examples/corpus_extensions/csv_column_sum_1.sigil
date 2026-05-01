@@ -1,0 +1,5 @@
+(set lines (split $0 "\n"))
+(set header (split (array_get lines 0) ","))
+(set idx (array_index_of header $1))
+(set rows (array_slice lines 1 (sub (len lines) 1)))
+(println (sum (map_arr rows (\row (int (array_get (split row ",") idx))))))

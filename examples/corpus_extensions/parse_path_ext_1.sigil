@@ -1,0 +1,7 @@
+(set path $0)
+(set parts (split path "/"))
+(set fname (last parts))
+(set dots (split fname "."))
+(if (gt (len dots) 1)
+  (println (last dots))
+  (else (println "none")))

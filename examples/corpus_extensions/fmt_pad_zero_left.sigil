@@ -1,0 +1,6 @@
+(set s $0)
+(set pad (sub #1 (len s)))
+(while (gt pad 0)
+  (set s (string_concat "0" s))
+  (set pad (sub pad 1)))
+(println s)

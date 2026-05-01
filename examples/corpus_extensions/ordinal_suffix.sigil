@@ -1,0 +1,10 @@
+(set n #0)
+(set last2 (mod n 100))
+(set last1 (mod n 10))
+(set suffix (cond
+  ((and (ge last2 11) (le last2 13)) "th")
+  ((eq last1 1) "st")
+  ((eq last1 2) "nd")
+  ((eq last1 3) "rd")
+  (true "th")))
+(println (join [$0 suffix] ""))

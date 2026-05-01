@@ -1,0 +1,14 @@
+(set s $0)
+(set stack [])
+(set ok true)
+(for-each c (chars s)
+  (cond
+    ((eq c "(") (push stack ")"))
+    ((eq c "[") (push stack "]"))
+    ((eq c "{") (push stack "}"))
+    ((in c "}])")
+      (cond
+        ((eq (len stack) 0) (set ok false))
+        ((ne (array_pop stack) c) (set ok false))))))
+(if (ne (len stack) 0) (set ok false))
+(println ok)

@@ -1,0 +1,4 @@
+(set rows array (split $0 "\n"))
+(for-each row string rows
+  (set cols array (split row ","))
+  (println (join cols "  ")))

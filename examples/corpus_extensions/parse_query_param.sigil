@@ -1,0 +1,6 @@
+(set qs $0)
+(set key $1)
+(for-each pair (split qs "&")
+  (set kv (split pair "="))
+  (if (eq (first kv) key)
+    (println (last kv))))

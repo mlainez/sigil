@@ -1,0 +1,4 @@
+(set rows (map_arr (split $0 ";") (\row (split row ","))))
+(set ncols (len (first rows)))
+(for-each i (range ncols)
+  (println (join (map_arr rows (\row (get_or row i ""))) " ")))

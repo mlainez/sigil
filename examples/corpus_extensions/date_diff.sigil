@@ -1,0 +1,15 @@
+(fn jdn s string -> int
+  (set y (int (string_slice s 0 4)))
+  (set m (int (string_slice s 5 2)))
+  (set d (int (string_slice s 8 2)))
+  (set a (div (sub 14 m) 12))
+  (set yy (sub (add y 4800) a))
+  (set mm (sub (add m (mul 12 a)) 3))
+  (set t1 (div (add (mul 153 mm) 2) 5))
+  (set t2 (mul 365 yy))
+  (set t3 (div yy 4))
+  (set t4 (div yy 100))
+  (set t5 (div yy 400))
+  (ret (sub (add (add (add (add d t1) t2) t3) (sub t5 t4)) 32045)))
+
+(println (fmt "{} days" (abs (sub (jdn $1) (jdn $0)))))

@@ -1,0 +1,1 @@
+(println (join (sort_by (split $0 " ") (\w (len w))) " "))

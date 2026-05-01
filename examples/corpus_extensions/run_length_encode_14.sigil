@@ -1,0 +1,16 @@
+(set s $0)
+(set arr (chars s))
+(set result "")
+(set current (first arr))
+(set count 1)
+(set n (len arr))
+(for i 1 n
+  (set c (array_get arr i))
+  (if (eq c current)
+    (set count (add count 1))
+    (else
+      (set result (string_concat result (fmt "{}{}" current count)))
+      (set current c)
+      (set count 1))))
+(set result (string_concat result (fmt "{}{}" current count)))
+(println result)

@@ -1,0 +1,5 @@
+(set lines (split $0 "\n"))
+(for-each line lines
+  (set fields (split line " "))
+  (if (eq (get_or fields 2 "") "ERROR")
+    (println (fmt "{} {}: {}" (get_or fields 0 "") (get_or fields 1 "") (join (slice fields 3 (len fields)) " ")))))

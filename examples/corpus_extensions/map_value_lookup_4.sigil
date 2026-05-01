@@ -1,0 +1,3 @@
+(set pairs (split $0 ","))
+(set found (filter pairs (\p (eq (first (split p "=")) $1))))
+(println (last (split (first found) "=")))

@@ -1,0 +1,4 @@
+(set words (split $0 " "))
+(set counts (counter words))
+(for-each pair (entries counts)
+  (println (fmt "{}: {}" (first pair) (last pair))))

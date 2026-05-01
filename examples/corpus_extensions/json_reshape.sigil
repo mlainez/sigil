@@ -1,0 +1,4 @@
+(set arr (json_parse $0))
+(for i 0 (json_length arr)
+  (set obj (json_get arr i))
+  (println (fmt "{} -> {}" (json_get obj "id") (json_get obj "val"))))

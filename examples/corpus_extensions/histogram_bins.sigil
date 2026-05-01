@@ -1,0 +1,19 @@
+(fn hashes n int -> string
+  (set s "")
+  (for i 0 n
+    (set s (add s "#")))
+  (ret s))
+
+(set arr (split $0 ","))
+(set b1 0)
+(set b2 0)
+(set b3 0)
+(for-each s arr
+  (set n (int s))
+  (cond
+    ((le n 3) (set b1 (add b1 1)))
+    ((le n 6) (set b2 (add b2 1)))
+    (true (set b3 (add b3 1)))))
+(println (fmt "1-3: {}" (hashes b1)))
+(println (fmt "4-6: {}" (hashes b2)))
+(println (fmt "7-9: {}" (hashes b3)))

@@ -1,0 +1,4 @@
+(set groups {})
+(for-each w (split $0 " ")
+  (set groups (map_set groups (join (sort (chars w)) "") true)))
+(println (len groups))

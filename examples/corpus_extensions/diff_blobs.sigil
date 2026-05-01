@@ -1,0 +1,20 @@
+(set blob1 string $0)
+(set blob2 string $1)
+
+(set lines1 array (split blob1 "\n"))
+(set lines2 array (split blob2 "\n"))
+
+(set set1 map (reduce lines1 (\(acc line) (merge acc {line 1})) {}))
+(set set2 map (reduce lines2 (\(acc line) (merge acc {line 1})) {}))
+
+(set added array (filter lines2 (\line (not (in line set1)))))
+(set removed array (filter lines1 (\line (not (in line set2)))))
+
+(set sorted_added array (sort added))
+(set sorted_removed array (sort removed))
+
+(for-each line string sorted_added
+  (println (fmt "+ {}" line)))
+
+(for-each line string sorted_removed
+  (println (fmt "- {}" line)))

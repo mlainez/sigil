@@ -1,0 +1,4 @@
+(set input string $0)
+(set pairs array (split input ","))
+(set values array (map_arr (\pair (second (split pair "="))) pairs))
+(println (join " " values))

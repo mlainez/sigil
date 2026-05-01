@@ -1,0 +1,36 @@
+(set s $0)
+(set stack [])
+(set indices [])
+(set n (len s))
+(set result "balanced")
+(set i 0)
+(set done false)
+
+(while (and (lt i n) (not done))
+  (set c (string_get s i))
+  (cond
+    ((or (eq c 40) (or (eq c 91) (eq c 123)))
+      (push stack c)
+      (push indices i))
+    ((or (eq c 41) (or (eq c 93) (eq c 125)))
+      (cond
+        ((eq (len stack) 0)
+          (set result (fmt "mismatch at {}" i))
+          (set done true))
+        (true
+          (set top (array_pop stack))
+          (array_pop indices)
+          (set expected 40)
+          (cond
+            ((eq c 41) (set expected 40))
+            ((eq c 93) (set expected 91))
+            (true (set expected 123)))
+          (if (ne top expected)
+            (set result (fmt "mismatch at {}" i))
+            (set done true))))))
+  (set i (add i 1)))
+
+(if (and (not done) (gt (len stack) 0))
+  (set result (fmt "unclosed at {}" (array_get indices 0))))
+
+(println result)

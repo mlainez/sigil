@@ -1,0 +1,12 @@
+(set rows (split $0 "\n"))
+(set header (first rows))
+(set cols (split header ","))
+(set col_idx 0)
+(set i 0)
+(for-each col cols
+  (if (eq col $1) (set col_idx i))
+  (set i (+ i 1)))
+(println header)
+(for-each row (rest rows)
+  (if (and (ne row "") (eq (first (slice (split row ",") col_idx (+ col_idx 1))) $2))
+    (println row)))

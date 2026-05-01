@@ -1,0 +1,11 @@
+(set s $0)
+(set max_run 0)
+(set current_run 0)
+(for-each ch (chars s)
+  (if (eq ch "0")
+    (set current_run (+ current_run 1))
+    (else
+      (set max_run (max max_run current_run))
+      (set current_run 0))))
+(set max_run (max max_run current_run))
+(println max_run)

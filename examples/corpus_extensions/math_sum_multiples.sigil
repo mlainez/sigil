@@ -1,0 +1,1 @@
+(println (sum (filter (range 1 (add #0 1)) (\x (eq (mod x #1) 0)))))

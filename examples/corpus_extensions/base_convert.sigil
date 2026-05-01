@@ -1,0 +1,13 @@
+(set digits "0123456789abcdefghijklmnopqrstuvwxyz")
+(set s (lower $0))
+(set n 0)
+(for-each c (chars s)
+  (set n (add (mul n #1) (string_find digits c))))
+(if (eq n 0)
+  (println "0")
+  (else
+    (set out "")
+    (while (gt n 0)
+      (set out (string_concat (string_slice digits (mod n #2) 1) out))
+      (set n (div n #2)))
+    (println out)))

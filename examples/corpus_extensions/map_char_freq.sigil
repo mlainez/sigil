@@ -1,0 +1,8 @@
+(set s $0)
+(set m {})
+(for-each c (chars s)
+  (map_inc m c))
+(set parts [])
+(for-each k (sort (map_keys m))
+  (push parts (fmt "{}:{}" k (map_get m k))))
+(println (join parts " "))

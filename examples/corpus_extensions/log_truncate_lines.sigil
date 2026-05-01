@@ -1,0 +1,3 @@
+(set lines array (split $0 "\n"))
+(for-each line string lines
+  (println (string_slice line 0 (arg_int 1))))

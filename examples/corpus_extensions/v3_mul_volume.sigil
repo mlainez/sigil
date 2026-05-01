@@ -1,0 +1,4 @@
+(set l int #0)
+(set w int #1)
+(set h int #2)
+(println (mul (mul l w) h))

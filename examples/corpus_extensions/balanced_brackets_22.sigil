@@ -1,0 +1,25 @@
+(set s string $0)
+(set arr array (chars s))
+(set stack array [])
+(set n int (len arr))
+(set result string "balanced")
+(set found bool false)
+(set i int 0)
+(while (and (lt i n) (not found))
+  (set c string (array_get arr i))
+  (cond
+    ((eq c "(") (push stack ")"))
+    ((eq c "[") (push stack "]"))
+    ((eq c "{") (push stack "}"))
+    (true
+      (cond
+        ((eq (len stack) 0)
+          (set result (fmt "mismatch at {}" i))
+          (set found true))
+        ((eq (array_get stack (sub (len stack) 1)) c)
+          (array_pop stack))
+        (true
+          (set result (fmt "mismatch at {}" i))
+          (set found true)))))
+  (set i (add i 1)))
+(println result)

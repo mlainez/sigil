@@ -1,0 +1,4 @@
+(cond
+  ((eq #0 0) (println "zero"))
+  ((gt #0 0) (println "pos"))
+  (true (println "neg")))

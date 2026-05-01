@@ -1,0 +1,14 @@
+(set xs (parse_ints $0))
+(set len (len xs))
+(set max_streak 0)
+(set current_streak 1)
+
+(for i 1 len
+  (if (lt (array_get xs i) (array_get xs (- i 1)))
+    (set current_streak (+ current_streak 1))
+    (begin
+      (set max_streak (max max_streak current_streak))
+      (set current_streak 1))))
+
+(set max_streak (max max_streak current_streak))
+(println max_streak)

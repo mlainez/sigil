@@ -1,0 +1,5 @@
+(set path $0)
+(set parts (split path "."))
+(if (le (len parts) 1)
+  (println "")
+  (else (println (last parts))))

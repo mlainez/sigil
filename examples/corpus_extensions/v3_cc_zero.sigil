@@ -1,0 +1,6 @@
+(set a string $0)
+(set b string $1)
+(set m int 0)
+(for-each c (chars a)
+  (if (in c b) (set m (add m 1))))
+(println m)

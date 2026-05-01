@@ -1,0 +1,13 @@
+(set paths (split $0 ","))
+(set seen {})
+(for-each path paths
+  (set segs (split path "/"))
+  (for-each i (range 0 (len segs))
+    (set prefix (slice segs 0 (+ i 1)))
+    (set key (join prefix "/"))
+    (set seg (last prefix))
+    (set indent_str (join (map_arr (range 0 (* i 2)) (\_ " ")) ""))
+    (set was_seen (in key seen))
+    (set seen (json_set seen [key] true))
+    (if (eq was_seen false)
+      (println (join [indent_str seg] "")))))

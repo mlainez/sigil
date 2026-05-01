@@ -1,0 +1,7 @@
+(set nums (parse_ints $0))
+(set m (array_get nums 0))
+(set out [m])
+(for i 1 (len nums)
+  (set m (max m (array_get nums i)))
+  (push out m))
+(println (join out " "))

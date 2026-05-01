@@ -1,0 +1,1 @@
+(println (join (sort (map_arr (split $0 ",") (\p (set kv (split p "=")) (fmt "{}={}" (array_get kv 1) (array_get kv 0))))) ","))

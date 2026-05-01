@@ -1,0 +1,9 @@
+(set amount #0)
+(set total 0)
+(for-each d [25 10 5 1]
+  (set c (div amount d))
+  (if (gt c 0)
+    (println (fmt "{}:{}" d c)))
+  (set total (add total c))
+  (set amount (mod amount d)))
+(println (fmt "total:{}" total))

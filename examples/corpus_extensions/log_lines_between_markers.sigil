@@ -1,0 +1,13 @@
+(set lines (split $0 "\n"))
+(set start_idx -1)
+(set end_idx -1)
+(set i 0)
+(for-each line lines
+  (if (and (eq start_idx -1) (eq line $1))
+    (set start_idx i))
+  (if (and (ge start_idx 0) (and (eq end_idx -1) (and (gt i start_idx) (eq line $2))))
+    (set end_idx i))
+  (set i (+ i 1)))
+(if (and (ge start_idx 0) (ge end_idx 0))
+  (for-each line (slice lines (+ start_idx 1) end_idx)
+    (println line)))

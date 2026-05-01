@@ -1,0 +1,3 @@
+(set row string $0)
+(set fields array (split row ","))
+(println (array_get fields 1))

@@ -1,0 +1,20 @@
+(set input string $0)
+(set words array (split input " "))
+(set counts map {})
+(for-each w string words
+  (map_inc counts w))
+(set sorted_keys array (sort (map_keys counts)))
+(set n int (len sorted_keys))
+(for i 0 n
+  (set jmax int (sub (sub n i) 1))
+  (for j 0 jmax
+    (set j1 int (add j 1))
+    (set w1 string (array_get sorted_keys j))
+    (set w2 string (array_get sorted_keys j1))
+    (set c1 int (map_get counts w1))
+    (set c2 int (map_get counts w2))
+    (if (lt c1 c2)
+      (set sorted_keys (array_set sorted_keys j w2))
+      (set sorted_keys (array_set sorted_keys j1 w1)))))
+(for-each w string sorted_keys
+  (println (fmt "{} {}" w (map_get counts w))))

@@ -1,0 +1,10 @@
+(for-each s (split $0 ",")
+  (set n (int s))
+  (set ns (str n))
+  (set prefix "")
+  (for i 0 (sub 3 (len ns))
+    (set prefix (string_concat prefix " ")))
+  (set bars "")
+  (for j 0 n
+    (set bars (string_concat bars "#")))
+  (println (fmt "{prefix}{ns} | {bars}")))

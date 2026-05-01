@@ -1,0 +1,8 @@
+(set n #0)
+(set words (slice (argv) 1 (argv_count)))
+(set counts (counter words))
+(set alpha_sorted (sort_by (entries counts) (\e (first e))))
+(set count_sorted (sort_by alpha_sorted (\e (neg (last e)))))
+(set top (slice count_sorted 0 n))
+(for-each entry top
+  (println (fmt "{}: {}" (first entry) (last entry))))

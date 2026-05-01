@@ -1,0 +1,6 @@
+(set lines (split $0 "\n"))
+(set non_empty (filter lines (\line (ne line ""))))
+(set valid (filter non_empty (\line (ne (string_get line 0) 35))))
+(set matching (filter valid (\line (string_starts_with (first (split line "=")) $1))))
+(set sorted (sort matching))
+(for-each line sorted (println line))

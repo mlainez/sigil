@@ -1,0 +1,2 @@
+(set n int #0)
+(println (mul 1 (pow 2 n)))

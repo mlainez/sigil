@@ -1,0 +1,6 @@
+(set rows (split $0 ";"))
+(set row (array_get rows #1))
+(set nums (map_arr (split row ",") (\x (int x))))
+(set m (array_get nums 0))
+(for-each n nums (set m (max m n)))
+(println m)

@@ -1,0 +1,9 @@
+(set n #0)
+(set row [1])
+(for i 0 n
+  (println (join row " "))
+  (set next [1])
+  (for j 0 (sub (len row) 1)
+    (push next (add (array_get row j) (array_get row (add j 1)))))
+  (push next 1)
+  (set row next))

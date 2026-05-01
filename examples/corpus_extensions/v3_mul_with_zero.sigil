@@ -1,0 +1,5 @@
+(set a int #0)
+(set b int #1)
+(set c int #2)
+(set d int #3)
+(println (mul (mul a b) (mul c d)))

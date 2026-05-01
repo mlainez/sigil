@@ -1,0 +1,9 @@
+(set lines array (split $0 "\n"))
+(set found bool false)
+(for-each line string lines
+  (set parts array (split line " "))
+  (if (and (not found) (eq (first parts) "ERROR"))
+    (do
+      (println (join (rest parts) " "))
+      (set found true))))
+(if (not found) (println "NONE"))

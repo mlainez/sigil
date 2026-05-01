@@ -1,0 +1,8 @@
+(set s $0)
+(set n (len s))
+(set h (div n 2))
+(set r (mod n 2))
+(set a (string_slice s 0 h))
+(set m (string_slice s h r))
+(set b (string_slice s (add h r) h))
+(println (fmt "{}{}{}" b m a))

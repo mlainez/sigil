@@ -1,0 +1,7 @@
+(set config string $0)
+(set parts array (split config "\n"))
+(set pairs array [])
+(for-each line string parts
+  (set kv array (split line "="))
+  (push pairs (fmt "\"{}\": \"{}\"" (first kv) (last kv))))
+(println (fmt "{{{}}}" (join pairs ", ")))

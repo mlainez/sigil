@@ -1,8 +1,92 @@
-# Sigil - Sigil
+# Sigil
 
-**A programming language designed by AI, for AI code generation.**
+**A programming language designed by AI, refined by observing AI failures, deployed for AI code generation.**
 
-Sigil is a modern systems programming language specifically engineered to eliminate the ambiguities and complexities that make traditional languages difficult for Large Language Models (LLMs) to generate reliably. Every design decision prioritizes **predictability, explicitness, and zero ambiguity**.
+Sigil is a Lisp-shaped scripting language whose design has been shaped by months of iteration with Large Language Models — first via collaborative AI/human design, then through a continuous feedback loop where every model failure on a benchmark fed back into the language surface. Each builtin alias, prelude function, and parser tolerance has a benchmark story behind it.
+
+The result: **the local Sigil ensemble (Qwen-Sigil-7B + Phi-Sigil-14B) hits 92% of Claude Sonnet's accuracy on real tooling tasks at $0 marginal cost** — without the model ever being trained on Sigil at scale. The trick is a deliberate "meeting halfway" pattern: the language admits any reasonable shape the model produces (multiple aliases, lenient parsing) and maps it to canonical implementations.
+
+> **Honest note on principles.** This README has been updated several times to reflect what the project actually became. The original "designed by AI, for AI" framing — and especially the "ONE WAY ONLY / zero ambiguity" claims — described an aspirational pure design. In practice, working with pre-trained models forced a more nuanced reality: the language inherits the AI's training distribution (Python/JS shapes, Lisp synonyms) and works best when it admits those shapes. See [`papers/MEETING_HALFWAY.md`](papers/MEETING_HALFWAY.md) and [`papers/JOURNEY.md`](papers/JOURNEY.md) for the full retrospective. The principles below are split into "**held**" (verified by benchmarks) and "**aspirational**" (stated but not enforced) accordingly.
+
+## Documentation index
+
+If you only have time for one document, pick from this list by your goal.
+
+### Start here
+
+| Document | What it is | When to read |
+|---|---|---|
+| [`AGENTS.md`](AGENTS.md) | LLM-optimised quick reference (~8K tokens). Examples, idioms, common gotchas. | If you (or a model) are about to write Sigil code. |
+| [`.sigil.grammar`](.sigil.grammar) | Machine-readable grammar (~800 tokens). | Cheapest way to prime an LLM on the syntax. Read first when token budget matters. |
+| [`LANGUAGE_SPEC.md`](LANGUAGE_SPEC.md) | Complete language specification — types, control flow, builtins, semantics. | Reference for anything not covered in AGENTS.md. |
+
+### Architecture and language surface
+
+| Document | What it is |
+|---|---|
+| [`SIGIL-CORE.md`](SIGIL-CORE.md) | Core IR specification: 5 frozen statements (`set`, `label`, `goto`, `ifnot`, `ret`). The stable layer. |
+| [`SIGIL-AGENT.md`](SIGIL-AGENT.md) | Agent surface specification: `while`, `for`, `if`, `for-each`, etc. The evolving layer. |
+| [`.sigil.analysis`](.sigil.analysis) | Architectural analysis — design decisions and known issues, in detail. |
+| [`stdlib/README.md`](stdlib/README.md) | Stdlib module list, the **builtin-vs-stdlib boundary principle**, and the **if-Lisp-form trap** (a recurring stdlib gotcha). |
+| [`tests/README.md`](tests/README.md) | Test framework and naming conventions. |
+
+### The research story (read for context, not implementation)
+
+| Document | What it is |
+|---|---|
+| [`papers/JOURNEY.md`](papers/JOURNEY.md) | The full chronicle — phases 1–14. From cloud fine-tunes through QLoRA, RAG, ensembling, validator-in-loop, philosophy retrospective. ~900 lines but indexed by phase. |
+| [`papers/MEETING_HALFWAY.md`](papers/MEETING_HALFWAY.md) | The operational design philosophy: when to add an alias for a model's reach versus when to push back. |
+| [`papers/CONFIDENTIALITY_AND_LOCAL_LLMS.md`](papers/CONFIDENTIALITY_AND_LOCAL_LLMS.md) | Why local LLMs matter for confidentiality / data residency. |
+| [`papers/MODEL_VERSIONS.md`](papers/MODEL_VERSIONS.md) | Catalog of every fine-tuned Sigil model (cloud and local), with the rationale, recipe, result, and lesson per version. Reference for "why does v3.1 exist?" / "what's different about v5?" |
+| [`papers/AGENTIC_HARNESS_PLAN.md`](papers/AGENTIC_HARNESS_PLAN.md) | Plan for the next phase: an agentic test harness comparing cloud-only vs local-Sigil-tooling token consumption on multi-step tasks. |
+
+### Benchmarking and fine-tuning
+
+| Document | What it is |
+|---|---|
+| [`benchmark/RESEARCH_PLAN.md`](benchmark/RESEARCH_PLAN.md) | Pre-registered claims and evaluation protocol. |
+| [`benchmark/RAG.md`](benchmark/RAG.md) | RAG architecture: how `nomic-embed-text` builds the retrieval index over the training corpus, knob effects (k, min_score, top1_floor, mmr_lambda). |
+| [`benchmark/RESULTS.md`](benchmark/RESULTS.md) | Aggregated benchmark results across models and configurations. |
+| [`benchmark/corpus_pipeline.md`](benchmark/corpus_pipeline.md) | How the training corpus was generated and filtered. |
+| [`benchmark/PLAN_local_vs_cloud_economics.md`](benchmark/PLAN_local_vs_cloud_economics.md) | Cost/Wh comparison between local Sigil and cloud Python paths. |
+| [`benchmark/llm_generation_strategy.md`](benchmark/llm_generation_strategy.md) | Prompt structure and retry strategy. |
+
+### Workflow and agent integration
+
+| Document | What it is |
+|---|---|
+| [`agent_workflow/README.md`](agent_workflow/README.md) | Patterns for using Sigil from inside an agentic-AI workflow. |
+| [`examples/README.md`](examples/README.md) | Example programs index. Real working programs. |
+| [`examples/chat_app/README.md`](examples/chat_app/README.md) | WebSocket chat application walkthrough. |
+| [`examples/todo_app/README.md`](examples/todo_app/README.md) | TODO app with SQLite backend walkthrough. |
+
+### Suggested reading order for a new researcher
+
+If you came to this repository fresh and want to understand both **what Sigil is** and **what was learned about local-LLM tooling on the way here**, read in this order. Each step builds on the previous and skips redundancy.
+
+1. **[`papers/JOURNEY.md`](papers/JOURNEY.md)** — Phases 1–3 (cloud fine-tunes; corpus-extender; the 10-iteration measurement loop). Sets up the problem and the evaluation infrastructure.
+2. **[`benchmark/RAG.md`](benchmark/RAG.md)** — how RAG retrieval is wired and what knobs matter.
+3. **[`papers/JOURNEY.md`](papers/JOURNEY.md)** — Phases 4–7 (un-tuned 32B + RAG, then 3B and 7B local QLoRA fine-tunes). The Sigil-vs-Python head-to-head lands here.
+4. **[`papers/MEETING_HALFWAY.md`](papers/MEETING_HALFWAY.md)** — the design philosophy that emerged from the failure analysis. Read alongside JOURNEY phase 11 ("language additions earned by failures").
+5. **[`papers/JOURNEY.md`](papers/JOURNEY.md)** — Phases 8–13 (Sonnet comparison; deployment study; ensemble fallback hypothesis; routing variants). The local-vs-frontier comparison is here, with the 25/30 ensemble result.
+6. **[`papers/JOURNEY.md`](papers/JOURNEY.md)** — **Phase 14 retrospective.** Per-principle grade against the original README claims. The most opinionated section.
+7. **[`papers/CONFIDENTIALITY_AND_LOCAL_LLMS.md`](papers/CONFIDENTIALITY_AND_LOCAL_LLMS.md)** — why this work matters beyond accuracy: data residency and compliance.
+8. **[`benchmark/RESULTS.md`](benchmark/RESULTS.md)** + the JSON files in `benchmark/` — every numerical claim in the narrative cites a result file. They're all here, reproducible.
+9. **[`stdlib/README.md`](stdlib/README.md)** — the **builtin-vs-stdlib boundary principle** and the **if-Lisp-form trap**. The clearest statement of what we learned about language-design pitfalls.
+
+The interpreter source (`interpreter/interpreter.ml`, ~5K lines) is the canonical answer to any "but what does it actually do?" question. Builtin definitions live near their dispatch site; comments document trade-offs and historical reasons.
+
+Reproducing any benchmark number: every JSON in `benchmark/` records the model, prompts, hyper-parameters, and seed. The exact commands are in `benchmark/eval_real_tooling.py` (deployment), `benchmark/rag_loop.py` (synthetic 100-task), and `benchmark/finetune_local.py` (training). All deterministic at temperature 0; retry attempts are the only stochastic part and use a fixed temperature ramp.
+
+### Memory / auto-recovered knowledge
+
+For Claude Code working on this repo, durable lessons are persisted to `~/.claude/projects/-var-home-marc-Projects-sigil/memory/`:
+- **Navi31 QLoRA stable recipe** — `lr=2e-5 / max_seq=1024 / warmup=0.2 / clip=1.0` for AMD RX 7800 XT.
+- **Sigil arch boundary** — when to add to OCaml builtins vs `stdlib/core/prelude.sigil`; the if-Lisp-form trap.
+- **Phi-4 LoRA + ollama** — runtime ADAPTER path crashes on Phi-3/4; merge-then-quantize workaround.
+- **Corpus-generation lessons** — what shapes work and what to avoid.
+
+These auto-load into Claude sessions so they don't have to be re-derived.
 
 ## The Problem Sigil Solves
 
@@ -79,29 +163,35 @@ dune build
 
 ## Language Philosophy
 
-### Design Principles (AI-Driven Decisions)
+### Principles that held (verified by benchmarks)
 
-These design decisions were made during collaborative AI-human development to maximize LLM code generation reliability:
+These design decisions survived months of iteration with real models on real benchmarks. They produced measurable wins.
 
-1. **ONE WAY ONLY** - Every construct has exactly one canonical form. No alternatives, no shortcuts, no "you can also...". Zero ambiguity.
+1. **Two-layer architecture (Core + Agent).** Sigil-Core is 5 frozen statements (`set`, `label`, `goto`, `ifnot`, `ret`). Sigil-Agent is the surface layer (`while`, `for`, `if`, etc.) that evolves freely. Core never broke. Models that learned the Agent surface 12 months ago would still work today.
 
-2. **Explicit Everything** - Types, conversions, control flow, error handling - nothing is implicit. What you see is what you get.
+2. **Type-directed dispatch.** Models write `(add x y)`, interpreter picks int/float/decimal/string/array dispatch from the first arg. Lower memorization burden than `add_int`/`add_f64`/`add_str`. Models adopt this naturally.
 
-3. **Type-Directed Dispatch** - LLMs write `(add x y)`, interpreter infers whether to use `add_int` or `add_float` based on `x`'s type. Reduces cognitive load.
+3. **S-expression syntax.** Zero precedence ambiguity, uniform `(op args...)` shape, generates trivially. Every Coder model can produce it.
 
-4. **Flat Structure** - Sequential statements with simple jumps. No deeply nested expressions that require tracking complex state.
+4. **Frozen Core IR.** The 5 Core statements never changed. They're the stable training target.
 
-5. **S-Expression Syntax** - Uniform, parenthesized Lisp-style syntax. Trivial to parse, generate, and validate.
+5. **No comments.** Models don't write comments; corpus stays clean; no token waste on cruft.
 
-6. **Frozen Core IR** - The 5 Core statements (`set`, `label`, `goto`, `ifnot`, `ret`) will never change. Future-proof.
+6. **Pure-Sigil stdlib.** All stdlib in Sigil itself. Phase 12 *strengthened* this principle by moving convenience functions from OCaml to an auto-loaded prelude written in Sigil. The reason: clean Sigil stdlib doubles as documentation the model can read at retrieval time.
 
-7. **No Comments** - Sigil intentionally has no comment syntax. Use descriptive names and `meta-note` in tests. Forces clarity.
+7. **Panic-based errors with contextual messages.** Hard panics, but the messages tell the model what to fix (`"sub takes (int int) or (float float), got (string int)"`). Phase 11 added type-tuple hints across the high-frequency ops; +3pp on synthetic benchmark.
 
-8. **Eating Our Own Dog Food** - All tooling, utilities, and stdlib modules are written in pure Sigil. If Sigil can't express something, we fix Sigil, not reach for Python.
+8. **Machine-readable docs first.** `.sigil.grammar` (~800 tokens) is what models consume; prose docs are secondary.
 
-9. **Panic-Based Errors** - Operations fail with clear panic messages. LLM regenerates with checks when needed.
+### Principles that didn't hold as stated (but the operational pattern that emerged is more interesting)
 
-10. **Machine-Readable First** - Documentation prioritizes machine-readable formats (`.sigil.grammar`, `.sigil.meta`) over prose. LLMs read these first.
+9. **~~ONE WAY ONLY~~ → Many ways for input, one canonical implementation.** The original principle claimed every construct had exactly one canonical form. **In practice we have ~30 aliases** (`head/first`, `count_el/count`, `+/add`, `<`/`lt`, `contains/in/has`, `size/length/len`, etc.). Every alias was added because models reach for it from Python/Lisp/Haskell training. Each alias produced a benchmark win.
+
+   The operational pattern that emerged: **"meeting halfway" — the language admits any reasonable shape the model produces, then maps to canonical implementations.** This is documented separately in `papers/MEETING_HALFWAY.md`.
+
+10. **~~Zero ambiguity~~ → Minimal ambiguity, with a few documented gotchas.** The if-Lisp-form trap (2-statement then-body without `(else)` becomes Lisp/Scheme then-else); `string_get` returning int char code while `string_at` returns 1-char string; `count` overloaded for strings and arrays. Real ambiguity, real cost. We document them in `stdlib/README.md` so the next stdlib author catches them.
+
+11. **~~Designed by AI, for AI~~ → Designed by AI, refined by observing AI failures, deployed for AI.** AI did design Sigil. AI did pick OCaml. AI did write the implementation. But the language we ended up with optimizes for **the AI's training distribution** (Python/JS shapes, Lisp synonyms), not for an abstract AI-cleanness. The distinction is real: the AI didn't design what works best for AI in general — it designed what works for *the kind of AI it itself is*: a pre-trained transformer with a Python-heavy prior. A different language, with similar pure principles but tuned for a model trained from scratch on its own corpus, would look very different.
 
 ## Use Cases
 
@@ -369,12 +459,14 @@ sigil/
 
 **When generating Sigil code, LLMs should consult in this order:**
 
-1. **`.sigil.grammar`** (~800 tokens) - Complete syntax reference, CONSULT FIRST
-2. **`.sigil.analysis`** (detailed) - Design decisions, known issues
-3. **`AGENTS.md`** (8K tokens) - LLM-optimized quick reference with examples
-4. **`LANGUAGE_SPEC.md`** (full) - Complete specification for deep dives
+1. **[`.sigil.grammar`](.sigil.grammar)** (~800 tokens) — complete syntax reference, **consult first**
+2. **[`.sigil.analysis`](.sigil.analysis)** — design decisions and known issues
+3. **[`AGENTS.md`](AGENTS.md)** (~8K tokens) — LLM-optimised quick reference with examples
+4. **[`LANGUAGE_SPEC.md`](LANGUAGE_SPEC.md)** — complete specification for deep dives
 
-**Why this order?** Token efficiency. `.sigil.grammar` is 10x more efficient than prose documentation.
+**Why this order?** Token efficiency. `.sigil.grammar` is ~10× more efficient than prose documentation.
+
+For *human* readers (researchers, contributors), see the **[Documentation index](#documentation-index)** at the top of this README — it groups everything by goal (start-here, architecture, research story, benchmarking, workflow).
 
 ## Key Design Decisions Explained
 

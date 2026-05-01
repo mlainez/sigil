@@ -1,0 +1,18 @@
+(set csv string $0)
+(set col int #1)
+
+(fn parse_row row string -> array
+  (split row ","))
+
+(set rows array (map_arr (split csv "\n") parse_row))
+(set column_values array (map_arr rows (\row (parse_int (first (slice row col (+ col 1)))))))
+
+(set min_val int (reduce column_values min (first column_values)))
+(set max_val int (reduce column_values max (first column_values)))
+(set sum_val int (reduce column_values + 0))
+(set count int (len column_values))
+(set mean_val int (/ sum_val count))
+
+(println (fmt "min: {}" min_val))
+(println (fmt "max: {}" max_val))
+(println (fmt "mean: {}" mean_val))

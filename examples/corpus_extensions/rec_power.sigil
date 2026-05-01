@@ -1,0 +1,5 @@
+(set base #0)
+(set exp #1)
+(set r 1)
+(for i 0 exp (set r (mul r base)))
+(println r)

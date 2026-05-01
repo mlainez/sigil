@@ -1,0 +1,19 @@
+(fn fdiv a int b int -> int
+  (set q (div a b))
+  (set r (sub a (mul q b)))
+  (if (and (ne r 0) (lt (bit_xor r b) 0))
+    (ret (sub q 1)))
+  (ret q))
+
+(set tokens (split $0 " "))
+(set stack [])
+(set a 0)
+(set b 0)
+(for-each tok tokens
+  (cond
+    ((eq tok "+") (set b (array_pop stack)) (set a (array_pop stack)) (push stack (add a b)))
+    ((eq tok "-") (set b (array_pop stack)) (set a (array_pop stack)) (push stack (sub a b)))
+    ((eq tok "*") (set b (array_pop stack)) (set a (array_pop stack)) (push stack (mul a b)))
+    ((eq tok "/") (set b (array_pop stack)) (set a (array_pop stack)) (push stack (fdiv a b)))
+    (true (push stack (int tok)))))
+(println (last stack))

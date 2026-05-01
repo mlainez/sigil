@@ -1,0 +1,7 @@
+(set s $0)
+(set out "")
+(for-each c (chars s)
+  (if (is_upper c)
+    (set out (fmt "{}_{}" out (lower c)))
+    (else (set out (fmt "{}{}" out c)))))
+(println out)

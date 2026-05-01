@@ -1,0 +1,15 @@
+(set column string $0)
+(set value string $1)
+(set csv_data string $2)
+
+(set lines array (split csv_data "\n"))
+(set header string (first lines))
+(set rows array (rest lines))
+
+(set filtered_rows array 
+  (filter rows (\row 
+    (eq (second (split row ",")) value))))
+
+(println header)
+(for-each row string filtered_rows
+  (println row))

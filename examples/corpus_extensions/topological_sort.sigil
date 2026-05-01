@@ -1,0 +1,49 @@
+(set graph_str string $0)
+(set segs array (split graph_str ";"))
+(set in_deg map {})
+(set dependents map {})
+(set all_nodes array [])
+
+(for-each seg string segs
+  (set parts array (split seg ":"))
+  (set node string (array_get parts 0))
+  (if (not (in node all_nodes))
+    (set all_nodes (push all_nodes node))
+    (set dependents (map_set dependents node []))
+    (set in_deg (map_set in_deg node 0)))
+  (set deps_str string (get_or parts 1 ""))
+  (if (gt (len deps_str) 0)
+    (set deps array (split deps_str ","))
+    (for-each dep string deps
+      (if (not (in dep all_nodes))
+        (set all_nodes (push all_nodes dep))
+        (set dependents (map_set dependents dep []))
+        (set in_deg (map_set in_deg dep 0)))
+      (set in_deg (map_set in_deg node (add (map_get in_deg node) 1)))
+      (set cur_dep array (map_get dependents dep))
+      (set cur_dep (push cur_dep node))
+      (set dependents (map_set dependents dep cur_dep)))))
+
+(set result array [])
+(while (gt (len all_nodes) 0)
+  (set sorted array (sort (array_copy all_nodes)))
+  (set picked string "")
+  (set found bool false)
+  (for-each n string sorted
+    (if (and (not found) (eq (map_get in_deg n) 0))
+      (set picked n)
+      (set found true)))
+  (if (not found)
+    (set all_nodes []))
+  (if found
+    (set result (push result picked))
+    (set new_nodes array [])
+    (for-each n string all_nodes
+      (if (not (eq n picked))
+        (set new_nodes (push new_nodes n))))
+    (set all_nodes new_nodes)
+    (set deps_of_picked array (map_get dependents picked))
+    (for-each d string deps_of_picked
+      (set in_deg (map_set in_deg d (sub (map_get in_deg d) 1))))))
+
+(println (join result " "))

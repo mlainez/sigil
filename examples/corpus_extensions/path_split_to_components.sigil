@@ -1,0 +1,5 @@
+(set path $0)
+(set parts (split path "/"))
+(for-each p parts
+  (if (and (ne p "") (ne p "."))
+    (println p)))

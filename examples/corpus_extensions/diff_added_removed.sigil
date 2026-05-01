@@ -1,0 +1,16 @@
+(set file1 string $0)
+(set file2 string $1)
+
+(set lines1 array (sort (split file1 "\n")))
+(set lines2 array (sort (split file2 "\n")))
+
+(set diff1 array (filter (\x (not (in x lines2))) lines1))
+(set diff2 array (filter (\x (not (in x lines1))) lines2))
+
+(for-each line string diff1
+  (println (fmt "- {}" line)))
+
+(for-each line string diff2
+  (println (fmt "+ {}" line)))
+
+(println (fmt "summary: -{} +{}" (len diff1) (len diff2)))

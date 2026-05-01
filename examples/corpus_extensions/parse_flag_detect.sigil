@@ -1,0 +1,8 @@
+(set args (argv))
+(set found false)
+(for-each a args
+  (if (string_starts_with a "--")
+    (set found true)))
+(if found
+  (println "flags present")
+  (else (println "no flags")))

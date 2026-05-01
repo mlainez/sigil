@@ -1,0 +1,9 @@
+(set words (split $0 " "))
+(set c {})
+(for-each w words (map_inc c w))
+(set es (entries c))
+(set sorted (sort_by es (\e [(neg (array_get e 1)) (array_get e 0)])))
+(set n (min 5 (len sorted)))
+(for i 0 n
+  (set e (array_get sorted i))
+  (println (fmt "{}: {}" (array_get e 0) (array_get e 1))))

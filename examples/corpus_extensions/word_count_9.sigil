@@ -1,0 +1,4 @@
+(set lines array (argv))
+(for-each line string lines
+  (set words array (split line " "))
+  (println (len words)))

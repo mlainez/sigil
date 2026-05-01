@@ -1,0 +1,8 @@
+(set path $0)
+(if (eq (last path) "/")
+  (println (string_slice path 0 (- (len path) 1)))
+  (else
+    (set parts (split path "/"))
+    (if (gt (len parts) 1)
+      (println (join (slice parts 0 (- (len parts) 1)) "/"))
+      (println ""))))

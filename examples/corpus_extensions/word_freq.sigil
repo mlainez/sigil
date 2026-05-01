@@ -1,0 +1,10 @@
+(set counts (counter (split $0 " ")))
+(set sorted (sort_by (entries counts)
+  (\p
+    (set n (sub 1000000000 (array_get p 1)))
+    (set ns (str n))
+    (while (lt (len ns) 10)
+      (set ns (string_concat "0" ns)))
+    (ret (string_concat ns (array_get p 0))))))
+(for-each p sorted
+  (println (fmt "{}: {}" (array_get p 0) (array_get p 1))))

@@ -1,0 +1,6 @@
+(set config string $0)
+(set lines array (split config "\n"))
+(println "key,value")
+(for-each line string lines
+  (set kv array (split line "="))
+  (println (join [(first kv) "," (last kv)] "")))

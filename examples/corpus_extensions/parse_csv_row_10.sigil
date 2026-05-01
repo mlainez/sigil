@@ -1,0 +1,2 @@
+(set fields (split (first (split $0 "\n")) ","))
+(println (first (slice fields 2 3)))

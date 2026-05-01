@@ -1,0 +1,8 @@
+(set trans_list (split $0 ","))
+(set states (split $1 ","))
+(set n (len states))
+(set indices (range 0 (- n 1)))
+(set bad (filter indices (\i (not (in (join [(get_or states i "") (get_or states (+ i 1) "")] "->") trans_list)))))
+(cond
+  ((eq 0 (len bad)) (println "valid"))
+  (true (println (join ["invalid at step " (str (+ (first bad) 1))] ""))))

@@ -1,0 +1,5 @@
+(set lines (filter (split $0 "\n") (\line (gt (len line) 0))))
+(for-each line lines
+  (set fields (split line " "))
+  (if (eq (first (rest (rest fields))) "ERROR")
+    (println (fmt "{} {}: {}" (first fields) (first (rest fields)) (join (rest (rest (rest fields))) " ")))))

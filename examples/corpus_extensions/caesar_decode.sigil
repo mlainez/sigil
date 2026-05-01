@@ -1,0 +1,12 @@
+(set text $0)
+(set shift (mod #1 26))
+(set result "")
+(for-each c (chars text)
+  (set code (string_get c 0))
+  (cond
+    ((and (ge code 65) (le code 90))
+      (set result (string_concat result (char_from_code (add 65 (mod (add (sub code 65) (sub 26 shift)) 26))))))
+    ((and (ge code 97) (le code 122))
+      (set result (string_concat result (char_from_code (add 97 (mod (add (sub code 97) (sub 26 shift)) 26))))))
+    (true (set result (string_concat result c)))))
+(println result)

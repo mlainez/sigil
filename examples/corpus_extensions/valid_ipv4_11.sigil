@@ -1,0 +1,15 @@
+(set parts (split $0 "."))
+(set valid (eq (len parts) 4))
+(if valid
+  (for-each p parts
+    (cond
+      ((eq (len p) 0) (set valid false))
+      ((and (gt (len p) 1) (eq (string_get p 0) 48)) (set valid false))
+      (true
+        (set ok true)
+        (for i 0 (len p)
+          (if (not (is_digit (string_get p i))) (set ok false)))
+        (cond
+          ((not ok) (set valid false))
+          ((gt (int p) 255) (set valid false)))))))
+(if valid (println "yes") (else (println "no")))

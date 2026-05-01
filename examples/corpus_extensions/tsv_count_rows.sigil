@@ -1,0 +1,3 @@
+(set tsv string $0)
+(set lines array (split tsv "\n"))
+(println (len lines))

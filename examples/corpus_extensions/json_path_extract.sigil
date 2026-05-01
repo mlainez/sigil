@@ -1,0 +1,4 @@
+(set j (json_parse $0))
+(set path_str (string_replace (string_replace $1 "[" ".") "]" ""))
+(set keys (split path_str "."))
+(println (json_get j keys))

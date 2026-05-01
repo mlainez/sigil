@@ -1,0 +1,9 @@
+(set log_content string $0)
+(set severity string $1)
+(let lines (split log_content "\n"))
+(let filtered_lines (filter lines (\line
+  (let parts (split line " "))
+  (eq (first (slice parts 2)) severity))))
+(for-each match filtered_lines
+  (let parts (split match " "))
+  (println (fmt "{} {} | {}" (first parts) (second parts) (join (slice parts 3) " "))))

@@ -1,0 +1,5 @@
+(set url $0)
+(set after (last (split url "://")))
+(set no_path (first (split after "/")))
+(set host (first (split no_path ":")))
+(println host)

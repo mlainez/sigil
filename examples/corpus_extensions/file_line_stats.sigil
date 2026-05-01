@@ -1,0 +1,8 @@
+(set lines (split $0 "\n"))
+(if (eq (last lines) "") (set lines (slice lines 0 (sub (len lines) 1))))
+(set total (len lines))
+(set blank (len (filter lines (\l (eq (len (filter (chars l) (\c (gt (string_get c 0) 32)))) 0)))))
+(set non_blank (sub total blank))
+(println (fmt "total: {}" total))
+(println (fmt "blank: {}" blank))
+(println (fmt "non_blank: {}" non_blank))

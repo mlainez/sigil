@@ -1,0 +1,19 @@
+(fn insert node map v int -> map
+  (if (eq (len node) 0)
+    (ret {"val" v "left" {} "right" {}}))
+  (if (lt v (map_get node "val"))
+    (ret (map_set node "left" (insert (map_get node "left") v)))
+    (else
+      (ret (map_set node "right" (insert (map_get node "right") v))))))
+
+(fn preorder node map -> unit
+  (if (gt (len node) 0)
+    (println (map_get node "val"))
+    (preorder (map_get node "left"))
+    (preorder (map_get node "right"))))
+
+(set parts (split $0 ","))
+(set root {})
+(for-each p parts
+  (set root (insert root (int p))))
+(preorder root)

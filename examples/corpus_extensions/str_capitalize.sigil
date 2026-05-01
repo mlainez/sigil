@@ -1,0 +1,2 @@
+(set s $0)
+(println (fmt "{}{}" (upper (string_slice s 0 1)) (string_slice s 1 (sub (len s) 1))))

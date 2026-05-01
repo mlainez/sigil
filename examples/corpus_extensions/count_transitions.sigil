@@ -1,0 +1,8 @@
+(set s string $0)
+(set cs array (chars s))
+(set n int (len cs))
+(set diff_count 0)
+(for i 1 n
+  (if (ne (array_get cs (sub i 1)) (array_get cs i))
+    (set diff_count (add diff_count 1))))
+(println diff_count)

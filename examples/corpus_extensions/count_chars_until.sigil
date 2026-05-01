@@ -1,0 +1,6 @@
+(set s $0)
+(set ch $1)
+(set idx (string_find s ch))
+(if (eq idx -1)
+  (println (len s))
+  (else (println idx)))

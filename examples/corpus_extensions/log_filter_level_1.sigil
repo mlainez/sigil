@@ -1,0 +1,3 @@
+(set logs array (split $0 "\n"))
+(set filtered_logs array (filter logs (\log (in "ERROR" log))))
+(println (join filtered_logs "\n"))

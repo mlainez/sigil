@@ -1,0 +1,5 @@
+(set x #0)
+(cond
+  ((gt x 0) (println 1))
+  ((lt x 0) (println -1))
+  (true (println 0)))

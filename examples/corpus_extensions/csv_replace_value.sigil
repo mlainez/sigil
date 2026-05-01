@@ -1,0 +1,9 @@
+(set all_rows (split $0 "\n"))
+(set header (first all_rows))
+(set data_rows (filter (rest all_rows) (\r (gt (len r) 0))))
+(set cols (split header ","))
+(set col_idx (first (filter (range (len cols)) (\i (eq (get_or cols i "") $1)))))
+(println header)
+(for-each row data_rows
+  (set fields (split row ","))
+  (println (join (map_arr (range (len fields)) (\i (if (and (eq i col_idx) (eq (get_or fields i "") $2)) $3 (get_or fields i "")))) ",")))

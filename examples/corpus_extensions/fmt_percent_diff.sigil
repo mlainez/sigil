@@ -1,0 +1,7 @@
+(set a (float $0))
+(set b (float $1))
+(set pct (mul (div (sub b a) a) 100.0))
+(set scaled (round (mul pct 10.0)))
+(set whole (div scaled 10))
+(set frac (mod (abs scaled) 10))
+(println (fmt "{}.{}%" whole frac))

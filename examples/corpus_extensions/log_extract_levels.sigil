@@ -1,0 +1,3 @@
+(set log string $0)
+(for-each line string (split log "\n")
+  (println (first (split line " "))))

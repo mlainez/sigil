@@ -1,0 +1,9 @@
+(set s $0)
+(set n #1)
+(if (lt n 0) (set n 0))
+(if (gt n (len s)) (println ""))
+(do
+  (set out "")
+  (for i n (len s)
+    (set out (add out (char_from_code (string_get s i)))))
+  (println out))

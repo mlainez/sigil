@@ -1,0 +1,5 @@
+(set s $0)
+(set n (len s))
+(set start (div (sub n 1) 2))
+(set length (sub 2 (mod n 2)))
+(println (string_slice s start length))

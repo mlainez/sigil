@@ -1,0 +1,2 @@
+(set input string $0)
+(println (string_replace input "foo" "bar"))

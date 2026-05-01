@@ -1,0 +1,9 @@
+(set n #0)
+(if (eq n 0)
+  (println "0")
+  (do
+    (set out "")
+    (while (gt n 0)
+      (set out (str (if (eq (mod n 2) 1) "1" "0") out))
+      (set n (div n 2)))
+    (println out)))

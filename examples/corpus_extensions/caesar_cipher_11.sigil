@@ -1,0 +1,6 @@
+(fn shift c int n int -> int
+  (cond
+    ((and (ge c 65) (le c 90)) (ret (add 65 (mod (add (sub c 65) n) 26))))
+    ((and (ge c 97) (le c 122)) (ret (add 97 (mod (add (sub c 97) n) 26))))
+    (true (ret c))))
+(println (join (map_arr (chars $0) (\c (char_from_code (shift (string_get c 0) #1)))) ""))

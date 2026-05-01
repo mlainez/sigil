@@ -1,0 +1,7 @@
+(set s (add (arg_float 0) (arg_float 1)))
+(set cents (round (mul s 100.0)))
+(set whole (div cents 100))
+(set frac (mod cents 100))
+(if (lt frac 10)
+  (println (fmt "{}.0{}" whole frac))
+  (else (println (fmt "{}.{}" whole frac))))

@@ -1,0 +1,5 @@
+(set n #0)
+(cond
+  ((gt n 0) (println "pos"))
+  ((lt n 0) (println "neg"))
+  (true (println "zero")))

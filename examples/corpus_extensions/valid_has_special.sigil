@@ -1,0 +1,6 @@
+(set s $0)
+(set bad false)
+(for-each c (chars s)
+  (if (not (or (is_alpha c) (is_digit c)))
+    (set bad true)))
+(if bad (println "yes") (else (println "no")))

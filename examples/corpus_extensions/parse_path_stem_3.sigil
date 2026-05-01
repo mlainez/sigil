@@ -1,0 +1,7 @@
+(set path $0)
+(set parts (split path "/"))
+(set name (last parts))
+(set dot_parts (split name "."))
+(set n (len dot_parts))
+(set stem (join (array_slice dot_parts 0 (sub n 1)) "."))
+(println stem)

@@ -1,0 +1,3 @@
+(set words array (split $0 ","))
+(for i 1 (add (len words) 1)
+  (println (join (slice words 0 i) "")))

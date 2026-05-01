@@ -1,0 +1,9 @@
+(set log string $0)
+(set level string $1)
+(set lines array (split log "\n"))
+(set filtered_lines array (filter lines (\line
+  (set parts array (split line " "))
+  (eq (array_get parts 2) level))))
+(map_arr filtered_lines (\line
+  (set parts array (split line " "))
+  (println (fmt "{} | {}" (array_get parts 1) (join (slice parts 3 (len parts)) " ")))))

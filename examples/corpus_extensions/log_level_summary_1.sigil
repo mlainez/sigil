@@ -1,0 +1,16 @@
+(fn get_level line str -> str
+  (first (rest (rest (split line " ")))))
+
+(fn get_time line str -> str
+  (first (rest (split line " "))))
+
+(fn get_msg line str -> str
+  (join (rest (rest (rest (split line " ")))) " "))
+
+(set lines (filter (split $0 "\n") (\line (gt (len line) 0))))
+(println (fmt "INFO: {}" (len (filter lines (\line (eq (get_level line) "INFO"))))))
+(println (fmt "WARN: {}" (len (filter lines (\line (eq (get_level line) "WARN"))))))
+(println (fmt "ERROR: {}" (len (filter lines (\line (eq (get_level line) "ERROR"))))))
+(println "--- ERROR lines ---")
+(for-each eline (filter lines (\line (eq (get_level line) "ERROR")))
+  (println (fmt "{} {}" (get_time eline) (get_msg eline))))

@@ -1,0 +1,4 @@
+(for-each pair (split $0 "&")
+  (set kv (split pair "="))
+  (if (eq (first kv) $1)
+    (println (last kv))))

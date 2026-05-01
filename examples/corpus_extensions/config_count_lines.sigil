@@ -1,0 +1,12 @@
+(set config string $0)
+(set lines array (split config "\n"))
+(set count int 0)
+
+(for-each line string lines
+  (if (and (not (eq (slice line 0 1) "#")) (not (eq line "")))
+    (begin
+      (set parts array (split line "="))
+      (if (gt (len parts) 1)
+        (set count (add count 1))))))
+
+(println (fmt "{}" count))

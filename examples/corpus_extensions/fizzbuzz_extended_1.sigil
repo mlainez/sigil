@@ -1,0 +1,11 @@
+(set n #0)
+(set rules (split $1 ","))
+(for i 1 (add n 1)
+  (set out "")
+  (for-each rule rules
+    (set parts (split rule ":"))
+    (if (eq (mod i (int (first parts))) 0)
+      (set out (add out (last parts)))))
+  (if (eq out "")
+    (println i)
+    (else (println out))))

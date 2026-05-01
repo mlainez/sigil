@@ -1,0 +1,2 @@
+(set text string $0)
+(println (join (split text "foo") "bar"))

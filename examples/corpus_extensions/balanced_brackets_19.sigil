@@ -1,0 +1,17 @@
+(set s $0)
+(set stack [])
+(set valid true)
+(set pairs {")" "(" "]" "[" "}" "{"})
+(for-each c (chars s)
+  (if valid
+    (if (in c ["(" "[" "{"])
+      (push stack c)
+      (else
+        (if (eq (len stack) 0)
+          (set valid false)
+          (else
+            (set top (array_pop stack))
+            (if (ne top (map_get pairs c)) (set valid false))))))))
+(if (and valid (eq (len stack) 0))
+  (println "VALID")
+  (else (println "INVALID")))

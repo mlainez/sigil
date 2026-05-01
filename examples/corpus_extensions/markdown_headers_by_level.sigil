@@ -1,0 +1,20 @@
+(fn line_level line string -> int
+  (cond
+    ((string_starts_with line "### ") (ret 3))
+    ((string_starts_with line "## ") (ret 2))
+    ((string_starts_with line "# ") (ret 1))
+    (true (ret 0))))
+
+(fn header_prefix lv int -> string
+  (cond
+    ((eq lv 1) (ret "= "))
+    ((eq lv 2) (ret "- "))
+    (true (ret "~ "))))
+
+(set lines (split $0 "\n"))
+(set max_level #1)
+(set headers (filter lines (\line (and (gt (line_level line) 0) (le (line_level line) max_level)))))
+(for-each hdr headers
+  (set lv (line_level hdr))
+  (println (join [(header_prefix lv) (join (slice (chars hdr) (+ lv 1)) "")] "")))
+(println (join ["headers: " (str (len headers))] ""))

@@ -1,0 +1,11 @@
+(set rows (split $0 ";"))
+(set grid (map_arr rows (\r (split r ","))))
+(set ncols (len (array_get grid 0)))
+(set nrows (len grid))
+(set out [])
+(for c 0 ncols
+  (set col [])
+  (for r 0 nrows
+    (push col (array_get (array_get grid r) c)))
+  (push out (join col ",")))
+(println (join out ";"))

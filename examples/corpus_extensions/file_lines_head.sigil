@@ -1,0 +1,4 @@
+(set lines string $0)
+(set line_array array (split lines "\n"))
+(for-each line string (slice line_array 0 5)
+  (println line))

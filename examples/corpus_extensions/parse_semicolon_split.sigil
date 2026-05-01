@@ -1,0 +1,1 @@
+(for-each f (split $0 ";") (println f))

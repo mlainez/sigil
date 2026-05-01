@@ -1,0 +1,9 @@
+(set lines (split $0 "\n"))
+(for-each line lines
+  (set lv (cond
+    ((string_starts_with line "### ") 3)
+    ((string_starts_with line "## ") 2)
+    ((string_starts_with line "# ") 1)
+    (true 0)))
+  (if (gt lv 0)
+    (println (fmt "{}[{}] {}" (join (map_arr (range (mul 2 (sub lv 1))) (\_ " ")) "") lv (join (rest (split line " ")) " ")))))

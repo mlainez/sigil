@@ -1,0 +1,6 @@
+(set words (split $0 " "))
+(set best 0)
+(for-each w words
+  (if (and (gt (len w) 0) (in (lower (string_slice w 0 1)) "aeiou"))
+    (if (gt (len w) best) (set best (len w)))))
+(println best)

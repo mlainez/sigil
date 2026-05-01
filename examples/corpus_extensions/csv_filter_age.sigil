@@ -1,0 +1,10 @@
+(set n int (argv_count))
+(set rows array [])
+(for i 1 n
+  (set parts array (split (arg_str i) ","))
+  (set age int (string_to_int (array_get parts 1)))
+  (if (gt age 25)
+    (push rows [age (array_get parts 0)])))
+(set sorted array (sort_by rows (\r (array_get r 0))))
+(for-each row sorted
+  (println (fmt "{},{}" (array_get row 1) (array_get row 0))))

@@ -1,0 +1,9 @@
+(set totals {})
+(for i 0 (argv_count)
+  (set parts (split (arg_str i) ","))
+  (set cat (array_get parts 1))
+  (set amt (string_to_int (array_get parts 2)))
+  (set totals (map_set totals cat (add (get_or totals cat 0) amt))))
+(set sorted (sort_by (entries totals) (\e (neg (array_get e 1)))))
+(for-each e sorted
+  (println (fmt "{}: {}" (array_get e 0) (array_get e 1))))

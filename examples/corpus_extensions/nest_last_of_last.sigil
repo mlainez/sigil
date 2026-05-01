@@ -1,0 +1,4 @@
+(set rows (split $0 ";"))
+(set last_row (last rows))
+(set cells (split last_row ","))
+(println (last cells))

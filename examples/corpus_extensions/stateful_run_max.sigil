@@ -1,0 +1,13 @@
+(set input $0)
+(set max_run 1)
+(set current_run 1)
+(set prev_char "")
+(for-each ch (chars input)
+  (if (eq ch prev_char)
+    (set current_run (+ current_run 1))
+    (else
+      (set max_run (max max_run current_run))
+      (set current_run 1)))
+  (set prev_char ch))
+(set max_run (max max_run current_run))
+(println max_run)

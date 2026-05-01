@@ -1,0 +1,6 @@
+(set pairs (split $0 "&"))
+(set target $1)
+(for-each p pairs
+  (set kv (split p "="))
+  (if (eq (array_get kv 0) target)
+    (println (array_get kv 1))))

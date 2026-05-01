@@ -1,0 +1,10 @@
+(set rows (split $0 ";"))
+(set grid [])
+(for-each r rows (push grid (split r ",")))
+(set h (len grid))
+(set w (len (first grid)))
+(for j 0 w
+  (set col [])
+  (for i 0 h
+    (push col (array_get (array_get grid i) j)))
+  (println (join col ",")))

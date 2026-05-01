@@ -1,0 +1,1 @@
+(println (reduce (filter (map_arr (parse_ints $0) (\x (* x x))) (\x (= (mod x 2) 0))) + 0))

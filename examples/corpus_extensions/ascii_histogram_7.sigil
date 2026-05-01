@@ -1,0 +1,3 @@
+(for-each s (split $0 ",")
+  (set n (first (parse_ints s)))
+  (println (join [s ": " (join (map_arr (range n) (\x "#")) "")] "")))

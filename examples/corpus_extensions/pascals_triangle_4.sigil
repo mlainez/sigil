@@ -1,0 +1,14 @@
+(set n int #0)
+(fn pascal_row prev array -> array
+  (set row array [1])
+  (for-each i int (range 1 (len prev))
+    (push row (+ (array_get prev i) (array_get prev (- i 1)))))
+  (push row 1)
+  (ret row))
+
+(set rows array [[1]])
+(for i 1 n
+  (set rows (push rows (pascal_row (last rows)))))
+
+(for-each row array rows
+  (println (join (map_arr row str) " ")))

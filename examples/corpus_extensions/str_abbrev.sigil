@@ -1,0 +1,2 @@
+(set s $0)
+(println (fmt "{}-{}" (first (chars s)) (last (chars s))))

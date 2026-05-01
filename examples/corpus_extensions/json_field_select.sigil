@@ -1,0 +1,10 @@
+(set data string $0)
+(set fields string $1)
+(set json_arr array (json_parse data))
+(set field_names array (split fields ","))
+
+(for-each obj map json_arr
+  (set values array [])
+  (for-each field string field_names
+    (push values (str (json_get obj [field]))))
+  (println (join " " values)))

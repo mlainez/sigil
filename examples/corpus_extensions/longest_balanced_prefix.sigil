@@ -1,0 +1,13 @@
+(set s $0)
+(set n (len s))
+(set best 0)
+(set bal 0)
+(for i 0 n
+  (set c (string_slice s i 1))
+  (if (eq c "(")
+    (set bal (add bal 1)))
+  (if (eq c ")")
+    (set bal (sub bal 1)))
+  (if (lt bal 0) (break))
+  (if (ge i best) (set best i)))
+(println (add best 1))

@@ -1,0 +1,7 @@
+(set s $0)
+(set n (len s))
+(set h (div n 2))
+(set left (string_slice s 0 h))
+(set mid (string_slice s h (sub n (mul 2 h))))
+(set right (string_slice s (sub n h) h))
+(println (fmt "{}{}{}" right mid left))

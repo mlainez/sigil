@@ -1,0 +1,1 @@
+(if (eq (mod #0 2) 0) (println "even") (else (println "odd")))

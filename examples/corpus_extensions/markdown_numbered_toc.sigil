@@ -1,0 +1,36 @@
+(fn count_hash s string -> int
+  (cond
+    ((string_starts_with s "######") (ret 6))
+    ((string_starts_with s "#####") (ret 5))
+    ((string_starts_with s "####") (ret 4))
+    ((string_starts_with s "###") (ret 3))
+    ((string_starts_with s "##") (ret 2))
+    (true (ret 1))))
+
+(set lines (split $0 "\n"))
+(set headers (filter lines (\l (string_starts_with l "#"))))
+(set c1 0)
+(set c2 0)
+(set c3 0)
+(set c4 0)
+(set c5 0)
+(set c6 0)
+
+(for-each line headers
+  (set level (count_hash line))
+  (set text (slice line (+ level 1) (len line)))
+  (set c1 (cond ((= level 1) (+ c1 1)) (true c1)))
+  (set c2 (cond ((= level 2) (+ c2 1)) ((< level 2) 0) (true c2)))
+  (set c3 (cond ((= level 3) (+ c3 1)) ((< level 3) 0) (true c3)))
+  (set c4 (cond ((= level 4) (+ c4 1)) ((< level 4) 0) (true c4)))
+  (set c5 (cond ((= level 5) (+ c5 1)) ((< level 5) 0) (true c5)))
+  (set c6 (cond ((= level 6) (+ c6 1)) ((< level 6) 0) (true c6)))
+  (set numstr (cond
+    ((= level 1) (str c1))
+    ((= level 2) (fmt "{}.{}" c1 c2))
+    ((= level 3) (fmt "{}.{}.{}" c1 c2 c3))
+    ((= level 4) (fmt "{}.{}.{}.{}" c1 c2 c3 c4))
+    ((= level 5) (fmt "{}.{}.{}.{}.{}" c1 c2 c3 c4 c5))
+    (true (fmt "{}.{}.{}.{}.{}.{}" c1 c2 c3 c4 c5 c6))))
+  (set indent (join (map_arr (range 0 (* 2 (- level 1))) (\i " ")) ""))
+  (println (fmt "{}{}. {}" indent numstr text)))

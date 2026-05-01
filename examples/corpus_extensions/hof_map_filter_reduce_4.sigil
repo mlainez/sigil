@@ -1,0 +1,4 @@
+(set nums array (split $0 " "))
+(set squares array (map_arr (\x (mul x x)) (map_arr str->int nums)))
+(set evens array (filter (\x (eq (mod x 2) 0)) squares))
+(println (reduce + 0 evens))

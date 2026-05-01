@@ -1,0 +1,14 @@
+(set parts (split $0 "."))
+(set ok true)
+(if (ne (len parts) 4) (set ok false))
+(if ok
+  (for-each p parts
+    (if (eq (len p) 0) (set ok false))
+    (if ok
+      (for-each c (chars p)
+        (if (not (is_digit c)) (set ok false))))
+    (if ok
+      (set n (int p))
+      (if (gt n 255) (set ok false)))))
+(if ok (println "yes"))
+(if (not ok) (println "no"))

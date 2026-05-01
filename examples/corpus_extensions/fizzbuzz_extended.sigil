@@ -1,0 +1,13 @@
+(set n #0)
+(set rules [])
+(for j 1 (argv_count)
+  (set part (split (arg_str j) ":"))
+  (push rules [(int (first part)) (last part)]))
+(for i 1 (add n 1)
+  (set s "")
+  (for-each rule rules
+    (if (eq (mod i (first rule)) 0)
+      (set s (add s (last rule)))))
+  (if (eq s "")
+    (println i)
+    (else (println s))))

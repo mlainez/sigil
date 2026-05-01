@@ -1,0 +1,4 @@
+(set pairs (entries (counter (split $0 " "))))
+(set sorted (sort_by (sort_by pairs first) (\p (neg (last p)))))
+(for-each pair (slice sorted 0 3)
+  (println (fmt "{}: {}" (first pair) (last pair))))

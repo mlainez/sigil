@@ -1,0 +1,5 @@
+(fn normalize s string -> string
+  (ret (join (sort (chars (lower (string_replace s " " "")))) "")))
+(if (eq (normalize $0) (normalize $1))
+  (println "yes")
+  (else (println "no")))

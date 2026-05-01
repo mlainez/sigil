@@ -1,0 +1,21 @@
+(set x (float $0))
+(set n #1)
+(set mult 1)
+(for i 0 n
+  (set mult (mul mult 10)))
+(set scaled (mul x (cast_int_float mult)))
+(set floored (floor scaled))
+(set diff (sub scaled (cast_int_float floored)))
+(set rounded floored)
+(cond
+  ((gt diff 0.5) (set rounded (add floored 1)))
+  ((lt diff 0.5) (set rounded floored))
+  (true
+    (if (eq (mod floored 2) 1)
+      (set rounded (add floored 1)))))
+(set int_part (div rounded mult))
+(set frac_part (mod rounded mult))
+(set frac_str (str frac_part))
+(while (lt (len frac_str) n)
+  (set frac_str (string_concat "0" frac_str)))
+(println (fmt "{}.{}" (str int_part) frac_str))

@@ -1,0 +1,34 @@
+(set s1 string $0)
+(set s2 string $1)
+(set m int (len s1))
+(set n int (len s2))
+(set dp array [])
+(for i 0 (add m 1)
+  (set row array [])
+  (for j 0 (add n 1)
+    (push row 0))
+  (push dp row))
+
+(for i 0 (add m 1)
+  (array_set (array_get dp i) 0 i))
+
+(for j 0 (add n 1)
+  (array_set (array_get dp 0) j j))
+
+(for i 1 (add m 1)
+  (for j 1 (add n 1)
+    (set ca int (string_get s1 (sub i 1)))
+    (set cb int (string_get s2 (sub j 1)))
+    (if (eq ca cb)
+      (array_set (array_get dp i) j (array_get (array_get dp (sub i 1)) (sub j 1)))
+      (else
+        (set up int (array_get (array_get dp (sub i 1)) j))
+        (set left int (array_get (array_get dp i) (sub j 1)))
+        (set diag int (array_get (array_get dp (sub i 1)) (sub j 1)))
+        (array_set (array_get dp i) j (add 1 (min (min up left) diag)))))))
+
+(set d int (array_get (array_get dp m) n))
+(if (eq d 1)
+  (println "yes")
+  (else
+    (println "no")))

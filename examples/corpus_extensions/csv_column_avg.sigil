@@ -1,0 +1,8 @@
+(set rows (split $0 "\n"))
+(set header (split (first rows) ","))
+(set idx (string_find (join header ",") $1))
+(set idx 0)
+(for-each i (range 0 (len header))
+  (if (eq (get_or header i "") $1) (set idx i)))
+(set values (parse_ints (join (map_arr (rest rows) (\r (get_or (split r ",") idx "0"))) " ")))
+(println (div (sum values) (len values)))

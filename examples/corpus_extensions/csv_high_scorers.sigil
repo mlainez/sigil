@@ -1,0 +1,10 @@
+(set rows (rest (split $0 "\n")))
+(set threshold #1)
+(fn score_of row str -> int
+  (ret (first (parse_ints (get_or (split row ",") 2 "0")))))
+(fn name_of row str -> str
+  (ret (get_or (split row ",") 0 "")))
+(set filtered (filter rows (\row (gt (score_of row) threshold))))
+(set sorted (sort_by filtered (\row (neg (score_of row)))))
+(for-each row sorted
+  (println (join [(name_of row) (str (score_of row))] "\t")))

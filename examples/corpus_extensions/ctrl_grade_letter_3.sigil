@@ -1,0 +1,9 @@
+(set score int #0)
+(set grade string
+  (cond
+    ((ge score 90) "A")
+    ((ge score 80) "B")
+    ((ge score 70) "C")
+    ((ge score 60) "D")
+    (true "F")))
+(println grade)

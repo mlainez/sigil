@@ -1,0 +1,5 @@
+(fn is_prime n int -> bool
+  (cond
+    ((lt n 2) (ret false))
+    (true (ret (eq (len (filter (range 2 (add n 1)) (\x (and (le (mul x x) n) (eq (mod n x) 0))))) 0)))))
+(println (is_prime #0))

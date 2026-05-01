@@ -1,0 +1,14 @@
+(set s $0)
+(set stack [])
+(set ok true)
+(set match {")" "(" "]" "[" "}" "{"})
+(for-each c (chars s)
+  (if ok
+    (cond
+      ((in c "([{") (push stack c))
+      ((in c ")]}")
+        (if (or (eq (len stack) 0) (ne (last stack) (map_get match c)))
+          (set ok false)
+          (else (array_pop stack)))))))
+(if (and ok (gt (len stack) 0)) (set ok false))
+(println ok)

@@ -1,0 +1,20 @@
+(set list1 string $0)
+(set list2 string $1)
+
+(set words1 array (split list1 "\n"))
+(set words2 array (split list2 "\n"))
+
+(set set1 map (counter words1))
+(set set2 map (counter words2))
+
+(set onlyInList1 array (filter words1 (\w (not (in w set2)))))
+(set onlyInList2 array (filter words2 (\w (not (in w set1)))))
+
+(set sortedOnlyInList1 array (sort onlyInList1))
+(set sortedOnlyInList2 array (sort onlyInList2))
+
+(for-each word string sortedOnlyInList1
+  (println (fmt "- {}" word)))
+
+(for-each word string sortedOnlyInList2
+  (println (fmt "+ {}" word)))

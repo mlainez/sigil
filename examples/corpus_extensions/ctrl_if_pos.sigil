@@ -1,0 +1,1 @@
+(if (gt #0 0) (println "positive") (else (println "not")))

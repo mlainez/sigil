@@ -1,0 +1,4 @@
+(set logs string $0)
+(set lines array (split logs "\n"))
+(set filtered_lines array (filter (\line (in "ERROR" (slice line 0 5))) lines))
+(for-each line string filtered_lines (println line))

@@ -1,0 +1,8 @@
+(set out "")
+(set i 0)
+(for-each c (chars $0)
+  (if (and (is_upper c) (gt i 0))
+    (set out (+ out "_")))
+  (set out (+ out (lower c)))
+  (set i (+ i 1)))
+(println out)

@@ -1,0 +1,5 @@
+(set rows (split $0 ";"))
+(set total 0)
+(for i 0 (len rows)
+  (set total (add total (int (array_get (split (array_get rows i) ",") i)))))
+(println total)

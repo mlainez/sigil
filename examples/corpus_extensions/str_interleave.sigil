@@ -1,0 +1,7 @@
+(set a $0)
+(set b $1)
+(set result "")
+(for i 0 (len a)
+  (set result (string_concat result (string_slice a i 1)))
+  (set result (string_concat result (string_slice b i 1))))
+(println result)

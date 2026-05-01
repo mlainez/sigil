@@ -1,0 +1,11 @@
+(set tokens (split $0 " "))
+(set freq {})
+(for-each t tokens
+  (map_inc freq t))
+(set keys (sort (map_keys freq)))
+(for-each k keys
+  (set count (map_get freq k))
+  (set stars "")
+  (for i 0 count
+    (set stars (string_concat stars "*")))
+  (println (fmt "{}: {}" k stars)))

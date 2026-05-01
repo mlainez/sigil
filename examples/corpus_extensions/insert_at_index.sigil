@@ -1,0 +1,4 @@
+(set s string $0)
+(set i int (arg_int 1))
+(set ins string $2)
+(println (fmt "{}{}{}\n" (slice s 0 i) ins (slice s i)))

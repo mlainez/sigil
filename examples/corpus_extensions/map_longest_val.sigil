@@ -1,0 +1,12 @@
+(set pairs (split $0 ","))
+(set best_key "")
+(set best_len -1)
+(for-each p pairs
+  (set kv (split p "="))
+  (set k (array_get kv 0))
+  (set v (array_get kv 1))
+  (set vl (len v))
+  (if (or (gt vl best_len) (and (eq vl best_len) (lt k best_key)))
+    (set best_key k)
+    (set best_len vl)))
+(println best_key)

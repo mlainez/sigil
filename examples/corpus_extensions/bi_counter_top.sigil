@@ -1,0 +1,12 @@
+(set words (split $0 " "))
+(set counts {})
+(for-each w words
+  (map_inc counts w))
+(set best "")
+(set best_count 0)
+(for-each k (map_keys counts)
+  (set v (map_get counts k))
+  (if (gt v best_count)
+    (set best_count v)
+    (set best k)))
+(println best)

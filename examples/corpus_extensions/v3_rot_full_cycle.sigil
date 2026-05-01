@@ -1,0 +1,7 @@
+(set a string $0)
+(set b string $1)
+(println (cond
+  ((eq (len a) 0) "yes")
+  ((ne (len a) (len b)) "no")
+  ((in b (string_concat a a)) "yes")
+  (true "no")))

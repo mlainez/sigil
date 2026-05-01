@@ -1,0 +1,7 @@
+(set n int #0)
+(set s int 0)
+(for i 1 (add n 1)
+  (if (eq (mod i 2) 0)
+    (set s (sub s i))
+    (else (set s (add s i)))))
+(println s)

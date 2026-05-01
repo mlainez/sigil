@@ -1,0 +1,8 @@
+(set words (split $0 " "))
+(set out [])
+(for i 0 (len words)
+  (set w (array_get words i))
+  (if (eq (mod i 2) 1)
+    (set w (swapcase w)))
+  (push out w))
+(println (join out " "))

@@ -1,0 +1,5 @@
+(set lines (split $0 "\n"))
+(set headers (filter lines (\line (string_starts_with line "#"))))
+(for-each h headers
+  (set level (string_find h " "))
+  (println (fmt "h{}: {}" level (slice h (add level 1) (len h)))))

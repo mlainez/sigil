@@ -1,0 +1,12 @@
+(set p $0)
+(set parts (split p "/"))
+(set base (last parts))
+(set n (len base))
+(set chars (chars base))
+(set idx -1)
+(for i 0 n
+  (if (eq (array_get chars i) ".")
+    (set idx i)))
+(if (lt idx 0)
+  (println "")
+  (else (println (string_slice base (add idx 1) (sub n (add idx 1))))))

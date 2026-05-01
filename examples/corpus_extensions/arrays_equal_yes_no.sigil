@@ -1,0 +1,5 @@
+(set arr1 (parse_ints $0))
+(set arr2 (parse_ints $1))
+(if (eq arr1 arr2)
+  (println "yes")
+  (else (println "no")))

@@ -1,0 +1,36 @@
+(set s $0)
+(set n #1)
+(set dot (string_find s "."))
+(set int_str "")
+(set frac "")
+(if (eq dot -1)
+  (set int_str s)
+  (else
+    (set int_str (string_slice s 0 dot))
+    (set frac (string_slice s (add dot 1) (sub (len s) (add dot 1))))))
+(while (lt (len frac) (add n 1))
+  (set frac (string_concat frac "0")))
+(set rd (string_get frac n))
+(set truncated (string_slice frac 0 n))
+(if (ge rd 53)
+  (cond
+    ((eq n 0)
+      (set int_str (str (add (int int_str) 1))))
+    (true
+      (set t (add (int truncated) 1))
+      (set p 1)
+      (for i 0 n
+        (set p (mul p 10)))
+      (if (ge t p)
+        (set int_str (str (add (int int_str) 1)))
+        (set truncated "")
+        (for i 0 n
+          (set truncated (string_concat truncated "0")))
+        (else
+          (set ts (str t))
+          (while (lt (len ts) n)
+            (set ts (string_concat "0" ts)))
+          (set truncated ts))))))
+(if (eq n 0)
+  (println int_str)
+  (else (println (string_concat int_str (string_concat "." truncated)))))

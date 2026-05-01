@@ -1,0 +1,1 @@
+(println (join (filter (map_arr (split $0 " ") (\x (int x))) (\x (gt x 0))) " "))

@@ -1,0 +1,6 @@
+(set base int (arg_int 0))
+(set exp int (arg_int 1))
+(set result int 1)
+(for i 0 exp
+  (set result (mul result base)))
+(println result)

@@ -1,0 +1,7 @@
+(set data map (json_parse $0))
+(set threshold int #1)
+(set items array (json_get data ["items"]))
+(set filtered_items array (filter (\x (gt (json_get x "stars") threshold)) items))
+(set sorted_items array (sort_by filtered_items (\x (neg (json_get x "stars")))))
+(for-each item map sorted_items
+  (println (fmt "{} ({})" (json_get item "name") (json_get item "stars"))))

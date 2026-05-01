@@ -1,0 +1,24 @@
+(set s string $0)
+(set stack array [])
+(set ok bool true)
+(set n int (len s))
+(for i 0 n
+  (if ok
+    (set c string (string_slice s i 1))
+    (cond
+      ((or (eq c "(") (or (eq c "[") (eq c "{")))
+        (push stack c))
+      ((or (eq c ")") (or (eq c "]") (eq c "}")))
+        (if (eq (len stack) 0)
+          (set ok false)
+          (else
+            (set top string (array_pop stack))
+            (cond
+              ((and (eq c ")") (eq top "(")) (set ok true))
+              ((and (eq c "]") (eq top "[")) (set ok true))
+              ((and (eq c "}") (eq top "{")) (set ok true))
+              (true (set ok false))))))
+      (true (set ok ok)))))
+(if (and ok (eq (len stack) 0))
+  (println "Balanced")
+  (else (println "Not Balanced")))

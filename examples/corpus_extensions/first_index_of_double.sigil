@@ -1,0 +1,8 @@
+(set s $0)
+(set chars (chars s))
+(set found false)
+(for i 1 (len chars)
+  (if (eq (array_get chars (sub i 1)) (array_get chars i))
+    (println i)
+    (set found true)))
+(if (not found) (println -1))

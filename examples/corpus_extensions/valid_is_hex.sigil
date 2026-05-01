@@ -1,0 +1,2 @@
+(set r (regex_compile "^[0-9a-fA-F]+$"))
+(if (regex_match r $0) (println "yes") (else (println "no")))

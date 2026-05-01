@@ -1,0 +1,5 @@
+(set lines array (split $0 "\n"))
+(set i int 1)
+(for-each line string lines
+  (println (fmt "{}: {}" i line))
+  (set i (add i 1)))

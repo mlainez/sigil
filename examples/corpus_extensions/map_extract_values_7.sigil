@@ -1,0 +1,4 @@
+(set pairs (split $0 ","))
+(set m (reduce pairs (\(acc pair) (set kv (split pair "=")) (merge acc {(first kv) (last kv)})) {}))
+(set keys (split $1 ","))
+(println (join (map_arr keys (\k (get_or m k ""))) " "))

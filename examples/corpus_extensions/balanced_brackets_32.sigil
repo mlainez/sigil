@@ -1,0 +1,16 @@
+(fn is_balanced s string -> bool
+  (set stack [])
+  (for-each c (chars s)
+    (cond
+      ((eq c "(") (push stack ")"))
+      ((eq c "[") (push stack "]"))
+      ((eq c "{") (push stack "}"))
+      (true
+        (if (eq (len stack) 0) (ret false))
+        (if (ne (array_pop stack) c) (ret false)))))
+  (ret (eq (len stack) 0)))
+
+(for i 0 (argv_count)
+  (if (is_balanced (arg_str i))
+    (println "True")
+    (else (println "False"))))

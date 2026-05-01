@@ -1,0 +1,13 @@
+(set re (regex_compile "[a-z]+"))
+(set counts {})
+(for-each w (regex_find_all re (lower $0))
+  (map_inc counts w))
+
+(set keys [])
+(for-each e (entries counts)
+  (push keys (fmt "{} {} {}" (sub 999999 (array_get e 1)) (array_get e 0) (array_get e 1))))
+(sort keys)
+
+(for i 0 (min 5 (len keys))
+  (set p (split (array_get keys i) " "))
+  (println (fmt "{} {}" (array_get p 1) (array_get p 2))))

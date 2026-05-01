@@ -1,0 +1,16 @@
+(set n int #0)
+(set rc int (sub (argv_count) 1))
+(set divs array [])
+(set names array [])
+(for r 0 rc
+  (set parts array (split (arg_str (add r 1)) ":"))
+  (set divs (push divs (int (array_get parts 0))))
+  (set names (push names (array_get parts 1))))
+(for i 1 (add n 1)
+  (set out string "")
+  (for j 0 rc
+    (if (eq (mod i (array_get divs j)) 0)
+      (set out (string_concat out (array_get names j)))))
+  (if (eq (len out) 0)
+    (println i)
+    (else (println out))))

@@ -1,0 +1,8 @@
+(set s $0)
+(set out "")
+(for-each c (chars s)
+  (set lc (lower c))
+  (if (in lc "aeiou")
+    (set out (string_concat out (upper lc)))
+    (else (set out (string_concat out lc)))))
+(println out)

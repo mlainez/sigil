@@ -1,0 +1,8 @@
+(set logs string $0)
+(set lines array (split logs "\n"))
+(set filtered_lines array (filter lines (\line (or (in "WARN" line) (in "ERROR" line)))))
+(for-each line string filtered_lines
+  (set parts array (split line " "))
+  (set level string (first (slice parts 2 3)))
+  (set message string (trim (join (slice parts 3) " ")))
+  (println (fmt "{}: {}" level message)))

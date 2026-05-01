@@ -1,0 +1,8 @@
+(set url string $0)
+(set key string $1)
+(set query array (split (slice url (+ (index_of url "?") 1)) "&"))
+(set params map {})
+(for-each param string query
+  (set parts array (split param "="))
+  (map_set params (first parts) (last parts)))
+(println (map_get params key))

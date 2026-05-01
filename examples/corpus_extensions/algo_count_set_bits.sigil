@@ -1,0 +1,6 @@
+(set n #0)
+(set c 0)
+(while (gt n 0)
+  (set c (add c (bit_and n 1)))
+  (set n (bit_shift_right n 1)))
+(println c)

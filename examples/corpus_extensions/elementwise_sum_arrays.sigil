@@ -1,0 +1,3 @@
+(set a (parse_ints $0))
+(set b (parse_ints $1))
+(println (join (map_arr (range 0 (len a)) (\i (str (add (array_get a i) (array_get b i))))) " "))

@@ -1,0 +1,8 @@
+(set pairs (split $0 ","))
+(set key $1)
+(set result "missing")
+(for-each p pairs
+  (set kv (split p "="))
+  (if (eq (array_get kv 0) key)
+    (set result (array_get kv 1))))
+(println result)

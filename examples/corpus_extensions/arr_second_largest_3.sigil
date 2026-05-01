@@ -1,0 +1,3 @@
+(set nums (parse_ints $0))
+(set u (sort (uniq nums)))
+(println (array_get u (sub (len u) 2)))

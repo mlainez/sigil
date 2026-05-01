@@ -1,0 +1,13 @@
+(fn valid_line line string -> bool
+  (cond
+    ((eq (len line) 0) (ret false))
+    ((string_starts_with line "#") (ret false))
+    ((string_starts_with line "[") (ret false))
+    (true (ret true))))
+(set lines (split $0 "\n"))
+(set valid (filter lines valid_line))
+(set wanted (split $1 ","))
+(set found (filter valid (\line (in (first (split line "=")) wanted))))
+(set sorted (sort_by found (\line (first (split line "=")))))
+(for-each line sorted
+  (println line))

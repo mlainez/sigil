@@ -1,0 +1,8 @@
+(set arr (parse_ints $0))
+(set avg (div (float (sum arr)) (float (len arr))))
+(set h (round (mul avg 100.0)))
+(set w (div h 100))
+(set f (mod h 100))
+(if (lt f 10)
+  (println (fmt "{w}.0{f}"))
+  (else (println (fmt "{w}.{f}"))))

@@ -1,0 +1,10 @@
+(set s $0)
+(if (eq (len s) 0)
+  (println "yes")
+  (else
+    (set first (string_get s 0))
+    (set all_same true)
+    (for i 1 (len s)
+      (if (ne (string_get s i) first)
+        (set all_same false)))
+    (if all_same (println "yes") (else (println "no")))))

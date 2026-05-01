@@ -1,0 +1,8 @@
+(fn gcd a int b int -> int
+  (if (eq b 0) (ret a))
+  (ret (gcd b (mod a b))))
+(set nums (parse_ints $0))
+(set g (array_get nums 0))
+(for i 1 (len nums)
+  (set g (gcd g (array_get nums i))))
+(println g)

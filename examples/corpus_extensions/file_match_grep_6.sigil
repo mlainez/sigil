@@ -1,0 +1,4 @@
+(set text string $0)
+(set lines array (split text "\n"))
+(set filtered_lines array (filter (\line (in "error" line)) lines))
+(for-each line string filtered_lines (println line))

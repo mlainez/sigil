@@ -1,0 +1,5 @@
+(set rows (split $0 ";"))
+(set header (split (first rows) ","))
+(set col #1)
+(set total (sum (map_arr (rest rows) (\r (int (array_get (split r ",") col))))))
+(println (fmt "{}: {}" (array_get header col) total))

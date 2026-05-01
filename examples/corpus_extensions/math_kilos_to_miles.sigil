@@ -1,0 +1,7 @@
+(set km (arg_float 0))
+(set h (round (mul (mul km 0.621371) 100.0)))
+(set w (div h 100))
+(set f (mod h 100))
+(if (lt f 10)
+  (println (fmt "{}.0{}" w f))
+  (else (println (fmt "{}.{}" w f))))

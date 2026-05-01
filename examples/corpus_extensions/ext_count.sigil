@@ -1,0 +1,16 @@
+(set lines array (split $0 "\n"))
+(set exts map {})
+(for-each line string lines
+  (set parts array (split line "."))
+  (if (gt (len parts) 1)
+    (set k string (last parts))
+    (if (in k exts)
+      (map_set exts k (add (map_get exts k) 1))
+      (else (map_set exts k 1)))
+    (else
+      (if (in "NONE" exts)
+        (map_set exts "NONE" (add (map_get exts "NONE") 1))
+        (else (map_set exts "NONE" 1))))))
+(set keys array (sort (map_keys exts)))
+(println (join (map_arr keys (\k string
+  (ret (fmt "{}:{}" k (map_get exts k))))) " "))

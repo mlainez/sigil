@@ -1,0 +1,7 @@
+(fn norm s string -> string
+  (set t (string_replace (lower s) " " ""))
+  (ret (join (sort (chars t)) "")))
+
+(if (eq (norm $0) (norm $1))
+  (println "yes")
+  (else (println "no")))

@@ -1,0 +1,14 @@
+(set list1 array (split $0 "\n"))
+(set list2 array (split $1 "\n"))
+
+(set diff1 array (diff list1 list2))
+(set diff2 array (diff list2 list1))
+
+(sort diff1)
+(sort diff2)
+
+(for-each line string diff1
+  (println (fmt "- {}" line)))
+
+(for-each line string diff2
+  (println (fmt "+ {}" line)))

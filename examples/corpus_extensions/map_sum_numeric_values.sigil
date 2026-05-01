@@ -1,0 +1,7 @@
+(set total 0)
+(for-each pair (split $0 ",")
+  (set v (array_get (split pair "=") 1))
+  (try
+    (set total (add total (int v)))
+    (catch e string (set total total))))
+(println total)

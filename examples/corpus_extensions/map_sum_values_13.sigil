@@ -1,0 +1,2 @@
+(set pairs (split $0 ","))
+(println (sum (map_arr pairs (\p (int (last (split p "=")))))))

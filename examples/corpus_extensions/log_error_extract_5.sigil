@@ -1,0 +1,2 @@
+(for-each line (filter (split $0 "\n") (\line (string_contains line "[ERROR]")))
+  (println (last (split line " [ERROR] "))))

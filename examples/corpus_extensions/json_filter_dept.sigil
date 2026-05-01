@@ -1,0 +1,5 @@
+(set data (json_parse $0))
+(set filtered (filter data (\obj (eq (json_get obj ["dept"]) $1))))
+(set sorted (sort_by filtered (\obj (json_get obj ["name"]))))
+(for-each item sorted
+  (println (fmt "{}: {}" (json_get item ["name"]) (json_get item ["salary"]))))

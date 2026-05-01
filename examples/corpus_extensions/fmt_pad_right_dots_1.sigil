@@ -1,0 +1,6 @@
+(set s $0)
+(set w #1)
+(set pad (sub w (len s)))
+(set dots "")
+(for i 0 pad (set dots (string_concat dots ".")))
+(println (string_concat s dots))

@@ -1,0 +1,8 @@
+(set arr (parse_ints $0))
+(set best (array_get arr 0))
+(set cur best)
+(for i 1 (len arr)
+  (set x (array_get arr i))
+  (set cur (max x (add cur x)))
+  (set best (max best cur)))
+(println best)

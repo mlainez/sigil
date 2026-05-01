@@ -1,0 +1,1 @@
+(println (join (filter (parse_ints $0) (\x (eq (mod x 2) 0))) " "))

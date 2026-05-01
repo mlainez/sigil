@@ -1,0 +1,7 @@
+(set words (split $0 ","))
+(set keyed [])
+(for-each w words
+  (push keyed (fmt "{}{}" (add (len w) 1000) w)))
+(sort keyed)
+(for-each k keyed
+  (println (string_slice k 4 (sub (len k) 4))))

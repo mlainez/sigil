@@ -1,0 +1,7 @@
+(set tokens (split $0 " "))
+(println (last (reduce tokens (\(stk tok) (cond
+  ((eq tok "+") (push (slice stk 0 (- (len stk) 2)) (+ (last (slice stk 0 (- (len stk) 1))) (last stk))))
+  ((eq tok "-") (push (slice stk 0 (- (len stk) 2)) (- (last (slice stk 0 (- (len stk) 1))) (last stk))))
+  ((eq tok "*") (push (slice stk 0 (- (len stk) 2)) (* (last (slice stk 0 (- (len stk) 1))) (last stk))))
+  ((eq tok "/") (push (slice stk 0 (- (len stk) 2)) (/ (last (slice stk 0 (- (len stk) 1))) (last stk))))
+  (true (push stk (first (parse_ints tok)))))) [])))

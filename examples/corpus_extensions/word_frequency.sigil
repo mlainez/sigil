@@ -1,0 +1,18 @@
+(set txt (trim $0))
+(set parts (split txt " "))
+(set words [])
+(for-each w parts
+  (if (gt (len w) 0) (push words w)))
+(set counts {})
+(for-each w words (map_inc counts w))
+(set keys [])
+(for-each k (map_keys counts)
+  (set c (map_get counts k))
+  (set s (str (sub 1000000000 c)))
+  (push keys (string_concat (string_concat s " ") k)))
+(sort keys)
+(for-each sk keys
+  (set sp (string_find sk " "))
+  (set tot (string_length sk))
+  (set word (string_slice sk (add sp 1) (sub tot (add sp 1))))
+  (println (fmt "{} {}" word (map_get counts word))))

@@ -1,0 +1,1 @@
+(println (join (map_arr (chars $0) (\c (cond ((in (lower c) "aeiou") (upper c)) ((is_alpha c) (lower c)) (true c)))) ""))

@@ -1,0 +1,4 @@
+(set s string $0)
+(set lower_s string (lower s))
+(set reversed_s string (rev lower_s))
+(println (eq lower_s reversed_s))

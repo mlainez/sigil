@@ -1,0 +1,19 @@
+(fn add_commas n int -> string
+  (set s string (str n))
+  (set result string "")
+  (set L int (len s))
+  (for i 0 L
+    (set idx int (sub (sub L 1) i))
+    (set ch string (string_slice s idx 1))
+    (if (and (gt i 0) (eq (mod i 3) 0))
+      (set result (string_concat "," result)))
+    (set result (string_concat ch result)))
+  (ret result))
+
+(set f float (float $0))
+(set cents_total int (round (mul f 100.0)))
+(set dollars int (div cents_total 100))
+(set cents int (mod cents_total 100))
+(set cents_str string (str cents))
+(if (lt cents 10) (set cents_str (string_concat "0" cents_str)))
+(println (fmt "${}.{}" (add_commas dollars) cents_str))

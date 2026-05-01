@@ -1,0 +1,7 @@
+(set v (float $0))
+(set s (round (mul v 10000.0)))
+(set w (div s 100))
+(set f (mod s 100))
+(set fs (str f))
+(if (lt f 10) (set fs (string_concat "0" fs)))
+(println (fmt "{}.{}%" w fs))

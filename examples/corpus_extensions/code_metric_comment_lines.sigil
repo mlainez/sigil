@@ -1,0 +1,7 @@
+(set code string $0)
+(set lines array (split code "\n"))
+(set count int 0)
+(for-each line string lines
+  (if (and (ge (len line) 1) (eq (first line) "#"))
+    (set count (add count 1))))
+(println count)

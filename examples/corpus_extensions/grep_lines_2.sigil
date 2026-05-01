@@ -1,0 +1,6 @@
+(set needle $0)
+(set n (argv_count))
+(for i 1 n
+  (set line (arg_str i))
+  (if (in needle line)
+    (println (fmt "{}: {}" i line))))

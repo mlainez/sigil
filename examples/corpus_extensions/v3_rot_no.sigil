@@ -1,0 +1,9 @@
+(set a string $0)
+(set b string $1)
+(set n int (len a))
+(set m int (len b))
+(if (ne n m)
+  (println "no")
+  (else
+    (set double_a string (string_concat a a))
+    (if (in b double_a) (println "yes") (else (println "no")))))

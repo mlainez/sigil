@@ -1,0 +1,2 @@
+(set nums (parse_ints $0))
+(println (join (map_arr (range 1 (len nums)) (\i (sub (array_get nums i) (array_get nums (- i 1))))) " "))

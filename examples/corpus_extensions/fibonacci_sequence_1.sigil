@@ -1,0 +1,10 @@
+(set n #0)
+(set a 0)
+(set b 1)
+(set arr [])
+(for i 0 n
+  (push arr a)
+  (set t (add a b))
+  (set a b)
+  (set b t))
+(println (join arr " "))

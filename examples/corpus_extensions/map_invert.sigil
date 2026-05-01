@@ -1,0 +1,2 @@
+(set result (map_arr (sort (split $0 ",")) (\p (fmt "{}={}" (array_get (split p "=") 1) (array_get (split p "=") 0)))))
+(println (join result ","))

@@ -1,0 +1,13 @@
+(fn jkey p string k string -> string
+  (if (eq p "") (ret k))
+  (ret (fmt "{}.{}" p k)))
+
+(fn flatten v json p string out array -> array
+  (if (is_object v)
+    (for-each k (map_keys v)
+      (set out (flatten (json_get v k) (jkey p k) out)))
+    (else (push out (fmt "{}={}" p (str v)))))
+  (ret out))
+
+(for-each line (sort (flatten (json_parse $0) "" []))
+  (println line))

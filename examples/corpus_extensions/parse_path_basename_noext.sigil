@@ -1,0 +1,5 @@
+(set base (last (split $0 "/")))
+(set parts (split base "."))
+(if (le (len parts) 1)
+  (println base)
+  (else (println (join (slice parts 0 (sub (len parts) 1)) "."))))

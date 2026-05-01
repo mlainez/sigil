@@ -1,0 +1,4 @@
+(set a string $0)
+(set b string $1)
+(set ab string (string_concat a a))
+(println (if (in b ab) "yes" "no"))

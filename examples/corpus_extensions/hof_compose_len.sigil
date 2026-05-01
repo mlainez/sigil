@@ -1,0 +1,1 @@
+(println (len (string_replace $0 " " "")))

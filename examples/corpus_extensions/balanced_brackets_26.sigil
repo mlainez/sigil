@@ -1,0 +1,21 @@
+(set s $0)
+(set stack [])
+(set balanced true)
+(for-each c (chars s)
+  (cond
+    ((in c "([{")
+      (push stack c))
+    ((eq (len stack) 0)
+      (set balanced false))
+    (true
+      (set top (array_pop stack))
+      (if (or (and (eq c ")") (ne top "("))
+              (or (and (eq c "]") (ne top "["))
+                  (and (eq c "}") (ne top "{"))))
+        (set balanced false)))))
+(if (gt (len stack) 0)
+  (set balanced false))
+(if balanced
+  (println "Balanced")
+  (else
+    (println "Not Balanced")))

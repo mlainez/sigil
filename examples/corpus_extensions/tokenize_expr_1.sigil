@@ -1,0 +1,8 @@
+(set s $0)
+(set s (string_replace s "+" " + "))
+(set s (string_replace s "-" " - "))
+(set s (string_replace s "*" " * "))
+(set s (string_replace s "/" " / "))
+(set s (string_replace s "(" " ( "))
+(set s (string_replace s ")" " ) "))
+(println (join (filter (split s " ") (\t (ne t ""))) " "))

@@ -1,0 +1,8 @@
+(set stack [])
+(for-each p (split $0 "/")
+  (if (eq p "..")
+    (if (gt (len stack) 0) (array_pop stack))
+    (else
+      (if (and (ne p "") (ne p "."))
+        (push stack p)))))
+(println (string_concat "/" (join stack "/")))

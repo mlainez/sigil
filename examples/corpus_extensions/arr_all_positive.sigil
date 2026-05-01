@@ -1,0 +1,4 @@
+(set nums (parse_ints $0))
+(set ok true)
+(for-each n nums (if (le n 0) (set ok false)))
+(if ok (println "yes") (else (println "no")))

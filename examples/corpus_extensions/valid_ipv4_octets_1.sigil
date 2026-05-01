@@ -1,0 +1,10 @@
+(set ip $0)
+(set parts (split ip "."))
+(set valid (eq (len parts) 4))
+(for-each p parts
+  (if (and valid (eq (len p) 0)) (set valid false))
+  (if valid
+    (for-each c (chars p)
+      (if (not (is_digit c)) (set valid false))))
+  (if (and valid (gt (int p) 255)) (set valid false)))
+(if valid (println "yes") (else (println "no")))

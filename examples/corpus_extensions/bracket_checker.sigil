@@ -1,0 +1,21 @@
+(fn expected_close opener str -> str
+  (cond
+    ((eq opener "(") (ret ")"))
+    ((eq opener "[") (ret "]"))
+    ((eq opener "{") (ret "}"))
+    (true (ret ""))))
+
+(set stack [])
+(set ok true)
+(for-each c (chars $0)
+  (if ok
+    (cond
+      ((in c ["(" "[" "{"]) (set stack (push stack c)))
+      ((in c [")" "]" "}"])
+        (cond
+          ((eq (len stack) 0) (set ok false))
+          ((eq (expected_close (last stack)) c) (set stack (slice stack 0 (sub (len stack) 1))))
+          (true (set ok false)))))))
+(cond
+  ((and ok (eq (len stack) 0)) (println "Balanced"))
+  (true (println "Not Balanced")))

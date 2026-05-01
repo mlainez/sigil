@@ -1,0 +1,6 @@
+(set data (json_parse $0))
+(set fields (split $1 ","))
+(set sort_field (first fields))
+(set sorted (sort_by data (\obj (str (json_get obj [sort_field])))))
+(for-each obj sorted
+  (println (join (map_arr fields (\f (fmt "{}={}" f (str (json_get obj [f]))))) " ")))

@@ -1,0 +1,9 @@
+(set s string $0)
+(set out string "")
+(set n int (len s))
+(for i 0 n
+  (set c string (array_get (chars s) i))
+  (if (eq (mod i 2) 0)
+    (set out (string_concat out (lower c)))
+    (else (set out (string_concat out (upper c))))))
+(println out)

@@ -1,0 +1,4 @@
+(set text string $0)
+(set lines array (split text "\n"))
+(set non_empty_lines int (len (filter (\line (not (eq line ""))) lines)))
+(println non_empty_lines)

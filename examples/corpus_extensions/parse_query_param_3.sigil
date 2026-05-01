@@ -1,0 +1,10 @@
+(set url $0)
+(set key $1)
+(set qidx (string_find url "?"))
+(set query (string_slice url (add qidx 1) (sub (len url) (add qidx 1))))
+(set pairs (split query "&"))
+(set target (string_concat key "="))
+(set tlen (len target))
+(for-each p pairs
+  (if (string_starts_with p target)
+    (println (string_slice p tlen (sub (len p) tlen)))))

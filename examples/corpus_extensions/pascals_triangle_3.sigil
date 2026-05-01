@@ -1,0 +1,10 @@
+(set n int #0)
+(set row array [1])
+(println (join row " "))
+(for i 1 n
+  (set new array [1])
+  (for j 1 i
+    (push new (add (array_get row (sub j 1)) (array_get row j))))
+  (push new 1)
+  (set row new)
+  (println (join row " ")))

@@ -1,0 +1,6 @@
+(set left (split $0 ";"))
+(set right (split $1 ";"))
+(for-each x left
+  (if (not (in x right)) (println (fmt "-{}" x))))
+(for-each x right
+  (if (not (in x left)) (println (fmt "+{}" x))))

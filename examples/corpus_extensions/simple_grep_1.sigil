@@ -1,0 +1,3 @@
+(set pattern string $0)
+(set lines array (slice (argv) 1))
+(filter lines (\line (if (in pattern line) (println line))))

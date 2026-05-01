@@ -1,0 +1,5 @@
+(set lines array (split $0 "\n"))
+(for-each line string lines
+  (set trimmed_line string (trim line))
+  (if (ne trimmed_line "")
+    (println line)))

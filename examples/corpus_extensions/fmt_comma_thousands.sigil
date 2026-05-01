@@ -1,0 +1,10 @@
+(set n (str #0))
+(set rev_chars (rev (chars n)))
+(set result [])
+(set i 0)
+(for-each c rev_chars
+  (if (and (gt i 0) (eq (mod i 3) 0))
+    (push result ","))
+  (push result c)
+  (set i (add i 1)))
+(println (join (rev result) ""))

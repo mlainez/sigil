@@ -1,0 +1,8 @@
+(set nums (parse_ints $0))
+(set counts {})
+(for-each n nums
+  (map_inc counts (str n)))
+(set uniq_nums (uniq (sort nums)))
+(for-each n uniq_nums
+  (set c (map_get counts (str n)))
+  (println (fmt "{}: {}" n (join (map_arr (range 0 c) (\i "#")) ""))))

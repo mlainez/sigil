@@ -1,0 +1,5 @@
+(set xs (parse_ints $0))
+(set sum (reduce xs (\(acc x) (+ acc x)) 0))
+(set count (len xs))
+(set mean (cast_int_float (/ sum count)))
+(println (fmt "{:.3f}" mean))

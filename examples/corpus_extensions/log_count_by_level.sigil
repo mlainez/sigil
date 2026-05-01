@@ -1,0 +1,13 @@
+(set lines array (split $0 "\n"))
+(set info int 0)
+(set warn int 0)
+(set err int 0)
+(for-each line string lines
+  (set parts array (split line " "))
+  (if (eq (first parts) "INFO")
+    (set info (add info 1)))
+  (if (eq (first parts) "WARN")
+    (set warn (add warn 1)))
+  (if (eq (first parts) "ERROR")
+    (set err (add err 1))))
+(println (fmt "INFO:{} WARN:{} ERROR:{}" info warn err))

@@ -1,0 +1,46 @@
+(set raw $0)
+(set parts (split raw ";"))
+
+(set indeg {})
+(set dependents {})
+(set all_nodes [])
+
+(for-each part parts
+  (if (gt (len part) 0)
+    (set kv (split part ":"))
+    (set name (array_get kv 0))
+    (push all_nodes name)
+    (map_set indeg name 0)
+    (set dep_str "")
+    (if (gt (len kv) 1)
+      (set dep_str (array_get kv 1)))
+    (if (gt (len dep_str) 0)
+      (set dlist (split dep_str ","))
+      (for-each d dlist
+        (map_set indeg name (add (map_get indeg name) 1))
+        (set cur [])
+        (if (map_has dependents d)
+          (set cur (map_get dependents d)))
+        (push cur name)
+        (map_set dependents d cur)))))
+
+(set ready [])
+(for-each n all_nodes
+  (if (eq (map_get indeg n) 0)
+    (push ready n)))
+(sort ready)
+
+(set result [])
+(while (gt (len ready) 0)
+  (set node (array_get ready 0))
+  (set ready (array_slice ready 1 (sub (len ready) 1)))
+  (push result node)
+  (if (map_has dependents node)
+    (set deps_of (map_get dependents node))
+    (for-each m deps_of
+      (map_set indeg m (sub (map_get indeg m) 1))
+      (if (eq (map_get indeg m) 0)
+        (push ready m)))
+    (sort ready)))
+
+(println (join result " -> "))

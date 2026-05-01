@@ -1,0 +1,10 @@
+(set data (json_parse $0))
+(set field1 $1)
+(set threshold #2)
+(set field2 $3)
+(set n #4)
+(set filtered (filter data (\obj (gt (json_get obj [field1]) threshold))))
+(set sorted (rev (sort_by filtered (\obj (json_get obj [field2])))))
+(set top (slice sorted 0 n))
+(for-each item top
+  (println (fmt "{}: {}" (json_get item ["name"]) (json_get item [field2]))))

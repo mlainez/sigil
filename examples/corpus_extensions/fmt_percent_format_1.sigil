@@ -1,0 +1,5 @@
+(set v float (arg_float 0))
+(set scaled int (round (mul v 1000.0)))
+(set whole int (div scaled 10))
+(set frac int (mod scaled 10))
+(println (fmt "{}.{}%" whole frac))

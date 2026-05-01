@@ -1,0 +1,3 @@
+(set rows (split $0 "\n"))
+(set header (array_get (split (first rows) ",") 1))
+(println (sum (map_arr (rest rows) (\r (int (array_get (split r ",") 1))))))

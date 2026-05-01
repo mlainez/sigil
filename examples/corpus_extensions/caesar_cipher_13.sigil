@@ -1,0 +1,15 @@
+(fn shift_char c string k int -> string
+  (set code int (string_get c 0))
+  (cond
+    ((and (ge code 65) (le code 90))
+      (ret (char_from_code (add 65 (mod (add (mod (add (sub code 65) k) 26) 26) 26)))))
+    ((and (ge code 97) (le code 122))
+      (ret (char_from_code (add 97 (mod (add (mod (add (sub code 97) k) 26) 26) 26)))))
+    (true (ret c))))
+
+(set s string $0)
+(set k int #1)
+(set out string "")
+(for-each c string (chars s)
+  (set out (string_concat out (shift_char c k))))
+(println out)

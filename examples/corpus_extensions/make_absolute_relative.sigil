@@ -1,0 +1,3 @@
+(set base string $0)
+(set rel string $1)
+(println (fmt "{}{}" base rel))

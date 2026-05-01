@@ -1,0 +1,5 @@
+(set input $0)
+(set nums (parse_ints input))
+(set sorted (sort nums))
+(set mid (/ (len sorted) 2))
+(println (array_get sorted mid))

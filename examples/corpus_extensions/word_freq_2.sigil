@@ -1,0 +1,14 @@
+(set txt $0)
+(set words (split txt " "))
+(set c {})
+(for-each w words (map_inc c w))
+(set keys (map_keys c))
+(set sort_strs [])
+(for-each k keys
+  (set cnt (map_get c k))
+  (set padded (sub 999999 cnt))
+  (push sort_strs (fmt "{}|{}|{}" padded k cnt)))
+(sort sort_strs)
+(for-each ss sort_strs
+  (set parts (split ss "|"))
+  (println (fmt "{}: {}" (array_get parts 1) (array_get parts 2))))

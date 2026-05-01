@@ -1,0 +1,11 @@
+(set data string $0)
+(set field string $1)
+(set value string $2)
+(set sort_field string $3)
+
+(set parsed_json array (json_parse data))
+(set filtered_json array (filter parsed_json (\x (eq (json_get x field) value))))
+(set sorted_json array (sort_by filtered_json (\x (json_get x sort_field))))
+
+(for-each obj map sorted_json
+  (println (json_get obj "name")))

@@ -1,0 +1,17 @@
+(set log string $0)
+(set n int #1)
+
+(set lines array (split log "\n"))
+(set seen map {})
+(set result_lines array [])
+
+(for-each line string lines
+  (if (lt (len result_lines) n)
+    (do
+      (set line_str string line)
+      (if (not (map_has seen line_str))
+        (begin
+          (set seen (map_set seen line_str true))
+          (push result_lines line_str))))))
+
+(println (string_join result_lines "\n"))

@@ -1,0 +1,13 @@
+(set stack array [])
+(for-each token string (split $0 " ")
+  (cond
+    ((in token ["+" "-" "*" "/"])
+     (set b int (pop stack))
+     (set a int (pop stack))
+     (push stack (cond
+                  ((eq token "+") (+ a b))
+                  ((eq token "-") (- a b))
+                  ((eq token "*") (* a b))
+                  ((eq token "/") (/ a b)))))
+    (true (push stack (str->int token)))))
+(println (first stack))

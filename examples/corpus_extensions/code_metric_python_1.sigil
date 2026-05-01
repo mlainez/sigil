@@ -1,0 +1,19 @@
+(set code string $0)
+(set lines array (split code "\n"))
+(set functions int 0)
+(set imports int 0)
+(set comments int 0)
+(set blank_lines int 0)
+
+(for-each line string lines
+  (set stripped_line string (string_trim line))
+  (cond
+    ((in "def " stripped_line) (set functions (add functions 1)))
+    ((or (in "import " stripped_line) (in "from " stripped_line)) (set imports (add imports 1)))
+    ((eq stripped_line "") (set blank_lines (add blank_lines 1)))
+    ((and (ge (len stripped_line) 1) (eq (first stripped_line) "#")) (set comments (add comments 1)))))
+
+(println (fmt "functions: {}" functions))
+(println (fmt "imports: {}" imports))
+(println (fmt "comments: {}" comments))
+(println (fmt "blank_lines: {}" blank_lines))

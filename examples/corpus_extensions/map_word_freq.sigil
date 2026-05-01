@@ -1,0 +1,7 @@
+(set counts {})
+(for-each w (split $0 " ")
+  (map_inc counts w))
+(set parts [])
+(for-each k (sort (map_keys counts))
+  (push parts (fmt "{}:{}" k (map_get counts k))))
+(println (join parts " "))

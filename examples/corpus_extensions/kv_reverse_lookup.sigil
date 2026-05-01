@@ -1,0 +1,27 @@
+(set config string $0)
+(set val string $1)
+
+(fn parse_config config string -> map
+  (set lines array (split config "\n"))
+  (set result map {})
+  (for-each line string lines
+    (if (and (not (eq line "")) (not (string_starts_with line "#")))
+      (set parts array (split line "="))
+      (set key string (array_get parts 0))
+      (set value string (array_get parts 1))
+      (set result (+ result {key value}))))
+  (ret result))
+
+(set config_map map (parse_config config))
+
+(fn get_keys_with_value config_map map val string -> array
+  (set keys array [])
+  (for-each k string (map_keys config_map)
+    (if (eq (get config_map k) val)
+      (push keys k)))
+  (ret (sort keys)))
+
+(set matching_keys array (get_keys_with_value config_map val))
+
+(for-each key string matching_keys
+  (println key))

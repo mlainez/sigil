@@ -1,0 +1,26 @@
+(fn check s string -> string
+  (set stack [])
+  (for i 0 (len s)
+    (set c (string_slice s i 1))
+    (cond
+      ((in c "([{")
+        (push stack c))
+      ((in c ")]}")
+        (cond
+          ((eq (len stack) 0)
+            (ret (fmt "unbalanced at index {}" i)))
+          (true
+            (set top (array_pop stack))
+            (set ok false)
+            (if (and (eq c ")") (eq top "(")) (set ok true))
+            (if (and (eq c "]") (eq top "[")) (set ok true))
+            (if (and (eq c "}") (eq top "{")) (set ok true))
+            (if (not ok)
+              (ret (fmt "unbalanced at index {}" i))))))))
+  (if (gt (len stack) 0)
+    (ret "unbalanced (unclosed)"))
+  (ret "balanced"))
+
+(for i 0 (argv_count)
+  (set arg (arg_str i))
+  (println (fmt "{}: {}" arg (check arg))))

@@ -1,0 +1,9 @@
+(set words (split $0 " "))
+(set groups {})
+(for-each w words
+  (set key (join (sort (chars w)) ""))
+  (if (in key groups)
+    (push (map_get groups key) w)
+    (else (map_set groups key [w]))))
+(for-each e (sort_by (entries groups) (\x (first (array_get x 1))))
+  (println (join (array_get e 1) " ")))

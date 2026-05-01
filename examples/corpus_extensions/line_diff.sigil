@@ -1,0 +1,18 @@
+(set a (split $0 "\n"))
+(set b (split $1 "\n"))
+(set la (len a))
+(set lb (len b))
+(set m (max la lb))
+(for i 0 m
+  (cond
+    ((and (lt i la) (lt i lb))
+      (cond
+        ((eq (array_get a i) (array_get b i))
+          (println (fmt "= {}" (array_get a i))))
+        (true
+          (println (fmt "- {}" (array_get a i)))
+          (println (fmt "+ {}" (array_get b i))))))
+    ((lt i la)
+      (println (fmt "- {}" (array_get a i))))
+    (true
+      (println (fmt "+ {}" (array_get b i))))))

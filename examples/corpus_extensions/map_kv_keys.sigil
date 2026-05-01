@@ -1,0 +1,3 @@
+(set pairs (split $0 ","))
+(set keys (map_arr pairs (\p (first (split p "=")))))
+(println (join (sort keys) " "))

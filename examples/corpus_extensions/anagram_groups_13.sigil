@@ -1,0 +1,7 @@
+(set words (split $0 ","))
+(set groups {})
+(for-each word words
+  (set key (join (sort (chars word)) ""))
+  (set groups (merge groups {key (push (get_or groups key []) word)})))
+(for-each entry (sort_by (entries groups) first)
+  (println (join (sort (last entry)) ",")))

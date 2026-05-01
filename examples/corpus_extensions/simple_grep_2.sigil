@@ -1,0 +1,5 @@
+(set pattern string $0)
+(set lines array (split $1 "\n"))
+(for-each line string lines
+  (if (in pattern line)
+    (println line)))

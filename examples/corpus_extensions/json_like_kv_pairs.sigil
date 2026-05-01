@@ -1,0 +1,3 @@
+(set obj map (json_parse $0))
+(for-each k string (map_keys obj)
+  (println (fmt "{}:{}" k (str (json_get obj [k])))))

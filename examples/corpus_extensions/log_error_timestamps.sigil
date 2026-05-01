@@ -1,0 +1,7 @@
+(set log string $0)
+(set lines array (split log "\n"))
+(set filtered_lines array (filter lines (\line (> (len line) 0))))
+(for-each line string filtered_lines
+  (set parts array (split line " "))
+  (if (eq (first (slice parts 2)) "ERROR")
+    (println (fmt "[{} {}] {}" (first (slice parts 0)) (first (slice parts 1)) (join (slice parts 3 (len parts)) " ")))))

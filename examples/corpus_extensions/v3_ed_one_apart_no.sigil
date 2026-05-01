@@ -1,0 +1,15 @@
+(set s1 string $0)
+(set s2 string $1)
+(set len1 int (len s1))
+(set len2 int (len s2))
+
+(if (ne len1 len2)
+  (println "no")
+  (else
+    (set diff_count int 0)
+    (for i 0 len1
+      (if (ne (string_get s1 i) (string_get s2 i))
+        (set diff_count (add diff_count 1))))
+    (if (eq diff_count 1)
+      (println "yes")
+      (else (println "no")))))

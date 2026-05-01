@@ -1,0 +1,16 @@
+(set config string $0)
+(set key1 string $1)
+(set key2 string $2)
+
+(fn has_key config string key string -> bool
+  (set lines array (split config "\n"))
+  (for-each line string lines
+    (if (in (fmt "{}=" key) line)
+      (ret true)))
+  (ret false))
+
+(println (cond
+  ((and (has_key config key1) (has_key config key2)) "BOTH")
+  ((has_key config key1) "FIRST")
+  ((has_key config key2) "SECOND")
+  (true "NEITHER")))

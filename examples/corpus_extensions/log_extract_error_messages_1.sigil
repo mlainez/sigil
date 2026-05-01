@@ -1,0 +1,5 @@
+(set logs string $0)
+(set lines array (split logs "\n"))
+(set error_lines array (filter (\line (contains line "ERROR: ")) lines))
+(set messages array (map_arr (\line (slice line 7)) error_lines))
+(for-each msg string messages (println msg))

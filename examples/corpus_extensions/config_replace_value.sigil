@@ -1,0 +1,18 @@
+(set config string $0)
+(set key string $1)
+(set new_val string $2)
+
+(fn lines_of s string -> array
+  (filter (split s "\n") (\line (and (not (eq line "")) (not (string_starts_with line "#"))))))
+
+(set lines array (lines_of config))
+(set found bool false)
+(set result_lines array [])
+
+(for-each line string lines
+  (set parts array (split line "="))
+  (if (eq (array_get parts 0) key)
+    (push result_lines (fmt "{}={}" key new_val))
+    (else (push result_lines line))))
+
+(println (join result_lines "\n"))

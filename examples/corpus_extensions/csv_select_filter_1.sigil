@@ -1,0 +1,11 @@
+(set all_rows (split $0 "\n"))
+(set header (split (first all_rows) ","))
+(set data_rows (rest all_rows))
+(set proj_names (split $1 ":"))
+(set threshold #3)
+(set filter_idx (first (first (filter (enumerate header) (\pair (eq (last pair) $2))))))
+(set proj_idxs (map_arr proj_names (\name (first (first (filter (enumerate header) (\pair (eq (last pair) name))))))))
+(for-each row data_rows
+  (set fields (split row ","))
+  (if (gt (first (parse_ints (get fields filter_idx))) threshold)
+    (println (join (map_arr proj_idxs (\i (get fields i))) "\t"))))

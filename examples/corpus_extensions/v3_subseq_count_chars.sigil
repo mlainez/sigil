@@ -1,0 +1,17 @@
+(set haystack string $0)
+(set needle string $1)
+
+(set i int 0)
+(set n int (len haystack))
+(set m int (len needle))
+
+(while (and (lt i n) (lt i (sub n m)))
+  (set j int 0)
+  (set ok bool true)
+  (while (and ok (lt j m))
+    (if (ne (string_get haystack (add i j)) (string_get needle j)) (set ok false))
+    (set j (add j 1)))
+  (if ok (break))
+  (set i (add i 1)))
+
+(println i)

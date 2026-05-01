@@ -1,0 +1,8 @@
+(set a (chars $0))
+(set b (chars $1))
+(set n (len a))
+(set c 0)
+(for i 0 n
+  (if (ne (array_get a i) (array_get b i))
+    (set c (add c 1))))
+(println c)

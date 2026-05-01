@@ -1,0 +1,3 @@
+(set pat (regex_compile "[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}"))
+(for-each email (sort (uniq (regex_find_all pat $0)))
+  (println email))

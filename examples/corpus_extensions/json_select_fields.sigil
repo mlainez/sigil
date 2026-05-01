@@ -1,0 +1,5 @@
+(set input string $0)
+(set parsed_json json (json_parse input))
+(set name string (json_get parsed_json ["name"]))
+(set age int (json_get parsed_json ["age"]))
+(println (str "{\"name\": \"" name "\", \"age\": " age "}"))

@@ -1,0 +1,17 @@
+(set a string $0)
+(set b string $1)
+
+(set len_a int (len a))
+(set len_b int (len b))
+
+(set i int 0)
+(set result string "")
+
+(while (lt i (max len_a len_b))
+  (if (lt i len_a)
+    (set result (string_concat result (array_get (chars a) i))))
+  (if (lt i len_b)
+    (set result (string_concat result (array_get (chars b) i))))
+  (set i (add i 1)))
+
+(println result)

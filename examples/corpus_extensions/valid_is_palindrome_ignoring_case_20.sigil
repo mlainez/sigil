@@ -1,0 +1,2 @@
+(set s (lower $0))
+(println (eq s (join (rev (chars s)) "")))

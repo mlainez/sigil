@@ -1,0 +1,7 @@
+(set s $0)
+(set n (len s))
+(set h (div n 2))
+(if (eq (mod n 2) 0)
+  (println (fmt "{}{}" (string_slice s h h) (string_slice s 0 h)))
+  (else
+    (println (fmt "{}{}{}" (string_slice s (add h 1) h) (string_slice s h 1) (string_slice s 0 h)))))

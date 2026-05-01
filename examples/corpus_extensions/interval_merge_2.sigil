@@ -1,0 +1,20 @@
+(set parts (split $0 " "))
+(set ivs [])
+(for-each p parts
+  (push ivs (parse_ints p "-")))
+(set ivs (sort_by ivs (\x (array_get x 0))))
+(set merged [])
+(for-each iv ivs
+  (set s (array_get iv 0))
+  (set e (array_get iv 1))
+  (if (eq (len merged) 0)
+    (push merged [s e])
+    (else
+      (set pi (sub (len merged) 1))
+      (set prev (array_get merged pi))
+      (set pe (array_get prev 1))
+      (if (le s (add pe 1))
+        (array_set merged pi [(array_get prev 0) (max pe e)])
+        (else (push merged [s e]))))))
+(for-each m merged
+  (println (fmt "{}-{}" (array_get m 0) (array_get m 1))))

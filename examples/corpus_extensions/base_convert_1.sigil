@@ -1,0 +1,10 @@
+(fn to_hex n int -> string
+  (if (eq n 0) (ret "0"))
+  (set digits "0123456789ABCDEF")
+  (set result "")
+  (while (gt n 0)
+    (set result (string_concat (string_slice digits (mod n 16) 1) result))
+    (set n (div n 16)))
+  (ret result))
+
+(println (to_hex #0))

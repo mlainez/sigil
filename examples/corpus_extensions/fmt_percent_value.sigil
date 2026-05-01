@@ -1,0 +1,5 @@
+(set v (float $0))
+(set scaled (round (mul v 1000.0)))
+(set whole (div scaled 10))
+(set frac (mod scaled 10))
+(println (fmt "{whole}.{frac}%"))

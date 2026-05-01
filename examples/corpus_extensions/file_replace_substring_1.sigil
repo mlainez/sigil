@@ -1,0 +1,3 @@
+(set text string $0)
+(set result string (string_replace text "foo" "bar"))
+(println result)

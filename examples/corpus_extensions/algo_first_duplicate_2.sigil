@@ -1,0 +1,12 @@
+(set nums (split $0 " "))
+(set seen {})
+(set result "none")
+(set found false)
+(for-each n nums
+  (if (not found)
+    (if (in n seen)
+      (set result n)
+      (set found true)
+      (else
+        (set seen (map_set seen n "1"))))))
+(println result)

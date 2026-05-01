@@ -1,0 +1,12 @@
+(set args (argv))
+(set parsed (map_arr args (\a (split a "="))))
+(set max_len 0)
+(for-each p parsed (set max_len (max max_len (len (first p)))))
+(for-each p parsed
+  (set label (first p))
+  (set n (int (last p)))
+  (set pad "")
+  (for i 0 (sub max_len (len label)) (set pad (add pad " ")))
+  (set hashes "")
+  (for i 0 n (set hashes (add hashes "#")))
+  (println (fmt "{} | {}" (add pad label) hashes)))

@@ -1,0 +1,4 @@
+(set s $0)
+(set n (len s))
+(set mid (div (add n 1) 2))
+(println (string_concat (string_slice s mid (sub n mid)) (string_slice s 0 mid)))

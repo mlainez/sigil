@@ -1,0 +1,12 @@
+(set url $0)
+(set after (last (split url "://")))
+(set end (len after))
+(set i 0)
+(while (lt i end)
+  (set c (string_get after i))
+  (cond
+    ((eq c 58) (set end i))
+    ((eq c 47) (set end i))
+    ((eq c 63) (set end i)))
+  (set i (add i 1)))
+(println (string_slice after 0 end))

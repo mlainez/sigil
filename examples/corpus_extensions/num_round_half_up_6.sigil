@@ -1,0 +1,44 @@
+(fn add_one s string -> string
+  (set cs (chars s))
+  (set carry 1)
+  (set i (sub (len cs) 1))
+  (while (and (ge i 0) (eq carry 1))
+    (set d (string_to_int (array_get cs i)))
+    (set d (add d 1))
+    (if (ge d 10)
+      (set d 0)
+      (else (set carry 0)))
+    (set cs (array_set cs i (str d)))
+    (set i (sub i 1)))
+  (set result (join cs ""))
+  (if (eq carry 1)
+    (set result (string_concat "1" result)))
+  (ret result))
+
+(set s $0)
+(set n #1)
+(set parts (split s "."))
+(set int_part (array_get parts 0))
+(set frac_part "")
+(if (gt (len parts) 1)
+  (set frac_part (array_get parts 1)))
+
+(while (lt (len frac_part) (add n 1))
+  (set frac_part (string_concat frac_part "0")))
+
+(set truncated (string_slice frac_part 0 n))
+(set look_digit (string_to_int (string_slice frac_part n 1)))
+
+(set combined (string_concat int_part truncated))
+(if (ge look_digit 5)
+  (set combined (add_one combined)))
+
+(set comb_len (len combined))
+(set int_len (sub comb_len n))
+(set new_int (string_slice combined 0 int_len))
+
+(if (eq n 0)
+  (println new_int)
+  (else
+    (set new_frac (string_slice combined int_len n))
+    (println (string_format "{}.{}" new_int new_frac))))

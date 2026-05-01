@@ -1,0 +1,11 @@
+(set arr (sort (parse_ints $0)))
+(set n (len arr))
+(set mid (/ n 2))
+(if (eq (% n 2) 1)
+  (println (fmt "{}.0" (array_get arr mid)))
+  (else
+    (set sum (+ (array_get arr (- mid 1)) (array_get arr mid)))
+    (set whole (/ sum 2))
+    (if (eq (% sum 2) 0)
+      (println (fmt "{}.0" whole))
+      (else (println (fmt "{}.5" whole))))))

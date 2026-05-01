@@ -1,0 +1,11 @@
+(set packages array (json_parse $0))
+(set filter_key string (first (split $1 "=")))
+(set filter_value string (last (split $1 "=")))
+(set sort_field string $2)
+
+(set filtered_packages array (filter packages (\pkg (eq (json_get pkg filter_key) filter_value))))
+
+(set sorted_packages array (sort_by filtered_packages (\pkg (neg (json_get pkg sort_field)))))
+
+(for-each pkg filtered_packages
+  (println (fmt "{}:{}" (json_get pkg "name") (json_get pkg "version"))))

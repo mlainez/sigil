@@ -1,0 +1,3 @@
+(set lines (split $0 "\n"))
+(set idx (array_index_of (split (first lines) ",") $1))
+(println (sum (map_arr (rest lines) (\row (int (array_get (split row ",") idx))))))

@@ -1,0 +1,8 @@
+(set w (arg_float 0))
+(set h (arg_float 1))
+(set bmi (div w (mul h h)))
+(cond
+  ((lt bmi 18.5) (println "under"))
+  ((lt bmi 25.0) (println "normal"))
+  ((lt bmi 30.0) (println "over"))
+  (true (println "obese")))

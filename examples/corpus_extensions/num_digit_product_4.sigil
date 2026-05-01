@@ -1,0 +1,5 @@
+(set s $0)
+(set p 1)
+(for-each c (chars s)
+  (set p (mul p (sub (string_get c 0) 48))))
+(println p)

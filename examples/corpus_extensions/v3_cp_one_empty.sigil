@@ -1,0 +1,8 @@
+(set a $0)
+(set b $1)
+(set i 0)
+(while (and (lt i (len a)) (lt i (len b)))
+  (if (ne (string_get a i) (string_get b i))
+    (break))
+  (set i (add i 1)))
+(println (string_slice a 0 i))

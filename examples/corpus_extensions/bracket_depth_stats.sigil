@@ -1,0 +1,13 @@
+(set s $0)
+(set depth 0)
+(set max_d 0)
+(set pairs 0)
+(for-each c (chars s)
+  (cond
+    ((eq c "(")
+      (set depth (add depth 1))
+      (if (gt depth max_d) (set max_d depth)))
+    ((gt depth 0)
+      (set depth (sub depth 1))
+      (set pairs (add pairs 1)))))
+(println (fmt "depth={} pairs={}" max_d pairs))

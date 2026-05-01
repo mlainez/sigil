@@ -1,0 +1,22 @@
+(fn extract url string comp string -> string
+  (set parts (split url "://"))
+  (set scheme_val (first parts))
+  (set rest (last parts))
+  (set no_query (first (split rest "?")))
+  (set host_val (first (split no_query "/")))
+  (set path_start (len host_val))
+  (set path_val (slice no_query path_start (len no_query)))
+  (set qparts (split rest "?"))
+  (set query_val (if (gt (len qparts) 1) (last qparts) ""))
+  (cond
+    ((eq comp "scheme") (ret scheme_val))
+    ((eq comp "host") (ret host_val))
+    ((eq comp "path") (ret path_val))
+    (true (ret query_val))))
+
+(set urls (filter (split $0 "\n") (\u (gt (len u) 0))))
+(set components (map_arr urls (\u (extract u $1))))
+(set result (uniq (sort components)))
+(for-each v result
+  (println v))
+(println (fmt "unique: {}" (len result)))

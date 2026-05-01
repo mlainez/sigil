@@ -1,0 +1,10 @@
+(set words (argv))
+(set groups (reduce words (\(acc w)
+  (set key (join (sort (chars w)) ""))
+  (json_set acc [key] (push (get_or acc key []) w))
+) {}))
+(set sorted_groups (sort_by
+  (map_arr (entries groups) (\kv (sort (last kv))))
+  (\g (first g))))
+(for-each g sorted_groups
+  (println (join g " ")))

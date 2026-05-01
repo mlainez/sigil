@@ -1,0 +1,8 @@
+(set parts array (split $0 " "))
+(set n int (len parts))
+(set total int 0)
+(set result array [])
+(for i 0 n
+  (set total (add total (int (array_get parts i))))
+  (push result (str (div total (+ i 1)))))
+(println (join result " "))

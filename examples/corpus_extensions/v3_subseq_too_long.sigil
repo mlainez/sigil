@@ -1,0 +1,13 @@
+(set haystack string $0)
+(set needle string $1)
+
+(set i int 0)
+(set n int 0)
+(while (lt i (len haystack))
+  (if (eq (string_get haystack i) (string_get needle n))
+    (set n (add n 1)))
+  (set i (add i 1)))
+
+(if (eq n (len needle))
+  (println "yes")
+  (else (println "no")))

@@ -1,0 +1,17 @@
+(set shift (mod (add (mod #0 26) 26) 26))
+(set parts [])
+(set n (len (argv)))
+(for i 1 n
+  (push parts (array_get (argv) i)))
+(set text (join parts " "))
+(set out "")
+(for-each c (chars text)
+  (set code (string_get c 0))
+  (cond
+    ((and (ge code 65) (le code 90))
+      (set out (string_concat out (char_from_code (add 65 (mod (add (sub code 65) shift) 26))))))
+    ((and (ge code 97) (le code 122))
+      (set out (string_concat out (char_from_code (add 97 (mod (add (sub code 97) shift) 26))))))
+    (true
+      (set out (string_concat out c)))))
+(println out)

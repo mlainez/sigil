@@ -1,0 +1,9 @@
+(set combined (fmt "{}/{}" $0 $1))
+(set parts (split combined "/"))
+(set stack [])
+(for-each p parts
+  (cond
+    ((eq p "..") (if (gt (len stack) 0) (array_pop stack)))
+    ((or (eq p "") (eq p ".")) (set noop 0))
+    (true (push stack p))))
+(println (fmt "/{}" (join stack "/")))

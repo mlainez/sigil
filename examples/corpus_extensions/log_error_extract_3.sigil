@@ -1,0 +1,10 @@
+(set log string $0)
+(set lines array (split log "\n"))
+(set error_messages array [])
+(for-each line string lines
+  (let parts array (split line " "))
+  (cond
+    ((eq (first (slice parts 2 3)) "ERROR")
+     (push error_messages (join (slice parts 3 (len parts)) " ")))))
+(for-each msg string error_messages
+  (println msg))

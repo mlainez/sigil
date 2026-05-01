@@ -1,0 +1,28 @@
+(fn is_open c string -> bool
+  (cond
+    ((eq c "(") (ret true))
+    ((eq c "[") (ret true))
+    ((eq c "{") (ret true))
+    (true (ret false))))
+
+(fn open_for c string -> string
+  (cond
+    ((eq c ")") (ret "("))
+    ((eq c "]") (ret "["))
+    ((eq c "}") (ret "{"))
+    (true (ret ""))))
+
+(fn step s string c string -> string
+  (cond
+    ((eq s "FAIL") (ret "FAIL"))
+    ((is_open c) (ret (join (push (chars s) c) "")))
+    ((ne (open_for c) "")
+     (cond
+       ((eq (len s) 0) (ret "FAIL"))
+       ((eq (last (chars s)) (open_for c))
+        (ret (join (slice (chars s) 0 (sub (len s) 1)) "")))
+       (true (ret "FAIL"))))
+    (true (ret s))))
+
+(set result (reduce (chars $0) (\(s c) (step s c)) ""))
+(println (eq result ""))

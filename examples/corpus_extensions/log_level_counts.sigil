@@ -1,0 +1,8 @@
+(set lines (split $0 "\n"))
+(set counts {})
+(for-each line lines
+  (set idx (string_find line ":"))
+  (if (ge idx 0)
+    (map_inc counts (string_slice line 0 idx))))
+(for-each k (sort (map_keys counts))
+  (println (fmt "{}={}" k (map_get counts k))))

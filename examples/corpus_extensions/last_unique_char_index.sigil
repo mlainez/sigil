@@ -1,0 +1,8 @@
+(set s $0)
+(set char_count (counter (chars s)))
+(set last_unique_index -1)
+(set chars_array (chars s))
+(for-each i (range 0 (len s))
+  (if (eq (get char_count (get chars_array i)) 1)
+    (set last_unique_index i)))
+(println last_unique_index)

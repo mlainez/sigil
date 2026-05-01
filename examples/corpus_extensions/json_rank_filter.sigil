@@ -1,0 +1,12 @@
+(set data (json_parse $0))
+(set filtered (filter data (\item (ge (json_get item ["score"]) #1))))
+(set sorted (sort_by filtered (\item (fmt "{}{}" (sub 100000 (json_get item ["score"])) (json_get item ["name"])))))
+(set indexed (enumerate sorted))
+(for-each pair indexed
+  (println (fmt "{}. {} ({}): {}" (add (first pair) 1) (json_get (last pair) ["name"]) (json_get (last pair) ["dept"]) (json_get (last pair) ["score"]))))
+(println "---")
+(set depts (map_arr sorted (\item (json_get item ["dept"]))))
+(set counts (counter depts))
+(set dept_entries (sort_by (entries counts) (\pair (first pair))))
+(for-each pair dept_entries
+  (println (fmt "{}: {}" (first pair) (last pair))))

@@ -1,0 +1,20 @@
+(set intervals (map_arr (split $0 ",")
+  (\p (map_arr (split p "-") (\s (int s))))))
+(set intervals (sort_by intervals (\x (array_get x 0))))
+
+(set result [])
+(for-each iv intervals
+  (cond
+    ((eq (len result) 0)
+      (set result (push result iv)))
+    ((le (array_get iv 0) (array_get (array_get result (sub (len result) 1)) 1))
+      (set li (sub (len result) 1))
+      (set last (array_get result li))
+      (set result (array_set result li
+        [(array_get last 0) (max (array_get last 1) (array_get iv 1))])))
+    (true
+      (set result (push result iv)))))
+
+(println (join
+  (map_arr result (\iv (fmt "{}-{}" (array_get iv 0) (array_get iv 1))))
+  ","))

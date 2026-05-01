@@ -1,0 +1,1 @@
+(println (len (filter (parse_ints $0) (\x (gt x #1)))))

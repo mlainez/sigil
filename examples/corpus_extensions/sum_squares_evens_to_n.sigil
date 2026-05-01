@@ -1,0 +1,1 @@
+(println (sum (map_arr (filter (range 2 (+ #0 1)) (\x (eq (mod x 2) 0))) (\x (* x x)))))

@@ -1,0 +1,4 @@
+(set parts (split $0 "."))
+(if (gt (len parts) 1)
+  (println (last parts))
+  (else (println "")))

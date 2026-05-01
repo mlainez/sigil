@@ -1,0 +1,8 @@
+(set n #0)
+(set c 0)
+(while (gt n 1)
+  (if (eq (mod n 2) 0)
+    (set n (div n 2))
+    (else (set n (add (mul 3 n) 1))))
+  (set c (add c 1)))
+(println c)

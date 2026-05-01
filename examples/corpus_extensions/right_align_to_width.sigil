@@ -1,0 +1,7 @@
+(set s string $0)
+(set w int #1)
+(set pad_len int (sub w (len s)))
+(set padding string "")
+(for i 0 pad_len
+  (set padding (string_concat padding " ")))
+(println (string_concat padding s))

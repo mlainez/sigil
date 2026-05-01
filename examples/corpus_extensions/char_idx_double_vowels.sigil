@@ -1,0 +1,8 @@
+(set s string $0)
+(set vowels string "aeiouAEIOU")
+(set out string "")
+(for-each c (chars s)
+  (set out (string_concat out c))
+  (if (in c vowels)
+    (set out (string_concat out c))))
+(println out)

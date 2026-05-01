@@ -1,0 +1,13 @@
+(fn is_prime n int -> bool
+  (if (lt n 2) (ret false))
+  (if (eq n 2) (ret true))
+  (if (eq (mod n 2) 0) (ret false))
+  (set i 3)
+  (while (le (mul i i) n)
+    (if (eq (mod n i) 0) (ret false))
+    (set i (add i 2)))
+  (ret true))
+
+(if (is_prime #0)
+  (println "yes")
+  (else (println "no")))

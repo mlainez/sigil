@@ -1,0 +1,8 @@
+(set rows (map_arr (split $0 ";") (\r (split r ","))))
+(set ncols (len (first rows)))
+(set nrows (len rows))
+(for j 0 ncols
+  (set col [])
+  (for i 0 nrows
+    (push col (array_get (array_get rows i) j)))
+  (println (join col ",")))

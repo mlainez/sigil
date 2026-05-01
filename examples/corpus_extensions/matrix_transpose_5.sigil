@@ -1,0 +1,3 @@
+(set rows (map (split $0 "\n") (\row (split row ","))))
+(for-each i (range 0 (len (first rows)))
+  (println (join (map rows (\row (get_or row i ""))) ",")))

@@ -1,0 +1,26 @@
+(fn tokenize s string -> array
+  (set tokens [])
+  (set num "")
+  (set cs (chars s))
+  (set n (len cs))
+  (for i 0 n
+    (set c (array_get cs i))
+    (if (is_digit c)
+      (set num (string_concat num c))
+      (else
+        (if (gt (len num) 0)
+          (push tokens (string_concat "NUM:" num)))
+        (set num "")
+        (cond
+          ((eq c "(") (push tokens "LP"))
+          ((eq c ")") (push tokens "RP"))
+          (true (push tokens (string_concat "OP:" c)))))))
+  (if (gt (len num) 0)
+    (push tokens (string_concat "NUM:" num)))
+  (ret tokens))
+
+(set ac (argv_count))
+(for i 0 ac
+  (set s (arg_str i))
+  (set toks (tokenize s))
+  (println (fmt "{} -> [{}]" s (join toks ", "))))

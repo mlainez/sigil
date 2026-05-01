@@ -1,0 +1,1 @@
+(println (sum (parse_ints $0)))

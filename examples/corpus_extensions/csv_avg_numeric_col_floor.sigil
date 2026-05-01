@@ -1,0 +1,7 @@
+(set csv string $0)
+(set col string $1)
+(set rows array (split csv "\n"))
+(set headers array (split (first rows) ","))
+(set idx int (array_index_of headers col))
+(set vals array (map_arr (rest rows) (\r (int (array_get (split r ",") idx)))))
+(println (div (sum vals) (len vals)))

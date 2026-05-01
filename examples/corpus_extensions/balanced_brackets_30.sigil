@@ -1,0 +1,19 @@
+(set s string $0)
+(set stack array [])
+(set ok bool true)
+(for-each c (chars s)
+  (cond
+    ((or (eq c "(") (or (eq c "[") (eq c "{")))
+      (push stack c))
+    ((or (eq c ")") (or (eq c "]") (eq c "}")))
+      (if (eq (len stack) 0)
+        (set ok false)
+        (else
+          (set top (array_pop stack))
+          (cond
+            ((and (eq c ")") (ne top "(")) (set ok false))
+            ((and (eq c "]") (ne top "[")) (set ok false))
+            ((and (eq c "}") (ne top "{")) (set ok false))
+            (true (set dummy int 0))))))))
+(if (gt (len stack) 0) (set ok false))
+(println (str ok))

@@ -1,0 +1,15 @@
+(fn balanced s string -> bool
+  (set stack [])
+  (set pairs {")" "(" "]" "[" "}" "{"})
+  (for-each c (chars s)
+    (cond
+      ((in c ["(" "[" "{"]) (push stack c))
+      ((in c [")" "]" "}"])
+        (if (eq (len stack) 0) (ret false))
+        (if (ne (array_pop stack) (map_get pairs c)) (ret false)))))
+  (ret (eq (len stack) 0)))
+
+(for-each s (argv)
+  (if (balanced s)
+    (println (fmt "{} OK" s))
+    (else (println (fmt "{} BAD" s)))))

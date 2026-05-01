@@ -1,0 +1,3 @@
+(set xs (parse_ints $0))
+(set sorted (sort_by xs (\x (neg x))))
+(println (join (map_arr sorted (\x (str x))) " "))

@@ -1,0 +1,3 @@
+(set lines array (split $0 "\n"))
+(for-each line string lines
+  (println (fmt "{}: {}" (add (array_index_of lines line) 1) line)))

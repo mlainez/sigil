@@ -1,0 +1,9 @@
+(set pairs string $0)
+(set key string $1)
+(set pair_list array (split pairs ","))
+(set result string "")
+(for-each pair string pair_list
+  (set kv array (split pair "="))
+  (if (eq (first kv) key)
+    (set result (second kv))))
+(println result)

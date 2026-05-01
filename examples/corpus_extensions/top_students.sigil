@@ -1,0 +1,11 @@
+(set tuples [])
+(for-each e (split $0 ",")
+  (set p (split e ":"))
+  (set sc (int (array_get p 1)))
+  (push tuples [(sub 0 sc) (array_get p 0) sc])
+)
+(sort tuples)
+(for i 0 5
+  (set t (array_get tuples i))
+  (println (fmt "{}. {} ({})" (add i 1) (array_get t 1) (array_get t 2)))
+)

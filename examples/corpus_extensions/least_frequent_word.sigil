@@ -1,0 +1,9 @@
+(set s $0)
+(set words (split s " "))
+(set counts {})
+(for-each w words (map_inc counts w))
+(set sorted (sort_by (entries counts) (\(k v) v)))
+(set result [])
+(for i 0 1
+  (push result (first (array_get sorted i))))
+(println (join result " "))

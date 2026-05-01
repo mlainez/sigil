@@ -1,0 +1,1 @@
+(println (reduce (filter (map_arr (split $0 " ") (\x (int x))) (\x (gt x 0))) (\(a b) (mul a b)) 1))

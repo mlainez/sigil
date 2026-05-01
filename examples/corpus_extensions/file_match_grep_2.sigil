@@ -1,0 +1,4 @@
+(set text string $0)
+(set lines array (split text "\n"))
+(set filtered_lines array (filter (\line (in "test" line)) lines))
+(println (join filtered_lines "\n"))

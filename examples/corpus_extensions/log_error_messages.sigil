@@ -1,0 +1,11 @@
+(set log string $0)
+(set lines array (split log "\n"))
+(set error_messages array [])
+(for-each line string lines
+  (if (in "ERROR" line)
+    (let parts array (split line " "))
+    (let message string (join (slice parts 3) " "))
+    (push error_messages message)))
+(set sorted_errors array (sort error_messages))
+(for-each msg string sorted_errors
+  (println msg))

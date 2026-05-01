@@ -1,0 +1,8 @@
+(set lines1 array (split $0 "\n"))
+(set lines2 array (split $1 "\n"))
+(for-each i int (range 0 (len lines1))
+  (let line1 string (first (slice lines1 i (+ i 1))))
+  (let line2 string (first (slice lines2 i (+ i 1))))
+  (if (eq line1 line2) (println (fmt "  {line1}")))
+  (if (ne line1 line2) (println (fmt "- {line1}")))
+  (if (ne line1 line2) (println (fmt "+ {line2}"))))

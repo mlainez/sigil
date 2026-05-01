@@ -1,0 +1,11 @@
+(set counts {})
+(for-each w (split $0 " ")
+  (if (gt (len w) 0)
+    (map_inc counts w)))
+(set keys [])
+(for-each e (entries counts)
+  (push keys (fmt "{}_{}" (sub 9999999 (array_get e 1)) (array_get e 0))))
+(sort keys)
+(for-each k keys
+  (set word (string_slice k 8 (sub (len k) 8)))
+  (println (fmt "{}: {}" word (map_get counts word))))

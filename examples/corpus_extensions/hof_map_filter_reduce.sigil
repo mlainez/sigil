@@ -1,0 +1,5 @@
+(set nums array (parse_ints $0 " "))
+(set squares array (map_arr (\x (* x x)) nums))
+(set evens array (filter (\x (eq (% x 2) 0)) squares))
+(set result int (reduce evens + 0))
+(println result)

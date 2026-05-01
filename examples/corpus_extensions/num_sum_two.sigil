@@ -1,0 +1,3 @@
+(set a int #0)
+(set b int #1)
+(println (+ a b))

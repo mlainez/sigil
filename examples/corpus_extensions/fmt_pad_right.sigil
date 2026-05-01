@@ -1,0 +1,5 @@
+(set s $0)
+(set w #1)
+(set out s)
+(while (lt (len out) w) (set out (string_concat out ".")))
+(println out)

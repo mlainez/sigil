@@ -1,0 +1,8 @@
+(set arr (parse_ints $0))
+(set result -1)
+(for i 1 (len arr)
+  (if (lt (array_get arr i) (array_get arr (sub i 1)))
+    (begin
+      (set result i)
+      (break))))
+(println result)

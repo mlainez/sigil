@@ -1,0 +1,9 @@
+(set input string $0)
+(set key string $1)
+(set pairs array (split input ","))
+(set result string "")
+(for-each pair string pairs
+  (set parts array (split pair "="))
+  (if (eq (first parts) key)
+    (set result (second parts))))
+(println result)

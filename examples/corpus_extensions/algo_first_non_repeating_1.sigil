@@ -1,0 +1,8 @@
+(set s $0)
+(set chars (chars s))
+(set counts {})
+(for-each c chars (map_inc counts c))
+(set unique (filter chars (\c (eq (map_get counts c) 1))))
+(if (gt (len unique) 0)
+  (println (first unique))
+  (else (println "_")))

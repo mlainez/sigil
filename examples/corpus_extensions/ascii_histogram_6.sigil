@@ -1,0 +1,21 @@
+(set n int (argv_count))
+(set labels array [])
+(set counts array [])
+(set max_w int 0)
+(for i 0 n
+  (set parts array (split (arg_str i) ":"))
+  (set label string (array_get parts 0))
+  (set count int (string_to_int (array_get parts 1)))
+  (push labels label)
+  (push counts count)
+  (if (gt (len label) max_w)
+    (set max_w (len label))))
+(for i 0 n
+  (set lbl string (array_get labels i))
+  (set cnt int (array_get counts i))
+  (while (lt (len lbl) max_w)
+    (set lbl (string_concat lbl " ")))
+  (set bars string "")
+  (for j 0 cnt
+    (set bars (string_concat bars "#")))
+  (println (fmt "{} | {}" lbl bars)))

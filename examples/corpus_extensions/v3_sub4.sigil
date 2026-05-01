@@ -1,0 +1,7 @@
+(set args string (arg_str 0))
+(set parts array (split args " "))
+(set a int (array_get (parse_ints (join parts " ")) 0))
+(set b int (array_get (parse_ints (join parts " ")) 1))
+(set c int (array_get (parse_ints (join parts " ")) 2))
+(set d int (array_get (parse_ints (join parts " ")) 3))
+(println (sub (sub (sub a b) c) d))

@@ -1,0 +1,9 @@
+(set words (argv))
+(set groups {})
+(for-each w words
+  (set key (join (sort (chars w)) ""))
+  (if (in key groups)
+    (set groups (map_set groups key (push (map_get groups key) w)))
+    (else (set groups (map_set groups key [w])))))
+(for-each k (sort (map_keys groups))
+  (println (join (sort (map_get groups k)) " ")))

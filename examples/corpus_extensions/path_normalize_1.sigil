@@ -1,0 +1,10 @@
+(set parts (split $0 "/"))
+(set stack [])
+(for-each seg parts
+  (if (eq seg "..")
+    (if (gt (len stack) 0)
+      (array_pop stack))
+    (else
+      (if (and (ne seg "") (ne seg "."))
+        (push stack seg)))))
+(println (string_concat "/" (join stack "/")))

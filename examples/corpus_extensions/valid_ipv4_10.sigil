@@ -1,0 +1,19 @@
+(fn valid_part s string -> bool
+  (if (eq (len s) 0) (ret false))
+  (for-each c (chars s)
+    (if (not (is_digit c)) (ret false)))
+  (set n (string_to_int s))
+  (if (lt n 0) (ret false))
+  (if (gt n 255) (ret false))
+  (ret true))
+
+(fn valid_ip s string -> bool
+  (set parts (split s "."))
+  (if (ne (len parts) 4) (ret false))
+  (for-each p parts
+    (if (not (valid_part p)) (ret false)))
+  (ret true))
+
+(if (valid_ip $0)
+  (println "yes")
+  (else (println "no")))

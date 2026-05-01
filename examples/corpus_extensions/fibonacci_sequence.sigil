@@ -1,0 +1,7 @@
+(set n #0)
+(set arr [0 1])
+(for i 2 n
+  (push arr (add (array_get arr (sub i 1)) (array_get arr (sub i 2)))))
+(if (eq n 1) (set arr [0]))
+(if (le n 0) (set arr []))
+(println (join (slice arr 0 n) " "))

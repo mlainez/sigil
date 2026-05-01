@@ -1,0 +1,4 @@
+(set words (split $0 " "))
+(set keys (uniq (sort (map_arr words (\w (join (sort (chars w)) ""))))))
+(set groups (map_arr keys (\k (sort (filter words (\w (eq (join (sort (chars w)) "") k)))))))
+(for-each g (sort_by groups first) (println (join g " ")))

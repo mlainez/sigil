@@ -1,0 +1,6 @@
+(set rows (split $0 "\n"))
+(set col #1)
+(set s 0)
+(for-each r rows
+  (set s (add s (int (array_get (split r ",") col)))))
+(println s)

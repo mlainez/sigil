@@ -1,0 +1,9 @@
+(println (last (reduce (argv) (\(stack token)
+  (cond
+    ((eq token "+") (push (slice stack 0 (- (len stack) 2)) (+ (last (slice stack 0 (- (len stack) 1))) (last stack))))
+    ((eq token "-") (push (slice stack 0 (- (len stack) 2)) (- (last (slice stack 0 (- (len stack) 1))) (last stack))))
+    ((eq token "*") (push (slice stack 0 (- (len stack) 2)) (* (last (slice stack 0 (- (len stack) 1))) (last stack))))
+    ((eq token "/") (push (slice stack 0 (- (len stack) 2)) (/ (last (slice stack 0 (- (len stack) 1))) (last stack))))
+    (true (push stack (first (parse_ints token))))
+  )
+) [])))

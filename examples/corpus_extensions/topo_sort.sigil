@@ -1,0 +1,37 @@
+(set input $0)
+(set lines (split input "\n"))
+(set deps {})
+(set indeg {})
+(set nodes [])
+
+(for-each line lines
+  (set parts (split line ":"))
+  (set name (array_get parts 0))
+  (set dep_str "")
+  (if (> (len parts) 1)
+    (set dep_str (array_get parts 1)))
+  (if (not (in name nodes))
+    (set nodes (push nodes name)))
+  (set dlist [])
+  (if (> (len dep_str) 0)
+    (set dlist (split dep_str ",")))
+  (set deps (map_set deps name dlist))
+  (set indeg (map_set indeg name (len dlist))))
+
+(set result [])
+(set processed {})
+
+(while (< (len result) (len nodes))
+  (set ready [])
+  (for-each n nodes
+    (if (and (not (in n processed)) (eq (map_get indeg n) 0))
+      (set ready (push ready n))))
+  (set ready (sort ready))
+  (set pick (first ready))
+  (set result (push result pick))
+  (set processed (map_set processed pick true))
+  (for-each n nodes
+    (if (in pick (map_get deps n))
+      (set indeg (map_set indeg n (- (map_get indeg n) 1))))))
+
+(println (join result " "))

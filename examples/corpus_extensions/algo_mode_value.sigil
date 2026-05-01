@@ -1,0 +1,10 @@
+(set tokens (split $0 " "))
+(set counts {})
+(set best "")
+(set best_count 0)
+(for-each tok tokens
+  (set c (map_inc counts tok))
+  (if (gt c best_count)
+    (set best tok)
+    (set best_count c)))
+(println best)

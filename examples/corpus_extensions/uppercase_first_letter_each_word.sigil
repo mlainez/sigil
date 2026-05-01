@@ -1,0 +1,10 @@
+(set s string $0)
+(set words array (split s " "))
+(set result string "")
+(for-each w string words
+  (set first char (first (chars w)))
+  (set rest string (lower (slice w 1)))
+  (set uc_first string (upper first))
+  (if (eq result "") (set result (fmt "{}{}" uc_first rest))
+    (else (set result (fmt "{} {}{}" result uc_first rest)))))
+(println (fmt "{}\n" result))

@@ -1,0 +1,7 @@
+(set text string $0)
+(set lines array (split text "\n"))
+(set indexed_lines array [])
+(for-each line string lines
+  (set indexed_line string (fmt "{} {}" (add (len indexed_lines) 1) line))
+  (push indexed_lines indexed_line))
+(println (join indexed_lines "\n"))

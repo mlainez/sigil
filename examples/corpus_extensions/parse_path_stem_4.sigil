@@ -1,0 +1,5 @@
+(set path $0)
+(set name (last (split path "/")))
+(set segs (split name "."))
+(set n (len segs))
+(println (join (slice segs 0 (sub n 1)) "."))

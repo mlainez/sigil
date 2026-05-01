@@ -1,0 +1,11 @@
+(set nums array (parse_ints $0))
+(set n int (len nums))
+(set result string "")
+(for i 0 n
+  (set x int (array_get nums i))
+  (if (eq i 0)
+    (set result (str x))
+    (else
+      (set result (string_concat result " "))
+      (set result (string_concat result (str (bit_xor x (last (parse_ints result)))))))))
+(println (fmt "{}\n" result))

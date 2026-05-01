@@ -1,0 +1,8 @@
+(set input $0)
+(set prev_char "")
+(set result "")
+(for-each ch (chars input)
+  (if (not (eq ch prev_char))
+    (set result (fmt "{}{}" result ch)))
+  (set prev_char ch))
+(println result)

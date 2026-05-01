@@ -1,0 +1,3 @@
+(set s string $0)
+(set parts array (split s "_"))
+(println (join parts "-"))

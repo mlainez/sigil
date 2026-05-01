@@ -1,0 +1,8 @@
+(set parts (split $0 "."))
+(set int_part (first parts))
+(set dec_part (last parts))
+(set rev_chars (rev (chars int_part)))
+(set n (len rev_chars))
+(set starts (filter (range 0 n) (\i (eq (mod i 3) 0))))
+(set groups (map_arr starts (\i (join (rev (slice rev_chars i (add i 3))) ""))))
+(println (join ["$" (join (rev groups) ",") "." dec_part] ""))

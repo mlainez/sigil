@@ -1,0 +1,4 @@
+(set toks (split $0 " "))
+(if (eq (len toks) (len (uniq toks)))
+  (println "yes")
+  (else (println "no")))

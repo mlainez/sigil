@@ -1,0 +1,1 @@
+(println (fmt "{} {}" (div #0 #1) (mod #0 #1)))

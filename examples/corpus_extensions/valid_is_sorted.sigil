@@ -1,0 +1,3 @@
+(set nums array (map_arr (split $0 " ") (\x (str x))))
+(set sorted_nums array (sort nums))
+(println (eq nums sorted_nums))

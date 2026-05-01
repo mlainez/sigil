@@ -1,0 +1,7 @@
+(set text $0)
+(set pat $1)
+(set lines (split text "\n"))
+(for i 0 (len lines)
+  (set line (array_get lines i))
+  (if (in pat line)
+    (println (fmt "{}:{}" (add i 1) line))))

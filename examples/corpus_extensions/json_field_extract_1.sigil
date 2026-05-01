@@ -1,0 +1,4 @@
+(set arr (json_parse $0))
+(set field $1)
+(for-each obj arr
+  (println (json_get obj field)))

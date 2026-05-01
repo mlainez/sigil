@@ -1,0 +1,3 @@
+(set s string $0)
+(for-each f string (split s "|")
+  (println f))

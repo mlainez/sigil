@@ -1,0 +1,6 @@
+(set a array (parse_ints $0))
+(set b array (parse_ints $1))
+(set out [])
+(for i 0 (len a)
+  (push out (str (max (array_get a i) (array_get b i)))))
+(println (join out " "))

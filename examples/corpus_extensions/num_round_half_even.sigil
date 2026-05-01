@@ -1,0 +1,10 @@
+(set f (float $0))
+(set fl (floor f))
+(set diff (sub f (cast_int_float fl)))
+(cond
+  ((lt diff 0.5) (println fl))
+  ((gt diff 0.5) (println (add fl 1)))
+  (true
+    (if (eq (mod fl 2) 0)
+      (println fl)
+      (else (println (add fl 1))))))

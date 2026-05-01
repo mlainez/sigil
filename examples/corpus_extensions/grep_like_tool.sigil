@@ -1,0 +1,5 @@
+(set pattern string $0)
+(set text string $1)
+(set lines array (split text "\n"))
+(set filtered_lines array (filter (\line (in pattern line)) lines))
+(for-each line string filtered_lines (println line))

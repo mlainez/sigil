@@ -1,0 +1,4 @@
+(set lines array (split $0 "\n"))
+(for-each line string lines
+  (if (and (not (eq line "")) (not (string_starts_with line "#")))
+    (println (first (split line "=")))))

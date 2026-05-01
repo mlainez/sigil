@@ -1,0 +1,9 @@
+(set a string $0)
+(set b string $1)
+
+(set count int 0)
+(for-each ch (chars a)
+  (if (in ch b)
+    (set count (add count 1))))
+
+(println count)

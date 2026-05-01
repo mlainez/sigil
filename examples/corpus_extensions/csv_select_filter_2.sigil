@@ -1,0 +1,22 @@
+(set csv string $0)
+(set cols string $1)
+(set filter string $2)
+
+(set rows array (split csv "\n"))
+(set header_row string (array_get rows 0))
+(set col_names array (split header_row ","))
+
+(set filter_col string (first (split filter "=")))
+(set filter_val string (last (split filter "=")))
+
+(set filtered_rows array
+     (filter (slice rows 1) (\row
+       (eq (array_get (split row ",") (index_of col_names filter_col)) filter_val))))
+
+(set projected_rows array
+     (map_arr filtered_rows (\row
+       (join (map_arr (split cols ",") (\col
+         (array_get (split row ",") (index_of col_names col)))) "\t"))))
+
+(println (join (split cols ",") "\t"))
+(for-each r string projected_rows (println r))

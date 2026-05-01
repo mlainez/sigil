@@ -1,0 +1,19 @@
+(set mode $0)
+(set s $1)
+(set out "")
+(if (eq mode "to_snake")
+  (for-each c (chars s)
+    (if (is_upper c)
+      (set out (string_concat out (string_concat "_" (to_lower_char c))))
+      (else (set out (string_concat out c)))))
+  (else
+    (set upper false)
+    (for-each c (chars s)
+      (if (eq c "_")
+        (set upper true)
+        (else
+          (if upper
+            (set out (string_concat out (to_upper_char c)))
+            (else (set out (string_concat out c))))
+          (set upper false))))))
+(println out)

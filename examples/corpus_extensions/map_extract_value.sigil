@@ -1,0 +1,8 @@
+(set input string $0)
+(set pairs array (split input ","))
+(set result string "")
+(for-each pair string pairs
+  (set parts array (split pair "="))
+  (if (eq (first parts) "b")
+    (set result (second parts))))
+(println result)

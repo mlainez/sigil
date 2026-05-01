@@ -1,0 +1,48 @@
+(fn is_leap y int -> bool
+  (or (and (eq (mod y 4) 0) (ne (mod y 100) 0)) (eq (mod y 400) 0)))
+
+(fn dim y int m int -> int
+  (cond
+    ((eq m 2)
+      (if (is_leap y) (ret 29))
+      (ret 28))
+    ((or (eq m 4) (or (eq m 6) (or (eq m 9) (eq m 11))))
+      (ret 30))
+    (true (ret 31))))
+
+(fn dow y int m int d int -> int
+  (set yy y)
+  (set mm m)
+  (if (lt mm 3)
+    (set mm (add mm 12))
+    (set yy (sub yy 1)))
+  (set k (mod yy 100))
+  (set j (div yy 100))
+  (set h (add d (add (div (mul 13 (add mm 1)) 5) (add k (add (div k 4) (sub (div j 4) (mul 2 j)))))))
+  (set h (mod (add (mod h 7) 7) 7))
+  (ret h))
+
+(set parts (split $0 "-"))
+(set y (int (array_get parts 0)))
+(set m (int (array_get parts 1)))
+(set d (int (array_get parts 2)))
+(set n #1)
+
+(set added 0)
+(while (lt added n)
+  (set d (add d 1))
+  (if (gt d (dim y m))
+    (set d 1)
+    (set m (add m 1))
+    (if (gt m 12)
+      (set m 1)
+      (set y (add y 1))))
+  (set h (dow y m d))
+  (if (and (ne h 0) (ne h 1))
+    (set added (add added 1))))
+
+(set ms (str m))
+(if (lt m 10) (set ms (string_concat "0" ms)))
+(set ds (str d))
+(if (lt d 10) (set ds (string_concat "0" ds)))
+(println (join [y ms ds] "-"))

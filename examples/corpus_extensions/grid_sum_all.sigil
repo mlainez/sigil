@@ -1,0 +1,1 @@
+(println (sum (map_arr (split (string_replace $0 ";" ",") ",") (\x (int x)))))

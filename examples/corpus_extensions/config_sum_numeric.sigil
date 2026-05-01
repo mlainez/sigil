@@ -1,0 +1,3 @@
+(set lines (split $0 "\n"))
+(set pat (regex_compile "^-?[0-9]+$"))
+(println (sum (map_arr (filter lines (\line (regex_match pat (last (split line "="))))) (\line (first (parse_ints (last (split line "="))))))))

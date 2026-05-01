@@ -1,0 +1,10 @@
+(set log_blob string $0)
+(set lines array (split log_blob "\n"))
+(set error_lines array [])
+(for-each line string lines
+  (let parts array (split line " "))
+  (if (eq (first (slice parts 2)) "ERROR")
+    (push error_lines (join (slice parts 3) " "))))
+(println (fmt "ERROR count: {}" (len error_lines)))
+(for-each msg string error_lines
+  (println msg))

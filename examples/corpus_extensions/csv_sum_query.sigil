@@ -1,0 +1,12 @@
+(set lines (split $0 "
+"))
+(set headers (split (first lines) ","))
+(set fcol (array_index_of headers $1))
+(set scol (array_index_of headers $3))
+(set total 0)
+(set n (len lines))
+(for i 1 n
+  (set row (split (array_get lines i) ","))
+  (if (eq (array_get row fcol) $2)
+    (set total (add total (int (array_get row scol))))))
+(println total)

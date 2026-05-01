@@ -1,0 +1,4 @@
+(set lines (split $0 "\n"))
+(for-each line lines
+  (if (string_starts_with line "#")
+    (println (fmt "{}:{}" (len (first (split line " "))) (join (rest (split line " ")) " ")))))

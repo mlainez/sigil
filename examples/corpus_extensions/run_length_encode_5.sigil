@@ -1,0 +1,20 @@
+(fn rle s string -> string
+  (set cs (chars s))
+  (set n (len cs))
+  (if (eq n 0) (ret ""))
+  (set out "")
+  (set cur (array_get cs 0))
+  (set k 1)
+  (for i 1 n
+    (set c (array_get cs i))
+    (if (eq c cur)
+      (set k (add k 1))
+      (else
+        (set out (fmt "{}{}{}" out cur k))
+        (set cur c)
+        (set k 1))))
+  (ret (fmt "{}{}{}" out cur k)))
+
+(for i 0 (argv_count)
+  (set a (arg_str i))
+  (println (fmt "{} -> {}" a (rle a))))

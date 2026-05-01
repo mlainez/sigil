@@ -1,0 +1,9 @@
+(fn rotate_check a string b string -> bool
+  (set len int (len a))
+  (if (ne len (len b)) (ret false))
+  (set doubled_a string (string_concat a a))
+  (ret (in b doubled_a)))
+
+(if (rotate_check $0 $1)
+  (println "yes")
+  (else (println "no")))

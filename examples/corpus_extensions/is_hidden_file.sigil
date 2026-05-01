@@ -1,0 +1,4 @@
+(set name string $0)
+(if (eq (string_slice name 0 1) ".")
+  (println "yes")
+  (else (println "no")))

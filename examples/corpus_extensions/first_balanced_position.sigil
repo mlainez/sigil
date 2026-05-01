@@ -1,0 +1,13 @@
+(set s string $0)
+(set n int (len s))
+(set depth int 0)
+(set result int -1)
+(for i 0 n
+  (set c string (string_slice s i 1))
+  (if (eq c "(")
+    (set depth (add depth 1)))
+  (if (and (eq c ")") (gt depth 0))
+    (set depth (sub depth 1)))
+  (if (and (eq result -1) (eq depth 0))
+    (set result i)))
+(println (fmt "{}\n" result))

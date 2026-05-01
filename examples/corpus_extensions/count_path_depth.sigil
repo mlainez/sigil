@@ -1,0 +1,3 @@
+(set path string $0)
+(set parts array (split path "/"))
+(println (len (filter (\p p (ne p "")) parts)))

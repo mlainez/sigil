@@ -1,0 +1,7 @@
+(set pairs (split $0 ","))
+(set m {})
+(for-each p pairs
+  (set kv (split p "="))
+  (set m (json_set m [(first kv)] (last kv))))
+(set keys (split $1 ","))
+(println (join (map_arr keys (\k (json_get m [k]))) " "))

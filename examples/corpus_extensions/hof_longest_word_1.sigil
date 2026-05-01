@@ -1,0 +1,6 @@
+(set words (split $0 " "))
+(set best "")
+(for-each w words
+  (if (gt (len w) (len best))
+    (set best w)))
+(println best)

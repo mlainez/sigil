@@ -1,0 +1,1 @@
+(println (sum (map_arr (chars $0) (\c (sub (string_get c 0) 48)))))

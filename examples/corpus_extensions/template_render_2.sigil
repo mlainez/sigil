@@ -1,0 +1,3 @@
+(set template $0)
+(set pairs (slice (argv) 1 (argv_count)))
+(println (reduce pairs (\(tmpl pair) (string_replace tmpl (join ["{" (first (split pair "=")) "}"] "") (last (split pair "=")))) template))

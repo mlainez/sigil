@@ -1,0 +1,7 @@
+(set x (float $0))
+(set r (floor (add (mul x 100.0) 0.5)))
+(set i (div r 100))
+(set d (mod r 100))
+(if (lt d 10)
+  (println (fmt "{}.0{}" i d))
+  (else (println (fmt "{}.{}" i d))))

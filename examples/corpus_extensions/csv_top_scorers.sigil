@@ -1,0 +1,19 @@
+(set csv string $0)
+(set threshold int #1)
+
+(set lines array (split csv "\n"))
+(set header string (first lines))
+(set data array (rest lines))
+
+(set filtered_data array (filter (\line
+  (set parts array (split line ","))
+  (ge (string_to_int (second parts)) threshold)) data))
+
+(set sorted_data array (sort_by filtered_data (\line
+  (set parts array (split line ","))
+  (neg (string_to_int (second parts))))))
+
+(println "name\tscore")
+(for-each line string sorted_data
+  (set parts array (split line ","))
+  (println (fmt "{}\t{}" (first parts) (second parts))))

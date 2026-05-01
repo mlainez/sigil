@@ -1,0 +1,3 @@
+(set n #0)
+(set divisors (filter (range 2 n) (\d (eq (mod n d) 0))))
+(println (and (gt n 1) (eq (len divisors) 0)))

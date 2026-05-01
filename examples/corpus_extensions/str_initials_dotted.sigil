@@ -1,0 +1,1 @@
+(println (fmt "{}." (join (map_arr (split $0 " ") (\w (upper (string_slice w 0 1)))) ".")))

@@ -1,0 +1,6 @@
+(set parts (split $0 ","))
+(for i 0 (len parts)
+  (set v (int (array_get parts i)))
+  (set bar "")
+  (for j 0 v (set bar (string_concat bar "#")))
+  (println (fmt "{}: {}" (add i 1) bar)))

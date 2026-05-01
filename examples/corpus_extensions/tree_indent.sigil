@@ -1,0 +1,31 @@
+(set pairs (split $0 ","))
+(set children {})
+(set all_parents [])
+(set all_children [])
+
+(for-each pair pairs
+  (set parts (split pair ":"))
+  (set p (first parts))
+  (set c (last parts))
+  (push all_parents p)
+  (push all_children c)
+  (set kids (get_or children p []))
+  (push kids c)
+  (map_set children p kids))
+
+(set root "")
+(for-each q all_parents
+  (if (not (in q all_children))
+    (set root q)))
+
+(fn dfs node string depth int kids map -> int
+  (set indent "")
+  (for i 0 depth
+    (set indent (string_concat indent "  ")))
+  (println (string_concat indent node))
+  (if (map_has kids node)
+    (for-each child (map_get kids node)
+      (dfs child (add depth 1) kids)))
+  (ret 0))
+
+(dfs root 0 children)

@@ -1,0 +1,26 @@
+(set words (split $0 " "))
+(set counts {})
+(for-each w words
+  (map_inc counts w))
+
+(set n #1)
+(set ents (entries counts))
+
+(set max_c 0)
+(for-each e ents
+  (set ec (array_get e 1))
+  (if (gt ec max_c) (set max_c ec)))
+
+(set printed 0)
+(set c max_c)
+(while (and (gt c 0) (lt printed n))
+  (set bucket [])
+  (for-each e ents
+    (if (eq (array_get e 1) c)
+      (push bucket (array_get e 0))))
+  (sort bucket)
+  (for-each w bucket
+    (if (lt printed n)
+      (println (fmt "{}: {}" w c))
+      (set printed (add printed 1))))
+  (set c (sub c 1)))

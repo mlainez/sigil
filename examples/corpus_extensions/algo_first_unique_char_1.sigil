@@ -1,0 +1,8 @@
+(set s $0)
+(set freq (counter (chars s)))
+(set result "_")
+(for-each c (chars s)
+  (if (eq (map_get freq c) 1)
+    (set result c)
+    (break)))
+(println result)

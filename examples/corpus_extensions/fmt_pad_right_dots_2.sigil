@@ -1,0 +1,7 @@
+(set s $0)
+(set w #1)
+(set pad (sub w (len s)))
+(set result s)
+(for i 0 pad
+  (set result (string_concat result ".")))
+(println result)

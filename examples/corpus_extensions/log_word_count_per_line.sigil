@@ -1,0 +1,3 @@
+(set log string $0)
+(for-each line string (split log "\n")
+  (println (fmt "{:3}: {}" (len (filter (split line " ") (\x (ne x "")))) line)))

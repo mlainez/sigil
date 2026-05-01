@@ -1,0 +1,5 @@
+(set num #0)
+(set indices (parse_ints $1))
+(for-each i indices
+  (set num (bit_or num (bit_shift_left 1 i))))
+(println num)

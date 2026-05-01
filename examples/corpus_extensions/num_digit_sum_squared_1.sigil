@@ -1,0 +1,2 @@
+(set s (sum (map_arr (chars $0) (\c (int c)))))
+(println (mul s s))

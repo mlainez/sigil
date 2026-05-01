@@ -1,0 +1,4 @@
+(set s $0)
+(if (and (eq (len s) 5) (eq (count_in s "0123456789") 5))
+  (println "yes")
+  (else (println "no")))

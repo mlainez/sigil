@@ -1,0 +1,9 @@
+(set pairs (split $0 ","))
+(set counts {})
+(for-each pair pairs
+  (set kv (split pair ":"))
+  (set k (first kv))
+  (set v (int (last kv)))
+  (set counts (map_set counts k (add v (get_or counts k 0)))))
+(for-each k (sort (map_keys counts))
+  (println (fmt "{}: {}" k (map_get counts k))))

@@ -1,0 +1,3 @@
+(set nums array (split $0 " "))
+(set squares array (map_arr (\x (mul x x)) (map_arr str->int nums)))
+(println (reduce + 0 squares))

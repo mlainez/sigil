@@ -1,0 +1,24 @@
+(set ones ["zero" "one" "two" "three" "four" "five" "six" "seven" "eight" "nine"])
+(set teens ["ten" "eleven" "twelve" "thirteen" "fourteen" "fifteen" "sixteen" "seventeen" "eighteen" "nineteen"])
+(set tens ["" "" "twenty" "thirty" "forty" "fifty" "sixty" "seventy" "eighty" "ninety"])
+(set n #0)
+(if (eq n 0)
+  (println "zero")
+  (else
+    (set parts [])
+    (set h (div n 100))
+    (set r (mod n 100))
+    (if (gt h 0)
+      (push parts (fmt "{} hundred" (array_get ones h))))
+    (if (gt r 0)
+      (cond
+        ((lt r 10) (push parts (array_get ones r)))
+        ((lt r 20) (push parts (array_get teens (sub r 10))))
+        (true
+          (set t (div r 10))
+          (set o (mod r 10))
+          (if (eq o 0)
+            (push parts (array_get tens t))
+            (else
+              (push parts (fmt "{} {}" (array_get tens t) (array_get ones o))))))))
+    (println (join parts " "))))

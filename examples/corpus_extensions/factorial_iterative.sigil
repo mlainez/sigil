@@ -1,0 +1,5 @@
+(set n int #0)
+(set result int 1)
+(for i 2 (add n 1)
+  (set result (mul result i)))
+(println result)

@@ -1,0 +1,2 @@
+(set j (json_parse $0))
+(println (json_get j (split $1 ".")))

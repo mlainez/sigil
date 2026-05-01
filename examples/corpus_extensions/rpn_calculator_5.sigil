@@ -1,0 +1,10 @@
+(set stack [])
+(for i 0 (argv_count)
+  (set s (arg_str i))
+  (cond
+    ((eq s "+") (set b (array_pop stack)) (set a (array_pop stack)) (push stack (add a b)))
+    ((eq s "-") (set b (array_pop stack)) (set a (array_pop stack)) (push stack (sub a b)))
+    ((eq s "*") (set b (array_pop stack)) (set a (array_pop stack)) (push stack (mul a b)))
+    ((eq s "/") (set b (array_pop stack)) (set a (array_pop stack)) (push stack (div a b)))
+    (true (push stack (int s)))))
+(println (array_pop stack))

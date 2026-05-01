@@ -1,0 +1,6 @@
+(set n #0)
+(set s "")
+(while (gt n 0)
+  (set s (string_concat (str (mod n 2)) s))
+  (set n (div n 2)))
+(println s)

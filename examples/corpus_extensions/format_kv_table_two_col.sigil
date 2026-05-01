@@ -1,0 +1,13 @@
+(set config string $0)
+(set lines array (split config "\n"))
+(set keys array [])
+(for-each line string lines
+  (set parts array (split line "="))
+  (push keys (first parts)))
+(set max_len int (len (first (sort_by keys (\k int (neg (len k)))))))
+(println (join (map_arr lines (\line string
+  (set parts array (split line "="))
+  (set key string (first parts))
+  (set val string (last parts))
+  (set pad string (string_repeat " " (sub max_len (len key))))
+  (ret (fmt "{}{} = {}" pad key val)))) "\n"))

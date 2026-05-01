@@ -1,0 +1,7 @@
+(set arr (parse_ints $0))
+(set n (len arr))
+(set ok true)
+(for i 1 n
+  (if (gt (array_get arr i) (array_get arr (sub i 1)))
+    (set ok false)))
+(if ok (println "yes") (else (println "no")))

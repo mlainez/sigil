@@ -1,0 +1,3 @@
+(if (eq (argv_count) 0)
+  (println "usage: <name>")
+  (else (println (fmt "hello {}" $0))))

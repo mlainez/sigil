@@ -1,0 +1,6 @@
+(set lines (split $0 "\n"))
+(set filtered (filter lines (\line (and (gt (len line) 0) (ne (string_starts_with line "#") true)))))
+(set env_map (reduce filtered (\(m line) (merge m {(first (split line "=")) (join (rest (split line "=")) "=")})) {}))
+(set keys (split $1 ","))
+(for-each k keys
+  (println (fmt "{}={}" k (get_or env_map k "<missing>"))))

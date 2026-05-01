@@ -1,0 +1,13 @@
+(set rows (split $0 "\n"))
+(set header (split (first rows) ","))
+(set cols (split $1 ","))
+(set threshold #2)
+(set data (rest rows))
+(set score_idx (first (first (filter (enumerate header) (\p (eq (last p) "score"))))))
+(set col_indices (map_arr cols (\col (first (first (filter (enumerate header) (\p (eq (last p) col))))))))
+(set filtered (filter data (\row (gt (first (parse_ints (last (first (filter (enumerate (split row ",")) (\p (eq (first p) score_idx))))))) threshold))))
+(set sorted (sort_by filtered (\row (neg (first (parse_ints (last (first (filter (enumerate (split row ",")) (\p (eq (first p) score_idx)))))))))))
+(println (join cols "\t"))
+(for-each row sorted
+  (set fields (split row ","))
+  (println (join (map_arr col_indices (\i (last (first (filter (enumerate fields) (\p (eq (first p) i))))))) "\t")))

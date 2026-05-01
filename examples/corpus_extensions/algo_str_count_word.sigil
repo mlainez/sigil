@@ -1,0 +1,6 @@
+(set words (split $0 " "))
+(set target $1)
+(set n 0)
+(for-each w words
+  (if (eq w target) (set n (add n 1))))
+(println n)

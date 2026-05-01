@@ -1,0 +1,3 @@
+(set nums array (map_arr (split $0 " ") (\x (str->int x))))
+(set evens array (filter nums (\n (eq (mod n 2) 0))))
+(println (join evens " "))

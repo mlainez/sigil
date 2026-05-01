@@ -1,0 +1,6 @@
+(set pat (regex_compile $0))
+(set lines (split $1 "\n"))
+(for i 0 (len lines)
+  (set line (array_get lines i))
+  (if (regex_match pat line)
+    (println (fmt "{}:{}" (add i 1) line))))

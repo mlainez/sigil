@@ -1,0 +1,13 @@
+(set s $0)
+(set cs (filter (chars s) (\c (ne c " "))))
+(set counts {})
+(for-each c cs
+  (map_inc counts c))
+(set best "")
+(set best_count 0)
+(for-each c cs
+  (set cnt (map_get counts c))
+  (if (gt cnt best_count)
+    (set best_count cnt)
+    (set best c)))
+(println best)

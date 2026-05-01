@@ -1,0 +1,1 @@
+(println (join (sort (split $0 "\n")) "\n"))

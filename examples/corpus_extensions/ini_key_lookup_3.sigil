@@ -1,0 +1,6 @@
+(set valid (filter (split $0 "\n") (\l (and (gt (len l) 0) (eq (string_starts_with l "#") false)))))
+(for-each key (split $1 ",")
+  (set matches (filter valid (\l (eq (first (split l "=")) key))))
+  (cond
+    ((gt (len matches) 0) (println (first matches)))
+    (true (println (join [key "=NOT_FOUND"] "")))))

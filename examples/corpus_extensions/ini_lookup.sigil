@@ -1,0 +1,10 @@
+(set lines (split $0 "\n"))
+(set config (json_parse "{}"))
+(set current_section "")
+(for-each line lines
+  (if (string_starts_with line "[")
+    (set current_section (first (split (last (split line "[")) "]"))))
+  (if (string_contains line " = ")
+    (set config (json_set config [(fmt "{}.{}" current_section (first (split line " = ")))] (last (split line " = "))))))
+(for-each lookup (split $1 ",")
+  (println (fmt "{}={}" lookup (json_get config [lookup]))))

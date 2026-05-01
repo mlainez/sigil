@@ -1,0 +1,2 @@
+(set t (div (mul #0 1000) #1))
+(println (fmt "{}.{}%" (div t 10) (mod t 10)))

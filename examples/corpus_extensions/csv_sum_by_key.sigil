@@ -1,0 +1,8 @@
+(set totals {})
+(for-each rec (split $0 "|")
+  (set parts (split rec ","))
+  (set name (first parts))
+  (set num (int (last parts)))
+  (set totals (map_set totals name (add (get_or totals name 0) num))))
+(for-each name (sort (map_keys totals))
+  (println (fmt "{} {}" name (map_get totals name))))

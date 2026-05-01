@@ -1,0 +1,2 @@
+(set arr (parse_ints $0))
+(println (sum (map_arr (filter arr (\x (eq (mod x 2) 0))) (\x (mul x x)))))

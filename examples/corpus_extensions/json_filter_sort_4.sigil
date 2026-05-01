@@ -1,0 +1,10 @@
+(set data string $0)
+(set field_name string $1)
+(set threshold int #2)
+
+(set parsed_data array (json_parse data))
+(set filtered_data array (filter parsed_data (\x (gt (json_get x field_name) threshold))))
+(set sorted_data array (sort_by filtered_data (\x (json_get x "name"))))
+
+(for-each obj map sorted_data
+  (println (fmt "{}: {}" (json_get obj "name") (json_get obj field_name))))

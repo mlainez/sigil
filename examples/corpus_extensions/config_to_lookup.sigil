@@ -1,0 +1,7 @@
+(set config string $0)
+(set key string $1)
+
+(for-each line string (split config "\n")
+  (set parts array (split line "="))
+  (if (and (gt (len parts) 0) (eq (array_get parts 0) key))
+    (println (array_get parts 1))))

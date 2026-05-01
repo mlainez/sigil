@@ -1,0 +1,17 @@
+(fn format_int n int -> string
+  (set s (str n))
+  (set L (len s))
+  (ret (reduce (enumerate (chars s)) (\(acc p) (cond ((and (gt (first p) 0) (eq (mod (sub L (first p)) 3) 0)) (join [acc "," (last p)] "")) (true (join [acc (last p)] "")))) "")))
+
+(set parts (split $0 "."))
+(set int_str (first parts))
+(set dec_str (cond ((gt (len parts) 1) (last parts)) (true "")))
+(set dec_padded (join [dec_str "000"] ""))
+(set d3 (slice dec_padded 0 3))
+(set int_val (first (parse_ints int_str)))
+(set d3_val (first (parse_ints d3)))
+(set total (div (add (add (mul int_val 1000) d3_val) 5) 10))
+(set final_int (div total 100))
+(set final_cents (mod total 100))
+(set cents_str (slice (str (add 100 final_cents)) 1 3))
+(println (fmt "${}.{}" (format_int final_int) cents_str))

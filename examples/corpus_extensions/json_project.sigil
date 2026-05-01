@@ -1,0 +1,11 @@
+(set arr (json_parse $0))
+(set fields (split $1 ","))
+(set n (json_length arr))
+(set parts [])
+(for i 0 n
+  (set obj (json_get arr i))
+  (set field_parts [])
+  (for-each f fields
+    (push field_parts (join ["\"" f "\": " (str (json_get obj f))] "")))
+  (push parts (join ["{" (join field_parts ", ") "}"] "")))
+(println (join ["[" (join parts ", ") "]"] ""))

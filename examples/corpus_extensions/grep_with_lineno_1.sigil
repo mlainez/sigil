@@ -1,0 +1,5 @@
+(set lines (split $0 "\n"))
+(for i 0 (len lines)
+  (set line (array_get lines i))
+  (if (in $1 line)
+    (println (fmt "{}:{}" (add i 1) line))))

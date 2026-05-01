@@ -1,0 +1,16 @@
+(set s string $0)
+(set n int #1)
+(set words array (split s " "))
+(set line string "")
+(for-each w string words
+  (set new_line string "")
+  (if (gt (len w) 0)
+    (set new_line (add line w)))
+  (if (and (le (len new_line) n) (ne line ""))
+    (set line (fmt "{} {}" line w))
+    (else
+      (if (gt (len line) 0)
+        (println line))
+      (set line w))))
+(if (gt (len line) 0)
+  (println line))

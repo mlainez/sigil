@@ -1,0 +1,48 @@
+(fn fmt_price p float -> string
+  (set cents int (round (mul p 100.0)))
+  (set whole int (div cents 100))
+  (set frac int (mod cents 100))
+  (set frac_str string (string_from_int frac))
+  (if (lt frac 10)
+    (set frac_str (string_concat "0" frac_str)))
+  (ret (string_format "{}.{}" whole frac_str)))
+
+(set j json (json_parse $0))
+(set threshold float (string_to_float $1))
+(set items array [])
+(set n int (json_length j))
+(for i 0 n
+  (set obj (json_get j i))
+  (set price float (string_to_float (str (json_get obj "price"))))
+  (set pname string (str (json_get obj "name")))
+  (set pcat string (str (json_get obj "category")))
+  (if (gt price threshold)
+    (set entry array [price pname pcat])
+    (set items (push items entry))))
+
+(set m int (array_length items))
+(for i 0 m
+  (set bound int (sub (sub m i) 1))
+  (for jj 0 bound
+    (set a (array_get items jj))
+    (set b (array_get items (add jj 1)))
+    (if (lt (array_get a 0) (array_get b 0))
+      (set items (array_set items jj b))
+      (set items (array_set items (add jj 1) a)))))
+
+(set counts map {})
+(for-each item items
+  (set ecat string (array_get item 2))
+  (set ename string (array_get item 1))
+  (set eprice float (array_get item 0))
+  (println (string_format "{}: ${}" ename (fmt_price eprice)))
+  (if (map_has counts ecat)
+    (set counts (map_set counts ecat (add (map_get counts ecat) 1)))
+    (else (set counts (map_set counts ecat 1)))))
+
+(println "---")
+
+(set keys (map_keys counts))
+(set keys (sort keys))
+(for-each k string keys
+  (println (string_format "{}: {}" k (map_get counts k))))

@@ -1,0 +1,1 @@
+(println (array_index_of (split $0 " ") $1))

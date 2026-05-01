@@ -1,0 +1,6 @@
+(set tmpl $0)
+(for-each p (split $1 ",")
+  (set kv (split p "="))
+  (set placeholder (string_concat "{{" (string_concat (array_get kv 0) "}}")))
+  (set tmpl (string_replace tmpl placeholder (array_get kv 1))))
+(println tmpl)

@@ -1,0 +1,16 @@
+(set s $0)
+(set pat $1)
+(set i 0)
+(set found false)
+(for-each c (chars pat)
+  (set found false)
+  (for-each j (range i (len s))
+    (if (eq c (array_get (chars s) j))
+      (begin
+        (set i (+ j 1))
+        (set found true))))
+  (if (not found)
+    (break)))
+(if found
+  (println (fmt "yes-{}" (len pat)))
+  (else (println "no")))

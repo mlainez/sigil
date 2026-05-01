@@ -1,0 +1,23 @@
+(fn print_leaf j json -> unit
+  (set s (json_stringify j))
+  (set n (len s))
+  (cond
+    ((and (ge n 2) (eq (string_get s 0) 34))
+      (println (string_slice s 1 (sub n 2))))
+    (true (println s))))
+
+(fn walk j json path array idx int -> unit
+  (cond
+    ((is_array j)
+      (for-each elem j
+        (walk elem path idx)))
+    ((ge idx (len path))
+      (print_leaf j))
+    (true
+      (set key (array_get path idx))
+      (if (json_has j key)
+        (walk (json_get j key) path (add idx 1))))))
+
+(set root (json_parse $0))
+(set path (split $1 "."))
+(walk root path 0)

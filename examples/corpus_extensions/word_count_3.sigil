@@ -1,0 +1,22 @@
+(set vocab ["the" "quick" "brown" "fox" "jumps" "over" "lazy" "grey" "dog"])
+(set text $0)
+(set words (split text " "))
+(set counts {})
+(for-each w vocab
+  (set counts (map_set counts w 0)))
+(for-each w words
+  (if (map_has counts w)
+    (set counts (map_set counts w (add (map_get counts w) 1)))))
+(set max_count 0)
+(for-each w vocab
+  (set v (map_get counts w))
+  (if (gt v max_count) (set max_count v)))
+(for i 0 (add max_count 1)
+  (set count (sub max_count i))
+  (set group [])
+  (for-each w vocab
+    (if (eq (map_get counts w) count)
+      (set group (push group w))))
+  (set group (sort group))
+  (for-each k group
+    (println (fmt "{} {}" k count))))

@@ -1,0 +1,13 @@
+(set pairs {")" "(" "]" "[" "}" "{"})
+(set opens "([{")
+(set stack [])
+(set ok true)
+(for-each c (chars $0)
+  (if ok
+    (cond
+      ((in c opens) (push stack c))
+      ((map_has pairs c)
+        (cond
+          ((eq (len stack) 0) (set ok false))
+          ((ne (array_pop stack) (map_get pairs c)) (set ok false)))))))
+(println (and ok (eq (len stack) 0)))

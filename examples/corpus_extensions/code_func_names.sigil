@@ -1,0 +1,15 @@
+(set source string $0)
+(set lines array (split source "\n"))
+(set fn_names array [])
+
+(for-each line string lines
+  (if (and (in "def" (split line " ")) (not (in ":" (slice line 0 4))))
+    (set words array (split line " "))
+    (for-each word string words
+      (if (and (in "(" word) (not (eq word "(")))
+        (let name_parts array (split word "("))
+        (let name string (first name_parts))
+        (push fn_names name)))))
+
+(for-each name string fn_names
+  (println name))

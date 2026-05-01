@@ -1,0 +1,4 @@
+(set words (split $0 " "))
+(set keys (map_arr words (\w (join (sort (chars w)) ""))))
+(for-each k (uniq keys)
+  (println (join (filter words (\w (eq (join (sort (chars w)) "") k))) " ")))

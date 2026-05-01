@@ -1,0 +1,3 @@
+(set words (split $0 " "))
+(set initials (map_arr words (\w (upper (first (chars w))))))
+(println (join initials ""))

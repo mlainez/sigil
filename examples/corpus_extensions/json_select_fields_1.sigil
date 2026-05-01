@@ -1,0 +1,6 @@
+(set json_str string $0)
+(set parsed_json map (json_parse json_str))
+(set name string (json_get parsed_json ["name"]))
+(set version string (json_get parsed_json ["version"]))
+(println (fmt "name: {}" name))
+(println (fmt "version: {}" version))

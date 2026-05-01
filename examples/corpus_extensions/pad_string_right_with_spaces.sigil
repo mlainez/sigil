@@ -1,0 +1,3 @@
+(if (lt (len $0) #1)
+  (println (add $0 (repeat " " (sub #1 (len $0)))))
+  (println $0))

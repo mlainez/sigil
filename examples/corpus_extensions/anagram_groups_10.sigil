@@ -1,0 +1,9 @@
+(set words (split $0 ","))
+(set groups {})
+(for-each w words
+  (set key (join (sort (chars w)) ""))
+  (set bucket (get_or groups key []))
+  (push bucket w)
+  (map_set groups key bucket))
+(for-each k (sort (map_keys groups))
+  (println (join (sort (map_get groups k)) " ")))

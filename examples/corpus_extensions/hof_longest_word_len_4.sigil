@@ -1,0 +1,1 @@
+(println (reduce (map_arr (filter (split $0 " ") (\w (in (string_slice w 0 1) "aeiouAEIOU"))) (\w (len w))) (\(a b) (max a b)) 0))

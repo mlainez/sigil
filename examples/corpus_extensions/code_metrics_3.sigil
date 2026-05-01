@@ -1,0 +1,16 @@
+(set source string $0)
+(set lines array (split source "\n"))
+(set counts map {"functions" 0 "imports" 0 "comments" 0 "blanks" 0})
+
+(for-each line string lines
+  (set stripped string (trim line))
+  (cond
+    ((eq (slice stripped 0 4) "def ") (set counts (merge counts {"functions" (add (get counts "functions") 1)})))
+    ((or (eq (slice stripped 0 7) "import ") (eq (slice stripped 0 5) "from ")) (set counts (merge counts {"imports" (add (get counts "imports") 1)})))
+    ((eq (slice stripped 0 1) "#") (set counts (merge counts {"comments" (add (get counts "comments") 1)})))
+    ((eq stripped "") (set counts (merge counts {"blanks" (add (get counts "blanks") 1)})))))
+
+(println (fmt "functions: {}" (get counts "functions")))
+(println (fmt "imports: {}" (get counts "imports")))
+(println (fmt "comments: {}" (get counts "comments")))
+(println (fmt "blanks: {}" (get counts "blanks")))

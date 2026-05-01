@@ -1,0 +1,8 @@
+(set parts (split $0 "."))
+(set int_str (first parts))
+(set dec_raw (get_or parts 1 ""))
+(set dec_str (slice (join [dec_raw "00"] "") 0 2))
+(set rev_int (rev int_str))
+(set groups (regex_find_all (regex_compile ".{1,3}") rev_int))
+(set formatted (rev (join groups ",")))
+(println (join ["$" formatted "." dec_str] ""))

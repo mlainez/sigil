@@ -1,0 +1,4 @@
+(set pairs (entries (counter (split $0 " "))))
+(set pairs (sort_by pairs (\p [(neg (array_get p 1)) (array_get p 0)])))
+(for-each p pairs
+  (println (fmt "{}: {}" (array_get p 0) (array_get p 1))))

@@ -1,0 +1,8 @@
+(set s $0)
+(set w #1)
+(set pad (sub w (len s)))
+(set zeros "")
+(while (gt pad 0)
+  (set zeros (string_concat zeros "0"))
+  (set pad (sub pad 1)))
+(println (string_concat zeros s))

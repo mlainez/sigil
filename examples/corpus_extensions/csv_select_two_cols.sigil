@@ -1,0 +1,11 @@
+(set csv string $0)
+(set col1 string $1)
+(set col2 string $2)
+
+(set header array (split (array_get (split csv "\n") 0) ","))
+(set idx1 int (index_of header col1))
+(set idx2 int (index_of header col2))
+
+(for-each row (slice (split csv "\n") 1)
+  (set fields array (split row ","))
+  (println (fmt "{}={}{}" (array_get fields idx1) (array_get fields idx2) "")))

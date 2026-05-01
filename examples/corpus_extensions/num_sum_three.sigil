@@ -1,0 +1,3 @@
+(set input string $0)
+(set nums array (map_arr (split input " ") (\x (str->int x))))
+(println (reduce nums + 0))

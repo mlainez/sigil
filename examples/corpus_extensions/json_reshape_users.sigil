@@ -1,0 +1,4 @@
+(set users (json_get (json_parse $0) "users"))
+(set sorted (sort_by users (\u (neg (json_get u "age")))))
+(for-each u sorted
+  (println (fmt "{} ({})" (json_get u "name") (json_get u "age"))))

@@ -1,0 +1,13 @@
+(set rows (split $0 "\n"))
+(set header (split (first rows) ","))
+(set data_rows (filter (rest rows) (\row (ne row ""))))
+(set proj_cols (split $1 ","))
+(set filter_parts (split $2 "="))
+(set filter_field (first filter_parts))
+(set filter_value (join (rest filter_parts) "="))
+(set filter_idx (first (map_arr (filter (enumerate header) (\pair (eq (last pair) filter_field))) (\pair (first pair)))))
+(set proj_indices (map_arr proj_cols (\col (first (map_arr (filter (enumerate header) (\pair (eq (last pair) col))) (\pair (first pair)))))))
+(set matching_rows (filter data_rows (\row (eq (get_or (split row ",") filter_idx "") filter_value))))
+(println (join proj_cols "\t"))
+(for-each row matching_rows
+  (println (join (map_arr proj_indices (\i (get_or (split row ",") i ""))) "\t")))

@@ -1,0 +1,14 @@
+(fn shift_char c int s int -> int
+  (cond
+    ((and (ge c 65) (le c 90))
+      (ret (add 65 (mod (add (sub c 65) s) 26))))
+    ((and (ge c 97) (le c 122))
+      (ret (add 97 (mod (add (sub c 97) s) 26))))
+    (true (ret c))))
+
+(set s #1)
+(set text $2)
+(set out "")
+(for i 0 (len text)
+  (set out (string_concat out (char_from_code (shift_char (string_get text i) s)))))
+(println out)

@@ -1,0 +1,9 @@
+(set log_lines array (split $0 "\n"))
+(set level string $1)
+(set matches array [])
+(for-each line string log_lines
+  (if (in level (split line " "))
+    (push matches line)))
+(println (fmt "{} matches:" (len matches)))
+(for-each match string matches
+  (println match))

@@ -1,0 +1,4 @@
+(set s string $0)
+(set n int #1)
+(if (lt n 0) (set n 0))
+(println (string_slice s (sub (len s) n) n))

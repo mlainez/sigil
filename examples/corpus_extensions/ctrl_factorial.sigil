@@ -1,0 +1,4 @@
+(fn fact n int -> int
+  (if (le n 1) (ret 1))
+  (ret (mul n (fact (sub n 1)))))
+(println (fact #0))

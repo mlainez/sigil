@@ -1,0 +1,17 @@
+(fn to_roman n int -> str
+  (cond
+    ((ge n 1000) (ret (join ["M" (to_roman (sub n 1000))] "")))
+    ((ge n 900) (ret (join ["CM" (to_roman (sub n 900))] "")))
+    ((ge n 500) (ret (join ["D" (to_roman (sub n 500))] "")))
+    ((ge n 400) (ret (join ["CD" (to_roman (sub n 400))] "")))
+    ((ge n 100) (ret (join ["C" (to_roman (sub n 100))] "")))
+    ((ge n 90) (ret (join ["XC" (to_roman (sub n 90))] "")))
+    ((ge n 50) (ret (join ["L" (to_roman (sub n 50))] "")))
+    ((ge n 40) (ret (join ["XL" (to_roman (sub n 40))] "")))
+    ((ge n 10) (ret (join ["X" (to_roman (sub n 10))] "")))
+    ((ge n 9) (ret (join ["IX" (to_roman (sub n 9))] "")))
+    ((ge n 5) (ret (join ["V" (to_roman (sub n 5))] "")))
+    ((ge n 4) (ret (join ["IV" (to_roman (sub n 4))] "")))
+    ((ge n 1) (ret (join ["I" (to_roman (sub n 1))] "")))
+    (true (ret ""))))
+(println (to_roman #0))

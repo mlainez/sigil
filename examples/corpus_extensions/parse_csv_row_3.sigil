@@ -1,0 +1,3 @@
+(set csv string $0)
+(set parts array (split csv ","))
+(println (second parts))

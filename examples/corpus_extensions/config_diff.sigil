@@ -1,0 +1,22 @@
+(set old string $0)
+(set new string $1)
+
+(fn parse_config config string -> array
+  (filter (split config "\n") (\line (and (not (eq (first line) "#")) (not (eq line ""))))))
+
+(set old_lines array (parse_config old))
+(set new_lines array (parse_config new))
+
+(set old_set map (reduce old_lines (\(acc line) (merge acc {line true})) {}))
+(set new_set map (reduce new_lines (\(acc line) (merge acc {line true})) {}))
+
+(fn diff_sets set1 map set2 map -> array
+  (map_arr (filter (entries set1) (\entry (not (in (first entry) set2)))) (\entry (first entry))))
+
+(set removed array (sort (diff_sets old_set new_set)))
+(set added array (sort (diff_sets new_set old_set)))
+
+(for-each line string removed (println (fmt "- {}" line)))
+(for-each line string added (println (fmt "+ {}" line)))
+
+(println (fmt "summary: {} removed, {} added" (len removed) (len added)))

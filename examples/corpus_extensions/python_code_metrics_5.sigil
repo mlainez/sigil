@@ -1,0 +1,22 @@
+(set lines array (split $0 "\n"))
+(set counts map {"functions" 0 "imports" 0 "comments" 0 "blank" 0})
+
+(if (gt (len lines) 0)
+    (set lines array (slice lines 0 (- (len lines) 1))))
+
+(for-each line string lines
+  (set stripped string (string_trim line))
+  (cond
+    ((or (string_starts_with stripped "def ") (string_starts_with stripped "def\t"))
+     (set counts map (merge counts {"functions" (add (get counts "functions") 1)})))
+    ((or (string_starts_with stripped "import ") (string_starts_with stripped "from "))
+     (set counts map (merge counts {"imports" (add (get counts "imports") 1)})))
+    ((string_starts_with stripped "#")
+     (set counts map (merge counts {"comments" (add (get counts "comments") 1)})))
+    ((eq stripped "")
+     (set counts map (merge counts {"blank" (add (get counts "blank") 1)})))))
+
+(println (fmt "functions: {}" (get counts "functions")))
+(println (fmt "imports: {}" (get counts "imports")))
+(println (fmt "comments: {}" (get counts "comments")))
+(println (fmt "blank: {}" (get counts "blank")))

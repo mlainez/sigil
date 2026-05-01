@@ -1,0 +1,21 @@
+(set words (split $0 ","))
+(set n (len words))
+(set w0 (array_get words 0))
+(set min_len (len w0))
+(for i 1 n
+  (set wl (len (array_get words i)))
+  (if (lt wl min_len)
+    (set min_len wl)))
+
+(set prefix "")
+(for i 0 min_len
+  (set c (string_slice w0 i 1))
+  (set all_match true)
+  (for j 1 n
+    (if (ne (string_slice (array_get words j) i 1) c)
+      (set all_match false)))
+  (if all_match
+    (set prefix (string_concat prefix c))
+    (else (break))))
+
+(println prefix)

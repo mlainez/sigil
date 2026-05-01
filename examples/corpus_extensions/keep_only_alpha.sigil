@@ -1,0 +1,6 @@
+(set s string $0)
+(set out string "")
+(for-each c string (chars s)
+  (if (is_alpha c)
+    (set out (string_concat out c))))
+(println out)

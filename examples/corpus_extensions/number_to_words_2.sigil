@@ -1,0 +1,24 @@
+(set n #0)
+(set ones_w ["" "one" "two" "three" "four" "five" "six" "seven" "eight" "nine"])
+(set teens_w ["ten" "eleven" "twelve" "thirteen" "fourteen" "fifteen" "sixteen" "seventeen" "eighteen" "nineteen"])
+(set tens_w ["" "" "twenty" "thirty" "forty" "fifty" "sixty" "seventy" "eighty" "ninety"])
+
+(set h (div n 100))
+(set r (mod n 100))
+
+(set tail_str "")
+(cond
+  ((lt r 10) (set tail_str (array_get ones_w r)))
+  ((lt r 20) (set tail_str (array_get teens_w (sub r 10))))
+  (true
+    (set tn (div r 10))
+    (set on (mod r 10))
+    (cond
+      ((eq on 0) (set tail_str (array_get tens_w tn)))
+      (true (set tail_str (fmt "{}-{}" (array_get tens_w tn) (array_get ones_w on)))))))
+
+(cond
+  ((eq n 0) (println "zero"))
+  ((eq h 0) (println tail_str))
+  ((eq r 0) (println (fmt "{} hundred" (array_get ones_w h))))
+  (true (println (fmt "{} hundred {}" (array_get ones_w h) tail_str))))

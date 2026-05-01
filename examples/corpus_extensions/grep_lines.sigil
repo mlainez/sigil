@@ -1,0 +1,6 @@
+(set lines (split $1 "\n"))
+(set i 1)
+(for-each line lines
+  (if (in $0 line)
+    (println (fmt "{}:{}" i line)))
+  (set i (add i 1)))

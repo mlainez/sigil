@@ -1,0 +1,1 @@
+(println (join (filter (split $0 " ") (\w (gt (len w) #1))) " "))

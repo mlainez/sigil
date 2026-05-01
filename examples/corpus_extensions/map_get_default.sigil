@@ -1,0 +1,7 @@
+(set pairs (split $0 ","))
+(set result "NONE")
+(for-each p pairs
+  (set kv (split p "="))
+  (if (eq (array_get kv 0) $1)
+    (set result (array_get kv 1))))
+(println result)

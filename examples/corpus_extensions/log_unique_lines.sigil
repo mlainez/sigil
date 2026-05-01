@@ -1,0 +1,7 @@
+(set lines (split $0 "\n"))
+(set seen {})
+(for-each line lines
+  (set already (has seen line))
+  (set seen (json_set seen [line] true))
+  (if (not already)
+    (println line)))

@@ -1,0 +1,4 @@
+(set nums (parse_ints $0))
+(set m (array_get nums 0))
+(for-each n nums (if (gt n m) (set m n)))
+(println m)

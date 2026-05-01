@@ -1,0 +1,4 @@
+(set json_str string $0)
+(set parsed_json map (json_parse json_str))
+(println (json_get parsed_json ["name"]))
+(println (json_get parsed_json ["age"]))
