@@ -1,0 +1,10 @@
+FROM ./phi4_sigil_f16.gguf
+PARAMETER temperature 0
+PARAMETER num_ctx 8192
+PARAMETER stop "<|im_start|>"
+PARAMETER stop "<|im_end|>"
+PARAMETER stop "<|im_sep|>"
+TEMPLATE """{{- if .System }}<|im_start|>system<|im_sep|>{{ .System }}<|im_end|>{{ end -}}
+{{- range .Messages }}<|im_start|>{{ .Role }}<|im_sep|>{{ .Content }}<|im_end|>{{ end -}}
+<|im_start|>assistant<|im_sep|>"""
+SYSTEM "You write Sigil programs. Output ONLY raw Sigil code, no markdown, no prose."

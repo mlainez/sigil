@@ -1,0 +1,242 @@
+[
+  {
+    "id": "cut_passwd_usernames",
+    "source": "common shell pattern (cut -d: -f1 < /etc/passwd)",
+    "desc": "Take a /etc/passwd-formatted string in arg0 (lines of colon-separated fields). Print just the first field (username) of each line, one per line.",
+    "args": ["root:x:0:0:root:/root:/bin/bash\ndaemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin\nuser:x:1000:1000:User,,,:/home/user:/bin/bash"],
+    "expected": "root\ndaemon\nuser\n",
+    "python": "import sys\nfor l in sys.argv[1].split('\\n'):\n    print(l.split(':',1)[0])"
+  },
+  {
+    "id": "grep_count_pattern",
+    "source": "common shell pattern (grep -c)",
+    "desc": "Take a multi-line text in arg0 and a substring in arg1. Print how many lines contain the substring.",
+    "args": ["error: foo\ninfo: bar\nerror: baz\nwarn: qux\nerror: zip", "error"],
+    "expected": "3\n",
+    "python": "import sys\nq=sys.argv[2]\nprint(sum(1 for l in sys.argv[1].split('\\n') if q in l))"
+  },
+  {
+    "id": "tail_n_lines",
+    "source": "common shell pattern (tail -n)",
+    "desc": "Take multi-line text and a positive integer n. Print the last n lines (in original order).",
+    "args": ["a\nb\nc\nd\ne", "3"],
+    "expected": "c\nd\ne\n",
+    "python": "import sys\nn=int(sys.argv[2])\nlines=sys.argv[1].split('\\n')\nprint('\\n'.join(lines[-n:]))"
+  },
+  {
+    "id": "head_n_lines",
+    "source": "common shell pattern (head -n)",
+    "desc": "Take multi-line text and a positive integer n. Print the first n lines.",
+    "args": ["a\nb\nc\nd\ne", "2"],
+    "expected": "a\nb\n",
+    "python": "import sys\nn=int(sys.argv[2])\nprint('\\n'.join(sys.argv[1].split('\\n')[:n]))"
+  },
+  {
+    "id": "sort_uniq_count_top",
+    "source": "common shell pattern (sort | uniq -c | sort -rn | head)",
+    "desc": "Take a multi-line string. Print each distinct line and its count formatted '   N line', most-frequent first, ties broken by first-occurrence. One per line.",
+    "args": ["apple\nbanana\napple\ncherry\nbanana\napple"],
+    "expected": "   3 apple\n   2 banana\n   1 cherry\n",
+    "python": "import sys\nfrom collections import Counter\nlines=sys.argv[1].split('\\n')\nfirst={}\nfor i,l in enumerate(lines): first.setdefault(l,i)\nc=Counter(lines)\nfor l in sorted(c.keys(), key=lambda x: (-c[x], first[x])):\n    print(f'{c[l]:>4} {l}')"
+  },
+  {
+    "id": "wc_l",
+    "source": "common shell pattern (wc -l)",
+    "desc": "Take multi-line text in arg0. Print the count of newlines in the text (0 for empty input).",
+    "args": ["a\nb\nc"],
+    "expected": "2\n",
+    "python": "import sys\nprint(sys.argv[1].count('\\n'))"
+  },
+  {
+    "id": "wc_w",
+    "source": "common shell pattern (wc -w)",
+    "desc": "Take a string in arg0. Print the count of whitespace-separated tokens.",
+    "args": ["the quick  brown  fox"],
+    "expected": "4\n",
+    "python": "import sys\nprint(len(sys.argv[1].split()))"
+  },
+  {
+    "id": "find_with_extension",
+    "source": "common shell pattern (find . -name '*.ext')",
+    "desc": "Take a newline-separated list of filenames in arg0 and a target extension in arg1 (no leading dot). Print only filenames matching that extension.",
+    "args": ["main.py\nREADME.md\nutils.py\nMakefile\ntest_a.py", "py"],
+    "expected": "main.py\nutils.py\ntest_a.py\n",
+    "python": "import sys\next=sys.argv[2]\nfor f in sys.argv[1].split('\\n'):\n    if f.endswith('.'+ext): print(f)"
+  },
+  {
+    "id": "awk_filter_field_gt",
+    "source": "common shell pattern (awk -F, '$3>100')",
+    "desc": "Take a CSV-like string (no header, comma-separated). Take a 0-based column index in arg1 and a threshold integer in arg2. Print rows where the integer in that column is strictly greater than the threshold.",
+    "args": ["a,1,50\nb,2,150\nc,3,99\nd,4,200", "2", "100"],
+    "expected": "b,2,150\nd,4,200\n",
+    "python": "import sys\nidx=int(sys.argv[2]); t=int(sys.argv[3])\nfor r in sys.argv[1].split('\\n'):\n    if int(r.split(',')[idx]) > t: print(r)"
+  },
+  {
+    "id": "cut_first_n_chars",
+    "source": "common shell pattern (cut -c1-N)",
+    "desc": "Take a multi-line text in arg0 and a positive integer n in arg1. Print the first n characters of each line.",
+    "args": ["abcdef\nhello world\n12345", "3"],
+    "expected": "abc\nhel\n123\n",
+    "python": "import sys\nn=int(sys.argv[2])\nfor l in sys.argv[1].split('\\n'): print(l[:n])"
+  },
+  {
+    "id": "grep_invert",
+    "source": "common shell pattern (grep -v)",
+    "desc": "Take multi-line text and a substring. Print lines NOT containing the substring.",
+    "args": ["error: a\ninfo: b\nerror: c\nwarn: d", "error"],
+    "expected": "info: b\nwarn: d\n",
+    "python": "import sys\nq=sys.argv[2]\nfor l in sys.argv[1].split('\\n'):\n    if q not in l: print(l)"
+  },
+  {
+    "id": "grep_only_matching",
+    "source": "common shell pattern (grep -o)",
+    "desc": "Take a multi-line text and a substring. Print every occurrence of the substring (one per line) across all lines, preserving order.",
+    "args": ["foo bar foo\nbar foo baz\nfoo", "foo"],
+    "expected": "foo\nfoo\nfoo\nfoo\n",
+    "python": "import sys\nq=sys.argv[2]\nfor l in sys.argv[1].split('\\n'):\n    i=0\n    while True:\n        j=l.find(q,i)\n        if j<0: break\n        print(q); i=j+len(q)"
+  },
+  {
+    "id": "extract_emails",
+    "source": "common shell pattern (grep -oE 'email-regex')",
+    "desc": "Take a string and extract all email-like tokens (basic pattern: NAME@DOMAIN.TLD where NAME is alphanumeric+dot, DOMAIN is alphanumeric, TLD is 2-6 alpha). Print each email on its own line, in order of appearance.",
+    "args": ["Contact alice@example.com or bob.smith@foo.bar.io for info, also test@x.co"],
+    "expected": "alice@example.com\nbob.smith@foo.bar.io\ntest@x.co\n",
+    "python": "import sys, re\nfor m in re.findall(r'[A-Za-z0-9.]+@[A-Za-z0-9.]+\\.[A-Za-z]{2,6}', sys.argv[1]):\n    print(m)"
+  },
+  {
+    "id": "find_max_in_log",
+    "source": "log analysis (find peak number)",
+    "desc": "Take a multi-line log where each line ends with '... took Nms' (or contains 'took Nms' for some integer N). Print the largest N seen.",
+    "args": ["GET /a took 23ms\nPOST /b took 150ms\nGET /c took 7ms\nPUT /d took 89ms"],
+    "expected": "150\n",
+    "python": "import sys, re\nvals=[int(m) for m in re.findall(r'took (\\d+)ms', sys.argv[1])]\nprint(max(vals))"
+  },
+  {
+    "id": "duplicate_remover",
+    "source": "common shell pattern (sort -u or awk '!seen[$0]++')",
+    "desc": "Take multi-line text. Print lines in their original order with later duplicates removed.",
+    "args": ["a\nb\na\nc\nb\nd\na"],
+    "expected": "a\nb\nc\nd\n",
+    "python": "import sys\nseen=set()\nfor l in sys.argv[1].split('\\n'):\n    if l not in seen: seen.add(l); print(l)"
+  },
+  {
+    "id": "sed_replace_global",
+    "source": "common shell pattern (sed 's/X/Y/g')",
+    "desc": "Take three args: text, target string, replacement string. Print text with all non-overlapping occurrences replaced.",
+    "args": ["hello world hello", "hello", "hi"],
+    "expected": "hi world hi\n",
+    "python": "import sys\nprint(sys.argv[1].replace(sys.argv[2], sys.argv[3]))"
+  },
+  {
+    "id": "tr_squeeze_spaces",
+    "source": "common shell pattern (tr -s ' ')",
+    "desc": "Take a string. Print it with runs of spaces collapsed to a single space (do not strip leading/trailing).",
+    "args": ["  hello   world  foo "],
+    "expected": " hello world foo \n",
+    "python": "import sys, re\nprint(re.sub(r' +', ' ', sys.argv[1]))"
+  },
+  {
+    "id": "df_human_readable",
+    "source": "df-style output formatting",
+    "desc": "Take a non-negative integer byte count. Print 'X.YZ B/KB/MB/GB/TB' choosing the largest unit where the value remains >= 1, with 2 decimals.",
+    "args": ["5242880"],
+    "expected": "5.00 MB\n",
+    "python": "import sys\nn=float(sys.argv[1])\nfor u in ['B','KB','MB','GB','TB']:\n    if n < 1024 or u=='TB': print(f'{n:.2f} {u}'); break\n    n /= 1024"
+  },
+  {
+    "id": "process_grep",
+    "source": "ps aux | grep pattern | grep -v grep",
+    "desc": "Take a multi-line ps-style listing in arg0 and a pattern in arg1. Print lines that contain the pattern AND do not contain the literal string 'grep'.",
+    "args": ["root 1 systemd\nuser 234 firefox\nuser 567 grep python\nuser 890 python script.py", "python"],
+    "expected": "user 890 python script.py\n",
+    "python": "import sys\nq=sys.argv[2]\nfor l in sys.argv[1].split('\\n'):\n    if q in l and 'grep' not in l: print(l)"
+  },
+  {
+    "id": "git_log_format",
+    "source": "git log --pretty=format formatting",
+    "desc": "Take a multi-line input where each line is 'COMMIT_HASH AUTHOR MESSAGE...' (space-separated, message may contain spaces). Print 'AUTHOR: MESSAGE' for each line.",
+    "args": ["abc123 alice fix: typo\ndef456 bob feat: new feature\nghi789 carol refactor: simplify"],
+    "expected": "alice: fix: typo\nbob: feat: new feature\ncarol: refactor: simplify\n",
+    "python": "import sys\nfor l in sys.argv[1].split('\\n'):\n    parts=l.split(' ',2)\n    if len(parts)>=3: print(f'{parts[1]}: {parts[2]}')"
+  },
+  {
+    "id": "json_path_extract",
+    "source": "jq '.field' style extraction",
+    "desc": "Take a JSON object string in arg0 and a top-level key in arg1. Print the value at that key. If the value is a string, print without quotes. If it's a number, print as-is. If absent, print 'null'.",
+    "args": ["{\"name\": \"alice\", \"age\": 30, \"city\": \"NYC\"}", "name"],
+    "expected": "alice\n",
+    "python": "import sys, json\nd=json.loads(sys.argv[1])\nv=d.get(sys.argv[2])\nif v is None: print('null')\nelse: print(v if not isinstance(v,(dict,list)) else json.dumps(v))"
+  },
+  {
+    "id": "csv_to_tsv",
+    "source": "common shell pattern (tr ',' '\\t')",
+    "desc": "Take a CSV string in arg0 (no quoting concerns). Print it with commas replaced by tabs. Output prints '\\t' as literal tab characters.",
+    "args": ["a,b,c\n1,2,3"],
+    "expected": "a\tb\tc\n1\t2\t3\n",
+    "python": "import sys\nprint(sys.argv[1].replace(',','\\t'))"
+  },
+  {
+    "id": "extract_urls",
+    "source": "grep -oE 'http[s]?://...'",
+    "desc": "Take a string. Print all http:// and https:// URLs (run of non-whitespace characters), one per line in order. URLs end at first whitespace or end of string.",
+    "args": ["See https://example.com and http://foo.io for docs, plus https://x.y/path"],
+    "expected": "https://example.com\nhttp://foo.io\nhttps://x.y/path\n",
+    "python": "import sys, re\nfor m in re.findall(r'https?://\\S+', sys.argv[1]):\n    print(m.rstrip(',.;:'))"
+  },
+  {
+    "id": "uniq_c_simple",
+    "source": "uniq -c (consecutive duplicates count)",
+    "desc": "Take multi-line text. For each maximal run of identical consecutive lines, print '   N line' (count right-aligned to width 4 then space then line).",
+    "args": ["apple\napple\nbanana\napple\napple\napple"],
+    "expected": "   2 apple\n   1 banana\n   3 apple\n",
+    "python": "import sys\nlines=sys.argv[1].split('\\n')\ni=0\nwhile i<len(lines):\n    j=i\n    while j<len(lines) and lines[j]==lines[i]: j+=1\n    print(f'{j-i:>4} {lines[i]}')\n    i=j"
+  },
+  {
+    "id": "split_at_blank_lines",
+    "source": "common parsing pattern (paragraph splitting)",
+    "desc": "Take a multi-line string with paragraphs separated by one or more BLANK lines. Print each paragraph as a single line with its internal newlines replaced by spaces, paragraphs separated by '---' on its own line. No trailing '---'.",
+    "args": ["hello\nworld\n\nfoo\nbar\nbaz\n\nlast"],
+    "expected": "hello world\n---\nfoo bar baz\n---\nlast\n",
+    "python": "import sys, re\nparas=[p for p in re.split(r'\\n\\s*\\n', sys.argv[1]) if p.strip()]\noneliners=[' '.join(p.split('\\n')) for p in paras]\nprint('\\n---\\n'.join(oneliners))"
+  },
+  {
+    "id": "permission_octal_to_symbolic",
+    "source": "common admin task (translate file permissions)",
+    "desc": "Take a 3-digit octal permission string (e.g. '755'). Print the equivalent symbolic representation 'rwxr-xr-x' (9 chars).",
+    "args": ["755"],
+    "expected": "rwxr-xr-x\n",
+    "python": "import sys\np=sys.argv[1]\nout=''\nfor c in p:\n    n=int(c)\n    out += ('r' if n&4 else '-') + ('w' if n&2 else '-') + ('x' if n&1 else '-')\nprint(out)"
+  },
+  {
+    "id": "ipv4_validate",
+    "source": "config validation (ip address check)",
+    "desc": "Take a string. Print 'yes' if it is a syntactically valid dotted-quad IPv4 (four 0-255 integers separated by dots, no leading zeros except '0' itself), else 'no'.",
+    "args": ["192.168.1.1"],
+    "expected": "yes\n",
+    "python": "import sys\np=sys.argv[1].split('.')\nok=len(p)==4 and all(c.isdigit() and 0<=int(c)<=255 and (c=='0' or not c.startswith('0')) for c in p)\nprint('yes' if ok else 'no')"
+  },
+  {
+    "id": "iso_date_extract",
+    "source": "log parsing (extract dates)",
+    "desc": "Take a multi-line text. Print all ISO-format dates (YYYY-MM-DD) found, one per line in order.",
+    "args": ["log on 2024-01-15: ok\nlog on 2024-02-30: weird\nno date here\n2025-12-01 done"],
+    "expected": "2024-01-15\n2024-02-30\n2025-12-01\n",
+    "python": "import sys, re\nfor m in re.findall(r'\\d{4}-\\d{2}-\\d{2}', sys.argv[1]):\n    print(m)"
+  },
+  {
+    "id": "shell_argv_count",
+    "source": "shell scripting (process argv)",
+    "desc": "Take a space-separated string of shell arguments in arg0 (no quoting concerns, simple whitespace split). Print 'NAME=N' where NAME is each distinct token and N is its count, sorted alphabetically by NAME, space-separated.",
+    "args": ["--verbose --quiet --verbose -f file.txt -f other.txt"],
+    "expected": "--quiet=1 --verbose=2 -f=2 file.txt=1 other.txt=1\n",
+    "python": "import sys\nfrom collections import Counter\nc=Counter(sys.argv[1].split())\nprint(' '.join(f'{k}={c[k]}' for k in sorted(c)))"
+  },
+  {
+    "id": "extract_function_names_py",
+    "source": "code analysis (extract Python function names)",
+    "desc": "Take a Python source code string in arg0. Print the names of all top-level (no leading whitespace) `def NAME(` definitions, one per line in order.",
+    "args": ["def foo():\n    pass\n\nclass Bar:\n    def baz(self): pass\n\ndef main():\n    pass\n"],
+    "expected": "foo\nmain\n",
+    "python": "import sys, re\nfor m in re.findall(r'(?m)^def (\\w+)\\(', sys.argv[1]):\n    print(m)"
+  }
+]

@@ -2,5 +2,13 @@
 __pycache__/
 .env
 models/
+
+# Ignore intermediate / experimental jsonl outputs by default, but track the
+# canonical corpus and the seed files needed to reproduce the model trainings.
 *.jsonl
+!training_corpus.jsonl
+!prelude_seeds.jsonl
+!v4_targeted_seeds.jsonl
+!refresh_seeds.jsonl
+
 tier*_results.json

@@ -1,0 +1,202 @@
+[
+  {
+    "id": "cut_passwd_shells",
+    "source": "common shell pattern (cut -d: -f7 /etc/passwd)",
+    "desc": "Take a /etc/passwd-formatted string in arg0 (lines of colon-separated fields). Print just the LAST field (login shell) of each line, one per line.",
+    "args": ["root:x:0:0:root:/root:/bin/bash\ndaemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin\nuser:x:1000:1000:User,,,:/home/user:/bin/zsh"],
+    "expected": "/bin/bash\n/usr/sbin/nologin\n/bin/zsh\n",
+    "python": "import sys\nfor l in sys.argv[1].split('\\n'):\n    print(l.rsplit(':',1)[-1])"
+  },
+  {
+    "id": "cut_csv_third_column",
+    "source": "common shell pattern (cut -d, -f3)",
+    "desc": "Take a CSV string in arg0 (no embedded commas, comma-separated). Print just the 3rd field (1-indexed) of each line.",
+    "args": ["alice,30,engineer,paris\nbob,25,designer,nyc\ncarol,40,doctor,tokyo"],
+    "expected": "engineer\ndesigner\ndoctor\n",
+    "python": "import sys\nfor l in sys.argv[1].split('\\n'):\n    print(l.split(',')[2])"
+  },
+  {
+    "id": "grep_starts_with",
+    "source": "common shell pattern (grep ^prefix)",
+    "desc": "Take a multi-line string in arg0 and a prefix in arg1. Print lines that start with the prefix, in original order.",
+    "args": ["apple pie\nbanana split\napricot jam\ncherry tart\napple cake", "ap"],
+    "expected": "apple pie\napricot jam\napple cake\n",
+    "python": "import sys\np = sys.argv[2]\nfor l in sys.argv[1].split('\\n'):\n    if l.startswith(p): print(l)"
+  },
+  {
+    "id": "grep_line_longer_than",
+    "source": "common shell pattern (awk 'length($0) > N')",
+    "desc": "Take a multi-line string in arg0 and an integer N in arg1. Print lines whose length is strictly greater than N.",
+    "args": ["short\nthis is a longer line\nhi\nmedium length\nx", "5"],
+    "expected": "this is a longer line\nmedium length\n",
+    "python": "import sys\nn = int(sys.argv[2])\nfor l in sys.argv[1].split('\\n'):\n    if len(l) > n: print(l)"
+  },
+  {
+    "id": "sort_lines_alpha",
+    "source": "common shell pattern (sort)",
+    "desc": "Take a multi-line string in arg0. Print the lines sorted alphabetically.",
+    "args": ["banana\napple\ncherry\nbeet"],
+    "expected": "apple\nbanana\nbeet\ncherry\n",
+    "python": "import sys\nfor l in sorted(sys.argv[1].split('\\n')): print(l)"
+  },
+  {
+    "id": "sort_numbers_desc",
+    "source": "common shell pattern (sort -rn)",
+    "desc": "Take a string with whitespace-separated integers in arg0. Print them sorted in descending order, one per line.",
+    "args": ["42 7 100 3 88 19"],
+    "expected": "100\n88\n42\n19\n7\n3\n",
+    "python": "import sys\nfor n in sorted([int(x) for x in sys.argv[1].split()], reverse=True): print(n)"
+  },
+  {
+    "id": "count_distinct_words",
+    "source": "common shell pattern (tr ' ' '\\n' | sort -u | wc -l)",
+    "desc": "Take a string in arg0. Print the count of distinct whitespace-separated tokens.",
+    "args": ["the quick brown fox the lazy dog the fox"],
+    "expected": "6\n",
+    "python": "import sys\nprint(len(set(sys.argv[1].split())))"
+  },
+  {
+    "id": "middle_n_lines",
+    "source": "common shell pattern (sed -n 'M,Np')",
+    "desc": "Take a multi-line string in arg0 and two 1-indexed integers M and N in arg1 and arg2. Print lines M through N inclusive.",
+    "args": ["line1\nline2\nline3\nline4\nline5", "2", "4"],
+    "expected": "line2\nline3\nline4\n",
+    "python": "import sys\nlines = sys.argv[1].split('\\n')\nm, n = int(sys.argv[2]), int(sys.argv[3])\nfor l in lines[m-1:n]: print(l)"
+  },
+  {
+    "id": "wc_chars",
+    "source": "common shell pattern (wc -c)",
+    "desc": "Take a string in arg0. Print its character count (length in characters, not bytes).",
+    "args": ["hello world"],
+    "expected": "11\n",
+    "python": "import sys\nprint(len(sys.argv[1]))"
+  },
+  {
+    "id": "count_non_empty_lines",
+    "source": "common shell pattern (grep -c .)",
+    "desc": "Take a multi-line string in arg0. Print the count of lines that are not empty (have at least one character).",
+    "args": ["alpha\n\nbeta\ngamma\n\n\ndelta"],
+    "expected": "4\n",
+    "python": "import sys\nprint(sum(1 for l in sys.argv[1].split('\\n') if l))"
+  },
+  {
+    "id": "find_basenames",
+    "source": "common shell pattern (basename per line)",
+    "desc": "Take a string in arg0 with one filesystem path per line. Print the basename (last component after final /) of each, one per line.",
+    "args": ["/usr/local/bin/python\n/etc/passwd\n/home/user/.bashrc\nrelative/path/file.txt"],
+    "expected": "python\npasswd\n.bashrc\nfile.txt\n",
+    "python": "import sys\nfor p in sys.argv[1].split('\\n'):\n    print(p.rsplit('/', 1)[-1])"
+  },
+  {
+    "id": "sum_tsv_column",
+    "source": "common shell pattern (awk '{s+=$2} END {print s}')",
+    "desc": "Take a tab-separated multi-line string in arg0. Print the sum of integers in the 2nd column.",
+    "args": ["apple\t10\nbanana\t25\ncherry\t7\ndate\t8"],
+    "expected": "50\n",
+    "python": "import sys\nprint(sum(int(l.split('\\t')[1]) for l in sys.argv[1].split('\\n')))"
+  },
+  {
+    "id": "capitalize_words",
+    "source": "common text utility (title case)",
+    "desc": "Take a string in arg0. Print it with the first letter of each whitespace-separated word capitalized, the rest lowercase.",
+    "args": ["hello WORLD foo BAR"],
+    "expected": "Hello World Foo Bar\n",
+    "python": "import sys\nprint(' '.join(w.capitalize() for w in sys.argv[1].split()))"
+  },
+  {
+    "id": "delete_blank_lines",
+    "source": "common shell pattern (sed '/^$/d')",
+    "desc": "Take a multi-line string in arg0. Print all non-blank lines (in original order, no blank lines in output).",
+    "args": ["alpha\n\nbeta\n\n\ngamma\n\ndelta"],
+    "expected": "alpha\nbeta\ngamma\ndelta\n",
+    "python": "import sys\nfor l in sys.argv[1].split('\\n'):\n    if l: print(l)"
+  },
+  {
+    "id": "rot13_letters",
+    "source": "common text utility (tr a-zA-Z n-za-mN-ZA-M)",
+    "desc": "Take a string in arg0. Apply ROT13 transformation to ASCII letters (a-z and A-Z); leave other characters unchanged.",
+    "args": ["Hello, World! 123"],
+    "expected": "Uryyb, Jbeyq! 123\n",
+    "python": "import sys, codecs\nprint(codecs.encode(sys.argv[1], 'rot_13'))"
+  },
+  {
+    "id": "count_log_levels",
+    "source": "log analysis (group by level)",
+    "desc": "Take a multi-line log string in arg0 where each line starts with one of INFO, WARN, ERROR (followed by space and message). Print 'LEVEL=COUNT' lines for each LEVEL that appears, sorted alphabetically by LEVEL.",
+    "args": ["INFO server started\nERROR connection refused\nINFO request received\nWARN slow query\nERROR timeout\nINFO request done"],
+    "expected": "ERROR=2\nINFO=3\nWARN=1\n",
+    "python": "import sys\nfrom collections import Counter\nc = Counter(l.split(' ', 1)[0] for l in sys.argv[1].split('\\n'))\nfor k in sorted(c): print(f'{k}={c[k]}')"
+  },
+  {
+    "id": "extract_http_status_codes",
+    "source": "log parsing (HTTP status from log)",
+    "desc": "Take a multi-line string in arg0 containing access-log-style entries. Each line has a 3-digit HTTP status code surrounded by spaces. Print the status codes in order of appearance, one per line.",
+    "args": ["GET /a 200 142\nPOST /b 404 56\nGET /c 200 89\nPUT /d 500 12"],
+    "expected": "200\n404\n200\n500\n",
+    "python": "import sys, re\nfor l in sys.argv[1].split('\\n'):\n    m = re.search(r' (\\d{3}) ', l)\n    if m: print(m.group(1))"
+  },
+  {
+    "id": "extract_phone_numbers",
+    "source": "regex extraction (phone digits)",
+    "desc": "Take a string in arg0. Extract all 10-digit phone numbers in the format NNN-NNN-NNNN (digits and hyphens, exactly that shape). Print each on its own line in order of appearance.",
+    "args": ["Call 555-123-4567 or 800-555-9999. Bad: 12-345 and 555.123.4567"],
+    "expected": "555-123-4567\n800-555-9999\n",
+    "python": "import sys, re\nfor m in re.findall(r'\\d{3}-\\d{3}-\\d{4}', sys.argv[1]):\n    print(m)"
+  },
+  {
+    "id": "extract_hex_colors",
+    "source": "regex extraction (CSS colors)",
+    "desc": "Take a string in arg0. Extract all hex color codes in the format #RRGGBB (a # followed by 6 hex digits). Print each on its own line in order of appearance, lowercase.",
+    "args": ["color: #FF0000; bg: #00ff00; border: #0000FF; small: #abc; mid: #DEAD42 here"],
+    "expected": "#ff0000\n#00ff00\n#0000ff\n#dead42\n",
+    "python": "import sys, re\nfor m in re.findall(r'#[0-9a-fA-F]{6}', sys.argv[1]):\n    print(m.lower())"
+  },
+  {
+    "id": "json_array_count",
+    "source": "json analysis (count nested array)",
+    "desc": "Take a JSON string in arg0 of the form {\"items\":[...]}. Print the count of items in the array.",
+    "args": ["{\"items\":[\"a\",\"b\",\"c\",\"d\"]}"],
+    "expected": "4\n",
+    "python": "import sys, json\nprint(len(json.loads(sys.argv[1])['items']))"
+  },
+  {
+    "id": "tsv_to_csv",
+    "source": "format conversion (TSV → CSV)",
+    "desc": "Take a tab-separated multi-line string in arg0 (no commas in fields). Print the same data with tabs converted to commas.",
+    "args": ["name\tage\tcity\nalice\t30\tparis\nbob\t25\tnyc"],
+    "expected": "name,age,city\nalice,30,paris\nbob,25,nyc\n",
+    "python": "import sys\nprint(sys.argv[1].replace('\\t', ','))"
+  },
+  {
+    "id": "lines_to_csv",
+    "source": "common shell pattern (paste -sd, /tr '\\n' ',')",
+    "desc": "Take a multi-line string in arg0 (each line a value). Print all lines joined by commas on a single line, followed by a newline.",
+    "args": ["red\ngreen\nblue\nyellow"],
+    "expected": "red,green,blue,yellow\n",
+    "python": "import sys\nprint(','.join(sys.argv[1].split('\\n')))"
+  },
+  {
+    "id": "parens_balanced",
+    "source": "syntax check (parentheses)",
+    "desc": "Take a string in arg0. Print 'yes' if every opening parenthesis has a matching closing one (and they nest correctly using only '(' and ')'); print 'no' otherwise.",
+    "args": ["((foo)bar(baz))"],
+    "expected": "yes\n",
+    "python": "import sys\ns = sys.argv[1]; d = 0\nfor c in s:\n    if c == '(': d += 1\n    elif c == ')':\n        d -= 1\n        if d < 0: print('no'); sys.exit(0)\nprint('yes' if d == 0 else 'no')"
+  },
+  {
+    "id": "unique_chars_sorted",
+    "source": "common shell pattern (fold | sort -u)",
+    "desc": "Take a string in arg0. Print the distinct characters that appear in it, sorted by ASCII code, all on one line with no separator.",
+    "args": ["mississippi"],
+    "expected": "imps\n",
+    "python": "import sys\nprint(''.join(sorted(set(sys.argv[1]))))"
+  },
+  {
+    "id": "uppercase_lines",
+    "source": "common shell pattern (tr a-z A-Z)",
+    "desc": "Take a multi-line string in arg0. Print the same content with all letters uppercased.",
+    "args": ["Hello\nWorld\nFOO bar"],
+    "expected": "HELLO\nWORLD\nFOO BAR\n",
+    "python": "import sys\nprint(sys.argv[1].upper())"
+  }
+]
