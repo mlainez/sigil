@@ -13,3 +13,29 @@ benchmark/.env
 
 # Generated corpus (local-only, often bulk-written)
 examples/corpus/
+
+# LoRA training output and model artifacts (large binaries)
+benchmark/lora_out*/
+benchmark/phi4_merged/
+benchmark/phi4_sigil_f16.gguf
+benchmark/sigil_lora*.gguf
+benchmark/sigil_lora.gguf
+
+# Large RAG embedding index — regenerable from corpus via `python rag.py build`
+benchmark/rag_index.json
+
+# Intermediate corpus snapshots produced by the cleanup pipeline
+benchmark/training_corpus.before_refresh.jsonl
+benchmark/training_corpus.cleaned.jsonl
+benchmark/training_corpus.runtime_clean.jsonl
+benchmark/training_corpus.refreshed.jsonl
+benchmark/training_corpus.final.jsonl
+
+# Cleanup pipeline logs (regenerable)
+benchmark/corpus_refresh_log.txt
+benchmark/corpus_validation_report.txt
+benchmark/cleanup_log.txt
+benchmark/runtime_check_log.txt
+
+# Claude Code agent state (local-only)
+.claude/
