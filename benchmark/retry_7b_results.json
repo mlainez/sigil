@@ -1,0 +1,132 @@
+[
+  {
+    "id": "center_pad",
+    "shot1": false,
+    "shot2": false
+  },
+  {
+    "id": "hyphenate_camel",
+    "shot1": false,
+    "shot2": false
+  },
+  {
+    "id": "strip_punct",
+    "shot1": false,
+    "shot2": true
+  },
+  {
+    "id": "power_of_two",
+    "shot1": false,
+    "shot2": false
+  },
+  {
+    "id": "factorial_n",
+    "shot1": false,
+    "shot2": true
+  },
+  {
+    "id": "sort_freq_desc",
+    "shot1": false,
+    "shot2": false
+  },
+  {
+    "id": "remove_dupes_keep_last",
+    "shot1": false,
+    "shot2": false
+  },
+  {
+    "id": "common_prefix_words",
+    "shot1": false,
+    "shot2": false
+  },
+  {
+    "id": "log_count_level",
+    "shot1": false,
+    "shot2": false
+  },
+  {
+    "id": "log_extract_messages",
+    "shot1": false,
+    "shot2": false
+  },
+  {
+    "id": "first_unbalanced_index",
+    "shot1": false,
+    "shot2": false
+  },
+  {
+    "id": "longest_run_letter",
+    "shot1": false,
+    "shot2": false
+  },
+  {
+    "id": "longest_common_suffix_two",
+    "shot1": false,
+    "shot2": false
+  },
+  {
+    "id": "is_rotation_of",
+    "shot1": false,
+    "shot2": true
+  },
+  {
+    "id": "is_subsequence",
+    "shot1": false,
+    "shot2": false
+  },
+  {
+    "id": "path_join_parts",
+    "shot1": false,
+    "shot2": true
+  },
+  {
+    "id": "path_normalize_dots",
+    "shot1": false,
+    "shot2": false
+  },
+  {
+    "id": "swap_extension",
+    "shot1": false,
+    "shot2": false
+  },
+  {
+    "id": "binary_to_int",
+    "shot1": false,
+    "shot2": false
+  },
+  {
+    "id": "bit_at_index",
+    "shot1": false,
+    "shot2": true
+  },
+  {
+    "id": "fibonacci_nth",
+    "shot1": false,
+    "shot2": false
+  },
+  {
+    "id": "perfect_or_not",
+    "shot1": false,
+    "shot2": false
+  },
+  {
+    "id": "tribonacci_nth",
+    "shot1": false,
+    "shot2": false
+  },
+  {
+    "id": "harmonic_partial_truncated",
+    "shot1": false,
+    "shot2": false
+  },
+  {
+    "id": "min_three",
+    "shot1": false,
+    "shot2": false
+  },
+  {
+    "id": "first_word_longer_than",
+    "shot1": false,
+    "shot2": false
+  }
+]

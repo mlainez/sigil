@@ -1,0 +1,3734 @@
+{
+  "iterations": [
+    {
+      "iteration": 1,
+      "n_tasks": 10,
+      "a_pass": 2,
+      "b_pass": 5,
+      "flips_a_to_b": 4,
+      "flips_b_to_a": 1,
+      "net": 3,
+      "tasks": [
+        {
+          "id": "right_pad_spaces",
+          "a_pass": false,
+          "b_pass": true,
+          "a_bucket": "parse_error",
+          "b_bucket": null,
+          "a_seconds": 4.8,
+          "b_seconds": 3.0,
+          "a_code": "(fn pad_right str string n int -> string\n  (let len int (str_len str))\n  (if (ge len n)\n    (ret str)\n    (let spaces string (repeat \" \" (- n len)))\n    (ret (str_cat str spaces)))))\n\n(println (pad_right (arg_str 0) (arg_int 1)))",
+          "b_code": "(if (lt (len $0) #1)\n  (println (add $0 (repeat \" \" (sub #1 (len $0)))))\n  (println $0))",
+          "a_stdout": "",
+          "b_stdout": "hi   \n",
+          "a_stderr": "Parse error: Cannot use type keyword 'str' as function parameter name. Use a descriptive name instead (e.g., 'str_data', 'str_value')\n",
+          "b_stderr": "",
+          "rag_top_sim": 0.9727064128288406,
+          "rag_hits": [
+            {
+              "score": 0.9727064128288406,
+              "desc": "Take a string in arg0 and a positive integer n in arg1. Print arg0 right-padded with spaces to lengt"
+            },
+            {
+              "score": 0.7756806736856571,
+              "desc": "Take a string in arg0 and print it with each pair of adjacent characters swapped. If the length is o"
+            },
+            {
+              "score": 0.7730931867556475,
+              "desc": "For each space-separated word in arg1 (in order), print the word left-padded to the longest word's l"
+            },
+            {
+              "score": 0.7702114408051114,
+              "desc": "Take two strings in arg0 and arg1. Print the Jaccard similarity of their character sets (size of int"
+            },
+            {
+              "score": 0.7620155856861254,
+              "desc": "Take a non-negative integer in arg0 and print its binary representation as a string of '0' and '1' c"
+            }
+          ]
+        },
+        {
+          "id": "center_pad",
+          "a_pass": false,
+          "b_pass": false,
+          "a_bucket": "parse_error",
+          "b_bucket": "type_error",
+          "a_seconds": 3.8,
+          "b_seconds": 3.6,
+          "a_code": "(fn center str string n int -> string\n  (let len int (len str))\n  (if (lt len n)\n    (let spaces int (sub n len))\n    (let left int (div spaces 2))\n    (let right int (sub spaces left))\n    (ret (concat (rep \" \" left) str (rep \" \" right)))\n    (ret str)))\n\n(println (center (arg_str 0) (arg_int 1)))",
+          "b_code": "(set s $0)\n(set w #1)\n(set pad (sub w (len s)))\n(if (eq (mod pad 2) 1) (set pad (add pad 1)))\n(set left_pad (div pad 2))\n(set right_pad (sub pad left_pad))\n(println (string_concat (repeat \" \" left_pad) s (repeat \" \" right_pad)))",
+          "a_stdout": "",
+          "b_stdout": "",
+          "a_stderr": "Parse error: Cannot use type keyword 'str' as function parameter name. Use a descriptive name instead (e.g., 'str_data', 'str_value')\n",
+          "b_stderr": "Runtime error: Invalid arguments to string_concat\n",
+          "rag_top_sim": 0.8464935481987543,
+          "rag_hits": [
+            {
+              "score": 0.8464935481987543,
+              "desc": "Take a string in arg0 and a positive integer n in arg1. Print arg0 right-padded with spaces to lengt"
+            },
+            {
+              "score": 0.7840202409413344,
+              "desc": "Take a string in arg0 and a positive integer k in arg1. Print the top k most-frequent characters, br"
+            },
+            {
+              "score": 0.7543317339827137,
+              "desc": "Take a CSV string in arg0 (rows separated by '\\n', fields by ','). The first row is a header. Print "
+            },
+            {
+              "score": 0.7514252502340583,
+              "desc": "Take two strings in arg0 and arg1. Print the Jaccard similarity of their character sets (size of int"
+            },
+            {
+              "score": 0.7504970699320084,
+              "desc": "Left-pad arg1 with zeros to width arg2."
+            }
+          ]
+        },
+        {
+          "id": "truncate_ellipsis",
+          "a_pass": false,
+          "b_pass": true,
+          "a_bucket": "parse_error",
+          "b_bucket": null,
+          "a_seconds": 3.3,
+          "b_seconds": 3.0,
+          "a_code": "(fn truncate str string n int -> string\n  (if (> (len str) n)\n    (str (slice str 0 (- n 3)) \"...\")\n    (ret str)))\n\n(println (truncate (arg_str 0) (arg_int 1)))",
+          "b_code": "(if (> (len $0) #1)\n  (println (fmt \"{}...\" (slice $0 0 (- #1 3))))\n  (println $0))",
+          "a_stdout": "",
+          "b_stdout": "hello...\n",
+          "a_stderr": "Parse error: Cannot use type keyword 'str' as function parameter name. Use a descriptive name instead (e.g., 'str_data', 'str_value')\n",
+          "b_stderr": "",
+          "rag_top_sim": 0.8970186766864019,
+          "rag_hits": [
+            {
+              "score": 0.8970186766864019,
+              "desc": "Take a string in arg0 and a positive integer n in arg1. Print arg0 right-padded with spaces to lengt"
+            },
+            {
+              "score": 0.8245681900995535,
+              "desc": "Take a string in arg0 and print it with each pair of adjacent characters swapped. If the length is o"
+            },
+            {
+              "score": 0.809494414154415,
+              "desc": "Take two strings in arg0 and arg1. Print the Jaccard similarity of their character sets (size of int"
+            },
+            {
+              "score": 0.8036137412208249,
+              "desc": "Take a string in arg0 and print the length of the longest run of identical adjacent characters."
+            },
+            {
+              "score": 0.7918408297589533,
+              "desc": "Run-length encode the string in arg1 by replacing each maximal run of identical characters with the "
+            }
+          ]
+        },
+        {
+          "id": "wrap_words",
+          "a_pass": false,
+          "b_pass": false,
+          "a_bucket": "runtime_other",
+          "b_bucket": "parse_error",
+          "a_seconds": 4.4,
+          "b_seconds": 4.4,
+          "a_code": "(fn wrap_sentence sentence string n int -> unit\n  (let words array (split sentence \" \"))\n  (let lines array [])\n  (let current_line string \"\")\n  (for word string words\n    (if (gt (len current_line) (+ n 1))\n      (begin\n        (push lines current_line)\n        (set current_line word)\n      )\n      (set current_line (fmt \"{} {}\" current_line word))\n    ))\n  (push lines current_line)\n  (for line string lines\n    (println line)\n  ))\n\n(set sentence string (arg_str 0))\n(set n int (arg_int 1))\n(wrap_sentence sentence n)",
+          "b_code": "(fn wrap sentence string width int -> string\n  (set words (split sentence \" \"))\n  (set lines [])\n  (set line \"\")\n  (for-each word words\n    (if (eq (len line) 0)\n      (set line word)\n      (if (le (add (len line) 1) width)\n        (set line (fmt \"{} {}\" line word))\n        (begin\n          (push lines line)\n          (set line word)))))\n  (if (gt (len line) 0)\n    (push lines line)))\n  (join \"\\n\" lines))\n\n(println (wrap $0 #1))",
+          "a_stdout": "",
+          "b_stdout": "",
+          "a_stderr": "Runtime error: for loop start and end must be integers\n",
+          "b_stderr": "Parse error: Expected expression but got )\n",
+          "rag_top_sim": 0.8038682192200226,
+          "rag_hits": [
+            {
+              "score": 0.8038682192200226,
+              "desc": "Take a string in arg0 and a positive integer n in arg1. Print arg0 right-padded with spaces to lengt"
+            },
+            {
+              "score": 0.7935227111746663,
+              "desc": "Wrap a sentence at width N (arg2), preserving word boundaries."
+            },
+            {
+              "score": 0.7752314822511884,
+              "desc": "Split arg1 on \\n into lines and print the lines in ascending order of length, breaking ties alphabet"
+            },
+            {
+              "score": 0.766444090677062,
+              "desc": "For each space-separated word in arg1 (in order), print the word left-padded to the longest word's l"
+            },
+            {
+              "score": 0.7624565212159421,
+              "desc": "Search the multi-line text in arg2 (lines separated by \\n) for the substring in arg1 and print each "
+            }
+          ]
+        },
+        {
+          "id": "indent_lines",
+          "a_pass": false,
+          "b_pass": true,
+          "a_bucket": "wrong_output",
+          "b_bucket": null,
+          "a_seconds": 3.1,
+          "b_seconds": 2.9,
+          "a_code": "(set input string (arg_str 0))\n(set n int (arg_int 1))\n(println (map_arr (split input \"\\n\") (\\line string (str (repeat \" \" n)) line)))",
+          "b_code": "(set lines (split $0 \"\\n\"))\n(for-each line lines\n  (println (fmt \"{}{}\" (repeat \" \" #1) line)))",
+          "a_stdout": "[a, b, c]\n",
+          "b_stdout": "  a\n  b\n  c\n",
+          "a_stderr": "",
+          "b_stderr": "",
+          "rag_top_sim": 0.805118505463984,
+          "rag_hits": [
+            {
+              "score": 0.805118505463984,
+              "desc": "Search the multi-line text in arg2 (lines separated by \\n) for the substring in arg1 and print each "
+            },
+            {
+              "score": 0.791436491722838,
+              "desc": "Take a string in arg0 and a positive integer n in arg1. Print arg0 right-padded with spaces to lengt"
+            },
+            {
+              "score": 0.7747330633880087,
+              "desc": "Take a string in arg0 and a positive integer k in arg1. Print the top k most-frequent characters, br"
+            },
+            {
+              "score": 0.7688824721676419,
+              "desc": "First arg is a substring pattern, second arg is a multi-line text; print each line containing the pa"
+            },
+            {
+              "score": 0.7618700455389827,
+              "desc": "Take a string in arg0. Print it with each maximal run of identical adjacent characters collapsed to "
+            }
+          ]
+        },
+        {
+          "id": "title_each_word",
+          "a_pass": true,
+          "b_pass": false,
+          "a_bucket": null,
+          "b_bucket": "wrong_output",
+          "a_seconds": 2.6,
+          "b_seconds": 2.8,
+          "a_code": "(println (title $0))",
+          "b_code": "(println (join (map_arr (split $0 \" \") (\\w (swapcase w))) \" \"))",
+          "a_stdout": "Hello World Foo\n",
+          "b_stdout": "HEllO WOrlD foo\n",
+          "a_stderr": "",
+          "b_stderr": "",
+          "rag_top_sim": 0.8796298918537959,
+          "rag_hits": [
+            {
+              "score": 0.8796298918537959,
+              "desc": "Return the uppercase initials of each whitespace-separated word in arg1."
+            },
+            {
+              "score": 0.8796298918537959,
+              "desc": "Output the uppercase initials of each whitespace-separated word in arg1."
+            },
+            {
+              "score": 0.871220353062537,
+              "desc": "Output uppercase initials of each whitespace-separated word in arg1."
+            },
+            {
+              "score": 0.871220353062537,
+              "desc": "Output uppercase initials of each whitespace-separated word in arg1."
+            },
+            {
+              "score": 0.8518217453751857,
+              "desc": "Take a sentence in arg0. Print the whitespace-separated word that appears LEAST frequently. Break ti"
+            }
+          ]
+        },
+        {
+          "id": "hyphenate_camel",
+          "a_pass": false,
+          "b_pass": false,
+          "a_bucket": "wrong_output",
+          "b_bucket": "parse_error",
+          "a_seconds": 2.7,
+          "b_seconds": 3.1,
+          "a_code": "(println (swapcase (join \"-\" (split $0 \"\"))))",
+          "b_code": "(set s string $0)\n(println (join (map_arr (chars s) (\\c (cond ((is_upper c) (fmt \"-{}\" (lower c))) (true c)))) \"\")))",
+          "a_stdout": "CAMELcASEeXAMPLE\n",
+          "b_stdout": "",
+          "a_stderr": "",
+          "b_stderr": "Parse error: Expected expression but got )\n",
+          "rag_top_sim": 0.8552907888887747,
+          "rag_hits": [
+            {
+              "score": 0.8552907888887747,
+              "desc": "Take a string in arg0 and print it with letters alternating lower, UPPER, lower, UPPER, ... starting"
+            },
+            {
+              "score": 0.8293849453651687,
+              "desc": "Convert the integer arg1 (0-999) to its English word representation in lowercase, with single spaces"
+            },
+            {
+              "score": 0.8164308270267809,
+              "desc": "Print the uppercase initials of each space-separated word in arg1, joined by dots with a trailing do"
+            },
+            {
+              "score": 0.8142987490538227,
+              "desc": "Uppercase vowels and lowercase consonants in arg1."
+            },
+            {
+              "score": 0.8124479507988261,
+              "desc": "Convert the integer in arg1 (0..99) to lowercase English words using a hyphen between tens and ones "
+            }
+          ]
+        },
+        {
+          "id": "snake_to_pascal",
+          "a_pass": false,
+          "b_pass": true,
+          "a_bucket": "wrong_output",
+          "b_bucket": null,
+          "a_seconds": 2.6,
+          "b_seconds": 3.2,
+          "a_code": "(println (title (arg_str 0)))",
+          "b_code": "(set s string $0)\n(set parts array (split s \"_\"))\n(set pascalCase string \"\")\n(for-each part parts\n  (set pascalCase (fmt \"{}{}\" pascalCase (title part))))\n(println pascalCase)",
+          "a_stdout": "Hello_world_foo\n",
+          "b_stdout": "HelloWorldFoo\n",
+          "a_stderr": "",
+          "b_stderr": "",
+          "rag_top_sim": 0.8324670380938928,
+          "rag_hits": [
+            {
+              "score": 0.8324670380938928,
+              "desc": "Convert a camelCase string in arg1 to snake_case."
+            },
+            {
+              "score": 0.7981203916834728,
+              "desc": "Convert camelCase in arg1 to snake_case."
+            },
+            {
+              "score": 0.781692921029205,
+              "desc": "Convert camelCase string arg1 to snake_case."
+            },
+            {
+              "score": 0.7764697466259906,
+              "desc": "Convert camelCase arg1 to snake_case."
+            },
+            {
+              "score": 0.7641516483010096,
+              "desc": "Take a string in arg0 and print it with letters alternating lower, UPPER, lower, UPPER, ... starting"
+            }
+          ]
+        },
+        {
+          "id": "strip_punct",
+          "a_pass": false,
+          "b_pass": false,
+          "a_bucket": "undefined_var",
+          "b_bucket": "undefined_var",
+          "a_seconds": 2.9,
+          "b_seconds": 2.9,
+          "a_code": "(println (replace $0 \"[!\\\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~]\" \"\"))",
+          "b_code": "(println (replace $0 \"[!\\\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~]\" \"\"))",
+          "a_stdout": "",
+          "b_stdout": "",
+          "a_stderr": "Runtime error: Undefined variable: replace\n",
+          "b_stderr": "Runtime error: Undefined variable: replace\n",
+          "rag_top_sim": 0.0,
+          "rag_hits": []
+        },
+        {
+          "id": "reverse_words",
+          "a_pass": true,
+          "b_pass": true,
+          "a_bucket": null,
+          "b_bucket": null,
+          "a_seconds": 2.7,
+          "b_seconds": 2.7,
+          "a_code": "(println (join \" \" (rev (split $0 \" \"))))",
+          "b_code": "(set sentence $0)\n(println (join (rev (split sentence \" \")) \" \"))",
+          "a_stdout": "fox brown quick the\n",
+          "b_stdout": "fox brown quick the\n",
+          "a_stderr": "",
+          "b_stderr": "",
+          "rag_top_sim": 0.8248189933350322,
+          "rag_hits": [
+            {
+              "score": 0.8248189933350322,
+              "desc": "Take a sentence in arg0 (whitespace-separated words). Print the count of distinct words."
+            },
+            {
+              "score": 0.8173500374186121,
+              "desc": "Take a sentence in arg0. Print the whitespace-separated word that appears LEAST frequently. Break ti"
+            },
+            {
+              "score": 0.8090758676676955,
+              "desc": "Group space-separated words from arg1 into anagram groups (printed in first-occurrence order), with "
+            },
+            {
+              "score": 0.7911983760519058,
+              "desc": "Group the space-separated words in arg1 by anagram (sorted-letter key). Print each group as space-se"
+            },
+            {
+              "score": 0.7823776943010342,
+              "desc": "Evaluate the space-separated reverse Polish notation expression in argv[1] using integer arithmetic "
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "iteration": 2,
+      "n_tasks": 10,
+      "a_pass": 4,
+      "b_pass": 3,
+      "flips_a_to_b": 2,
+      "flips_b_to_a": 3,
+      "net": -1,
+      "tasks": [
+        {
+          "id": "sum_of_digits",
+          "a_pass": false,
+          "b_pass": true,
+          "a_bucket": "parse_error",
+          "b_bucket": null,
+          "a_seconds": 3.1,
+          "b_seconds": 2.8,
+          "a_code": "(fn sum_digits n int -> int\n  (let digits array (map_arr (str n) (\\c char -> (int c))))\n    (reduce add 0 digits)))\n\n(println (sum_digits #0))",
+          "b_code": "(println (sum (map_arr (chars $0) (\\c (int c)))))",
+          "a_stdout": "",
+          "b_stdout": "10\n",
+          "a_stderr": "Parse error: Expected expression but got )\n",
+          "b_stderr": "",
+          "rag_top_sim": 0.9318513603484063,
+          "rag_hits": [
+            {
+              "score": 0.9318513603484063,
+              "desc": "Print the sum of the decimal digits of the non-negative integer arg1."
+            },
+            {
+              "score": 0.8906927061454892,
+              "desc": "Print the sum of the decimal digits of the integer in arg1."
+            },
+            {
+              "score": 0.8890804493685828,
+              "desc": "Print the sum of decimal digits of the integer in arg1."
+            },
+            {
+              "score": 0.8890804493685828,
+              "desc": "Print the sum of decimal digits of the integer in arg1."
+            },
+            {
+              "score": 0.8890804493685828,
+              "desc": "Print the sum of decimal digits of the integer in arg1."
+            }
+          ]
+        },
+        {
+          "id": "count_digits_in_n",
+          "a_pass": false,
+          "b_pass": true,
+          "a_bucket": "empty_output",
+          "b_bucket": null,
+          "a_seconds": 2.9,
+          "b_seconds": 2.6,
+          "a_code": "(fn main -> int\n  (let n int (arg_int 0))\n  (println (len (str n)))\n)",
+          "b_code": "(println (len $0))",
+          "a_stdout": "",
+          "b_stdout": "5\n",
+          "a_stderr": "",
+          "b_stderr": "",
+          "rag_top_sim": 0.904464279095869,
+          "rag_hits": [
+            {
+              "score": 0.904464279095869,
+              "desc": "Sum the decimal digits of the non-negative integer in arg1."
+            },
+            {
+              "score": 0.904464279095869,
+              "desc": "Sum the decimal digits of the non-negative integer in arg1."
+            },
+            {
+              "score": 0.8864701077869495,
+              "desc": "Multiply the decimal digits of the non-negative integer arg1."
+            },
+            {
+              "score": 0.8691256145803953,
+              "desc": "Sum the digits of a non-negative integer."
+            },
+            {
+              "score": 0.8320569431070912,
+              "desc": "Print the product of the decimal digits of a non-negative integer arg1."
+            }
+          ]
+        },
+        {
+          "id": "is_prime",
+          "a_pass": false,
+          "b_pass": false,
+          "a_bucket": "empty_output",
+          "b_bucket": "parse_error",
+          "a_seconds": 4.0,
+          "b_seconds": 4.0,
+          "a_code": "(fn is_prime n int -> bool\n  (if (le n 1) (ret false))\n  (if (eq n 2) (ret true))\n  (for i 2 (sub n 1)\n    (if (eq (mod n i) 0) (ret false)))\n  (ret true))\n\n(fn main -> int\n  (set n int (arg_int 0))\n  (println (if (is_prime n) \"yes\" \"no\"))\n  (ret 0))",
+          "b_code": "(set n #0)\n(if (or (< n 2) (> n 10000))\n  (println \"no\")\n  (else\n    (set is_prime bool true)\n    (set i int 2)\n    (while (and is_prime (< (* i i) n))\n      (if (= (mod n i) 0)\n        (set is_prime false))\n      (set i (+ i 1)))\n    (if is_prime (println \"yes\") (else (println \"no\"))))))",
+          "a_stdout": "",
+          "b_stdout": "",
+          "a_stderr": "",
+          "b_stderr": "Parse error: Expected expression but got )\n",
+          "rag_top_sim": 0.8669979794704507,
+          "rag_hits": [
+            {
+              "score": 0.8669979794704507,
+              "desc": "Check if number in arg1 is prime (yes/no)."
+            },
+            {
+              "score": 0.8478939480929313,
+              "desc": "Check if number in arg1 is prime (true/false)."
+            },
+            {
+              "score": 0.8390634796161656,
+              "desc": "Determine if integer in arg1 is a prime number."
+            },
+            {
+              "score": 0.8056017328391124,
+              "desc": "Check if number in arg1 is prime."
+            },
+            {
+              "score": 0.7872702122296502,
+              "desc": "Print 'yes' if arg1 is a dotted quad of 4 integers each in 0..255, else 'no'."
+            }
+          ]
+        },
+        {
+          "id": "gcd_two",
+          "a_pass": true,
+          "b_pass": true,
+          "a_bucket": null,
+          "b_bucket": null,
+          "a_seconds": 3.2,
+          "b_seconds": 3.0,
+          "a_code": "(fn gcd a int b int -> int\n  (if (eq b 0)\n    (ret a)\n    (ret (gcd b (mod a b)))))\n(println (gcd (arg_int 0) (arg_int 1)))",
+          "b_code": "(fn gcd a int b int -> int\n  (if (eq b 0) (ret a))\n  (ret (gcd b (mod a b))))\n\n(println (gcd #0 #1))",
+          "a_stdout": "6\n",
+          "b_stdout": "6\n",
+          "a_stderr": "",
+          "b_stderr": "",
+          "rag_top_sim": 0.9585931013627849,
+          "rag_hits": [
+            {
+              "score": 0.9585931013627849,
+              "desc": "Take two positive integers in arg0 and arg1. Print their greatest common divisor computed via the Eu"
+            },
+            {
+              "score": 0.8699621771655857,
+              "desc": "Print the greatest common divisor of the space-separated positive integers in arg1."
+            },
+            {
+              "score": 0.8378541634951815,
+              "desc": "Take two integers in arg0 and arg1. Print the smaller of the two if both are positive; otherwise pri"
+            },
+            {
+              "score": 0.826535272410343,
+              "desc": "Print the GCD of integers arg1 and arg2."
+            },
+            {
+              "score": 0.8156561637481249,
+              "desc": "Print the greatest common divisor of two integers."
+            }
+          ]
+        },
+        {
+          "id": "lcm_two",
+          "a_pass": false,
+          "b_pass": false,
+          "a_bucket": "parse_error",
+          "b_bucket": "type_error",
+          "a_seconds": 3.6,
+          "b_seconds": 3.5,
+          "a_code": "(fn lcm a int b int -> int\n  (fn gcd x int y int -> int\n    (if (eq y 0) (ret x))\n    (ret (gcd y (mod x y)))))\n  (let g int (gcd a b))\n  (ret (div (mul a b) g))))\n\n(println (lcm (arg_int 0) (arg_int 1)))",
+          "b_code": "(fn lcm a int b int -> int\n  (fn gcd x int y int -> int\n    (if (eq y 0)\n      (ret x))\n    (ret (gcd y (mod x y))))\n  \n  (ret (div (mul a b) (gcd a b))))\n\n(println (lcm #0 #1))",
+          "a_stdout": "",
+          "b_stdout": "",
+          "a_stderr": "Parse error: Expected expression but got )\n",
+          "b_stderr": "Runtime error: eq requires arguments of the same type, got function and int\n",
+          "rag_top_sim": 0.8738993432379453,
+          "rag_hits": [
+            {
+              "score": 0.8738993432379453,
+              "desc": "Take two positive integers in arg0 and arg1. Print their greatest common divisor computed via the Eu"
+            },
+            {
+              "score": 0.8627217272922838,
+              "desc": "Take two integers in arg0 and arg1. Print the smaller of the two if both are positive; otherwise pri"
+            },
+            {
+              "score": 0.8415423223847086,
+              "desc": "Print the GCD of integers arg1 and arg2."
+            },
+            {
+              "score": 0.7897693564441989,
+              "desc": "Given integers arg1 and arg2, print arg1/arg2 as a percentage with one decimal."
+            },
+            {
+              "score": 0.7876982155744716,
+              "desc": "Print the least common multiple of two integers."
+            }
+          ]
+        },
+        {
+          "id": "power_of_two",
+          "a_pass": true,
+          "b_pass": false,
+          "a_bucket": null,
+          "b_bucket": "undefined_var",
+          "a_seconds": 3.6,
+          "b_seconds": 3.1,
+          "a_code": "(fn is_power_of_two n int -> string\n  (if (eq n 1) (ret \"yes\"))\n  (set x int 2)\n  (while (lt x n)\n    (set x (mul x 2)))\n  (if (eq x n) (ret \"yes\") (ret \"no\")))\n\n(println (is_power_of_two #0))",
+          "b_code": "(set n #0)\n(if (and (> n 0) (= (bitwise_and n (- n 1)) 0))\n  (println \"yes\")\n  (else (println \"no\")))",
+          "a_stdout": "yes\n",
+          "b_stdout": "",
+          "a_stderr": "",
+          "b_stderr": "Runtime error: Undefined variable: bitwise_and\n",
+          "rag_top_sim": 0.8196624751058714,
+          "rag_hits": [
+            {
+              "score": 0.8196624751058714,
+              "desc": "Print 'yes' if arg1 is a dotted quad of 4 integers each in 0..255, else 'no'."
+            },
+            {
+              "score": 0.7536613203864446,
+              "desc": "Take two space-separated lists of integers in arg0 and arg1. Print 'yes' if they are equal element-b"
+            },
+            {
+              "score": 0.7377093541063756,
+              "desc": "Take two integers in arg0 and arg1. Print the smaller of the two if both are positive; otherwise pri"
+            },
+            {
+              "score": 0.7321237168378096,
+              "desc": "Print 'yes' if arg1 and arg2 are anagrams (same multiset of characters), else 'no'."
+            },
+            {
+              "score": 0.7321224584070961,
+              "desc": "Take two strings in arg0 (the candidate) and arg1 (the target). Print 'yes' if arg0 contains every c"
+            }
+          ]
+        },
+        {
+          "id": "n_choose_k",
+          "a_pass": true,
+          "b_pass": false,
+          "a_bucket": null,
+          "b_bucket": "parse_error",
+          "a_seconds": 4.0,
+          "b_seconds": 3.8,
+          "a_code": "(fn binomial n int k int -> int\n  (if (eq k 0) (ret 1))\n  (if (eq k n) (ret 1))\n  (ret (div (fact n) (mul (fact k) (fact (sub n k))))))\n\n(fn fact n int -> int\n  (if (eq n 0) (ret 1))\n  (ret (mul n (fact (sub n 1)))))\n\n(println (binomial (arg_int 0) (arg_int 1)))",
+          "b_code": "(fn binomial n int k int -> int\n  (fn choose a int b int -> int\n    (if (eq b 0) (ret 1))\n    (ret (/ (* a (choose (sub a 1) (sub b 1))) b))))\n  (println (choose n k)))\n\n(set n int (arg_int 0))\n(set k int (arg_int 1))\n(binomial n k)",
+          "a_stdout": "10\n",
+          "b_stdout": "",
+          "a_stderr": "",
+          "b_stderr": "Parse error: Expected expression but got )\n",
+          "rag_top_sim": 0.0,
+          "rag_hits": []
+        },
+        {
+          "id": "factorial_n",
+          "a_pass": true,
+          "b_pass": false,
+          "a_bucket": null,
+          "b_bucket": "parse_error",
+          "a_seconds": 3.2,
+          "b_seconds": 3.3,
+          "a_code": "(fn fact n int -> int\n  (if (eq n 0) (ret 1))\n  (ret (mul n (fact (sub n 1)))))\n\n(set n int (arg_int 0))\n(println (fact n))",
+          "b_code": "(set n #0)\n(if (eq n 0)\n  (println \"1\")\n  (do\n    (set result 1)\n    (for-each i (range 1 (+ n 1))\n      (set result (* result i)))\n    (println result))))",
+          "a_stdout": "120\n",
+          "b_stdout": "",
+          "a_stderr": "",
+          "b_stderr": "Parse error: Expected expression but got )\n",
+          "rag_top_sim": 0.8313294232744995,
+          "rag_hits": [
+            {
+              "score": 0.8313294232744995,
+              "desc": "Take a non-negative integer in arg0 and print its binary representation as a string of '0' and '1' c"
+            },
+            {
+              "score": 0.8195541363194939,
+              "desc": "Sum the decimal digits of the non-negative integer in arg1."
+            },
+            {
+              "score": 0.8195541363194939,
+              "desc": "Sum the decimal digits of the non-negative integer in arg1."
+            },
+            {
+              "score": 0.7980829800709813,
+              "desc": "Multiply the decimal digits of the non-negative integer arg1."
+            },
+            {
+              "score": 0.794460017295644,
+              "desc": "Take a space-separated list of integers in arg0. Print the integer that appears more than half the t"
+            }
+          ]
+        },
+        {
+          "id": "abs_diff",
+          "a_pass": false,
+          "b_pass": false,
+          "a_bucket": "empty_output",
+          "b_bucket": "wrong_output",
+          "a_seconds": 3.3,
+          "b_seconds": 2.8,
+          "a_code": "(fn main -> int\n  (let a int (arg_int 0))\n  (let b int (arg_int 1))\n  (let diff int (sub (abs a) (abs b)))\n  (println diff)\n  (ret 0))",
+          "b_code": "(set a int #0)\n(set b int #1)\n(println (- (abs a) (abs b)))",
+          "a_stdout": "",
+          "b_stdout": "-2\n",
+          "a_stderr": "",
+          "b_stderr": "",
+          "rag_top_sim": 0.8706831572814256,
+          "rag_hits": [
+            {
+              "score": 0.8706831572814256,
+              "desc": "Take two integers in arg0 and arg1. Print the smaller of the two if both are positive; otherwise pri"
+            },
+            {
+              "score": 0.8431173846842669,
+              "desc": "Print the GCD of integers arg1 and arg2."
+            },
+            {
+              "score": 0.8029870997194524,
+              "desc": "Given integers arg1 and arg2, print arg1/arg2 as a percentage with one decimal."
+            },
+            {
+              "score": 0.8004519270518661,
+              "desc": "Sum two integers provided as args."
+            },
+            {
+              "score": 0.8004519270518661,
+              "desc": "Sum two integers provided as args."
+            }
+          ]
+        },
+        {
+          "id": "int_sqrt",
+          "a_pass": false,
+          "b_pass": false,
+          "a_bucket": "empty_output",
+          "b_bucket": "empty_output",
+          "a_seconds": 3.3,
+          "b_seconds": 3.3,
+          "a_code": "(fn main -> int\n  (let n int (arg_int 0))\n  (let k int 0)\n  (while (le (* k k) n)\n    (set k (add k 1)))\n  (println (sub k 1))\n  (ret 0))",
+          "b_code": "(fn main -> int\n  (let n int (arg_int 0))\n  (let k int 0)\n  (while (le (* k k) n)\n    (set k (add k 1)))\n  (println (sub k 1))\n  (ret 0))",
+          "a_stdout": "",
+          "b_stdout": "",
+          "a_stderr": "",
+          "b_stderr": "",
+          "rag_top_sim": 0.0,
+          "rag_hits": []
+        }
+      ]
+    },
+    {
+      "iteration": 3,
+      "n_tasks": 10,
+      "a_pass": 0,
+      "b_pass": 4,
+      "flips_a_to_b": 4,
+      "flips_b_to_a": 0,
+      "net": 4,
+      "tasks": [
+        {
+          "id": "intersect_int_arrays",
+          "a_pass": false,
+          "b_pass": false,
+          "a_bucket": "runtime_other",
+          "b_bucket": "runtime_other",
+          "a_seconds": 2.8,
+          "b_seconds": 3.5,
+          "a_code": "(println (join (uniq (split $0 \" \") (split $1 \" \")) \" \"))",
+          "b_code": "(set list1 (parse_ints $0))\n(set list2 (parse_ints $1))\n(set result [])\n\n(for-each x list1\n  (if (in x list2)\n    (and (not (in x result)) (push result x))))\n\n(println (join (map_arr result str) \" \"))",
+          "a_stdout": "",
+          "b_stdout": "",
+          "a_stderr": "Runtime error: uniq takes 1 array\n",
+          "b_stderr": "Runtime error: Invalid right operand for and: expected bool\n",
+          "rag_top_sim": 0.8792113923267034,
+          "rag_hits": [
+            {
+              "score": 0.8792113923267034,
+              "desc": "Print the GCD of the two integers in arg1 (space separated)."
+            },
+            {
+              "score": 0.8662252021791791,
+              "desc": "Print GCD of all integers in arg1 (space-separated)."
+            },
+            {
+              "score": 0.8632087787151463,
+              "desc": "Take a space-separated list of integers in arg0. Print them sorted descending, space-separated."
+            },
+            {
+              "score": 0.8526788674404929,
+              "desc": "Take a space-separated list of integers in arg0. Print the integer that appears more than half the t"
+            },
+            {
+              "score": 0.8392478841724382,
+              "desc": "Take a comma-separated list of integers in arg0, sort them ascending, and print them space-separated"
+            }
+          ]
+        },
+        {
+          "id": "union_preserve_order",
+          "a_pass": false,
+          "b_pass": true,
+          "a_bucket": "wrong_output",
+          "b_bucket": null,
+          "a_seconds": 2.8,
+          "b_seconds": 3.0,
+          "a_code": "(println (join (union (split $0 \" \") (split $1 \" \")) \"\\n\"))",
+          "b_code": "(set arr1 (split $0 \" \"))\n(set arr2 (split $1 \" \"))\n(set result (uniq (concat arr1 arr2)))\n(println (join result \" \"))",
+          "a_stdout": "a\nb\nc\nd\ne\n",
+          "b_stdout": "a b c d e\n",
+          "a_stderr": "",
+          "b_stderr": "",
+          "rag_top_sim": 0.7824724687605087,
+          "rag_hits": [
+            {
+              "score": 0.7824724687605087,
+              "desc": "Take two strings in arg0 (the candidate) and arg1 (the target). Print 'yes' if arg0 contains every c"
+            },
+            {
+              "score": 0.7719166213627705,
+              "desc": "Rotate the space-separated list in arg1 left by arg2 positions."
+            },
+            {
+              "score": 0.7638338194870399,
+              "desc": "Group space-separated words from arg1 into anagram groups (printed in first-occurrence order), with "
+            },
+            {
+              "score": 0.7627410020617557,
+              "desc": "Take a string in arg0 and a positive integer k in arg1. Print the top k most-frequent characters, br"
+            },
+            {
+              "score": 0.7618005418931271,
+              "desc": "Take two space-separated lists of integers in arg0 and arg1. Print 'yes' if they are equal element-b"
+            }
+          ]
+        },
+        {
+          "id": "symmetric_diff",
+          "a_pass": false,
+          "b_pass": false,
+          "a_bucket": "undefined_var",
+          "b_bucket": "parse_error",
+          "a_seconds": 3.8,
+          "b_seconds": 3.3,
+          "a_code": "(set args array (argv))\n(set list1 array (split (arg_str 0) \" \"))\n(set list2 array (split (arg_str 1) \" \"))\n\n(set diff1 array (filter (\\x (not (in x list2))) list1))\n(set diff2 array (filter (\\x (not (in x list1))) list2))\n\n(set result array (concat diff1 diff2))\n(sort! result)\n\n(println (join result \" \"))",
+          "b_code": "(set a (split $0 \" \"))\n(set b (split $1 \" \"))\n(set diff_a (filter (\\x (not (in x b)))) a))\n(set diff_b (filter (\\x (not (in x a)))) b))\n(println (join (sort (concat diff_a diff_b)) \" \"))",
+          "a_stdout": "",
+          "b_stdout": "",
+          "a_stderr": "Runtime error: Undefined variable: sort!\n",
+          "b_stderr": "Parse error: Expected ) but got Symbol(a)\n",
+          "rag_top_sim": 0.8086143535057982,
+          "rag_hits": [
+            {
+              "score": 0.8086143535057982,
+              "desc": "Rotate the space-separated list in arg1 left by arg2 positions."
+            },
+            {
+              "score": 0.797061177086783,
+              "desc": "Check if space-separated numbers in arg1 are sorted ascending."
+            },
+            {
+              "score": 0.7911744281187492,
+              "desc": "Group the space-separated words in arg1 by anagram (sorted-letter key). Print each group as space-se"
+            },
+            {
+              "score": 0.7906978780078827,
+              "desc": "Take a space-separated list of integers in arg0. Print them sorted descending, space-separated."
+            },
+            {
+              "score": 0.7768398237277512,
+              "desc": "Take a string in arg0 and a positive integer k in arg1. Print the top k most-frequent characters, br"
+            }
+          ]
+        },
+        {
+          "id": "is_subset",
+          "a_pass": false,
+          "b_pass": false,
+          "a_bucket": "undefined_var",
+          "b_bucket": "runtime_other",
+          "a_seconds": 4.5,
+          "b_seconds": 3.0,
+          "a_code": "(set args array (argv))\n(set list1 array (split (arg_str 0) \" \"))\n(set list2 array (split (arg_str 1) \" \"))\n(set set1 map {})\n(set set2 map {})\n\n(for-each item string list1\n  (set set1 (map_set set1 item true)))\n\n(for-each item string list2\n  (set set2 (map_set set2 item true)))\n\n(if (eq (map_size set1) (map_size set2))\n  (if (all (fn key string -> bool (map_has set2 key)) (map_keys set1))\n    (println \"yes\")\n    (println \"no\"))\n  (println \"no\"))",
+          "b_code": "(set arr1 (parse_ints $0))\n(set arr2 (parse_ints $1))\n(if (subset arr1 arr2)\n  (println \"yes\")\n  (else (println \"no\")))",
+          "a_stdout": "",
+          "b_stdout": "",
+          "a_stderr": "Runtime error: Undefined variable: map_size\n",
+          "b_stderr": "Runtime error: parse_ints: cannot parse: a\n",
+          "rag_top_sim": 0.8827641758319383,
+          "rag_hits": [
+            {
+              "score": 0.8827641758319383,
+              "desc": "Take two space-separated lists of integers in arg0 and arg1. Print 'yes' if they are equal element-b"
+            },
+            {
+              "score": 0.8823716343261906,
+              "desc": "Take two strings in arg0 (the candidate) and arg1 (the target). Print 'yes' if arg0 contains every c"
+            },
+            {
+              "score": 0.8061183537082807,
+              "desc": "Print 'yes' if arg1 and arg2 are anagrams (same multiset of characters), else 'no'."
+            },
+            {
+              "score": 0.7964935343837304,
+              "desc": "Print 'yes' if arg1 and arg2 are anagrams ignoring spaces and case, else 'no'."
+            },
+            {
+              "score": 0.78418814069646,
+              "desc": "Print 'yes' if arg1 and arg2 are case-insensitive anagrams ignoring spaces, else 'no'."
+            }
+          ]
+        },
+        {
+          "id": "freq_count_top_k",
+          "a_pass": false,
+          "b_pass": true,
+          "a_bucket": "parse_error",
+          "b_bucket": null,
+          "a_seconds": 3.9,
+          "b_seconds": 3.5,
+          "a_code": "(set args array (argv))\n(set str string (arg_str 0))\n(set k int (arg_int 1))\n\n(set words array (split str \" \"))\n(set freq map (counter words))\n\n(set sorted_freq array (sort_by (\\pair -> (- (second pair) 0)) (entries freq)))\n\n(set result array)\n(for-each pair array sorted_freq\n  (if (< (len result) k)\n    (push result (first pair))\n    (break))))\n\n(println (join \" \" result))",
+          "b_code": "(set s $0)\n(set k #1)\n(set counts {})\n(for-each w (split s \" \")\n  (map_inc counts w))\n(set sorted (sort_by (entries counts) (\\(k v) (- v))))\n(set result [])\n(for i 0 k\n  (push result (first (array_get sorted i))))\n(println (join result \" \"))",
+          "a_stdout": "",
+          "b_stdout": "a b\n",
+          "a_stderr": "Parse error: Cannot use type keyword 'str' as variable name. Use a descriptive name instead (e.g., 'str_data', 'str_value')\n",
+          "b_stderr": "",
+          "rag_top_sim": 0.9507690470643593,
+          "rag_hits": [
+            {
+              "score": 0.9507690470643593,
+              "desc": "Take a string in arg0 and a positive integer k in arg1. Print the top k most-frequent characters, br"
+            },
+            {
+              "score": 0.8137560381228227,
+              "desc": "Print the most frequent value among space-separated tokens in arg1; ties break by first appearance."
+            },
+            {
+              "score": 0.8063128465479166,
+              "desc": "Take a sentence in arg0. Print the whitespace-separated word that appears LEAST frequently. Break ti"
+            },
+            {
+              "score": 0.8005852995470348,
+              "desc": "Take a space-separated list of integers in arg0. Print them sorted descending, space-separated."
+            },
+            {
+              "score": 0.793864769475286,
+              "desc": "Print the most frequent alphabetic character in arg1 (lowercased); ties broken by alphabetical order"
+            }
+          ]
+        },
+        {
+          "id": "sort_freq_desc",
+          "a_pass": false,
+          "b_pass": true,
+          "a_bucket": "runtime_other",
+          "b_bucket": null,
+          "a_seconds": 2.9,
+          "b_seconds": 3.4,
+          "a_code": "(println (join (map_kv (counter (split $0 \" \")) (\\k v (fmt \"{}:{}\" k v))) \" \"))",
+          "b_code": "(set s $0)\n(set words (split s \" \"))\n(set counts {})\n(for-each w words (map_inc counts w))\n(set sorted (sort_by (entries counts) (\\(k v) (- v))))\n(println (join (map_arr sorted (\\(k v) (fmt \"{}:{}\" k v))) \" \"))",
+          "a_stdout": "",
+          "b_stdout": "a:3 b:2 c:1\n",
+          "a_stderr": "Runtime error: map_kv: closure expects 1 args, got 2\n",
+          "b_stderr": "",
+          "rag_top_sim": 0.9027889757192,
+          "rag_hits": [
+            {
+              "score": 0.9027889757192,
+              "desc": "Take a string in arg0 and a positive integer k in arg1. Print the top k most-frequent characters, br"
+            },
+            {
+              "score": 0.8479098602687744,
+              "desc": "Take a sentence in arg0. Print the whitespace-separated word that appears LEAST frequently. Break ti"
+            },
+            {
+              "score": 0.8261685775923318,
+              "desc": "Take a space-separated list of integers in arg0. Print them sorted descending, space-separated."
+            },
+            {
+              "score": 0.8198397644458906,
+              "desc": "Take a space-separated list of integers in arg0. Print the integer that appears more than half the t"
+            },
+            {
+              "score": 0.8044141448704341,
+              "desc": "Take a sentence in arg0 (whitespace-separated words). Print the count of distinct words."
+            }
+          ]
+        },
+        {
+          "id": "majority_or_none",
+          "a_pass": false,
+          "b_pass": false,
+          "a_bucket": "parse_error",
+          "b_bucket": "runtime_other",
+          "a_seconds": 3.9,
+          "b_seconds": 3.9,
+          "a_code": "(set args array (split $0 \" \"))\n(set counts map {})\n(for-each str string args\n  (if (in str counts)\n    (set counts[str] (+ (counts[str]) 1))\n    (set counts[str] 1)))\n(set half_len int (/ (len args) 2))\n(set result string \"none\")\n(for-each kv pair counts\n  (let [key string value int]\n    (if (> value half_len)\n      (set result key))))\n(println result)",
+          "b_code": "(set xs (parse_ints $0))\n(set len (len xs))\n(set threshold (/ len 2))\n(set counter {})\n(for-each x xs\n  (set count (if (map_has counter x) (map_get counter x) 0))\n  (set counter (map_set counter x (+ count 1))))\n(set result \"none\")\n(for-each k (keys counter)\n  (if (gt (map_get counter k) threshold)\n    (set result k)))\n(println result)",
+          "a_stdout": "",
+          "b_stdout": "",
+          "a_stderr": "Parse error: Cannot use type keyword 'str' as for-each variable name. Use a descriptive name instead (e.g., 'str_data', 'str_value')\n",
+          "b_stderr": "Runtime error: parse_ints: cannot parse: a\n",
+          "rag_top_sim": 0.8845634761664292,
+          "rag_hits": [
+            {
+              "score": 0.8845634761664292,
+              "desc": "Take a space-separated list of integers in arg0. Print the integer that appears more than half the t"
+            },
+            {
+              "score": 0.8253269057333324,
+              "desc": "Take a string in arg0 and print the 0-based index of the last character that appears exactly once in"
+            },
+            {
+              "score": 0.811332855687365,
+              "desc": "Take a string in arg0 and print the first character that appears more than once. Print empty if all "
+            },
+            {
+              "score": 0.7896044921589253,
+              "desc": "Take a string in arg0. Print it with each maximal run of identical adjacent characters collapsed to "
+            },
+            {
+              "score": 0.7767880386078114,
+              "desc": "Print the first value that repeats in space-separated arg1, or 'none'."
+            }
+          ]
+        },
+        {
+          "id": "remove_dupes_keep_last",
+          "a_pass": false,
+          "b_pass": false,
+          "a_bucket": "wrong_output",
+          "b_bucket": "undefined_var",
+          "a_seconds": 2.7,
+          "b_seconds": 3.2,
+          "a_code": "(println (join (uniq (split $0 \" \")) \"\\n\"))",
+          "b_code": "(set input $0)\n(set arr (split input \" \"))\n(set seen {})\n(set result [])\n(for-each x arr\n  (if (not (map_has seen x))\n    (push result x)))\n(println (join (reverse result) \" \"))",
+          "a_stdout": "a\nb\nc\nd\n",
+          "b_stdout": "",
+          "a_stderr": "",
+          "b_stderr": "Runtime error: Undefined variable: reverse\n",
+          "rag_top_sim": 0.8692796606161715,
+          "rag_hits": [
+            {
+              "score": 0.8692796606161715,
+              "desc": "Take a space-separated list of integers in arg0. Print them sorted descending, space-separated."
+            },
+            {
+              "score": 0.8394379989186718,
+              "desc": "Rotate the space-separated list in arg1 left by arg2 positions."
+            },
+            {
+              "score": 0.8322871051928207,
+              "desc": "Take a space-separated list of integers in arg0. Print the integer that appears more than half the t"
+            },
+            {
+              "score": 0.8258507458210773,
+              "desc": "Take a comma-separated list of integers in arg0, sort them ascending, and print them space-separated"
+            },
+            {
+              "score": 0.8257255749575003,
+              "desc": "Take a string in arg0 and a positive integer k in arg1. Print the top k most-frequent characters, br"
+            }
+          ]
+        },
+        {
+          "id": "common_prefix_words",
+          "a_pass": false,
+          "b_pass": true,
+          "a_bucket": "runtime_other",
+          "b_bucket": null,
+          "a_seconds": 3.9,
+          "b_seconds": 4.5,
+          "a_code": "(fn longest_common_prefix words array -> string\n  (fn prefix a string b string -> string\n    (set i int 0)\n    (while (< i (min (len a) (len b)))\n      (if (ne (char_at a i) (char_at b i)) (ret (slice a 0 i)))\n      (inc i))\n    (ret a))\n\n  (reduce prefix \"\" words))\n\n(println (longest_common_prefix (split $1 \" \")))",
+          "b_code": "(set words (split $0 \" \"))\n(set prefix \"\")\n(if (gt (len words) 0)\n  (set prefix (first words))\n  (set i 1)\n  (while (lt i (len words))\n    (set word (array_get words i))\n    (set j 0)\n    (set max_j (min (len prefix) (len word)))\n    (while (and (lt j max_j) (eq (string_slice prefix j 1) (string_slice word j 1)))\n      (set j (add j 1)))\n    (set prefix (string_slice prefix 0 j))\n    (set i (add i 1))))\n(println prefix)",
+          "a_stdout": "",
+          "b_stdout": "fl\n",
+          "a_stderr": "Runtime error: arg_str: index 1 out of bounds\n",
+          "b_stderr": "",
+          "rag_top_sim": 0.9108968744754121,
+          "rag_hits": [
+            {
+              "score": 0.9108968744754121,
+              "desc": "Given a comma-separated list of words, print the longest common prefix shared by all of them (empty "
+            },
+            {
+              "score": 0.8979392523759145,
+              "desc": "Print the longest common prefix of the comma-separated strings in arg 1 (print an empty line if ther"
+            },
+            {
+              "score": 0.8777712644256199,
+              "desc": "Take two whitespace-separated lists of words in arg0 and arg1. Print the longest common prefix of wo"
+            },
+            {
+              "score": 0.8775587872875772,
+              "desc": "Print the longest common prefix shared by all string arguments; if no common prefix exists, print an"
+            },
+            {
+              "score": 0.8340365827244323,
+              "desc": "From space-separated words in arg1, print the length of the longest word whose first letter is a vow"
+            }
+          ]
+        },
+        {
+          "id": "split_evens_odds",
+          "a_pass": false,
+          "b_pass": false,
+          "a_bucket": "parse_error",
+          "b_bucket": "undefined_var",
+          "a_seconds": 3.4,
+          "b_seconds": 3.3,
+          "a_code": "(set args array (split $0 \" \"))\n(set evens array)\n(set odds array)\n\n(for-each num int args\n  (if (eq (mod num 2) 0)\n    (push evens num)\n    (push odds num)))\n\n(println (join evens \" \"))\n(println (join odds \" \"))",
+          "b_code": "(set xs (parse_ints $0))\n(set evens (filter xs (\\x (eq (mod x 2) 0))))\n(set odds (filter xs (\\x (neq (mod x 2) 0))))\n(println (join evens \" \"))\n(println (join odds \" \"))",
+          "a_stdout": "",
+          "b_stdout": "",
+          "a_stderr": "Parse error: Expected expression but got )\n",
+          "b_stderr": "Runtime error: Undefined variable: neq\n",
+          "rag_top_sim": 0.8677634593346392,
+          "rag_hits": [
+            {
+              "score": 0.8677634593346392,
+              "desc": "Take a space-separated list of integers in arg0. Print them sorted descending, space-separated."
+            },
+            {
+              "score": 0.8478796843446144,
+              "desc": "Take a space-separated list of integers in arg0. Print the integer that appears more than half the t"
+            },
+            {
+              "score": 0.8347220244787208,
+              "desc": "Take a comma-separated list of integers in arg0, sort them ascending, and print them space-separated"
+            },
+            {
+              "score": 0.8291513390670504,
+              "desc": "Sum the squares of the even integers in the space-separated list in arg1."
+            },
+            {
+              "score": 0.8252902207031738,
+              "desc": "Take a space-separated list of integers in arg0. Print their arithmetic mean as a float with 3 decim"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "iteration": 4,
+      "n_tasks": 10,
+      "a_pass": 2,
+      "b_pass": 5,
+      "flips_a_to_b": 3,
+      "flips_b_to_a": 0,
+      "net": 3,
+      "tasks": [
+        {
+          "id": "csv_count_rows",
+          "a_pass": true,
+          "b_pass": true,
+          "a_bucket": null,
+          "b_bucket": null,
+          "a_seconds": 2.9,
+          "b_seconds": 2.8,
+          "a_code": "(set csv string $0)\n(set rows array (split csv \"\\n\"))\n(set data_rows array (slice rows 1))\n(println (len data_rows))",
+          "b_code": "(set rows (split $0 \"\\n\"))\n(println (sub (len rows) 1))",
+          "a_stdout": "3\n",
+          "b_stdout": "3\n",
+          "a_stderr": "",
+          "b_stderr": "",
+          "rag_top_sim": 0.8576442583626193,
+          "rag_hits": [
+            {
+              "score": 0.8576442583626193,
+              "desc": "Take a CSV string in arg0 (rows separated by '\\n', fields by ','). The first row is a header. Print "
+            },
+            {
+              "score": 0.7878997266824187,
+              "desc": "Take a sentence in arg0 (whitespace-separated words). Print the count of distinct words."
+            },
+            {
+              "score": 0.765984325998917,
+              "desc": "Take a space-separated list of integers in arg0. Print the integer that appears more than half the t"
+            },
+            {
+              "score": 0.7646015858728666,
+              "desc": "Given a CSV string with a header row (arg0), select the columns named in the comma-separated list ar"
+            },
+            {
+              "score": 0.7638367852306375,
+              "desc": "Treat arg1 as CSV text (newline-separated rows, comma-separated fields, first row is header). Print "
+            }
+          ]
+        },
+        {
+          "id": "csv_select_column",
+          "a_pass": false,
+          "b_pass": false,
+          "a_bucket": "empty_output",
+          "b_bucket": "type_error",
+          "a_seconds": 4.7,
+          "b_seconds": 3.7,
+          "a_code": "(fn main -> int\n  (let csv string (arg_str 0))\n  (let col_name string (arg_str 1))\n  \n  (let rows array (split csv \"\\n\"))\n  (let header string (first rows))\n  (let data_rows array (rest rows))\n  \n  (let col_index int -1)\n  (for-each field string (split header \",\")\n    (if (eq field col_name)\n      (set col_index int (index-of field (split header \",\")))))\n  \n  (if (lt col_index 0)\n    (println \"Column not found\")\n    (for-each row string data_rows\n      (let fields array (split row \",\"))\n      (println (array_get fields col_index))))\n  \n  (ret 0))",
+          "b_code": "(set rows (split $0 \"\\n\"))\n(set header (split (first rows) \",\"))\n(set col_name $1)\n(set idx 0)\n\n(for-each col header\n  (if (eq col col_name)\n    (set idx ci))\n  (set ci (+ ci 1)))\n\n(for i 1 (len rows)\n  (println (get_or (split (array_get rows i) \",\") idx \"\")))",
+          "a_stdout": "",
+          "b_stdout": "",
+          "a_stderr": "",
+          "b_stderr": "Runtime error: Type mismatch: variable 'idx' declared as int but got function\n",
+          "rag_top_sim": 0.8820716914987747,
+          "rag_hits": [
+            {
+              "score": 0.8820716914987747,
+              "desc": "Take a CSV string in arg0 (rows separated by '\\n', fields by ','). The first row is a header. Print "
+            },
+            {
+              "score": 0.8087371833575453,
+              "desc": "Treat arg1 as CSV text (newline-separated rows, comma-separated fields, first row is header). Print "
+            },
+            {
+              "score": 0.7877653619795307,
+              "desc": "Parse the JSON array of objects in arg 1, then for each element print the value of the field named i"
+            },
+            {
+              "score": 0.7839784788713713,
+              "desc": "Given a CSV string (argv[1], first row is header), a comma-separated list of zero-based column indic"
+            },
+            {
+              "score": 0.7778884026354317,
+              "desc": "Given a CSV string with a header row (arg0), select the columns named in the comma-separated list ar"
+            }
+          ]
+        },
+        {
+          "id": "log_count_level",
+          "a_pass": true,
+          "b_pass": true,
+          "a_bucket": null,
+          "b_bucket": null,
+          "a_seconds": 2.9,
+          "b_seconds": 3.4,
+          "a_code": "(println (str (len (filter (\\x (eq (first (split x \" \")) $1)) (split $0 \"\\n\")))))",
+          "b_code": "(set log string $0)\n(set level string $1)\n\n(fn count_lines logs string level string -> int\n  (len (filter (split logs \"\\n\") (\\line string\n    (eq (first (split line \" \")) level)))))\n\n(println (fmt \"{}\\n\" (count_lines log level)))",
+          "a_stdout": "2\n",
+          "b_stdout": "2\n",
+          "a_stderr": "",
+          "b_stderr": "",
+          "rag_top_sim": 0.8367336711367199,
+          "rag_hits": [
+            {
+              "score": 0.8367336711367199,
+              "desc": "Given a multi-line log blob as arg 0 where each line is 'DATE TIME LEVEL message', print all lines w"
+            },
+            {
+              "score": 0.8354295658317075,
+              "desc": "Filter log lines from arg0 by severity level arg1 (the third whitespace-delimited token), printing e"
+            },
+            {
+              "score": 0.820494710776573,
+              "desc": "Filter lines with level ERROR from a structured log blob in arg 0 (format: 'DATE TIME LEVEL MESSAGE'"
+            },
+            {
+              "score": 0.800131353443343,
+              "desc": "Given a multi-line log string as argv[1] where each line has whitespace-delimited tokens with the lo"
+            },
+            {
+              "score": 0.7875383174279886,
+              "desc": "Filter lines from a multi-level log blob by the given level string (second arg), reformatting each m"
+            }
+          ]
+        },
+        {
+          "id": "log_extract_messages",
+          "a_pass": false,
+          "b_pass": false,
+          "a_bucket": "parse_error",
+          "b_bucket": "runtime_other",
+          "a_seconds": 3.1,
+          "b_seconds": 3.5,
+          "a_code": "(println (join \"\\n\" (filter (\\line line\n  (let level string (split line \" \")[0])\n  (eq level (arg_str 1))))\n  (split (arg_str 0) \"\\n\"))))",
+          "b_code": "(set log string $0)\n(set level_filter string $1)\n(set lines array (split log \"\\n\"))\n(for-each line string lines\n  (let parts array (split line \" \"))\n  (if (eq (array_get parts 2) level_filter)\n    (println (join (slice parts 3 (len parts)) \" \"))))",
+          "a_stdout": "",
+          "b_stdout": "",
+          "a_stderr": "Parse error: Expected ) but got [\n",
+          "b_stderr": "Runtime error: Array index out of bounds: 2\n",
+          "rag_top_sim": 0.8702404008287619,
+          "rag_hits": [
+            {
+              "score": 0.8702404008287619,
+              "desc": "Given a multi-line log blob as arg 0 where each line is 'DATE TIME LEVEL message', print all lines w"
+            },
+            {
+              "score": 0.8540156858881317,
+              "desc": "From a multi-line log string whose lines have the format 'DATE TIME [LEVEL] message', print only the"
+            },
+            {
+              "score": 0.8375524487600658,
+              "desc": "Given a multiline log blob where each line has format 'DATE TIME LEVEL message', extract only the me"
+            },
+            {
+              "score": 0.8307976630350051,
+              "desc": "Parse the log text (lines of the form 'LEVEL: message') and print 'LEVEL=count' for each distinct le"
+            },
+            {
+              "score": 0.8278268617064933,
+              "desc": "Given a structured log string where each line is 'YYYY-MM-DD HH:MM:SS LEVEL message', print the mess"
+            }
+          ]
+        },
+        {
+          "id": "config_get_key",
+          "a_pass": false,
+          "b_pass": false,
+          "a_bucket": "runtime_other",
+          "b_bucket": "parse_error",
+          "a_seconds": 3.7,
+          "b_seconds": 3.7,
+          "a_code": "(set config_str string (arg_str 0))\n(set key string (arg_str 1))\n\n(set lines array (split config_str \"\\n\"))\n(set result string \"NONE\")\n\n(for line string lines\n  (set parts array (split line \"=\"))\n  (if (and (eq (len parts) 2) (eq (first parts) key))\n    (set result string (second parts))))\n\n(println result)",
+          "b_code": "(set config $0)\n(set key $1)\n\n(fn parse_config config string -> map\n  (reduce (split config \"\\n\") (\\(acc line)\n    (let kv (split line \"=\"))\n      (merge acc {first kv second kv})))\n    {}))\n\n(set config_map map (parse_config config))\n\n(if (in key config_map)\n  (println (get config_map key))\n  (println \"NONE\"))",
+          "a_stdout": "",
+          "b_stdout": "",
+          "a_stderr": "Runtime error: for loop start and end must be integers\n",
+          "b_stderr": "Parse error: Expected expression but got )\n",
+          "rag_top_sim": 0.8656184065573631,
+          "rag_hits": [
+            {
+              "score": 0.8656184065573631,
+              "desc": "Parse a key=value config string (argv[1]), ignoring lines starting with '#' and blank lines, splitti"
+            },
+            {
+              "score": 0.8278557293955225,
+              "desc": "Given two INI-style key=value config strings (arg0=old, arg1=new), ignoring lines starting with '#' "
+            },
+            {
+              "score": 0.816682644300534,
+              "desc": "Given a URL query string in arg1 and a key in arg2, print the value of that key."
+            },
+            {
+              "score": 0.8084709182200946,
+              "desc": "Parse arg1 as k=v,k=v pairs and print the value for key arg2, or 'NONE' if missing."
+            },
+            {
+              "score": 0.8010000167246406,
+              "desc": "Given k=v pairs in arg1 and a key in arg2, print its value or 'missing' if not present."
+            }
+          ]
+        },
+        {
+          "id": "config_keys_sorted",
+          "a_pass": false,
+          "b_pass": true,
+          "a_bucket": "type_error",
+          "b_bucket": null,
+          "a_seconds": 3.3,
+          "b_seconds": 4.1,
+          "a_code": "(set config_str string (arg_str 0))\n(set lines array (split config_str \"\\n\"))\n(set keys array (map_arr lines (\\line string (split line \"=\"))))\n(set sorted_keys array (sort keys))\n(for-each key string sorted_keys\n  (println key))",
+          "b_code": "(set lines array (split $0 \"\\n\"))\n(set keys map {})\n\n(for-each line string lines\n  (if (and (not (eq line \"\")) (not (eq (slice line 0 1) \"#\")))\n    (set parts array (split line \"=\"))\n    (set key string (array_get parts 0))\n    (set val string (array_get parts 1))\n    (set keys (+ keys {key true}))))\n\n(set sorted_keys array (sort (keys keys)))\n(for-each key string sorted_keys\n  (println key))",
+          "a_stdout": "",
+          "b_stdout": "host\nport\nuser\n",
+          "a_stderr": "Runtime error: Type mismatch in for-each: variable 'key' declared as string but got array\n",
+          "b_stderr": "",
+          "rag_top_sim": 0.8870770943229482,
+          "rag_hits": [
+            {
+              "score": 0.8870770943229482,
+              "desc": "Parse a configuration string of key=value lines (skipping lines that are empty, start with '#', or s"
+            },
+            {
+              "score": 0.8691419386544539,
+              "desc": "Given two INI-style key=value config strings (arg0=old, arg1=new), ignoring lines starting with '#' "
+            },
+            {
+              "score": 0.8688497095739994,
+              "desc": "Parse a key=value config string (argv[1]), ignoring lines starting with '#' and blank lines, splitti"
+            },
+            {
+              "score": 0.8285490290874357,
+              "desc": "Given an INI-format config blob as arg 0 with '[section]' headers and 'key=value' lines (blank lines"
+            },
+            {
+              "score": 0.8258800926998962,
+              "desc": "Parse a key=value config blob ignoring blank lines and lines starting with '#', then for each key in"
+            }
+          ]
+        },
+        {
+          "id": "csv_filter_by_value",
+          "a_pass": false,
+          "b_pass": true,
+          "a_bucket": "empty_output",
+          "b_bucket": null,
+          "a_seconds": 3.7,
+          "b_seconds": 3.8,
+          "a_code": "(fn filter_csv csv string col_name string value string -> unit\n  (let lines array (split csv \"\\n\"))\n  (let header array (first lines))\n  (let col_index int (index_of header col_name))\n  (for-each line array (rest lines)\n    (let cells array (split line \",\"))\n    (if (eq (cells col_index) value)\n      (println line))))",
+          "b_code": "(set csv string $0)\n(set col_name string $1)\n(set value string $2)\n\n(set rows array (split csv \"\\n\"))\n(set header array (split (first rows) \",\"))\n(set idx int (index_of header col_name))\n\n(set filtered_rows array\n  (filter (rest rows)\n    (\\row\n      (eq (array_get (split row \",\") idx) value))))\n\n(for-each row string filtered_rows (println row))",
+          "a_stdout": "",
+          "b_stdout": "alice,dev\ncarol,dev\n",
+          "a_stderr": "",
+          "b_stderr": "",
+          "rag_top_sim": 0.840144377060302,
+          "rag_hits": [
+            {
+              "score": 0.840144377060302,
+              "desc": "Treat arg1 as CSV text (newline-separated rows, comma-separated fields, first row is header). Print "
+            },
+            {
+              "score": 0.825307618171067,
+              "desc": "Take a CSV string in arg0 (rows separated by '\\n', fields by ','). The first row is a header. Print "
+            },
+            {
+              "score": 0.7993751938688279,
+              "desc": "Given a CSV string (argv[1], first row is header), a comma-separated list of zero-based column indic"
+            },
+            {
+              "score": 0.7990032703118076,
+              "desc": "Given a CSV in arg1 (header line plus rows), filter column (arg2) equal to value (arg3), sum integer"
+            },
+            {
+              "score": 0.7967964704449496,
+              "desc": "From a CSV string (first arg) with a header row, select only the columns whose names are listed comm"
+            }
+          ]
+        },
+        {
+          "id": "kv_pairs_to_json_like",
+          "a_pass": false,
+          "b_pass": false,
+          "a_bucket": "empty_output",
+          "b_bucket": "empty_output",
+          "a_seconds": 2.8,
+          "b_seconds": 3.0,
+          "a_code": "(println (join \";\" (map_arr (split $0 \",\") (\\k v (fmt \"{}:{}\", k v)))))",
+          "b_code": "(set pairs (split $0 \",\"))\n(println (join \";\" (map_arr pairs (\\p (fmt \"{}:{}\", (first (split p \"=\")), (last (split p \"=\")))))))",
+          "a_stdout": "",
+          "b_stdout": "",
+          "a_stderr": "Lexer error: Unexpected character: ,\n",
+          "b_stderr": "Lexer error: Unexpected character: ,\n",
+          "rag_top_sim": 0.8208608147809304,
+          "rag_hits": [
+            {
+              "score": 0.8208608147809304,
+              "desc": "Given key-value pairs in arg1 (k=v,k=v) and a key in arg2, print the value."
+            },
+            {
+              "score": 0.8160516619028777,
+              "desc": "Parse arg1 as k=v,k=v pairs and print the value for key arg2, or 'NONE' if missing."
+            },
+            {
+              "score": 0.8155867761697542,
+              "desc": "Parse k=v pairs from arg1 separated by commas, then print the value for key arg2, or 'NONE' if missi"
+            },
+            {
+              "score": 0.8154954166903455,
+              "desc": "Parse arg1 as k=v pairs; print the value for key arg2, or NONE if missing."
+            },
+            {
+              "score": 0.8135187652783465,
+              "desc": "Parse k=v,k=v pairs from arg1; print value for key arg2 or 'none' if absent."
+            }
+          ]
+        },
+        {
+          "id": "sum_field_in_csv",
+          "a_pass": false,
+          "b_pass": true,
+          "a_bucket": "type_error",
+          "b_bucket": null,
+          "a_seconds": 4.2,
+          "b_seconds": 3.3,
+          "a_code": "(fn sum_column csv string col_name string -> int\n  (let lines array (split csv \"\\n\"))\n  (let headers array (split (first lines) \",\"))\n  (let col_index int (index_of headers col_name))\n  (let data array (slice lines 1 -1))\n  (let sum int 0)\n  (for-each row string data\n    (let values array (split row \",\"))\n    (set sum (+ sum (parse_int (values col_index)))))\n  (println sum))\n\n(sum_column (arg_str 0) (arg_str 1))",
+          "b_code": "(set lines (split $0 \"\\n\"))\n(set headers (split (first lines) \",\"))\n(set col (array_index_of headers $1))\n(println (sum (map_arr (rest lines) (\\r (int (array_get (split r \",\") col))))))",
+          "a_stdout": "",
+          "b_stdout": "10\n",
+          "a_stderr": "Runtime error: Invalid arguments to map_values\n",
+          "b_stderr": "",
+          "rag_top_sim": 0.8441389832484216,
+          "rag_hits": [
+            {
+              "score": 0.8441389832484216,
+              "desc": "Given a CSV in arg1 (header line plus rows), filter column (arg2) equal to value (arg3), sum integer"
+            },
+            {
+              "score": 0.8313839893137279,
+              "desc": "Take a CSV string in arg0 (rows separated by '\\n', fields by ','). The first row is a header. Print "
+            },
+            {
+              "score": 0.8082640427416329,
+              "desc": "Given a CSV blob (arg 1, with a header row and data rows joined by semicolons and fields by commas) "
+            },
+            {
+              "score": 0.8075176268984084,
+              "desc": "Parse a CSV string (first line is header, remaining lines are integer rows) and print 'name: sum' fo"
+            },
+            {
+              "score": 0.8061658103277755,
+              "desc": "Parse a CSV string with a header row and sum the integer values of the named column, printing the to"
+            }
+          ]
+        },
+        {
+          "id": "count_log_unique_users",
+          "a_pass": false,
+          "b_pass": false,
+          "a_bucket": "runtime_other",
+          "b_bucket": "parse_error",
+          "a_seconds": 3.4,
+          "b_seconds": 2.9,
+          "a_code": "(set log_lines array (split $0 \"\\n\"))\n(set users map {})\n(for line string log_lines\n  (let parts array (split line \" \"))\n  (if (eq (first parts) \"login\")\n    (set users (map_set users (second parts) true))))\n(println (len users))",
+          "b_code": "(set log $0)\n(set users (map_arr (split log \"\\n\") (\\line (first (split line \" \"))))))\n(println (len (uniq users)))",
+          "a_stdout": "",
+          "b_stdout": "",
+          "a_stderr": "Runtime error: for loop start and end must be integers\n",
+          "b_stderr": "Parse error: Expected expression but got )\n",
+          "rag_top_sim": 0.781226709772452,
+          "rag_hits": [
+            {
+              "score": 0.781226709772452,
+              "desc": "Each CLI arg is 'label=count'. Print one line per arg in input order, right-padding the label to the"
+            },
+            {
+              "score": 0.7792993113659364,
+              "desc": "Filter log lines from arg0 by severity level arg1 (the third whitespace-delimited token), printing e"
+            },
+            {
+              "score": 0.7617343389598558,
+              "desc": "Take a sentence in arg0 (whitespace-separated words). Print the count of distinct words."
+            },
+            {
+              "score": 0.7469343158057035,
+              "desc": "Given a multi-line server log blob where each line has fields 'DATE TIME LEVEL MESSAGE...' as the fi"
+            },
+            {
+              "score": 0.7461810613495669,
+              "desc": "Given a multi-line log blob as arg 0 where each line is 'DATE TIME LEVEL message', print all lines w"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "iteration": 5,
+      "n_tasks": 10,
+      "a_pass": 0,
+      "b_pass": 4,
+      "flips_a_to_b": 4,
+      "flips_b_to_a": 0,
+      "net": 4,
+      "tasks": [
+        {
+          "id": "balanced_brackets_multi",
+          "a_pass": false,
+          "b_pass": false,
+          "a_bucket": "runtime_other",
+          "b_bucket": "parse_error",
+          "a_seconds": 4.7,
+          "b_seconds": 5.0,
+          "a_code": "(fn is_balanced s string -> bool\n  (set stack array [])\n  (for-each c char s\n    (cond\n      ((eq c \"(\") (push stack \"(\"))\n      ((eq c \")\") (if (in stack \"(\") (pop stack) (ret false)))\n      ((eq c \"[\") (push stack \"[\"))\n      ((eq c \"]\") (if (in stack \"[\") (pop stack) (ret false)))\n      ((eq c \"{\") (push stack \"{\"))\n      ((eq c \"}\") (if (in stack \"{\") (pop stack) (ret false)))))\n  (ret (eq (len stack) 0)))\n\n(println (if (is_balanced (arg_str 0)) \"yes\" \"no\"))",
+          "b_code": "(set s $0)\n(set stack [])\n(for-each c (chars s)\n  (cond\n    ((in c [\"(\" \"[\" \"{\"])\n      (push stack c))\n    ((eq c \")\")\n        (if (or (eq (len stack) 0) (ne (last stack) \"(\"))\n          (println \"no\"))\n        (array_pop stack)))\n    ((eq c \"]\")\n        (if (or (eq (len stack) 0) (ne (last stack) \"[\"))\n          (println \"no\"))\n        (array_pop stack)))\n    ((eq c \"}\")\n        (if (or (eq (len stack) 0) (ne (last stack) \"{\"))\n          (println \"no\"))\n        (array_pop stack)))))\n(if (ne (len stack) 0)\n  (println \"no\")\n  (else (println \"yes\")))",
+          "a_stdout": "",
+          "b_stdout": "",
+          "a_stderr": "Runtime error: in: expects (string, string) for substring, (value, array) for element, or (key, map)\n",
+          "b_stderr": "Parse error: Expected symbol but got (\n",
+          "rag_top_sim": 0.8632701064945275,
+          "rag_hits": [
+            {
+              "score": 0.8632701064945275,
+              "desc": "Read a string and print 'yes' if brackets ()[]{} are balanced, 'no' otherwise."
+            },
+            {
+              "score": 0.8542260859791008,
+              "desc": "Take a string of parentheses in arg0 and print 'yes' if balanced, otherwise 'no'."
+            },
+            {
+              "score": 0.8260239098942738,
+              "desc": "Print 'true' if the brackets in arg1 are balanced across (), [], {}, else 'false'."
+            },
+            {
+              "score": 0.8177664221646321,
+              "desc": "Print 'true' if arg1 has balanced ()[]{} brackets, else 'false'."
+            },
+            {
+              "score": 0.8147583020082965,
+              "desc": "For each argument string, check if its brackets ()[]{} are balanced and properly nested; print '<arg"
+            }
+          ]
+        },
+        {
+          "id": "first_unbalanced_index",
+          "a_pass": false,
+          "b_pass": false,
+          "a_bucket": "parse_error",
+          "b_bucket": "parse_error",
+          "a_seconds": 3.9,
+          "b_seconds": 3.8,
+          "a_code": "(fn find_unbalanced_index args array -> int\n  (set str string (arg_str 0))\n  (set len int (len str))\n  (set stack array [])\n  (for i 0 len\n    (set char string (str str i))\n    (if (eq char \"(\")\n      (push stack char)\n      (if (eq (len stack) 0)\n        (ret i))))\n  (ret -1))\n\n(find_unbalanced_index (argv) (argv_count))",
+          "b_code": "(set s $0)\n(set stack [])\n(set n (len s))\n(set result -1)\n\n(for i 0 n\n  (if (eq result -1)\n    (set c (string_get s i))\n    (cond\n      ((eq c \"(\") (push stack i))\n      ((eq c \")\")\n        (if (eq (len stack) 0)\n          (set result i)\n          (array_pop stack)))))))\n\n(println result)",
+          "a_stdout": "",
+          "b_stdout": "",
+          "a_stderr": "Parse error: Cannot use type keyword 'str' as variable name. Use a descriptive name instead (e.g., 'str_data', 'str_value')\n",
+          "b_stderr": "Parse error: Expected expression but got )\n",
+          "rag_top_sim": 0.8410009965789789,
+          "rag_hits": [
+            {
+              "score": 0.8410009965789789,
+              "desc": "Check whether the bracket characters in argv[1] form a balanced sequence of (), [], {}; print 'balan"
+            },
+            {
+              "score": 0.8384285907459431,
+              "desc": "Take a string in arg0 and print the 0-based index of the last character that appears exactly once in"
+            },
+            {
+              "score": 0.8166847608377221,
+              "desc": "Check if a string of brackets ()[]{} is balanced; print 'balanced', or 'unbalanced at position N' (0"
+            },
+            {
+              "score": 0.8069623603989582,
+              "desc": "Check if the given string has balanced brackets among (), [], and {}; print 'balanced' if valid, els"
+            },
+            {
+              "score": 0.8064842679928506,
+              "desc": "Check if the bracket string in argv[1] (containing only ()[]{}) is balanced; print 'balanced' or 'un"
+            }
+          ]
+        },
+        {
+          "id": "longest_run_letter",
+          "a_pass": false,
+          "b_pass": true,
+          "a_bucket": "parse_error",
+          "b_bucket": null,
+          "a_seconds": 4.5,
+          "b_seconds": 3.8,
+          "a_code": "(fn max_run_length str string -> int\n  (set len int (len str))\n  (if (eq len 0) (ret 0))\n\n  (fn helper i int max_len int -> int\n    (if (ge i len) (ret max_len))\n    (set j int i)\n    (while (and (lt j len) (eq (str_get str i) (str_get str j)))\n      (set j (add j 1)))\n    (set max_len (max max_len (sub j i)))\n    (helper (add i 1) max_len))\n\n  (helper 0 0))\n\n(println (max_run_length (arg_str 0)))",
+          "b_code": "(set input $0)\n(set max_run 1)\n(set current_run 1)\n(set prev_char \"\")\n(for-each ch (chars input)\n  (if (eq ch prev_char)\n    (set current_run (+ current_run 1))\n    (else\n      (set max_run (max max_run current_run))\n      (set current_run 1)))\n  (set prev_char ch))\n(set max_run (max max_run current_run))\n(println max_run)",
+          "a_stdout": "",
+          "b_stdout": "4\n",
+          "a_stderr": "Parse error: Cannot use type keyword 'str' as function parameter name. Use a descriptive name instead (e.g., 'str_data', 'str_value')\n",
+          "b_stderr": "",
+          "rag_top_sim": 0.932299323747071,
+          "rag_hits": [
+            {
+              "score": 0.932299323747071,
+              "desc": "Take a string in arg0 and print the length of the longest run of identical adjacent characters."
+            },
+            {
+              "score": 0.8725566229366335,
+              "desc": "Take a string in arg0. Print it with each maximal run of identical adjacent characters collapsed to "
+            },
+            {
+              "score": 0.8620541527336684,
+              "desc": "Print the length of the longest word (by characters) in arg1."
+            },
+            {
+              "score": 0.8306077278836217,
+              "desc": "Run-length-encode the single CLI string argument by emitting each maximal run of identical character"
+            },
+            {
+              "score": 0.8305086439350592,
+              "desc": "Print the length of the longest word in arg1 that starts with a consonant."
+            }
+          ]
+        },
+        {
+          "id": "split_on_consecutive",
+          "a_pass": false,
+          "b_pass": false,
+          "a_bucket": "parse_error",
+          "b_bucket": "parse_error",
+          "a_seconds": 4.2,
+          "b_seconds": 3.9,
+          "a_code": "(fn main -> int\n  (let str string (arg_str 0))\n  (let result string \"\")\n  (for i 0 (sub (len str) 1)\n    (let char char (str_get str i))\n    (let count int 1)\n    (while (and (< (add i count) (len str)) (eq (str_get str (add i count)) char))\n      (set count (add count 1)))\n    (set result (string_concat result (fmt \"{}{} \" char count))))\n  (println (trim result))\n  (ret 0))",
+          "b_code": "(set input $0)\n(set result \"\")\n(for-each ch (chars input)\n  (if (not (eq ch \"\"))\n    (set result (fmt \"{}{}1 \" result ch))\n    (else\n      (let last_char (string_slice result -2 1))\n      (let count (to_int (string_slice result -1)))\n      (set result (fmt \"{}{} {}\" (slice result 0 -3) last_char (+ count 1)))))\n(println (trim result \" \"))",
+          "a_stdout": "",
+          "b_stdout": "",
+          "a_stderr": "Parse error: Cannot use type keyword 'str' as variable name. Use a descriptive name instead (e.g., 'str_data', 'str_value')\n",
+          "b_stderr": "Parse error: Expected expression but got EOF\n",
+          "rag_top_sim": 0.8317762594525048,
+          "rag_hits": [
+            {
+              "score": 0.8317762594525048,
+              "desc": "Take a string in arg0. Print it with each maximal run of identical adjacent characters collapsed to "
+            },
+            {
+              "score": 0.7965147229082893,
+              "desc": "Take a string in arg0 and a positive integer k in arg1. Print the top k most-frequent characters, br"
+            },
+            {
+              "score": 0.7916130842999473,
+              "desc": "Take a sentence in arg0 (whitespace-separated words). Print the count of distinct words."
+            },
+            {
+              "score": 0.7776132349883345,
+              "desc": "Take a string in arg0 and print the length of the longest run of identical adjacent characters."
+            },
+            {
+              "score": 0.7684834099747584,
+              "desc": "Compress arg1 using run-length encoding: each run of identical consecutive characters becomes the ch"
+            }
+          ]
+        },
+        {
+          "id": "max_consecutive_evens",
+          "a_pass": false,
+          "b_pass": true,
+          "a_bucket": "type_error",
+          "b_bucket": null,
+          "a_seconds": 4.2,
+          "b_seconds": 4.0,
+          "a_code": "(set nums array (split $0 \" \"))\n(set max_streak int 0)\n(set current_streak int 0)\n\n(for-each num int nums\n  (if (eq (mod num 2) 0)\n    (set current_streak (add current_streak 1))\n    (begin\n      (if (gt current_streak max_streak)\n        (set max_streak current_streak))\n      (set current_streak 0))))\n\n(if (gt current_streak max_streak)\n  (set max_streak current_streak))\n\n(println max_streak)",
+          "b_code": "(set xs (parse_ints $0))\n(set len (len xs))\n(set max_streak 0)\n(set current_streak 0)\n\n(for i 0 len\n  (if (eq (mod (array_get xs i) 2) 0)\n    (begin\n      (set current_streak (+ current_streak 1))\n      (if (> current_streak max_streak)\n        (set max_streak current_streak)))\n    (set current_streak 0)))\n\n(println max_streak)",
+          "a_stdout": "",
+          "b_stdout": "4\n",
+          "a_stderr": "Runtime error: Type mismatch in for-each: variable 'num' declared as int but got string\n",
+          "b_stderr": "",
+          "rag_top_sim": 0.9313498984265275,
+          "rag_hits": [
+            {
+              "score": 0.9313498984265275,
+              "desc": "Take a space-separated list of integers in arg0. Print the length of the longest strictly DECREASING"
+            },
+            {
+              "score": 0.850475617912056,
+              "desc": "Take a space-separated list of integers in arg0. Print the integer that appears more than half the t"
+            },
+            {
+              "score": 0.8344392198770972,
+              "desc": "Take an odd-length space-separated list of integers in arg0 and print the median."
+            },
+            {
+              "score": 0.8226054793445456,
+              "desc": "Sum the squares of the even integers in the space-separated list in arg1."
+            },
+            {
+              "score": 0.8222148995965386,
+              "desc": "Take a space-separated list of integers in arg0. Print them sorted descending, space-separated."
+            }
+          ]
+        },
+        {
+          "id": "longest_increasing_streak",
+          "a_pass": false,
+          "b_pass": true,
+          "a_bucket": "undefined_var",
+          "b_bucket": null,
+          "a_seconds": 3.8,
+          "b_seconds": 4.1,
+          "a_code": "(set arr array (split $0 \" \"))\n(set max_len int 0)\n(set len int (len arr))\n\n(for i 0 len\n  (set streak int 1)\n  (while (< (+ i streak) len)\n    (if (le (arr_get arr i) (arr_get arr (+ i streak)))\n      (break))\n    (inc streak))\n  (if (> streak max_len)\n    (set max_len streak)))\n\n(println max_len)",
+          "b_code": "(set xs (parse_ints $0))\n(set len (len xs))\n(set max_streak 0)\n(set current_streak 1)\n\n(for i 1 len\n  (if (gt (array_get xs i) (array_get xs (- i 1)))\n    (set current_streak (+ current_streak 1))\n    (begin\n      (set max_streak (max max_streak current_streak))\n      (set current_streak 1))))\n\n(set max_streak (max max_streak current_streak))\n(println max_streak)",
+          "a_stdout": "",
+          "b_stdout": "4\n",
+          "a_stderr": "Runtime error: Undefined variable: arr_get\n",
+          "b_stderr": "",
+          "rag_top_sim": 0.986674772411892,
+          "rag_hits": [
+            {
+              "score": 0.986674772411892,
+              "desc": "Take a space-separated list of integers in arg0. Print the length of the longest strictly DECREASING"
+            },
+            {
+              "score": 0.8425550818715841,
+              "desc": "Take a space-separated list of integers in arg0. Print them sorted descending, space-separated."
+            },
+            {
+              "score": 0.8421178792799233,
+              "desc": "Take a space-separated list of integers in arg0. Print the integer that appears more than half the t"
+            },
+            {
+              "score": 0.8172844798591435,
+              "desc": "Given window size k (first arg) and a space-separated list of integers (second arg), print the max o"
+            },
+            {
+              "score": 0.8168013820610432,
+              "desc": "Print the running maximum of space-separated integers in arg1, space-separated."
+            }
+          ]
+        },
+        {
+          "id": "every_other_letter",
+          "a_pass": false,
+          "b_pass": false,
+          "a_bucket": "type_error",
+          "b_bucket": "wrong_output",
+          "a_seconds": 2.9,
+          "b_seconds": 2.9,
+          "a_code": "(println (join \"\" (filter (\\x i -> (eq (mod i 2) 0)) (split $0 \"\"))))",
+          "b_code": "(set s $0)\n(println (join \"\" (filter (\\x (eq (mod x 2) 0)) (range 0 (len s)))))",
+          "a_stdout": "",
+          "b_stdout": "0246\n",
+          "a_stderr": "Runtime error: Invalid arguments to mod\n",
+          "b_stderr": "",
+          "rag_top_sim": 0.8673089284131645,
+          "rag_hits": [
+            {
+              "score": 0.8673089284131645,
+              "desc": "Take a string in arg0 and print the 0-based index of the last character that appears exactly once in"
+            },
+            {
+              "score": 0.7937687566349022,
+              "desc": "Take a non-negative integer in arg0 and print its binary representation as a string of '0' and '1' c"
+            },
+            {
+              "score": 0.7929298099442245,
+              "desc": "Take a string in arg0. Print it with each maximal run of identical adjacent characters collapsed to "
+            },
+            {
+              "score": 0.7812408186776938,
+              "desc": "Take a string in arg0 and print the first character that appears more than once. Print empty if all "
+            },
+            {
+              "score": 0.7766733548825167,
+              "desc": "Print the value of column index arg2 (0-based) from the CSV row in arg1."
+            }
+          ]
+        },
+        {
+          "id": "find_substring_index",
+          "a_pass": false,
+          "b_pass": false,
+          "a_bucket": "undefined_var",
+          "b_bucket": "empty_output",
+          "a_seconds": 2.8,
+          "b_seconds": 3.3,
+          "a_code": "(println (if (in $1 $0) (str (find $1 $0)) \"-1\"))",
+          "b_code": "(set s $0)\n(set t $1)\n(set pos -1)\n(for-each i (range 0 (len s)))\n  (if (eq (slice s i (+ i (len t))) t)\n    (set pos i)\n    (break))\n(println pos)",
+          "a_stdout": "",
+          "b_stdout": "",
+          "a_stderr": "Runtime error: Undefined variable: find\n",
+          "b_stderr": "Unexpected error: Dune__exe__Interpreter.Break\n",
+          "rag_top_sim": 0.8063748861414949,
+          "rag_hits": [
+            {
+              "score": 0.8063748861414949,
+              "desc": "Take a string in arg0 and print the 0-based index of the last character that appears exactly once in"
+            },
+            {
+              "score": 0.8059099329000701,
+              "desc": "Take two strings in arg0 and arg1. Print the Jaccard similarity of their character sets (size of int"
+            },
+            {
+              "score": 0.8018771584281007,
+              "desc": "Count occurrences of a character (arg2) in a string (arg1)."
+            },
+            {
+              "score": 0.8008322937823099,
+              "desc": "Binary-search a sorted space-separated int array (arg1) for a target (arg2). Print the 0-based index"
+            },
+            {
+              "score": 0.8008322937823099,
+              "desc": "Binary-search a sorted space-separated int array (arg1) for a target (arg2). Print the 0-based index"
+            }
+          ]
+        },
+        {
+          "id": "all_caps_or_not",
+          "a_pass": false,
+          "b_pass": true,
+          "a_bucket": "parse_error",
+          "b_bucket": null,
+          "a_seconds": 3.4,
+          "b_seconds": 3.2,
+          "a_code": "(fn is_all_uppercase str string -> bool\n  (let all_upper (map_arr str (\\c char -> (eq c (upper c)))))\n  (reduce all_upper true (\\a b -> (and a b)))))\n\n(println (if (is_all_uppercase $0) \"yes\" \"no\"))",
+          "b_code": "(set s $0)\n(set all_upper true)\n(for-each c (chars s)\n  (if (and (is_alpha c) (not (is_upper c)))\n    (set all_upper false)))\n(println (if all_upper \"yes\" \"no\"))",
+          "a_stdout": "",
+          "b_stdout": "yes\n",
+          "a_stderr": "Parse error: Cannot use type keyword 'str' as function parameter name. Use a descriptive name instead (e.g., 'str_data', 'str_value')\n",
+          "b_stderr": "",
+          "rag_top_sim": 0.8223831560964997,
+          "rag_hits": [
+            {
+              "score": 0.8223831560964997,
+              "desc": "Print 'true' if arg1 has >=8 chars, an uppercase, a lowercase, and a digit; else 'false'."
+            },
+            {
+              "score": 0.8223658613416748,
+              "desc": "Take a string of parentheses in arg0 and print 'yes' if balanced, otherwise 'no'."
+            },
+            {
+              "score": 0.8210275486349949,
+              "desc": "Check if arg1 is a palindrome ignoring case (output 'yes' or 'no')."
+            },
+            {
+              "score": 0.8208304872924889,
+              "desc": "Print 'true' if arg1 has >=8 chars, a digit, an uppercase, and a lowercase letter, else 'false'."
+            },
+            {
+              "score": 0.8152134327788791,
+              "desc": "Print 'yes' if arg1 and arg2 are case-insensitive anagrams ignoring spaces, else 'no'."
+            }
+          ]
+        },
+        {
+          "id": "starts_and_ends_same",
+          "a_pass": false,
+          "b_pass": false,
+          "a_bucket": "parse_error",
+          "b_bucket": "parse_error",
+          "a_seconds": 3.3,
+          "b_seconds": 3.1,
+          "a_code": "(fn main -> int\n  (let str string (arg_str 0))\n  (if (eq (len str) 0)\n    (println \"no\")\n    (if (eq (str 0) (last str))\n      (println \"yes\")\n      (println \"no\"))))",
+          "b_code": "(set s $0)\n(if (eq (len s) 0) (println \"no\") (else (if (eq (first s) (last s)) (println \"yes\") (else (println \"no\"))))))",
+          "a_stdout": "",
+          "b_stdout": "",
+          "a_stderr": "Parse error: Cannot use type keyword 'str' as variable name. Use a descriptive name instead (e.g., 'str_data', 'str_value')\n",
+          "b_stderr": "Parse error: Expected expression but got )\n",
+          "rag_top_sim": 0.8419952435799175,
+          "rag_hits": [
+            {
+              "score": 0.8419952435799175,
+              "desc": "Take a string of parentheses in arg0 and print 'yes' if balanced, otherwise 'no'."
+            },
+            {
+              "score": 0.7928780134926188,
+              "desc": "Check if arg1 is a palindrome ignoring case (output 'yes' or 'no')."
+            },
+            {
+              "score": 0.7927682970576717,
+              "desc": "Take two strings in arg0 (the candidate) and arg1 (the target). Print 'yes' if arg0 contains every c"
+            },
+            {
+              "score": 0.7913006843250985,
+              "desc": "Take a non-negative integer in arg0 and print its binary representation as a string of '0' and '1' c"
+            },
+            {
+              "score": 0.7858460877811911,
+              "desc": "Check if arg1 is a palindrome ignoring case and print 'yes' or 'no'."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "iteration": 6,
+      "n_tasks": 10,
+      "a_pass": 0,
+      "b_pass": 5,
+      "flips_a_to_b": 5,
+      "flips_b_to_a": 0,
+      "net": 5,
+      "tasks": [
+        {
+          "id": "hamming_distance",
+          "a_pass": false,
+          "b_pass": true,
+          "a_bucket": "undefined_var",
+          "b_bucket": null,
+          "a_seconds": 3.6,
+          "b_seconds": 3.4,
+          "a_code": "(fn diff-strings a string b string -> int\n  (set len int (len a))\n  (set count int 0)\n  (for i 0 len\n    (if (ne (char-at a i) (char-at b i))\n      (set count (add count 1))))\n  (ret count))\n\n(println (diff-strings $0 $1))",
+          "b_code": "(set s0 $0)\n(set s1 $1)\n(set n (len s0))\n(set diff 0)\n(for-each i (range n)\n  (if (ne (string_get s0 i) (string_get s1 i))\n    (set diff (add diff 1))))\n(println diff)",
+          "a_stdout": "",
+          "b_stdout": "3\n",
+          "a_stderr": "Runtime error: Undefined variable: char-at\n",
+          "b_stderr": "",
+          "rag_top_sim": 0.8091521429783612,
+          "rag_hits": [
+            {
+              "score": 0.8091521429783612,
+              "desc": "Return the middle character of arg1, or the two middle characters if length is even."
+            },
+            {
+              "score": 0.8051849860038682,
+              "desc": "Take two strings in arg0 and arg1. Print the Jaccard similarity of their character sets (size of int"
+            },
+            {
+              "score": 0.8020437338296705,
+              "desc": "Swap the two halves of arg1 (odd length keeps the middle char in place between halves)."
+            },
+            {
+              "score": 0.7989467966977365,
+              "desc": "Take two strings in arg0 (the candidate) and arg1 (the target). Print 'yes' if arg0 contains every c"
+            },
+            {
+              "score": 0.7957297579564849,
+              "desc": "Swap the two halves of arg1 (odd length: middle goes to end of first half)."
+            }
+          ]
+        },
+        {
+          "id": "common_chars_count",
+          "a_pass": false,
+          "b_pass": true,
+          "a_bucket": "parse_error",
+          "b_bucket": null,
+          "a_seconds": 3.3,
+          "b_seconds": 4.0,
+          "a_code": "(set a string (arg_str 0))\n(set b string (arg_str 1))\n\n(set set_a set (split a \"\"))\n(set set_b set (split b \"\"))\n\n(set common_chars set (filter (\\x (in x set_b)) set_a))\n\n(println (len common_chars))",
+          "b_code": "(set s1 $0)\n(set s2 $1)\n(set set1 {})\n(set set2 {})\n\n(for-each c (chars s1)\n  (set set1 (map_set set1 c true)))\n\n(for-each c (chars s2)\n  (set set2 (map_set set2 c true)))\n\n(set common 0)\n\n(for-each k (map_keys set1)\n  (if (map_has set2 k)\n    (set common (add common 1))))\n\n(println (string_from_int common))",
+          "a_stdout": "",
+          "b_stdout": "3\n",
+          "a_stderr": "Parse error: Expected ) but got (\n",
+          "b_stderr": "",
+          "rag_top_sim": 0.8400105228225239,
+          "rag_hits": [
+            {
+              "score": 0.8400105228225239,
+              "desc": "Count occurrences of a character (arg2) in a string (arg1)."
+            },
+            {
+              "score": 0.8146451642114899,
+              "desc": "Take two strings in arg0 and arg1. Print the Jaccard similarity of their character sets (size of int"
+            },
+            {
+              "score": 0.8126066904650053,
+              "desc": "Take a sentence in arg0 and a single letter in arg1. Print how many whitespace-separated words in ar"
+            },
+            {
+              "score": 0.810575247730267,
+              "desc": "Take two strings in arg0 (the candidate) and arg1 (the target). Print 'yes' if arg0 contains every c"
+            },
+            {
+              "score": 0.8065636859787192,
+              "desc": "Return the middle character of arg1, or the two middle characters if length is even."
+            }
+          ]
+        },
+        {
+          "id": "is_anagram",
+          "a_pass": false,
+          "b_pass": true,
+          "a_bucket": "wrong_output",
+          "b_bucket": null,
+          "a_seconds": 3.3,
+          "b_seconds": 3.0,
+          "a_code": "(fn is_anagram a string b string -> bool\n  (let sorted_a (sort (split a \"\")))\n  (let sorted_b (sort (split b \"\")))\n  (eq sorted_a sorted_b))\n\n(println (if (is_anagram $0 $1) \"yes\" \"no\"))",
+          "b_code": "(set a (sort (chars $0)))\n(set b (sort (chars $1)))\n(if (eq a b)\n  (println \"yes\")\n  (else (println \"no\")))",
+          "a_stdout": "no\n",
+          "b_stdout": "yes\n",
+          "a_stderr": "",
+          "b_stderr": "",
+          "rag_top_sim": 0.9077654006584435,
+          "rag_hits": [
+            {
+              "score": 0.9077654006584435,
+              "desc": "Print 'yes' if arg1 and arg2 are anagrams (same multiset of characters), else 'no'."
+            },
+            {
+              "score": 0.9039169317118879,
+              "desc": "Print 'yes' if arg1 and arg2 are anagrams ignoring spaces and case, else 'no'."
+            },
+            {
+              "score": 0.8845887047546451,
+              "desc": "Print 'yes' if arg1 and arg2 are case-insensitive anagrams ignoring spaces, else 'no'."
+            },
+            {
+              "score": 0.8600569363389761,
+              "desc": "Take two strings in arg0 (the candidate) and arg1 (the target). Print 'yes' if arg0 contains every c"
+            },
+            {
+              "score": 0.8534000441351012,
+              "desc": "Print true if arg1 and arg2 are anagrams (ignoring case and spaces), else false."
+            }
+          ]
+        },
+        {
+          "id": "longest_common_prefix_two",
+          "a_pass": false,
+          "b_pass": false,
+          "a_bucket": "runtime_other",
+          "b_bucket": "wrong_output",
+          "a_seconds": 3.8,
+          "b_seconds": 4.0,
+          "a_code": "(fn longest_common_prefix a string b string -> string\n  (let common string \"\")\n  (for i int 0 (min (len a) (len b))\n    (if (eq (char_at a i) (char_at b i))\n      (set common (str common (char_at a i)))\n      (break)))\n  (println common))\n\n(set args array (argv))\n(longest_common_prefix (arg_str 0) (arg_str 1))",
+          "b_code": "(set a $0)\n(set b $1)\n(set i 0)\n(set len_a (len a))\n(set len_b (len b))\n(set min_len (min len_a len_b))\n(set prefix \"\")\n(while (lt i min_len)\n  (if (ne (string_slice a i 1) (string_slice b i 1))\n    (break))\n  (set prefix (string_concat prefix (string_slice a i 1)))\n  (set i (add i 1)))\n(println prefix \"\\n\")",
+          "a_stdout": "",
+          "b_stdout": "inter \n",
+          "a_stderr": "Runtime error: for loop start and end must be integers\n",
+          "b_stderr": "",
+          "rag_top_sim": 0.8864310822179816,
+          "rag_hits": [
+            {
+              "score": 0.8864310822179816,
+              "desc": "Take two whitespace-separated lists of words in arg0 and arg1. Print the longest common prefix of wo"
+            },
+            {
+              "score": 0.8825927053702365,
+              "desc": "Take two whitespace-separated lists of words in arg0 and arg1. Print the longest common suffix of wo"
+            },
+            {
+              "score": 0.859970544694618,
+              "desc": "Print the longest common prefix of the comma-separated strings in arg 1 (print an empty line if ther"
+            },
+            {
+              "score": 0.8149506496973236,
+              "desc": "Print the length of the longest word (by characters) in arg1."
+            },
+            {
+              "score": 0.8110999067908903,
+              "desc": "Print the length of the longest word in arg1."
+            }
+          ]
+        },
+        {
+          "id": "longest_common_suffix_two",
+          "a_pass": false,
+          "b_pass": false,
+          "a_bucket": "parse_error",
+          "b_bucket": "empty_output",
+          "a_seconds": 4.2,
+          "b_seconds": 4.1,
+          "a_code": "(fn longest_common_suffix a string b string -> string\n  (let len_a int (len a))\n  (let len_b int (len b))\n  (let min_len int (min len_a len_b))\n  (for i 0 min_len\n    (if (eq (char_at a (- len_a i)) (char_at b (- len_b i)))\n      (set suffix string (substr a (- len_a i) len_a))\n      (break))))\n  (ret suffix))\n\n(println (longest_common_suffix (arg_str 0) (arg_str 1)))",
+          "b_code": "(set a (rev (split $0 \"\")))\n(set b (rev (split $1 \"\")))\n(set n (len a))\n(set m (len b))\n(set lim (if (lt n m) n m))\n(set i 0)\n(set done false)\n(for-each k (range 0 lim)\n  (if (and (not done) (eq (get_or a k \"\") (get_or b k \"\")))\n    (set i (add k 1))\n    (set done true)))\n(println (join (rev (slice a 0 i)) \"\"))",
+          "a_stdout": "",
+          "b_stdout": "\n",
+          "a_stderr": "Parse error: Expected expression but got )\n",
+          "b_stderr": "",
+          "rag_top_sim": 0.9228836633509171,
+          "rag_hits": [
+            {
+              "score": 0.9228836633509171,
+              "desc": "Take two whitespace-separated lists of words in arg0 and arg1. Print the longest common suffix of wo"
+            },
+            {
+              "score": 0.8628171205227873,
+              "desc": "Take two whitespace-separated lists of words in arg0 and arg1. Print the longest common prefix of wo"
+            },
+            {
+              "score": 0.8256425597022014,
+              "desc": "Print the longest common prefix of the comma-separated strings in arg 1 (print an empty line if ther"
+            },
+            {
+              "score": 0.8101831923209486,
+              "desc": "Length of the longest word starting with a vowel in arg1."
+            },
+            {
+              "score": 0.8076180397322069,
+              "desc": "Print the length of the longest word (by characters) in arg1."
+            }
+          ]
+        },
+        {
+          "id": "edit_one_apart",
+          "a_pass": false,
+          "b_pass": false,
+          "a_bucket": "parse_error",
+          "b_bucket": "undefined_var",
+          "a_seconds": 3.8,
+          "b_seconds": 6.2,
+          "a_code": "(fn main -> int\n  (let a string (arg_str 0))\n  (let b string (arg_str 1))\n  (if (eq a b)\n    (println \"no\")\n    (let diff bool false)\n    (for-each char char a\n      (if (in char b)\n        (set diff true)\n        (return)))\n    (if diff\n      (println \"yes\")\n      (println \"no\"))))",
+          "b_code": "(set s1 $0)\n(set s2 $1)\n(set len1 (len s1))\n(set len2 (len s2))\n\n(if (eq len1 len2)\n  (begin\n    (set diff_count 0)\n    (for-each i (range len1)\n      (if (ne (char_at s1 i) (char_at s2 i))\n        (begin\n          (inc diff_count)\n          (if (> diff_count 1)\n            (exit \"no\")))))\n    (if (= diff_count 1)\n      (println \"yes\")\n      (else (println \"no\"))))\n  (begin\n    (if (> len1 len2)\n      (swap s1 s2))\n    (set i 0)\n    (while (< i len1)\n      (if (eq (char_at s1 i) (char_at s2 i))\n        (inc i)\n        (begin\n          (if (eq i 0)\n            (set s2 (slice s2 1))\n            (set s2 (concat (slice s2 0 i) (slice s2 (+ i 1)))))\n          (break))))\n    (if (= i len1)\n      (println \"yes\")\n      (else (println \"no\")))))",
+          "a_stdout": "",
+          "b_stdout": "",
+          "a_stderr": "Parse error: Cannot use type keyword 'char' as for-each variable name. Use a descriptive name instead (e.g., 'char_data', 'char_value')\n",
+          "b_stderr": "Runtime error: Undefined variable: char_at\n",
+          "rag_top_sim": 0.8325386191459143,
+          "rag_hits": [
+            {
+              "score": 0.8325386191459143,
+              "desc": "Take two strings in arg0 (the candidate) and arg1 (the target). Print 'yes' if arg0 contains every c"
+            },
+            {
+              "score": 0.8192894407279594,
+              "desc": "Take a string of parentheses in arg0 and print 'yes' if balanced, otherwise 'no'."
+            },
+            {
+              "score": 0.8038542068113329,
+              "desc": "Print 'yes' if arg1 and arg2 are anagrams (same multiset of characters), else 'no'."
+            },
+            {
+              "score": 0.7978872988462611,
+              "desc": "Check if arg1 is a palindrome ignoring case and print 'yes' or 'no'."
+            },
+            {
+              "score": 0.7967104915482559,
+              "desc": "Check if arg1 is a palindrome ignoring case (output 'yes' or 'no')."
+            }
+          ]
+        },
+        {
+          "id": "shared_word_count",
+          "a_pass": false,
+          "b_pass": true,
+          "a_bucket": "undefined_var",
+          "b_bucket": null,
+          "a_seconds": 4.0,
+          "b_seconds": 3.3,
+          "a_code": "(set words1 array (split $0 \" \"))\n(set words2 array (split $1 \" \"))\n(set set1 map {})\n(set set2 map {})\n\n(for-each word string words1\n  (set set1 (map_set set1 word true)))\n\n(for-each word string words2\n  (set set2 (map_set set2 word true)))\n\n(set commonWords int 0)\n(for-each key string set1\n  (if (in key set2)\n    (inc commonWords)))\n\n(println commonWords)",
+          "b_code": "(set s1 $0)\n(set s2 $1)\n(set words1 (split s1 \" \"))\n(set words2 (split s2 \" \"))\n(set set1 (uniq words1))\n(set set2 (uniq words2))\n(set common (inter set1 set2))\n(println (len common))",
+          "a_stdout": "",
+          "b_stdout": "2\n",
+          "a_stderr": "Runtime error: Undefined variable: inc\n",
+          "b_stderr": "",
+          "rag_top_sim": 0.9268860485345058,
+          "rag_hits": [
+            {
+              "score": 0.9268860485345058,
+              "desc": "Take a sentence in arg0 (whitespace-separated words). Print the count of distinct words."
+            },
+            {
+              "score": 0.8854982944131399,
+              "desc": "Take a sentence in arg0 and a single letter in arg1. Print how many whitespace-separated words in ar"
+            },
+            {
+              "score": 0.8459786385568295,
+              "desc": "Take a sentence in arg0. Print the whitespace-separated word that appears LEAST frequently. Break ti"
+            },
+            {
+              "score": 0.8254532936263456,
+              "desc": "Print number of anagram groups among space-separated words in arg1."
+            },
+            {
+              "score": 0.8214333308940104,
+              "desc": "Take two whitespace-separated lists of words in arg0 and arg1. Print the longest common prefix of wo"
+            }
+          ]
+        },
+        {
+          "id": "is_rotation_of",
+          "a_pass": false,
+          "b_pass": false,
+          "a_bucket": "parse_error",
+          "b_bucket": "parse_error",
+          "a_seconds": 3.5,
+          "b_seconds": 3.6,
+          "a_code": "(fn is_rotation s1 string s2 string -> bool\n  (let len int (len s1))\n    (if (ne len (len s2)) (ret false))\n    (ret (in (concat s1 s1) s2))))\n\n(println (if (is_rotation $0 $1) \"yes\" \"no\"))",
+          "b_code": "(set s $0)\n(set t $1)\n(if (eq (len s) (len t))\n  (let ((n (len s)))\n    (for-each i (range n)\n      (if (eq (slice s i (+ i n)) t)\n        (begin\n          (println \"yes\")\n          (exit)))))\n    (println \"no\"))\n  (println \"no\"))",
+          "a_stdout": "",
+          "b_stdout": "",
+          "a_stderr": "Parse error: Expected expression but got )\n",
+          "b_stderr": "Parse error: Expected symbol but got (\n",
+          "rag_top_sim": 0.8596331588901198,
+          "rag_hits": [
+            {
+              "score": 0.8596331588901198,
+              "desc": "Take two strings in arg0 (the candidate) and arg1 (the target). Print 'yes' if arg0 contains every c"
+            },
+            {
+              "score": 0.8115360071682393,
+              "desc": "Print 'yes' if arg1 and arg2 are anagrams (same multiset of characters), else 'no'."
+            },
+            {
+              "score": 0.7899080646102188,
+              "desc": "Print yes if arg1 has >=8 chars, an uppercase, a lowercase, and a digit; else no."
+            },
+            {
+              "score": 0.7821720847533518,
+              "desc": "Print true if arg1 has >=8 chars, an uppercase, a lowercase, and a digit, else false."
+            },
+            {
+              "score": 0.7768834835804298,
+              "desc": "Print 'true' if arg1 has >=8 chars, an uppercase, a lowercase, and a digit; else 'false'."
+            }
+          ]
+        },
+        {
+          "id": "char_overlap_ratio",
+          "a_pass": false,
+          "b_pass": true,
+          "a_bucket": "parse_error",
+          "b_bucket": null,
+          "a_seconds": 4.7,
+          "b_seconds": 5.6,
+          "a_code": "(fn main -> int\n  (let args array (argv))\n  (let arg0 string (arg_str 0))\n  (let arg1 string (arg_str 1))\n\n  (let set0 map (to_set arg0))\n  (let set1 map (to_set arg1))\n\n  (let size_both int (len (set_intersection set0 set1)))\n  (let size_either int (len (set_union set0 set1)))\n\n  (if (and (eq size_both 0) (eq size_either 0))\n    (println \"0.000\")\n    (let ratio float (/ size_both size_either))\n    (println (fmt \"{:.3f}\" ratio))))\n\n  (ret 0)\n)",
+          "b_code": "(set sa {})\n(for-each c (chars $0)\n  (set sa (map_set sa c true)))\n(set sb {})\n(for-each c (chars $1)\n  (set sb (map_set sb c true)))\n(set inter 0)\n(for-each k (map_keys sa)\n  (if (map_has sb k) (set inter (add inter 1))))\n(set un (sub (add (map_length sa) (map_length sb)) inter))\n(if (eq un 0)\n  (println \"0.000\")\n  (else\n    (set ratio (div (cast_int_float inter) (cast_int_float un)))\n    (set n (round (mul ratio 1000.0)))\n    (set whole (div n 1000))\n    (set frac (mod n 1000))\n    (set fs (string_from_int frac))\n    (while (lt (len fs) 3)\n      (set fs (string_concat \"0\" fs)))\n    (println (fmt \"{}.{}\" whole fs))))",
+          "a_stdout": "",
+          "b_stdout": "0.429\n",
+          "a_stderr": "Parse error: Expected expression but got )\n",
+          "b_stderr": "",
+          "rag_top_sim": 0.9261363113290936,
+          "rag_hits": [
+            {
+              "score": 0.9261363113290936,
+              "desc": "Take two strings in arg0 and arg1. Print the Jaccard similarity of their character sets (size of int"
+            },
+            {
+              "score": 0.7882547495794062,
+              "desc": "Take a non-negative integer in arg0 and print its binary representation as a string of '0' and '1' c"
+            },
+            {
+              "score": 0.7816908810375129,
+              "desc": "Take two integers in arg0 and arg1. Print the smaller of the two if both are positive; otherwise pri"
+            },
+            {
+              "score": 0.7587564245575676,
+              "desc": "Convert the number string in arg 1 (interpreted in from-base given by arg 2) to the to-base given by"
+            },
+            {
+              "score": 0.7551143371148772,
+              "desc": "Take a string in arg0 and a positive integer n in arg1. Print arg0 right-padded with spaces to lengt"
+            }
+          ]
+        },
+        {
+          "id": "is_subsequence",
+          "a_pass": false,
+          "b_pass": false,
+          "a_bucket": "parse_error",
+          "b_bucket": "type_error",
+          "a_seconds": 4.4,
+          "b_seconds": 4.1,
+          "a_code": "(fn is_subsequence candidate string target string -> bool\n  (let rec check sub target\n    (cond\n      ((eq sub \"\") (ret true))\n      ((in (first sub) target)\n        (set idx int (find_index (first sub) target))\n        (check (rest sub) (slice target (+ idx 1))))\n      (true (ret false))))\n  (check candidate target))\n\n(fn main -> int\n  (let candidate string (arg_str 0))\n  (let target string (arg_str 1))\n  (if (is_subsequence candidate target)\n    (println \"yes\")\n    (println \"no\"))\n  (ret 0))",
+          "b_code": "(set candidate $0)\n(set target $1)\n(set i 0)\n(set is_subsequence true)\n(for-each c (chars target)\n  (set found false)\n  (for j (range i (len candidate))\n    (if (eq c (array_get (chars candidate) j))\n      (begin\n        (set i (+ j 1))\n        (set found true))))\n  (if (not found)\n    (set is_subsequence false)))\n(if is_subsequence\n  (println \"yes\")\n  (else (println \"no\")))",
+          "a_stdout": "",
+          "b_stdout": "",
+          "a_stderr": "Parse error: Expected ) but got Symbol(sub)\n",
+          "b_stderr": "Runtime error: Invalid arguments to array_get\n",
+          "rag_top_sim": 0.9673350971064919,
+          "rag_hits": [
+            {
+              "score": 0.9673350971064919,
+              "desc": "Take two strings in arg0 (the candidate) and arg1 (the target). Print 'yes' if arg0 contains every c"
+            },
+            {
+              "score": 0.8441062009038381,
+              "desc": "Print 'yes' if arg1 and arg2 are anagrams (same multiset of characters), else 'no'."
+            },
+            {
+              "score": 0.8018317174400749,
+              "desc": "Print 'yes' if arg1 and arg2 are anagrams ignoring spaces and case, else 'no'."
+            },
+            {
+              "score": 0.7946302533461181,
+              "desc": "Print 'yes' if arg1 and arg2 are case-insensitive anagrams ignoring spaces, else 'no'."
+            },
+            {
+              "score": 0.7815983382420457,
+              "desc": "Check if arg1 is a palindrome ignoring case (output 'yes' or 'no')."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "iteration": 7,
+      "n_tasks": 10,
+      "a_pass": 2,
+      "b_pass": 8,
+      "flips_a_to_b": 7,
+      "flips_b_to_a": 1,
+      "net": 6,
+      "tasks": [
+        {
+          "id": "path_basename",
+          "a_pass": true,
+          "b_pass": true,
+          "a_bucket": null,
+          "b_bucket": null,
+          "a_seconds": 2.6,
+          "b_seconds": 2.9,
+          "a_code": "(println (last (split $0 \"/\")))",
+          "b_code": "(set path $0)\n(if (contains path \"/\")\n  (println (last (split path \"/\")))\n  (println path))",
+          "a_stdout": "sigil\n",
+          "b_stdout": "sigil\n",
+          "a_stderr": "",
+          "b_stderr": "",
+          "rag_top_sim": 0.8732492949368182,
+          "rag_hits": [
+            {
+              "score": 0.8732492949368182,
+              "desc": "Take a Unix path in arg0 (may start with '/'). Print the path with the last '/'-separated segment re"
+            },
+            {
+              "score": 0.8166829438914134,
+              "desc": "Normalize the absolute Unix-style path in argv[1] by collapsing '.', '..', and empty segments; print"
+            },
+            {
+              "score": 0.7983296588327837,
+              "desc": "Simplify the Unix-style absolute path in argv[1] by resolving '.', '..', repeated and trailing slash"
+            },
+            {
+              "score": 0.7965410491937125,
+              "desc": "Simplify a Unix-style absolute path given as the single CLI arg, resolving '.' and '..' segments and"
+            },
+            {
+              "score": 0.7871292296315626,
+              "desc": "Simplify a Unix-style absolute path given as the only CLI argument by resolving '.', '..', and redun"
+            }
+          ]
+        },
+        {
+          "id": "path_dirname",
+          "a_pass": false,
+          "b_pass": true,
+          "a_bucket": "wrong_output",
+          "b_bucket": null,
+          "a_seconds": 2.9,
+          "b_seconds": 3.3,
+          "a_code": "(println (if (> (len $0) 0) (slice $0 0 (- (len $0) 1)) \"\"))",
+          "b_code": "(set path $0)\n(if (eq path \"/\")\n  (println \"\")\n  (do\n    (set parts (split path \"/\"))\n    (if (> (len parts) 1)\n      (println (join (slice parts 0 (- (len parts) 1)) \"/\"))\n      (println \"\"))))",
+          "a_stdout": "/usr/local/bin/sigi\n",
+          "b_stdout": "/usr/local/bin\n",
+          "a_stderr": "",
+          "b_stderr": "",
+          "rag_top_sim": 0.8881789046761871,
+          "rag_hits": [
+            {
+              "score": 0.8881789046761871,
+              "desc": "Take a Unix path in arg0 (may start with '/'). Print the path with the last '/'-separated segment re"
+            },
+            {
+              "score": 0.8091246168138996,
+              "desc": "Normalize the absolute Unix-style path in argv[1] by collapsing '.', '..', and empty segments; print"
+            },
+            {
+              "score": 0.7896276489311947,
+              "desc": "Simplify a Unix-style absolute path given as the only CLI argument by resolving '.', '..', and redun"
+            },
+            {
+              "score": 0.7812898693109381,
+              "desc": "Simplify the Unix-style absolute path in argv[1] by resolving '.', '..', repeated and trailing slash"
+            },
+            {
+              "score": 0.7806438989922536,
+              "desc": "Print the file extension (without dot) of the path in arg1, or empty string if none."
+            }
+          ]
+        },
+        {
+          "id": "path_extension",
+          "a_pass": false,
+          "b_pass": true,
+          "a_bucket": "empty_output",
+          "b_bucket": null,
+          "a_seconds": 3.2,
+          "b_seconds": 3.0,
+          "a_code": "(fn main -> int\n  (let filename string (arg_str 0))\n  (let parts array (split filename \".\"))\n  (if (> (len parts) 1)\n    (println (last parts))\n    (println \"\"))\n  (ret 0))",
+          "b_code": "(set fname $0)\n(set parts (split fname \".\"))\n(if (gt (len parts) 1)\n  (println (last parts))\n  (else (println \"\")))",
+          "a_stdout": "",
+          "b_stdout": "gz\n",
+          "a_stderr": "",
+          "b_stderr": "",
+          "rag_top_sim": 0.8484761804563107,
+          "rag_hits": [
+            {
+              "score": 0.8484761804563107,
+              "desc": "Print the file extension (without dot) of the path in arg1, or empty string if none."
+            },
+            {
+              "score": 0.8270605400254891,
+              "desc": "Given a filesystem path in arg1, print the filename without its extension."
+            },
+            {
+              "score": 0.8076475024389743,
+              "desc": "Print the filename (without extension) from the POSIX path in arg1."
+            },
+            {
+              "score": 0.7875225237240409,
+              "desc": "Print the file extension (without dot) of path arg1, or 'none' if none."
+            },
+            {
+              "score": 0.78393609283447,
+              "desc": "Print the filename without extension from path arg1."
+            }
+          ]
+        },
+        {
+          "id": "path_join_parts",
+          "a_pass": false,
+          "b_pass": true,
+          "a_bucket": "type_error",
+          "b_bucket": null,
+          "a_seconds": 2.7,
+          "b_seconds": 2.7,
+          "a_code": "(println (join \"/\" (slice 1 (argv_count) (argv))))",
+          "b_code": "(set path $0)\n(println (join (split path \" \") \"/\"))",
+          "a_stdout": "",
+          "b_stdout": "usr/local/bin/sigil\n",
+          "a_stderr": "Runtime error: slice takes (string|array, start, end?)\n",
+          "b_stderr": "",
+          "rag_top_sim": 0.8691719751229448,
+          "rag_hits": [
+            {
+              "score": 0.8691719751229448,
+              "desc": "Take a Unix path in arg0 (may start with '/'). Print the path with the last '/'-separated segment re"
+            },
+            {
+              "score": 0.8143850481714427,
+              "desc": "Simplify a Unix-style absolute path given as the single CLI arg, resolving '.' and '..' segments and"
+            },
+            {
+              "score": 0.7969560878792479,
+              "desc": "Normalize the absolute Unix-style path in argv[1] by collapsing '.', '..', and empty segments; print"
+            },
+            {
+              "score": 0.7689194610786897,
+              "desc": "Simplify a Unix-style absolute path given as the only CLI argument by resolving '.', '..', and redun"
+            },
+            {
+              "score": 0.749184984232896,
+              "desc": "Take a space-separated list of integers in arg0. Print them sorted descending, space-separated."
+            }
+          ]
+        },
+        {
+          "id": "path_depth",
+          "a_pass": false,
+          "b_pass": true,
+          "a_bucket": "parse_error",
+          "b_bucket": null,
+          "a_seconds": 2.9,
+          "b_seconds": 2.9,
+          "a_code": "(fn path string -> int\n  (let segments array (split path \"/\"))\n  (ret (len (filter (\\x string (ne x \"\")) segments))))",
+          "b_code": "(set path $0)\n(set segments (split path \"/\"))\n(println (len (filter (\\x (ne x \"\")) segments)))",
+          "a_stdout": "",
+          "b_stdout": "3\n",
+          "a_stderr": "Parse error: Cannot use type keyword 'string' as function parameter name. Use a descriptive name instead (e.g., 'string_data', 'string_value')\n",
+          "b_stderr": "",
+          "rag_top_sim": 0.8196690032400666,
+          "rag_hits": [
+            {
+              "score": 0.8196690032400666,
+              "desc": "Take a Unix path in arg0 (may start with '/'). Print the path with the last '/'-separated segment re"
+            },
+            {
+              "score": 0.7655576013599451,
+              "desc": "Normalize the absolute Unix-style path in argv[1] by collapsing '.', '..', and empty segments; print"
+            },
+            {
+              "score": 0.7594495920170552,
+              "desc": "Simplify a Unix-style absolute path given as the single CLI arg, resolving '.' and '..' segments and"
+            },
+            {
+              "score": 0.7512200880584458,
+              "desc": "Resolve arg2 as a Unix path (handling '.', '..', empty segments) relative to base path arg1 and prin"
+            },
+            {
+              "score": 0.7473468771229216,
+              "desc": "Take a sentence in arg0 (whitespace-separated words). Print the count of distinct words."
+            }
+          ]
+        },
+        {
+          "id": "path_strip_leading_slash",
+          "a_pass": false,
+          "b_pass": true,
+          "a_bucket": "empty_output",
+          "b_bucket": null,
+          "a_seconds": 3.2,
+          "b_seconds": 2.9,
+          "a_code": "(fn main -> int\n  (let path string (arg_str 0))\n  (if (eq (substr path 0 1) \"/\")\n    (println (substr path 1))\n    (println path))\n  (ret 0))",
+          "b_code": "(set path $0)\n(if (eq (slice path 0 1) \"/\")\n  (println (slice path 1))\n  (println path))",
+          "a_stdout": "",
+          "b_stdout": "usr/local\n",
+          "a_stderr": "",
+          "b_stderr": "",
+          "rag_top_sim": 0.8985886699906351,
+          "rag_hits": [
+            {
+              "score": 0.8985886699906351,
+              "desc": "Take a Unix path in arg0 (may start with '/'). Print the path with the last '/'-separated segment re"
+            },
+            {
+              "score": 0.8085324329594377,
+              "desc": "Normalize the absolute Unix-style path in argv[1] by collapsing '.', '..', and empty segments; print"
+            },
+            {
+              "score": 0.7898887890690043,
+              "desc": "Simplify a Unix-style absolute path given as the single CLI arg, resolving '.' and '..' segments and"
+            },
+            {
+              "score": 0.7819056937152076,
+              "desc": "Simplify a Unix-style absolute path given as the only CLI argument by resolving '.', '..', and redun"
+            },
+            {
+              "score": 0.7573267074360815,
+              "desc": "Resolve arg2 as a Unix path (handling '.', '..', empty segments) relative to base path arg1 and prin"
+            }
+          ]
+        },
+        {
+          "id": "path_normalize_dots",
+          "a_pass": false,
+          "b_pass": true,
+          "a_bucket": "undefined_var",
+          "b_bucket": null,
+          "a_seconds": 2.7,
+          "b_seconds": 3.2,
+          "a_code": "(println (replace_all (arg_str 0) \"/\\./\" \"\"))",
+          "b_code": "(set path $0)\n(set parts (split path \"/\"))\n(set result [])\n(for-each seg parts\n  (if (and (ne seg \"\") (ne seg \".\"))\n    (push result seg)))\n(println (string_concat \"/\" (join result \"/\")))",
+          "a_stdout": "",
+          "b_stdout": "/usr/local/bin/sigil\n",
+          "a_stderr": "Runtime error: Undefined variable: replace_all\n",
+          "b_stderr": "",
+          "rag_top_sim": 0.8924758694904407,
+          "rag_hits": [
+            {
+              "score": 0.8924758694904407,
+              "desc": "Take a Unix path in arg0 (may start with '/'). Print the path with the last '/'-separated segment re"
+            },
+            {
+              "score": 0.8459041647809574,
+              "desc": "Normalize the absolute Unix-style path in argv[1] by collapsing '.', '..', and empty segments; print"
+            },
+            {
+              "score": 0.8416793716578664,
+              "desc": "Simplify a Unix-style absolute path given as the single CLI arg, resolving '.' and '..' segments and"
+            },
+            {
+              "score": 0.8045282392855585,
+              "desc": "Simplify the Unix-style absolute path in argv[1] by resolving '.', '..', repeated and trailing slash"
+            },
+            {
+              "score": 0.7979891048792642,
+              "desc": "Normalize an absolute Unix-style path by resolving '.' and '..' segments and collapsing redundant sl"
+            }
+          ]
+        },
+        {
+          "id": "longest_path_segment",
+          "a_pass": true,
+          "b_pass": false,
+          "a_bucket": null,
+          "b_bucket": "wrong_output",
+          "a_seconds": 3.5,
+          "b_seconds": 3.2,
+          "a_code": "(set path string (arg_str 0))\n(set segments array (split path \"/\"))\n(set longest string \"\")\n(set max_len int 0)\n\n(for-each segment string segments\n  (if (gt (len segment) max_len)\n    (begin\n      (set longest segment)\n      (set max_len (len segment)))))\n\n(println longest)",
+          "b_code": "(set path $0)\n(if (eq path \"/\")\n  (println \"\")\n  (do\n    (set parts (split path \"/\"))\n    (if (gt (len parts) 1)\n      (println (last parts))\n      (println \"\"))))",
+          "a_stdout": "ccc\n",
+          "b_stdout": "c\n",
+          "a_stderr": "",
+          "b_stderr": "",
+          "rag_top_sim": 0.811144632952651,
+          "rag_hits": [
+            {
+              "score": 0.811144632952651,
+              "desc": "Print the longest word in arg1; on ties, the first one wins."
+            },
+            {
+              "score": 0.8002886900645303,
+              "desc": "Print the longest word in arg1 (ties: first occurrence)."
+            },
+            {
+              "score": 0.7903366576152279,
+              "desc": "Take a Unix path in arg0 (may start with '/'). Print the path with the last '/'-separated segment re"
+            },
+            {
+              "score": 0.7764455158852858,
+              "desc": "Print the longest word in arg1; on ties, return the first encountered."
+            },
+            {
+              "score": 0.7730488865321331,
+              "desc": "Print the longest word in arg1; on ties print the first occurring."
+            }
+          ]
+        },
+        {
+          "id": "ends_with_extension",
+          "a_pass": false,
+          "b_pass": true,
+          "a_bucket": "empty_output",
+          "b_bucket": null,
+          "a_seconds": 3.2,
+          "b_seconds": 3.1,
+          "a_code": "(fn main -> int\n  (let filename string (arg_str 0))\n  (let ext string (arg_str 1))\n  (if (ends_with filename \".\" ext)\n    (println \"yes\")\n    (println \"no\"))\n  (ret 0))",
+          "b_code": "(set fname $0)\n(set ext $1)\n(if (eq (string_slice fname (- (len fname) (len ext)) (len fname)) ext)\n  (println \"yes\")\n  (else (println \"no\")))",
+          "a_stdout": "",
+          "b_stdout": "yes\n",
+          "a_stderr": "",
+          "b_stderr": "",
+          "rag_top_sim": 0.8213524789916616,
+          "rag_hits": [
+            {
+              "score": 0.8213524789916616,
+              "desc": "Print the filename (without extension) from the POSIX path in arg1."
+            },
+            {
+              "score": 0.8137576938952705,
+              "desc": "Print the file extension (without dot) of the path in arg1, or empty string if none."
+            },
+            {
+              "score": 0.7943023740693539,
+              "desc": "Print the filename without extension from path arg1."
+            },
+            {
+              "score": 0.7902802443108057,
+              "desc": "Given a filesystem path in arg1, print the filename without its extension."
+            },
+            {
+              "score": 0.7839537470789062,
+              "desc": "Print the basename of arg1 without its final extension."
+            }
+          ]
+        },
+        {
+          "id": "swap_extension",
+          "a_pass": false,
+          "b_pass": false,
+          "a_bucket": "type_error",
+          "b_bucket": "parse_error",
+          "a_seconds": 3.5,
+          "b_seconds": 3.4,
+          "a_code": "(fn replace_extension filename string new_ext string -> string\n  (let parts array (split filename \".\"))\n  (if (> (len parts) 1)\n    (join (slice parts 0 (- (len parts) 1)) \".\" new_ext)\n    filename))\n\n(println (replace_extension (arg_str 0) (arg_str 1)))",
+          "b_code": "(set fname $0)\n(set new_ext $1)\n(set parts (split fname \".\"))\n(if (le (len parts) 1)\n  (println (str fname \".\" new_ext))\n  (else (println (join (slice parts 0 (sub (len parts) 1)) \".\" ) \".\" new_ext))))",
+          "a_stdout": "",
+          "b_stdout": "",
+          "a_stderr": "Runtime error: join takes (array, string)\n",
+          "b_stderr": "Parse error: Expected expression but got )\n",
+          "rag_top_sim": 0.8654098337756261,
+          "rag_hits": [
+            {
+              "score": 0.8654098337756261,
+              "desc": "Print the filename (without extension) from the POSIX path in arg1."
+            },
+            {
+              "score": 0.8475727939847905,
+              "desc": "Print the basename of arg1 without its final extension."
+            },
+            {
+              "score": 0.8301232138050408,
+              "desc": "Print the filename without extension from path arg1."
+            },
+            {
+              "score": 0.8155996794489601,
+              "desc": "Print the file extension (without dot) of the path in arg1, or empty string if none."
+            },
+            {
+              "score": 0.8089719549169876,
+              "desc": "Print the filename stem (no extension, no directories) of the path in arg1."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "iteration": 8,
+      "n_tasks": 10,
+      "a_pass": 2,
+      "b_pass": 7,
+      "flips_a_to_b": 5,
+      "flips_b_to_a": 0,
+      "net": 5,
+      "tasks": [
+        {
+          "id": "popcount",
+          "a_pass": false,
+          "b_pass": false,
+          "a_bucket": "wrong_output",
+          "b_bucket": "wrong_output",
+          "a_seconds": 3.5,
+          "b_seconds": 2.9,
+          "a_code": "(fn popcount n int -> int\n  (set count int 0)\n  (for i 0 32\n    (if (eq (bit_and n (pow 2 i)) 0) (ret count))\n    (set count (add count 1)))\n  (ret count))\n\n(println (popcount (arg_int 0)))",
+          "b_code": "(println (len (filter (\\x (eq x \"1\")) (split (fmt \"{:b}\" #0) \"\"))))",
+          "a_stdout": "1\n",
+          "b_stdout": "0\n",
+          "a_stderr": "",
+          "b_stderr": "",
+          "rag_top_sim": 0.8290486794413037,
+          "rag_hits": [
+            {
+              "score": 0.8290486794413037,
+              "desc": "Take a non-negative integer in arg0 and print its binary representation as a string of '0' and '1' c"
+            },
+            {
+              "score": 0.8176638445036658,
+              "desc": "Sum the decimal digits of the non-negative integer in arg1."
+            },
+            {
+              "score": 0.8176638445036658,
+              "desc": "Sum the decimal digits of the non-negative integer in arg1."
+            },
+            {
+              "score": 0.8050553746724924,
+              "desc": "Multiply the decimal digits of the non-negative integer arg1."
+            },
+            {
+              "score": 0.8029195291490939,
+              "desc": "Print the product of the decimal digits of a non-negative integer arg1."
+            }
+          ]
+        },
+        {
+          "id": "to_binary_str",
+          "a_pass": false,
+          "b_pass": false,
+          "a_bucket": "parse_error",
+          "b_bucket": "parse_error",
+          "a_seconds": 3.5,
+          "b_seconds": 3.6,
+          "a_code": "(fn main -> int\n  (let n int (arg_int 0))\n  (if (eq n 0)\n    (println \"0\")\n    (let bin string \"\")\n      (while (> n 0)\n        (set bin (str (mod n 2) bin))\n        (set n (div n 2)))\n      (println bin))))",
+          "b_code": "(set n #0)\n(if (eq n 0)\n  (println \"0\")\n  (else\n    (set out \"\")\n    (while (gt n 0)\n      (set out (str (if (eq (mod n 2) 1) \"1\" \"0\") out))\n      (set n (div n 2)))\n    (println out))))",
+          "a_stdout": "",
+          "b_stdout": "",
+          "a_stderr": "Parse error: Expected expression but got )\n",
+          "b_stderr": "Parse error: Expected expression but got )\n",
+          "rag_top_sim": 0.942063395570045,
+          "rag_hits": [
+            {
+              "score": 0.942063395570045,
+              "desc": "Take a non-negative integer in arg0 and print its binary representation as a string of '0' and '1' c"
+            },
+            {
+              "score": 0.7936919958188107,
+              "desc": "For each non-negative integer CLI argument, print 'N: bin=B oct=O hex=H' showing its binary, octal, "
+            },
+            {
+              "score": 0.7846702945659091,
+              "desc": "Take two strings in arg0 and arg1. Print the Jaccard similarity of their character sets (size of int"
+            },
+            {
+              "score": 0.7826340040931603,
+              "desc": "Convert the number string in arg 1 (interpreted in from-base given by arg 2) to the to-base given by"
+            },
+            {
+              "score": 0.7801878652930495,
+              "desc": "Take a string in arg0 and print the 0-based index of the last character that appears exactly once in"
+            }
+          ]
+        },
+        {
+          "id": "binary_to_int",
+          "a_pass": false,
+          "b_pass": true,
+          "a_bucket": "empty_output",
+          "b_bucket": null,
+          "a_seconds": 3.1,
+          "b_seconds": 3.4,
+          "a_code": "(fn main -> int\n  (let bin_str string (arg_str 0))\n  (let dec_val int (parseInt bin_str 2))\n  (println dec_val)\n  (ret 0))",
+          "b_code": "(set bin $0)\n(set result 0)\n(set n (len bin))\n(for i 0 n\n  (set ch (string_get bin i))\n  (set result (mul result 2))\n  (if (eq ch 49)\n    (set result (add result 1))))\n(println result)",
+          "a_stdout": "",
+          "b_stdout": "13\n",
+          "a_stderr": "",
+          "b_stderr": "",
+          "rag_top_sim": 0.8871286102893784,
+          "rag_hits": [
+            {
+              "score": 0.8871286102893784,
+              "desc": "Take a non-negative integer in arg0 and print its binary representation as a string of '0' and '1' c"
+            },
+            {
+              "score": 0.8434015475469016,
+              "desc": "Read a binary string and print its decimal value."
+            },
+            {
+              "score": 0.8339472755781534,
+              "desc": "Sum the decimal digits of the non-negative integer in arg1."
+            },
+            {
+              "score": 0.8339472755781534,
+              "desc": "Sum the decimal digits of the non-negative integer in arg1."
+            },
+            {
+              "score": 0.8236514558466332,
+              "desc": "Multiply the decimal digits of the non-negative integer arg1."
+            }
+          ]
+        },
+        {
+          "id": "bit_at_index",
+          "a_pass": true,
+          "b_pass": true,
+          "a_bucket": null,
+          "b_bucket": null,
+          "a_seconds": 3.5,
+          "b_seconds": 3.0,
+          "a_code": "(fn bit_test n int i int -> int\n  (let mask int (shl 1 i))\n  (if (and (gt n 0) (eq (band n mask) mask)) (ret 1) (ret 0)))\n\n(println (bit_test (arg_int 0) (arg_int 1)))",
+          "b_code": "(set n #0)\n(set i #1)\n(println (if (eq (bit_and n (bit_shift_left 1 i)) 0) \"0\" \"1\"))",
+          "a_stdout": "1\n",
+          "b_stdout": "1\n",
+          "a_stderr": "",
+          "b_stderr": "",
+          "rag_top_sim": 0.7866741430823228,
+          "rag_hits": [
+            {
+              "score": 0.7866741430823228,
+              "desc": "Take an integer in arg0 (treated as 64-bit) and a space-separated list of bit indices in arg1. Print"
+            },
+            {
+              "score": 0.7803712618977773,
+              "desc": "Take a space-separated list of integers in arg0. Print the 0-based index of the FIRST negative value"
+            },
+            {
+              "score": 0.7791885591195873,
+              "desc": "Take a non-negative integer in arg0 and print its binary representation as a string of '0' and '1' c"
+            },
+            {
+              "score": 0.7658367163333298,
+              "desc": "Take two integers in arg0 and arg1. Print the smaller of the two if both are positive; otherwise pri"
+            },
+            {
+              "score": 0.75178966535218,
+              "desc": "From sorted space-separated integers in arg1, print the 0-based index of target arg2, or -1 if absen"
+            }
+          ]
+        },
+        {
+          "id": "set_bit",
+          "a_pass": false,
+          "b_pass": true,
+          "a_bucket": "undefined_var",
+          "b_bucket": null,
+          "a_seconds": 3.3,
+          "b_seconds": 2.8,
+          "a_code": "(fn set_bit n int i int -> string\n  (let mask int (bitwise_or (pow 2 i) -1))\n  (ret (fmt \"{}\\n\" (bitwise_or n mask))))\n\n(println (set_bit (arg_int 0) (arg_int 1)))",
+          "b_code": "(set n #0)\n(set i #1)\n(println (bit_or n (bit_shift_left 1 i)))",
+          "a_stdout": "",
+          "b_stdout": "10\n",
+          "a_stderr": "Runtime error: Undefined variable: bitwise_or\n",
+          "b_stderr": "",
+          "rag_top_sim": 0.8085983051429257,
+          "rag_hits": [
+            {
+              "score": 0.8085983051429257,
+              "desc": "Take a non-negative integer in arg0 and print its binary representation as a string of '0' and '1' c"
+            },
+            {
+              "score": 0.7981185625352868,
+              "desc": "Take an integer in arg0 (treated as 64-bit) and a space-separated list of bit indices in arg1. Print"
+            },
+            {
+              "score": 0.7967907722510621,
+              "desc": "Take a space-separated list of integers in arg0. Print the 0-based index of the FIRST negative value"
+            },
+            {
+              "score": 0.7658144810206438,
+              "desc": "Sum the decimal digits of the non-negative integer in arg1."
+            },
+            {
+              "score": 0.7658144810206438,
+              "desc": "Sum the decimal digits of the non-negative integer in arg1."
+            }
+          ]
+        },
+        {
+          "id": "clear_bit",
+          "a_pass": false,
+          "b_pass": true,
+          "a_bucket": "undefined_var",
+          "b_bucket": null,
+          "a_seconds": 3.3,
+          "b_seconds": 2.9,
+          "a_code": "(fn clear_bit n int i int -> int\n  (let mask int (bitwise_not (bitwise_left_shift 1 i)))\n  (ret (bitwise_and n mask)))\n\n(println (clear_bit (arg_int 0) (arg_int 1)))",
+          "b_code": "(set n #0)\n(set i #1)\n(println (bit_and n (bit_not (bit_shift_left 1 i))))",
+          "a_stdout": "",
+          "b_stdout": "12\n",
+          "a_stderr": "Runtime error: Undefined variable: bitwise_left_shift\n",
+          "b_stderr": "",
+          "rag_top_sim": 0.8073962615745869,
+          "rag_hits": [
+            {
+              "score": 0.8073962615745869,
+              "desc": "Take an integer in arg0 (treated as 64-bit) and a space-separated list of bit indices in arg1. Print"
+            },
+            {
+              "score": 0.8038643627247795,
+              "desc": "Take a non-negative integer in arg0 and print its binary representation as a string of '0' and '1' c"
+            },
+            {
+              "score": 0.7908645669492542,
+              "desc": "Take a space-separated list of integers in arg0. Print the 0-based index of the FIRST negative value"
+            },
+            {
+              "score": 0.770577532059948,
+              "desc": "Sum the decimal digits of the non-negative integer in arg1."
+            },
+            {
+              "score": 0.770577532059948,
+              "desc": "Sum the decimal digits of the non-negative integer in arg1."
+            }
+          ]
+        },
+        {
+          "id": "highest_set_bit",
+          "a_pass": false,
+          "b_pass": true,
+          "a_bucket": "parse_error",
+          "b_bucket": null,
+          "a_seconds": 3.5,
+          "b_seconds": 3.1,
+          "a_code": "(fn main -> int\n  (let n int (arg_int 0))\n  (if (le n 0)\n    (println \"0\")\n    (let mut i int 0)\n    (while (lt (shl 1 i) n)\n      (set i (add i 1)))\n    (println (sub i 1))))",
+          "b_code": "(set n #0)\n(set result -1)\n(for i 0 32\n  (if (gt (bit_shift_left 1 i) n)\n    (break)))\n(println (sub i 1))",
+          "a_stdout": "",
+          "b_stdout": "3\n",
+          "a_stderr": "Parse error: Expected ) but got Symbol(int)\n",
+          "b_stderr": "",
+          "rag_top_sim": 0.7936947788761607,
+          "rag_hits": [
+            {
+              "score": 0.7936947788761607,
+              "desc": "Take an integer in arg0 (treated as 64-bit) and a space-separated list of bit indices in arg1. Print"
+            },
+            {
+              "score": 0.7851889771599067,
+              "desc": "Take a space-separated list of integers in arg0. Print the 0-based index of the FIRST negative value"
+            },
+            {
+              "score": 0.7686982790135798,
+              "desc": "Take a non-negative integer in arg0 and print its binary representation as a string of '0' and '1' c"
+            },
+            {
+              "score": 0.759987557522229,
+              "desc": "From sorted space-separated integers in arg1, print the 0-based index of target arg2, or -1 if absen"
+            },
+            {
+              "score": 0.7542380859024197,
+              "desc": "Convert a positive integer (1..3999) given as a CLI arg to its Roman numeral representation."
+            }
+          ]
+        },
+        {
+          "id": "and_two",
+          "a_pass": false,
+          "b_pass": false,
+          "a_bucket": "empty_output",
+          "b_bucket": "undefined_var",
+          "a_seconds": 3.1,
+          "b_seconds": 2.6,
+          "a_code": "(fn main -> int\n  (let a int (arg_int 0))\n  (let b int (arg_int 1))\n  (println (and a b))\n  (ret 0))",
+          "b_code": "(println (bitwise_and #0 #1))",
+          "a_stdout": "",
+          "b_stdout": "",
+          "a_stderr": "",
+          "b_stderr": "Runtime error: Undefined variable: bitwise_and\n",
+          "rag_top_sim": 0.8494261552409259,
+          "rag_hits": [
+            {
+              "score": 0.8494261552409259,
+              "desc": "Take two integers in arg0 and arg1. Print the smaller of the two if both are positive; otherwise pri"
+            },
+            {
+              "score": 0.8479852063096327,
+              "desc": "Print the GCD of integers arg1 and arg2."
+            },
+            {
+              "score": 0.8420374842922176,
+              "desc": "Sum the decimal digits of the non-negative integer in arg1."
+            },
+            {
+              "score": 0.8420374842922176,
+              "desc": "Sum the decimal digits of the non-negative integer in arg1."
+            },
+            {
+              "score": 0.8229933970511064,
+              "desc": "Multiply the decimal digits of the non-negative integer arg1."
+            }
+          ]
+        },
+        {
+          "id": "xor_two",
+          "a_pass": false,
+          "b_pass": true,
+          "a_bucket": "empty_output",
+          "b_bucket": null,
+          "a_seconds": 3.0,
+          "b_seconds": 2.6,
+          "a_code": "(fn main -> int\n  (let a int (arg_int 0))\n  (let b int (arg_int 1))\n  (println (xor a b)))",
+          "b_code": "(println (xor #0 #1))",
+          "a_stdout": "",
+          "b_stdout": "6\n",
+          "a_stderr": "",
+          "b_stderr": "",
+          "rag_top_sim": 0.8494261552409259,
+          "rag_hits": [
+            {
+              "score": 0.8494261552409259,
+              "desc": "Take two integers in arg0 and arg1. Print the smaller of the two if both are positive; otherwise pri"
+            },
+            {
+              "score": 0.8479852063096327,
+              "desc": "Print the GCD of integers arg1 and arg2."
+            },
+            {
+              "score": 0.8420374842922176,
+              "desc": "Sum the decimal digits of the non-negative integer in arg1."
+            },
+            {
+              "score": 0.8420374842922176,
+              "desc": "Sum the decimal digits of the non-negative integer in arg1."
+            },
+            {
+              "score": 0.8229933970511064,
+              "desc": "Multiply the decimal digits of the non-negative integer arg1."
+            }
+          ]
+        },
+        {
+          "id": "shift_left",
+          "a_pass": true,
+          "b_pass": true,
+          "a_bucket": null,
+          "b_bucket": null,
+          "a_seconds": 3.1,
+          "b_seconds": 2.6,
+          "a_code": "(fn shift-left n int k int -> string\n  (let shifted-int (shl n k))\n  (ret (str shifted-int)))\n\n(println (shift-left (arg_int 0) (arg_int 1)))",
+          "b_code": "(println (bit_shift_left #0 #1))",
+          "a_stdout": "48\n",
+          "b_stdout": "48\n",
+          "a_stderr": "",
+          "b_stderr": "",
+          "rag_top_sim": 0.7988733043711921,
+          "rag_hits": [
+            {
+              "score": 0.7988733043711921,
+              "desc": "Sum the decimal digits of the non-negative integer in arg1."
+            },
+            {
+              "score": 0.7988733043711921,
+              "desc": "Sum the decimal digits of the non-negative integer in arg1."
+            },
+            {
+              "score": 0.7844541503094079,
+              "desc": "Take an integer in arg0 (treated as 64-bit) and a space-separated list of bit indices in arg1. Print"
+            },
+            {
+              "score": 0.7770652602402264,
+              "desc": "Multiply the decimal digits of the non-negative integer arg1."
+            },
+            {
+              "score": 0.7664838134474571,
+              "desc": "Apply a Caesar shift of N (arg2, may be any integer) to the ASCII letters in arg1, preserving case a"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "iteration": 9,
+      "n_tasks": 10,
+      "a_pass": 1,
+      "b_pass": 3,
+      "flips_a_to_b": 2,
+      "flips_b_to_a": 0,
+      "net": 2,
+      "tasks": [
+        {
+          "id": "fibonacci_nth",
+          "a_pass": false,
+          "b_pass": false,
+          "a_bucket": "wrong_output",
+          "b_bucket": "parse_error",
+          "a_seconds": 3.8,
+          "b_seconds": 3.3,
+          "a_code": "(fn fib n int -> int\n  (if (eq n 0) (ret 0))\n  (if (eq n 1) (ret 1))\n  (set a int 0)\n  (set b int 1)\n  (for i 2 n\n    (set temp int b)\n    (set b (add a b))\n    (set a temp))\n  (ret b))\n\n(println (fib (arg_int 0)))",
+          "b_code": "(println (fib (arg_int 0)))\n\n(fn fib n int -> int\n  (cond\n    ((eq n 0) 0)\n    ((eq n 1) 1)\n    (true (+ (fib (- n 1)) (fib (- n 2)))))))",
+          "a_stdout": "34\n",
+          "b_stdout": "",
+          "a_stderr": "",
+          "b_stderr": "Parse error: Expected expression but got )\n",
+          "rag_top_sim": 0.7893043805956629,
+          "rag_hits": [
+            {
+              "score": 0.7893043805956629,
+              "desc": "Multiply the decimal digits of the non-negative integer arg1."
+            },
+            {
+              "score": 0.7863553436322825,
+              "desc": "Sum the decimal digits of the non-negative integer in arg1."
+            },
+            {
+              "score": 0.7863553436322825,
+              "desc": "Sum the decimal digits of the non-negative integer in arg1."
+            },
+            {
+              "score": 0.7854233274316499,
+              "desc": "Print the sum of the decimal digits of the non-negative integer arg1."
+            },
+            {
+              "score": 0.7786245499727117,
+              "desc": "Print the product of the decimal digits of the non-negative integer arg1."
+            }
+          ]
+        },
+        {
+          "id": "triangular_n",
+          "a_pass": true,
+          "b_pass": true,
+          "a_bucket": null,
+          "b_bucket": null,
+          "a_seconds": 3.0,
+          "b_seconds": 3.0,
+          "a_code": "(fn triangular n int -> int\n  (ret (/ (* n (+ n 1)) 2)))\n\n(set n int (arg_int 0))\n(println (triangular n))",
+          "b_code": "(fn triangular n int -> int\n  (ret (/ (* n (+ n 1)) 2)))\n\n(set n int (arg_int 0))\n(println (triangular n))",
+          "a_stdout": "28\n",
+          "b_stdout": "28\n",
+          "a_stderr": "",
+          "b_stderr": "",
+          "rag_top_sim": 0.0,
+          "rag_hits": []
+        },
+        {
+          "id": "collatz_steps",
+          "a_pass": false,
+          "b_pass": true,
+          "a_bucket": "undefined_var",
+          "b_bucket": null,
+          "a_seconds": 3.7,
+          "b_seconds": 3.5,
+          "a_code": "(fn collatz n int -> int\n  (set steps int 0)\n  (while (gt n 1)\n    (if (eq (mod n 2) 0)\n      (set n (/ n 2))\n      (set n (+ (* n 3) 1)))\n    (inc steps))\n  (ret steps))\n\n(set n int (arg_int 0))\n(println (collatz n))",
+          "b_code": "(set n #0)\n(set c 0)\n(while (gt n 1)\n  (if (eq (mod n 2) 0)\n    (set n (div n 2))\n    (else (set n (add (mul 3 n) 1))))\n  (set c (add c 1)))\n(println c)",
+          "a_stdout": "",
+          "b_stdout": "8\n",
+          "a_stderr": "Runtime error: Undefined variable: inc\n",
+          "b_stderr": "",
+          "rag_top_sim": 0.9120527261912302,
+          "rag_hits": [
+            {
+              "score": 0.9120527261912302,
+              "desc": "For the positive integer in arg 1, compute the number of Collatz steps needed to reach 1 (n/2 if eve"
+            },
+            {
+              "score": 0.8035633232202712,
+              "desc": "Read an integer n and print the Collatz sequence until it reaches 1."
+            },
+            {
+              "score": 0.7798303258210583,
+              "desc": "Print FizzBuzz result for single integer arg1: Fizz if div by 3, Buzz if div by 5, FizzBuzz if both,"
+            },
+            {
+              "score": 0.7642718721889806,
+              "desc": "Take a string in arg0 and a positive integer n in arg1. Print arg0 right-padded with spaces to lengt"
+            },
+            {
+              "score": 0.7418201549252978,
+              "desc": "Tokenize the arithmetic expression in the first arg into NUM(n)/OP(c)/LP/RP tokens, one per line, in"
+            }
+          ]
+        },
+        {
+          "id": "perfect_or_not",
+          "a_pass": false,
+          "b_pass": true,
+          "a_bucket": "parse_error",
+          "b_bucket": null,
+          "a_seconds": 3.9,
+          "b_seconds": 3.4,
+          "a_code": "(fn is_perfect n int -> bool\n  (set sum int 0)\n  (for i 1 (sub n 1)\n    (if (eq (mod n i) 0)\n      (set sum (add sum i))))\n  (ret (eq sum n)))\n\n(fn main -> int\n  (set n int (#0))\n  (if (is_perfect n)\n    (println \"yes\")\n    (println \"no\"))\n  (ret 0))",
+          "b_code": "(set n (arg_int 0))\n(set sum 0)\n(for i 1 (sub n 1)\n  (if (eq (mod n i) 0)\n    (set sum (add sum i))))\n(if (eq sum n)\n  (println \"yes\")\n  (else (println \"no\")))",
+          "a_stdout": "",
+          "b_stdout": "yes\n",
+          "a_stderr": "Parse error: Expected symbol but got (\n",
+          "b_stderr": "",
+          "rag_top_sim": 0.7926545889353672,
+          "rag_hits": [
+            {
+              "score": 0.7926545889353672,
+              "desc": "Print 'yes' if arg1 is a dotted quad of 4 integers each in 0..255, else 'no'."
+            },
+            {
+              "score": 0.7535640527747828,
+              "desc": "Take two space-separated lists of integers in arg0 and arg1. Print 'yes' if they are equal element-b"
+            }
+          ]
+        },
+        {
+          "id": "divisor_count",
+          "a_pass": false,
+          "b_pass": false,
+          "a_bucket": "wrong_output",
+          "b_bucket": "wrong_output",
+          "a_seconds": 3.4,
+          "b_seconds": 3.4,
+          "a_code": "(fn count_divisors n int -> int\n  (set count int 0)\n  (for i 1 n\n    (if (eq (mod n i) 0)\n      (set count (add count 1))))\n  (ret count))\n\n(set n int #0)\n(println (count_divisors n))",
+          "b_code": "(fn count_divisors n int -> int\n  (set count int 0)\n  (for i 1 n\n    (if (eq (mod n i) 0)\n      (set count (add count 1))))\n  (ret count))\n\n(set n int #0)\n(println (count_divisors n))",
+          "a_stdout": "5\n",
+          "b_stdout": "5\n",
+          "a_stderr": "",
+          "b_stderr": "",
+          "rag_top_sim": 0.0,
+          "rag_hits": []
+        },
+        {
+          "id": "geometric_partial_sum",
+          "a_pass": false,
+          "b_pass": false,
+          "a_bucket": "empty_output",
+          "b_bucket": "type_error",
+          "a_seconds": 3.2,
+          "b_seconds": 3.0,
+          "a_code": "(fn main -> int\n  (let n int (arg_int 0))\n  (let powers array (map_arr (range 0 (+ n 1)) (\\i (pow 2 i))))\n  (println (sum powers))\n  (ret 0))",
+          "b_code": "(println (reduce (map_arr (range 0 (+ $0 1)) (\\i (pow 2 i))) (\\(a b) (add a b)) 0))",
+          "a_stdout": "",
+          "b_stdout": "",
+          "a_stderr": "",
+          "b_stderr": "Runtime error: range takes (end) or (start, end)\n",
+          "rag_top_sim": 0.8093473092513246,
+          "rag_hits": [
+            {
+              "score": 0.8093473092513246,
+              "desc": "Print the sum of the decimal digits of the non-negative integer arg1."
+            },
+            {
+              "score": 0.7696270749642413,
+              "desc": "Print the product of the decimal digits of a non-negative integer arg1."
+            },
+            {
+              "score": 0.7676677819584135,
+              "desc": "Print the product of the decimal digits of the non-negative integer arg1."
+            },
+            {
+              "score": 0.7676677819584135,
+              "desc": "Print the product of the decimal digits of the non-negative integer arg1."
+            },
+            {
+              "score": 0.7676677819584135,
+              "desc": "Print the product of the decimal digits of the non-negative integer arg1."
+            }
+          ]
+        },
+        {
+          "id": "tribonacci_nth",
+          "a_pass": false,
+          "b_pass": false,
+          "a_bucket": "wrong_output",
+          "b_bucket": "wrong_output",
+          "a_seconds": 4.2,
+          "b_seconds": 4.2,
+          "a_code": "(fn tribonacci n int -> int\n  (if (eq n 0) (ret 0))\n  (if (eq n 1) (ret 1))\n  (if (eq n 2) (ret 1))\n\n  (set a int 0)\n  (set b int 1)\n  (set c int 1)\n\n  (for i 3 n\n    (set temp int (+ a b c))\n    (set a b)\n    (set b c)\n    (set c temp))\n\n  (ret c))\n\n(println (tribonacci (arg_int 0)))",
+          "b_code": "(fn tribonacci n int -> int\n  (if (eq n 0) (ret 0))\n  (if (eq n 1) (ret 1))\n  (if (eq n 2) (ret 1))\n\n  (set a int 0)\n  (set b int 1)\n  (set c int 1)\n\n  (for i 3 n\n    (set temp int (+ a b c))\n    (set a b)\n    (set b c)\n    (set c temp))\n\n  (ret c))\n\n(println (tribonacci (arg_int 0)))",
+          "a_stdout": "13\n",
+          "b_stdout": "13\n",
+          "a_stderr": "",
+          "b_stderr": "",
+          "rag_top_sim": 0.0,
+          "rag_hits": []
+        },
+        {
+          "id": "sum_evens_to_n",
+          "a_pass": false,
+          "b_pass": false,
+          "a_bucket": "runtime_other",
+          "b_bucket": "type_error",
+          "a_seconds": 3.7,
+          "b_seconds": 3.1,
+          "a_code": "(fn sum_even n int -> int\n  (let arr array (range 0 (add n 1)))\n  (let even_arr array (filter (\\x (eq (mod x 2) 0)) arr))\n  (let sum int (reduce (\\a b (add a b)) 0 even_arr))\n  (println sum))\n\n(set n int (arg_int 0))\n(sum_even n)",
+          "b_code": "(println (reduce (filter (\\x (eq (mod x 2) 0)) (range 0 (+ $0 1))) (\\(a b) (+ a b)) 0))",
+          "a_stdout": "",
+          "b_stdout": "",
+          "a_stderr": "Runtime error: reduce: closure expects 1 args, got 2\n",
+          "b_stderr": "Runtime error: range takes (end) or (start, end)\n",
+          "rag_top_sim": 0.8258246309250932,
+          "rag_hits": [
+            {
+              "score": 0.8258246309250932,
+              "desc": "Print the sum of the decimal digits of the non-negative integer arg1."
+            },
+            {
+              "score": 0.7900203804218592,
+              "desc": "Take a space-separated list of integers in arg0. Print the integer that appears more than half the t"
+            },
+            {
+              "score": 0.7740555212632001,
+              "desc": "Print the product of the decimal digits of a non-negative integer arg1."
+            },
+            {
+              "score": 0.7723672603906839,
+              "desc": "Print the product of the decimal digits of the non-negative integer arg1."
+            },
+            {
+              "score": 0.7723672603906839,
+              "desc": "Print the product of the decimal digits of the non-negative integer arg1."
+            }
+          ]
+        },
+        {
+          "id": "first_n_primes",
+          "a_pass": false,
+          "b_pass": false,
+          "a_bucket": "parse_error",
+          "b_bucket": "wrong_output",
+          "a_seconds": 4.7,
+          "b_seconds": 4.3,
+          "a_code": "(fn is_prime n int -> bool\n  (if (le n 1) (ret false))\n  (set i int 2)\n  (while (lt i (sqrt n))\n    (if (eq (mod n i) 0) (ret false))\n    (set i (add i 1)))\n  (ret true))\n\n(fn print_primes n int -> unit\n  (set count int 0)\n  (set num int 2)\n  (while (lt count n)\n    (if (is_prime num)\n      (begin\n        (print num)\n        (set count (add count 1))\n        (when (lt count n) (print \" \")))))\n    (set num (add num 1))))\n\n(print_primes #0)",
+          "b_code": "(set n #0)\n(fn is_prime num int -> bool\n  (if (le num 1) (ret false))\n  (for i 2 (int (sqrt num))\n    (if (eq (mod num i) 0) (ret false)))\n  (ret true))\n\n(set primes [])\n(set count 0)\n(set i 2)\n(while (< count n)\n  (if (is_prime i)\n    (begin\n      (push primes i)\n      (set count (+ count 1))))\n  (set i (+ i 1)))\n\n(println (join (map_arr primes str) \" \"))",
+          "a_stdout": "",
+          "b_stdout": "2 3 4 5 6\n",
+          "a_stderr": "Parse error: Expected expression but got )\n",
+          "b_stderr": "",
+          "rag_top_sim": 0.8465903543919684,
+          "rag_hits": [
+            {
+              "score": 0.8465903543919684,
+              "desc": "Print the GCD of all space-separated positive integers in arg1."
+            },
+            {
+              "score": 0.8151386172859469,
+              "desc": "Print the first N Fibonacci numbers starting 0, 1 (where N is the integer first arg) on one line, sp"
+            },
+            {
+              "score": 0.8045232087138938,
+              "desc": "Print the product of the positive integers among space-separated values in arg1."
+            },
+            {
+              "score": 0.8006090681034125,
+              "desc": "Print the GCD of the two integers in arg1 (space separated)."
+            },
+            {
+              "score": 0.7994233520881852,
+              "desc": "Print the first N (arg1) rows of Pascal's triangle, each row as space-separated integers."
+            }
+          ]
+        },
+        {
+          "id": "harmonic_partial_truncated",
+          "a_pass": false,
+          "b_pass": false,
+          "a_bucket": "parse_error",
+          "b_bucket": "wrong_output",
+          "a_seconds": 3.3,
+          "b_seconds": 3.0,
+          "a_code": "(fn main -> int\n  (let n int (#0))\n  (let sum float 0)\n  (for i 1 n\n    (set sum (+ sum (/ 1.0 i))))\n  (println (fmt \"{:.3f}\" sum))\n  (ret 0))",
+          "b_code": "(println (fmt \"{:.3f}\" (reduce (map_arr (range 1 (+ #0 1)) (\\n (/ 1 n))) + 0)))",
+          "a_stdout": "",
+          "b_stdout": "1.000\n",
+          "a_stderr": "Parse error: Expected symbol but got (\n",
+          "b_stderr": "",
+          "rag_top_sim": 0.8165529298018326,
+          "rag_hits": [
+            {
+              "score": 0.8165529298018326,
+              "desc": "Print the sum of the decimal digits of the non-negative integer arg1."
+            },
+            {
+              "score": 0.7972518356401725,
+              "desc": "Print the sum of the decimal digits of the integer in arg1."
+            },
+            {
+              "score": 0.7965173709721309,
+              "desc": "Print the sum of decimal digits of the integer in arg1."
+            },
+            {
+              "score": 0.7965173709721309,
+              "desc": "Print the sum of decimal digits of the integer in arg1."
+            },
+            {
+              "score": 0.7965173709721309,
+              "desc": "Print the sum of decimal digits of the integer in arg1."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "iteration": 10,
+      "n_tasks": 10,
+      "a_pass": 2,
+      "b_pass": 4,
+      "flips_a_to_b": 2,
+      "flips_b_to_a": 0,
+      "net": 2,
+      "tasks": [
+        {
+          "id": "max_three",
+          "a_pass": false,
+          "b_pass": false,
+          "a_bucket": "type_error",
+          "b_bucket": "type_error",
+          "a_seconds": 3.6,
+          "b_seconds": 2.6,
+          "a_code": "(fn max a int b int c int -> int\n  (cond\n    ((gt a b) (if (gt a c) (ret a) (ret c)))\n    (true (if (gt b c) (ret b) (ret c)))))\n\n(println (max (arg_int 0) (arg_int 1) (arg_int 2)))",
+          "b_code": "(println (max #0 #1 #2))",
+          "a_stdout": "",
+          "b_stdout": "",
+          "a_stderr": "Runtime error: Invalid arguments to max\n",
+          "b_stderr": "Runtime error: Invalid arguments to max\n",
+          "rag_top_sim": 0.8586497512122878,
+          "rag_hits": [
+            {
+              "score": 0.8586497512122878,
+              "desc": "Print the second largest distinct integer in arg1."
+            },
+            {
+              "score": 0.8451059076745323,
+              "desc": "Print the GCD of three integers arg1 arg2 arg3."
+            },
+            {
+              "score": 0.8446703107308376,
+              "desc": "Print the GCD of three integers given as arg1 arg2 arg3."
+            },
+            {
+              "score": 0.8422837101745237,
+              "desc": "Print the GCD of integers arg1 and arg2."
+            },
+            {
+              "score": 0.8220075618763065,
+              "desc": "Print the second-largest distinct integer from space-separated numbers in arg1."
+            }
+          ]
+        },
+        {
+          "id": "min_three",
+          "a_pass": true,
+          "b_pass": true,
+          "a_bucket": null,
+          "b_bucket": null,
+          "a_seconds": 3.6,
+          "b_seconds": 2.9,
+          "a_code": "(fn min3 a int b int c int -> int\n  (cond\n    ((lt a b) (cond ((lt a c) (ret a)) (true (ret c))))\n    ((lt b c) (ret b))\n    (true (ret c))))\n\n(println (min3 (arg_int 0) (arg_int 1) (arg_int 2)))",
+          "b_code": "(set a #0)\n(set b #1)\n(set c #2)\n(println (min (min a b) c))",
+          "a_stdout": "3\n",
+          "b_stdout": "3\n",
+          "a_stderr": "",
+          "b_stderr": "",
+          "rag_top_sim": 0.8630481913249533,
+          "rag_hits": [
+            {
+              "score": 0.8630481913249533,
+              "desc": "Print the GCD of three integers given as arg1 arg2 arg3."
+            },
+            {
+              "score": 0.8627629160107302,
+              "desc": "Print the GCD of three integers arg1 arg2 arg3."
+            },
+            {
+              "score": 0.8358435067844608,
+              "desc": "Print the GCD of integers arg1 and arg2."
+            },
+            {
+              "score": 0.8149400118677199,
+              "desc": "Sum three integers provided as a single space-separated string in arg1."
+            },
+            {
+              "score": 0.8044391229042738,
+              "desc": "Take two integers in arg0 and arg1. Print the smaller of the two if both are positive; otherwise pri"
+            }
+          ]
+        },
+        {
+          "id": "clamp_value",
+          "a_pass": true,
+          "b_pass": true,
+          "a_bucket": null,
+          "b_bucket": null,
+          "a_seconds": 3.4,
+          "b_seconds": 3.4,
+          "a_code": "(fn clamp x int lo int hi int -> string\n  (if (lt x lo) (ret (str lo)))\n  (if (gt x hi) (ret (str hi)))\n  (ret (str x)))\n\n(println (clamp (arg_int 0) (arg_int 1) (arg_int 2)))",
+          "b_code": "(fn clamp x int lo int hi int -> string\n  (if (lt x lo) (ret (str lo)))\n  (if (gt x hi) (ret (str hi)))\n  (ret (str x)))\n\n(println (clamp (arg_int 0) (arg_int 1) (arg_int 2)))",
+          "a_stdout": "10\n",
+          "b_stdout": "10\n",
+          "a_stderr": "",
+          "b_stderr": "",
+          "rag_top_sim": 0.0,
+          "rag_hits": []
+        },
+        {
+          "id": "celsius_to_fahrenheit",
+          "a_pass": false,
+          "b_pass": false,
+          "a_bucket": "type_error",
+          "b_bucket": "type_error",
+          "a_seconds": 3.3,
+          "b_seconds": 2.9,
+          "a_code": "(fn celsius_to_fahrenheit c int -> float\n  (let f float (+ (* c 9/5) 32))\n  (println (fmt \"{:.1f}\" f)))\n\n(set temp_c int (arg_int 0))\n(celsius_to_fahrenheit temp_c)",
+          "b_code": "(set c #0)\n(set f (add (mul c 1.8) 32))\n(println (fmt \"%.1f\\n\" f))",
+          "a_stdout": "",
+          "b_stdout": "",
+          "a_stderr": "Runtime error: Invalid arguments to mul\n",
+          "b_stderr": "Runtime error: Invalid arguments to mul\n",
+          "rag_top_sim": 0.7867092241246847,
+          "rag_hits": [
+            {
+              "score": 0.7867092241246847,
+              "desc": "Round the float in arg1 to the integer nearest (half away from zero)."
+            },
+            {
+              "score": 0.7851413212744521,
+              "desc": "Read a Celsius temperature and print the Fahrenheit equivalent."
+            },
+            {
+              "score": 0.7841845854972952,
+              "desc": "Format a float in arg1 as currency with two decimal places."
+            },
+            {
+              "score": 0.7618280942967562,
+              "desc": "Convert the integer arg (1..3999) to its Roman numeral representation using standard subtractive not"
+            },
+            {
+              "score": 0.7618005577822796,
+              "desc": "Round the float in arg1 to the number of decimals given in arg2 using banker's rounding."
+            }
+          ]
+        },
+        {
+          "id": "is_palindrome_int",
+          "a_pass": false,
+          "b_pass": false,
+          "a_bucket": "parse_error",
+          "b_bucket": "parse_error",
+          "a_seconds": 3.8,
+          "b_seconds": 3.4,
+          "a_code": "(fn is_palindrome n int -> string\n  (let str string (str n))\n  (let len int (len str))\n  (let is_equal bool true)\n  (for i 0 (div len 2)\n    (if (ne (char_at str i) (char_at str (sub len 1 i)))\n      (set is_equal false)))\n  (if is_equal \"yes\" \"no\"))\n\n(println (is_palindrome #0))",
+          "b_code": "(set n #0)\n(if (eq n 0)\n  (println \"yes\")\n  (do\n    (set s (str n))\n    (set rev_s (reverse s))\n    (if (eq s rev_s)\n      (println \"yes\")\n      (else (println \"no\"))))))",
+          "a_stdout": "",
+          "b_stdout": "",
+          "a_stderr": "Parse error: Cannot use type keyword 'str' as variable name. Use a descriptive name instead (e.g., 'str_data', 'str_value')\n",
+          "b_stderr": "Parse error: Expected expression but got )\n",
+          "rag_top_sim": 0.8191441920563708,
+          "rag_hits": [
+            {
+              "score": 0.8191441920563708,
+              "desc": "Print 'yes' if arg1 is a dotted quad of 4 integers each in 0..255, else 'no'."
+            },
+            {
+              "score": 0.8136037998319974,
+              "desc": "Sum the decimal digits of the non-negative integer in arg1."
+            },
+            {
+              "score": 0.8136037998319974,
+              "desc": "Sum the decimal digits of the non-negative integer in arg1."
+            },
+            {
+              "score": 0.8128291159209396,
+              "desc": "Take a non-negative integer in arg0 and print its binary representation as a string of '0' and '1' c"
+            },
+            {
+              "score": 0.7962660605891715,
+              "desc": "Print 'yes' if arg1 is a valid dotted-decimal IPv4 address, else 'no'."
+            }
+          ]
+        },
+        {
+          "id": "average_of_ints",
+          "a_pass": false,
+          "b_pass": true,
+          "a_bucket": "type_error",
+          "b_bucket": null,
+          "a_seconds": 3.0,
+          "b_seconds": 3.2,
+          "a_code": "(set nums array (split $0 \" \"))\n(set sum int 0)\n(for-each num int nums\n  (set sum (add sum num)))\n(println (div sum (len nums)))",
+          "b_code": "(set xs (parse_ints $0))\n(set sum (reduce xs (\\(acc x) (+ acc x)) 0))\n(set count (len xs))\n(set mean (/ sum count))\n(println (fmt \"{:.0f}\" (cast_int_float mean)))",
+          "a_stdout": "",
+          "b_stdout": "3\n",
+          "a_stderr": "Runtime error: Type mismatch in for-each: variable 'num' declared as int but got string\n",
+          "b_stderr": "",
+          "rag_top_sim": 0.8970254182646811,
+          "rag_hits": [
+            {
+              "score": 0.8970254182646811,
+              "desc": "Take a space-separated list of integers in arg0. Print their arithmetic mean as a float with 3 decim"
+            },
+            {
+              "score": 0.8827686797634802,
+              "desc": "Take a space-separated list of integers in arg0. Print them sorted descending, space-separated."
+            },
+            {
+              "score": 0.8697462604317554,
+              "desc": "Take a space-separated list of integers in arg0. Print the integer that appears more than half the t"
+            },
+            {
+              "score": 0.8254236231640825,
+              "desc": "Print the GCD of the two integers in arg1 (space separated)."
+            },
+            {
+              "score": 0.8204701551301455,
+              "desc": "Take an integer in arg0 (treated as 64-bit) and a space-separated list of bit indices in arg1. Print"
+            }
+          ]
+        },
+        {
+          "id": "histogram_text",
+          "a_pass": false,
+          "b_pass": true,
+          "a_bucket": "undefined_var",
+          "b_bucket": null,
+          "a_seconds": 3.1,
+          "b_seconds": 3.1,
+          "a_code": "(fn print_hashes args array -> unit\n  (for-each num int args\n    (println (replicate \"#\" num))))\n\n(print_hashes (map_arr (split $0 \" \") str_to_int))",
+          "b_code": "(set arr (parse_ints $0))\n(for-each n arr\n  (set bars \"\")\n  (for i 0 n\n    (set bars (string_concat bars \"#\")))\n  (println bars))",
+          "a_stdout": "",
+          "b_stdout": "###\n#\n####\n##\n",
+          "a_stderr": "Runtime error: Undefined variable: str_to_int\n",
+          "b_stderr": "",
+          "rag_top_sim": 0.8510836392665093,
+          "rag_hits": [
+            {
+              "score": 0.8510836392665093,
+              "desc": "Given a whitespace-separated list of non-negative integers, print one line per value as 'index|bar' "
+            },
+            {
+              "score": 0.8438074853887124,
+              "desc": "Take a space-separated list of integers in arg0. Print the integer that appears more than half the t"
+            },
+            {
+              "score": 0.8378075014173484,
+              "desc": "Take a space-separated list of integers in arg0. Print the 0-based index of the FIRST negative value"
+            },
+            {
+              "score": 0.8307640994503626,
+              "desc": "Take a space-separated list of integers in arg0. Print them sorted descending, space-separated."
+            },
+            {
+              "score": 0.8245164580560619,
+              "desc": "Print an ASCII histogram of comma-separated non-negative integers; each line is the value right-alig"
+            }
+          ]
+        },
+        {
+          "id": "first_n_evens",
+          "a_pass": false,
+          "b_pass": false,
+          "a_bucket": "parse_error",
+          "b_bucket": "wrong_output",
+          "a_seconds": 3.5,
+          "b_seconds": 3.1,
+          "a_code": "(fn main -> int\n  (let n int (#0))\n  (if (lt n 1)\n    (println \"\")\n    (let evens array (map_arr (range 1 (+ n 1)) (\\x (if (eq (mod x 2) 0) x null))))\n      (println (join \" \" evens)))))",
+          "b_code": "(set n (arg_int 0))\n(println (join (map_arr (range 1 (+ n 1)) (\\x (if (eq (mod x 2) 0) x \"\"))) \" \"))",
+          "a_stdout": "",
+          "b_stdout": " 2  4\n",
+          "a_stderr": "Parse error: Expected symbol but got (\n",
+          "b_stderr": "",
+          "rag_top_sim": 0.8701991431824345,
+          "rag_hits": [
+            {
+              "score": 0.8701991431824345,
+              "desc": "Print the GCD of all space-separated positive integers in arg1."
+            },
+            {
+              "score": 0.8263670422596783,
+              "desc": "Filter even numbers from space-separated integers in arg1."
+            },
+            {
+              "score": 0.8263670422596783,
+              "desc": "Filter even numbers from space-separated integers in arg1."
+            },
+            {
+              "score": 0.8263670422596783,
+              "desc": "Filter even numbers from space-separated integers in arg1."
+            },
+            {
+              "score": 0.8233260063191806,
+              "desc": "Sum the squares of the even integers in arg1 (space-separated)."
+            }
+          ]
+        },
+        {
+          "id": "modular_pow",
+          "a_pass": false,
+          "b_pass": false,
+          "a_bucket": "type_error",
+          "b_bucket": "type_error",
+          "a_seconds": 4.3,
+          "b_seconds": 4.3,
+          "a_code": "(fn pow_mod base int exp int mod int -> int\n  (fn pow a int b int -> int\n    (if (eq b 0)\n      (ret 1)\n      (let half (pow a b (div b 2)))\n        (if (eq (mod b 2) 0)\n          (ret (mod (mul half half) mod))\n          (ret (mod (mul half half a) mod)))))\n  (println (mod (pow base exp) mod)))\n\n(println (pow_mod (arg_int 0) (arg_int 1) (arg_int 2)))",
+          "b_code": "(fn pow_mod base int exp int mod int -> int\n  (fn pow a int b int -> int\n    (if (eq b 0)\n      (ret 1)\n      (let half (pow a b (div b 2)))\n        (if (eq (mod b 2) 0)\n          (ret (mod (mul half half) mod))\n          (ret (mod (mul half half a) mod)))))\n  (println (mod (pow base exp) mod)))\n\n(println (pow_mod (arg_int 0) (arg_int 1) (arg_int 2)))",
+          "a_stdout": "",
+          "b_stdout": "",
+          "a_stderr": "Runtime error: eq requires arguments of the same type, got function and int\n",
+          "b_stderr": "Runtime error: eq requires arguments of the same type, got function and int\n",
+          "rag_top_sim": 0.0,
+          "rag_hits": []
+        },
+        {
+          "id": "first_word_longer_than",
+          "a_pass": false,
+          "b_pass": false,
+          "a_bucket": "empty_output",
+          "b_bucket": "empty_output",
+          "a_seconds": 3.8,
+          "b_seconds": 3.1,
+          "a_code": "(fn main -> int\n  (let sentence string (arg_str 0))\n  (let threshold int (arg_int 1))\n  \n  (let words array (split sentence \" \"))\n  (let result string \"NONE\")\n  \n  (for-each word string words\n    (if (> (len word) threshold)\n      (begin\n        (set result word)\n        (break))))\n  \n  (println result)\n  (ret 0))",
+          "b_code": "(set words (split $0 \" \"))\n(set result NONE)\n(for-each w words\n  (if (> (len w) #1)\n    (set result w)\n    (break)))\n(println result)",
+          "a_stdout": "",
+          "b_stdout": "",
+          "a_stderr": "",
+          "b_stderr": "Unexpected error: File \"interpreter.ml\", line 861, characters 26-31: Pattern matching failed\n",
+          "rag_top_sim": 0.8235976094934683,
+          "rag_hits": [
+            {
+              "score": 0.8235976094934683,
+              "desc": "Take a sentence in arg0. Print the whitespace-separated word that appears LEAST frequently. Break ti"
+            },
+            {
+              "score": 0.816644548113009,
+              "desc": "From space-separated words in arg1, print the length of the longest word whose first letter is a vow"
+            },
+            {
+              "score": 0.8141808301636179,
+              "desc": "Take a sentence in arg0 (whitespace-separated words). Print the count of distinct words."
+            },
+            {
+              "score": 0.8020261667950677,
+              "desc": "Convert the integer arg1 (0-999) to its English word representation in lowercase, with single spaces"
+            },
+            {
+              "score": 0.7977217617872209,
+              "desc": "From the whitespace-tokenized first arg, print the top N words (N from second arg) as 'word: count' "
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,372 @@
+{
+  "model": "qwen2.5-coder:32b",
+  "k": 5,
+  "min_score": 0.65,
+  "mmr_lambda": 1.0,
+  "tasks": [
+    {
+      "id": "alternating_case",
+      "a_pass": false,
+      "b_pass": true,
+      "a_seconds": 32.6,
+      "b_seconds": 28.8,
+      "a_code": "(set input string $0)\n(set len int (len input))\n(set result string \"\")\n(for i 0 len\n  (set char string (slice input i 1))\n  (if (and (in char \"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ\") (eq (% i 2) 0))\n    (set result (join result (upper char)))\n    (if (and (in char \"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ\") (eq (% i 2) 1))\n      (set result (join result (lower char)))\n      (set result (join result char)))))\n(println result)",
+      "b_code": "(set s string $0)\n(set out string \"\")\n(set n int (len s))\n(for i 0 n\n  (set c string (array_get (chars s) i))\n  (if (eq (mod i 2) 0)\n    (set out (string_concat out (upper c)))\n    (else (set out (string_concat out (lower c))))))\n(println out)",
+      "a_stdout": "",
+      "b_stdout": "HeLlO\n",
+      "a_stderr": "Runtime error: join takes (array, string)\n",
+      "b_stderr": "",
+      "rag_top_sim": 0.9150845959360887,
+      "rag_hits": [
+        {
+          "score": 0.9150845959360887,
+          "desc": "Take a string in arg0 and print it with letters alternating lower, UPPER, lower, UPPER, ... starting with lower. Non-let"
+        },
+        {
+          "score": 0.7918088562587527,
+          "desc": "Decode a Caesar-cipher string by shifting letters BACK by the given integer amount, preserving case and non-letter chara"
+        },
+        {
+          "score": 0.7903356933416174,
+          "desc": "Apply a Caesar shift to a text string given as the first CLI argument using the integer shift given as the second, rotat"
+        },
+        {
+          "score": 0.7798546589879338,
+          "desc": "Encode the text 'Hello, World!' with a Caesar cipher shift of 3 (letters only, preserving case and non-letters) and prin"
+        },
+        {
+          "score": 0.7757341240981027,
+          "desc": "For each CLI arg, print the string followed by 'OK' if parentheses, brackets, and braces are balanced and properly neste"
+        }
+      ]
+    },
+    {
+      "id": "rle_encode",
+      "a_pass": false,
+      "b_pass": true,
+      "a_seconds": 27.6,
+      "b_seconds": 33.9,
+      "a_code": "(set input string $0)\n(set result string \"\")\n(set prev char (first input))\n(set count int 1)\n\n(for-each ch char (slice input 1)\n  (if (eq ch prev)\n    (set count (add count 1))\n    (begin\n      (set result (fmt \"{}{}\" result prev count))\n      (set prev ch)\n      (set count 1))))\n\n(set result (fmt \"{}{}\" result prev count))\n(println result)",
+      "b_code": "(set s $0)\n(set n (len s))\n(if (gt n 0)\n  (set chars (chars s))\n  (set cur (first chars))\n  (set count 1)\n  (for i 1 n\n    (set ch (array_get chars i))\n    (if (eq ch cur)\n      (set count (+ count 1))\n      (else\n        (print (fmt \"{}{}\" cur count))\n        (set cur ch)\n        (set count 1))))\n  (println (fmt \"{}{}\" cur count)))",
+      "a_stdout": "",
+      "b_stdout": "a3b2c1\n",
+      "a_stderr": "Parse error: Expected ) but got (\n",
+      "b_stderr": "",
+      "rag_top_sim": 0.8900258272198971,
+      "rag_hits": [
+        {
+          "score": 0.8900258272198971,
+          "desc": "Run-length encode the string in arg1 by replacing each maximal run of identical characters with the character followed b"
+        },
+        {
+          "score": 0.8815534631052186,
+          "desc": "Run-length encode the arg1 string by emitting each maximal run of identical characters as the character followed by its "
+        },
+        {
+          "score": 0.8772053904405219,
+          "desc": "Run-length encode the string in arg 1 by emitting each maximal run as the character immediately followed by its integer "
+        },
+        {
+          "score": 0.8732251047877451,
+          "desc": "Run-length encode the single string arg by emitting each character followed by its run length, with no separators."
+        },
+        {
+          "score": 0.8672792585533251,
+          "desc": "Run-length encode the single CLI string by emitting each maximal run of identical characters as the character followed b"
+        }
+      ]
+    },
+    {
+      "id": "rotate_left",
+      "a_pass": false,
+      "b_pass": false,
+      "a_seconds": 19.8,
+      "b_seconds": 23.5,
+      "a_code": "(set nums array (split $0 \" \"))\n(set k int #1)\n(set len int (len nums))\n(set rotated array (slice nums k len))\n(push rotated (slice nums 0 k))\n(println (join rotated \" \"))",
+      "b_code": "(set arr (split $0 \" \"))\n(set n (len arr))\n(set k (mod #1 n))\n(println (join (concat (slice arr k (- n k)) (slice arr 0 k)) \" \"))",
+      "a_stdout": "3 4 5 [1, 2]\n",
+      "b_stdout": "3 1 2\n",
+      "a_stderr": "",
+      "b_stderr": "",
+      "rag_top_sim": 0.8326118279161883,
+      "rag_hits": [
+        {
+          "score": 0.8326118279161883,
+          "desc": "Take a comma-separated list of integers in arg0, sort them ascending, and print them space-separated."
+        },
+        {
+          "score": 0.8315068462927985,
+          "desc": "Rotate the space-separated list in arg1 left by arg2 positions."
+        },
+        {
+          "score": 0.8294282892183835,
+          "desc": "Print the GCD of the two integers in arg1 (space separated)."
+        },
+        {
+          "score": 0.8210366366785564,
+          "desc": "Sum the squares of the even integers in the space-separated list in arg1."
+        },
+        {
+          "score": 0.8151812232914127,
+          "desc": "Take an odd-length space-separated list of integers in arg0 and print the median."
+        }
+      ]
+    },
+    {
+      "id": "digital_root",
+      "a_pass": false,
+      "b_pass": true,
+      "a_seconds": 24.1,
+      "b_seconds": 25.0,
+      "a_code": "(set num int #0)\n(fn digital_root n int -> int\n  (if (lt n 10) (ret n))\n  (set sum int 0)\n  (for-each digit int (split (str n) \"\")\n    (set sum (add sum digit)))\n  (ret (digital_root sum)))\n(println (digital_root num))",
+      "b_code": "(set n #0)\n(while (ge n 10)\n  (set s 0)\n  (for-each c string (chars (str n))\n    (set s (add s (int c))))\n  (set n s))\n(println n)",
+      "a_stdout": "",
+      "b_stdout": "2\n",
+      "a_stderr": "Runtime error: Type mismatch in for-each: variable 'digit' declared as int but got string\n",
+      "b_stderr": "",
+      "rag_top_sim": 0.8506767251804574,
+      "rag_hits": [
+        {
+          "score": 0.8506767251804574,
+          "desc": "Print the sum of decimal digits of the integer in arg1."
+        },
+        {
+          "score": 0.8506767251804574,
+          "desc": "Print the sum of decimal digits of the integer in arg1."
+        },
+        {
+          "score": 0.8506767251804574,
+          "desc": "Print the sum of decimal digits of the integer in arg1."
+        },
+        {
+          "score": 0.8505292545577676,
+          "desc": "Print the sum of the decimal digits of the integer in arg1."
+        },
+        {
+          "score": 0.8370047031435723,
+          "desc": "Repeatedly sum digits of arg1 until a single digit remains."
+        }
+      ]
+    },
+    {
+      "id": "count_words_starting_with",
+      "a_pass": true,
+      "b_pass": true,
+      "a_seconds": 23.2,
+      "b_seconds": 24.6,
+      "a_code": "(set sentence string $0)\n(set letter string $1)\n(set words array (split sentence \" \"))\n(set count int 0)\n(for-each word string words\n  (if (and (gt (len word) 0) (eq (first word) letter))\n    (set count (add count 1))))\n(println count)",
+      "b_code": "(set sentence $0)\n(set letter $1)\n(set words (split sentence \" \"))\n(set count 0)\n(for-each word words \n  (if (eq (first (chars word)) letter)\n    (set count (add count 1))))\n(println count)",
+      "a_stdout": "3\n",
+      "b_stdout": "3\n",
+      "a_stderr": "",
+      "b_stderr": "",
+      "rag_top_sim": 0.9667100988924524,
+      "rag_hits": [
+        {
+          "score": 0.9667100988924524,
+          "desc": "Take a sentence in arg0 and a single letter in arg1. Print how many whitespace-separated words in arg0 end with arg1 (ca"
+        },
+        {
+          "score": 0.8184228532232936,
+          "desc": "Return the uppercase initials of each whitespace-separated word in arg1."
+        },
+        {
+          "score": 0.8184228532232936,
+          "desc": "Output the uppercase initials of each whitespace-separated word in arg1."
+        },
+        {
+          "score": 0.8142991219318527,
+          "desc": "Output uppercase initials of each whitespace-separated word in arg1."
+        },
+        {
+          "score": 0.8142991219318527,
+          "desc": "Output uppercase initials of each whitespace-separated word in arg1."
+        }
+      ]
+    },
+    {
+      "id": "kth_largest",
+      "a_pass": false,
+      "b_pass": false,
+      "a_seconds": 21.8,
+      "b_seconds": 22.6,
+      "a_code": "(set nums array (map_arr (split $0 \" \") (\\x (str x))))\n(set k int #1)\n(set sorted_nums array (sort_by nums (\\(a b) (gt a b))))\n(set result int (array_get sorted_nums (sub k 1)))\n(println result)",
+      "b_code": "(set nums (parse_ints $0))\n(set k (sub #1 1))\n(sort_by nums (\\(a b) (gt a b)))\n(println (array_get nums k))",
+      "a_stdout": "",
+      "b_stdout": "1\n",
+      "a_stderr": "Runtime error: Invalid arguments to gt\n",
+      "b_stderr": "",
+      "rag_top_sim": 0.9046234045478192,
+      "rag_hits": [
+        {
+          "score": 0.9046234045478192,
+          "desc": "Take a space-separated list of integers in arg0 and a 1-based index k in arg1. Print the k-th smallest value."
+        },
+        {
+          "score": 0.8305094344569426,
+          "desc": "Print the second largest distinct value among space-separated integers in arg1."
+        },
+        {
+          "score": 0.827680944815381,
+          "desc": "Print the second-largest distinct value from space-separated integers in arg1."
+        },
+        {
+          "score": 0.8273696620046855,
+          "desc": "Print the second-largest distinct integer from the space-separated list in arg1."
+        },
+        {
+          "score": 0.8238781265877815,
+          "desc": "Print the second largest distinct integer from the space-separated list in arg1."
+        }
+      ]
+    },
+    {
+      "id": "sum_squares_to_n",
+      "a_pass": true,
+      "b_pass": true,
+      "a_seconds": 18.7,
+      "b_seconds": 21.1,
+      "a_code": "(set n int #0)\n(set sum int 0)\n(for-each i int (range 1 (+ n 1))\n  (set sum (+ sum (* i i))))\n(println sum)",
+      "b_code": "(set n #0)\n(set sum 0)\n(for i 1 (+ n 1)\n  (set sum (+ sum (* i i))))\n(println sum)",
+      "a_stdout": "55\n",
+      "b_stdout": "55\n",
+      "a_stderr": "",
+      "b_stderr": "",
+      "rag_top_sim": 0.8311243956479119,
+      "rag_hits": [
+        {
+          "score": 0.8311243956479119,
+          "desc": "For the positive integer in arg 1, compute the number of Collatz steps needed to reach 1 (n/2 if even, 3n+1 if odd) and "
+        },
+        {
+          "score": 0.8074013150529673,
+          "desc": "Print the GCD of integers arg1 and arg2."
+        },
+        {
+          "score": 0.7999133069082639,
+          "desc": "Convert a positive integer (1..3999) given as a CLI arg to its Roman numeral representation."
+        },
+        {
+          "score": 0.7833000345107659,
+          "desc": "Convert the positive integer in argv[1] to its standard Roman numeral representation and print it."
+        },
+        {
+          "score": 0.7759391255417389,
+          "desc": "Convert the positive integer in argv[1] (1..3999) to a Roman numeral using the standard subtractive forms; print the num"
+        }
+      ]
+    },
+    {
+      "id": "first_unique_char",
+      "a_pass": false,
+      "b_pass": true,
+      "a_seconds": 28.1,
+      "b_seconds": 26.1,
+      "a_code": "(set s string $0)\n(set char_count map {})\n(for-each c string s\n  (set count int (if (in c char_count) (get char_count c) 0))\n  (set char_count (assoc char_count c (add count 1))))\n(set result int -1)\n(for-each \\(c i) enumerate s\n  (when (eq (get char_count c) 1)\n    (set result i)\n    (break)))\n(println result)",
+      "b_code": "(set s $0)\n(set char_count (counter (chars s)))\n(set result -1)\n(for-each i (range 0 (len s))\n  (if (eq (get char_count (get (chars s) i)) 1)\n    (set result i)\n    (break)))\n(println result)",
+      "a_stdout": "",
+      "b_stdout": "1\n",
+      "a_stderr": "Runtime error: for-each requires an array or map\n",
+      "b_stderr": "",
+      "rag_top_sim": 0.9682716480660158,
+      "rag_hits": [
+        {
+          "score": 0.9682716480660158,
+          "desc": "Take a string in arg0 and print the 0-based index of the last character that appears exactly once in the whole string. I"
+        },
+        {
+          "score": 0.8806393756251304,
+          "desc": "Take a string in arg0 and print the first character that appears more than once. Print empty if all characters are uniqu"
+        },
+        {
+          "score": 0.7977683490283899,
+          "desc": "Given a CSV row in arg1 and a 0-based index in arg2, print that column's value."
+        },
+        {
+          "score": 0.7874897074475876,
+          "desc": "Given a CSV row in arg1 and a zero-based column index arg2, print that column."
+        },
+        {
+          "score": 0.7855954169002644,
+          "desc": "Given CSV arg1 and 0-based column index arg2, print that column."
+        }
+      ]
+    },
+    {
+      "id": "max_paren_depth",
+      "a_pass": false,
+      "b_pass": true,
+      "a_seconds": 25.5,
+      "b_seconds": 27.5,
+      "a_code": "(set s string $0)\n(set max_depth int 0)\n(set current_depth int 0)\n\n(for-each ch string s\n  (if (eq ch \"(\")\n    (set current_depth (add current_depth 1))\n    (if (eq ch \")\")\n      (set current_depth (sub current_depth 1))))\n  (set max_depth (max max_depth current_depth)))\n\n(println max_depth)",
+      "b_code": "(set s $0)\n(set depth 0)\n(set max_d 0)\n(for-each c (chars s)\n  (cond\n    ((eq c \"(\") (set depth (+ depth 1)) (if (> depth max_d) (set max_d depth)))\n    ((eq c \")\") (set depth (- depth 1)))))\n(println max_d)",
+      "a_stdout": "",
+      "b_stdout": "3\n",
+      "a_stderr": "Runtime error: for-each requires an array or map\n",
+      "b_stderr": "",
+      "rag_top_sim": 0.8829926576464427,
+      "rag_hits": [
+        {
+          "score": 0.8829926576464427,
+          "desc": "Compute and print the maximum parenthesis nesting depth reached while scanning arg1 left to right (only '(' and ')' affe"
+        },
+        {
+          "score": 0.8288666956018891,
+          "desc": "Scan a string of round brackets in arg1 and print 'depth=X pairs=Y' where X is the maximum nesting depth reached and Y i"
+        },
+        {
+          "score": 0.7644056791970752,
+          "desc": "Write a Sigil program that implements max nesting depth."
+        },
+        {
+          "score": 0.7597819396672505,
+          "desc": "Take a string of parentheses in arg0 and print 'yes' if balanced, otherwise 'no'."
+        },
+        {
+          "score": 0.7283520807095324,
+          "desc": "Take a CSV with header in arg0 and a column name in arg1. Print the maximum integer value in that column."
+        }
+      ]
+    },
+    {
+      "id": "csv_column_sum",
+      "a_pass": false,
+      "b_pass": true,
+      "a_seconds": 25.6,
+      "b_seconds": 25.4,
+      "a_code": "(set csv string $0)\n(set col_name string $1)\n(set lines array (split csv \"\\n\"))\n(set header array (split (first lines) \",\"))\n(set col_index int (index_of header col_name))\n(set values array (map_arr (rest lines) (\\line (str_to_int (nth (split line \",\") col_index)))))\n(set total int (reduce values + 0))\n(println total)",
+      "b_code": "(set rows (split $0 \"\\n\"))\n(set header (split (first rows) \",\"))\n(set idx (array_index_of header $1))\n(println (sum (map_arr (rest rows) (\\row (int (get_or (split row \",\") idx \"0\"))))))",
+      "a_stdout": "",
+      "b_stdout": "95\n",
+      "a_stderr": "Runtime error: Undefined variable: nth\n",
+      "b_stderr": "",
+      "rag_top_sim": 0.9045880632330064,
+      "rag_hits": [
+        {
+          "score": 0.9045880632330064,
+          "desc": "Take a CSV string in arg0 (rows separated by '\\n', fields by ','). The first row is a header. Print the average integer "
+        },
+        {
+          "score": 0.856266521108586,
+          "desc": "Given a CSV in arg1 (header line plus rows), filter column (arg2) equal to value (arg3), sum integer column (arg4), and "
+        },
+        {
+          "score": 0.8232651237183358,
+          "desc": "Given a CSV string with a header row (arg0), select the columns named in the comma-separated list arg1, keep only data r"
+        },
+        {
+          "score": 0.8188841417078135,
+          "desc": "Treat argv[1] as CSV text with a header row and sum the integer values of the column named by argv[2]; print the total."
+        },
+        {
+          "score": 0.8160230433530012,
+          "desc": "Parse a CSV string with a header row and sum the integer values of the named column, printing the total."
+        }
+      ]
+    }
+  ],
+  "a_pass": 2,
+  "b_pass": 8,
+  "flips_a_to_b": 6,
+  "flips_b_to_a": 0
+}

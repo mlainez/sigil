@@ -1,0 +1,372 @@
+{
+  "model": "qwen2.5-coder:32b",
+  "k": 5,
+  "min_score": 0.65,
+  "mmr_lambda": 1.0,
+  "tasks": [
+    {
+      "id": "rotate_right",
+      "a_pass": false,
+      "b_pass": true,
+      "a_seconds": 24.0,
+      "b_seconds": 23.9,
+      "a_code": "(set nums array (split $0 \" \"))\n(set k int #1)\n(set len int (len nums))\n(set k int (mod k len))\n(set rotated array (slice nums (- len k) len))\n(push rotated (slice nums 0 (- len k)))\n(println (join rotated \" \"))",
+      "b_code": "(set arr (split $0 \" \"))\n(set n (len arr))\n(set k (mod #1 n))\n(println (join (concat (slice arr (- n k) n) (slice arr 0 (- n k))) \" \"))",
+      "a_stdout": "4 5 [1, 2, 3]\n",
+      "b_stdout": "4 5 1 2 3\n",
+      "a_stderr": "",
+      "b_stderr": "",
+      "rag_top_sim": 0.8327023584327556,
+      "rag_hits": [
+        {
+          "score": 0.8327023584327556,
+          "desc": "Take a comma-separated list of integers in arg0, sort them ascending, and print them space-separated."
+        },
+        {
+          "score": 0.8289552496169987,
+          "desc": "Print the GCD of the two integers in arg1 (space separated)."
+        },
+        {
+          "score": 0.8265370374011405,
+          "desc": "Rotate the space-separated list in arg1 left by arg2 positions."
+        },
+        {
+          "score": 0.8194320216301545,
+          "desc": "Sum the squares of the even integers in the space-separated list in arg1."
+        },
+        {
+          "score": 0.8101184494358304,
+          "desc": "Sum the squares of the odd ints in the space-separated list in arg1."
+        }
+      ]
+    },
+    {
+      "id": "count_uppercase",
+      "a_pass": false,
+      "b_pass": true,
+      "a_seconds": 20.2,
+      "b_seconds": 22.7,
+      "a_code": "(set input string $0)\n(set count int 0)\n(for-each char string input\n  (if (and (ge char 'A') (le char 'Z'))\n    (set count (add count 1))))\n(println count)",
+      "b_code": "(set s $0)\n(set count int 0)\n(for-each c (chars s)\n  (if (is_upper c)\n    (set count (+ count 1))))\n(println count)",
+      "a_stdout": "",
+      "b_stdout": "5\n",
+      "a_stderr": "Runtime error: for-each requires an array or map\n",
+      "b_stderr": "",
+      "rag_top_sim": 0.8016407054424832,
+      "rag_hits": [
+        {
+          "score": 0.8016407054424832,
+          "desc": "Take a string in arg0 and print it with letters alternating lower, UPPER, lower, UPPER, ... starting with lower. Non-let"
+        },
+        {
+          "score": 0.7937776578392944,
+          "desc": "Read a string from the first CLI arg and print whether every character is a letter."
+        },
+        {
+          "score": 0.7865229151841197,
+          "desc": "Print 'true' if arg1 has >=8 chars, a digit, an uppercase, and a lowercase letter, else 'false'."
+        },
+        {
+          "score": 0.7852249546432458,
+          "desc": "Print true if arg1 has >=8 chars and contains at least one lowercase, uppercase, digit, else false."
+        },
+        {
+          "score": 0.7845764935916097,
+          "desc": "Print true if arg1 has >=8 chars, an uppercase, a lowercase, and a digit, else false."
+        }
+      ]
+    },
+    {
+      "id": "second_largest_distinct",
+      "a_pass": false,
+      "b_pass": false,
+      "a_seconds": 24.3,
+      "b_seconds": 23.6,
+      "a_code": "(set input string $0)\n(set nums array (map_arr (split input \" \") (\\x (str x))))\n(set distinct_nums array (uniq nums))\n(if (lt (len distinct_nums) 2)\n    (println -1)\n    (let sorted_nums (sort_by distinct_nums (\\(a b) (gt a b)))\n         (println (second sorted_nums))))",
+      "b_code": "(set nums (parse_ints $0))\n(set u (sort (uniq nums)))\n(if (lt (len u) 2)\n    (println -1)\n    (println (array_get u (sub (len u) 2))))",
+      "a_stdout": "",
+      "b_stdout": "",
+      "a_stderr": "Parse error: Expected ) but got (\n",
+      "b_stderr": "",
+      "rag_top_sim": 0.9255245356061944,
+      "rag_hits": [
+        {
+          "score": 0.9255245356061944,
+          "desc": "Given space-separated integers in arg1, print the second largest distinct value."
+        },
+        {
+          "score": 0.9179892953290262,
+          "desc": "Print the second-largest distinct value from space-separated integers in arg1."
+        },
+        {
+          "score": 0.9160178164925065,
+          "desc": "Print the second largest distinct value among space-separated integers in arg1."
+        },
+        {
+          "score": 0.9055097997288314,
+          "desc": "Print the second-largest distinct integer from the space-separated list in arg1."
+        },
+        {
+          "score": 0.9036250082375256,
+          "desc": "Print the second largest distinct integer from the space-separated list in arg1."
+        }
+      ]
+    },
+    {
+      "id": "string_set_diff",
+      "a_pass": false,
+      "b_pass": true,
+      "a_seconds": 20.2,
+      "b_seconds": 24.7,
+      "a_code": "(set arg0 string $0)\n(set arg1 string $1)\n(set chars array [])\n(for-each ch string arg0\n  (if (not (in ch arg1))\n    (push chars ch)))\n(println (join \"\" chars))",
+      "b_code": "(set s0 $0)\n(set s1 $1)\n(set chars1 (chars s1))\n(set result [])\n(for-each c (chars s0)\n  (if (not (in c chars1))\n    (push result c)))\n(println (join \"\" result))",
+      "a_stdout": "",
+      "b_stdout": "aacadaa\n",
+      "a_stderr": "Runtime error: for-each requires an array or map\n",
+      "b_stderr": "",
+      "rag_top_sim": 0.8583158417168223,
+      "rag_hits": [
+        {
+          "score": 0.8583158417168223,
+          "desc": "Count occurrences of a character (arg2) in a string (arg1)."
+        },
+        {
+          "score": 0.8047529524100364,
+          "desc": "Print the first non-repeating character in arg1, or '_' if none exists."
+        },
+        {
+          "score": 0.7993519041134552,
+          "desc": "Print the first non-repeating character in arg1, or '_' if none."
+        },
+        {
+          "score": 0.7993519041134552,
+          "desc": "Print the first non-repeating character in arg1, or '_' if none."
+        },
+        {
+          "score": 0.7983460395886568,
+          "desc": "Take a string in arg0 and print the first character that appears more than once. Print empty if all characters are uniqu"
+        }
+      ]
+    },
+    {
+      "id": "product_of_digits",
+      "a_pass": false,
+      "b_pass": true,
+      "a_seconds": 19.0,
+      "b_seconds": 23.1,
+      "a_code": "(set num string $0)\n(set digits array (split num \"\"))\n(set product int 1)\n(for-each digit string digits\n  (set product (mul product (str_int digit))))\n(println product)",
+      "b_code": "(set s $0)\n(set p 1)\n(for-each c (chars s)\n  (set p (mul p (sub (string_get c 0) 48))))\n(println p)",
+      "a_stdout": "",
+      "b_stdout": "24\n",
+      "a_stderr": "Runtime error: Undefined variable: str_int\n",
+      "b_stderr": "",
+      "rag_top_sim": 0.8919188491665019,
+      "rag_hits": [
+        {
+          "score": 0.8919188491665019,
+          "desc": "Print the product of the decimal digits of the non-negative integer arg1."
+        },
+        {
+          "score": 0.8919188491665019,
+          "desc": "Print the product of the decimal digits of the non-negative integer arg1."
+        },
+        {
+          "score": 0.8919188491665019,
+          "desc": "Print the product of the decimal digits of the non-negative integer arg1."
+        },
+        {
+          "score": 0.8893278683556851,
+          "desc": "Print the product of the decimal digits of a non-negative integer arg1."
+        },
+        {
+          "score": 0.8733536631561697,
+          "desc": "Sum the decimal digits of the non-negative integer in arg1."
+        }
+      ]
+    },
+    {
+      "id": "zero_pad_left",
+      "a_pass": false,
+      "b_pass": false,
+      "a_seconds": 19.1,
+      "b_seconds": 24.3,
+      "a_code": "(set input string $0)\n(set n int #1)\n(set len int (len input))\n(if (lt len n)\n  (println (fmt \"{:0>{}}\" n input))\n  (println input))",
+      "b_code": "(set s $0)\n(set n #1)\n(if (lt (len s) n)\n  (println (fmt \"{}{}\" (string_repeat \"0\" (- n (len s))) s))\n  (else\n    (println s)))",
+      "a_stdout": "",
+      "b_stdout": "",
+      "a_stderr": "Runtime error: Undefined variable: :0>{\n",
+      "b_stderr": "Runtime error: Undefined variable: string_repeat\n",
+      "rag_top_sim": 0.8010871041759092,
+      "rag_hits": [
+        {
+          "score": 0.8010871041759092,
+          "desc": "Take a string in arg0 and print the length of the longest run of identical adjacent characters."
+        },
+        {
+          "score": 0.7811345329684455,
+          "desc": "Take a string in arg0 and print the 0-based index of the last character that appears exactly once in the whole string. I"
+        },
+        {
+          "score": 0.7791974119558357,
+          "desc": "Run-length encode the string in arg 1 by emitting each maximal run as the character immediately followed by its integer "
+        },
+        {
+          "score": 0.7789854010575953,
+          "desc": "Convert the number string in arg 1 (interpreted in from-base given by arg 2) to the to-base given by arg 3 and print it "
+        },
+        {
+          "score": 0.778857937309863,
+          "desc": "Take a string in arg0 and print it with letters alternating lower, UPPER, lower, UPPER, ... starting with lower. Non-let"
+        }
+      ]
+    },
+    {
+      "id": "acronym",
+      "a_pass": true,
+      "b_pass": false,
+      "a_seconds": 18.1,
+      "b_seconds": 19.7,
+      "a_code": "(set sentence string $0)\n(set words array (split sentence \" \"))\n(set acronym string (join (map_arr words (\\word (first word))) \"\"))\n(println (upper acronym))",
+      "b_code": "println (join (map_arr (split $0 \" \") (\\w (upper (first (chars w))))) \"\")",
+      "a_stdout": "SCUBA\n",
+      "b_stdout": "",
+      "a_stderr": "",
+      "b_stderr": "",
+      "rag_top_sim": 0.9315612461342191,
+      "rag_hits": [
+        {
+          "score": 0.9315612461342191,
+          "desc": "Return the uppercase acronym formed from the first letter of each space-separated word in arg1."
+        },
+        {
+          "score": 0.9123674198068349,
+          "desc": "Print uppercase acronym of space-separated words in arg1."
+        },
+        {
+          "score": 0.9044374945830533,
+          "desc": "Return the uppercase initials of each whitespace-separated word in arg1."
+        },
+        {
+          "score": 0.9044374945830533,
+          "desc": "Output the uppercase initials of each whitespace-separated word in arg1."
+        },
+        {
+          "score": 0.8882016853473662,
+          "desc": "Output uppercase initials of each whitespace-separated word in arg1."
+        }
+      ]
+    },
+    {
+      "id": "max_word_length",
+      "a_pass": true,
+      "b_pass": true,
+      "a_seconds": 21.5,
+      "b_seconds": 24.1,
+      "a_code": "(set sentence string $0)\n(set words array (split sentence \" \"))\n(set max_length int 0)\n(for-each word string words\n  (set len int (len word))\n  (if (gt len max_length)\n    (set max_length len)))\n(println max_length)",
+      "b_code": "(set words (split $0 \" \"))\n(set max_len 0)\n(for-each w words\n  (set len (len w))\n  (if (gt len max_len) (set max_len len)))\n(println max_len)",
+      "a_stdout": "5\n",
+      "b_stdout": "5\n",
+      "a_stderr": "",
+      "b_stderr": "",
+      "rag_top_sim": 0.902097276340249,
+      "rag_hits": [
+        {
+          "score": 0.902097276340249,
+          "desc": "Print the length of the longest word in arg1."
+        },
+        {
+          "score": 0.8901499916369136,
+          "desc": "Print the length of the longest word (by characters) in arg1."
+        },
+        {
+          "score": 0.8644447544273454,
+          "desc": "Print the length of the longest word in arg1 that starts with a consonant."
+        },
+        {
+          "score": 0.8572580653470332,
+          "desc": "From space-separated words in arg1, print the length of the longest word whose first letter is a vowel; 0 if none."
+        },
+        {
+          "score": 0.8185668574198279,
+          "desc": "Take a string in arg0 and print the length of the longest run of identical adjacent characters."
+        }
+      ]
+    },
+    {
+      "id": "fizzbuzz_n",
+      "a_pass": true,
+      "b_pass": true,
+      "a_seconds": 24.4,
+      "b_seconds": 28.2,
+      "a_code": "(set n int #0)\n(for i 1 (+ n 1)\n  (cond\n    ((eq (% i 15) 0) (println \"FizzBuzz\"))\n    ((eq (% i 3) 0) (println \"Fizz\"))\n    ((eq (% i 5) 0) (println \"Buzz\"))\n    (true (println i))))",
+      "b_code": "(set n #0)\n(for i 1 (+ n 1)\n  (cond\n    ((eq (mod i 15) 0) (println \"FizzBuzz\"))\n    ((eq (mod i 3) 0) (println \"Fizz\"))\n    ((eq (mod i 5) 0) (println \"Buzz\"))\n    (true (println i))))",
+      "a_stdout": "1\n2\nFizz\n4\nBuzz\n",
+      "b_stdout": "1\n2\nFizz\n4\nBuzz\n",
+      "a_stderr": "",
+      "b_stderr": "",
+      "rag_top_sim": 0.7780387168495534,
+      "rag_hits": [
+        {
+          "score": 0.7780387168495534,
+          "desc": "Print FizzBuzz result for single integer arg1: Fizz if div by 3, Buzz if div by 5, FizzBuzz if both, else the number."
+        },
+        {
+          "score": 0.7754967365863715,
+          "desc": "For the positive integer in arg 1, compute the number of Collatz steps needed to reach 1 (n/2 if even, 3n+1 if odd) and "
+        },
+        {
+          "score": 0.7697684720007565,
+          "desc": "Print the first N Fibonacci numbers starting from 0,1 (where N is the single integer CLI arg), one per line."
+        },
+        {
+          "score": 0.7670608466085873,
+          "desc": "Tokenize the arithmetic expression in the first arg into NUM(n)/OP(c)/LP/RP tokens, one per line, in order."
+        },
+        {
+          "score": 0.7664722601524778,
+          "desc": "Convert a positive integer (1..3999) given as a CLI arg to its Roman numeral representation."
+        }
+      ]
+    },
+    {
+      "id": "caesar_decrypt",
+      "a_pass": false,
+      "b_pass": true,
+      "a_seconds": 24.9,
+      "b_seconds": 28.2,
+      "a_code": "(set input string $0)\n(set shift int #1)\n\n(fn decrypt_char c char -> char\n  (set base int (ord 'A'))\n  (set offset int (mod (- (ord c) base -shift) 26))\n  (chr (+ base offset)))\n\n(set decrypted string (join \"\" (map_arr input (\\c (decrypt_char c)))))\n\n(println decrypted)",
+      "b_code": "(set text $0)\n(set shift #1)\n(set result \"\")\n(for-each c (chars text)\n  (set code (string_get c 0))\n  (set new_code (add 65 (mod (sub (sub code 65) shift) 26)))\n  (set result (string_concat result (char_from_code new_code))))\n(println result)",
+      "a_stdout": "",
+      "b_stdout": "HELLO\n",
+      "a_stderr": "Parse error: Expected type but got Symbol(char)\n",
+      "b_stderr": "",
+      "rag_top_sim": 0.8584765162342334,
+      "rag_hits": [
+        {
+          "score": 0.8584765162342334,
+          "desc": "Apply a Caesar cipher to the text in arg 1 using the integer shift in arg 2 (positive shifts rotate letters forward), pr"
+        },
+        {
+          "score": 0.8517058816945317,
+          "desc": "Caesar cipher: first arg is 'encode' or 'decode', second is integer shift, third is the text; shift only ASCII letters, "
+        },
+        {
+          "score": 0.850987440997318,
+          "desc": "First arg is integer shift; remaining args joined with single spaces form the plaintext. Apply a Caesar shift to ASCII l"
+        },
+        {
+          "score": 0.8445234185252152,
+          "desc": "Apply a Caesar cipher with the integer shift in arg2 to the text in arg1, rotating ASCII letters within their case and l"
+        },
+        {
+          "score": 0.842802252114089,
+          "desc": "Apply a Caesar cipher with shift argv[2] to argv[1], shifting only ASCII letters and preserving case and other character"
+        }
+      ]
+    }
+  ],
+  "a_pass": 3,
+  "b_pass": 7,
+  "flips_a_to_b": 5,
+  "flips_b_to_a": 1
+}

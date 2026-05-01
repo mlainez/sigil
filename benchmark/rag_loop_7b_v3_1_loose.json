@@ -1,0 +1,765 @@
+{
+  "iterations": [
+    {
+      "iteration": 1,
+      "n_tasks": 10,
+      "a_pass": 4,
+      "b_pass": 6,
+      "flips_a_to_b": 3,
+      "flips_b_to_a": 1,
+      "net": 2,
+      "tasks": [
+        {
+          "id": "right_pad_spaces",
+          "a_pass": true,
+          "b_pass": true,
+          "a_bucket": null,
+          "b_bucket": null,
+          "a_seconds": 5.4,
+          "b_seconds": 5.5,
+          "a_code": "(set s string $0)\n(set n int #1)\n(while (lt (len s) n)\n  (set s (string_concat s \" \")))\n(println s)",
+          "b_code": "(if (lt (len $0) #1)\n  (println (add $0 (repeat \" \" (sub #1 (len $0)))))\n  (else (println $0)))",
+          "a_stdout": "hi   \n",
+          "b_stdout": "hi   \n",
+          "a_stderr": "",
+          "b_stderr": "",
+          "rag_top_sim": 0.9727064128288406,
+          "rag_hits": [
+            {
+              "score": 0.9727064128288406,
+              "desc": "Take a string in arg0 and a positive integer n in arg1. Print arg0 right-padded with spaces to lengt"
+            },
+            {
+              "score": 0.8542136480155121,
+              "desc": "Take a string in arg0 and a positive integer n in arg1. Print arg0 with each character repeated n ti"
+            },
+            {
+              "score": 0.8053528782083713,
+              "desc": "Take a string and a non-negative integer n. Print the first n characters; if string is shorter, prin"
+            },
+            {
+              "score": 0.802541519390474,
+              "desc": "Take a string and a positive integer n. Print the string with each tab character replaced by n space"
+            },
+            {
+              "score": 0.7828869770938665,
+              "desc": "Take a string and a non-negative integer n. Print the last n characters; if shorter, print in full."
+            }
+          ]
+        },
+        {
+          "id": "center_pad",
+          "a_pass": true,
+          "b_pass": false,
+          "a_bucket": null,
+          "b_bucket": "wrong_output",
+          "a_seconds": 1.9,
+          "b_seconds": 3.1,
+          "a_code": "(set s string $0)\n(set n int #1)\n(set pad_len int (sub n (len s)))\n(set left_pad int (div pad_len 2))\n(set right_pad int (sub pad_len left_pad))\n(println (string_concat (repeat \" \" left_pad) (string_concat s (repeat \" \" right_pad))))",
+          "b_code": "(set s string $0)\n(set w int #1)\n(set pad_len int (sub w (len s)))\n(set left_pad string \"\")\n(set right_pad string \"\")\n(for i 0 pad_len\n  (set pad_char string \" \")\n  (if (eq (mod i 2) 0)\n    (set pad_char \" \"))\n  (set left_pad (string_concat left_pad pad_char))\n  (set right_pad (string_concat right_pad pad_char)))\n(println (string_concat left_pad s))\n(println (string_concat right_pad s))",
+          "a_stdout": "  hi  \n",
+          "b_stdout": "    hi\n    hi\n",
+          "a_stderr": "",
+          "b_stderr": "",
+          "rag_top_sim": 0.8464935481987543,
+          "rag_hits": [
+            {
+              "score": 0.8464935481987543,
+              "desc": "Take a string in arg0 and a positive integer n in arg1. Print arg0 right-padded with spaces to lengt"
+            },
+            {
+              "score": 0.8462418181394431,
+              "desc": "Take a string and a positive integer width. Print the string right-aligned in a field of that width "
+            },
+            {
+              "score": 0.8207836227582596,
+              "desc": "Take a string in arg0 and a positive integer n in arg1. Print arg0 with each character repeated n ti"
+            },
+            {
+              "score": 0.7840202409413344,
+              "desc": "Take a string in arg0 and a positive integer k in arg1. Print the top k most-frequent characters, br"
+            },
+            {
+              "score": 0.7720063975884747,
+              "desc": "Take a non-negative integer n in arg0 and a positive integer r in arg1. Print 1 + r + r^2 + ... + r^"
+            }
+          ]
+        },
+        {
+          "id": "truncate_ellipsis",
+          "a_pass": false,
+          "b_pass": true,
+          "a_bucket": "undefined_var",
+          "b_bucket": null,
+          "a_seconds": 1.5,
+          "b_seconds": 1.9,
+          "a_code": "(set s string $0)\n(set n int #1)\n(if (gt (len s) n)\n  (println (string_slice s 0 (sub n 3)) \"...\"))\n(else (println s))",
+          "b_code": "(set s $0)\n(set n #1)\n(if (gt (len s) n)\n  (println (fmt \"{}...\" (slice s 0 (- n 3))))\n  (else (println s)))",
+          "a_stdout": "hello ...\nhello world\n",
+          "b_stdout": "hello...\n",
+          "a_stderr": "Runtime error: Undefined variable: else\n",
+          "b_stderr": "",
+          "rag_top_sim": 0.8970186766864019,
+          "rag_hits": [
+            {
+              "score": 0.8970186766864019,
+              "desc": "Take a string in arg0 and a positive integer n in arg1. Print arg0 right-padded with spaces to lengt"
+            },
+            {
+              "score": 0.8612471563096432,
+              "desc": "Take a string in arg0 and a positive integer n in arg1. Print arg0 with each character repeated n ti"
+            },
+            {
+              "score": 0.8245681900995535,
+              "desc": "Take a string in arg0 and print it with each pair of adjacent characters swapped. If the length is o"
+            },
+            {
+              "score": 0.8146461750892053,
+              "desc": "Take a long string in arg0 and a short word in arg1. If arg1 is a subsequence of arg0, print yes-N w"
+            },
+            {
+              "score": 0.8135610754517203,
+              "desc": "Take a string and a non-negative integer n. Print the first n characters; if string is shorter, prin"
+            }
+          ]
+        },
+        {
+          "id": "wrap_words",
+          "a_pass": false,
+          "b_pass": true,
+          "a_bucket": "wrong_output",
+          "b_bucket": null,
+          "a_seconds": 2.5,
+          "b_seconds": 3.9,
+          "a_code": "(set s string $0)\n(set n int #1)\n(set words array (split s \" \"))\n(set line string \"\")\n(for-each w string words\n  (set nl int (len line))\n  (if (gt (add nl (add 1 (len w))) n)\n    (println line)\n    (set line w)\n    (else (set line (string_concat (string_concat line \" \") w)))))\n(if (gt (len line) 0) (println line))",
+          "b_code": "(set s string $0)\n(set n int #1)\n(set words array (split s \" \"))\n(set line string \"\")\n(for-each w string words\n  (set new_line string \"\")\n  (if (gt (len w) 0)\n    (set new_line (add line w)))\n  (if (and (le (len new_line) n) (ne line \"\"))\n    (set line (fmt \"{} {}\" line w))\n    (else\n      (if (gt (len line) 0)\n        (println line))\n      (set line w))))\n(if (gt (len line) 0)\n  (println line))",
+          "a_stdout": " the quick\nbrown fox\njumps\n",
+          "b_stdout": "the quick\nbrown fox\njumps\n",
+          "a_stderr": "",
+          "b_stderr": "",
+          "rag_top_sim": 0.9216075752277539,
+          "rag_hits": [
+            {
+              "score": 0.9216075752277539,
+              "desc": "Take a sentence and a positive integer n. Greedily wrap into lines of width <= n (words separated by"
+            },
+            {
+              "score": 0.8038682192200226,
+              "desc": "Take a string in arg0 and a positive integer n in arg1. Print arg0 right-padded with spaces to lengt"
+            },
+            {
+              "score": 0.7935227111746663,
+              "desc": "Wrap a sentence at width N (arg2), preserving word boundaries."
+            },
+            {
+              "score": 0.7752314822511884,
+              "desc": "Split arg1 on \\n into lines and print the lines in ascending order of length, breaking ties alphabet"
+            },
+            {
+              "score": 0.766444090677062,
+              "desc": "For each space-separated word in arg1 (in order), print the word left-padded to the longest word's l"
+            }
+          ]
+        },
+        {
+          "id": "indent_lines",
+          "a_pass": true,
+          "b_pass": true,
+          "a_bucket": null,
+          "b_bucket": null,
+          "a_seconds": 1.4,
+          "b_seconds": 1.6,
+          "a_code": "(set lines array (split $0 \"\\n\"))\n(set n int #1)\n(println (join (map_arr lines (\\line (string_concat (repeat \" \" n) line))) \"\\n\"))",
+          "b_code": "(set lines array (split $0 \"\\n\"))\n(for-each line string lines\n  (println (string_concat (repeat \" \" #1) line)))",
+          "a_stdout": "  a\n  b\n  c\n",
+          "b_stdout": "  a\n  b\n  c\n",
+          "a_stderr": "",
+          "b_stderr": "",
+          "rag_top_sim": 0.913851697141454,
+          "rag_hits": [
+            {
+              "score": 0.913851697141454,
+              "desc": "Take multi-line string and a non-negative integer n. Print each line prefixed with n spaces."
+            },
+            {
+              "score": 0.8217612261621979,
+              "desc": "Take a string in arg0 and a positive integer n in arg1. Print arg0 with each character repeated n ti"
+            },
+            {
+              "score": 0.805118505463984,
+              "desc": "Search the multi-line text in arg2 (lines separated by \\n) for the substring in arg1 and print each "
+            },
+            {
+              "score": 0.8044644814082583,
+              "desc": "Take multi-line string. Print each line with leading and trailing whitespace stripped."
+            },
+            {
+              "score": 0.792358719413066,
+              "desc": "Take multi-line string. Print each line prefixed with its 1-based number followed by ': '."
+            }
+          ]
+        },
+        {
+          "id": "title_each_word",
+          "a_pass": false,
+          "b_pass": true,
+          "a_bucket": "wrong_output",
+          "b_bucket": null,
+          "a_seconds": 3.9,
+          "b_seconds": 2.9,
+          "a_code": "(set s string $0)\n(set words array (split s \" \"))\n(set result string \"\")\n(for-each w string words\n  (set fc int (string_get w 0))\n  (if (is_upper fc)\n    (set result (string_concat result (char_from_code (bit_or fc 32))))\n    (else (set result (string_concat result (char_from_code fc)))))\n  (for-each c string (slice w 1 (len w))\n    (set lc int (string_get c 0))\n    (if (is_lower lc)\n      (set result (string_concat result (char_from_code (bit_or lc 32))))\n      (else (set result (string_concat result (char_from_code lc))))))\n  (set result (string_concat result \" \")))\n(println (slice result 0 (- (len result) 1)))",
+          "b_code": "(set s string $0)\n(set words array (split s \" \"))\n(set result string \"\")\n(for-each w string words\n  (set first char (first (chars w)))\n  (set rest string (lower (slice w 1)))\n  (set uc_first string (upper first))\n  (if (eq result \"\") (set result (fmt \"{}{}\" uc_first rest))\n    (else (set result (fmt \"{} {}{}\" result uc_first rest)))))\n(println (fmt \"{}\\n\" result))",
+          "a_stdout": "heLLo woRLd fOO\n",
+          "b_stdout": "Hello World Foo\n",
+          "a_stderr": "",
+          "b_stderr": "",
+          "rag_top_sim": 0.8946655868536926,
+          "rag_hits": [
+            {
+              "score": 0.8946655868536926,
+              "desc": "Take a sentence. Print it with the first letter of each whitespace-separated word uppercased, rest l"
+            },
+            {
+              "score": 0.8796298918537959,
+              "desc": "Return the uppercase initials of each whitespace-separated word in arg1."
+            },
+            {
+              "score": 0.8796298918537959,
+              "desc": "Output the uppercase initials of each whitespace-separated word in arg1."
+            },
+            {
+              "score": 0.871220353062537,
+              "desc": "Output uppercase initials of each whitespace-separated word in arg1."
+            },
+            {
+              "score": 0.871220353062537,
+              "desc": "Output uppercase initials of each whitespace-separated word in arg1."
+            }
+          ]
+        },
+        {
+          "id": "hyphenate_camel",
+          "a_pass": false,
+          "b_pass": false,
+          "a_bucket": "type_error",
+          "b_bucket": "wrong_output",
+          "a_seconds": 1.7,
+          "b_seconds": 2.5,
+          "a_code": "(set s string $0)\n(set out string \"\")\n(for-each c int (chars s)\n  (if (is_upper c)\n    (set out (string_concat out \"-\")))\n  (set out (string_concat out (char_from_code c))))\n(println (lower out))",
+          "b_code": "(set s string $0)\n(set out string \"\")\n(for-each c string (chars s)\n  (if (is_upper c)\n    (set out (string_concat out \"-\"))\n    (else (set out (string_concat out (lower c))))))\n(println (fmt \"{}\\n\" out))",
+          "a_stdout": "",
+          "b_stdout": "camel-ase-xample\n",
+          "a_stderr": "Runtime error: Type mismatch in for-each: variable 'c' declared as int but got string\n",
+          "b_stderr": "",
+          "rag_top_sim": 0.8552907888887747,
+          "rag_hits": [
+            {
+              "score": 0.8552907888887747,
+              "desc": "Take a string in arg0 and print it with letters alternating lower, UPPER, lower, UPPER, ... starting"
+            },
+            {
+              "score": 0.8293849453651687,
+              "desc": "Convert the integer arg1 (0-999) to its English word representation in lowercase, with single spaces"
+            },
+            {
+              "score": 0.8164308270267809,
+              "desc": "Print the uppercase initials of each space-separated word in arg1, joined by dots with a trailing do"
+            },
+            {
+              "score": 0.8142987490538227,
+              "desc": "Uppercase vowels and lowercase consonants in arg1."
+            },
+            {
+              "score": 0.8124479507988261,
+              "desc": "Convert the integer in arg1 (0..99) to lowercase English words using a hyphen between tens and ones "
+            }
+          ]
+        },
+        {
+          "id": "snake_to_pascal",
+          "a_pass": false,
+          "b_pass": false,
+          "a_bucket": "wrong_output",
+          "b_bucket": "wrong_output",
+          "a_seconds": 1.4,
+          "b_seconds": 1.6,
+          "a_code": "(set s string $0)\n(set parts array (split s \"_\"))\n(set upper_parts array (map_arr (\\p (upper p)) parts))\n(println (join upper_parts \"\"))",
+          "b_code": "(set s $0)\n(println (join (map_arr (split s \"_\") (\\w (upper (first (chars w))))) \"\"))",
+          "a_stdout": "HELLOWORLDFOO\n",
+          "b_stdout": "HWF\n",
+          "a_stderr": "",
+          "b_stderr": "",
+          "rag_top_sim": 0.8324670380938928,
+          "rag_hits": [
+            {
+              "score": 0.8324670380938928,
+              "desc": "Convert a camelCase string in arg1 to snake_case."
+            },
+            {
+              "score": 0.8158873433188769,
+              "desc": "Take a kebab-case string. Print it converted to snake_case (replace - with _)."
+            },
+            {
+              "score": 0.7981203916834728,
+              "desc": "Convert camelCase in arg1 to snake_case."
+            },
+            {
+              "score": 0.781692921029205,
+              "desc": "Convert camelCase string arg1 to snake_case."
+            },
+            {
+              "score": 0.7764697466259906,
+              "desc": "Convert camelCase arg1 to snake_case."
+            }
+          ]
+        },
+        {
+          "id": "strip_punct",
+          "a_pass": false,
+          "b_pass": false,
+          "a_bucket": "type_error",
+          "b_bucket": "type_error",
+          "a_seconds": 1.6,
+          "b_seconds": 1.6,
+          "a_code": "(set s string $0)\n(set result string \"\")\n(for-each c int (chars s)\n  (if (not (is_punctuation c))\n    (set result (string_concat result (char_from_code c)))))\n(println result)",
+          "b_code": "(set s string $0)\n(set result string \"\")\n(for-each c int (chars s)\n  (if (not (is_punctuation c))\n    (set result (string_concat result (char_from_code c)))))\n(println result)",
+          "a_stdout": "",
+          "b_stdout": "",
+          "a_stderr": "Runtime error: Type mismatch in for-each: variable 'c' declared as int but got string\n",
+          "b_stderr": "Runtime error: Type mismatch in for-each: variable 'c' declared as int but got string\n",
+          "rag_top_sim": 0.0,
+          "rag_hits": []
+        },
+        {
+          "id": "reverse_words",
+          "a_pass": true,
+          "b_pass": true,
+          "a_bucket": null,
+          "b_bucket": null,
+          "a_seconds": 1.0,
+          "b_seconds": 1.7,
+          "a_code": "(set s string $0)\n(println (join (rev (split s \" \")) \" \"))",
+          "b_code": "(set sentence $0)\n(set words (split sentence \" \"))\n(println (join (rev words) \" \"))",
+          "a_stdout": "fox brown quick the\n",
+          "b_stdout": "fox brown quick the\n",
+          "a_stderr": "",
+          "b_stderr": "",
+          "rag_top_sim": 0.8248189933350322,
+          "rag_hits": [
+            {
+              "score": 0.8248189933350322,
+              "desc": "Take a sentence in arg0 (whitespace-separated words). Print the count of distinct words."
+            },
+            {
+              "score": 0.8173500374186121,
+              "desc": "Take a sentence in arg0. Print the whitespace-separated word that appears LEAST frequently. Break ti"
+            },
+            {
+              "score": 0.8090758676676955,
+              "desc": "Group space-separated words from arg1 into anagram groups (printed in first-occurrence order), with "
+            },
+            {
+              "score": 0.7911983760519058,
+              "desc": "Group the space-separated words in arg1 by anagram (sorted-letter key). Print each group as space-se"
+            },
+            {
+              "score": 0.7823776943010342,
+              "desc": "Evaluate the space-separated reverse Polish notation expression in argv[1] using integer arithmetic "
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "iteration": 2,
+      "n_tasks": 10,
+      "a_pass": 8,
+      "b_pass": 6,
+      "flips_a_to_b": 1,
+      "flips_b_to_a": 3,
+      "net": -2,
+      "tasks": [
+        {
+          "id": "sum_of_digits",
+          "a_pass": true,
+          "b_pass": true,
+          "a_bucket": null,
+          "b_bucket": null,
+          "a_seconds": 1.6,
+          "b_seconds": 1.4,
+          "a_code": "(set n int #0)\n(set s string (str n))\n(set total int 0)\n(for-each c string (chars s)\n  (set total (add total (sub (string_get c 0) 48))))\n(println total)",
+          "b_code": "(println (sum (map_arr (chars $0) (\\c (sub (string_get c 0) 48)))))",
+          "a_stdout": "10\n",
+          "b_stdout": "10\n",
+          "a_stderr": "",
+          "b_stderr": "",
+          "rag_top_sim": 0.9318513603484063,
+          "rag_hits": [
+            {
+              "score": 0.9318513603484063,
+              "desc": "Print the sum of the decimal digits of the non-negative integer arg1."
+            },
+            {
+              "score": 0.8906927061454892,
+              "desc": "Print the sum of the decimal digits of the integer in arg1."
+            },
+            {
+              "score": 0.8890804493685828,
+              "desc": "Print the sum of decimal digits of the integer in arg1."
+            },
+            {
+              "score": 0.8890804493685828,
+              "desc": "Print the sum of decimal digits of the integer in arg1."
+            },
+            {
+              "score": 0.8890804493685828,
+              "desc": "Print the sum of decimal digits of the integer in arg1."
+            }
+          ]
+        },
+        {
+          "id": "count_digits_in_n",
+          "a_pass": true,
+          "b_pass": false,
+          "a_bucket": null,
+          "b_bucket": "undefined_var",
+          "a_seconds": 1.0,
+          "b_seconds": 1.6,
+          "a_code": "(set n int #0)\n(println (string_length (str n)))",
+          "b_code": "(set n int #0)\n(println (add 1 (floor (log10 (cast_int_float n)))))",
+          "a_stdout": "5\n",
+          "b_stdout": "",
+          "a_stderr": "",
+          "b_stderr": "Runtime error: Undefined variable: log10\n",
+          "rag_top_sim": 0.904464279095869,
+          "rag_hits": [
+            {
+              "score": 0.904464279095869,
+              "desc": "Sum the decimal digits of the non-negative integer in arg1."
+            },
+            {
+              "score": 0.904464279095869,
+              "desc": "Sum the decimal digits of the non-negative integer in arg1."
+            },
+            {
+              "score": 0.8864701077869495,
+              "desc": "Multiply the decimal digits of the non-negative integer arg1."
+            },
+            {
+              "score": 0.8691256145803953,
+              "desc": "Sum the digits of a non-negative integer."
+            },
+            {
+              "score": 0.8494997432365713,
+              "desc": "Take a non-negative integer byte count in arg0. Print it as 'X.YZ B/KB/MB/GB/TB' with 2 decimal plac"
+            }
+          ]
+        },
+        {
+          "id": "is_prime",
+          "a_pass": true,
+          "b_pass": true,
+          "a_bucket": null,
+          "b_bucket": null,
+          "a_seconds": 2.9,
+          "b_seconds": 3.0,
+          "a_code": "(set n int #0)\n(if (le n 1) (println \"no\"))\n(if (eq n 2) (println \"yes\"))\n(if (and (gt n 2) (eq (mod n 2) 0)) (println \"no\"))\n(set i int 3)\n(while (and (lt (mul i i) (add n 1))\n             (ne (mod n i) 0))\n  (set i (add i 2)))\n(if (lt (mul i i) (add n 1)) (println \"no\") (else (println \"yes\")))",
+          "b_code": "(set n #0)\n(if (le n 1)\n  (println \"no\")\n  (else\n    (set is_prime bool true)\n    (set i int 2)\n    (while (and is_prime (le (mul i i) n))\n      (if (eq (mod n i) 0)\n        (set is_prime false))\n      (set i (add i 1)))\n    (if is_prime (println \"yes\") (else (println \"no\")))))",
+          "a_stdout": "yes\n",
+          "b_stdout": "yes\n",
+          "a_stderr": "",
+          "b_stderr": "",
+          "rag_top_sim": 0.8669979794704507,
+          "rag_hits": [
+            {
+              "score": 0.8669979794704507,
+              "desc": "Check if number in arg1 is prime (yes/no)."
+            },
+            {
+              "score": 0.8478939480929313,
+              "desc": "Check if number in arg1 is prime (true/false)."
+            },
+            {
+              "score": 0.8390634796161656,
+              "desc": "Determine if integer in arg1 is a prime number."
+            },
+            {
+              "score": 0.8056017328391124,
+              "desc": "Check if number in arg1 is prime."
+            },
+            {
+              "score": 0.7872702122296502,
+              "desc": "Print 'yes' if arg1 is a dotted quad of 4 integers each in 0..255, else 'no'."
+            }
+          ]
+        },
+        {
+          "id": "gcd_two",
+          "a_pass": true,
+          "b_pass": true,
+          "a_bucket": null,
+          "b_bucket": null,
+          "a_seconds": 1.4,
+          "b_seconds": 1.8,
+          "a_code": "(fn gcd a int b int -> int\n  (if (eq b 0) (ret a))\n  (ret (gcd b (mod a b))))\n\n(println (gcd #0 #1))",
+          "b_code": "(fn gcd a int b int -> int\n  (if (eq b 0) (ret a))\n  (ret (gcd b (mod a b))))\n\n(println (gcd #0 #1))",
+          "a_stdout": "6\n",
+          "b_stdout": "6\n",
+          "a_stderr": "",
+          "b_stderr": "",
+          "rag_top_sim": 0.9585931013627849,
+          "rag_hits": [
+            {
+              "score": 0.9585931013627849,
+              "desc": "Take two positive integers in arg0 and arg1. Print their greatest common divisor computed via the Eu"
+            },
+            {
+              "score": 0.8699621771655857,
+              "desc": "Print the greatest common divisor of the space-separated positive integers in arg1."
+            },
+            {
+              "score": 0.8378541634951815,
+              "desc": "Take two integers in arg0 and arg1. Print the smaller of the two if both are positive; otherwise pri"
+            },
+            {
+              "score": 0.826535272410343,
+              "desc": "Print the GCD of integers arg1 and arg2."
+            },
+            {
+              "score": 0.8156561637481249,
+              "desc": "Print the greatest common divisor of two integers."
+            }
+          ]
+        },
+        {
+          "id": "lcm_two",
+          "a_pass": false,
+          "b_pass": false,
+          "a_bucket": "wrong_output",
+          "b_bucket": "undefined_var",
+          "a_seconds": 2.1,
+          "b_seconds": 1.6,
+          "a_code": "(set a int #0)\n(set b int #1)\n(set g int 1)\n(set i int 2)\n(while (le i (max a b))\n  (if (and (eq (mod a i) 0) (eq (mod b i) 0))\n    (set g i))\n  (set i (add i 1)))\n(println g)",
+          "b_code": "(fn lcm a int b int -> int\n  (ret (div (mul a b) (gcd a b))))\n\n(println (lcm #0 #1))",
+          "a_stdout": "2\n",
+          "b_stdout": "",
+          "a_stderr": "",
+          "b_stderr": "Runtime error: Undefined variable: gcd\n",
+          "rag_top_sim": 0.8738993432379453,
+          "rag_hits": [
+            {
+              "score": 0.8738993432379453,
+              "desc": "Take two positive integers in arg0 and arg1. Print their greatest common divisor computed via the Eu"
+            },
+            {
+              "score": 0.8627217272922838,
+              "desc": "Take two integers in arg0 and arg1. Print the smaller of the two if both are positive; otherwise pri"
+            },
+            {
+              "score": 0.8415423223847086,
+              "desc": "Print the GCD of integers arg1 and arg2."
+            },
+            {
+              "score": 0.8200675234345236,
+              "desc": "Take a non-negative integer n in arg0 and a positive integer r in arg1. Print 1 + r + r^2 + ... + r^"
+            },
+            {
+              "score": 0.8085260309524834,
+              "desc": "Take three integers. Print arg0 - arg1 - arg2."
+            }
+          ]
+        },
+        {
+          "id": "power_of_two",
+          "a_pass": true,
+          "b_pass": true,
+          "a_bucket": null,
+          "b_bucket": null,
+          "a_seconds": 1.9,
+          "b_seconds": 2.1,
+          "a_code": "(set n int #0)\n(if (eq n 1) (println \"yes\"))\n(while (and (gt n 2) (eq (mod n 2) 0))\n  (set n (div n 2)))\n(if (eq n 2) (println \"yes\") (else (println \"no\")))",
+          "b_code": "(set n int #0)\n(if (eq n 1) (println \"yes\") (else (if (and (gt n 2) (eq (mod n 2) 0)) (println \"yes\") (else (println \"no\")))))",
+          "a_stdout": "yes\n",
+          "b_stdout": "yes\n",
+          "a_stderr": "",
+          "b_stderr": "",
+          "rag_top_sim": 0.8196624751058714,
+          "rag_hits": [
+            {
+              "score": 0.8196624751058714,
+              "desc": "Print 'yes' if arg1 is a dotted quad of 4 integers each in 0..255, else 'no'."
+            },
+            {
+              "score": 0.798941426929784,
+              "desc": "Take a positive integer n in arg0. Print the sum of integers 1+2+...+n inclusive."
+            },
+            {
+              "score": 0.7899953686367317,
+              "desc": "Take a positive integer n in arg0. Print the sum of squares of even integers from 2 to n inclusive."
+            },
+            {
+              "score": 0.784712986901493,
+              "desc": "Take a non-negative integer n in arg0. Print 2^0 + 2^1 + ... + 2^n. n=0 \u2192 1; n=3 \u2192 15."
+            },
+            {
+              "score": 0.7808494181593488,
+              "desc": "Take a non-negative integer n in arg0 and a positive integer r in arg1. Print 1 + r + r^2 + ... + r^"
+            }
+          ]
+        },
+        {
+          "id": "n_choose_k",
+          "a_pass": true,
+          "b_pass": true,
+          "a_bucket": null,
+          "b_bucket": null,
+          "a_seconds": 1.7,
+          "b_seconds": 2.7,
+          "a_code": "(set n int #0)\n(set k int #1)\n(set r int 1)\n(for i 0 k\n  (set r (mul r (sub n i))))\n(for i 1 (add k 1)\n  (set r (div r i)))\n(println r)",
+          "b_code": "(set n int #0)\n(set k int #1)\n(if (eq k 0) (println \"1\"))\n(if (gt k (/ n 2)) (set k (- n k)))\n(set top int 1)\n(set bot int 1)\n(for i 0 k\n  (set top (mul top (sub n i)))\n  (set bot (mul bot (+ i 1))))\n(println (/ top bot))",
+          "a_stdout": "10\n",
+          "b_stdout": "10\n",
+          "a_stderr": "",
+          "b_stderr": "",
+          "rag_top_sim": 0.7966262842981938,
+          "rag_hits": [
+            {
+              "score": 0.7966262842981938,
+              "desc": "Take a non-negative integer n in arg0 and a positive integer r in arg1. Print 1 + r + r^2 + ... + r^"
+            },
+            {
+              "score": 0.7767391558624184,
+              "desc": "Take a non-negative integer n in arg0. Print 2^0 + 2^1 + ... + 2^n. n=0 \u2192 1; n=3 \u2192 15."
+            },
+            {
+              "score": 0.7593656241842117,
+              "desc": "Take a non-negative integer i in arg0. Print L(i) where L(0)=2, L(1)=1, L(k)=L(k-1)+L(k-2). For i=0 "
+            },
+            {
+              "score": 0.7533021461574037,
+              "desc": "Take a non-negative integer n in arg0 and an integer x in arg1. Apply f(x) = 2*x + 1 exactly n times"
+            },
+            {
+              "score": 0.7434215369707601,
+              "desc": "Take two positive integers in arg0 and arg1. Print their greatest common divisor computed via the Eu"
+            }
+          ]
+        },
+        {
+          "id": "factorial_n",
+          "a_pass": true,
+          "b_pass": false,
+          "a_bucket": null,
+          "b_bucket": "wrong_output",
+          "a_seconds": 1.3,
+          "b_seconds": 1.4,
+          "a_code": "(set n int #0)\n(set r int 1)\n(for i 2 (add n 1)\n  (set r (mul r i)))\n(println r)",
+          "b_code": "(set n int #0)\n(println (mul 1 (pow 2 n)))",
+          "a_stdout": "120\n",
+          "b_stdout": "32\n",
+          "a_stderr": "",
+          "b_stderr": "",
+          "rag_top_sim": 0.8772571668736623,
+          "rag_hits": [
+            {
+              "score": 0.8772571668736623,
+              "desc": "Take a non-negative integer n in arg0. Print n!! (double factorial): n*(n-2)*(n-4)*... down to 1 or "
+            },
+            {
+              "score": 0.8675105619080816,
+              "desc": "Take a non-negative integer n in arg0. Print n! using iterative multiplication. 0!=1, 5!=120."
+            },
+            {
+              "score": 0.8593617385884079,
+              "desc": "Take a non-negative integer n in arg0. Print 2^0 + 2^1 + ... + 2^n. n=0 \u2192 1; n=3 \u2192 15."
+            },
+            {
+              "score": 0.8559723844010486,
+              "desc": "Take a non-negative integer n in arg0 and a positive integer r in arg1. Print 1 + r + r^2 + ... + r^"
+            },
+            {
+              "score": 0.8429336831449789,
+              "desc": "Take a non-negative integer n in arg0. Starting from 1, double n times and print the result. n=0 \u2192 1"
+            }
+          ]
+        },
+        {
+          "id": "abs_diff",
+          "a_pass": false,
+          "b_pass": true,
+          "a_bucket": "wrong_output",
+          "b_bucket": null,
+          "a_seconds": 1.2,
+          "b_seconds": 1.2,
+          "a_code": "(set a int (arg_int 0))\n(set b int (arg_int 1))\n(println (sub (abs a) (abs b)))",
+          "b_code": "(println (abs (sub #0 #1)))",
+          "a_stdout": "-2\n",
+          "b_stdout": "8\n",
+          "a_stderr": "",
+          "b_stderr": "",
+          "rag_top_sim": 0.8706831572814256,
+          "rag_hits": [
+            {
+              "score": 0.8706831572814256,
+              "desc": "Take two integers in arg0 and arg1. Print the smaller of the two if both are positive; otherwise pri"
+            },
+            {
+              "score": 0.8431173846842669,
+              "desc": "Print the GCD of integers arg1 and arg2."
+            },
+            {
+              "score": 0.818576414189818,
+              "desc": "Take three integers. If arg0 - arg1 - arg2 is greater than 0, print positive; if equal to 0, print z"
+            },
+            {
+              "score": 0.8043612776524592,
+              "desc": "Take three integers in arg0, arg1, arg2. Print the result of arg0 - arg1 - arg2."
+            },
+            {
+              "score": 0.8029870997194524,
+              "desc": "Given integers arg1 and arg2, print arg1/arg2 as a percentage with one decimal."
+            }
+          ]
+        },
+        {
+          "id": "int_sqrt",
+          "a_pass": true,
+          "b_pass": false,
+          "a_bucket": null,
+          "b_bucket": "wrong_output",
+          "a_seconds": 1.4,
+          "b_seconds": 1.7,
+          "a_code": "(set n int #0)\n(set k int 1)\n(while (le (mul k k) n)\n  (set k (add k 1)))\n(println (sub k 1))",
+          "b_code": "(set n int #0)\n(println (floor (cast_int_float (bit_shift_left 1 (div (+ n 1) 2)))))",
+          "a_stdout": "4\n",
+          "b_stdout": "512\n",
+          "a_stderr": "",
+          "b_stderr": "",
+          "rag_top_sim": 0.787798701695857,
+          "rag_hits": [
+            {
+              "score": 0.787798701695857,
+              "desc": "Take a non-negative integer byte count in arg0. Print it as 'X.YZ B/KB/MB/GB/TB' with 2 decimal plac"
+            },
+            {
+              "score": 0.7843523005768966,
+              "desc": "Take a positive integer n in arg0. Print the sum of squares of even integers from 2 to n inclusive."
+            },
+            {
+              "score": 0.7835858843932314,
+              "desc": "Take a non-negative integer n in arg0. Print 2^0 + 2^1 + ... + 2^n. n=0 \u2192 1; n=3 \u2192 15."
+            },
+            {
+              "score": 0.7672791997051558,
+              "desc": "Take a non-negative integer n in arg0 and a positive integer r in arg1. Print 1 + r + r^2 + ... + r^"
+            },
+            {
+              "score": 0.7576452813294494,
+              "desc": "Take a positive integer n in arg0. Print the sum of integers 1+2+...+n inclusive."
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

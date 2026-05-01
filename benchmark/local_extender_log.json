@@ -1,0 +1,37 @@
+[
+  {
+    "id": "sum_range_step_2",
+    "status": "failed",
+    "attempts": 4,
+    "last_code": "(println (sum (map_arr (range #0 (+ #1 1)) (\\x (if (eq (mod x 2) 0) x 0)))))",
+    "last_err": "Program ran cleanly but produced '20\\n' instead of the required exact output '25\\n'. Trace through your logic step by step against the expected output to find the discrepancy."
+  },
+  {
+    "id": "lucas_nth",
+    "status": "failed",
+    "attempts": 4,
+    "last_code": "(set n int #0)\n(cond\n  ((eq n 0) (println 2))\n  ((eq n 1) (println 1))\n  (true\n    (set a int 2)\n    (set b int 1)\n    (for i 2 n\n      (set t int a)\n      (set a (add a b))\n      (set b t))\n    (println a)))",
+    "last_err": "Program ran cleanly but produced '13\\n' instead of the required exact output '18\\n'. Trace through your logic step by step against the expected output to find the discrepancy."
+  },
+  {
+    "id": "padovan_nth",
+    "status": "failed",
+    "attempts": 4,
+    "last_code": "(set n int #0)\n(if (eq n 0) (println 1) (ret))\n(if (lt n 2) (println 1) (ret))\n(set a int 1)\n(set b int 1)\n(set c int 1)\n(for i 3 (add n 1)\n  (set t int c)\n  (set c (add a b))\n  (set a b)\n  (set b t))\n(println c)",
+    "last_err": "Parse error: Expected expression but got )"
+  },
+  {
+    "id": "interleave_strings",
+    "status": "failed",
+    "attempts": 4,
+    "last_code": "(set a $0)\n(set b $1)\n(set len_a (len a))\n(set len_b (len b))\n(set max_len (max len_a len_b))\n(for i 0 max_len\n  (if (lt i len_a) (print (string_get a i)))\n  (if (lt i len_b) (print (string_get b i))))\n(println)",
+    "last_err": "Program ran cleanly but produced '9749985099515253\\n' instead of the required exact output 'a1b2c345\\n'. Trace through your logic step by step against the expected output to find the discrepancy."
+  },
+  {
+    "id": "duplicate_each_char",
+    "status": "ok",
+    "attempts": 1,
+    "code": "(set s $0)\n(set n #1)\n(println (join (map_arr (chars s) (\\c (repeat c n))) \"\"))",
+    "tokens": 79
+  }
+]

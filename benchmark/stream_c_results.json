@@ -1,0 +1,1408 @@
+{
+  "sigil_model": "qwen-sigil-v2:7b",
+  "python_local_model": "qwen2.5-coder:7b",
+  "cloud_model": "claude-sonnet-4-6",
+  "n_tasks": 30,
+  "aggregates": {
+    "local_sigil": {
+      "pass": 20,
+      "sec": 225.0,
+      "wh": 11.248099999999999,
+      "cost": 0.0
+    },
+    "local_python": {
+      "pass": 14,
+      "sec": 82.70999999999998,
+      "wh": 4.1347000000000005,
+      "cost": 0.0
+    },
+    "cloud_claude-sonnet-4-6": {
+      "pass": 29,
+      "sec": 156.99999999999997,
+      "wh": 2.8452,
+      "cost": 0.08489999999999999
+    }
+  },
+  "tasks": [
+    {
+      "id": "cut_passwd_usernames",
+      "category": "common shell pattern (cut -d: -f1 < /etc/passwd)",
+      "sigil": {
+        "path": "local_sigil",
+        "pass": true,
+        "attempts": 1,
+        "code": "(set lines array (split $0 \"\\n\"))\n(for-each line string lines\n  (println (first (split line \":\"))))",
+        "seconds": 1.25,
+        "chars": 99,
+        "wh": 0.0624,
+        "cost_usd": 0.0,
+        "stdout": "root\ndaemon\nuser\n",
+        "stderr": ""
+      },
+      "python_local": {
+        "path": "local_python",
+        "pass": true,
+        "code": "import sys\n\nfor line in sys.argv[1].split('\\n'):\n    if line:\n        print(line.split(':')[0])",
+        "seconds": 2.06,
+        "chars": 95,
+        "wh": 0.1031,
+        "cost_usd": 0.0,
+        "stdout": "root\ndaemon\nuser\n",
+        "stderr": "",
+        "tokens": {
+          "prompt_tokens": 186,
+          "completion_tokens": 31
+        }
+      },
+      "cloud": {
+        "path": "cloud_claude-sonnet-4-6",
+        "pass": true,
+        "code": "import sys\n\ndata = sys.argv[1]\nfor line in data.splitlines():\n    if line:\n        print(line.split(':')[0])",
+        "seconds": 3.37,
+        "chars": 108,
+        "wh": 0.0204,
+        "cost_usd": 0.0006,
+        "stdout": "root\ndaemon\nuser\n",
+        "stderr": "",
+        "tokens": {
+          "prompt_tokens": 3,
+          "completion_tokens": 39
+        }
+      }
+    },
+    {
+      "id": "grep_count_pattern",
+      "category": "common shell pattern (grep -c)",
+      "sigil": {
+        "path": "local_sigil",
+        "pass": true,
+        "attempts": 1,
+        "code": "(set text $0)\n(set needle $1)\n(set lines (split text \"\\n\"))\n(set count 0)\n(for-each line lines\n  (if (in needle line)\n    (set count (add count 1))))\n(println count)",
+        "seconds": 6.16,
+        "chars": 165,
+        "wh": 0.3078,
+        "cost_usd": 0.0,
+        "stdout": "3\n",
+        "stderr": ""
+      },
+      "python_local": {
+        "path": "local_python",
+        "pass": false,
+        "code": "import sys\n\ntext = sys.argv[1]\nsubstring = sys.argv[2]\n\ncount = sum(1 for line in text.split('\\n') if substring in line)\n\nprint(f'{count}\\n')",
+        "seconds": 2.28,
+        "chars": 141,
+        "wh": 0.1139,
+        "cost_usd": 0.0,
+        "stdout": "3\n\n",
+        "stderr": "",
+        "tokens": {
+          "prompt_tokens": 137,
+          "completion_tokens": 47
+        }
+      },
+      "cloud": {
+        "path": "cloud_claude-sonnet-4-6",
+        "pass": true,
+        "code": "import sys\n\ntext = sys.argv[1]\nsubstring = sys.argv[2]\nlines = text.split('\\n')\nprint(sum(1 for line in lines if substring in line))",
+        "seconds": 3.62,
+        "chars": 132,
+        "wh": 0.0249,
+        "cost_usd": 0.0007,
+        "stdout": "3\n",
+        "stderr": "",
+        "tokens": {
+          "prompt_tokens": 3,
+          "completion_tokens": 48
+        }
+      }
+    },
+    {
+      "id": "tail_n_lines",
+      "category": "common shell pattern (tail -n)",
+      "sigil": {
+        "path": "local_sigil",
+        "pass": true,
+        "attempts": 1,
+        "code": "(set lines array (split $0 \"\\n\"))\n(println (join (slice lines (sub (len lines) #1)) \"\\n\"))",
+        "seconds": 5.72,
+        "chars": 90,
+        "wh": 0.286,
+        "cost_usd": 0.0,
+        "stdout": "c\nd\ne\n",
+        "stderr": ""
+      },
+      "python_local": {
+        "path": "local_python",
+        "pass": false,
+        "code": "import sys\n\ndef main():\n    text = sys.argv[1]\n    n = int(sys.argv[2])\n    lines = text.split('\\n')\n    last_n_lines = '\\n'.join(lines[-n:]) + '\\n'\n    print(last_n_lines)\n\nif __name__ == \"__main__\":\n    main()",
+        "seconds": 2.56,
+        "chars": 211,
+        "wh": 0.1279,
+        "cost_usd": 0.0,
+        "stdout": "c\nd\ne\n\n",
+        "stderr": "",
+        "tokens": {
+          "prompt_tokens": 127,
+          "completion_tokens": 70
+        }
+      },
+      "cloud": {
+        "path": "cloud_claude-sonnet-4-6",
+        "pass": true,
+        "code": "import sys\n\ntext = sys.argv[1]\nn = int(sys.argv[2])\nlines = text.split('\\n')\nfor line in lines[-n:]:\n    print(line)",
+        "seconds": 3.51,
+        "chars": 116,
+        "wh": 0.0349,
+        "cost_usd": 0.001,
+        "stdout": "c\nd\ne\n",
+        "stderr": "",
+        "tokens": {
+          "prompt_tokens": 3,
+          "completion_tokens": 68
+        }
+      }
+    },
+    {
+      "id": "head_n_lines",
+      "category": "common shell pattern (head -n)",
+      "sigil": {
+        "path": "local_sigil",
+        "pass": true,
+        "attempts": 1,
+        "code": "(set lines array (split $0 \"\\n\"))\n(println (join (slice lines 0 #1) \"\\n\"))",
+        "seconds": 5.58,
+        "chars": 74,
+        "wh": 0.279,
+        "cost_usd": 0.0,
+        "stdout": "a\nb\n",
+        "stderr": ""
+      },
+      "python_local": {
+        "path": "local_python",
+        "pass": false,
+        "code": "import sys\n\ntext = sys.argv[1]\nn = int(sys.argv[2])\nprint(text.split('\\n')[:n])",
+        "seconds": 2.04,
+        "chars": 79,
+        "wh": 0.1018,
+        "cost_usd": 0.0,
+        "stdout": "['a', 'b']\n",
+        "stderr": "",
+        "tokens": {
+          "prompt_tokens": 120,
+          "completion_tokens": 32
+        }
+      },
+      "cloud": {
+        "path": "cloud_claude-sonnet-4-6",
+        "pass": true,
+        "code": "import sys\n\ntext = sys.argv[1]\nn = int(sys.argv[2])\nlines = text.split('\\n')\nprint('\\n'.join(lines[:n]))",
+        "seconds": 4.54,
+        "chars": 104,
+        "wh": 0.0449,
+        "cost_usd": 0.0013,
+        "stdout": "a\nb\n",
+        "stderr": "",
+        "tokens": {
+          "prompt_tokens": 3,
+          "completion_tokens": 88
+        }
+      }
+    },
+    {
+      "id": "sort_uniq_count_top",
+      "category": "common shell pattern (sort | uniq -c | sort -rn | head)",
+      "sigil": {
+        "path": "local_sigil",
+        "pass": true,
+        "attempts": 2,
+        "code": "(set lines array (split $0 \"\\n\"))\n(set counts map {})\n(for-each line string lines\n  (map_inc counts line))\n(set sorted (sort_by (entries counts) (\\(k v) (- v))))\n(set result [])\n(for i 0 (len sorted)\n  (set k int (array_get (array_get sorted i) 1))\n  (push result (fmt \"   {} {}\" k (array_get (array_get sorted i) 0))))\n(println (join result \"\\n\"))",
+        "seconds": 9.04,
+        "chars": 348,
+        "wh": 0.4519,
+        "cost_usd": 0.0,
+        "stdout": "   3 apple\n   2 banana\n   1 cherry\n",
+        "stderr": ""
+      },
+      "python_local": {
+        "path": "local_python",
+        "pass": false,
+        "code": "import sys\n\nlines = sys.argv[1].split('\\n')\nline_counts = {}\n\nfor line in lines:\n    if line in line_counts:\n        line_counts[line] += 1\n    else:\n        line_counts[line] = 1\n\nsorted_lines = sorted(line_counts.items(), key=lambda x: (-x[1], lines.index(x[0])))\n\noutput = '\\n'.join(f'   {count} {line}' for line, count in sorted_lines) + '\\n'\nprint(output)",
+        "seconds": 3.08,
+        "chars": 360,
+        "wh": 0.1538,
+        "cost_usd": 0.0,
+        "stdout": "   3 apple\n   2 banana\n   1 cherry\n\n",
+        "stderr": "",
+        "tokens": {
+          "prompt_tokens": 152,
+          "completion_tokens": 110
+        }
+      },
+      "cloud": {
+        "path": "cloud_claude-sonnet-4-6",
+        "pass": true,
+        "code": "import sys\n\ntext = sys.argv[1]\nlines = text.split('\\n')\ncounts = {}\norder = []\nfor line in lines:\n    if line not in counts:\n        counts[line] = 0\n        order.append(line)\n    counts[line] += 1\n\nsorted_lines = sorted(order, key=lambda l: -counts[l])\nfor line in sorted_lines:\n    print(f\"{counts[line]:4} {line}\")",
+        "seconds": 4.81,
+        "chars": 318,
+        "wh": 0.0869,
+        "cost_usd": 0.0026,
+        "stdout": "   3 apple\n   2 banana\n   1 cherry\n",
+        "stderr": "",
+        "tokens": {
+          "prompt_tokens": 3,
+          "completion_tokens": 172
+        }
+      }
+    },
+    {
+      "id": "wc_l",
+      "category": "common shell pattern (wc -l)",
+      "sigil": {
+        "path": "local_sigil",
+        "pass": true,
+        "attempts": 3,
+        "code": "(set text string $0)\n(println (sub (len text) (len (string_replace text \"\\n\" \"\"))))",
+        "seconds": 7.04,
+        "chars": 83,
+        "wh": 0.352,
+        "cost_usd": 0.0,
+        "stdout": "2\n",
+        "stderr": ""
+      },
+      "python_local": {
+        "path": "local_python",
+        "pass": true,
+        "code": "import sys\n\nif len(sys.argv) > 1:\n    text = sys.argv[1]\n    newline_count = text.count('\\n')\n    print(newline_count)\nelse:\n    print('0')",
+        "seconds": 2.27,
+        "chars": 139,
+        "wh": 0.1135,
+        "cost_usd": 0.0,
+        "stdout": "2\n",
+        "stderr": "",
+        "tokens": {
+          "prompt_tokens": 119,
+          "completion_tokens": 47
+        }
+      },
+      "cloud": {
+        "path": "cloud_claude-sonnet-4-6",
+        "pass": true,
+        "code": "import sys\nprint(sys.argv[1].count('\\n'))",
+        "seconds": 3.09,
+        "chars": 41,
+        "wh": 0.0099,
+        "cost_usd": 0.0003,
+        "stdout": "2\n",
+        "stderr": "",
+        "tokens": {
+          "prompt_tokens": 3,
+          "completion_tokens": 18
+        }
+      }
+    },
+    {
+      "id": "wc_w",
+      "category": "common shell pattern (wc -w)",
+      "sigil": {
+        "path": "local_sigil",
+        "pass": false,
+        "attempts": 3,
+        "code": "(set s $0)\n(println (len (split s \" \")))",
+        "seconds": 6.5,
+        "chars": 40,
+        "wh": 0.3251,
+        "cost_usd": 0.0,
+        "stdout": "",
+        "stderr": "got '6\\n' expected '4\\n'"
+      },
+      "python_local": {
+        "path": "local_python",
+        "pass": true,
+        "code": "import sys\n\nif len(sys.argv) > 1:\n    tokens = sys.argv[1].split()\n    print(len(tokens))\nelse:\n    print(0)",
+        "seconds": 2.12,
+        "chars": 108,
+        "wh": 0.1058,
+        "cost_usd": 0.0,
+        "stdout": "4\n",
+        "stderr": "",
+        "tokens": {
+          "prompt_tokens": 112,
+          "completion_tokens": 39
+        }
+      },
+      "cloud": {
+        "path": "cloud_claude-sonnet-4-6",
+        "pass": true,
+        "code": "import sys\nprint(len(sys.argv[1].split()))",
+        "seconds": 3.63,
+        "chars": 42,
+        "wh": 0.0099,
+        "cost_usd": 0.0003,
+        "stdout": "4\n",
+        "stderr": "",
+        "tokens": {
+          "prompt_tokens": 3,
+          "completion_tokens": 18
+        }
+      }
+    },
+    {
+      "id": "find_with_extension",
+      "category": "common shell pattern (find . -name '*.ext')",
+      "sigil": {
+        "path": "local_sigil",
+        "pass": true,
+        "attempts": 1,
+        "code": "(set lines array (split $0 \"\\n\"))\n(for-each line string lines\n  (set parts array (split line \".\"))\n  (if (eq (last parts) $1)\n    (println line)))",
+        "seconds": 6.1,
+        "chars": 146,
+        "wh": 0.305,
+        "cost_usd": 0.0,
+        "stdout": "main.py\nutils.py\ntest_a.py\n",
+        "stderr": ""
+      },
+      "python_local": {
+        "path": "local_python",
+        "pass": false,
+        "code": "import sys\n\ndef filter_filenames(filenames, extension):\n    return '\\n'.join([filename for filename in filenames.split('\\n') if filename.endswith('.' + extension)]) + '\\n'\n\nif __name__ == \"__main__\":\n    input_data = sys.argv[1]\n    target_extension = sys.argv[2]\n    result = filter_filenames(input_data, target_extension)\n    print(result)",
+        "seconds": 2.72,
+        "chars": 341,
+        "wh": 0.1361,
+        "cost_usd": 0.0,
+        "stdout": "main.py\nutils.py\ntest_a.py\n\n",
+        "stderr": "",
+        "tokens": {
+          "prompt_tokens": 148,
+          "completion_tokens": 84
+        }
+      },
+      "cloud": {
+        "path": "cloud_claude-sonnet-4-6",
+        "pass": true,
+        "code": "import sys\n\nfilenames = sys.argv[1].split('\\n')\next = sys.argv[2]\n\nfor f in filenames:\n    if f.endswith('.' + ext):\n        print(f)",
+        "seconds": 3.2,
+        "chars": 133,
+        "wh": 0.0274,
+        "cost_usd": 0.0008,
+        "stdout": "main.py\nutils.py\ntest_a.py\n",
+        "stderr": "",
+        "tokens": {
+          "prompt_tokens": 3,
+          "completion_tokens": 53
+        }
+      }
+    },
+    {
+      "id": "awk_filter_field_gt",
+      "category": "common shell pattern (awk -F, '$3>100')",
+      "sigil": {
+        "path": "local_sigil",
+        "pass": true,
+        "attempts": 1,
+        "code": "(set rows (split $0 \"\\n\"))\n(for-each row (filter (rest rows) (\\r (gt (first (parse_ints (get_or (split r \",\") #1 \"0\"))) #2)))\n  (println row))",
+        "seconds": 6.4,
+        "chars": 142,
+        "wh": 0.3198,
+        "cost_usd": 0.0,
+        "stdout": "b,2,150\nd,4,200\n",
+        "stderr": ""
+      },
+      "python_local": {
+        "path": "local_python",
+        "pass": true,
+        "code": "import sys\n\ndef filter_csv_rows(csv_string, column_index, threshold):\n    rows = csv_string.strip().split('\\n')\n    filtered_rows = [row for row in rows if int(row.split(',')[int(column_index)]) > int(threshold)]\n    return '\\n'.join(filtered_rows)\n\nif __name__ == \"__main__\":\n    csv_input = sys.argv[1]\n    column_index = sys.argv[2]\n    threshold = sys.argv[3]\n    result = filter_csv_rows(csv_input, column_index, threshold)\n    print(result)",
+        "seconds": 3.0,
+        "chars": 446,
+        "wh": 0.1501,
+        "cost_usd": 0.0,
+        "stdout": "b,2,150\nd,4,200\n",
+        "stderr": "",
+        "tokens": {
+          "prompt_tokens": 186,
+          "completion_tokens": 116
+        }
+      },
+      "cloud": {
+        "path": "cloud_claude-sonnet-4-6",
+        "pass": true,
+        "code": "import sys\n\ndata = sys.argv[1]\ncol = int(sys.argv[2])\nthreshold = int(sys.argv[3])\n\nfor row in data.splitlines():\n    parts = row.split(',')\n    if int(parts[col]) > threshold:\n        print(row)",
+        "seconds": 4.18,
+        "chars": 195,
+        "wh": 0.0369,
+        "cost_usd": 0.0011,
+        "stdout": "b,2,150\nd,4,200\n",
+        "stderr": "",
+        "tokens": {
+          "prompt_tokens": 3,
+          "completion_tokens": 72
+        }
+      }
+    },
+    {
+      "id": "cut_first_n_chars",
+      "category": "common shell pattern (cut -c1-N)",
+      "sigil": {
+        "path": "local_sigil",
+        "pass": true,
+        "attempts": 1,
+        "code": "(set lines array (split $0 \"\\n\"))\n(for-each line string lines\n  (println (string_slice line 0 #1)))",
+        "seconds": 5.69,
+        "chars": 99,
+        "wh": 0.2847,
+        "cost_usd": 0.0,
+        "stdout": "abc\nhel\n123\n",
+        "stderr": ""
+      },
+      "python_local": {
+        "path": "local_python",
+        "pass": false,
+        "code": "import sys\n\ntext = sys.argv[0]\nn = int(sys.argv[1])\n\noutput = ''.join(line[:n] for line in text.split('\\n'))\nprint(output)",
+        "seconds": 2.2,
+        "chars": 122,
+        "wh": 0.11,
+        "cost_usd": 0.0,
+        "stdout": "",
+        "stderr": "",
+        "tokens": {
+          "prompt_tokens": 136,
+          "completion_tokens": 42
+        }
+      },
+      "cloud": {
+        "path": "cloud_claude-sonnet-4-6",
+        "pass": true,
+        "code": "import sys\ntext = sys.argv[1]\nn = int(sys.argv[2])\nfor line in text.split('\\n'):\n    print(line[:n])",
+        "seconds": 3.23,
+        "chars": 100,
+        "wh": 0.0494,
+        "cost_usd": 0.0015,
+        "stdout": "abc\nhel\n123\n",
+        "stderr": "",
+        "tokens": {
+          "prompt_tokens": 3,
+          "completion_tokens": 97
+        }
+      }
+    },
+    {
+      "id": "grep_invert",
+      "category": "common shell pattern (grep -v)",
+      "sigil": {
+        "path": "local_sigil",
+        "pass": true,
+        "attempts": 1,
+        "code": "(set logs string $0)\n(set pattern string $1)\n(set lines array (split logs \"\\n\"))\n(for-each line string lines\n  (if (not (in pattern line))\n    (println line)))",
+        "seconds": 5.91,
+        "chars": 159,
+        "wh": 0.2955,
+        "cost_usd": 0.0,
+        "stdout": "info: b\nwarn: d\n",
+        "stderr": ""
+      },
+      "python_local": {
+        "path": "local_python",
+        "pass": false,
+        "code": "import sys\n\nif len(sys.argv) != 3:\n    print(\"Usage: python script.py <text> <substring>\")\n    sys.exit(1)\n\ntext = sys.argv[1]\nsubstring = sys.argv[2]\n\nlines = text.split('\\n')\nfiltered_lines = [line for line in lines if substring not in line]\noutput = '\\n'.join(filtered_lines) + '\\n'\n\nprint(output)",
+        "seconds": 2.81,
+        "chars": 300,
+        "wh": 0.1403,
+        "cost_usd": 0.0,
+        "stdout": "info: b\nwarn: d\n\n",
+        "stderr": "",
+        "tokens": {
+          "prompt_tokens": 130,
+          "completion_tokens": 89
+        }
+      },
+      "cloud": {
+        "path": "cloud_claude-sonnet-4-6",
+        "pass": true,
+        "code": "import sys\n\ntext = sys.argv[1]\nsubstring = sys.argv[2]\n\nfor line in text.splitlines():\n    if substring not in line:\n        print(line)",
+        "seconds": 3.6,
+        "chars": 136,
+        "wh": 0.0239,
+        "cost_usd": 0.0007,
+        "stdout": "info: b\nwarn: d\n",
+        "stderr": "",
+        "tokens": {
+          "prompt_tokens": 3,
+          "completion_tokens": 46
+        }
+      }
+    },
+    {
+      "id": "grep_only_matching",
+      "category": "common shell pattern (grep -o)",
+      "sigil": {
+        "path": "local_sigil",
+        "pass": true,
+        "attempts": 1,
+        "code": "(set text string $0)\n(set pattern string $1)\n(for-each line string (split text \"\\n\")\n  (for-each m (regex_find_all (regex_compile pattern) line)\n    (println m)))",
+        "seconds": 6.0,
+        "chars": 162,
+        "wh": 0.2998,
+        "cost_usd": 0.0,
+        "stdout": "foo\nfoo\nfoo\nfoo\n",
+        "stderr": ""
+      },
+      "python_local": {
+        "path": "local_python",
+        "pass": true,
+        "code": "import sys\n\ndef find_substring_occurrences(text, substring):\n    occurrences = []\n    lines = text.split('\\n')\n    for line in lines:\n        start = 0\n        while True:\n            start = line.find(substring, start)\n            if start == -1:\n                break\n            occurrences.append(line[start:start+len(substring)])\n            start += len(substring)\n    return '\\n'.join(occurrences)\n\nif __name__ == \"__main__\":\n    text = sys.argv[1]\n    substring = sys.argv[2]\n    result = find_substring_occurrences(text, substring)\n    print(result)",
+        "seconds": 3.34,
+        "chars": 558,
+        "wh": 0.1671,
+        "cost_usd": 0.0,
+        "stdout": "foo\nfoo\nfoo\nfoo\n",
+        "stderr": "",
+        "tokens": {
+          "prompt_tokens": 136,
+          "completion_tokens": 133
+        }
+      },
+      "cloud": {
+        "path": "cloud_claude-sonnet-4-6",
+        "pass": true,
+        "code": "import sys\n\ntext = sys.argv[1]\nsub = sys.argv[2]\n\nstart = 0\nwhile True:\n    idx = text.find(sub, start)\n    if idx == -1:\n        break\n    print(sub)\n    start = idx + len(sub)",
+        "seconds": 14.21,
+        "chars": 177,
+        "wh": 0.4134,
+        "cost_usd": 0.0124,
+        "stdout": "foo\nfoo\nfoo\nfoo\n",
+        "stderr": "",
+        "tokens": {
+          "prompt_tokens": 3,
+          "completion_tokens": 825
+        }
+      }
+    },
+    {
+      "id": "extract_emails",
+      "category": "common shell pattern (grep -oE 'email-regex')",
+      "sigil": {
+        "path": "local_sigil",
+        "pass": false,
+        "attempts": 3,
+        "code": "(set pat (regex_compile \"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}\"))\n(for-each email (sort (uniq (regex_find_all pat $0)))\n  (println email))",
+        "seconds": 9.01,
+        "chars": 147,
+        "wh": 0.4503,
+        "cost_usd": 0.0,
+        "stdout": "",
+        "stderr": "got 'alice@example.com or\\nbob.smith@foo.bar.io for\\ntest@x.co\\n' expected 'alice@example.com\\nbob.smith@foo.bar.io\\ntest@x.co\\n'"
+      },
+      "python_local": {
+        "path": "local_python",
+        "pass": true,
+        "code": "import sys\nimport re\n\ndef extract_emails(input_string):\n    email_pattern = r'\\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Z|a-z]{2,6}\\b'\n    emails = re.findall(email_pattern, input_string)\n    for email in emails:\n        print(email)\n\nif __name__ == \"__main__\":\n    if len(sys.argv) > 1:\n        extract_emails(' '.join(sys.argv[1:]))",
+        "seconds": 3.01,
+        "chars": 331,
+        "wh": 0.1507,
+        "cost_usd": 0.0,
+        "stdout": "alice@example.com\nbob.smith@foo.bar.io\ntest@x.co\n",
+        "stderr": "",
+        "tokens": {
+          "prompt_tokens": 178,
+          "completion_tokens": 107
+        }
+      },
+      "cloud": {
+        "path": "cloud_claude-sonnet-4-6",
+        "pass": true,
+        "code": "import sys\nimport re\n\ntext = sys.argv[1]\npattern = r'[a-zA-Z0-9][a-zA-Z0-9.]*@[a-zA-Z0-9][a-zA-Z0-9.]*\\.[a-zA-Z]{2,6}\\b'\nfor match in re.findall(pattern, text):\n    print(match)",
+        "seconds": 22.69,
+        "chars": 177,
+        "wh": 0.8499,
+        "cost_usd": 0.0255,
+        "stdout": "alice@example.com\nbob.smith@foo.bar.io\ntest@x.co\n",
+        "stderr": "",
+        "tokens": {
+          "prompt_tokens": 3,
+          "completion_tokens": 1698
+        }
+      }
+    },
+    {
+      "id": "find_max_in_log",
+      "category": "log analysis (find peak number)",
+      "sigil": {
+        "path": "local_sigil",
+        "pass": false,
+        "attempts": 3,
+        "code": "(set logs string $0)\n(set lines array (split logs \"\\n\"))\n(set max_time int 0)\n\n(for-each line string lines\n  (set parts array (split line \" \"))\n  (for-each p string parts\n    (if (in \"took\" p)\n      (do\n        (set nums array (filter (\\c (is_digit c)) (chars p)))\n        (set num_str string (join nums \"\"))\n        (set time int (string_to_int num_str))\n        (if (gt time max_time) (set max_time time))))))\n\n(println (fmt \"{}\\n\" max_time))",
+        "seconds": 13.0,
+        "chars": 444,
+        "wh": 0.6499,
+        "cost_usd": 0.0,
+        "stdout": "",
+        "stderr": "Runtime error: Cannot convert to int:"
+      },
+      "python_local": {
+        "path": "local_python",
+        "pass": false,
+        "code": "import sys\n\nif __name__ == \"__main__\":\n    log = sys.argv[1]\n    max_time = 0\n    for line in log.split('\\n'):\n        if 'took' in line and 'ms' in line:\n            time_str = line.split('took ')[1].split('ms')[0]\n            time = int(time_str)\n            if time > max_time:\n                max_time = time\n    print(f'{max_time}\\n')",
+        "seconds": 2.96,
+        "chars": 339,
+        "wh": 0.1481,
+        "cost_usd": 0.0,
+        "stdout": "150\n\n",
+        "stderr": "",
+        "tokens": {
+          "prompt_tokens": 163,
+          "completion_tokens": 100
+        }
+      },
+      "cloud": {
+        "path": "cloud_claude-sonnet-4-6",
+        "pass": true,
+        "code": "import sys\nimport re\n\ntext = sys.argv[1]\nnums = [int(m.group(1)) for m in re.finditer(r'took (\\d+)ms', text)]\nprint(max(nums))",
+        "seconds": 6.3,
+        "chars": 126,
+        "wh": 0.1127,
+        "cost_usd": 0.0034,
+        "stdout": "150\n",
+        "stderr": "",
+        "tokens": {
+          "prompt_tokens": 4,
+          "completion_tokens": 223
+        }
+      }
+    },
+    {
+      "id": "duplicate_remover",
+      "category": "common shell pattern (sort -u or awk '!seen[$0]++')",
+      "sigil": {
+        "path": "local_sigil",
+        "pass": true,
+        "attempts": 1,
+        "code": "(set lines array (split $0 \"\\n\"))\n(set seen {})\n(for-each line string lines\n  (set already bool (has seen line))\n  (set seen (json_set seen [line] true))\n  (if (not already)\n    (println line)))",
+        "seconds": 6.25,
+        "chars": 194,
+        "wh": 0.3123,
+        "cost_usd": 0.0,
+        "stdout": "a\nb\nc\nd\n",
+        "stderr": ""
+      },
+      "python_local": {
+        "path": "local_python",
+        "pass": true,
+        "code": "import sys\n\nlines = sys.argv[1].split('\\n')\nseen = set()\nresult = []\n\nfor line in lines:\n    if line not in seen:\n        result.append(line)\n        seen.add(line)\n\nprint('\\n'.join(result))",
+        "seconds": 2.34,
+        "chars": 190,
+        "wh": 0.1172,
+        "cost_usd": 0.0,
+        "stdout": "a\nb\nc\nd\n",
+        "stderr": "",
+        "tokens": {
+          "prompt_tokens": 125,
+          "completion_tokens": 55
+        }
+      },
+      "cloud": {
+        "path": "cloud_claude-sonnet-4-6",
+        "pass": true,
+        "code": "import sys\n\ntext = sys.argv[1]\nlines = text.split('\\n')\nseen = set()\nresult = []\nfor line in lines:\n    if line not in seen:\n        seen.add(line)\n        result.append(line)\nprint('\\n'.join(result))",
+        "seconds": 3.95,
+        "chars": 200,
+        "wh": 0.0364,
+        "cost_usd": 0.0011,
+        "stdout": "a\nb\nc\nd\n",
+        "stderr": "",
+        "tokens": {
+          "prompt_tokens": 3,
+          "completion_tokens": 71
+        }
+      }
+    },
+    {
+      "id": "sed_replace_global",
+      "category": "common shell pattern (sed 's/X/Y/g')",
+      "sigil": {
+        "path": "local_sigil",
+        "pass": true,
+        "attempts": 1,
+        "code": "(println (string_replace $0 $1 $2))",
+        "seconds": 5.4,
+        "chars": 35,
+        "wh": 0.27,
+        "cost_usd": 0.0,
+        "stdout": "hi world hi\n",
+        "stderr": ""
+      },
+      "python_local": {
+        "path": "local_python",
+        "pass": false,
+        "code": "import sys\n\nif len(sys.argv) != 4:\n    print(\"Usage: python script.py <text> <target_string> <replacement_string>\")\nelse:\n    text = sys.argv[1]\n    target_string = sys.argv[2]\n    replacement_string = sys.argv[3]\n    result = text.replace(target_string, replacement_string)\n    print(result + '\\n')",
+        "seconds": 2.69,
+        "chars": 299,
+        "wh": 0.1343,
+        "cost_usd": 0.0,
+        "stdout": "hi world hi\n\n",
+        "stderr": "",
+        "tokens": {
+          "prompt_tokens": 124,
+          "completion_tokens": 82
+        }
+      },
+      "cloud": {
+        "path": "cloud_claude-sonnet-4-6",
+        "pass": true,
+        "code": "import sys\n\ntext, target, replacement = sys.argv[1], sys.argv[2], sys.argv[3]\nprint(text.replace(target, replacement))",
+        "seconds": 3.98,
+        "chars": 118,
+        "wh": 0.0214,
+        "cost_usd": 0.0006,
+        "stdout": "hi world hi\n",
+        "stderr": "",
+        "tokens": {
+          "prompt_tokens": 3,
+          "completion_tokens": 41
+        }
+      }
+    },
+    {
+      "id": "tr_squeeze_spaces",
+      "category": "common shell pattern (tr -s ' ')",
+      "sigil": {
+        "path": "local_sigil",
+        "pass": false,
+        "attempts": 3,
+        "code": "(set s string $0)\n(println (join (split (string_replace s \"  +\" \" \") \" \") \" \"))",
+        "seconds": 6.42,
+        "chars": 79,
+        "wh": 0.3212,
+        "cost_usd": 0.0,
+        "stdout": "",
+        "stderr": "got '  hello   world  foo \\n' expected ' hello world foo \\n'"
+      },
+      "python_local": {
+        "path": "local_python",
+        "pass": false,
+        "code": "import sys\n\ninput_string = ' '.join(sys.argv[1:])\nprint(input_string + '\\n')",
+        "seconds": 1.99,
+        "chars": 76,
+        "wh": 0.0995,
+        "cost_usd": 0.0,
+        "stdout": "  hello   world  foo \n\n",
+        "stderr": "",
+        "tokens": {
+          "prompt_tokens": 124,
+          "completion_tokens": 26
+        }
+      },
+      "cloud": {
+        "path": "cloud_claude-sonnet-4-6",
+        "pass": true,
+        "code": "import sys\nimport re\n\ns = sys.argv[1]\nprint(re.sub(r' +', ' ', s))",
+        "seconds": 3.53,
+        "chars": 66,
+        "wh": 0.0334,
+        "cost_usd": 0.001,
+        "stdout": " hello world foo \n",
+        "stderr": "",
+        "tokens": {
+          "prompt_tokens": 3,
+          "completion_tokens": 65
+        }
+      }
+    },
+    {
+      "id": "df_human_readable",
+      "category": "df-style output formatting",
+      "sigil": {
+        "path": "local_sigil",
+        "pass": true,
+        "attempts": 1,
+        "code": "(set n int #0)\n(if (le n 1024)\n  (println (fmt \"{} B\" n))\n  (else\n    (set units array [\"KB\" \"MB\" \"GB\" \"TB\"])\n    (set i int 0)\n    (set val float (/ (cast_int_float n) 1024.0))\n    (while (and (ge val 1024.0) (lt i 3))\n      (set val (div val 1024.0))\n      (set i (add i 1)))\n    (println (fmt \"{:.2f} {}\" val (array_get units i)))))",
+        "seconds": 7.86,
+        "chars": 335,
+        "wh": 0.3929,
+        "cost_usd": 0.0,
+        "stdout": "5.00 MB\n",
+        "stderr": ""
+      },
+      "python_local": {
+        "path": "local_python",
+        "pass": false,
+        "code": "import sys\n\ndef format_size(size):\n    units = ['B', 'KB', 'MB', 'GB', 'TB']\n    for unit in units:\n        if size < 1024:\n            return f\"{size:.2f} {unit}\\n\"\n        size /= 1024\n\nif __name__ == \"__main__\":\n    if len(sys.argv) != 2:\n        print(\"Usage: python script.py <non-negative integer>\")\n        sys.exit(1)\n    \n    try:\n        byte_count = int(sys.argv[1])\n        if byte_count < 0:\n            raise ValueError\n    except ValueError:\n        print(\"Error: Input must be a non-negative integer.\")\n        sys.exit(1)\n    \n    print(format_size(byte_count))",
+        "seconds": 3.73,
+        "chars": 578,
+        "wh": 0.1863,
+        "cost_usd": 0.0,
+        "stdout": "5.00 MB\n\n",
+        "stderr": "",
+        "tokens": {
+          "prompt_tokens": 142,
+          "completion_tokens": 164
+        }
+      },
+      "cloud": {
+        "path": "cloud_claude-sonnet-4-6",
+        "pass": true,
+        "code": "import sys\n\ndef format_bytes(n):\n    units = [('TB', 1024**4), ('GB', 1024**3), ('MB', 1024**2), ('KB', 1024), ('B', 1)]\n    for unit, factor in units:\n        value = n / factor\n        if value >= 1:\n            return f\"{value:.2f} {unit}\"\n    return f\"{n:.2f} B\"\n\nprint(format_bytes(int(sys.argv[1])))",
+        "seconds": 4.3,
+        "chars": 305,
+        "wh": 0.0859,
+        "cost_usd": 0.0026,
+        "stdout": "5.00 MB\n",
+        "stderr": "",
+        "tokens": {
+          "prompt_tokens": 3,
+          "completion_tokens": 170
+        }
+      }
+    },
+    {
+      "id": "process_grep",
+      "category": "ps aux | grep pattern | grep -v grep",
+      "sigil": {
+        "path": "local_sigil",
+        "pass": true,
+        "attempts": 1,
+        "code": "(set pat string $1)\n(set lines array (split $0 \"\\n\"))\n(filter lines (\\line (if (and (in pat line) (not (in \"grep\" line))) (println line))))",
+        "seconds": 5.99,
+        "chars": 139,
+        "wh": 0.2993,
+        "cost_usd": 0.0,
+        "stdout": "user 890 python script.py\n",
+        "stderr": ""
+      },
+      "python_local": {
+        "path": "local_python",
+        "pass": true,
+        "code": "import sys\n\ndef filter_lines(lines, pattern):\n    return [line for line in lines if pattern in line and 'grep' not in line]\n\nif __name__ == \"__main__\":\n    input_data = sys.argv[1]\n    pattern = sys.argv[2]\n    lines = input_data.split('\\n')\n    filtered_lines = filter_lines(lines, pattern)\n    print('\\n'.join(filtered_lines))",
+        "seconds": 2.82,
+        "chars": 328,
+        "wh": 0.1411,
+        "cost_usd": 0.0,
+        "stdout": "user 890 python script.py\n",
+        "stderr": "",
+        "tokens": {
+          "prompt_tokens": 161,
+          "completion_tokens": 88
+        }
+      },
+      "cloud": {
+        "path": "cloud_claude-sonnet-4-6",
+        "pass": true,
+        "code": "import sys\n\nlines = sys.argv[1].split('\\n')\npattern = sys.argv[2]\n\nfor line in lines:\n    if pattern in line and 'grep' not in line:\n        print(line)",
+        "seconds": 3.13,
+        "chars": 152,
+        "wh": 0.0279,
+        "cost_usd": 0.0008,
+        "stdout": "user 890 python script.py\n",
+        "stderr": "",
+        "tokens": {
+          "prompt_tokens": 3,
+          "completion_tokens": 54
+        }
+      }
+    },
+    {
+      "id": "git_log_format",
+      "category": "git log --pretty=format formatting",
+      "sigil": {
+        "path": "local_sigil",
+        "pass": true,
+        "attempts": 1,
+        "code": "(set lines array (split $0 \"\\n\"))\n(for-each line string lines\n  (set parts array (split line \" \"))\n  (println (fmt \"{}: {}\" (first (slice parts 1)) (join (rest (slice parts 1)) \" \"))))",
+        "seconds": 6.65,
+        "chars": 184,
+        "wh": 0.3323,
+        "cost_usd": 0.0,
+        "stdout": "alice: fix: typo\nbob: feat: new feature\ncarol: refactor: simplify\n",
+        "stderr": ""
+      },
+      "python_local": {
+        "path": "local_python",
+        "pass": true,
+        "code": "import sys\n\ninput_data = sys.argv[1]\nlines = input_data.split('\\n')\noutput = ''\n\nfor line in lines:\n    if line:\n        parts = line.split(' ', 2)\n        if len(parts) > 2:\n            author = parts[1]\n            message = ' '.join(parts[2:])\n            output += f'{author}: {message}\\n'\n\nprint(output.strip())",
+        "seconds": 2.78,
+        "chars": 316,
+        "wh": 0.1389,
+        "cost_usd": 0.0,
+        "stdout": "alice: fix: typo\nbob: feat: new feature\ncarol: refactor: simplify\n",
+        "stderr": "",
+        "tokens": {
+          "prompt_tokens": 174,
+          "completion_tokens": 88
+        }
+      },
+      "cloud": {
+        "path": "cloud_claude-sonnet-4-6",
+        "pass": true,
+        "code": "import sys\n\nfor line in sys.argv[1].splitlines():\n    parts = line.split(' ', 2)\n    print(f\"{parts[1]}: {parts[2]}\")",
+        "seconds": 4.73,
+        "chars": 117,
+        "wh": 0.0844,
+        "cost_usd": 0.0025,
+        "stdout": "alice: fix: typo\nbob: feat: new feature\ncarol: refactor: simplify\n",
+        "stderr": "",
+        "tokens": {
+          "prompt_tokens": 3,
+          "completion_tokens": 167
+        }
+      }
+    },
+    {
+      "id": "json_path_extract",
+      "category": "jq '.field' style extraction",
+      "sigil": {
+        "path": "local_sigil",
+        "pass": true,
+        "attempts": 1,
+        "code": "(set j json (json_parse $0))\n(println (json_get j [$1]))",
+        "seconds": 5.16,
+        "chars": 56,
+        "wh": 0.2578,
+        "cost_usd": 0.0,
+        "stdout": "alice\n",
+        "stderr": ""
+      },
+      "python_local": {
+        "path": "local_python",
+        "pass": true,
+        "code": "import sys\nimport json\n\ndef print_json_value(json_str, key):\n    try:\n        data = json.loads(json_str)\n        value = data.get(key, None)\n        if isinstance(value, str):\n            print(value)\n        elif isinstance(value, (int, float)):\n            print(value)\n        else:\n            print('null')\n    except json.JSONDecodeError:\n        print('null')\n\nif __name__ == \"__main__\":\n    if len(sys.argv) != 3:\n        print('Usage: python script.py <json_string> <key>')\n        sys.exit(1)\n\n    json_str = sys.argv[1]\n    key = sys.argv[2]\n\n    print_json_value(json_str, key)",
+        "seconds": 3.56,
+        "chars": 590,
+        "wh": 0.1782,
+        "cost_usd": 0.0,
+        "stdout": "alice\n",
+        "stderr": "",
+        "tokens": {
+          "prompt_tokens": 166,
+          "completion_tokens": 150
+        }
+      },
+      "cloud": {
+        "path": "cloud_claude-sonnet-4-6",
+        "pass": true,
+        "code": "import sys\nimport json\n\ndata = json.loads(sys.argv[1])\nkey = sys.argv[2]\n\nif key not in data:\n    print('null')\nelse:\n    value = data[key]\n    print(value)",
+        "seconds": 3.96,
+        "chars": 156,
+        "wh": 0.0309,
+        "cost_usd": 0.0009,
+        "stdout": "alice\n",
+        "stderr": "",
+        "tokens": {
+          "prompt_tokens": 3,
+          "completion_tokens": 60
+        }
+      }
+    },
+    {
+      "id": "csv_to_tsv",
+      "category": "common shell pattern (tr ',' '\\t')",
+      "sigil": {
+        "path": "local_sigil",
+        "pass": true,
+        "attempts": 1,
+        "code": "(set csv string $0)\n(println (string_replace csv \",\" \"\\t\"))",
+        "seconds": 5.23,
+        "chars": 59,
+        "wh": 0.2615,
+        "cost_usd": 0.0,
+        "stdout": "a\tb\tc\n1\t2\t3\n",
+        "stderr": ""
+      },
+      "python_local": {
+        "path": "local_python",
+        "pass": true,
+        "code": "import sys\n\ncsv_string = sys.argv[1]\ntabbed_string = csv_string.replace(',', '\\t')\nprint(tabbed_string)",
+        "seconds": 2.05,
+        "chars": 103,
+        "wh": 0.1023,
+        "cost_usd": 0.0,
+        "stdout": "a\tb\tc\n1\t2\t3\n",
+        "stderr": "",
+        "tokens": {
+          "prompt_tokens": 139,
+          "completion_tokens": 32
+        }
+      },
+      "cloud": {
+        "path": "cloud_claude-sonnet-4-6",
+        "pass": true,
+        "code": "import sys\nprint(sys.argv[1].replace(',', '\\t'))",
+        "seconds": 3.14,
+        "chars": 48,
+        "wh": 0.0109,
+        "cost_usd": 0.0003,
+        "stdout": "a\tb\tc\n1\t2\t3\n",
+        "stderr": "",
+        "tokens": {
+          "prompt_tokens": 3,
+          "completion_tokens": 20
+        }
+      }
+    },
+    {
+      "id": "extract_urls",
+      "category": "grep -oE 'http[s]?://...'",
+      "sigil": {
+        "path": "local_sigil",
+        "pass": true,
+        "attempts": 1,
+        "code": "(set text string $0)\n(set lines array (split text \"\\n\"))\n(for-each line string lines\n  (set parts array (split line \" \"))\n  (for-each part string parts\n    (if (or (string_starts_with part \"http://\") (string_starts_with part \"https://\"))\n      (println part))))",
+        "seconds": 6.03,
+        "chars": 261,
+        "wh": 0.3015,
+        "cost_usd": 0.0,
+        "stdout": "https://example.com\nhttp://foo.io\nhttps://x.y/path\n",
+        "stderr": ""
+      },
+      "python_local": {
+        "path": "local_python",
+        "pass": true,
+        "code": "import sys\n\ndef extract_urls(text):\n    urls = []\n    i = 0\n    while i < len(text):\n        if text[i:i+7] == \"http://\" or text[i:i+8] == \"https://\":\n            start = i\n            while i < len(text) and not text[i].isspace():\n                i += 1\n            urls.append(text[start:i])\n        else:\n            i += 1\n    return urls\n\nif __name__ == \"__main__\":\n    if len(sys.argv) > 1:\n        input_text = sys.argv[1]\n        urls = extract_urls(input_text)\n        for url in urls:\n            print(url)",
+        "seconds": 3.45,
+        "chars": 517,
+        "wh": 0.1727,
+        "cost_usd": 0.0,
+        "stdout": "https://example.com\nhttp://foo.io\nhttps://x.y/path\n",
+        "stderr": "",
+        "tokens": {
+          "prompt_tokens": 159,
+          "completion_tokens": 144
+        }
+      },
+      "cloud": {
+        "path": "cloud_claude-sonnet-4-6",
+        "pass": true,
+        "code": "import sys\nimport re\n\ntext = sys.argv[1]\nfor url in re.findall(r'https?://\\S+', text):\n    print(url)",
+        "seconds": 3.32,
+        "chars": 101,
+        "wh": 0.0224,
+        "cost_usd": 0.0007,
+        "stdout": "https://example.com\nhttp://foo.io\nhttps://x.y/path\n",
+        "stderr": "",
+        "tokens": {
+          "prompt_tokens": 3,
+          "completion_tokens": 43
+        }
+      }
+    },
+    {
+      "id": "uniq_c_simple",
+      "category": "uniq -c (consecutive duplicates count)",
+      "sigil": {
+        "path": "local_sigil",
+        "pass": true,
+        "attempts": 1,
+        "code": "(set lines array (split $0 \"\\n\"))\n(set i 0)\n(set n int (len lines))\n(while (lt i n)\n  (set line string (array_get lines i))\n  (set count int 1)\n  (set j int (add i 1))\n  (while (and (lt j n) (eq (array_get lines j) line))\n    (set count (add count 1))\n    (set j (add j 1)))\n  (println (fmt \"{:>4} {}\" count line))\n  (set i j))",
+        "seconds": 7.23,
+        "chars": 327,
+        "wh": 0.3613,
+        "cost_usd": 0.0,
+        "stdout": "   2 apple\n   1 banana\n   3 apple\n",
+        "stderr": ""
+      },
+      "python_local": {
+        "path": "local_python",
+        "pass": true,
+        "code": "import sys\n\ntext = sys.argv[1]\nlines = text.split('\\n')\nresult = []\n\ni = 0\nwhile i < len(lines):\n    count = 1\n    while i + 1 < len(lines) and lines[i] == lines[i + 1]:\n        i += 1\n        count += 1\n    result.append(f'{count:4} {lines[i]}')\n    i += 1\n\nprint('\\n'.join(result))",
+        "seconds": 2.94,
+        "chars": 283,
+        "wh": 0.1468,
+        "cost_usd": 0.0,
+        "stdout": "   2 apple\n   1 banana\n   3 apple\n",
+        "stderr": "",
+        "tokens": {
+          "prompt_tokens": 148,
+          "completion_tokens": 102
+        }
+      },
+      "cloud": {
+        "path": "cloud_claude-sonnet-4-6",
+        "pass": true,
+        "code": "import sys\nfrom itertools import groupby\n\ntext = sys.argv[1]\nlines = text.split('\\n')\nfor key, group in groupby(lines):\n    count = sum(1 for _ in group)\n    print(f\"{count:4} {key}\")",
+        "seconds": 4.23,
+        "chars": 183,
+        "wh": 0.0644,
+        "cost_usd": 0.0019,
+        "stdout": "   2 apple\n   1 banana\n   3 apple\n",
+        "stderr": "",
+        "tokens": {
+          "prompt_tokens": 3,
+          "completion_tokens": 127
+        }
+      }
+    },
+    {
+      "id": "split_at_blank_lines",
+      "category": "common parsing pattern (paragraph splitting)",
+      "sigil": {
+        "path": "local_sigil",
+        "pass": false,
+        "attempts": 3,
+        "code": "(set lines array (split $0 \"\\n\"))\n(set paragraphs array [])\n(set curr string \"\")\n(for-each line string lines\n  (if (eq line \"\")\n    (if (gt (len curr) 0)\n      (set paragraphs (push paragraphs (join (filter (\\x (ne x \"\")) (split curr \"\\n\")) \" \"))))))\n  (else (set curr (string_concat curr (fmt \"{}\\n\" line)))))\n(if (gt (len curr) 0)\n  (set paragraphs (push paragraphs (join (filter (\\x (ne x \"\")) (split curr \"\\n\")) \" \"))))\n(for-each p string paragraphs\n  (println p))\n(if (gt (len paragraphs) 0)\n  (println \"---\"))",
+        "seconds": 11.15,
+        "chars": 515,
+        "wh": 0.5573,
+        "cost_usd": 0.0,
+        "stdout": "",
+        "stderr": "Parse error: Expected expression but got )"
+      },
+      "python_local": {
+        "path": "local_python",
+        "pass": false,
+        "code": "import sys\n\ndef process_paragraphs(text):\n    paragraphs = text.strip().split('\\n\\n')\n    processed_paragraphs = [' '.join(p.splitlines()) for p in paragraphs]\n    return '\\n'.join(processed_paragraphs + ['---'])\n\nif __name__ == \"__main__\":\n    input_text = sys.argv[1]\n    output = process_paragraphs(input_text)\n    print(output)",
+        "seconds": 2.74,
+        "chars": 331,
+        "wh": 0.1368,
+        "cost_usd": 0.0,
+        "stdout": "hello world\nfoo bar baz\nlast\n---\n",
+        "stderr": "",
+        "tokens": {
+          "prompt_tokens": 165,
+          "completion_tokens": 86
+        }
+      },
+      "cloud": {
+        "path": "cloud_claude-sonnet-4-6",
+        "pass": false,
+        "code": "import sys\nimport re\n\ntext = sys.argv[1]\nparagraphs = re.split(r'\\n{2,}', text.strip())\nlines = [' '.join(p.split('\\n')) for p in paragraphs]\nprint('---\\n'.join(line + '\\n' for line in lines), end='')\nprint()",
+        "seconds": 10.44,
+        "chars": 208,
+        "wh": 0.2555,
+        "cost_usd": 0.0076,
+        "stdout": "hello world\n---\nfoo bar baz\n---\nlast\n\n",
+        "stderr": "",
+        "tokens": {
+          "prompt_tokens": 5,
+          "completion_tokens": 508
+        }
+      }
+    },
+    {
+      "id": "permission_octal_to_symbolic",
+      "category": "common admin task (translate file permissions)",
+      "sigil": {
+        "path": "local_sigil",
+        "pass": false,
+        "attempts": 3,
+        "code": "(set perm string $0)\n(set r int (string_get perm 0))\n(set w int (string_get perm 1))\n(set x int (string_get perm 2))\n\n(fn to_char n int -> string\n  (if (eq n 48) (ret \"-\"))\n  (set n (sub n 32))\n  (if (gt n 56) (set n (sub n 32)))\n  (ret (char_from_code (add 97 (sub n 49)))))\n\n(set r1 string (to_char r))\n(set w1 string (to_char w))\n(set x1 string (to_char x))\n\n(println (string_concat (string_concat (string_concat r1 w1) x1) \"rwxr-xr-x\"))",
+        "seconds": 13.48,
+        "chars": 440,
+        "wh": 0.6739,
+        "cost_usd": 0.0,
+        "stdout": "",
+        "stderr": "got 'GEErwxr-xr-x\\n' expected 'rwxr-xr-x\\n'"
+      },
+      "python_local": {
+        "path": "local_python",
+        "pass": false,
+        "code": "import sys\n\ndef octal_to_symbolic(octal):\n    permissions = 'rwx'\n    symbolic = ''\n    for digit in octal:\n        for i in range(3):\n            if int(digit) & (1 << (2 - i)):\n                symbolic += permissions[i]\n            else:\n                symbolic += '-'\n        symbolic += ' '\n    return symbolic.strip() + '\\n'\n\nif __name__ == \"__main__\":\n    if len(sys.argv) != 2 or not sys.argv[1].isdigit() or len(sys.argv[1]) != 3:\n        print(\"Usage: python script.py <3-digit octal permission>\")\n    else:\n        print(octal_to_symbolic(sys.argv[1]))",
+        "seconds": 3.58,
+        "chars": 563,
+        "wh": 0.1789,
+        "cost_usd": 0.0,
+        "stdout": "rwx r-x r-x\n\n",
+        "stderr": "",
+        "tokens": {
+          "prompt_tokens": 133,
+          "completion_tokens": 153
+        }
+      },
+      "cloud": {
+        "path": "cloud_claude-sonnet-4-6",
+        "pass": true,
+        "code": "import sys\n\ndef octal_to_symbolic(octal_str):\n    perms = []\n    for digit in octal_str:\n        n = int(digit)\n        perms.append('r' if n & 4 else '-')\n        perms.append('w' if n & 2 else '-')\n        perms.append('x' if n & 1 else '-')\n    return ''.join(perms)\n\nprint(octal_to_symbolic(sys.argv[1]))",
+        "seconds": 8.47,
+        "chars": 308,
+        "wh": 0.1822,
+        "cost_usd": 0.0054,
+        "stdout": "rwxr-xr-x\n",
+        "stderr": "",
+        "tokens": {
+          "prompt_tokens": 4,
+          "completion_tokens": 362
+        }
+      }
+    },
+    {
+      "id": "ipv4_validate",
+      "category": "config validation (ip address check)",
+      "sigil": {
+        "path": "local_sigil",
+        "pass": false,
+        "attempts": 3,
+        "code": "(set parts array (split $0 \".\"))\n(if (ne (len parts) 4)\n  (println \"no\")\n  (else\n    (set ok true)\n    (for-each p string parts\n      (cond\n        ((eq (len p) 0) (set ok false))\n        ((and (gt (len p) 1) (eq (string_get p 0) 48)) (set ok false))\n        (true\n          (set n int (len p))\n          (for i 0 n\n            (if (not (is_digit (string_get p i)))\n              (set ok false)))))))\n    (if ok (println \"yes\") (else (println \"no\")))))",
+        "seconds": 14.72,
+        "chars": 452,
+        "wh": 0.7362,
+        "cost_usd": 0.0,
+        "stdout": "",
+        "stderr": "Parse error: else block must be the last item in an if expression"
+      },
+      "python_local": {
+        "path": "local_python",
+        "pass": false,
+        "code": "import sys\n\ndef is_valid_ipv4(ip):\n    parts = ip.split('.')\n    if len(parts) != 4:\n        return False\n    for part in parts:\n        if not part.isdigit():\n            return False\n        num = int(part)\n        if num < 0 or num > 255 or (len(part) > 1 and part[0] == '0'):\n            return False\n    return True\n\nif __name__ == \"__main__\":\n    ip = sys.argv[1]\n    print('yes\\n' if is_valid_ipv4(ip) else 'no\\n')",
+        "seconds": 3.27,
+        "chars": 421,
+        "wh": 0.1634,
+        "cost_usd": 0.0,
+        "stdout": "yes\n\n",
+        "stderr": "",
+        "tokens": {
+          "prompt_tokens": 149,
+          "completion_tokens": 128
+        }
+      },
+      "cloud": {
+        "path": "cloud_claude-sonnet-4-6",
+        "pass": true,
+        "code": "import sys\n\ndef is_valid_ipv4(s):\n    parts = s.split('.')\n    if len(parts) != 4:\n        return False\n    for part in parts:\n        if not part:\n            return False\n        if len(part) > 1 and part[0] == '0':\n            return False\n        if not part.isdigit():\n            return False\n        if not 0 <= int(part) <= 255:\n            return False\n    return True\n\nprint('yes' if is_valid_ipv4(sys.argv[1]) else 'no')",
+        "seconds": 4.29,
+        "chars": 431,
+        "wh": 0.0909,
+        "cost_usd": 0.0027,
+        "stdout": "yes\n",
+        "stderr": "",
+        "tokens": {
+          "prompt_tokens": 3,
+          "completion_tokens": 180
+        }
+      }
+    },
+    {
+      "id": "iso_date_extract",
+      "category": "log parsing (extract dates)",
+      "sigil": {
+        "path": "local_sigil",
+        "pass": false,
+        "attempts": 3,
+        "code": "(set lines array (split $0 \"\\n\"))\n(for-each line string lines\n  (set parts array (split line \" \"))\n  (if (and (ge (len (first parts)) 10) (eq (string_get (first parts) 4) 45))\n    (println (join (slice parts 1) \" \"))))",
+        "seconds": 9.59,
+        "chars": 218,
+        "wh": 0.4793,
+        "cost_usd": 0.0,
+        "stdout": "",
+        "stderr": "got 'done\\n' expected '2024-01-15\\n2024-02-30\\n2025-12-01\\n'"
+      },
+      "python_local": {
+        "path": "local_python",
+        "pass": true,
+        "code": "import sys\nimport re\n\ndef extract_dates(text):\n    date_pattern = r'\\b\\d{4}-\\d{2}-\\d{2}\\b'\n    dates = re.findall(date_pattern, text)\n    return '\\n'.join(dates)\n\nif __name__ == \"__main__\":\n    input_text = ' '.join(sys.argv[1:])\n    print(extract_dates(input_text))",
+        "seconds": 2.77,
+        "chars": 266,
+        "wh": 0.1385,
+        "cost_usd": 0.0,
+        "stdout": "2024-01-15\n2024-02-30\n2025-12-01\n",
+        "stderr": "",
+        "tokens": {
+          "prompt_tokens": 193,
+          "completion_tokens": 86
+        }
+      },
+      "cloud": {
+        "path": "cloud_claude-sonnet-4-6",
+        "pass": true,
+        "code": "import sys\nimport re\n\ntext = sys.argv[1]\ndates = re.findall(r'\\b\\d{4}-\\d{2}-\\d{2}\\b', text)\nfor date in dates:\n    print(date)",
+        "seconds": 3.01,
+        "chars": 126,
+        "wh": 0.0304,
+        "cost_usd": 0.0009,
+        "stdout": "2024-01-15\n2024-02-30\n2025-12-01\n",
+        "stderr": "",
+        "tokens": {
+          "prompt_tokens": 3,
+          "completion_tokens": 59
+        }
+      }
+    },
+    {
+      "id": "shell_argv_count",
+      "category": "shell scripting (process argv)",
+      "sigil": {
+        "path": "local_sigil",
+        "pass": false,
+        "attempts": 3,
+        "code": "(set args array (argv))\n(set counts map {})\n(for-each arg string args\n  (if (not (in arg counts))\n    (set counts (map_set counts arg 0)))\n  (set counts (map_set counts arg (+ (map_get counts arg) 1))))\n(println (join (sort (map_kv (\\k v (fmt \"{}={}\" k v)) counts)) \" \"))",
+        "seconds": 10.08,
+        "chars": 271,
+        "wh": 0.504,
+        "cost_usd": 0.0,
+        "stdout": "",
+        "stderr": "Runtime error: map_kv takes (map, function)"
+      },
+      "python_local": {
+        "path": "local_python",
+        "pass": false,
+        "code": "import sys\n\ndef count_tokens(args):\n    token_count = {}\n    for arg in args[1:]:\n        if arg in token_count:\n            token_count[arg] += 1\n        else:\n            token_count[arg] = 1\n    sorted_tokens = sorted(token_count.items())\n    result = ' '.join(f'{name}={count}' for name, count in sorted_tokens)\n    print(result)\n\nif __name__ == \"__main__\":\n    count_tokens(sys.argv)",
+        "seconds": 2.94,
+        "chars": 388,
+        "wh": 0.1472,
+        "cost_usd": 0.0,
+        "stdout": "--verbose --quiet --verbose -f file.txt -f other.txt=1\n",
+        "stderr": "",
+        "tokens": {
+          "prompt_tokens": 170,
+          "completion_tokens": 102
+        }
+      },
+      "cloud": {
+        "path": "cloud_claude-sonnet-4-6",
+        "pass": true,
+        "code": "import sys\nfrom collections import Counter\n\ntokens = sys.argv[1].split()\ncounts = Counter(tokens)\nprint(' '.join(f'{name}={n}' for name, n in sorted(counts.items())))",
+        "seconds": 4.4,
+        "chars": 166,
+        "wh": 0.0559,
+        "cost_usd": 0.0017,
+        "stdout": "--quiet=1 --verbose=2 -f=2 file.txt=1 other.txt=1\n",
+        "stderr": "",
+        "tokens": {
+          "prompt_tokens": 3,
+          "completion_tokens": 110
+        }
+      }
+    },
+    {
+      "id": "extract_function_names_py",
+      "category": "code analysis (extract Python function names)",
+      "sigil": {
+        "path": "local_sigil",
+        "pass": false,
+        "attempts": 3,
+        "code": "(set source string $0)\n(set lines array (split source \"\\n\"))\n(for-each line string lines\n  (set stripped string (string_trim line))\n  (if (and (gt (len stripped) 0) (eq (first stripped) \"d\") (eq (second stripped) \"e\"))\n    (println (slice stripped 4 -1))))",
+        "seconds": 10.36,
+        "chars": 256,
+        "wh": 0.5181,
+        "cost_usd": 0.0,
+        "stdout": "",
+        "stderr": "Parse error: Expected ) but got ("
+      },
+      "python_local": {
+        "path": "local_python",
+        "pass": false,
+        "code": "import sys\n\nsource_code = sys.argv[1]\nlines = source_code.split('\\n')\nfunction_names = []\n\nfor line in lines:\n    if line.strip().startswith('def ') and '(' in line:\n        function_name = line.split('(')[0].split(' ')[1]\n        function_names.append(function_name)\n\nprint('\\n'.join(function_names))",
+        "seconds": 2.61,
+        "chars": 301,
+        "wh": 0.1304,
+        "cost_usd": 0.0,
+        "stdout": "foo\n\nmain\n",
+        "stderr": "",
+        "tokens": {
+          "prompt_tokens": 157,
+          "completion_tokens": 77
+        }
+      },
+      "cloud": {
+        "path": "cloud_claude-sonnet-4-6",
+        "pass": true,
+        "code": "import sys\nimport re\n\ncode = sys.argv[1]\nfor line in code.splitlines():\n    m = re.match(r'def (\\w+)\\(', line)\n    if m:\n        print(m.group(1))",
+        "seconds": 4.14,
+        "chars": 146,
+        "wh": 0.0669,
+        "cost_usd": 0.002,
+        "stdout": "foo\nmain\n",
+        "stderr": "",
+        "tokens": {
+          "prompt_tokens": 3,
+          "completion_tokens": 132
+        }
+      }
+    }
+  ]
+}

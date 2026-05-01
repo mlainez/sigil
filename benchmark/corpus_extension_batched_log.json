@@ -1,0 +1,52 @@
+[
+  {
+    "id": "email_extract",
+    "status": "failed",
+    "note": "no code in batch reply"
+  },
+  {
+    "id": "caesar_cipher_8",
+    "status": "failed",
+    "note": "no code in batch reply"
+  },
+  {
+    "id": "grep_lines_2",
+    "status": "failed",
+    "note": "no code in batch reply"
+  },
+  {
+    "id": "pascals_triangle_2",
+    "status": "failed",
+    "note": "no code in batch reply"
+  },
+  {
+    "id": "roman_numerals_3",
+    "status": "failed",
+    "note": "no code in batch reply"
+  },
+  {
+    "id": "sieve_primes",
+    "status": "failed",
+    "note": "no code in batch reply"
+  },
+  {
+    "id": "csv_filter_4",
+    "status": "failed",
+    "note": "no code in batch reply"
+  },
+  {
+    "id": "run_length_encode_13",
+    "status": "failed",
+    "note": "no code in batch reply"
+  },
+  {
+    "id": "csv_filter_6",
+    "status": "failed",
+    "note": "runtime: Runtime error: Undefined variable: get\n"
+  },
+  {
+    "id": "csv_column_stats_1",
+    "status": "failed",
+    "note": "runtime: Runtime error: Undefined variable: get\n"
+  }
+]

@@ -1,0 +1,299 @@
+{
+  "model": "marclainez_f68b/Qwen2.5-7B-Instruct-sigil-v5-174eb962-3bf78ef7",
+  "results": {
+    "1": [
+      {
+        "id": "hello_world",
+        "status": "ok",
+        "sigil_tokens": 27,
+        "python_tokens": 6,
+        "ratio": 4.5,
+        "attempts": 1,
+        "sigil_code": "(module hello_world\n  (fn main -> int\n    (println \"Hello, World!\\n\")\n    (ret 0)))"
+      },
+      {
+        "id": "cli_int_echo",
+        "status": "ok",
+        "sigil_tokens": 34,
+        "python_tokens": 10,
+        "ratio": 3.4,
+        "attempts": 1,
+        "sigil_code": "(module print_first_arg\n  (fn main -> int\n    (set arg0 (int $0))\n    (println arg0)\n    (ret 0)))"
+      },
+      {
+        "id": "indexed_loop",
+        "status": "fail",
+        "last_sigil": "(module print_ints\n  (fn main -> int\n    (set n (int $0))\n    (for i 1 n\n      (print (str i \"\\n\")))\n    (ret 0)))",
+        "last_out": ""
+      },
+      {
+        "id": "array_sum",
+        "status": "ok",
+        "sigil_tokens": 58,
+        "python_tokens": 18,
+        "ratio": 3.2222222222222223,
+        "attempts": 1,
+        "sigil_code": "(module sum_integers\n  (fn main -> int\n    (set args (argv))\n    (set nums (map_arr int (split (car args) \" \")))\n    (set total (reduce + 0 nums))\n    (println total)\n    (ret 0)))"
+      },
+      {
+        "id": "string_vowel_count",
+        "status": "fail",
+        "last_sigil": "(module count_vowels\n  (fn main -> int\n    (set s $0)\n    (set count 0)\n    (set vowels \"aeiouAEIOU\")\n    (for c in s\n      (if (contains vowels c)\n        (set count (add count 1))))\n    (println cou",
+        "last_out": ""
+      },
+      {
+        "id": "filter_evens",
+        "status": "fail",
+        "last_sigil": "(module even_numbers\n  (fn main -> int\n    (set args (split $0 \" \"))\n    (set evens (filter args (fn x -> int (eq (mod x 2) 0))))\n    (set out (join evens \" \"))\n    (print out)\n    (ret 0)))",
+        "last_out": ""
+      },
+      {
+        "id": "word_frequency",
+        "status": "fail",
+        "last_sigil": "(module word_count\n  (fn main -> int\n    (set args (argv))\n    (set text (car args))\n    (set words (split text \" \"))\n    (set counts (counter words))\n    (set sorted_words (sort (keys counts)))\n    (",
+        "last_out": ""
+      },
+      {
+        "id": "string_build",
+        "status": "ok",
+        "sigil_tokens": 55,
+        "python_tokens": 26,
+        "ratio": 2.1153846153846154,
+        "attempts": 1,
+        "sigil_code": "(module hello_world\n  (fn main -> int\n    (set name $0)\n    (set age $1)\n    (println (fmt \"Hello, {name}! You are {age} years old.\" name name age))\n    (ret 0)))"
+      },
+      {
+        "id": "safe_divide",
+        "status": "fail",
+        "last_sigil": "(module divide_by_zero\n  (fn main -> int\n    (set arg1 (int $0))\n    (set arg2 (int $1))\n    (if (eq arg2 0)\n      (println \"error\\n\")\n      (println (div arg1 arg2)))\n    (ret 0)))",
+        "last_out": "error\n"
+      },
+      {
+        "id": "factorial_recursive",
+        "status": "fail",
+        "last_sigil": "(module factorial\n  (fn fact n int -> int\n    (if (eq n 0)\n      1\n      (mul n (fact (sub n 1)))))\n  \n  (fn main -> int\n    (set n (int $0))\n    (print (str (fact n)))\n    (ret 0)))",
+        "last_out": ""
+      },
+      {
+        "id": "substring_find",
+        "status": "fail",
+        "last_sigil": "(module substring_position\n  (fn main -> int\n    (set arg1 $0)\n    (set arg2 $1)\n    (set pos (str.index_of arg1 arg2))\n    (if (eq pos -1)\n      (println -1)\n      (println pos))\n    (ret 0)))",
+        "last_out": ""
+      },
+      {
+        "id": "sort_ints",
+        "status": "fail",
+        "last_sigil": "(module sort_ints\n  (fn main -> int\n    (set args (split $0 \" \"))\n    (set nums (map_arr int args))\n    (set sorted_nums (sort nums))\n    (set result (join \" \" sorted_nums))\n    (println result)\n    (",
+        "last_out": ""
+      },
+      {
+        "id": "cond_dispatch",
+        "status": "fail",
+        "last_sigil": "(module month_name\n  (fn main -> int\n    (set month $0)\n    (if (and (gt month 0) (lt month 13))\n      (set month_name (match month\n        (1 \"January\")\n        (2 \"February\")\n        (3 \"March\")\n   ",
+        "last_out": ""
+      },
+      {
+        "id": "json_assemble",
+        "status": "fail",
+        "last_sigil": "(module json_name_age\n  (fn main -> int\n    (set name (str $0))\n    (set age (int $1))\n    (print (fmt \"{\\\"name\\\":\\\"{name}\\\",\\\"age\\\":{age}}\\n\" name=name age=age))\n    (ret 0)))",
+        "last_out": ""
+      },
+      {
+        "id": "http_response",
+        "status": "ok",
+        "sigil_tokens": 56,
+        "python_tokens": 24,
+        "ratio": 2.3333333333333335,
+        "attempts": 1,
+        "sigil_code": "(module print_http_status_line\n  (fn main -> int\n    (set status_code $0)\n    (set reason_phrase $1)\n    (println (fmt \"HTTP/1.1 {status_code} {reason_phrase}\\n\"))\n    (ret 0)))"
+      }
+    ],
+    "2": [
+      {
+        "id": "csv_sum_col",
+        "status": "fail",
+        "last_sigil": "(module parse_csv\n\n  (fn main -> int\n    (set csv $0)\n    (set rows (split csv \";\"))\n    (set total 0)\n    (for row rows\n      (set fields (split row \",\"))\n      (set value (int (get fields 1)))\n     ",
+        "last_out": ""
+      },
+      {
+        "id": "word_longer_than",
+        "status": "fail",
+        "last_sigil": "(module word_filter\n\n  (fn main -> int\n    (set sentence (arg 0))\n    (set n (int (arg 1)))\n    (set words (split sentence \" \"))\n    (set filtered_words (filter words (fn word -> bool (len word) > n))",
+        "last_out": ""
+      },
+      {
+        "id": "reverse_each_word",
+        "status": "fail",
+        "last_sigil": "(module reverse_words\n  (fn main -> int\n    (set args (argv))\n    (set sentence (car args))\n    (set words (split sentence \" \"))\n    (set reversed_words (map_arr words (fn word -> string\n      (set ch",
+        "last_out": ""
+      },
+      {
+        "id": "count_char",
+        "status": "fail",
+        "last_sigil": "(module count_char_occurrences\n  (fn count_char_occurrences str char -> int\n    (set count 0)\n    (for i 0 (len str)\n      (if (eq (str (sub str i 1)) char)\n        (set count (add count 1))))\n    (re",
+        "last_out": ""
+      },
+      {
+        "id": "dedupe_preserve_order",
+        "status": "fail",
+        "last_sigil": "(module remove_duplicates\n  (fn main -> int\n    (set args (slice $0 1))\n    (set seen (set))\n    (set result (set))\n    (for i 0 (len args)\n      (set word (get args i))\n      (if (not (contains seen ",
+        "last_out": ""
+      },
+      {
+        "id": "average_int",
+        "status": "fail",
+        "last_sigil": "(module compute_average\n  (fn main -> int\n    (set nums (split $0 \" \"))\n    (set sum 0)\n    (set count (len nums))\n    (for i 0 count\n      (set sum (+ sum (int (nums i)))))\n    (set avg (div sum coun",
+        "last_out": ""
+      },
+      {
+        "id": "repeat_string",
+        "status": "fail",
+        "last_sigil": "(module repeat_string\n  (fn repeat_string str count -> str\n    (set result \"\")\n    (for i 0 count\n      (set result (concat result str)))\n    (ret result))\n  \n  (fn main -> int\n    (set str $0)\n    (s",
+        "last_out": ""
+      },
+      {
+        "id": "kv_pair_lookup",
+        "status": "fail",
+        "last_sigil": "(module sigil_program\n\n  (fn main -> int\n    (set args (argv))\n    (set pairs (get args 0))\n    (set key (get args 1))\n    (set kv_pairs (split pairs \",\"))\n    (set found false)\n    (set value \"\")\n   ",
+        "last_out": ""
+      },
+      {
+        "id": "swap_case",
+        "status": "fail",
+        "last_sigil": "(module swap_case\n  (fn main -> int\n    (set str (get $0))\n    (set result \"\")\n    (for i 0 (len str)\n      (set c (get (str (get str i))))\n      (if (eq (str (lower c)) c)\n        (set result (join (",
+        "last_out": ""
+      },
+      {
+        "id": "longest_word",
+        "status": "fail",
+        "last_sigil": "(module longest_word\n  (fn main -> int\n    (set sentence $0)\n    (set words (split sentence \" \"))\n    (set longest_word \"\")\n    (set longest_len 0)\n    (for word in words\n      (set len (len word))\n  ",
+        "last_out": ""
+      },
+      {
+        "id": "is_sorted",
+        "status": "fail",
+        "last_sigil": "(module space_sorted\n\n  (fn main -> int\n    (set args (argv))\n    (set nums (split args 0 ' '))\n    (set sorted (sort (map_arr int nums)))\n    (set result (if (equal sorted nums) \"yes\" \"no\"))\n    (pri",
+        "last_out": ""
+      },
+      {
+        "id": "sum_digits",
+        "status": "ok",
+        "sigil_tokens": 70,
+        "python_tokens": 16,
+        "ratio": 4.375,
+        "attempts": 1,
+        "sigil_code": "(module sum_digits\n  (fn main -> int\n    (set n (int $0))\n    (set sum 0)\n    (while (gt n 0)\n      (set sum (add sum (mod n 10)))\n      (set n (div n 10)))\n    (println sum)\n    (ret 0)))"
+      },
+      {
+        "id": "caesar_shift",
+        "status": "fail",
+        "last_sigil": "(module caesar_cipher\n\n  (fn caesar_cipher text shift -> string\n    (set result \"\")\n    (for char in text\n      (set new_char (char_shift char shift))\n      (set result (str result new_char)))\n    (re",
+        "last_out": ""
+      },
+      {
+        "id": "title_case",
+        "status": "fail",
+        "last_sigil": "(module capitalize_words\n  (fn capitalize_words -> string\n    (set sentence $0)\n    (set words (split sentence \" \"))\n    (set capitalized_words [])\n    (for word words\n      (set first_letter (string ",
+        "last_out": ""
+      },
+      {
+        "id": "max_subarray_len",
+        "status": "fail",
+        "last_sigil": "(module longest_subarray\n  (fn main -> int\n    (set args (split $0 \" \"))\n    (set target (int (get args 1)))\n    (set nums (map_arr int (get args 0)))\n    (set n (len nums))\n    (set max_len 0)\n    (s",
+        "last_out": ""
+      }
+    ],
+    "3": [
+      {
+        "id": "word_frequency_top",
+        "status": "fail",
+        "last_sigil": "(module word_freq\n  (fn main -> int\n    (set args (argv))\n    (set sentence (car args))\n    (set words (split sentence \" \"))\n    (set freqs (counter words))\n    (set sorted_freqs (sort_by freqs (lambd",
+        "last_out": ""
+      },
+      {
+        "id": "group_anagrams",
+        "status": "fail",
+        "last_sigil": "(module group_anagrams\n  (fn main -> int\n    (set args (argv))\n    (set words (map_arr (fn w -> string (trim w)) args))\n    (set anagrams (group_by (fn w -> string (sort (chars w))) words))\n    (set r",
+        "last_out": ""
+      },
+      {
+        "id": "balanced_parens",
+        "status": "fail",
+        "last_sigil": "(module check_balance\n  (fn main -> int\n    (set args (argv))\n    (set input (car args))\n    (set stack [])\n    (set openers \"([{\")\n    (set closers \")]}\")\n    (set matches \"([{}])\")\n    (set balanced",
+        "last_out": ""
+      },
+      {
+        "id": "matrix_transpose",
+        "status": "fail",
+        "last_sigil": "(module transpose_matrix\n\n  (fn transpose rows -> string\n    (set rows (split rows \";\"))\n    (set cols (map_arr rows (fn row -> (split row \",\")))\n    (set transposed (map_arr (range (len (first cols))",
+        "last_out": ""
+      },
+      {
+        "id": "flatten_nested",
+        "status": "fail",
+        "last_sigil": "(module flatten_list\n\n  (fn flatten lst -> string\n    (set result \"\")\n    (set stack [lst])\n    (while (not (empty? stack))\n      (set current (pop stack))\n      (if (is_array? current)\n        (set s",
+        "last_out": ""
+      },
+      {
+        "id": "running_average",
+        "status": "fail",
+        "last_sigil": "(module running_averages\n\n  (fn main -> int\n    (set args (argv))\n    (set nums (map_arr int (split args \" \")))\n    (set n (len nums))\n    (set sum 0)\n    (set avg 0)\n    (for i 0 n\n      (set sum (ad",
+        "last_out": ""
+      },
+      {
+        "id": "interval_merge",
+        "status": "fail",
+        "last_sigil": "(module merge_intervals\n  (fn parse_interval str -> (int int)\n    (set [a b] (split str \"-\"))\n    (set a (int a))\n    (set b (int b))\n    (ret (a b)))\n  (fn merge_intervals intervals -> (string)\n    (",
+        "last_out": ""
+      },
+      {
+        "id": "kv_update",
+        "status": "fail",
+        "last_sigil": "(module parse_pairs\n  (fn main -> int\n    (set args (split $0 \",\"))\n    (set pairs (split #1 \",\"))\n    (set merged (merge_pairs args pairs))\n    (println (join merged \",\"))\n    (ret 0))\n\n  (fn merge_p",
+        "last_out": ""
+      },
+      {
+        "id": "prime_sieve",
+        "status": "fail",
+        "last_sigil": "(module primes\n  (fn main -> int\n    (set n (int $0))\n    (set primes (filter (fn x -> int\n      (set is_prime (bool true))\n      (set limit (int (sqrt x)))\n      (set i (int 2))\n      (while (and (lt",
+        "last_out": ""
+      },
+      {
+        "id": "two_sum",
+        "status": "fail",
+        "last_sigil": "(module find_two_sum\n  (fn main -> int\n    (set args (split $0 \" \"))\n    (set nums (map_arr int (split (car args) \" \")))\n    (set target (int (cadr args)))\n    (set n (len nums))\n    (set res (map_arr",
+        "last_out": ""
+      },
+      {
+        "id": "rle_encode",
+        "status": "fail",
+        "last_sigil": "(module run_length_encode\n  (fn main -> int\n    (set s $0)\n    (set n (len s))\n    (set i 0)\n    (set count 1)\n    (set result \"\")\n    (while (< i n)\n      (set c (string_get s i))\n      (set next_c (",
+        "last_out": ""
+      },
+      {
+        "id": "diff_sets",
+        "status": "fail",
+        "last_sigil": "(module word_diff\n\n  (fn main -> int\n    (set args (split $0 \" \"))\n    (set list1 (split (car args) \" \"))\n    (set list2 (split (cadr args) \" \"))\n    (set diff (filter list1 (fn x -> bool (not (member",
+        "last_out": ""
+      },
+      {
+        "id": "fib_memo",
+        "status": "fail",
+        "last_sigil": "(module fib\n  (fn fib n int -> int\n    (if (eq n 0) 0\n      (if (eq n 1) 1\n        (add (fib (sub n 1)) (fib (sub n 2))))))\n\n  (fn main -> int\n    (set n (int $0))\n    (set res (fib n))\n    (println r",
+        "last_out": "unit\n"
+      },
+      {
+        "id": "query_string_parse",
+        "status": "fail",
+        "last_sigil": "(module parse_query_string\n\n  (fn main -> int\n    (set args (argv))\n    (set query (get args 0))\n    (set pairs (split query \"&\"))\n    (set kv (map_arr pairs (fn pair -> (kv pair \"=\")))\n    (set sorte",
+        "last_out": ""
+      },
+      {
+        "id": "stack_calc",
+        "status": "fail",
+        "last_sigil": "(module rpn_eval\n\n  (fn eval_rpn args -> int\n    (set stack [])\n    (for arg in args\n      (set op (str arg))\n      (if (eq op \"+\")\n        (set a (pop stack))\n        (set b (pop stack))\n        (pus",
+        "last_out": ""
+      }
+    ]
+  }
+}

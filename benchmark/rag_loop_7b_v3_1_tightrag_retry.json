@@ -1,0 +1,743 @@
+{
+  "model": "qwen-sigil-v3.1:7b",
+  "rag": {
+    "k": 3,
+    "min_score": 0.85,
+    "top1_floor": 0.88
+  },
+  "max_attempts": 3,
+  "source": "benchmark/rag_loop_7b_v3_1_tightrag.json",
+  "iterations": [
+    {
+      "iteration": 1,
+      "retried": 3,
+      "pass_at_attempt": {
+        "1": 0,
+        "2": 1,
+        "3": 1
+      },
+      "total_pass": 2,
+      "tasks": [
+        {
+          "id": "hyphenate_camel",
+          "passed_at": 2,
+          "attempts": [
+            "(set s string $0)\n(set out string \"\")\n(for-each c int (chars s)\n  (if (is_upper c)\n    (set out (string_concat out \"-\")))\n  (set out (string_concat out (char_from_code c))))\n(println (lower out))",
+            "(set s string $0)\n(set out string \"\")\n(for-each c string (chars s)\n  (if (is_upper (string_get c 0))\n    (set out (string_concat out \"-\")))\n  (set out (string_concat out c)))\n(println (lower out))"
+          ],
+          "errs": [
+            "Runtime error: Type mismatch in for-each: variable 'c' declared as int but got string\n",
+            ""
+          ],
+          "outs": [
+            "",
+            "camel-case-example\n"
+          ],
+          "secs": [
+            1.7,
+            1.3
+          ]
+        },
+        {
+          "id": "snake_to_pascal",
+          "passed_at": null,
+          "attempts": [
+            "(set s string $0)\n(set parts array (split s \"_\"))\n(set upper_parts array (map_arr (\\p (upper p)) parts))\n(println (join upper_parts \"\"))",
+            "(set s string $0)\n(set parts array (split s \"_\"))\n(set upper_parts array (map_arr (\\p (upper p)) parts))\n(println (join upper_parts \"\"))",
+            "(set s string $0)\n(set parts array (split s \"_\"))\n(set upper_parts array (map_arr (\\p (upper p)) parts))\n(println (join upper_parts \"\"))"
+          ],
+          "errs": [
+            "",
+            "",
+            ""
+          ],
+          "outs": [
+            "HELLOWORLDFOO\n",
+            "HELLOWORLDFOO\n",
+            "HELLOWORLDFOO\n"
+          ],
+          "secs": [
+            1.4,
+            0.9,
+            0.8
+          ]
+        },
+        {
+          "id": "strip_punct",
+          "passed_at": 3,
+          "attempts": [
+            "(set s string $0)\n(set result string \"\")\n(for-each c int (chars s)\n  (if (not (is_punctuation c))\n    (set result (string_concat result (char_from_code c)))))\n(println result)",
+            "(set s string $0)\n(set result string \"\")\n(for-each c string (chars s)\n  (if (not (is_punctuation c))\n    (set result (string_concat result c))))\n(println result)",
+            "(set s string $0)\n(set result string \"\")\n(for-each c string (chars s)\n  (if (not (in c \"\\\"!#$%&\\'()*+,-./:;<=>?@[\\]^_`{|}~\"))\n    (set result (string_concat result c))))\n(println result)"
+          ],
+          "errs": [
+            "Runtime error: Type mismatch in for-each: variable 'c' declared as int but got string\n",
+            "Runtime error: Undefined variable: is_punctuation\n",
+            ""
+          ],
+          "outs": [
+            "",
+            "",
+            "hello world\n"
+          ],
+          "secs": [
+            1.6,
+            1.0,
+            1.3
+          ]
+        }
+      ]
+    },
+    {
+      "iteration": 2,
+      "retried": 1,
+      "pass_at_attempt": {
+        "1": 0,
+        "2": 1,
+        "3": 0
+      },
+      "total_pass": 1,
+      "tasks": [
+        {
+          "id": "abs_diff",
+          "passed_at": 2,
+          "attempts": [
+            "(set a int (arg_int 0))\n(set b int (arg_int 1))\n(println (sub (abs a) (abs b)))",
+            "(set a int (arg_int 0))\n(set b int (arg_int 1))\n(println (abs (sub a b)))"
+          ],
+          "errs": [
+            "",
+            ""
+          ],
+          "outs": [
+            "-2\n",
+            "8\n"
+          ],
+          "secs": [
+            1.2,
+            0.7
+          ]
+        }
+      ]
+    },
+    {
+      "iteration": 3,
+      "retried": 4,
+      "pass_at_attempt": {
+        "1": 0,
+        "2": 1,
+        "3": 0
+      },
+      "total_pass": 1,
+      "tasks": [
+        {
+          "id": "union_preserve_order",
+          "passed_at": 2,
+          "attempts": [
+            "(set a array (split $0 \" \"))\n(set b array (split $1 \" \"))\n(set u array [])\n(for-each x string a\n  (if (not (in x b))\n    (set u (push u x))))\n(for-each y string b\n  (if (not (in y u))\n    (set u (push u y))))\n(println (join u \" \"))",
+            "(set a array (split $0 \" \"))\n(set b array (split $1 \" \"))\n(set u map {})\n(for-each x string a\n  (if (not (map_has u x)) (set u (map_set u x true))))\n(for-each y string b\n  (if (not (map_has u y)) (set u (map_set u y true))))\n(println (join (map_keys u) \" \"))"
+          ],
+          "errs": [
+            "",
+            ""
+          ],
+          "outs": [
+            "b c d a e\n",
+            "a b c d e\n"
+          ],
+          "secs": [
+            2.2,
+            1.9
+          ]
+        },
+        {
+          "id": "is_subset",
+          "passed_at": null,
+          "attempts": [
+            "(set arr1 (parse_ints $0))\n(set arr2 (parse_ints $1))\n(if (eq (sort arr1) (sort arr2))\n  (println \"yes\")\n  (else (println \"no\")))",
+            "(set arr1 (parse_ints $0))\n(set arr2 (parse_ints $1))\n(if (eq (sort arr1) (sort arr2))\n  (println \"yes\")\n  (else (println \"no\")))",
+            "(set arr1 (parse_ints $0))\n(set arr2 (parse_ints $1))\n(if (eq (sort arr1) (sort arr2))\n  (println \"yes\")\n  (else (println \"no\")))"
+          ],
+          "errs": [
+            "Runtime error: parse_ints: cannot parse: a\n",
+            "Runtime error: parse_ints: cannot parse: a\n",
+            "Runtime error: parse_ints: cannot parse: a\n"
+          ],
+          "outs": [
+            "",
+            "",
+            ""
+          ],
+          "secs": [
+            1.9,
+            1.1,
+            0.9
+          ]
+        },
+        {
+          "id": "sort_freq_desc",
+          "passed_at": null,
+          "attempts": [
+            "(set words array (split $0 \" \"))\n(set counts map {})\n(for-each w string words\n  (map_inc counts w))\n(set sorted (sort_by (entries counts) (\\(k v) (- v))))\n(set result [])\n(for i 0 (len words)\n  (push result (fmt \"{}:{}\" (first (array_get sorted i)) (second (array_get sorted i)))))\n(println (join result \" \"))",
+            "(set s $0)\n(set counts {})\n(for-each c (chars s)\n  (map_inc counts c))\n(set sorted (sort_by (entries counts) (\\(k v) (- v))))\n(set result [])\n(for i 0 (len s)\n  (push result (fmt \"{}:{}\" (first (array_get sorted i)) (second (array_get sorted i)))))\n(println (join result \" \"))",
+            "(set s $0)\n(set counts {})\n(for-each c (chars s)\n  (map_inc counts c))\n(set sorted (sort_by (entries counts) (\\(k v) (- v))))\n(set result [])\n(for i 0 (len sorted)\n  (push result (fmt \"{}:{}\" (first (array_get sorted i)) (second (array_get sorted i)))))\n(println (join result \" \"))"
+          ],
+          "errs": [
+            "Runtime error: Array index out of bounds: 3\n",
+            "Runtime error: Array index out of bounds: 4\n",
+            ""
+          ],
+          "outs": [
+            "",
+            "",
+            " :5 a:3 b:2 c:1\n"
+          ],
+          "secs": [
+            2.5,
+            1.8,
+            1.7
+          ]
+        },
+        {
+          "id": "remove_dupes_keep_last",
+          "passed_at": null,
+          "attempts": [
+            "(set words array (split $0 \" \"))\n(set seen map {})\n(set result array [])\n(for-each w string words\n  (set k int 0)\n  (if (in w seen)\n    (set k (add (map_get seen w) 1)))\n  (set seen (map_set seen w k))\n  (if (eq k 0)\n    (push result w)))\n(println (join result \" \"))",
+            "(set words array (split $0 \" \"))\n(set seen map {})\n(set result array [])\n(for-each w string words\n  (set k int 0)\n  (if (in w seen)\n    (set k (add (map_get seen w) 1)))\n  (set seen (map_set seen w k))\n  (if (eq k 1)\n    (push result w)))\n(println (join result \" \"))",
+            "(set words array (split $0 \" \"))\n(set seen map {})\n(set result array [])\n(for-each w string (rev words)\n  (if (not (in w seen))\n    (push result w)))\n(println (join (rev result) \" \"))"
+          ],
+          "errs": [
+            "",
+            "",
+            ""
+          ],
+          "outs": [
+            "a b c d\n",
+            "a b\n",
+            "a b a c b d\n"
+          ],
+          "secs": [
+            2.3,
+            1.8,
+            1.1
+          ]
+        }
+      ]
+    },
+    {
+      "iteration": 4,
+      "retried": 2,
+      "pass_at_attempt": {
+        "1": 0,
+        "2": 0,
+        "3": 0
+      },
+      "total_pass": 0,
+      "tasks": [
+        {
+          "id": "sum_field_in_csv",
+          "passed_at": null,
+          "attempts": [
+            "(set csv string $0)\n(set col_name string $1)\n\n(set lines array (split csv \"\\n\"))\n(set header string (first lines))\n(set data_lines array (rest lines))\n\n(set headers array (split header \",\"))\n(set idx int (array_index_of headers col_name))\n\n(set total int 0)\n(for-each line string data_lines\n  (set fields array (split line \",\"))\n  (set val int (arg_int idx))\n  (set total (add total val)))\n\n(println (str total))",
+            "(set csv string $0)\n(set col_name string $1)\n\n(set lines array (split csv \"\\n\"))\n(set header string (first lines))\n(set data_lines array (rest lines))\n\n(set headers array (split header \",\"))\n(set idx int (array_index_of headers col_name))\n\n(set total decimal 0d)\n(for-each line string data_lines\n  (set fields array (split line \",\"))\n  (set val decimal (string_to_decimal (array_get fields idx)))\n  (set total (add total val)))\n\n(println (str total))",
+            "(set csv string $0)\n(set col_name string $1)\n\n(set lines array (split csv \"\\n\"))\n(set header string (first lines))\n(set data_lines array (rest lines))\n\n(set headers array (split header \",\"))\n(set idx int (array_index_of headers col_name))\n\n(set total decimal 0d)\n(for-each line string data_lines\n  (set fields array (split line \",\"))\n  (set val decimal (cast_string_decimal (array_get fields idx)))\n  (set total (add total val)))\n\n(println (str total))"
+          ],
+          "errs": [
+            "Unexpected error: Failure(\"Int64.of_string\")\n",
+            "Runtime error: Undefined variable: string_to_decimal\n",
+            "Runtime error: Undefined variable: cast_string_decimal\n"
+          ],
+          "outs": [
+            "",
+            "",
+            ""
+          ],
+          "secs": [
+            2.6,
+            2.3,
+            2.2
+          ]
+        },
+        {
+          "id": "count_log_unique_users",
+          "passed_at": null,
+          "attempts": [
+            "(set lines array (split $0 \"\\n\"))\n(set users map {})\n(for-each line string lines\n  (set parts array (split line \" \"))\n  (if (in (first parts) [\"login\"])\n    (map_set users (second parts) true)))\n(println (len users))",
+            "(set lines array (split $0 \"\\n\"))\n(set users map {})\n(for-each line string lines\n  (set parts array (split line \" \"))\n  (if (eq (first parts) \"login\")\n    (map_set users (second parts) true)))\n(println (len users))",
+            "(set lines array (split $0 \"\\n\"))\n(set users map {})\n(for-each line string lines\n  (set parts array (split line \" \"))\n  (if (eq (first parts) \"login\")\n    (map_set users (second parts) true)))\n(println (len users))"
+          ],
+          "errs": [
+            "",
+            "",
+            ""
+          ],
+          "outs": [
+            "0\n",
+            "0\n",
+            "0\n"
+          ],
+          "secs": [
+            1.8,
+            1.3,
+            1.2
+          ]
+        }
+      ]
+    },
+    {
+      "iteration": 5,
+      "retried": 5,
+      "pass_at_attempt": {
+        "1": 0,
+        "2": 2,
+        "3": 0
+      },
+      "total_pass": 2,
+      "tasks": [
+        {
+          "id": "balanced_brackets_multi",
+          "passed_at": null,
+          "attempts": [
+            "(set s string $0)\n(set stack array [])\n(set ok bool true)\n(for-each c string (chars s)\n  (cond\n    ((in c \"([{\")\n      (push stack c))\n    ((eq ok true)\n     (cond\n       ((in c \")]}\")\n         (if (eq (len stack) 0)\n           (set ok false)\n           (else\n             (set top string (array_pop stack))\n             (cond\n               ((and (eq c \")\") (ne top \"(\")) (set ok false))\n               ((and (eq c \"]\") (ne top \"[\")) (set ok false))\n               ((and (eq c \"}\") (ne top \"{\")) (set ok false)))))))))\n(if (and (eq ok true) (gt (len stack) 0))\n  (set ok false))\n(if ok\n  (println \"yes\")\n  (else (println \"no\")))",
+            "(set s string $0)\n(set stack array [])\n(set ok bool true)\n(for-each c string (chars s)\n  (cond\n    ((in c \"([{\")\n      (push stack c))\n    ((eq ok true)\n     (cond\n       ((in c \")]}\")\n         (if (eq (len stack) 0)\n           (set ok false)\n           (else\n             (set top string (array_pop stack))\n             (cond\n               ((and (eq c \")\") (ne top \"(\")) (set ok false))\n               ((and (eq c \"]\") (ne top \"[\")) (set ok false))\n               ((and (eq c \"}\") (ne top \"{\")) (set ok false)))))))))\n(if (and (eq ok true) (gt (len stack) 0))\n  (set ok false))\n(if ok\n  (println \"yes\")\n  (else (println \"no\")))",
+            "(set s string $0)\n(set stack array [])\n(set ok bool true)\n(for-each c string (chars s)\n  (cond\n    ((in c \"([{\")\n      (push stack c))\n    ((eq ok true)\n     (cond\n       ((in c \")]}\")\n         (if (eq (len stack) 0)\n           (set ok false)\n           (else\n             (set top string (array_pop stack))\n             (cond\n               ((and (eq c \")\") (ne top \"(\")) (set ok false))\n               ((and (eq c \"]\") (ne top \"[\")) (set ok false))\n               ((and (eq c \"}\") (ne top \"{\")) (set ok false)))))))))\n(if (and (eq ok true) (gt (len stack) 0))\n  (set ok false))\n(if ok\n  (println \"yes\")\n  (else (println \"no\")))"
+          ],
+          "errs": [
+            "Parse error: Expected expression but got EOF\n",
+            "Parse error: Expected expression but got EOF\n",
+            "Parse error: Expected expression but got EOF\n"
+          ],
+          "outs": [
+            "",
+            "",
+            ""
+          ],
+          "secs": [
+            4.1,
+            3.7,
+            3.4
+          ]
+        },
+        {
+          "id": "longest_run_letter",
+          "passed_at": 2,
+          "attempts": [
+            "(set s $0)\n(set max_run 1)\n(set current_run 1)\n(for-each ch (chars s)\n  (if (eq ch (array_get (chars s) (- (len s) 1)))\n    (set current_run (+ current_run 1))\n    (else\n      (set max_run (max max_run current_run))\n      (set current_run 1))))\n(set max_run (max max_run current_run))\n(println max_run)",
+            "(set s $0)\n(set max_run 1)\n(set current_run 1)\n(set prev_char \"\")\n(for-each ch (chars s)\n  (if (eq ch prev_char)\n    (set current_run (+ current_run 1))\n    (else\n      (set max_run (max max_run current_run))\n      (set current_run 1)))\n  (set prev_char ch))\n(set max_run (max max_run current_run))\n(println max_run)"
+          ],
+          "errs": [
+            "",
+            ""
+          ],
+          "outs": [
+            "3\n",
+            "4\n"
+          ],
+          "secs": [
+            2.7,
+            2.0
+          ]
+        },
+        {
+          "id": "split_on_consecutive",
+          "passed_at": null,
+          "attempts": [
+            "(set s string $0)\n(set result string \"\")\n(set current char \"\")\n(set count int 0)\n\n(for-each c string (chars s)\n  (if (eq c current)\n    (set count (add count 1))\n    (else\n      (if (gt count 0)\n        (set result (string_concat result (fmt \"{}{}\" current count))))\n      (set current c)\n      (set count 1))))\n\n(if (gt count 0)\n  (set result (string_concat result (fmt \"{}{}\" current count))))\n\n(println (string_concat result \"\\n\"))",
+            "(set s string $0)\n(set result string \"\")\n(set current char \"\")\n(set count int 0)\n\n(for-each c string (chars s)\n  (if (eq c current)\n    (set count (add count 1))\n    (else\n      (if (gt count 0)\n        (set result (string_concat result (fmt \"{}{}\" current count))))\n      (set current c)\n      (set count 1))))\n\n(if (gt count 0)\n  (set result (string_concat result (fmt \"{}{}\" current count))))\n\n(println (string_concat result \"\\n\"))",
+            "(set s string $0)\n(set result string \"\")\n(set current char \"\")\n(set count int 0)\n\n(for-each c string (chars s)\n  (if (eq c current)\n    (set count (add count 1))\n    (else\n      (if (gt count 0)\n        (set result (string_concat result (fmt \"{}{}\" current count))))\n      (set current c)\n      (set count 1))))\n\n(if (gt count 0)\n  (set result (string_concat result (fmt \"{}{}\" current count))))\n\n(println (string_format \"{}\\n\" result))"
+          ],
+          "errs": [
+            "",
+            "",
+            ""
+          ],
+          "outs": [
+            "a3b2c1d4\n",
+            "a3b2c1d4\n",
+            "a3b2c1d4\n"
+          ],
+          "secs": [
+            2.8,
+            2.4,
+            2.3
+          ]
+        },
+        {
+          "id": "max_consecutive_evens",
+          "passed_at": null,
+          "attempts": [
+            "(set nums array (parse_ints $0))\n(set max_streak int 1)\n(set current_streak int 1)\n\n(for i 1 (len nums)\n  (if (eq (mod (array_get nums i) 2) 0)\n    (set current_streak (+ current_streak 1))\n    (else\n      (set max_streak (max max_streak current_streak))\n      (set current_streak 1))))\n\n(set max_streak (max max_streak current_streak))\n(println max_streak)",
+            "(set nums array (parse_ints $0))\n(set max_streak int 1)\n(set current_streak int 1)\n\n(for i 1 (len nums)\n  (if (eq (mod (array_get nums i) 2) 0)\n    (set current_streak (+ current_streak 1))\n    (else\n      (set max_streak (max max_streak current_streak))\n      (set current_streak 1))))\n\n(set max_streak (max max_streak current_streak))\n(println max_streak)",
+            "(set nums array (parse_ints $0))\n(set max_streak int 1)\n(set current_streak int 1)\n\n(for i 1 (len nums)\n  (if (eq (mod (array_get nums i) 2) 0)\n    (set current_streak (+ current_streak 1))\n    (else\n      (set max_streak (max max_streak current_streak))\n      (set current_streak 1))))\n\n(set max_streak (max max_streak current_streak))\n(println max_streak)"
+          ],
+          "errs": [
+            "",
+            "",
+            ""
+          ],
+          "outs": [
+            "5\n",
+            "5\n",
+            "5\n"
+          ],
+          "secs": [
+            3.1,
+            2.3,
+            2.1
+          ]
+        },
+        {
+          "id": "all_caps_or_not",
+          "passed_at": 2,
+          "attempts": [
+            "(set s string $0)\n(set all_upper bool true)\n(for-each c int (chars s)\n  (if (is_alpha c)\n    (if (not (is_upper c))\n      (set all_upper false))))\n(if all_upper (println \"yes\") (else (println \"no\")))",
+            "(set s string $0)\n(set all_upper bool true)\n(for-each c string (chars s)\n  (if (is_alpha c)\n    (if (not (is_upper c))\n      (set all_upper false))))\n(if all_upper (println \"yes\") (else (println \"no\")))"
+          ],
+          "errs": [
+            "Runtime error: Type mismatch in for-each: variable 'c' declared as int but got string\n",
+            ""
+          ],
+          "outs": [
+            "",
+            "yes\n"
+          ],
+          "secs": [
+            1.8,
+            1.4
+          ]
+        }
+      ]
+    },
+    {
+      "iteration": 6,
+      "retried": 4,
+      "pass_at_attempt": {
+        "1": 0,
+        "2": 2,
+        "3": 0
+      },
+      "total_pass": 2,
+      "tasks": [
+        {
+          "id": "common_chars_count",
+          "passed_at": 2,
+          "attempts": [
+            "(set a string $0)\n(set b string $1)\n(set ca map (map_new))\n(for-each c (chars a)\n  (set k string (string_format \"{}\" c))\n  (if (not (map_has ca k)) (map_set ca k true)))\n(set count int 0)\n(for-each c (chars b)\n  (set k string (string_format \"{}\" c))\n  (if (and (map_has ca k) (gt count 0))\n    (set count (sub count 1))))\n(println (add (len a) (neg count)))",
+            "(set a string $0)\n(set b string $1)\n(set ca map (map_new))\n(for-each c (chars a)\n  (set k string (string_format \"{}\" c))\n  (if (not (map_has ca k)) (map_set ca k true)))\n(set cb map (map_new))\n(for-each c (chars b)\n  (set k string (string_format \"{}\" c))\n  (if (not (map_has cb k)) (map_set cb k true)))\n(set count int 0)\n(for-each k string (map_keys ca)\n  (if (map_has cb k) (set count (add count 1))))\n(println count)"
+          ],
+          "errs": [
+            "",
+            ""
+          ],
+          "outs": [
+            "5\n",
+            "3\n"
+          ],
+          "secs": [
+            3.3,
+            2.8
+          ]
+        },
+        {
+          "id": "edit_one_apart",
+          "passed_at": null,
+          "attempts": [
+            "(set a string $0)\n(set b string $1)\n\n(fn diff_by_one s1 string s2 string -> bool\n  (set len1 int (len s1))\n  (set len2 int (len s2))\n  (if (eq len1 len2)\n    (set count int 0)\n    (for i 0 len1\n      (if (ne (string_get s1 i) (string_get s2 i)) (set count (add count 1))))\n    (ret (le count 1)))\n  (if (eq (abs (sub len1 len2)) 1)\n    (set longer string \"\")\n    (set shorter string \"\")\n    (if (gt len1 len2)\n      (set longer s1)\n      (set shorter s2))\n    (else\n      (set longer s2)\n      (set shorter s1)))\n    (for i 0 (len shorter)\n      (if (ne (string_get longer i) (string_get shorter i)) (ret false)))\n    (ret true))\n  (ret false))\n\n(if (diff_by_one a b)\n  (println \"yes\")\n  (else\n    (println \"no\")))",
+            "(set a string $0)\n(set b string $1)\n\n(fn diff_by_one s1 string s2 string -> bool\n  (set len1 int (len s1))\n  (set len2 int (len s2))\n  (if (eq len1 len2)\n    (set count int 0)\n    (for i 0 len1\n      (if (ne (string_get s1 i) (string_get s2 i)) (set count (add count 1))))\n    (ret (le count 1)))\n  (if (eq (abs (sub len1 len2)) 1)\n    (set longer string \"\")\n    (set shorter string \"\")\n    (if (gt len1 len2)\n      (set longer s1)\n      (set shorter s2))\n    (else\n      (set longer s2)\n      (set shorter s1)))\n    (for i 0 (len shorter)\n      (if (ne (string_get longer i) (string_get shorter i)) (ret false)))\n    (ret true))\n  (ret false))\n\n(if (diff_by_one a b)\n  (println \"yes\")\n  (else\n    (println \"no\")))",
+            "(set a string $0)\n(set b string $1)\n\n(fn diff_by_one s1 string s2 string -> bool\n  (set len1 int (len s1))\n  (set len2 int (len s2))\n  (if (eq len1 len2)\n    (set count int 0)\n    (for i 0 len1\n      (if (ne (string_get s1 i) (string_get s2 i)) (set count (add count 1))))\n    (ret (le count 1)))\n  (if (eq (abs (sub len1 len2)) 1)\n    (set longer string \"\")\n    (set shorter string \"\")\n    (if (gt len1 len2)\n      (set longer s1)\n      (else\n        (set longer s2))))\n    (for i 0 (len shorter)\n      (if (ne (string_get longer i) (string_get shorter i)) (ret false)))\n    (ret true))\n  (ret false))\n\n(if (diff_by_one a b)\n  (println \"yes\")\n  (else\n    (println \"no\")))"
+          ],
+          "errs": [
+            "Parse error: Expected expression but got )\n",
+            "Parse error: Expected expression but got )\n",
+            "Parse error: Expected expression but got )\n"
+          ],
+          "outs": [
+            "",
+            "",
+            ""
+          ],
+          "secs": [
+            5.1,
+            4.7,
+            4.2
+          ]
+        },
+        {
+          "id": "shared_word_count",
+          "passed_at": 2,
+          "attempts": [
+            "(set a $0)\n(set b $1)\n(set wa (split a \" \"))\n(set wb (split b \" \"))\n(println (len (intersection (uniq wa) (uniq wb))))",
+            "(set a $0)\n(set b $1)\n(set wa (split a \" \"))\n(set wb (split b \" \"))\n(println (len (filter (uniq wa) (\\w (in w wb)))))"
+          ],
+          "errs": [
+            "Runtime error: Undefined variable: intersection\n",
+            ""
+          ],
+          "outs": [
+            "",
+            "2\n"
+          ],
+          "secs": [
+            1.5,
+            1.0
+          ]
+        },
+        {
+          "id": "is_subsequence",
+          "passed_at": null,
+          "attempts": [
+            "(set candidate $0)\n(set target $1)\n(set i 0)\n(set is_subsequence true)\n(for-each c (chars target)\n  (set found false)\n  (for-each j (range i (len candidate))\n    (if (eq c (array_get (chars candidate) j))\n      (begin\n        (set i (+ j 1))\n        (set found true))))\n  (if (not found)\n    (set is_subsequence false)))\n(if is_subsequence\n  (println \"yes\")\n  (else (println \"no\")))",
+            "(set candidate $0)\n(set target $1)\n(set i 0)\n(set is_subsequence true)\n(for-each c (chars target)\n  (set found false)\n  (for-each j (range i (len candidate))\n    (if (eq c (array_get (chars candidate) j))\n      (begin\n        (set i (+ j 1))\n        (set found true))))\n  (if (not found)\n    (set is_subsequence false)))\n(if is_subsequence\n  (println \"yes\")\n  (else (println \"no\")))",
+            "(set candidate $0)\n(set target $1)\n(set i 0)\n(set is_subsequence true)\n(for-each c (chars target)\n  (set found false)\n  (for j i (len candidate)\n    (if (eq c (array_get (chars candidate) j))\n      (begin\n        (set i (+ j 1))\n        (set found true))))\n  (if (not found)\n    (set is_subsequence false)))\n(if is_subsequence\n  (println \"yes\")\n  (else (println \"no\")))"
+          ],
+          "errs": [
+            "",
+            "",
+            ""
+          ],
+          "outs": [
+            "no\n",
+            "no\n",
+            "no\n"
+          ],
+          "secs": [
+            3.1,
+            2.3,
+            2.1
+          ]
+        }
+      ]
+    },
+    {
+      "iteration": 7,
+      "retried": 3,
+      "pass_at_attempt": {
+        "1": 0,
+        "2": 2,
+        "3": 1
+      },
+      "total_pass": 3,
+      "tasks": [
+        {
+          "id": "path_normalize_dots",
+          "passed_at": 2,
+          "attempts": [
+            "(set path $0)\n(if (eq path \"/\")\n  (println \"\")\n  (do\n    (set parts array (split path \"/\"))\n    (set filtered array [])\n    (for-each seg string parts\n      (if (and (ne seg \"\") (ne seg \".\"))\n        (push filtered seg)))\n    (println (join \"/\" filtered))))",
+            "(set path $0)\n(if (eq path \"/\")\n  (println \"\")\n  (do\n    (set parts array (split path \"/\"))\n    (set filtered array [])\n    (for-each seg string parts\n      (if (and (ne seg \"\") (ne seg \".\"))\n        (push filtered seg)))\n    (println (string_concat \"/\" (join filtered \"/\")))))"
+          ],
+          "errs": [
+            "",
+            ""
+          ],
+          "outs": [
+            "usr/local/bin/sigil\n",
+            "/usr/local/bin/sigil\n"
+          ],
+          "secs": [
+            2.1,
+            1.7
+          ]
+        },
+        {
+          "id": "longest_path_segment",
+          "passed_at": 3,
+          "attempts": [
+            "(set path string $0)\n(set parts array (split path \"/\"))\n(println (last parts))",
+            "(set path string $0)\n(set parts array (split path \"/\"))\n(println (array_get parts (sub (array_length parts) 1)))",
+            "(set path string $0)\n(set parts array (split path \"/\"))\n(set longest int 0)\n(for-each part string parts\n  (if (gt (string_length part) longest)\n    (set longest int (string_length part))))\n(set result string \"\")\n(for i 0 (array_length parts)\n  (set part string (array_get parts i))\n  (if (eq (string_length part) longest)\n    (set result part)))\n(println (fmt \"{}\\n\" result))"
+          ],
+          "errs": [
+            "",
+            "",
+            ""
+          ],
+          "outs": [
+            "c\n",
+            "c\n",
+            "ccc\n"
+          ],
+          "secs": [
+            1.1,
+            0.8,
+            2.0
+          ]
+        },
+        {
+          "id": "swap_extension",
+          "passed_at": 2,
+          "attempts": [
+            "(set fname string $0)\n(set parts array (split fname \".\"))\n(set n int (sub (argv_count) 1))\n(for i 0 n\n  (set ext string (arg_str i))\n  (array_set parts (sub (len parts) 1) ext))\n(println (string_join parts \".\"))",
+            "(set fname string $0)\n(set parts array (split fname \".\"))\n(array_set parts (sub (len parts) 1) $1)\n(println (string_join parts \".\"))"
+          ],
+          "errs": [
+            "",
+            ""
+          ],
+          "outs": [
+            "report.report.txt\n",
+            "report.md\n"
+          ],
+          "secs": [
+            1.9,
+            0.9
+          ]
+        }
+      ]
+    },
+    {
+      "iteration": 8,
+      "retried": 0,
+      "pass_at_attempt": {
+        "1": 0,
+        "2": 0,
+        "3": 0
+      },
+      "total_pass": 0,
+      "tasks": []
+    },
+    {
+      "iteration": 9,
+      "retried": 2,
+      "pass_at_attempt": {
+        "1": 0,
+        "2": 0,
+        "3": 0
+      },
+      "total_pass": 0,
+      "tasks": [
+        {
+          "id": "tribonacci_nth",
+          "passed_at": null,
+          "attempts": [
+            "(set n int #0)\n(cond\n  ((eq n 0) (println 0))\n  ((eq n 1) (println 1))\n  ((eq n 2) (println 1))\n  (true\n    (set a int 0)\n    (set b int 1)\n    (set c int 1)\n    (for i 3 (add n 1)\n      (set t int (add (add a b) c))\n      (set a b)\n      (set b c)\n      (set c t)))\n  (true (println c)))",
+            "(set n int #0)\n(cond\n  ((eq n 0) (println 0))\n  ((eq n 1) (println 1))\n  ((eq n 2) (println 1))\n  (true\n    (set a int 0)\n    (set b int 1)\n    (set c int 1)\n    (for i 3 (add n 1)\n      (set t int (add (add a b) c))\n      (set a b)\n      (set b c)\n      (set c t)))\n  (true (println c)))",
+            "(set n int (arg_int 0))\n(cond\n  ((eq n 0) (println 0))\n  ((eq n 1) (println 1))\n  ((eq n 2) (println 1))\n  (true\n    (set a int 0)\n    (set b int 1)\n    (set c int 1)\n    (for i 3 (add n 1)\n      (set t int (add (add a b) c))\n      (set a b)\n      (set b c)\n      (set c t)))\n  (true (println c)))"
+          ],
+          "errs": [
+            "",
+            "",
+            ""
+          ],
+          "outs": [
+            "",
+            "",
+            ""
+          ],
+          "secs": [
+            2.9,
+            2.5,
+            2.3
+          ]
+        },
+        {
+          "id": "harmonic_partial_truncated",
+          "passed_at": null,
+          "attempts": [
+            "(set n int #0)\n(set s float 0.0)\n(for i 1 (add n 1)\n  (set s (add s (div 1.0 (cast_int_float i)))))\n(println (string_format \"{:.3f}\" s))",
+            "(set n int #0)\n(set s float 0.0)\n(for i 1 (add n 1)\n  (set s (add s (div 1.0 (cast_int_float i)))))\n(println (string_format \"{:.3f}\" s))",
+            "(set n int #0)\n(set s float 0.0)\n(for i 1 (add n 1)\n  (set s (add s (div 1.0 (cast_int_float i)))))\n(println (string_format \"{:.3f}\" s))"
+          ],
+          "errs": [
+            "",
+            "",
+            ""
+          ],
+          "outs": [
+            "{:.3f}\n",
+            "{:.3f}\n",
+            "{:.3f}\n"
+          ],
+          "secs": [
+            1.7,
+            1.2,
+            1.1
+          ]
+        }
+      ]
+    },
+    {
+      "iteration": 10,
+      "retried": 3,
+      "pass_at_attempt": {
+        "1": 0,
+        "2": 0,
+        "3": 0
+      },
+      "total_pass": 0,
+      "tasks": [
+        {
+          "id": "celsius_to_fahrenheit",
+          "passed_at": null,
+          "attempts": [
+            "(set c int #0)\n(set f float (add 32.0 (div (mul (cast_int_float c) 9.0) 5.0)))\n(println (string_format \"{:.1f}\" f))",
+            "(set c int #0)\n(set f float (add 32.0 (div (mul (cast_int_float c) 9.0) 5.0)))\n(println (string_format \"{}\" (round (mul f 10.0))))",
+            "(set c int #0)\n(set f float (add 32.0 (div (mul (cast_int_float c) 9.0) 5.0)))\n(println (string_format \"{:.1f}\" f))"
+          ],
+          "errs": [
+            "",
+            "",
+            ""
+          ],
+          "outs": [
+            "{:.1f}\n",
+            "2120\n",
+            "{:.1f}\n"
+          ],
+          "secs": [
+            1.6,
+            1.2,
+            1.0
+          ]
+        },
+        {
+          "id": "first_n_evens",
+          "passed_at": null,
+          "attempts": [
+            "(set n int #0)\n(set evens array [])\n(for i 1 (add n 1)\n  (if (eq (mod i 2) 0)\n    (push evens (str i))))\n(println (string_join evens \" \"))",
+            "(set n int #0)\n(set evens array [])\n(for i 1 (add n 1)\n  (if (eq (mod i 2) 0)\n    (push evens (str i))))\n(println (string_format \"{}\\n\" (string_join evens \" \")))",
+            "(set n int #0)\n(set evens array [])\n(for i 1 (add n 1)\n  (if (eq (mod i 2) 0)\n    (push evens (str i))))\n(println (string_format \"{}\\n\" (string_join evens \" \")))"
+          ],
+          "errs": [
+            "",
+            "",
+            ""
+          ],
+          "outs": [
+            "2 4\n",
+            "2 4\n",
+            "2 4\n"
+          ],
+          "secs": [
+            1.7,
+            1.3,
+            1.3
+          ]
+        },
+        {
+          "id": "first_word_longer_than",
+          "passed_at": null,
+          "attempts": [
+            "(set words array (split $0 \" \"))\n(set threshold int #1)\n(for-each w string words\n  (if (gt (len w) threshold)\n    (println w)))",
+            "(set words array (split $0 \" \"))\n(set threshold int #1)\n(for-each w string words\n  (if (gt (len w) threshold)\n    (println w)))",
+            "(set words array (split $0 \" \"))\n(set threshold int #1)\n(set found bool false)\n(for-each w string words\n  (if (and (not found) (gt (len w) threshold))\n    (println w)\n    (set found true)))"
+          ],
+          "errs": [
+            "",
+            "",
+            ""
+          ],
+          "outs": [
+            "medium\nlonger\nlongest\n",
+            "medium\nlonger\nlongest\n",
+            ""
+          ],
+          "secs": [
+            1.4,
+            0.9,
+            1.1
+          ]
+        }
+      ]
+    }
+  ]
+}

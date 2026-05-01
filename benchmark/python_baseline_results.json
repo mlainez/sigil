@@ -1,0 +1,370 @@
+{
+  "summary": {
+    "pass": 20,
+    "n": 40,
+    "seconds": 37.281564712524414,
+    "chars": 7749
+  },
+  "tasks": [
+    {
+      "iter": 4,
+      "id": "csv_count_rows",
+      "pass": false,
+      "seconds": 2.31,
+      "chars": 146,
+      "code": "import sys\n\ncsv_string = sys.argv[1]\nrows = csv_string.split('\\n')\ndata_rows = rows[1:]\nnum_data_rows = len(data_rows)\nprint(f'{num_data_rows}\\n')",
+      "stdout": "3\n\n"
+    },
+    {
+      "iter": 4,
+      "id": "csv_select_column",
+      "pass": true,
+      "seconds": 0.95,
+      "chars": 233,
+      "code": "import sys\n\ncsv_data = sys.argv[1]\ncolumn_name = sys.argv[2]\n\nheader, *rows = csv_data.split('\\n')\ncolumns = header.split(',')\n\nindex = columns.index(column_name)\n\nfor row in rows:\n    fields = row.split(',')\n    print(fields[index])",
+      "stdout": "alice\nbob\n"
+    },
+    {
+      "iter": 4,
+      "id": "log_count_level",
+      "pass": true,
+      "seconds": 0.69,
+      "chars": 138,
+      "code": "import sys\n\nlog = sys.argv[1]\nlevel = sys.argv[2]\n\ncount = sum(1 for line in log.split('\\n') if line.startswith(level + ' '))\nprint(count)",
+      "stdout": "2\n"
+    },
+    {
+      "iter": 4,
+      "id": "log_extract_messages",
+      "pass": true,
+      "seconds": 0.85,
+      "chars": 173,
+      "code": "import sys\n\nlog = sys.argv[1]\nlevel = sys.argv[2]\n\nmessages = [line.split(' ', 1)[1] for line in log.split('\\n') if line.startswith(level + ' ')]\n\nprint('\\n'.join(messages))",
+      "stdout": "ok\nagain\n"
+    },
+    {
+      "iter": 4,
+      "id": "config_get_key",
+      "pass": false,
+      "seconds": 0.83,
+      "chars": 184,
+      "code": "import sys\n\nconfig_str = sys.argv[1]\nkey = sys.argv[2]\n\nconfig_dict = dict(line.split('=') for line in config_str.split('\\n'))\nvalue = config_dict.get(key, 'NONE')\n\nprint(value + '\\n')",
+      "stdout": "8080\n\n"
+    },
+    {
+      "iter": 4,
+      "id": "config_keys_sorted",
+      "pass": true,
+      "seconds": 0.8,
+      "chars": 196,
+      "code": "import sys\n\nconfig_str = sys.argv[1]\nconfig_dict = dict(line.split('=') for line in config_str.strip().split('\\n'))\nsorted_keys = sorted(config_dict.keys())\n\nfor key in sorted_keys:\n    print(key)",
+      "stdout": "host\nport\nuser\n"
+    },
+    {
+      "iter": 4,
+      "id": "csv_filter_by_value",
+      "pass": true,
+      "seconds": 1.21,
+      "chars": 298,
+      "code": "import sys\n\ncsv_data = sys.argv[1]\ncolumn_name = sys.argv[2]\nvalue = sys.argv[3]\n\nrows = csv_data.split('\\n')\nheader = rows[0].split(',')\ndata_rows = rows[1:]\n\nfiltered_rows = [row for row in data_rows if row.split(',')[header.index(column_name)] == value]\n\nfor row in filtered_rows:\n    print(row)",
+      "stdout": "alice,dev\ncarol,dev\n"
+    },
+    {
+      "iter": 4,
+      "id": "kv_pairs_to_json_like",
+      "pass": true,
+      "seconds": 0.68,
+      "chars": 140,
+      "code": "import sys\n\ninput_str = sys.argv[1]\noutput_str = ';'.join([item.replace('=', ':') for item in input_str.split(',')]) + ';'\nprint(output_str)",
+      "stdout": "a:1;b:2;c:3;\n"
+    },
+    {
+      "iter": 4,
+      "id": "sum_field_in_csv",
+      "pass": false,
+      "seconds": 1.06,
+      "chars": 248,
+      "code": "import sys\n\ncsv_data = sys.argv[1]\ncolumn_name = sys.argv[2]\n\nrows = csv_data.strip().split('\\n')\nheader = rows[0].split(',')\nindex = header.index(column_name)\n\ntotal_sum = sum(int(row.split(',')[index]) for row in rows[1:])\nprint(f'{total_sum}\\n')",
+      "stdout": "10\n\n"
+    },
+    {
+      "iter": 4,
+      "id": "count_log_unique_users",
+      "pass": true,
+      "seconds": 0.7,
+      "chars": 156,
+      "code": "import sys\n\nusers = set()\nfor line in sys.argv[1].split('\\n'):\n    if line:\n        user, action = line.split(' ')\n        users.add(user)\nprint(len(users))",
+      "stdout": "3\n"
+    },
+    {
+      "iter": 5,
+      "id": "balanced_brackets_multi",
+      "pass": false,
+      "seconds": 1.62,
+      "chars": 458,
+      "code": "import sys\n\ndef is_balanced(s):\n    stack = []\n    mapping = {\")\": \"(\", \"]\": \"[\", \"}\": \"{\"}\n    for char in s:\n        if char in mapping.values():\n            stack.append(char)\n        elif char in mapping:\n            if not stack or mapping[char] != stack.pop():\n                return False\n    return not stack\n\nif __name__ == \"__main__\":\n    input_string = sys.argv[1]\n    result = 'yes' if is_balanced(input_string) else 'no'\n    print(result + '\\n')",
+      "stdout": "yes\n\n"
+    },
+    {
+      "iter": 5,
+      "id": "first_unbalanced_index",
+      "pass": true,
+      "seconds": 1.38,
+      "chars": 383,
+      "code": "import sys\n\ndef find_unbalanced_index(s):\n    balance = 0\n    for i, char in enumerate(s):\n        if char == '(':\n            balance += 1\n        elif char == ')':\n            balance -= 1\n            if balance < 0:\n                return i\n    return -1\n\nif __name__ == \"__main__\":\n    input_string = sys.argv[1]\n    result = find_unbalanced_index(input_string)\n    print(result)",
+      "stdout": "4\n"
+    },
+    {
+      "iter": 5,
+      "id": "longest_run_letter",
+      "pass": false,
+      "seconds": 1.67,
+      "chars": 474,
+      "code": "import sys\n\ndef longest_run(s):\n    max_length = 0\n    current_length = 1\n    \n    for i in range(1, len(s)):\n        if s[i] == s[i - 1]:\n            current_length += 1\n        else:\n            if current_length > max_length:\n                max_length = current_length\n            current_length = 1\n    \n    return max(max_length, current_length)\n\nif __name__ == \"__main__\":\n    input_string = sys.argv[1]\n    result = longest_run(input_string)\n    print(result + '\\n')",
+      "stdout": ""
+    },
+    {
+      "iter": 5,
+      "id": "split_on_consecutive",
+      "pass": false,
+      "seconds": 1.7,
+      "chars": 404,
+      "code": "import sys\n\ndef compress_string(s):\n    result = []\n    i = 0\n    while i < len(s):\n        char = s[i]\n        count = 1\n        while i + 1 < len(s) and s[i + 1] == char:\n            i += 1\n            count += 1\n        result.append(f'{char}{count}')\n        i += 1\n    return ' '.join(result) + '\\n'\n\nif __name__ == \"__main__\":\n    input_string = sys.argv[1]\n    print(compress_string(input_string))",
+      "stdout": "a3 b2 c1 d4\n\n"
+    },
+    {
+      "iter": 5,
+      "id": "max_consecutive_evens",
+      "pass": true,
+      "seconds": 1.66,
+      "chars": 451,
+      "code": "import sys\n\ndef longest_even_streak(numbers):\n    max_streak = 0\n    current_streak = 0\n    \n    for num in numbers:\n        if num % 2 == 0:\n            current_streak += 1\n            if current_streak > max_streak:\n                max_streak = current_streak\n        else:\n            current_streak = 0\n    \n    return max_streak\n\nif __name__ == \"__main__\":\n    numbers = list(map(int, sys.argv[1].split()))\n    print(longest_even_streak(numbers))",
+      "stdout": "4\n"
+    },
+    {
+      "iter": 5,
+      "id": "longest_increasing_streak",
+      "pass": true,
+      "seconds": 1.87,
+      "chars": 542,
+      "code": "import sys\n\ndef longest_increasing_streak(nums):\n    if not nums:\n        return 0\n    \n    max_length = current_length = 1\n    \n    for i in range(1, len(nums)):\n        if nums[i] > nums[i - 1]:\n            current_length += 1\n        else:\n            max_length = max(max_length, current_length)\n            current_length = 1\n    \n    return max(max_length, current_length)\n\nif __name__ == \"__main__\":\n    input_str = sys.argv[1]\n    nums = list(map(int, input_str.split()))\n    result = longest_increasing_streak(nums)\n    print(result)",
+      "stdout": "4\n"
+    },
+    {
+      "iter": 5,
+      "id": "every_other_letter",
+      "pass": false,
+      "seconds": 0.93,
+      "chars": 189,
+      "code": "import sys\n\nif len(sys.argv) > 1:\n    input_string = sys.argv[1]\n    result = ''.join(input_string[i] for i in range(0, len(input_string), 2))\n    print(result + '\\n')\nelse:\n    print('\\n')",
+      "stdout": "aceg\n\n"
+    },
+    {
+      "iter": 5,
+      "id": "find_substring_index",
+      "pass": false,
+      "seconds": 0.66,
+      "chars": 120,
+      "code": "import sys\n\nif len(sys.argv) != 3:\n    print('-1')\nelse:\n    index = sys.argv[0].find(sys.argv[1])\n    print(str(index))",
+      "stdout": "-1\n"
+    },
+    {
+      "iter": 5,
+      "id": "all_caps_or_not",
+      "pass": true,
+      "seconds": 0.63,
+      "chars": 111,
+      "code": "import sys\n\nif all(c.isupper() or not c.isalpha() for c in sys.argv[1]):\n    print('yes')\nelse:\n    print('no')",
+      "stdout": "yes\n"
+    },
+    {
+      "iter": 5,
+      "id": "starts_and_ends_same",
+      "pass": true,
+      "seconds": 0.98,
+      "chars": 184,
+      "code": "import sys\n\nif len(sys.argv) < 2:\n    print('no')\nelse:\n    s = sys.argv[1]\n    if not s:\n        print('no')\n    elif s[0] == s[-1]:\n        print('yes')\n    else:\n        print('no')",
+      "stdout": "yes\n"
+    },
+    {
+      "iter": 8,
+      "id": "popcount",
+      "pass": true,
+      "seconds": 0.44,
+      "chars": 57,
+      "code": "import sys\n\nn = int(sys.argv[1])\nprint(bin(n).count('1'))",
+      "stdout": "3\n"
+    },
+    {
+      "iter": 8,
+      "id": "to_binary_str",
+      "pass": false,
+      "seconds": 0.45,
+      "chars": 57,
+      "code": "import sys\n\nn = int(sys.argv[1])\nprint(bin(n)[2:] + '\\n')",
+      "stdout": "1101\n\n"
+    },
+    {
+      "iter": 8,
+      "id": "binary_to_int",
+      "pass": false,
+      "seconds": 0.57,
+      "chars": 105,
+      "code": "import sys\n\nbinary_string = sys.argv[1]\ndecimal_value = int(binary_string, 2)\nprint(f\"{decimal_value}\\n\")",
+      "stdout": "13\n\n"
+    },
+    {
+      "iter": 8,
+      "id": "bit_at_index",
+      "pass": false,
+      "seconds": 0.66,
+      "chars": 97,
+      "code": "import sys\n\nn = int(sys.argv[1])\ni = int(sys.argv[2])\n\nresult = (n >> i) & 1\nprint(f'{result}\\n')",
+      "stdout": "1\n\n"
+    },
+    {
+      "iter": 8,
+      "id": "set_bit",
+      "pass": false,
+      "seconds": 0.64,
+      "chars": 98,
+      "code": "import sys\n\nn = int(sys.argv[1])\ni = int(sys.argv[2])\n\nresult = n | (1 << i)\n\nprint(f'{result}\\n')",
+      "stdout": "10\n\n"
+    },
+    {
+      "iter": 8,
+      "id": "clear_bit",
+      "pass": true,
+      "seconds": 0.57,
+      "chars": 92,
+      "code": "import sys\n\nn = int(sys.argv[1])\ni = int(sys.argv[2])\n\nresult = n & ~(1 << i)\n\nprint(result)",
+      "stdout": "12\n"
+    },
+    {
+      "iter": 8,
+      "id": "highest_set_bit",
+      "pass": true,
+      "seconds": 0.49,
+      "chars": 72,
+      "code": "import sys\n\nn = int(sys.argv[1])\nindex = n.bit_length() - 1\nprint(index)",
+      "stdout": "3\n"
+    },
+    {
+      "iter": 8,
+      "id": "and_two",
+      "pass": false,
+      "seconds": 0.54,
+      "chars": 73,
+      "code": "import sys\n\na = int(sys.argv[1])\nb = int(sys.argv[2])\n\nprint(a & b, '\\n')",
+      "stdout": "8 \n\n"
+    },
+    {
+      "iter": 8,
+      "id": "xor_two",
+      "pass": false,
+      "seconds": 1.02,
+      "chars": 193,
+      "code": "import sys\n\nif len(sys.argv) != 3:\n    print(\"Usage: python script.py <int1> <int2>\")\n    sys.exit(1)\n\nint1 = int(sys.argv[1])\nint2 = int(sys.argv[2])\n\nresult = int1 ^ int2\nprint(f\"{result}\\n\")",
+      "stdout": "6\n\n"
+    },
+    {
+      "iter": 8,
+      "id": "shift_left",
+      "pass": false,
+      "seconds": 0.6,
+      "chars": 90,
+      "code": "import sys\n\nn = int(sys.argv[1])\nk = int(sys.argv[2])\nresult = n << k\nprint(f'{result}\\n')",
+      "stdout": "48\n\n"
+    },
+    {
+      "iter": 10,
+      "id": "max_three",
+      "pass": false,
+      "seconds": 1.0,
+      "chars": 182,
+      "code": "import sys\n\nif len(sys.argv) != 4:\n    print(\"Usage: python script.py arg0 arg1 arg2\")\nelse:\n    a, b, c = map(int, sys.argv[1:])\n    largest = max(a, b, c)\n    print(f\"{largest}\\n\")",
+      "stdout": "7\n\n"
+    },
+    {
+      "iter": 10,
+      "id": "min_three",
+      "pass": false,
+      "seconds": 0.58,
+      "chars": 97,
+      "code": "import sys\n\nargs = [int(arg) for arg in sys.argv[1:]]\nsmallest = min(args)\nprint(f'{smallest}\\n')",
+      "stdout": "3\n\n"
+    },
+    {
+      "iter": 10,
+      "id": "clamp_value",
+      "pass": true,
+      "seconds": 0.69,
+      "chars": 120,
+      "code": "import sys\n\nx = int(sys.argv[1])\nlo = int(sys.argv[2])\nhi = int(sys.argv[3])\n\nresult = max(lo, min(x, hi))\nprint(result)",
+      "stdout": "10\n"
+    },
+    {
+      "iter": 10,
+      "id": "celsius_to_fahrenheit",
+      "pass": false,
+      "seconds": 0.68,
+      "chars": 103,
+      "code": "import sys\n\ncelsius = float(sys.argv[1])\nfahrenheit = celsius * 9 / 5 + 32\nprint(f\"{fahrenheit:.1f}\\n\")",
+      "stdout": "212.0\n\n"
+    },
+    {
+      "iter": 10,
+      "id": "is_palindrome_int",
+      "pass": false,
+      "seconds": 0.88,
+      "chars": 181,
+      "code": "import sys\n\ndef is_palindrome(num):\n    return str(num) == str(num)[::-1]\n\nif __name__ == \"__main__\":\n    num = int(sys.argv[1])\n    print('yes\\n' if is_palindrome(num) else 'no\\n')",
+      "stdout": "yes\n\n"
+    },
+    {
+      "iter": 10,
+      "id": "average_of_ints",
+      "pass": false,
+      "seconds": 0.69,
+      "chars": 141,
+      "code": "import sys\nfrom math import floor\n\nnumbers = list(map(int, sys.argv[1].split()))\nmean = sum(numbers) / len(numbers)\nprint(f'{floor(mean)}\\n')",
+      "stdout": "3\n\n"
+    },
+    {
+      "iter": 10,
+      "id": "histogram_text",
+      "pass": true,
+      "seconds": 0.45,
+      "chars": 69,
+      "code": "import sys\n\nfor num in sys.argv[1].split():\n    print('#' * int(num))",
+      "stdout": "###\n#\n####\n##\n"
+    },
+    {
+      "iter": 10,
+      "id": "first_n_evens",
+      "pass": true,
+      "seconds": 0.58,
+      "chars": 81,
+      "code": "import sys\n\nn = int(sys.argv[1])\nprint(' '.join(str(2*i) for i in range(1, n+1)))",
+      "stdout": "2 4 6 8\n"
+    },
+    {
+      "iter": 10,
+      "id": "modular_pow",
+      "pass": true,
+      "seconds": 1.8,
+      "chars": 417,
+      "code": "import sys\n\ndef modular_exponentiation(base, exp, mod):\n    result = 1\n    base = base % mod\n    while exp > 0:\n        if (exp % 2) == 1:\n            result = (result * base) % mod\n        exp = exp >> 1\n        base = (base * base) % mod\n    return result\n\nif __name__ == \"__main__\":\n    base = int(sys.argv[1])\n    exp = int(sys.argv[2])\n    mod = int(sys.argv[3])\n    print(modular_exponentiation(base, exp, mod))",
+      "stdout": "5\n"
+    },
+    {
+      "iter": 10,
+      "id": "first_word_longer_than",
+      "pass": true,
+      "seconds": 0.81,
+      "chars": 196,
+      "code": "import sys\n\nsentence = sys.argv[1]\nthreshold = int(sys.argv[2])\n\nwords = sentence.split()\nfor word in words:\n    if len(word) > threshold:\n        print(word)\n        break\nelse:\n    print('NONE')",
+      "stdout": "medium\n"
+    }
+  ]
+}

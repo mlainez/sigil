@@ -1,0 +1,352 @@
+[
+  {
+    "id": "v3_cp_two_words",
+    "status": "ok",
+    "attempts": 1,
+    "tokens": 200,
+    "via": "qwen-sigil-v2:7b"
+  },
+  {
+    "id": "v3_cp_no_overlap",
+    "status": "ok",
+    "attempts": 1,
+    "tokens": 214,
+    "via": "qwen-sigil-v2:7b"
+  },
+  {
+    "id": "v3_cp_one_empty",
+    "status": "ok",
+    "attempts": 1,
+    "tokens": 184,
+    "via": "qwen-sigil-v2:7b"
+  },
+  {
+    "id": "v3_cp_identical",
+    "status": "ok",
+    "attempts": 1,
+    "tokens": 200,
+    "via": "qwen-sigil-v2:7b"
+  },
+  {
+    "id": "v3_cp_length",
+    "status": "ok",
+    "attempts": 1,
+    "tokens": 181,
+    "via": "qwen-sigil-v2:7b"
+  },
+  {
+    "id": "v3_cp_words_equal_check",
+    "status": "ok",
+    "attempts": 1,
+    "tokens": 229,
+    "via": "qwen-sigil-v2:7b"
+  },
+  {
+    "id": "v3_cs_no_overlap",
+    "status": "ok",
+    "attempts": 2,
+    "tokens": 222,
+    "via": "qwen-sigil-v2:7b"
+  },
+  {
+    "id": "v3_cs_length",
+    "status": "ok",
+    "attempts": 1,
+    "tokens": 227,
+    "via": "qwen-sigil-v2:7b"
+  },
+  {
+    "id": "v3_cs_match_check",
+    "status": "ok",
+    "attempts": 1,
+    "tokens": 261,
+    "via": "qwen-sigil-v2:7b"
+  },
+  {
+    "id": "v3_cs_two_words",
+    "status": "ok",
+    "attempts": 4,
+    "tokens": 237,
+    "via": "qwen-sigil-v2:7b (coached)"
+  },
+  {
+    "id": "v3_subseq_simple",
+    "status": "ok",
+    "attempts": 1,
+    "tokens": 382,
+    "via": "qwen-sigil-v2:7b"
+  },
+  {
+    "id": "v3_cs_identical",
+    "status": "ok",
+    "attempts": 2,
+    "tokens": 232,
+    "via": "qwen-sigil-v2:7b"
+  },
+  {
+    "id": "v3_subseq_no",
+    "status": "ok",
+    "attempts": 1,
+    "tokens": 426,
+    "via": "qwen-sigil-v2:7b"
+  },
+  {
+    "id": "v3_subseq_empty_needle",
+    "status": "ok",
+    "attempts": 1,
+    "tokens": 369,
+    "via": "qwen-sigil-v2:7b"
+  },
+  {
+    "id": "v3_subseq_full_match",
+    "status": "ok",
+    "attempts": 1,
+    "tokens": 421,
+    "via": "qwen-sigil-v2:7b"
+  },
+  {
+    "id": "v3_subseq_repeated",
+    "status": "ok",
+    "attempts": 1,
+    "tokens": 426,
+    "via": "qwen-sigil-v2:7b"
+  },
+  {
+    "id": "v3_subseq_too_long",
+    "status": "ok",
+    "attempts": 2,
+    "tokens": 274,
+    "via": "qwen-sigil-v2:7b"
+  },
+  {
+    "id": "v3_cs_extension",
+    "status": "ok",
+    "attempts": 5,
+    "tokens": 383,
+    "via": "qwen-sigil-v2:7b (coached)"
+  },
+  {
+    "id": "v3_subseq_count_chars",
+    "status": "ok",
+    "attempts": 2,
+    "tokens": 376,
+    "via": "qwen-sigil-v2:7b"
+  },
+  {
+    "id": "v3_rot_simple",
+    "status": "ok",
+    "attempts": 1,
+    "tokens": 107,
+    "via": "qwen-sigil-v2:7b"
+  },
+  {
+    "id": "v3_rot_no",
+    "status": "ok",
+    "attempts": 1,
+    "tokens": 224,
+    "via": "qwen-sigil-v2:7b"
+  },
+  {
+    "id": "v3_subseq_word_match",
+    "status": "ok",
+    "attempts": 4,
+    "tokens": 335,
+    "via": "qwen-sigil-v2:7b (coached)"
+  },
+  {
+    "id": "v3_rot_full_cycle",
+    "status": "ok",
+    "attempts": 2,
+    "tokens": 158,
+    "via": "qwen-sigil-v2:7b"
+  },
+  {
+    "id": "v3_rot_diff_len",
+    "status": "ok",
+    "attempts": 4,
+    "tokens": 242,
+    "via": "qwen-sigil-v2:7b (coached)"
+  },
+  {
+    "id": "v3_ed_classic",
+    "status": "ok",
+    "attempts": 1,
+    "tokens": 695,
+    "via": "qwen-sigil-v2:7b"
+  },
+  {
+    "id": "v3_ed_zero",
+    "status": "ok",
+    "attempts": 1,
+    "tokens": 47,
+    "via": "qwen-sigil-v2:7b"
+  },
+  {
+    "id": "v3_ed_one_off",
+    "status": "ok",
+    "attempts": 1,
+    "tokens": 695,
+    "via": "qwen-sigil-v2:7b"
+  },
+  {
+    "id": "v3_rot_same",
+    "status": "ok",
+    "attempts": 5,
+    "tokens": 120,
+    "via": "qwen-sigil-v2:7b (coached)"
+  },
+  {
+    "id": "v3_rot_count_shifts",
+    "status": "failed",
+    "attempts": 3,
+    "note": "coached: stdout='' stderr=''",
+    "last_sigil": "(set s1 string $0)\n(set s2 string $1)\n(set n int (len s1))\n(set i 0)\n\n(while (lt i n)\n  (if (eq (string_slice s1 i n) s2)\n    (println i)\n    (ret 0))\n  (set i (add i 1)))\n\n(println -1)"
+  },
+  {
+    "id": "v3_ed_one_apart",
+    "status": "ok",
+    "attempts": 3,
+    "tokens": 919,
+    "via": "qwen-sigil-v2:7b"
+  },
+  {
+    "id": "v3_ed_one_apart_no",
+    "status": "ok",
+    "attempts": 1,
+    "tokens": 351,
+    "via": "qwen-sigil-v2:7b"
+  },
+  {
+    "id": "v3_ed_empty",
+    "status": "ok",
+    "attempts": 1,
+    "tokens": 67,
+    "via": "qwen-sigil-v2:7b"
+  },
+  {
+    "id": "v3_ed_anagram_check",
+    "status": "ok",
+    "attempts": 1,
+    "tokens": 733,
+    "via": "qwen-sigil-v2:7b"
+  },
+  {
+    "id": "v3_cc_count",
+    "status": "ok",
+    "attempts": 1,
+    "tokens": 251,
+    "via": "qwen-sigil-v2:7b"
+  },
+  {
+    "id": "v3_cc_anagram_check",
+    "status": "ok",
+    "attempts": 1,
+    "tokens": 303,
+    "via": "qwen-sigil-v2:7b"
+  },
+  {
+    "id": "v3_cc_zero",
+    "status": "ok",
+    "attempts": 2,
+    "tokens": 118,
+    "via": "qwen-sigil-v2:7b"
+  },
+  {
+    "id": "v3_cc_repeated",
+    "status": "ok",
+    "attempts": 1,
+    "tokens": 142,
+    "via": "qwen-sigil-v2:7b"
+  },
+  {
+    "id": "v3_ed_within_k",
+    "status": "failed",
+    "attempts": 3,
+    "note": "coached: stdout='' stderr='Runtime error: Invalid arguments to array_get\\n'",
+    "last_sigil": "(set s1 string $0)\n(set s2 string $1)\n(set k int (arg_int 2))\n(set len1 int (string_length s1))\n(set len2 int (string_length s2))\n(if (gt k (max len1 len2)) (println \"yes\"))\n(if (eq len1 len2)\n  (set "
+  },
+  {
+    "id": "v3_cc_string",
+    "status": "ok",
+    "attempts": 5,
+    "tokens": 214,
+    "via": "qwen-sigil-v2:7b (coached)"
+  },
+  {
+    "id": "v3_cc_subset",
+    "status": "ok",
+    "attempts": 4,
+    "tokens": 556,
+    "via": "qwen-sigil-v2:7b (coached)"
+  },
+  {
+    "id": "v3_sub3",
+    "status": "ok",
+    "attempts": 1,
+    "tokens": 30,
+    "via": "qwen-sigil-v2:7b"
+  },
+  {
+    "id": "v3_sub_chain_neg",
+    "status": "ok",
+    "attempts": 1,
+    "tokens": 30,
+    "via": "qwen-sigil-v2:7b"
+  },
+  {
+    "id": "v3_sub_then_compare",
+    "status": "ok",
+    "attempts": 1,
+    "tokens": 189,
+    "via": "qwen-sigil-v2:7b"
+  },
+  {
+    "id": "v3_mul3",
+    "status": "ok",
+    "attempts": 1,
+    "tokens": 72,
+    "via": "qwen-sigil-v2:7b"
+  },
+  {
+    "id": "v3_sub_index_arith",
+    "status": "ok",
+    "attempts": 4,
+    "tokens": 178,
+    "via": "qwen-sigil-v2:7b (coached)"
+  },
+  {
+    "id": "v3_sub4",
+    "status": "ok",
+    "attempts": 5,
+    "tokens": 324,
+    "via": "qwen-sigil-v2:7b (coached)"
+  },
+  {
+    "id": "v3_mul_volume",
+    "status": "ok",
+    "attempts": 1,
+    "tokens": 72,
+    "via": "qwen-sigil-v2:7b"
+  },
+  {
+    "id": "v3_mul_chain",
+    "status": "ok",
+    "attempts": 4,
+    "tokens": 55,
+    "via": "qwen-sigil-v2:7b (coached)"
+  },
+  {
+    "id": "v3_mul_with_zero",
+    "status": "ok",
+    "attempts": 1,
+    "tokens": 95,
+    "via": "qwen-sigil-v2:7b"
+  },
+  {
+    "id": "v3_mul_squared_volume",
+    "status": "ok",
+    "attempts": 1,
+    "tokens": 42,
+    "via": "qwen-sigil-v2:7b"
+  }
+]

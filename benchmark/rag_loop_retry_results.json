@@ -1,0 +1,194 @@
+{
+  "iterations": [
+    {
+      "iteration": 3,
+      "retried": 6,
+      "shot1_pass": 2,
+      "shot2_pass_via_retry": 0,
+      "total_pass": 2,
+      "tasks": [
+        {
+          "id": "union_preserve_order",
+          "shot1_pass": true,
+          "shot2_pass": true
+        },
+        {
+          "id": "freq_count_top_k",
+          "shot1_pass": false,
+          "shot2_pass": false,
+          "shot1_seconds": 27.1,
+          "shot2_seconds": 25.4,
+          "shot1_code": "(set tokens (split $0 \" \"))\n(set counts {})\n(for-each tok tokens\n  (map_inc counts tok))\n(set sorted (sort_by (entries counts) (\\(k v) (neg v))))\n(set top_k (slice sorted 0 #1))\n(set result [])\n(for-each pair top_k\n  (push result (first pair)))\n(println (join result \" \"))",
+          "shot2_code": "(set tokens (split $0 \" \"))\n(set counts {})\n(for-each tok tokens\n  (map_inc counts tok))\n(set sorted (sort_by (entries counts) (\\(k v) (neg v))))\n(set top_k (slice sorted 0 #1))\n(set result [])\n(for i 0 #1\n  (push result (first (array_get top_k i))))\n(println (join result \" \"))",
+          "shot1_err": "Runtime error: Invalid arguments to neg\n",
+          "shot2_err": "Runtime error: Invalid arguments to neg\n"
+        },
+        {
+          "id": "sort_freq_desc",
+          "shot1_pass": false,
+          "shot2_pass": false,
+          "shot1_seconds": 25.2,
+          "shot2_seconds": 23.8,
+          "shot1_code": "(set words (split $0 \" \"))\n(set counts {})\n(for-each w words\n  (map_inc counts w))\n(set sorted (sort_by entries counts (\\(k v) (neg v))))\n(set result (map_arr sorted (\\(k v) (fmt \"{}:{}\" k v))))\n(println (join result \" \"))",
+          "shot2_code": "(set words (split $0 \" \"))\n(set counts {})\n(for-each w words\n  (map_inc counts w))\n(set entries (map_to_array counts))\n(set sorted (sort_by entries (\\(k v) (neg v))))\n(set result (map_arr sorted (\\(k v) (fmt \"{}:{}\" k v))))\n(println (join result \" \"))",
+          "shot1_err": "Runtime error: sort_by takes (array, function)\n",
+          "shot2_err": "Runtime error: Undefined variable: map_to_array\n"
+        },
+        {
+          "id": "majority_or_none",
+          "shot1_pass": true,
+          "shot2_pass": true
+        },
+        {
+          "id": "remove_dupes_keep_last",
+          "shot1_pass": false,
+          "shot2_pass": false,
+          "shot1_seconds": 26.5,
+          "shot2_seconds": 22.7,
+          "shot1_code": "(set words (split $0 \" \"))\n(set order [])\n(for-each word words (\\w\n  (if (not (in w order))\n    (push order w)\n    (set order (filter order (\\x (ne x w))))\n  (push order w)))\n(set unique_order (reverse (uniq (reverse order))))\n(println (join unique_order \" \"))",
+          "shot2_code": "(set words (split $0 \" \"))\n(set order [])\n(for-each word words (\\w\n  (if (in w order)\n    (set order (filter order (\\x (ne x w)))))\n  (push order w)))\n(set unique_order (reverse (uniq (reverse order))))\n(println (join unique_order \" \"))",
+          "shot1_err": "Parse error: Expected expression but got EOF\n",
+          "shot2_err": "Runtime error: Undefined variable: reverse\n"
+        },
+        {
+          "id": "common_prefix_words",
+          "shot1_pass": false,
+          "shot2_pass": false,
+          "shot1_seconds": 31.3,
+          "shot2_seconds": 29.3,
+          "shot1_code": "(set words (split $0 \" \"))\n(set prefix \"\")\n(if (gt (len words) 0)\n  (set prefix (first words))\n  (for-each w words\n    (set i 0)\n    (while (and (lt i (min (len prefix) (len w))) (eq (string_slice prefix i 1) (string_slice w i 1)))\n      (set i (+ i 1)))\n    (set prefix (string_slice prefix 0 i))))\n(println prefix)",
+          "shot2_code": "(set words (split $0 \" \"))\n(set prefix \"\")\n(if (gt (len words) 0)\n  (set prefix (array_get words 0))\n  (for-each w words\n    (set i 0)\n    (while (and (lt i (min (len prefix) (len w))) (eq (string_slice prefix i 1) (string_slice w i 1)))\n      (set i (+ i 1)))\n    (set prefix (string_slice prefix 0 i))))\n(println prefix)",
+          "shot1_err": "",
+          "shot2_err": ""
+        }
+      ]
+    },
+    {
+      "iteration": 6,
+      "retried": 5,
+      "shot1_pass": 0,
+      "shot2_pass_via_retry": 1,
+      "total_pass": 1,
+      "tasks": [
+        {
+          "id": "longest_common_suffix_two",
+          "shot1_pass": false,
+          "shot2_pass": false,
+          "shot1_seconds": 34.9,
+          "shot2_seconds": 32.1,
+          "shot1_code": "(set s0 $0)\n(set s1 $1)\n(set len0 (len s0))\n(set len1 (len s1))\n(set min_len (min len0 len1))\n(set suffix \"\")\n(set i 0)\n(while (and (lt i min_len) (eq (string_slice s0 (- len0 i 1) 1) (string_slice s1 (- len1 i 1) 1)))\n  (set suffix (string_concat (string_slice s0 (- len0 i 1) 1) suffix))\n  (set i (add i 1)))\n(println suffix)",
+          "shot2_code": "(set s0 $0)\n(set s1 $1)\n(set len0 (len s0))\n(set len1 (len s1))\n(set min_len (min len0 len1))\n(set suffix \"\")\n(set i 0)\n(while (and (lt i min_len) (eq (string_slice s0 (- len0 i 1) 1) (string_slice s1 (- len1 i 1) 1)))\n  (set suffix (string_concat (string_slice s0 (- len0 i 1) 1) suffix))\n  (set i (add i 1)))\n(println suffix)",
+          "shot1_err": "Runtime error: Invalid arguments to sub\n",
+          "shot2_err": "Runtime error: Invalid arguments to sub\n"
+        },
+        {
+          "id": "edit_one_apart",
+          "shot1_pass": false,
+          "shot2_pass": false,
+          "shot1_seconds": 63.2,
+          "shot2_seconds": 60.8,
+          "shot1_code": "(set a $0)\n(set b $1)\n(set len_a (len a))\n(set len_b (len b))\n\n(fn one_substitution x string y string -> bool\n  (set diff_count 0)\n  (for i 0 len_a\n    (if (ne (char_at x i) (char_at y i))\n      (set diff_count (+ diff_count 1)))\n  (eq diff_count 1))\n\n(fn one_insertion_or_deletion shorter string longer string -> bool\n  (set diff_count 0)\n  (for i 0 (len shorter)\n    (if (ne (char_at shorter i) (char_at longer (+ i diff_count)))\n      (begin\n        (set diff_count (+ diff_count 1))\n        (if (gt diff_count 1)\n          (ret false)))))\n  (le diff_count 1))\n\n(if (eq a b)\n  (println \"no\")\n  (else\n    (cond\n      ((eq len_a len_b) (if (one_substitution a b) (println \"yes\") (else (println \"no\"))))\n      ((eq (+ len_a 1) len_b) (if (one_insertion_or_deletion a b) (println \"yes\") (else (println \"no\"))))\n      ((eq (- len_a 1) len_b) (if (one_insertion_or_deletion b a) (println \"yes\") (else (println \"no\"))))\n      (true (println \"no\")))))",
+          "shot2_code": "(set a $0)\n(set b $1)\n(set len_a (len a))\n(set len_b (len b))\n\n(fn one_substitution x string y string -> bool\n  (set diff_count 0)\n  (for i 0 len_a\n    (if (ne (string_get x i) (string_get y i))\n      (set diff_count (+ diff_count 1))))\n  (eq diff_count 1))\n\n(fn one_insertion_or_deletion shorter string longer string -> bool\n  (set diff_count 0)\n  (for i 0 (len shorter)\n    (if (ne (string_get shorter i) (string_get longer (+ i diff_count)))\n      (begin\n        (set diff_count (+ diff_count 1))\n        (if (gt diff_count 1)\n          (ret false)))))\n  (le diff_count 1))\n\n(if (eq a b)\n  (println \"no\")\n  (else\n    (cond\n      ((eq len_a len_b) (if (one_substitution a b) (println \"yes\") (else (println \"no\"))))\n      ((eq (+ len_a 1) len_b) (if (one_insertion_or_deletion a b) (println \"yes\") (else (println \"no\"))))\n      ((eq (- len_a 1) len_b) (if (one_insertion_or_deletion b a) (println \"yes\") (else (println \"no\"))))\n      (true (println \"no\")))))",
+          "shot1_err": "Parse error: Expected expression but got EOF\n",
+          "shot2_err": "Runtime error: for loop start and end must be integers\n"
+        },
+        {
+          "id": "is_rotation_of",
+          "shot1_pass": false,
+          "shot2_pass": true,
+          "shot1_seconds": 23.4,
+          "shot2_seconds": 22.0,
+          "shot1_code": "(set s1 $0)\n(set s2 $1)\n(if (and (eq (len s1) (len s2)) (in s2 (join (concat s1 s1) \"\")))\n  (println \"yes\")\n  (else (println \"no\")))",
+          "shot2_code": "(set s1 $0)\n(set s2 $1)\n(if (and (eq (len s1) (len s2)) (in s2 (join (concat (chars s1) (chars s1)) \"\")))\n  (println \"yes\")\n  (else (println \"no\")))",
+          "shot1_err": "Runtime error: join takes (array, string)\n",
+          "shot2_err": ""
+        },
+        {
+          "id": "char_overlap_ratio",
+          "shot1_pass": false,
+          "shot2_pass": false,
+          "shot1_seconds": 30.9,
+          "shot2_seconds": 28.9,
+          "shot1_code": "(set s1 $0)\n(set s2 $1)\n(set set1 (uniq (chars s1)))\n(set set2 (uniq (chars s2)))\n(set inter_set (inter set1 set2))\n(set union_set (union set1 set2))\n(if (eq (len union_set) 0)\n  (println \"0.000\")\n  (else\n    (set result (/ (len inter_set) (len union_set)))\n    (println (fmt \"{:.3f}\" result))))",
+          "shot2_code": "(set s1 $0)\n(set s2 $1)\n(set set1 (uniq (chars s1)))\n(set set2 (uniq (chars s2)))\n(set inter_set (inter set1 set2))\n(set union_set (union set1 set2))\n(if (eq (len union_set) 0)\n  (println \"0.000\")\n  (else\n    (set result (/ (len inter_set) (len union_set)))\n    (println (fmt \"{:0.3f}\" result))))",
+          "shot1_err": "Runtime error: Undefined variable: :.3f\n",
+          "shot2_err": "Runtime error: Undefined variable: :0.3f\n"
+        },
+        {
+          "id": "is_subsequence",
+          "shot1_pass": false,
+          "shot2_pass": false,
+          "shot1_seconds": 32.9,
+          "shot2_seconds": 30.4,
+          "shot1_code": "(set candidate string $0)\n(set target string $1)\n\n(fn is_subsequence a string b string -> bool\n  (set i int 0)\n  (for-each c (chars a)\n    (while (and (lt i (len b)) (ne c (string_get b i)))\n      (set i (+ i 1)))\n    (if (ge i (len b))\n      (ret false)))\n  (ret true))\n\n(if (is_subsequence candidate target)\n  (println \"yes\")\n  (else\n    (println \"no\")))",
+          "shot2_code": "(set candidate string $0)\n(set target string $1)\n\n(fn is_subsequence a string b string -> bool\n  (set i int 0)\n  (for-each c (chars a)\n    (while (and (lt i (len b)) (ne c (char_at b i)))\n      (set i (+ i 1)))\n    (if (ge i (len b))\n      (ret false)))\n  (ret true))\n\n(if (is_subsequence candidate target)\n  (println \"yes\")\n  (else\n    (println \"no\")))",
+          "shot1_err": "Runtime error: ne requires arguments of the same type, got string and int\n",
+          "shot2_err": "Runtime error: Undefined variable: char_at\n"
+        }
+      ]
+    },
+    {
+      "iteration": 9,
+      "retried": 6,
+      "shot1_pass": 2,
+      "shot2_pass_via_retry": 1,
+      "total_pass": 3,
+      "tasks": [
+        {
+          "id": "fibonacci_nth",
+          "shot1_pass": true,
+          "shot2_pass": true
+        },
+        {
+          "id": "perfect_or_not",
+          "shot1_pass": false,
+          "shot2_pass": false,
+          "shot1_seconds": 23.7,
+          "shot2_seconds": 21.9,
+          "shot1_code": "(set n #0)\n(set sum 0)\n(for i 1 n\n  (if (eq (mod n i) 0)\n    (set sum (+ sum i))))\n(if (eq sum n)\n  (println \"yes\")\n  (else (println \"no\"))",
+          "shot2_code": "(set n #0)\n(set sum 0)\n(for i 1 (sub n 1)\n  (if (eq (mod n i) 0)\n    (set sum (+ sum i))))\n(if (eq sum n)\n  (println \"yes\")\n  (else (println \"no\"))",
+          "shot1_err": "Parse error: Expected expression but got EOF\n",
+          "shot2_err": "Parse error: Expected expression but got EOF\n"
+        },
+        {
+          "id": "divisor_count",
+          "shot1_pass": false,
+          "shot2_pass": true,
+          "shot1_seconds": 21.6,
+          "shot2_seconds": 19.8,
+          "shot1_code": "(set n #0)\n(set count 0)\n(for i 1 n\n  (if (eq (mod n i) 0)\n    (set count (add count 1))))\n(println count)",
+          "shot2_code": "(set n #0)\n(set count 0)\n(for i 1 (add n 1)\n  (if (eq (mod n i) 0)\n    (set count (add count 1))))\n(println count)",
+          "shot1_err": "",
+          "shot2_err": ""
+        },
+        {
+          "id": "tribonacci_nth",
+          "shot1_pass": true,
+          "shot2_pass": true
+        },
+        {
+          "id": "first_n_primes",
+          "shot1_pass": false,
+          "shot2_pass": false,
+          "shot1_seconds": 32.2,
+          "shot2_seconds": 31.0,
+          "shot1_code": "(set n #0)\n(fn is_prime num int -> bool\n  (if (le num 1) (ret false))\n  (for i 2 (sqrt num)\n    (if (eq (mod num i) 0) (ret false)))\n  (ret true))\n\n(set primes [])\n(set candidate 2)\n(while (lt (len primes) n)\n  (if (is_prime candidate)\n    (push primes candidate))\n  (set candidate (+ candidate 1)))\n\n(println (join (map_arr primes str) \" \"))",
+          "shot2_code": "(set n #0)\n(fn is_prime num int -> bool\n  (if (le num 1) (ret false))\n  (set limit int (sqrt_int num))\n  (for i 2 limit\n    (if (eq (mod num i) 0) (ret false)))\n  (ret true))\n\n(set primes [])\n(set candidate 2)\n(while (lt (len primes) n)\n  (if (is_prime candidate)\n    (push primes candidate))\n  (set candidate (+ candidate 1)))\n\n(println (join (map_arr primes str) \" \"))",
+          "shot1_err": "Runtime error: Invalid arguments to sqrt\n",
+          "shot2_err": "Runtime error: Undefined variable: sqrt_int\n"
+        },
+        {
+          "id": "harmonic_partial_truncated",
+          "shot1_pass": false,
+          "shot2_pass": false,
+          "shot1_seconds": 21.4,
+          "shot2_seconds": 20.1,
+          "shot1_code": "(set n int #0)\n(set sum decimal 0)\n(for i 1 (+ n 1)\n  (set sum (+ sum (/ 1 i))))\n(println (fmt \"{:.3f}\" sum))",
+          "shot2_code": "(set n int #0)\n(set sum decimal 0d)\n(for i 1 (+ n 1)\n  (set sum (add sum (cast_decimal_float (/ 1 i)))))\n(println (fmt \"{:.3f}\" sum))",
+          "shot1_err": "Runtime error: Type mismatch: variable 'sum' declared as decimal but got int\n",
+          "shot2_err": "Runtime error: Invalid arguments to cast_decimal_float\n"
+        }
+      ]
+    }
+  ]
+}

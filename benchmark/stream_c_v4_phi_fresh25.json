@@ -1,0 +1,1228 @@
+{
+  "sigil_model": "qwen-sigil-v4:7b",
+  "python_local_model": "qwen2.5-coder:7b",
+  "cloud_model": "claude-sonnet-4-6",
+  "n_tasks": 25,
+  "aggregates": {
+    "local_sigil": {
+      "pass": 23,
+      "sec": 190.92,
+      "wh": 9.5463,
+      "cost": 0.0
+    },
+    "local_python": {
+      "pass": 13,
+      "sec": 60.83999999999999,
+      "wh": 3.0412999999999997,
+      "cost": 0.0
+    },
+    "cloud_claude-sonnet-4-6": {
+      "pass": 25,
+      "sec": 81.24999999999999,
+      "wh": 0.666,
+      "cost": 0.0193
+    }
+  },
+  "tasks": [
+    {
+      "id": "cut_passwd_shells",
+      "category": "common shell pattern (cut -d: -f7 /etc/passwd)",
+      "sigil": {
+        "path": "local_sigil",
+        "pass": true,
+        "attempts": 1,
+        "code": "(set lines array (split $0 \"\\n\"))\n(for-each line string lines\n  (println (last (split line \":\"))))",
+        "seconds": 5.81,
+        "chars": 98,
+        "wh": 0.2904,
+        "cost_usd": 0.0,
+        "stdout": "/bin/bash\n/usr/sbin/nologin\n/bin/zsh\n",
+        "stderr": "",
+        "model_used": "qwen-sigil-v4:7b",
+        "fallback_used": false
+      },
+      "python_local": {
+        "path": "local_python",
+        "pass": true,
+        "code": "import sys\n\nfor line in sys.argv[1].split('\\n'):\n    if line:\n        fields = line.split(':')\n        print(fields[-1])",
+        "seconds": 2.16,
+        "chars": 120,
+        "wh": 0.1081,
+        "cost_usd": 0.0,
+        "stdout": "/bin/bash\n/usr/sbin/nologin\n/bin/zsh\n",
+        "stderr": "",
+        "tokens": {
+          "prompt_tokens": 194,
+          "completion_tokens": 37
+        }
+      },
+      "cloud": {
+        "path": "cloud_claude-sonnet-4-6",
+        "pass": true,
+        "code": "import sys\n\nfor line in sys.argv[1].splitlines():\n    if line:\n        print(line.split(':')[-1])",
+        "seconds": 2.93,
+        "chars": 97,
+        "wh": 0.0184,
+        "cost_usd": 0.0005,
+        "stdout": "/bin/bash\n/usr/sbin/nologin\n/bin/zsh\n",
+        "stderr": "",
+        "tokens": {
+          "prompt_tokens": 3,
+          "completion_tokens": 35
+        }
+      }
+    },
+    {
+      "id": "cut_csv_third_column",
+      "category": "common shell pattern (cut -d, -f3)",
+      "sigil": {
+        "path": "local_sigil",
+        "pass": true,
+        "attempts": 1,
+        "code": "(println (join (map_arr (split $0 \"\\n\") (\\line (array_get (split line \",\") 2))) \"\\n\"))",
+        "seconds": 6.43,
+        "chars": 86,
+        "wh": 0.3213,
+        "cost_usd": 0.0,
+        "stdout": "engineer\ndesigner\ndoctor\n",
+        "stderr": "",
+        "model_used": "qwen-sigil-v4:7b",
+        "fallback_used": false
+      },
+      "python_local": {
+        "path": "local_python",
+        "pass": true,
+        "code": "import sys\n\ncsv_string = sys.argv[1]\nlines = csv_string.split('\\n')\nfor line in lines:\n    fields = line.split(',')\n    if len(fields) > 2:\n        print(fields[2])",
+        "seconds": 2.32,
+        "chars": 164,
+        "wh": 0.1158,
+        "cost_usd": 0.0,
+        "stdout": "engineer\ndesigner\ndoctor\n",
+        "stderr": "",
+        "tokens": {
+          "prompt_tokens": 162,
+          "completion_tokens": 50
+        }
+      },
+      "cloud": {
+        "path": "cloud_claude-sonnet-4-6",
+        "pass": true,
+        "code": "import sys\n\ndata = sys.argv[1]\nfor line in data.splitlines():\n    fields = line.split(',')\n    print(fields[2])",
+        "seconds": 2.77,
+        "chars": 111,
+        "wh": 0.0209,
+        "cost_usd": 0.0006,
+        "stdout": "engineer\ndesigner\ndoctor\n",
+        "stderr": "",
+        "tokens": {
+          "prompt_tokens": 3,
+          "completion_tokens": 40
+        }
+      }
+    },
+    {
+      "id": "grep_starts_with",
+      "category": "common shell pattern (grep ^prefix)",
+      "sigil": {
+        "path": "local_sigil",
+        "pass": true,
+        "attempts": 1,
+        "code": "(set lines array (split $0 \"\\n\"))\n(for-each line string lines\n  (if (string_starts_with line $1)\n    (println line)))",
+        "seconds": 6.35,
+        "chars": 117,
+        "wh": 0.3175,
+        "cost_usd": 0.0,
+        "stdout": "apple pie\napricot jam\napple cake\n",
+        "stderr": "",
+        "model_used": "qwen-sigil-v4:7b",
+        "fallback_used": false
+      },
+      "python_local": {
+        "path": "local_python",
+        "pass": true,
+        "code": "import sys\n\ninput_string = sys.argv[1]\nprefix = sys.argv[2]\n\nresult = [line for line in input_string.split('\\n') if line.startswith(prefix)]\n\nprint('\\n'.join(result))",
+        "seconds": 2.28,
+        "chars": 166,
+        "wh": 0.1138,
+        "cost_usd": 0.0,
+        "stdout": "apple pie\napricot jam\napple cake\n",
+        "stderr": "",
+        "tokens": {
+          "prompt_tokens": 147,
+          "completion_tokens": 48
+        }
+      },
+      "cloud": {
+        "path": "cloud_claude-sonnet-4-6",
+        "pass": true,
+        "code": "import sys\n\ntext = sys.argv[1]\nprefix = sys.argv[2]\n\nfor line in text.splitlines():\n    if line.startswith(prefix):\n        print(line)",
+        "seconds": 2.45,
+        "chars": 135,
+        "wh": 0.0249,
+        "cost_usd": 0.0007,
+        "stdout": "apple pie\napricot jam\napple cake\n",
+        "stderr": "",
+        "tokens": {
+          "prompt_tokens": 3,
+          "completion_tokens": 48
+        }
+      }
+    },
+    {
+      "id": "grep_line_longer_than",
+      "category": "common shell pattern (awk 'length($0) > N')",
+      "sigil": {
+        "path": "local_sigil",
+        "pass": true,
+        "attempts": 1,
+        "code": "(set lines array (split $0 \"\\n\"))\n(for-each line string lines\n  (if (gt (len line) #1)\n    (println line)))",
+        "seconds": 6.36,
+        "chars": 107,
+        "wh": 0.3182,
+        "cost_usd": 0.0,
+        "stdout": "this is a longer line\nmedium length\n",
+        "stderr": "",
+        "model_used": "qwen-sigil-v4:7b",
+        "fallback_used": false
+      },
+      "python_local": {
+        "path": "local_python",
+        "pass": true,
+        "code": "import sys\n\ninput_string = sys.argv[1]\nN = int(sys.argv[2])\n\nlines = input_string.split('\\n')\nlong_lines = [line for line in lines if len(line) > N]\n\noutput = '\\n'.join(long_lines)\nprint(output)",
+        "seconds": 2.44,
+        "chars": 194,
+        "wh": 0.1219,
+        "cost_usd": 0.0,
+        "stdout": "this is a longer line\nmedium length\n",
+        "stderr": "",
+        "tokens": {
+          "prompt_tokens": 141,
+          "completion_tokens": 60
+        }
+      },
+      "cloud": {
+        "path": "cloud_claude-sonnet-4-6",
+        "pass": true,
+        "code": "import sys\n\ntext = sys.argv[1]\nn = int(sys.argv[2])\n\nfor line in text.split('\\n'):\n    if len(line) > n:\n        print(line)",
+        "seconds": 2.73,
+        "chars": 124,
+        "wh": 0.0264,
+        "cost_usd": 0.0008,
+        "stdout": "this is a longer line\nmedium length\n",
+        "stderr": "",
+        "tokens": {
+          "prompt_tokens": 3,
+          "completion_tokens": 51
+        }
+      }
+    },
+    {
+      "id": "sort_lines_alpha",
+      "category": "common shell pattern (sort)",
+      "sigil": {
+        "path": "local_sigil",
+        "pass": true,
+        "attempts": 1,
+        "code": "(set lines array (split $0 \"\\n\"))\n(println (join (sort lines) \"\\n\"))",
+        "seconds": 6.14,
+        "chars": 68,
+        "wh": 0.307,
+        "cost_usd": 0.0,
+        "stdout": "apple\nbanana\nbeet\ncherry\n",
+        "stderr": "",
+        "model_used": "qwen-sigil-v4:7b",
+        "fallback_used": false
+      },
+      "python_local": {
+        "path": "local_python",
+        "pass": false,
+        "code": "import sys\n\nlines = sys.argv[1].split('\\n')\nsorted_lines = sorted(lines)\noutput = '\\n'.join(sorted_lines) + '\\n'\nprint(output)",
+        "seconds": 2.19,
+        "chars": 126,
+        "wh": 0.1094,
+        "cost_usd": 0.0,
+        "stdout": "apple\nbanana\nbeet\ncherry\n\n",
+        "stderr": "",
+        "tokens": {
+          "prompt_tokens": 124,
+          "completion_tokens": 41
+        }
+      },
+      "cloud": {
+        "path": "cloud_claude-sonnet-4-6",
+        "pass": true,
+        "code": "import sys\nlines = sys.argv[1].split('\\n')\nfor line in sorted(lines):\n    print(line)",
+        "seconds": 3.37,
+        "chars": 85,
+        "wh": 0.0384,
+        "cost_usd": 0.0011,
+        "stdout": "apple\nbanana\nbeet\ncherry\n",
+        "stderr": "",
+        "tokens": {
+          "prompt_tokens": 3,
+          "completion_tokens": 75
+        }
+      }
+    },
+    {
+      "id": "sort_numbers_desc",
+      "category": "common shell pattern (sort -rn)",
+      "sigil": {
+        "path": "local_sigil",
+        "pass": true,
+        "attempts": 1,
+        "code": "(set s string $0)\n(println (join (sort_by (split s \" \") (\\w (neg (int w)))) \"\\n\"))",
+        "seconds": 6.13,
+        "chars": 82,
+        "wh": 0.3065,
+        "cost_usd": 0.0,
+        "stdout": "100\n88\n42\n19\n7\n3\n",
+        "stderr": "",
+        "model_used": "qwen-sigil-v4:7b",
+        "fallback_used": false
+      },
+      "python_local": {
+        "path": "local_python",
+        "pass": true,
+        "code": "import sys\n\ndef main():\n    numbers = list(map(int, sys.argv[1].split()))\n    sorted_numbers = sorted(numbers, reverse=True)\n    for number in sorted_numbers:\n        print(number)\n\nif __name__ == \"__main__\":\n    main()",
+        "seconds": 2.39,
+        "chars": 219,
+        "wh": 0.1196,
+        "cost_usd": 0.0,
+        "stdout": "100\n88\n42\n19\n7\n3\n",
+        "stderr": "",
+        "tokens": {
+          "prompt_tokens": 144,
+          "completion_tokens": 57
+        }
+      },
+      "cloud": {
+        "path": "cloud_claude-sonnet-4-6",
+        "pass": true,
+        "code": "import sys\n\nnumbers = list(map(int, sys.argv[1].split()))\nfor n in sorted(numbers, reverse=True):\n    print(n)",
+        "seconds": 6.42,
+        "chars": 110,
+        "wh": 0.0209,
+        "cost_usd": 0.0006,
+        "stdout": "100\n88\n42\n19\n7\n3\n",
+        "stderr": "",
+        "tokens": {
+          "prompt_tokens": 3,
+          "completion_tokens": 40
+        }
+      }
+    },
+    {
+      "id": "count_distinct_words",
+      "category": "common shell pattern (tr ' ' '\\n' | sort -u | wc -l)",
+      "sigil": {
+        "path": "local_sigil",
+        "pass": true,
+        "attempts": 3,
+        "code": "(set words (uniq (tokens $0)))\n(println (len words))",
+        "seconds": 14.31,
+        "chars": 52,
+        "wh": 0.7156,
+        "cost_usd": 0.0,
+        "stdout": "6\n",
+        "stderr": "",
+        "model_used": "phi-sigil-v1:14b",
+        "fallback_used": true
+      },
+      "python_local": {
+        "path": "local_python",
+        "pass": true,
+        "code": "import sys\n\nif __name__ == \"__main__\":\n    input_string = sys.argv[1]\n    tokens = set(input_string.split())\n    print(len(tokens), end='\\n')",
+        "seconds": 2.17,
+        "chars": 141,
+        "wh": 0.1083,
+        "cost_usd": 0.0,
+        "stdout": "6\n",
+        "stderr": "",
+        "tokens": {
+          "prompt_tokens": 116,
+          "completion_tokens": 42
+        }
+      },
+      "cloud": {
+        "path": "cloud_claude-sonnet-4-6",
+        "pass": true,
+        "code": "import sys\nprint(len(set(sys.argv[1].split())))",
+        "seconds": 4.02,
+        "chars": 47,
+        "wh": 0.0114,
+        "cost_usd": 0.0003,
+        "stdout": "6\n",
+        "stderr": "",
+        "tokens": {
+          "prompt_tokens": 3,
+          "completion_tokens": 21
+        }
+      }
+    },
+    {
+      "id": "middle_n_lines",
+      "category": "common shell pattern (sed -n 'M,Np')",
+      "sigil": {
+        "path": "local_sigil",
+        "pass": true,
+        "attempts": 1,
+        "code": "(set lines array (split $0 \"\\n\"))\n(set m int (sub #1 1))\n(set n int (sub #2 1))\n(for i m (add n 1)\n  (println (array_get lines i)))",
+        "seconds": 6.65,
+        "chars": 131,
+        "wh": 0.3323,
+        "cost_usd": 0.0,
+        "stdout": "line2\nline3\nline4\n",
+        "stderr": "",
+        "model_used": "qwen-sigil-v4:7b",
+        "fallback_used": false
+      },
+      "python_local": {
+        "path": "local_python",
+        "pass": false,
+        "code": "import sys\n\nlines = sys.argv[1].split('\\n')\nM = int(sys.argv[2])\nN = int(sys.argv[3])\n\nfor i in range(M-1, N):\n    print(lines[i], end='\\n' if i < N-1 else '')",
+        "seconds": 2.47,
+        "chars": 159,
+        "wh": 0.1234,
+        "cost_usd": 0.0,
+        "stdout": "line2\nline3\nline4",
+        "stderr": "",
+        "tokens": {
+          "prompt_tokens": 150,
+          "completion_tokens": 62
+        }
+      },
+      "cloud": {
+        "path": "cloud_claude-sonnet-4-6",
+        "pass": true,
+        "code": "import sys\n\ntext = sys.argv[1]\nm = int(sys.argv[2])\nn = int(sys.argv[3])\n\nlines = text.split('\\n')\nfor line in lines[m-1:n]:\n    print(line)",
+        "seconds": 2.86,
+        "chars": 140,
+        "wh": 0.0324,
+        "cost_usd": 0.001,
+        "stdout": "line2\nline3\nline4\n",
+        "stderr": "",
+        "tokens": {
+          "prompt_tokens": 3,
+          "completion_tokens": 63
+        }
+      }
+    },
+    {
+      "id": "wc_chars",
+      "category": "common shell pattern (wc -c)",
+      "sigil": {
+        "path": "local_sigil",
+        "pass": true,
+        "attempts": 1,
+        "code": "(set s string $0)\n(println (len s))",
+        "seconds": 6.11,
+        "chars": 35,
+        "wh": 0.3053,
+        "cost_usd": 0.0,
+        "stdout": "11\n",
+        "stderr": "",
+        "model_used": "qwen-sigil-v4:7b",
+        "fallback_used": false
+      },
+      "python_local": {
+        "path": "local_python",
+        "pass": false,
+        "code": "import sys\n\nprint(len(sys.argv[1]) + '\\n')",
+        "seconds": 1.9,
+        "chars": 42,
+        "wh": 0.0952,
+        "cost_usd": 0.0,
+        "stdout": "",
+        "stderr": "",
+        "tokens": {
+          "prompt_tokens": 113,
+          "completion_tokens": 19
+        }
+      },
+      "cloud": {
+        "path": "cloud_claude-sonnet-4-6",
+        "pass": true,
+        "code": "import sys\nprint(len(sys.argv[1]))",
+        "seconds": 2.77,
+        "chars": 34,
+        "wh": 0.0089,
+        "cost_usd": 0.0002,
+        "stdout": "11\n",
+        "stderr": "",
+        "tokens": {
+          "prompt_tokens": 3,
+          "completion_tokens": 16
+        }
+      }
+    },
+    {
+      "id": "count_non_empty_lines",
+      "category": "common shell pattern (grep -c .)",
+      "sigil": {
+        "path": "local_sigil",
+        "pass": true,
+        "attempts": 1,
+        "code": "(println (len (filter (split $0 \"\\n\") (\\x (gt (string_length x) 0)))))",
+        "seconds": 6.35,
+        "chars": 70,
+        "wh": 0.3175,
+        "cost_usd": 0.0,
+        "stdout": "4\n",
+        "stderr": "",
+        "model_used": "qwen-sigil-v4:7b",
+        "fallback_used": false
+      },
+      "python_local": {
+        "path": "local_python",
+        "pass": false,
+        "code": "import sys\n\ninput_string = sys.argv[1]\nlines = input_string.split('\\n')\nnon_empty_lines_count = sum(1 for line in lines if line.strip())\nprint(f'{non_empty_lines_count}\\n')",
+        "seconds": 2.3,
+        "chars": 172,
+        "wh": 0.1152,
+        "cost_usd": 0.0,
+        "stdout": "4\n\n",
+        "stderr": "",
+        "tokens": {
+          "prompt_tokens": 128,
+          "completion_tokens": 50
+        }
+      },
+      "cloud": {
+        "path": "cloud_claude-sonnet-4-6",
+        "pass": true,
+        "code": "import sys\nlines = sys.argv[1].split('\\n')\nprint(sum(1 for line in lines if len(line) > 0))",
+        "seconds": 2.86,
+        "chars": 91,
+        "wh": 0.0424,
+        "cost_usd": 0.0013,
+        "stdout": "4\n",
+        "stderr": "",
+        "tokens": {
+          "prompt_tokens": 3,
+          "completion_tokens": 83
+        }
+      }
+    },
+    {
+      "id": "find_basenames",
+      "category": "common shell pattern (basename per line)",
+      "sigil": {
+        "path": "local_sigil",
+        "pass": true,
+        "attempts": 1,
+        "code": "(set lines array (split $0 \"\\n\"))\n(for-each line string lines\n  (println (last (split line \"/\"))))",
+        "seconds": 6.27,
+        "chars": 98,
+        "wh": 0.3135,
+        "cost_usd": 0.0,
+        "stdout": "python\npasswd\n.bashrc\nfile.txt\n",
+        "stderr": "",
+        "model_used": "qwen-sigil-v4:7b",
+        "fallback_used": false
+      },
+      "python_local": {
+        "path": "local_python",
+        "pass": true,
+        "code": "import sys\n\nfor path in sys.argv[1].split('\\n'):\n    print(path.split('/')[-1])",
+        "seconds": 2.02,
+        "chars": 79,
+        "wh": 0.1008,
+        "cost_usd": 0.0,
+        "stdout": "python\npasswd\n.bashrc\nfile.txt\n",
+        "stderr": "",
+        "tokens": {
+          "prompt_tokens": 149,
+          "completion_tokens": 27
+        }
+      },
+      "cloud": {
+        "path": "cloud_claude-sonnet-4-6",
+        "pass": true,
+        "code": "import sys\n\npaths = sys.argv[1].split('\\n')\nfor path in paths:\n    print(path.split('/')[-1])",
+        "seconds": 2.72,
+        "chars": 93,
+        "wh": 0.0189,
+        "cost_usd": 0.0005,
+        "stdout": "python\npasswd\n.bashrc\nfile.txt\n",
+        "stderr": "",
+        "tokens": {
+          "prompt_tokens": 3,
+          "completion_tokens": 36
+        }
+      }
+    },
+    {
+      "id": "sum_tsv_column",
+      "category": "common shell pattern (awk '{s+=$2} END {print s}')",
+      "sigil": {
+        "path": "local_sigil",
+        "pass": false,
+        "attempts": 3,
+        "code": "(set lines array (split $0 \"\\n\"))\n(println (sum\n  (map_arr lines (\\line\n    (last (split line \"\\t\"))))))",
+        "seconds": 15.79,
+        "chars": 104,
+        "wh": 0.7897,
+        "cost_usd": 0.0,
+        "stdout": "",
+        "stderr": "Runtime error: sum: array must be homogeneous int or float",
+        "model_used": "phi-sigil-v1:14b",
+        "fallback_used": true
+      },
+      "python_local": {
+        "path": "local_python",
+        "pass": false,
+        "code": "import sys\n\ndata = sys.argv[1]\nlines = data.split('\\n')\ntotal = sum(int(line.split('\\t')[1]) for line in lines if line)\nprint(f'{total}\\n')",
+        "seconds": 2.25,
+        "chars": 139,
+        "wh": 0.1123,
+        "cost_usd": 0.0,
+        "stdout": "50\n\n",
+        "stderr": "",
+        "tokens": {
+          "prompt_tokens": 134,
+          "completion_tokens": 47
+        }
+      },
+      "cloud": {
+        "path": "cloud_claude-sonnet-4-6",
+        "pass": true,
+        "code": "import sys\n\ndata = sys.argv[1]\nlines = data.strip().split('\\n')\ntotal = sum(int(line.split('\\t')[1]) for line in lines if line)\nprint(total)",
+        "seconds": 3.62,
+        "chars": 140,
+        "wh": 0.0269,
+        "cost_usd": 0.0008,
+        "stdout": "50\n",
+        "stderr": "",
+        "tokens": {
+          "prompt_tokens": 3,
+          "completion_tokens": 52
+        }
+      }
+    },
+    {
+      "id": "capitalize_words",
+      "category": "common text utility (title case)",
+      "sigil": {
+        "path": "local_sigil",
+        "pass": true,
+        "attempts": 1,
+        "code": "(println (join (map_arr (split $0 \" \") (\\w (title w))) \" \"))",
+        "seconds": 5.9,
+        "chars": 60,
+        "wh": 0.2948,
+        "cost_usd": 0.0,
+        "stdout": "Hello World Foo Bar\n",
+        "stderr": "",
+        "model_used": "qwen-sigil-v4:7b",
+        "fallback_used": false
+      },
+      "python_local": {
+        "path": "local_python",
+        "pass": false,
+        "code": "import sys\n\ndef capitalize_words(input_string):\n    words = input_string.split()\n    capitalized_words = [word.capitalize() for word in words]\n    return ' '.join(capitalized_words) + '\\n'\n\nif __name__ == \"__main__\":\n    if len(sys.argv) > 1:\n        result = capitalize_words(sys.argv[1])\n        print(result)",
+        "seconds": 2.67,
+        "chars": 311,
+        "wh": 0.1334,
+        "cost_usd": 0.0,
+        "stdout": "Hello World Foo Bar\n\n",
+        "stderr": "",
+        "tokens": {
+          "prompt_tokens": 122,
+          "completion_tokens": 80
+        }
+      },
+      "cloud": {
+        "path": "cloud_claude-sonnet-4-6",
+        "pass": true,
+        "code": "import sys\nprint(' '.join(word.capitalize() for word in sys.argv[1].split()))",
+        "seconds": 3.41,
+        "chars": 77,
+        "wh": 0.0139,
+        "cost_usd": 0.0004,
+        "stdout": "Hello World Foo Bar\n",
+        "stderr": "",
+        "tokens": {
+          "prompt_tokens": 3,
+          "completion_tokens": 26
+        }
+      }
+    },
+    {
+      "id": "delete_blank_lines",
+      "category": "common shell pattern (sed '/^$/d')",
+      "sigil": {
+        "path": "local_sigil",
+        "pass": true,
+        "attempts": 1,
+        "code": "(println (join (filter (split $0 \"\\n\") (\\x (ne x \"\"))) \"\\n\"))",
+        "seconds": 6.02,
+        "chars": 61,
+        "wh": 0.301,
+        "cost_usd": 0.0,
+        "stdout": "alpha\nbeta\ngamma\ndelta\n",
+        "stderr": "",
+        "model_used": "qwen-sigil-v4:7b",
+        "fallback_used": false
+      },
+      "python_local": {
+        "path": "local_python",
+        "pass": false,
+        "code": "import sys\n\ninput_string = sys.argv[1]\nlines = input_string.split('\\n')\nnon_blank_lines = [line for line in lines if line.strip()]\noutput = '\\n'.join(non_blank_lines) + '\\n'\nprint(output)",
+        "seconds": 2.34,
+        "chars": 187,
+        "wh": 0.1172,
+        "cost_usd": 0.0,
+        "stdout": "alpha\nbeta\ngamma\ndelta\n\n",
+        "stderr": "",
+        "tokens": {
+          "prompt_tokens": 138,
+          "completion_tokens": 55
+        }
+      },
+      "cloud": {
+        "path": "cloud_claude-sonnet-4-6",
+        "pass": true,
+        "code": "import sys\n\ntext = sys.argv[1]\nfor line in text.splitlines():\n    if line.strip():\n        print(line)",
+        "seconds": 2.46,
+        "chars": 102,
+        "wh": 0.0189,
+        "cost_usd": 0.0005,
+        "stdout": "alpha\nbeta\ngamma\ndelta\n",
+        "stderr": "",
+        "tokens": {
+          "prompt_tokens": 3,
+          "completion_tokens": 36
+        }
+      }
+    },
+    {
+      "id": "rot13_letters",
+      "category": "common text utility (tr a-zA-Z n-za-mN-ZA-M)",
+      "sigil": {
+        "path": "local_sigil",
+        "pass": true,
+        "attempts": 1,
+        "code": "(set s string $0)\n(println (join (map_arr (chars s) (\\c\n  (cond\n    ((and (ge (string_get c 0) 65) (le (string_get c 0) 90))\n      (ret (char_from_code (add 65 (mod (add (sub (string_get c 0) 65) 13) 26)))))\n    ((and (ge (string_get c 0) 97) (le (string_get c 0) 122))\n      (ret (char_from_code (add 97 (mod (add (sub (string_get c 0) 97) 13) 26)))))\n    (true\n      (ret c))))) \"\"))",
+        "seconds": 9.12,
+        "chars": 385,
+        "wh": 0.4559,
+        "cost_usd": 0.0,
+        "stdout": "Uryyb, Jbeyq! 123\n",
+        "stderr": "",
+        "model_used": "qwen-sigil-v4:7b",
+        "fallback_used": false
+      },
+      "python_local": {
+        "path": "local_python",
+        "pass": true,
+        "code": "import sys\n\ndef rot13(c):\n    if 'a' <= c <= 'z':\n        return chr((ord(c) - ord('a') + 13) % 26 + ord('a'))\n    elif 'A' <= c <= 'Z':\n        return chr((ord(c) - ord('A') + 13) % 26 + ord('A'))\n    else:\n        return c\n\ndef rot13_string(s):\n    return ''.join(rot13(c) for c in s)\n\nif __name__ == \"__main__\":\n    input_string = sys.argv[1]\n    output_string = rot13_string(input_string)\n    print(output_string)",
+        "seconds": 3.53,
+        "chars": 417,
+        "wh": 0.1765,
+        "cost_usd": 0.0,
+        "stdout": "Uryyb, Jbeyq! 123\n",
+        "stderr": "",
+        "tokens": {
+          "prompt_tokens": 138,
+          "completion_tokens": 149
+        }
+      },
+      "cloud": {
+        "path": "cloud_claude-sonnet-4-6",
+        "pass": true,
+        "code": "import sys\n\ntext = sys.argv[1]\nresult = text.translate(str.maketrans(\n    'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz',\n    'NOPQRSTUVWXYZABCDEFGHIJKLMnopqrstuvwxyzabcdefghijklm'\n))\nprint(result)",
+        "seconds": 3.74,
+        "chars": 205,
+        "wh": 0.0604,
+        "cost_usd": 0.0018,
+        "stdout": "Uryyb, Jbeyq! 123\n",
+        "stderr": "",
+        "tokens": {
+          "prompt_tokens": 3,
+          "completion_tokens": 119
+        }
+      }
+    },
+    {
+      "id": "count_log_levels",
+      "category": "log analysis (group by level)",
+      "sigil": {
+        "path": "local_sigil",
+        "pass": true,
+        "attempts": 1,
+        "code": "(set lines array (split $0 \"\\n\"))\n(set counts map {})\n(for-each line string lines\n  (set parts array (split line \" \"))\n  (let level string (first parts))\n  (if (not (in level counts))\n    (map_set counts level 0))\n  (set counts (map_set counts level (add 1 (get_or counts level 0)))))\n(for-each k (sort (keys counts))\n  (println (fmt \"{}={}\" k (get counts k))))",
+        "seconds": 7.75,
+        "chars": 361,
+        "wh": 0.3875,
+        "cost_usd": 0.0,
+        "stdout": "ERROR=2\nINFO=3\nWARN=1\n",
+        "stderr": "",
+        "model_used": "qwen-sigil-v4:7b",
+        "fallback_used": false
+      },
+      "python_local": {
+        "path": "local_python",
+        "pass": true,
+        "code": "import sys\n\ndef count_levels(log_lines):\n    level_counts = {}\n    for line in log_lines:\n        parts = line.split(' ', 1)\n        if len(parts) > 1 and parts[0] in ['INFO', 'WARN', 'ERROR']:\n            level = parts[0]\n            message = parts[1].strip()\n            if level in level_counts:\n                level_counts[level] += 1\n            else:\n                level_counts[level] = 1\n    return level_counts\n\ndef main():\n    log_lines = sys.argv[1].split('\\n')\n    level_counts = count_levels(log_lines)\n    for level, count in sorted(level_counts.items()):\n        print(f'{level}={count}')\n\nif __name__ == '__main__':\n    main()",
+        "seconds": 3.75,
+        "chars": 645,
+        "wh": 0.1874,
+        "cost_usd": 0.0,
+        "stdout": "ERROR=2\nINFO=3\nWARN=1\n",
+        "stderr": "",
+        "tokens": {
+          "prompt_tokens": 171,
+          "completion_tokens": 164
+        }
+      },
+      "cloud": {
+        "path": "cloud_claude-sonnet-4-6",
+        "pass": true,
+        "code": "import sys\nfrom collections import Counter\n\nlog = sys.argv[1]\ncounts = Counter()\nfor line in log.splitlines():\n    for level in (\"INFO\", \"WARN\", \"ERROR\"):\n        if line.startswith(level + \" \"):\n            counts[level] += 1\n            break\nfor level in sorted(counts):\n    print(f\"{level}={counts[level]}\")",
+        "seconds": 4.01,
+        "chars": 311,
+        "wh": 0.0794,
+        "cost_usd": 0.0024,
+        "stdout": "ERROR=2\nINFO=3\nWARN=1\n",
+        "stderr": "",
+        "tokens": {
+          "prompt_tokens": 3,
+          "completion_tokens": 157
+        }
+      }
+    },
+    {
+      "id": "extract_http_status_codes",
+      "category": "log parsing (HTTP status from log)",
+      "sigil": {
+        "path": "local_sigil",
+        "pass": true,
+        "attempts": 1,
+        "code": "(set lines array (split $0 \"\\n\"))\n(for-each line string lines\n  (set parts array (split line \" \"))\n  (println (array_get parts 2)))",
+        "seconds": 6.45,
+        "chars": 131,
+        "wh": 0.3225,
+        "cost_usd": 0.0,
+        "stdout": "200\n404\n200\n500\n",
+        "stderr": "",
+        "model_used": "qwen-sigil-v4:7b",
+        "fallback_used": false
+      },
+      "python_local": {
+        "path": "local_python",
+        "pass": true,
+        "code": "import sys\n\nlog_entries = sys.argv[1]\nstatus_codes = [entry.split()[2] for entry in log_entries.strip().split('\\n')]\nprint('\\n'.join(status_codes))",
+        "seconds": 2.25,
+        "chars": 147,
+        "wh": 0.1126,
+        "cost_usd": 0.0,
+        "stdout": "200\n404\n200\n500\n",
+        "stderr": "",
+        "tokens": {
+          "prompt_tokens": 190,
+          "completion_tokens": 44
+        }
+      },
+      "cloud": {
+        "path": "cloud_claude-sonnet-4-6",
+        "pass": true,
+        "code": "import sys\nimport re\n\ntext = sys.argv[1]\nfor line in text.splitlines():\n    match = re.search(r'(?<= )(\\d{3})(?= )', line)\n    if match:\n        print(match.group(1))",
+        "seconds": 5.42,
+        "chars": 166,
+        "wh": 0.0339,
+        "cost_usd": 0.001,
+        "stdout": "200\n404\n200\n500\n",
+        "stderr": "",
+        "tokens": {
+          "prompt_tokens": 3,
+          "completion_tokens": 66
+        }
+      }
+    },
+    {
+      "id": "extract_phone_numbers",
+      "category": "regex extraction (phone digits)",
+      "sigil": {
+        "path": "local_sigil",
+        "pass": true,
+        "attempts": 1,
+        "code": "(set s string $0)\n(for-each m (find_all \"[0-9]{3}-[0-9]{3}-[0-9]{4}\" s)\n  (println m))",
+        "seconds": 6.82,
+        "chars": 86,
+        "wh": 0.341,
+        "cost_usd": 0.0,
+        "stdout": "555-123-4567\n800-555-9999\n",
+        "stderr": "",
+        "model_used": "qwen-sigil-v4:7b",
+        "fallback_used": false
+      },
+      "python_local": {
+        "path": "local_python",
+        "pass": true,
+        "code": "import sys\n\ndef extract_phone_numbers(input_string):\n    import re\n    pattern = r'\\b\\d{3}-\\d{3}-\\d{4}\\b'\n    phone_numbers = re.findall(pattern, input_string)\n    return '\\n'.join(phone_numbers)\n\nif __name__ == \"__main__\":\n    if len(sys.argv) > 1:\n        input_string = sys.argv[1]\n        print(extract_phone_numbers(input_string))",
+        "seconds": 2.94,
+        "chars": 335,
+        "wh": 0.1471,
+        "cost_usd": 0.0,
+        "stdout": "555-123-4567\n800-555-9999\n",
+        "stderr": "",
+        "tokens": {
+          "prompt_tokens": 215,
+          "completion_tokens": 97
+        }
+      },
+      "cloud": {
+        "path": "cloud_claude-sonnet-4-6",
+        "pass": true,
+        "code": "import sys\nimport re\n\ntext = sys.argv[1]\nmatches = re.findall(r'\\b\\d{3}-\\d{3}-\\d{4}\\b', text)\nfor m in matches:\n    print(m)",
+        "seconds": 2.64,
+        "chars": 124,
+        "wh": 0.0304,
+        "cost_usd": 0.0009,
+        "stdout": "555-123-4567\n800-555-9999\n",
+        "stderr": "",
+        "tokens": {
+          "prompt_tokens": 3,
+          "completion_tokens": 59
+        }
+      }
+    },
+    {
+      "id": "extract_hex_colors",
+      "category": "regex extraction (CSS colors)",
+      "sigil": {
+        "path": "local_sigil",
+        "pass": false,
+        "attempts": 3,
+        "code": "(set s string $0)\n(for-each m (find_all \"#([a-fA-F0-9]{6})\" s)\n  (println (lower (get_or m 1 \"\"))))",
+        "seconds": 17.22,
+        "chars": 99,
+        "wh": 0.8612,
+        "cost_usd": 0.0,
+        "stdout": "",
+        "stderr": "got '' expected '#ff0000\\n#00ff00\\n#0000ff\\n#dead42\\n'",
+        "model_used": "phi-sigil-v1:14b",
+        "fallback_used": true
+      },
+      "python_local": {
+        "path": "local_python",
+        "pass": false,
+        "code": "import sys\n\ndef extract_hex_colors(input_string):\n    hex_color_pattern = r\"#([A-Fa-f0-9]{6})\"\n    matches = re.findall(hex_color_pattern, input_string)\n    return [f\"#{match.lower()}\" for match in matches]\n\nif __name__ == \"__main__\":\n    input_string = sys.argv[1]\n    hex_colors = extract_hex_colors(input_string)\n    for color in hex_colors:\n        print(color)",
+        "seconds": 2.93,
+        "chars": 365,
+        "wh": 0.1463,
+        "cost_usd": 0.0,
+        "stdout": "",
+        "stderr": "",
+        "tokens": {
+          "prompt_tokens": 197,
+          "completion_tokens": 98
+        }
+      },
+      "cloud": {
+        "path": "cloud_claude-sonnet-4-6",
+        "pass": true,
+        "code": "import sys\nimport re\n\ntext = sys.argv[1]\nmatches = re.findall(r'#[0-9a-fA-F]{6}\\b', text)\nprint('\\n'.join(m.lower() for m in matches))",
+        "seconds": 3.22,
+        "chars": 134,
+        "wh": 0.0314,
+        "cost_usd": 0.0009,
+        "stdout": "#ff0000\n#00ff00\n#0000ff\n#dead42\n",
+        "stderr": "",
+        "tokens": {
+          "prompt_tokens": 3,
+          "completion_tokens": 61
+        }
+      }
+    },
+    {
+      "id": "json_array_count",
+      "category": "json analysis (count nested array)",
+      "sigil": {
+        "path": "local_sigil",
+        "pass": true,
+        "attempts": 1,
+        "code": "(println (len (json_get (json_parse $0) [\"items\"])))",
+        "seconds": 5.88,
+        "chars": 52,
+        "wh": 0.2938,
+        "cost_usd": 0.0,
+        "stdout": "4\n",
+        "stderr": "",
+        "model_used": "qwen-sigil-v4:7b",
+        "fallback_used": false
+      },
+      "python_local": {
+        "path": "local_python",
+        "pass": false,
+        "code": "import sys\nimport json\n\ndata = json.loads(sys.argv[1])\nprint(len(data['items']), '\\n')",
+        "seconds": 2.03,
+        "chars": 86,
+        "wh": 0.1015,
+        "cost_usd": 0.0,
+        "stdout": "4 \n\n",
+        "stderr": "",
+        "tokens": {
+          "prompt_tokens": 126,
+          "completion_tokens": 29
+        }
+      },
+      "cloud": {
+        "path": "cloud_claude-sonnet-4-6",
+        "pass": true,
+        "code": "import sys\nimport json\n\ndata = json.loads(sys.argv[1])\nprint(len(data[\"items\"]))",
+        "seconds": 3.32,
+        "chars": 80,
+        "wh": 0.0164,
+        "cost_usd": 0.0005,
+        "stdout": "4\n",
+        "stderr": "",
+        "tokens": {
+          "prompt_tokens": 3,
+          "completion_tokens": 31
+        }
+      }
+    },
+    {
+      "id": "tsv_to_csv",
+      "category": "format conversion (TSV \u2192 CSV)",
+      "sigil": {
+        "path": "local_sigil",
+        "pass": true,
+        "attempts": 1,
+        "code": "(set rows array (split $0 \"\\n\"))\n(for-each row string rows\n  (println (string_replace row \"\\t\" \",\")))",
+        "seconds": 6.47,
+        "chars": 101,
+        "wh": 0.3237,
+        "cost_usd": 0.0,
+        "stdout": "name,age,city\nalice,30,paris\nbob,25,nyc\n",
+        "stderr": "",
+        "model_used": "qwen-sigil-v4:7b",
+        "fallback_used": false
+      },
+      "python_local": {
+        "path": "local_python",
+        "pass": true,
+        "code": "import sys\n\ninput_string = sys.argv[1]\noutput_string = input_string.replace('\\t', ',')\nprint(output_string)",
+        "seconds": 2.07,
+        "chars": 107,
+        "wh": 0.1033,
+        "cost_usd": 0.0,
+        "stdout": "name,age,city\nalice,30,paris\nbob,25,nyc\n",
+        "stderr": "",
+        "tokens": {
+          "prompt_tokens": 156,
+          "completion_tokens": 31
+        }
+      },
+      "cloud": {
+        "path": "cloud_claude-sonnet-4-6",
+        "pass": true,
+        "code": "import sys\nprint(sys.argv[1].replace('\\t', ','))",
+        "seconds": 2.86,
+        "chars": 48,
+        "wh": 0.0109,
+        "cost_usd": 0.0003,
+        "stdout": "name,age,city\nalice,30,paris\nbob,25,nyc\n",
+        "stderr": "",
+        "tokens": {
+          "prompt_tokens": 3,
+          "completion_tokens": 20
+        }
+      }
+    },
+    {
+      "id": "lines_to_csv",
+      "category": "common shell pattern (paste -sd, /tr '\\n' ',')",
+      "sigil": {
+        "path": "local_sigil",
+        "pass": true,
+        "attempts": 1,
+        "code": "(println (join (split $0 \"\\n\") \",\"))",
+        "seconds": 6.09,
+        "chars": 36,
+        "wh": 0.3046,
+        "cost_usd": 0.0,
+        "stdout": "red,green,blue,yellow\n",
+        "stderr": "",
+        "model_used": "qwen-sigil-v4:7b",
+        "fallback_used": false
+      },
+      "python_local": {
+        "path": "local_python",
+        "pass": false,
+        "code": "import sys\n\ninput_string = sys.argv[1]\noutput_string = ','.join(input_string.split('\\n')) + '\\n'\nprint(output_string)",
+        "seconds": 2.11,
+        "chars": 117,
+        "wh": 0.1057,
+        "cost_usd": 0.0,
+        "stdout": "red,green,blue,yellow\n\n",
+        "stderr": "",
+        "tokens": {
+          "prompt_tokens": 135,
+          "completion_tokens": 35
+        }
+      },
+      "cloud": {
+        "path": "cloud_claude-sonnet-4-6",
+        "pass": true,
+        "code": "import sys\nprint(','.join(sys.argv[1].splitlines()))",
+        "seconds": 2.74,
+        "chars": 52,
+        "wh": 0.0109,
+        "cost_usd": 0.0003,
+        "stdout": "red,green,blue,yellow\n",
+        "stderr": "",
+        "tokens": {
+          "prompt_tokens": 3,
+          "completion_tokens": 20
+        }
+      }
+    },
+    {
+      "id": "parens_balanced",
+      "category": "syntax check (parentheses)",
+      "sigil": {
+        "path": "local_sigil",
+        "pass": true,
+        "attempts": 1,
+        "code": "(set s string $0)\n(set stack [])\n(for-each c (chars s)\n  (cond\n    ((eq c \"(\") (push stack \")\"))\n    ((in c \")\")\n      (if (or (eq (len stack) 0) (ne (array_pop stack) c))\n        (println \"no\")\n        (else (if (eq (len stack) 0) (println \"yes\")))))))\n(if (gt (len stack) 0)\n  (println \"no\"))",
+        "seconds": 7.94,
+        "chars": 294,
+        "wh": 0.3972,
+        "cost_usd": 0.0,
+        "stdout": "yes\n",
+        "stderr": "",
+        "model_used": "qwen-sigil-v4:7b",
+        "fallback_used": false
+      },
+      "python_local": {
+        "path": "local_python",
+        "pass": false,
+        "code": "import sys\n\ndef check_parentheses(s):\n    stack = []\n    for char in s:\n        if char == '(':\n            stack.append(char)\n        elif char == ')':\n            if not stack:\n                return 'no'\n            stack.pop()\n    return 'yes' if not stack else 'no'\n\nif __name__ == \"__main__\":\n    input_string = sys.argv[1]\n    result = check_parentheses(input_string)\n    print(result + '\\n')",
+        "seconds": 2.96,
+        "chars": 399,
+        "wh": 0.1481,
+        "cost_usd": 0.0,
+        "stdout": "yes\n\n",
+        "stderr": "",
+        "tokens": {
+          "prompt_tokens": 135,
+          "completion_tokens": 102
+        }
+      },
+      "cloud": {
+        "path": "cloud_claude-sonnet-4-6",
+        "pass": true,
+        "code": "import sys\n\ndef check_parens(s):\n    depth = 0\n    for c in s:\n        if c == '(':\n            depth += 1\n        elif c == ')':\n            depth -= 1\n            if depth < 0:\n                return False\n    return depth == 0\n\nprint('yes' if check_parens(sys.argv[1]) else 'no')",
+        "seconds": 2.94,
+        "chars": 282,
+        "wh": 0.0479,
+        "cost_usd": 0.0014,
+        "stdout": "yes\n",
+        "stderr": "",
+        "tokens": {
+          "prompt_tokens": 3,
+          "completion_tokens": 94
+        }
+      }
+    },
+    {
+      "id": "unique_chars_sorted",
+      "category": "common shell pattern (fold | sort -u)",
+      "sigil": {
+        "path": "local_sigil",
+        "pass": true,
+        "attempts": 1,
+        "code": "(set s string $0)\n(set chars array (chars s))\n(set unique_chars array [])\n(for-each c chars\n  (if (not (in c unique_chars))\n    (push unique_chars c)))\n(println (join (sort unique_chars) \"\"))",
+        "seconds": 6.69,
+        "chars": 191,
+        "wh": 0.3347,
+        "cost_usd": 0.0,
+        "stdout": "imps\n",
+        "stderr": "",
+        "model_used": "qwen-sigil-v4:7b",
+        "fallback_used": false
+      },
+      "python_local": {
+        "path": "local_python",
+        "pass": false,
+        "code": "import sys\n\ndef main():\n    input_string = sys.argv[1]\n    distinct_chars = sorted(set(input_string))\n    result = ''.join(distinct_chars)\n    print(result + '\\n')\n\nif __name__ == \"__main__\":\n    main()",
+        "seconds": 2.37,
+        "chars": 202,
+        "wh": 0.1185,
+        "cost_usd": 0.0,
+        "stdout": "imps\n\n",
+        "stderr": "",
+        "tokens": {
+          "prompt_tokens": 122,
+          "completion_tokens": 56
+        }
+      },
+      "cloud": {
+        "path": "cloud_claude-sonnet-4-6",
+        "pass": true,
+        "code": "import sys\nprint(''.join(sorted(set(sys.argv[1]))))",
+        "seconds": 2.83,
+        "chars": 51,
+        "wh": 0.0119,
+        "cost_usd": 0.0003,
+        "stdout": "imps\n",
+        "stderr": "",
+        "tokens": {
+          "prompt_tokens": 3,
+          "completion_tokens": 22
+        }
+      }
+    },
+    {
+      "id": "uppercase_lines",
+      "category": "common shell pattern (tr a-z A-Z)",
+      "sigil": {
+        "path": "local_sigil",
+        "pass": true,
+        "attempts": 1,
+        "code": "(println (upper $0))",
+        "seconds": 5.87,
+        "chars": 20,
+        "wh": 0.2936,
+        "cost_usd": 0.0,
+        "stdout": "HELLO\nWORLD\nFOO BAR\n",
+        "stderr": "",
+        "model_used": "qwen-sigil-v4:7b",
+        "fallback_used": false
+      },
+      "python_local": {
+        "path": "local_python",
+        "pass": true,
+        "code": "import sys\n\ninput_string = sys.argv[1]\noutput_string = input_string.upper()\nprint(output_string)",
+        "seconds": 2.0,
+        "chars": 96,
+        "wh": 0.0999,
+        "cost_usd": 0.0,
+        "stdout": "HELLO\nWORLD\nFOO BAR\n",
+        "stderr": "",
+        "tokens": {
+          "prompt_tokens": 125,
+          "completion_tokens": 27
+        }
+      },
+      "cloud": {
+        "path": "cloud_claude-sonnet-4-6",
+        "pass": true,
+        "code": "import sys\nprint(sys.argv[1].upper())",
+        "seconds": 2.14,
+        "chars": 37,
+        "wh": 0.0089,
+        "cost_usd": 0.0002,
+        "stdout": "HELLO\nWORLD\nFOO BAR\n",
+        "stderr": "",
+        "tokens": {
+          "prompt_tokens": 3,
+          "completion_tokens": 16
+        }
+      }
+    }
+  ]
+}

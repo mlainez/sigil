@@ -1,0 +1,370 @@
+{
+  "model": "qwen2.5-coder:32b",
+  "k": 5,
+  "tasks": [
+    {
+      "id": "alternating_case",
+      "a_pass": false,
+      "b_pass": false,
+      "a_seconds": 33.6,
+      "b_seconds": 53.2,
+      "a_code": "(set input string $0)\n(set len int (len input))\n(set result string \"\")\n(for i 0 len\n  (set char string (slice input i 1))\n  (if (and (in char \"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ\") (eq (% i 2) 0))\n    (set result (join result (upper char)))\n    (if (and (in char \"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ\") (eq (% i 2) 1))\n      (set result (join result (lower char)))\n      (set result (join result char)))))\n(println result)",
+      "b_code": "(set input $0)\n(set result \"\")\n(set upper true)\n\n(for-each c char input\n  (if (and upper (or (ge (string_get c 0) 65) (le (string_get c 0) 90)))\n    (set result (add result c))\n    (if (and upper (or (ge (string_get c 0) 97) (le (string_get c 0) 122)))\n      (set result (add result (upcase c)))\n      (if (and (not upper) (or (ge (string_get c 0) 65) (le (string_get c 0) 90)))\n        (set result (add result (downcase c)))\n        (if (and (not upper) (or (ge (string_get c 0) 97) (le (string_get c 0) 122)))\n          (set result (add result c))\n          (set result (add result c))))))\n  (set upper (not upper)))\n\n(println result)",
+      "a_stdout": "",
+      "b_stdout": "",
+      "a_stderr": "Runtime error: join takes (array, string)\n",
+      "b_stderr": "Runtime error: for-each requires an array or map\n",
+      "rag_top_sim": 0.7758688355357084,
+      "rag_hits": [
+        {
+          "score": 0.7758688355357084,
+          "desc": "Read a string and print it reversed."
+        },
+        {
+          "score": 0.7671239341993501,
+          "desc": "Rotate a string by N positions."
+        },
+        {
+          "score": 0.74909289600109,
+          "desc": "Read a string and print it with all digits removed."
+        },
+        {
+          "score": 0.7420563486010177,
+          "desc": "Read a string from the first CLI arg and print whether every character is a letter."
+        },
+        {
+          "score": 0.7330044854086071,
+          "desc": "Read two strings and print them concatenated."
+        }
+      ]
+    },
+    {
+      "id": "rle_encode",
+      "a_pass": false,
+      "b_pass": false,
+      "a_seconds": 28.2,
+      "b_seconds": 34.4,
+      "a_code": "(set input string $0)\n(set result string \"\")\n(set prev char (first input))\n(set count int 1)\n\n(for-each ch char (slice input 1)\n  (if (eq ch prev)\n    (set count (add count 1))\n    (begin\n      (set result (fmt \"{}{}\" result prev count))\n      (set prev ch)\n      (set count 1))))\n\n(set result (fmt \"{}{}\" result prev count))\n(println result)",
+      "b_code": "(set s $0)\n(set n (len s))\n(set out \"\")\n(set i 0)\n(while (lt i n)\n  (set c (string_get s i))\n  (set count 1)\n  (set j (add i 1))\n  (while (and (lt j n) (eq (string_get s j) c))\n    (set count (add count 1))\n    (set j (add j 1)))\n  (set out (fmt \"{}{}{}\" out c count))\n  (set i j))\n(println out)",
+      "a_stdout": "",
+      "b_stdout": "973982991\n",
+      "a_stderr": "Parse error: Expected ) but got (\n",
+      "b_stderr": "",
+      "rag_top_sim": 0.7321865912515082,
+      "rag_hits": [
+        {
+          "score": 0.7321865912515082,
+          "desc": "Write a Sigil program that implements run length encode."
+        },
+        {
+          "score": 0.7295167071280737,
+          "desc": "Write a Sigil program that implements run length encode 1."
+        },
+        {
+          "score": 0.7286284493386379,
+          "desc": "Print character frequency of a string, one 'char count' pair per line."
+        },
+        {
+          "score": 0.7150781920865767,
+          "desc": "Count occurrences of a character (arg2) in a string (arg1)."
+        },
+        {
+          "score": 0.7148338423831827,
+          "desc": "Write a Sigil program that implements str count char."
+        }
+      ]
+    },
+    {
+      "id": "rotate_left",
+      "a_pass": false,
+      "b_pass": true,
+      "a_seconds": 19.7,
+      "b_seconds": 26.3,
+      "a_code": "(set nums array (split $0 \" \"))\n(set k int #1)\n(set len int (len nums))\n(set rotated array (slice nums k len))\n(push rotated (slice nums 0 k))\n(println (join rotated \" \"))",
+      "b_code": "(set args (argv))\n(set nums (split $0 \" \"))\n(set k #1)\n(set len (len nums))\n(set k (mod k len))\n(set rotated (slice nums k len))\n(set remaining (slice nums 0 k))\n(set result (concat rotated remaining))\n(println (join result \" \"))",
+      "a_stdout": "3 4 5 [1, 2]\n",
+      "b_stdout": "3 4 5 1 2\n",
+      "a_stderr": "",
+      "b_stderr": "",
+      "rag_top_sim": 0.7804540993943788,
+      "rag_hits": [
+        {
+          "score": 0.7804540993943788,
+          "desc": "Bubble-sort space-separated integers and print them space-separated."
+        },
+        {
+          "score": 0.766396118605125,
+          "desc": "Selection-sort space-separated integers."
+        },
+        {
+          "score": 0.7547908212184437,
+          "desc": "Binary-search a sorted space-separated int array (arg1) for a target (arg2). Print the 0-based index or -1."
+        },
+        {
+          "score": 0.7547908212184437,
+          "desc": "Binary-search a sorted space-separated int array (arg1) for a target (arg2). Print the 0-based index or -1."
+        },
+        {
+          "score": 0.7546935416851466,
+          "desc": "Remove duplicate integers from a space-separated list, preserving order."
+        }
+      ]
+    },
+    {
+      "id": "digital_root",
+      "a_pass": false,
+      "b_pass": true,
+      "a_seconds": 24.0,
+      "b_seconds": 26.2,
+      "a_code": "(set num int #0)\n(fn digital_root n int -> int\n  (if (lt n 10) (ret n))\n  (set sum int 0)\n  (for-each digit int (split (str n) \"\")\n    (set sum (add sum digit)))\n  (ret (digital_root sum)))\n(println (digital_root num))",
+      "b_code": "(set n #0)\n(while (ge n 10)\n  (set s 0)\n  (while (gt n 0)\n    (set s (add s (mod n 10)))\n    (set n (div n 10)))\n  (set n s))\n(println n)",
+      "a_stdout": "",
+      "b_stdout": "2\n",
+      "a_stderr": "Runtime error: Type mismatch in for-each: variable 'digit' declared as int but got string\n",
+      "b_stderr": "",
+      "rag_top_sim": 0.8070781707691017,
+      "rag_hits": [
+        {
+          "score": 0.8070781707691017,
+          "desc": "Read an integer and print its number of digits."
+        },
+        {
+          "score": 0.7953187007006844,
+          "desc": "Read an integer from the first CLI arg and print its absolute value."
+        },
+        {
+          "score": 0.7721259827257111,
+          "desc": "Read an integer from the first CLI arg and print its absolute value without using a builtin."
+        },
+        {
+          "score": 0.7661450132375964,
+          "desc": "Read a Roman numeral and print its integer value."
+        },
+        {
+          "score": 0.7589753191210024,
+          "desc": "Write a Sigil program that implements num digit sum until single."
+        }
+      ]
+    },
+    {
+      "id": "count_words_starting_with",
+      "a_pass": true,
+      "b_pass": false,
+      "a_seconds": 23.3,
+      "b_seconds": 25.0,
+      "a_code": "(set sentence string $0)\n(set letter string $1)\n(set words array (split sentence \" \"))\n(set count int 0)\n(for-each word string words\n  (if (and (gt (len word) 0) (eq (first word) letter))\n    (set count (add count 1))))\n(println count)",
+      "b_code": "(set sentence $0)\n(set letter $1)\n(set words (split sentence \" \"))\n(set count 0)\n(for-each word words (\\w \n  (if (string_equals (first w) letter)\n    (set count (+ count 1)))))\n(println count)",
+      "a_stdout": "3\n",
+      "b_stdout": "0\n",
+      "a_stderr": "",
+      "b_stderr": "",
+      "rag_top_sim": 0.7280471359588798,
+      "rag_hits": [
+        {
+          "score": 0.7280471359588798,
+          "desc": "Count occurrences of a character (arg2) in a string (arg1)."
+        },
+        {
+          "score": 0.7077883715186486,
+          "desc": "Read a space-separated list of words from the first CLI arg and group anagrams together."
+        },
+        {
+          "score": 0.6815005175048358,
+          "desc": "Title-case each word in a sentence."
+        },
+        {
+          "score": 0.6784816267803867,
+          "desc": "Wrap a sentence at width N (arg2), preserving word boundaries."
+        },
+        {
+          "score": 0.668350019686379,
+          "desc": "Apply a Caesar shift (arg2) to string (arg1)."
+        }
+      ]
+    },
+    {
+      "id": "kth_largest",
+      "a_pass": false,
+      "b_pass": false,
+      "a_seconds": 21.8,
+      "b_seconds": 24.9,
+      "a_code": "(set nums array (map_arr (split $0 \" \") (\\x (str x))))\n(set k int #1)\n(set sorted_nums array (sort_by nums (\\(a b) (gt a b))))\n(set result int (array_get sorted_nums (sub k 1)))\n(println result)",
+      "b_code": "(set line $0)\n(set parts (split line \" \"))\n(set nums [])\n(for-each part parts (\\p (push nums (int p))))\n(set k #1)\n(set sorted (sort_by nums >))\n(println (array_get sorted (sub k 1)))",
+      "a_stdout": "",
+      "b_stdout": "",
+      "a_stderr": "Runtime error: Invalid arguments to gt\n",
+      "b_stderr": "Runtime error: Array index out of bounds: 1\n",
+      "rag_top_sim": 0.7286680232827273,
+      "rag_hits": [
+        {
+          "score": 0.7286680232827273,
+          "desc": "Binary-search a sorted space-separated int array (arg1) for a target (arg2). Print the 0-based index or -1."
+        },
+        {
+          "score": 0.7286680232827273,
+          "desc": "Binary-search a sorted space-separated int array (arg1) for a target (arg2). Print the 0-based index or -1."
+        },
+        {
+          "score": 0.6814813516830338,
+          "desc": "Selection-sort space-separated integers."
+        },
+        {
+          "score": 0.6712019282351216,
+          "desc": "Remove duplicate integers from a space-separated list, preserving order."
+        },
+        {
+          "score": 0.6681148095489468,
+          "desc": "Bubble-sort space-separated integers and print them space-separated."
+        }
+      ]
+    },
+    {
+      "id": "sum_squares_to_n",
+      "a_pass": true,
+      "b_pass": true,
+      "a_seconds": 18.7,
+      "b_seconds": 21.1,
+      "a_code": "(set n int #0)\n(set sum int 0)\n(for-each i int (range 1 (+ n 1))\n  (set sum (+ sum (* i i))))\n(println sum)",
+      "b_code": "(set n #0)\n(set sum 0)\n(for i 1 (+ n 1)\n  (set sum (+ sum (* i i))))\n(println sum)",
+      "a_stdout": "55\n",
+      "b_stdout": "55\n",
+      "a_stderr": "",
+      "b_stderr": "",
+      "rag_top_sim": 0.7668466733365364,
+      "rag_hits": [
+        {
+          "score": 0.7668466733365364,
+          "desc": "Read an integer n and print the Collatz sequence until it reaches 1."
+        },
+        {
+          "score": 0.7442778012036227,
+          "desc": "Read two integers and print the one closer to zero."
+        },
+        {
+          "score": 0.73872773253851,
+          "desc": "Read an integer from the first CLI arg and print whether it is an Armstrong number (narcissistic)."
+        },
+        {
+          "score": 0.7386282217699262,
+          "desc": "Read an integer from the first CLI arg and print its absolute value."
+        },
+        {
+          "score": 0.7196101183463691,
+          "desc": "Read an integer and print its number of digits."
+        }
+      ]
+    },
+    {
+      "id": "first_unique_char",
+      "a_pass": false,
+      "b_pass": false,
+      "a_seconds": 28.1,
+      "b_seconds": 24.8,
+      "a_code": "(set s string $0)\n(set char_count map {})\n(for-each c string s\n  (set count int (if (in c char_count) (get char_count c) 0))\n  (set char_count (assoc char_count c (add count 1))))\n(set result int -1)\n(for-each \\(c i) enumerate s\n  (when (eq (get char_count c) 1)\n    (set result i)\n    (break)))\n(println result)",
+      "b_code": "(set s $0)\n(set char_count (counter s))\n(set result -1)\n(for-each i (enumerate s)\n  (if (eq (get char_count (first i)) 1)\n    (set result (second i))))\n(println result)",
+      "a_stdout": "",
+      "b_stdout": "",
+      "a_stderr": "Runtime error: for-each requires an array or map\n",
+      "b_stderr": "Runtime error: counter takes 1 array\n",
+      "rag_top_sim": 0.7506480350669935,
+      "rag_hits": [
+        {
+          "score": 0.7506480350669935,
+          "desc": "Read a string from the first CLI arg and print whether every character is a letter."
+        },
+        {
+          "score": 0.7290806728266261,
+          "desc": "Count occurrences of a character (arg2) in a string (arg1)."
+        },
+        {
+          "score": 0.7166885495448829,
+          "desc": "Binary-search a sorted space-separated int array (arg1) for a target (arg2). Print the 0-based index or -1."
+        },
+        {
+          "score": 0.7166885495448829,
+          "desc": "Binary-search a sorted space-separated int array (arg1) for a target (arg2). Print the 0-based index or -1."
+        },
+        {
+          "score": 0.7033954925577549,
+          "desc": "Write a Sigil test that verifies: returns 0 when no extra args."
+        }
+      ]
+    },
+    {
+      "id": "max_paren_depth",
+      "a_pass": false,
+      "b_pass": true,
+      "a_seconds": 25.6,
+      "b_seconds": 27.5,
+      "a_code": "(set s string $0)\n(set max_depth int 0)\n(set current_depth int 0)\n\n(for-each ch string s\n  (if (eq ch \"(\")\n    (set current_depth (add current_depth 1))\n    (if (eq ch \")\")\n      (set current_depth (sub current_depth 1))))\n  (set max_depth (max max_depth current_depth)))\n\n(println max_depth)",
+      "b_code": "(set s $0)\n(set current 0)\n(set max_val 0)\n(for-each ch (chars s)\n  (cond\n    ((eq ch \"(\") (set current (+ current 1)) (if (> current max_val) (set max_val current)))\n    ((eq ch \")\") (set current (- current 1)))))\n(println max_val)",
+      "a_stdout": "",
+      "b_stdout": "3\n",
+      "a_stderr": "Runtime error: for-each requires an array or map\n",
+      "b_stderr": "",
+      "rag_top_sim": 0.7646535066736722,
+      "rag_hits": [
+        {
+          "score": 0.7646535066736722,
+          "desc": "Write a Sigil program that implements max nesting depth."
+        },
+        {
+          "score": 0.7318999787094397,
+          "desc": "Write a Sigil program that implements max paren depth."
+        },
+        {
+          "score": 0.6483969437404952,
+          "desc": "Write a Sigil program that implements grid max in row."
+        },
+        {
+          "score": 0.6424251015667783,
+          "desc": "Write a Sigil program that implements max of two."
+        },
+        {
+          "score": 0.6421348463132746,
+          "desc": "Write a Sigil program that implements arr max."
+        }
+      ]
+    },
+    {
+      "id": "csv_column_sum",
+      "a_pass": false,
+      "b_pass": false,
+      "a_seconds": 25.6,
+      "b_seconds": 37.8,
+      "a_code": "(set csv string $0)\n(set col_name string $1)\n(set lines array (split csv \"\\n\"))\n(set header array (split (first lines) \",\"))\n(set col_index int (index_of header col_name))\n(set values array (map_arr (rest lines) (\\line (str_to_int (nth (split line \",\") col_index)))))\n(set total int (reduce values + 0))\n(println total)",
+      "b_code": "(set csv $0)\n(set target_col $1)\n\n(fn parse_csv s string -> array\n  (map_arr (split s \"\\n\") (\\line (split line \",\"))))\n\n(set rows (parse_csv csv))\n(set header (first rows))\n(set data (rest rows))\n\n(fn col_index headers string target string -> int\n  (find headers (\\(h i) (eq h target)) 0))\n\n(set index (col_index header target_col))\n\n(fn sum_column rows array index int -> int\n  (reduce rows (\\(row acc)\n    (add acc (int (nth row index)))) 0))\n\n(set total (sum_column data index))\n(println total)",
+      "a_stdout": "",
+      "b_stdout": "",
+      "a_stderr": "Runtime error: Undefined variable: nth\n",
+      "b_stderr": "Runtime error: Undefined variable: find\n",
+      "rag_top_sim": 0.7731872595624556,
+      "rag_hits": [
+        {
+          "score": 0.7731872595624556,
+          "desc": "Read an integer from the first CLI arg and print its absolute value."
+        },
+        {
+          "score": 0.7471669405635626,
+          "desc": "Read an integer from the first CLI arg and print its absolute value without using a builtin."
+        },
+        {
+          "score": 0.7253103252385195,
+          "desc": "Count occurrences of a character (arg2) in a string (arg1)."
+        },
+        {
+          "score": 0.7179249481327108,
+          "desc": "Read a Roman numeral and print its integer value."
+        },
+        {
+          "score": 0.7154252507083512,
+          "desc": "Read an integer n and print the Collatz sequence until it reaches 1."
+        }
+      ]
+    }
+  ],
+  "a_pass": 2,
+  "b_pass": 4,
+  "flips_a_to_b": 3,
+  "flips_b_to_a": 1
+}
