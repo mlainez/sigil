@@ -13,7 +13,7 @@
 
   (fn string_reassign -> string
     (set s "hello")
-    (set s (string_concat s " world"))
+    (set s (add s " world"))
     (ret s))
 
   (test-spec string_reassign
@@ -34,9 +34,9 @@
       (expect 15)))
 
   (fn array_reassign -> int
-    (set arr array [1 2 3])
-    (array_push arr 4)
-    (set len int (len arr))
+    (set arr [1 2 3])
+    (push arr 4)
+    (set len (len arr))
     (ret len))
 
   (test-spec array_reassign

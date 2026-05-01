@@ -2,7 +2,7 @@
   (fn count_to_five -> int
     (set n 0)
     (label loop_start)
-    (set n int (add n 1))
+    (set n (add n 1))
     (ifnot (lt n 5) loop_end)
     (goto loop_start)
     (label loop_end)

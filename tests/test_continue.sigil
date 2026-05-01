@@ -3,10 +3,10 @@
     (set i 0)
     (set sum 0)
     (while (lt i 10)
-      (set i int (add i 1))
+      (set i (add i 1))
       (if (eq i 3)
         (continue))
-      (set sum int (add sum i)))
+      (set sum (add sum i)))
     (ret sum))
 
   (test-spec test_continue_in_while
@@ -18,12 +18,12 @@
     (set i 0)
     (set count 0)
     (loop
-      (set i int (add i 1))
+      (set i (add i 1))
       (if (gt i 10)
         (break))
       (if (eq i 5)
         (continue))
-      (set count int (add count 1)))
+      (set count (add count 1)))
     (ret count))
 
   (test-spec test_continue_in_loop

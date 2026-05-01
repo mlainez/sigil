@@ -7,20 +7,20 @@
     (ret 0))
 
   (fn test_array arr string -> int
-    (array_push arr 42)
-    (array_push arr 99)
-    (set size int (len arr))
+    (push arr 42)
+    (push arr 99)
+    (set size (len arr))
     (print size)
-    (set val int (array_get arr 0))
+    (set val (array_get arr 0))
     (ret val))
 
   (fn test_string s string -> int
-    (set length int (len s))
+    (set length (len s))
     (print length)
     (ret length))
 
   (fn test_math x int -> int
-    (set result int (add x 10))
+    (set result (add x 10))
     (print result)
     (ret result))
 
@@ -31,7 +31,7 @@
 
   (test-spec test_array
     (case "array operations"
-      (input (array_new))
+      (input [])
       (expect 42)))
 
   (test-spec test_string

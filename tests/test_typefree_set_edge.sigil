@@ -10,7 +10,7 @@
       (expect 12d)))
 
   (fn map_reassign -> string
-    (set m map {"name" "Alice"})
+    (set m {"name" "Alice"})
     (map_set m "name" "Bob")
     (ret (map_get m "name")))
 

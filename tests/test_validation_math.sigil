@@ -3,13 +3,13 @@
   (import math_extended)
   
   (fn test_in_range -> int
-    (set in_range_result bool (in_range 5 0 10))
+    (set in_range_result (in_range 5 0 10))
     (if in_range_result
       (ret 1))
     (ret 0))
   
   (fn test_is_positive -> int
-    (set is_pos bool (is_positive 10))
+    (set is_pos (is_positive 10))
     (if is_pos
       (ret 1))
     (ret 0))
@@ -21,7 +21,7 @@
     (ret (sign -42)))
   
   (fn test_is_even -> int
-    (set even bool (is_even 4))
+    (set even (is_even 4))
     (if even
       (ret 1))
     (ret 0))

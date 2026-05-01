@@ -103,7 +103,7 @@
 
   (fn parse_pairs_missing -> bool
     (set m (parse_pairs "a=1,b=2" "," "="))
-    (ret (map_has m "c")))
+    (ret (in "c" m)))
 
   (test-spec parse_pairs_missing
     (case "missing key returns false"

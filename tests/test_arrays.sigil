@@ -1,6 +1,6 @@
 (module test
   (fn array_ops_length -> int
-    (ret (len (array_push (array_push (array_push (array_new) 42) 100) 7))))
+    (ret (len (push (push (push [] 42) 100) 7))))
   
   (test-spec array_ops_length
     (case "three elements"
@@ -8,7 +8,7 @@
       (expect 3)))
   
   (fn array_get_after_set idx int -> int
-    (ret (array_get (array_set (array_push (array_push (array_push (array_new) 42) 100) 7) 1 999) idx)))
+    (ret (array_get (array_set (push (push (push [] 42) 100) 7) 1 999) idx)))
   
   (test-spec array_get_after_set
     (case "get index 0 unchanged"

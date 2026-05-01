@@ -22,7 +22,7 @@
       (expect 0)))
   
   (fn bool_from_comparison -> int
-    (set result bool (lt 5 10))
+    (set result (lt 5 10))
     (if result
       (ret 1))
     (ret 0))

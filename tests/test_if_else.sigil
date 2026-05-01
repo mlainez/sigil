@@ -24,10 +24,10 @@
     (set result 0)
     (if flag
       (set result 1)
-      (set result int (add result 10))
+      (set result (add result 10))
       (else
         (set result 2)
-        (set result int (add result 20))))
+        (set result (add result 20))))
     (ret result))
 
   (fn nested_if_else x int -> string

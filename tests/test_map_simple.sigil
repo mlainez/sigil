@@ -1,6 +1,6 @@
 (module test
   (fn map_length_after_sets k1 string v1 int k2 string v2 int k3 string v3 int -> int
-    (ret (len (map_set (map_set (map_set (map_new) k1 v1) k2 v2) k3 v3))))
+    (ret (len (map_set (map_set (map_set {} k1 v1) k2 v2) k3 v3))))
   
   (test-spec map_length_after_sets
     (case "three entries"
@@ -14,7 +14,7 @@
       (expect 2)))
   
   (fn map_get_first k1 string v1 int -> int
-    (ret (map_get (map_set (map_new) k1 v1) k1)))
+    (ret (map_get (map_set {} k1 v1) k1)))
   
   (test-spec map_get_first
     (case "get x"
@@ -25,7 +25,7 @@
       (expect 42)))
   
   (fn map_get_after_multiple_sets k1 string v1 int k2 string v2 int key string -> int
-    (ret (map_get (map_set (map_set (map_new) k1 v1) k2 v2) key)))
+    (ret (map_get (map_set (map_set {} k1 v1) k2 v2) key)))
   
   (test-spec map_get_after_multiple_sets
     (case "get x value"
@@ -35,4 +35,4 @@
       (input "x" 10 "y" 20 "y")
       (expect 20)))
   
-  (meta-note "Tests map operations: map_new, map_set, map_get, map_length"))
+  (meta-note "Tests map operations: literal, set, get, len"))

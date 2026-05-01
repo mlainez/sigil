@@ -10,8 +10,8 @@
   (fn sum_range start int end int -> int
     (if (ge start end)
       (ret 0))
-    (set next int (add start 1))
-    (set rest int (sum_range next end))
+    (set next (add start 1))
+    (set rest (sum_range next end))
     (ret (add start rest)))
   
   (test-spec sum_range

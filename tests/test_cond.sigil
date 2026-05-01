@@ -31,12 +31,12 @@
     (ret result))
 
   (fn abs_value n int -> int
-    (set result int n)
+    (set result n)
     (cond
       ((lt n 0)
-        (set result int (sub 0 n)))
+        (set result (sub 0 n)))
       (true
-        (set result int n)))
+        (set result n)))
     (ret result))
 
   (fn no_match_returns_unit flag bool -> int

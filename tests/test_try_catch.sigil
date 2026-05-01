@@ -2,8 +2,8 @@
   (fn catch_div_zero -> string
     (set result "no error")
     (try
-      (set x int (div 10 0))
-      (set result string (str x))
+      (set x (div 10 0))
+      (set result (str x))
       (catch err string
         (set result "caught")))
     (ret result))
@@ -11,7 +11,7 @@
   (fn try_no_error -> int
     (set result 0)
     (try
-      (set result int (add 10 20))
+      (set result (add 10 20))
       (catch err string
         (set result -1)))
     (ret result))
@@ -19,18 +19,18 @@
   (fn catch_error_message -> string
     (set msg "none")
     (try
-      (set x int (div 5 0))
-      (set msg string (str x))
+      (set x (div 5 0))
+      (set msg (str x))
       (catch err string
-        (set msg string err)))
+        (set msg err)))
     (ret msg))
 
   (fn nested_try_catch -> string
     (set result "none")
     (try
       (try
-        (set x int (div 1 0))
-        (set result string (str x))
+        (set x (div 1 0))
+        (set result (str x))
         (catch inner_err string
           (set result "inner")))
       (catch outer_err string
@@ -39,11 +39,11 @@
 
   (fn try_catch_array_bounds -> string
     (set result "no error")
-    (set arr array (array_new))
-    (array_push arr 10)
+    (set arr [])
+    (push arr 10)
     (try
-      (set val int (array_get arr 5))
-      (set result string (str val))
+      (set val (array_get arr 5))
+      (set result (str val))
       (catch err string
         (set result "caught bounds")))
     (ret result))

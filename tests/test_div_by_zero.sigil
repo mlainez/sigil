@@ -2,7 +2,7 @@
   (fn safe_div a int b int -> int
     (set result 0)
     (try
-      (set result int (div a b))
+      (set result (div a b))
       (catch err string
         (set result -999)))
     (ret result))
@@ -10,7 +10,7 @@
   (fn safe_mod a int b int -> int
     (set result 0)
     (try
-      (set result int (mod a b))
+      (set result (mod a b))
       (catch err string
         (set result -999)))
     (ret result))

@@ -9,7 +9,7 @@
       (expect 42)))
 
   (fn infer_string_declaration -> string
-    (set s (string_concat "hello" " world"))
+    (set s (add "hello" " world"))
     (ret s))
 
   (test-spec infer_string_declaration

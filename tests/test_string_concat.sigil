@@ -1,6 +1,6 @@
 (module test
   (fn concat_and_length a string b string -> int
-    (ret (len (string_concat a b))))
+    (ret (len (add a b))))
   
   (test-spec concat_and_length
     (case "concatenate two strings"
@@ -16,4 +16,4 @@
       (input "Hello " "World")
       (expect 11)))
   
-  (meta-note "Tests string_concat and string_length operations"))
+  (meta-note "Tests add and len operations"))

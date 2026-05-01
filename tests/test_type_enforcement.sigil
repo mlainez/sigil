@@ -1,34 +1,34 @@
 (module test_type_enforcement
   (fn test_int_type -> bool
     (set x 42)
-    (set y int (add x 1))
+    (set y (add x 1))
     (ret (eq y 43)))
   
   (fn test_float_type -> bool
     (set x 3.14)
-    (set y float (add x 1.0))
+    (set y (add x 1.0))
     (ret (gt y 4.0)))
   
   (fn test_string_type -> bool
     (set name "hello")
-    (set greeting string (string_concat name " world"))
+    (set greeting (add name " world"))
     (ret (string_equals greeting "hello world")))
   
   (fn test_bool_type -> bool
     (set flag true)
-    (set result bool (not flag))
+    (set result (not flag))
     (ret (eq result false)))
   
   (fn test_array_type -> int
-    (set arr array (array_new))
-    (array_push arr 1)
-    (array_push arr 2)
+    (set arr [])
+    (push arr 1)
+    (push arr 2)
     (ret (len arr)))
   
   (fn test_map_type -> bool
-    (set m map (map_new))
+    (set m {})
     (map_set m "key" "value")
-    (set result string (map_get m "key"))
+    (set result (map_get m "key"))
     (ret (string_equals result "value")))
   
   (fn test_decimal_type -> bool

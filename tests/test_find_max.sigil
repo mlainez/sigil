@@ -1,14 +1,14 @@
 (module demo
   (fn find_max_of_five v1 int v2 int v3 int v4 int v5 int -> int
-    (set max int v1)
+    (set max v1)
     (if (gt v2 max)
-      (set max int v2))
+      (set max v2))
     (if (gt v3 max)
-      (set max int v3))
+      (set max v3))
     (if (gt v4 max)
-      (set max int v4))
+      (set max v4))
     (if (gt v5 max)
-      (set max int v5))
+      (set max v5))
     (ret max))
   
   (test-spec find_max_of_five

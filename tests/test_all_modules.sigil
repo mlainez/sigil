@@ -21,11 +21,11 @@
     (ret (square 7)))
   
   (fn test_array_sum -> int
-    (set arr array (array_range 1 6))
+    (set arr (array_range 1 6))
     (ret (array_sum arr 5)))
   
   (fn test_array_find -> int
-    (set arr array (array_range 1 6))
+    (set arr (array_range 1 6))
     (ret (array_find arr 3 5)))
   
   (fn test_bool_to_int -> int
@@ -33,13 +33,13 @@
     (ret (bool_to_int bool_val)))
   
   (fn test_in_range -> int
-    (set in_range_result bool (in_range 5 0 10))
+    (set in_range_result (in_range 5 0 10))
     (if in_range_result
       (ret 1))
     (ret 0))
   
   (fn test_is_positive -> int
-    (set is_pos bool (is_positive 42))
+    (set is_pos (is_positive 42))
     (if is_pos
       (ret 1))
     (ret 0))

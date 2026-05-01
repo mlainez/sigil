@@ -111,4 +111,4 @@
       (input)
       (expect "http://localhost:8080/api")))
 
-  (meta-note "Tests rewritten stdlib modules using for loops, type-free set, and string_format"))
+  (meta-note "Tests rewritten stdlib modules using for loops, type-free set, and fmt"))

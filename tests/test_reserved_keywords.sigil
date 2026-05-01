@@ -5,16 +5,16 @@
     (ret 0))
   
   (fn test_array_keyword -> int
-    (set array_data array (array_new))
-    (array_push array_data 42)
-    (set val int (array_get array_data 0))
+    (set array_data [])
+    (push array_data 42)
+    (set val (array_get array_data 0))
     (print val)
     (ret 0))
   
   (fn test_map_keyword -> int
-    (set map_data map (map_new))
+    (set map_data {})
     (map_set map_data "key" "value")
-    (set has_key bool (map_has map_data "key"))
+    (set has_key (in "key" map_data))
     (print has_key)
     (ret 0))
   

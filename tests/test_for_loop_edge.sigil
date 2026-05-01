@@ -11,7 +11,7 @@
       (expect 4)))
 
   (fn early_return_from_for arr array target int -> int
-    (set len int (len arr))
+    (set len (len arr))
     (for i 0 len
       (if (eq (array_get arr i) target)
         (ret i)))
@@ -30,8 +30,8 @@
 
   (fn computed_bounds n int -> int
     (set total 0)
-    (set start int (sub n 3))
-    (set end_val int (add n 2))
+    (set start (sub n 3))
+    (set end_val (add n 2))
     (for i start end_val
       (set total (add total i)))
     (ret total))
@@ -42,10 +42,10 @@
       (expect 20)))
 
   (fn for_inside_foreach -> int
-    (set arrs array [[1 2] [3 4] [5 6]])
+    (set arrs [[1 2] [3 4] [5 6]])
     (set total 0)
     (for-each sub_arr array arrs
-      (set sub_len int (len sub_arr))
+      (set sub_len (len sub_arr))
       (for j 0 sub_len
         (set total (add total (array_get sub_arr j)))))
     (ret total))

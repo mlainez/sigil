@@ -1,12 +1,12 @@
 (module test_eq_in_if
   (fn test_with_lt x int -> string
-    (set check bool (lt x 50))
+    (set check (lt x 50))
     (if check
       (ret "less than 50"))
     (ret "50 or more"))
   
   (fn test_with_eq x int -> string
-    (set check bool (eq x 100))
+    (set check (eq x 100))
     (if check
       (ret "equals 100"))
     (ret "not 100"))

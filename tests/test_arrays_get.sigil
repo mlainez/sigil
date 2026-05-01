@@ -1,6 +1,6 @@
 (module test
   (fn get_first val1 int val2 int -> int
-    (ret (array_get (array_push (array_push (array_new) val1) val2) 0)))
+    (ret (array_get (push (push [] val1) val2) 0)))
   
   (test-spec get_first
     (case "get first element"
@@ -11,7 +11,7 @@
       (expect 99)))
   
   (fn get_second val1 int val2 int -> int
-    (ret (array_get (array_push (array_push (array_new) val1) val2) 1)))
+    (ret (array_get (push (push [] val1) val2) 1)))
   
   (test-spec get_second
     (case "get second element"

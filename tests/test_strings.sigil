@@ -16,4 +16,4 @@
       (input "Hello World!")
       (expect 12)))
   
-  (meta-note "Tests string_length function"))
+  (meta-note "Tests len function"))

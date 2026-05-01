@@ -3,8 +3,8 @@
     (set i 0)
     (set sum 0)
     (while (lt i 100)
-      (set sum int (add sum i))
-      (set i int (add i 1))
+      (set sum (add sum i))
+      (set i (add i 1))
       (if (eq i 5)
         (break)))
     (ret sum))
@@ -17,7 +17,7 @@
   (fn test_break_in_loop -> int
     (set count 0)
     (loop
-      (set count int (add count 1))
+      (set count (add count 1))
       (if (gt count 10)
         (break)))
     (ret count))

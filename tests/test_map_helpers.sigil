@@ -1,6 +1,6 @@
 (module test_map_helpers
   (fn test_map_inc -> int
-    (set m map (map_new))
+    (set m {})
     (map_inc m "a")
     (map_inc m "a")
     (map_inc m "b")
@@ -13,7 +13,7 @@
       (expect 3)))
 
   (fn test_map_inc_new_key -> int
-    (set m map (map_new))
+    (set m {})
     (map_inc m "x")
     (ret (map_get m "x")))
 
@@ -23,8 +23,8 @@
       (expect 1)))
 
   (fn test_get_or_map_hit -> int
-    (set m map {"a" "10" "b" "20"})
-    (ret (string_to_int (get_or m "a" "0"))))
+    (set m {"a" "10" "b" "20"})
+    (ret (int (get_or m "a" "0"))))
 
   (test-spec test_get_or_map_hit
     (case "existing key returns value"
@@ -32,8 +32,8 @@
       (expect 10)))
 
   (fn test_get_or_map_miss -> int
-    (set m map {"a" "10"})
-    (ret (string_to_int (get_or m "missing" "99"))))
+    (set m {"a" "10"})
+    (ret (int (get_or m "missing" "99"))))
 
   (test-spec test_get_or_map_miss
     (case "missing key returns default"
@@ -41,7 +41,7 @@
       (expect 99)))
 
   (fn test_get_or_array_hit -> int
-    (set arr array [10 20 30])
+    (set arr [10 20 30])
     (ret (get_or arr 1 -1)))
 
   (test-spec test_get_or_array_hit
@@ -50,7 +50,7 @@
       (expect 20)))
 
   (fn test_get_or_array_oob -> int
-    (set arr array [10 20 30])
+    (set arr [10 20 30])
     (ret (get_or arr 99 -1)))
 
   (test-spec test_get_or_array_oob

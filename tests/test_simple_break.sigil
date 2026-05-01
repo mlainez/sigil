@@ -2,7 +2,7 @@
   (fn test_simple -> int
     (set i 0)
     (loop
-      (set i int (add i 1))
+      (set i (add i 1))
       (if (eq i 3)
         (break)))
     (ret i))

@@ -25,7 +25,7 @@
     (ret (max a b)))
 
   (fn test_string_to_float a string -> float
-    (ret (string_to_float a)))
+    (ret (float a)))
 
   (test-spec test_div
     (case "normal division"

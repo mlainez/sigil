@@ -4,7 +4,7 @@
     (set b decimal (cast_int_decimal 5))
     (set result decimal (add a b))
     (set expected decimal (cast_int_decimal 15))
-    (set matches bool (eq result expected))
+    (set matches (eq result expected))
     (ret matches))
   
   (test-spec decimal_add_works

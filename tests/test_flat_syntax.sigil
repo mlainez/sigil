@@ -3,13 +3,13 @@
     (ret (add a b)))
   
   (fn max a int b int -> int
-    (set greater bool (gt a b))
+    (set greater (gt a b))
     (if greater
       (ret a))
     (ret b))
   
   (fn min a int b int -> int
-    (set less bool (lt a b))
+    (set less (lt a b))
     (if less
       (ret a))
     (ret b))

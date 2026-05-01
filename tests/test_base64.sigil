@@ -8,8 +8,8 @@
     (ret (base64_decode encoded)))
 
   (fn test_roundtrip data string -> string
-    (set encoded string (base64_encode data))
-    (set decoded string (base64_decode encoded))
+    (set encoded (base64_encode data))
+    (set decoded (base64_decode encoded))
     (ret decoded))
 
   (test-spec test_encode

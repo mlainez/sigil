@@ -3,16 +3,16 @@
     (set da decimal (cast_int_decimal a))
     (set db decimal (cast_int_decimal b))
     (set sum decimal (add da db))
-    (set result_int int (cast_decimal_int sum))
-    (set matches bool (eq result_int expected))
+    (set result_int (cast_decimal_int sum))
+    (set matches (eq result_int expected))
     (ret matches))
   
   (fn decimal_mul_test a int b int expected int -> bool
     (set da decimal (cast_int_decimal a))
     (set db decimal (cast_int_decimal b))
     (set product decimal (mul da db))
-    (set result_int int (cast_decimal_int product))
-    (set matches bool (eq result_int expected))
+    (set result_int (cast_decimal_int product))
+    (set matches (eq result_int expected))
     (ret matches))
   
   (test-spec decimal_negative_add_test

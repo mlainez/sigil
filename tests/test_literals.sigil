@@ -1,41 +1,41 @@
 (module test_literals
 
   (fn test_array_literal_length -> int
-    (set nums array [1 2 3 4 5])
+    (set nums [1 2 3 4 5])
     (ret (len nums)))
 
   (fn test_array_literal_get idx int -> int
-    (set nums array [10 20 30])
+    (set nums [10 20 30])
     (ret (array_get nums idx)))
 
   (fn test_array_literal_empty -> int
-    (set arr array [])
+    (set arr [])
     (ret (len arr)))
 
   (fn test_array_literal_strings -> string
-    (set words array ["hello" "world"])
+    (set words ["hello" "world"])
     (ret (array_get words 1)))
 
   (fn test_array_literal_mixed_ops -> int
-    (set nums array [1 2 3])
-    (array_push nums 4)
+    (set nums [1 2 3])
+    (push nums 4)
     (ret (len nums)))
 
   (fn test_map_literal_get key_name string -> string
-    (set person map {"name" "Alice" "city" "Paris"})
+    (set person {"name" "Alice" "city" "Paris"})
     (ret (map_get person key_name)))
 
   (fn test_map_literal_length -> int
-    (set data map {"a" 1 "b" 2 "c" 3})
+    (set data {"a" 1 "b" 2 "c" 3})
     (ret (len data)))
 
   (fn test_map_literal_empty -> int
-    (set empty_map map {})
+    (set empty_map {})
     (ret (len empty_map)))
 
   (fn test_map_literal_has key_name string -> bool
-    (set data map {"x" 10 "y" 20})
-    (ret (map_has data key_name)))
+    (set data {"x" 10 "y" 20})
+    (ret (in key_name data)))
 
   (test-spec test_array_literal_length
     (case "5 element array"

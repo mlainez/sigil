@@ -3,7 +3,7 @@
   
   (fn abs_of_negative -> int
     (set y -10)
-    (set abs_y int (abs y))
+    (set abs_y (abs y))
     (ret abs_y))
   
   (test-spec abs_of_negative

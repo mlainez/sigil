@@ -4,8 +4,8 @@
   (fn query_empty_table -> int
     (set db process (open ":memory:"))
     (exec db "CREATE TABLE test (id INTEGER, val TEXT);")
-    (set rows array (query db "SELECT * FROM test;"))
-    (set count int (len rows))
+    (set rows (query db "SELECT * FROM test;"))
+    (set count (len rows))
     (close db)
     (ret count))
   
@@ -14,8 +14,8 @@
     (exec db "CREATE TABLE test (id INTEGER, val TEXT);")
     (exec db "INSERT INTO test VALUES (1, 'Alice');")
     (exec db "INSERT INTO test VALUES (2, 'Bob');")
-    (set rows array (query db "SELECT * FROM test;"))
-    (set count int (len rows))
+    (set rows (query db "SELECT * FROM test;"))
+    (set count (len rows))
     (close db)
     (ret count))
   
@@ -23,9 +23,9 @@
     (set db process (open ":memory:"))
     (exec db "CREATE TABLE test (id INTEGER, val TEXT);")
     (exec db "INSERT INTO test VALUES (1, 'Alice');")
-    (set rows array (query db "SELECT * FROM test;"))
-    (set first_row array (array_get rows 0))
-    (set val string (array_get first_row 1))
+    (set rows (query db "SELECT * FROM test;"))
+    (set first_row (array_get rows 0))
+    (set val (array_get first_row 1))
     (close db)
     (ret val))
   

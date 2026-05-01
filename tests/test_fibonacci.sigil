@@ -4,10 +4,10 @@
       (ret 0))
     (if (eq n 1)
       (ret 1))
-    (set n_minus_1 int (sub n 1))
-    (set n_minus_2 int (sub n 2))
-    (set fib1 int (fib_nth n_minus_1))
-    (set fib2 int (fib_nth n_minus_2))
+    (set n_minus_1 (sub n 1))
+    (set n_minus_2 (sub n 2))
+    (set fib1 (fib_nth n_minus_1))
+    (set fib2 (fib_nth n_minus_2))
     (ret (add fib1 fib2)))
   
   (test-spec fib_nth

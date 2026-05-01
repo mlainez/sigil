@@ -6,67 +6,67 @@
   
   (fn test_file_operations -> int
     (set test_file "/tmp/sigil_test.txt")
-    (set success bool (write_file_safe test_file "Hello Sigil!"))
+    (set success (write_file_safe test_file "Hello Sigil!"))
     (if (not success)
       (ret 0))
-    (set content string (read_file_safe test_file))
-    (set deleted bool (delete_if_exists test_file))
+    (set content (read_file_safe test_file))
+    (set deleted (delete_if_exists test_file))
     (if deleted
       (ret 1))
     (ret 0))
   
   (fn test_valid_port -> int
-    (set valid bool (is_valid_port 8080))
+    (set valid (is_valid_port 8080))
     (if valid
       (ret 1))
     (ret 0))
   
   (fn test_invalid_port -> int
-    (set invalid bool (is_valid_port 70000))
+    (set invalid (is_valid_port 70000))
     (if (not invalid)
       (ret 1))
     (ret 0))
   
   (fn test_build_url -> int
-    (set url string (build_url "localhost" 8080 "/api/v1"))
+    (set url (build_url "localhost" 8080 "/api/v1"))
     (set expected "http://localhost:8080/api/v1")
-    (set matches bool (string_equals url expected))
+    (set matches (string_equals url expected))
     (if matches
       (ret 1))
     (ret 0))
   
   (fn test_repeat_string -> int
-    (set repeated string (repeat_string "x" 5))
+    (set repeated (repeat_string "x" 5))
     (set expected "xxxxx")
-    (set matches bool (string_equals repeated expected))
+    (set matches (string_equals repeated expected))
     (if matches
       (ret 1))
     (ret 0))
   
   (fn test_pad_left -> int
-    (set padded string (pad_left "42" 5 "0"))
+    (set padded (pad_left "42" 5 "0"))
     (set expected "00042")
-    (set matches bool (string_equals padded expected))
+    (set matches (string_equals padded expected))
     (if matches
       (ret 1))
     (ret 0))
   
   (fn test_reverse_string -> int
-    (set reversed string (reverse_string "Sigil"))
+    (set reversed (reverse_string "Sigil"))
     (set expected "ligiS")
-    (set matches bool (string_equals reversed expected))
+    (set matches (string_equals reversed expected))
     (if matches
       (ret 1))
     (ret 0))
   
   (fn test_is_empty -> int
-    (set empty bool (is_empty ""))
+    (set empty (is_empty ""))
     (if empty
       (ret 1))
     (ret 0))
   
   (fn test_is_not_empty -> int
-    (set not_empty bool (is_empty "text"))
+    (set not_empty (is_empty "text"))
     (if (not not_empty)
       (ret 1))
     (ret 0))

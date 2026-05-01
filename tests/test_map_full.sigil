@@ -1,15 +1,16 @@
 (module test
   (fn map_ops_length -> int
-    (ret (len (map_set (map_set (map_set (map_new) "a" 100) "b" 200) "c" 300))))
-  
+    (ret (len (map_set (map_set (map_set {} "a" 100) "b" 200) "c" 300))))
+
   (test-spec map_ops_length
     (case "three entries"
       (input)
       (expect 3)))
-  
+
   (fn map_has_key key string -> bool
-    (ret (map_has (map_set (map_set (map_new) "a" 100) "b" 200) key)))
-  
+    (set m (map_set (map_set {} "a" 100) "b" 200))
+    (ret (in key m)))
+
   (test-spec map_has_key
     (case "has key a"
       (input "a")
@@ -20,21 +21,22 @@
     (case "does not have key x"
       (input "x")
       (expect false)))
-  
+
   (fn map_delete_then_length -> int
-    (ret (len (map_delete (map_set (map_set (map_set (map_new) "a" 100) "b" 200) "c" 300) "b"))))
-  
+    (ret (len (map_delete (map_set (map_set (map_set {} "a" 100) "b" 200) "c" 300) "b"))))
+
   (test-spec map_delete_then_length
     (case "delete one entry"
       (input)
       (expect 2)))
-  
+
   (fn map_delete_then_has key string -> bool
-    (ret (map_has (map_delete (map_set (map_new) "b" 200) "b") key)))
-  
+    (set m (map_delete (map_set {} "b" 200) "b"))
+    (ret (in key m)))
+
   (test-spec map_delete_then_has
     (case "deleted key b not present"
       (input "b")
       (expect false)))
-  
-  (meta-note "Tests map operations: new, set, get, length, has, delete"))
+
+  (meta-note "Tests map operations: literal, set, get, len, in, delete"))

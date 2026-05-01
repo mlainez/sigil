@@ -1,6 +1,6 @@
 (module test_if_ret
   (fn test_if_return x int -> string
-    (set is_100 bool (eq x 100))
+    (set is_100 (eq x 100))
     (if is_100
       (ret "one hundred"))
     (ret "not one hundred"))

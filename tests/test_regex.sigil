@@ -1,6 +1,6 @@
 (module test_regex
   (fn test_compile pattern string -> string
-    (set compiled string (regex_compile pattern))
+    (set compiled (regex_compile pattern))
     (ret compiled))
 
   (fn test_match pattern string text string -> bool
@@ -13,18 +13,18 @@
     (ret (regex_replace pattern text replacement)))
 
   (fn test_find_all_count pattern string text string -> int
-    (set matches array (regex_find_all pattern text))
+    (set matches (regex_find_all pattern text))
     (ret (len matches)))
 
   (fn test_find_all_first pattern string text string -> string
-    (set matches array (regex_find_all pattern text))
+    (set matches (regex_find_all pattern text))
     (if (gt (len matches) 0)
       (ret (array_get matches 0)))
     (ret ""))
 
   (fn test_find_all_last pattern string text string -> string
-    (set matches array (regex_find_all pattern text))
-    (set len int (len matches))
+    (set matches (regex_find_all pattern text))
+    (set len (len matches))
     (if (gt len 0)
       (ret (array_get matches (sub len 1))))
     (ret ""))

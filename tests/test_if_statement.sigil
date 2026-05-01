@@ -31,7 +31,8 @@
     (set result 0)
     (if (eq 5 5)
       (set result 1)
-      (set result int (add result 9)))
+      (set result (add result 9))
+      (else))
     (ret result))
   
   (fn test_if_with_return -> int

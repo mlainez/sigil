@@ -1,6 +1,6 @@
 (module test_string_chars
   (fn test_chars_length s string -> int
-    (set chars array (string_chars s))
+    (set chars (string_chars s))
     (ret (len chars)))
 
   (test-spec test_chars_length
@@ -15,7 +15,7 @@
       (expect 1)))
 
   (fn test_chars_first s string -> string
-    (set chars array (string_chars s))
+    (set chars (string_chars s))
     (ret (array_get chars 0)))
 
   (test-spec test_chars_first
@@ -27,10 +27,10 @@
       (expect "A")))
 
   (fn test_chars_join s string -> string
-    (set chars array (string_chars s))
+    (set chars (string_chars s))
     (set result "")
     (for-each ch string chars
-      (set result (string_concat result ch)))
+      (set result (add result ch)))
     (ret result))
 
   (test-spec test_chars_join

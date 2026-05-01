@@ -2,8 +2,8 @@
   (fn test_write_and_read -> int
     (set path "/tmp/sigil_test_file_io.txt")
     (file_write path "Hello from Sigil!")
-    (set content string (file_read path))
-    (set matches bool (string_equals content "Hello from Sigil!"))
+    (set content (file_read path))
+    (set matches (string_equals content "Hello from Sigil!"))
     (file_delete path)
     (if matches
       (ret 1))
@@ -12,7 +12,7 @@
   (fn test_file_exists_after_write -> int
     (set path "/tmp/sigil_test_exists.txt")
     (file_write path "test")
-    (set exists bool (file_exists path))
+    (set exists (file_exists path))
     (file_delete path)
     (if exists
       (ret 1))
@@ -22,7 +22,7 @@
     (set path "/tmp/sigil_test_delete.txt")
     (file_write path "temp")
     (file_delete path)
-    (set exists bool (file_exists path))
+    (set exists (file_exists path))
     (if (not exists)
       (ret 1))
     (ret 0))
@@ -31,9 +31,9 @@
     (set path "/tmp/sigil_test_append.txt")
     (file_write path "line1")
     (file_append path "\nline2")
-    (set content string (file_read path))
+    (set content (file_read path))
     (set expected "line1\nline2")
-    (set matches bool (string_equals content expected))
+    (set matches (string_equals content expected))
     (file_delete path)
     (if matches
       (ret 1))

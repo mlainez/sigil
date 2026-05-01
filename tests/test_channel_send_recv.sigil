@@ -3,7 +3,7 @@
   (fn test_send_recv -> int
     (set ch channel (channel_new 10))
     (channel_send ch 42)
-    (set val int (channel_recv ch))
+    (set val (channel_recv ch))
     (if (eq val 42)
       (ret 1))
     (ret 0))

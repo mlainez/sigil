@@ -1,9 +1,9 @@
 (module test_clamp
   (fn clamp x int min_val int max_val int -> int
-    (set too_low bool (lt x min_val))
+    (set too_low (lt x min_val))
     (if too_low
       (ret min_val))
-    (set too_high bool (gt x max_val))
+    (set too_high (gt x max_val))
     (if too_high
       (ret max_val))
     (ret x))

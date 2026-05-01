@@ -1,6 +1,6 @@
 (module test_simple_poly
   (fn test_add x int y int -> int
-    (set result int (add x y))
+    (set result (add x y))
     (ret result))
 
   (test-spec test_add

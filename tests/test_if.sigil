@@ -1,8 +1,8 @@
 (module test
   (fn max_i64 x int y int -> int
-    (set result int y)
+    (set result y)
     (if (gt x y)
-      (set result int x))
+      (set result x))
     (ret result))
   
   (test-spec max_i64

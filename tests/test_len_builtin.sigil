@@ -14,7 +14,7 @@
       (expect 1)))
 
   (fn test_len_array -> int
-    (set arr array [10 20 30 40])
+    (set arr [10 20 30 40])
     (ret (len arr)))
 
   (test-spec test_len_array
@@ -23,7 +23,7 @@
       (expect 4)))
 
   (fn test_len_empty_array -> int
-    (set arr array (array_new))
+    (set arr [])
     (ret (len arr)))
 
   (test-spec test_len_empty_array
@@ -32,7 +32,7 @@
       (expect 0)))
 
   (fn test_len_map -> int
-    (set m map {"a" "1" "b" "2" "c" "3"})
+    (set m {"a" "1" "b" "2" "c" "3"})
     (ret (len m)))
 
   (test-spec test_len_map

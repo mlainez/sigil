@@ -6,12 +6,12 @@
     (channel_send ch 20)
     (channel_send ch 30)
     
-    (set v1 int (channel_recv ch))
-    (set v2 int (channel_recv ch))
-    (set v3 int (channel_recv ch))
+    (set v1 (channel_recv ch))
+    (set v2 (channel_recv ch))
+    (set v3 (channel_recv ch))
     
-    (set sum int (add v1 v2))
-    (set sum int (add sum v3))
+    (set sum (add v1 v2))
+    (set sum (add sum v3))
     
     (if (eq sum 60)
       (ret 1))

@@ -3,7 +3,7 @@
     (set count 0)
     (loop
       (print "In loop")
-      (set count int (add count 1))
+      (set count (add count 1))
       (if (ge count 3)
         (break)))
     (ret count))

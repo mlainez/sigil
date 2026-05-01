@@ -44,10 +44,10 @@
       (input "name" "Alice" "age" 30)
       (expect "{\"name\":\"Alice\",\"age\":30}")))
   
-  (fn array_length v1 int v2 int v3 int -> int
+  (fn len v1 int v2 int v3 int -> int
     (ret (json_length (json_push (json_push (json_push (json_new_array) v1) v2) v3))))
   
-  (test-spec array_length
+  (test-spec len
     (case "three elements"
       (input 10 20 30)
       (expect 3))

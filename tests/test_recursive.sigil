@@ -19,8 +19,8 @@
   (fn factorial n int -> int
     (if (le n 1)
       (ret 1))
-    (set n_minus_1 int (sub n 1))
-    (set fact_rest int (factorial n_minus_1))
+    (set n_minus_1 (sub n 1))
+    (set fact_rest (factorial n_minus_1))
     (ret (mul n fact_rest)))
   
   (test-spec factorial

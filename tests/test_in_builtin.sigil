@@ -20,7 +20,7 @@
       (expect true)))
 
   (fn array_in target int -> bool
-    (set nums array [1 2 3 4 5])
+    (set nums [1 2 3 4 5])
     (ret (in target nums)))
 
   (test-spec array_in
@@ -32,7 +32,7 @@
       (expect false)))
 
   (fn map_key_in key string -> bool
-    (set m map {"a" "1" "b" "2"})
+    (set m {"a" "1" "b" "2"})
     (ret (in key m)))
 
   (test-spec map_key_in

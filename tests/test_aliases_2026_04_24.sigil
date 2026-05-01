@@ -1,0 +1,135 @@
+(module test
+
+  (fn test_let -> int
+    (let x 5)
+    (ret x))
+  (test-spec test_let
+    (case "let binds like set" (input) (expect 5)))
+
+
+  (fn test_def_caller -> int
+    (ret (def_fn 10)))
+
+  (def def_fn n int -> int
+    (ret (add n 1)))
+
+  (test-spec test_def_caller
+    (case "def defines functions" (input) (expect 11)))
+
+
+  (fn test_map_arr_first -> int
+    (set arr [1 2 3])
+    (ret (array_get (map arr (\x (mul x 2))) 2)))
+  (test-spec test_map_arr_first
+    (case "map array-first" (input) (expect 6)))
+
+  (fn test_map_fn_first -> int
+    (set arr [1 2 3])
+    (ret (array_get (map (\x (mul x 2)) arr) 2)))
+  (test-spec test_map_fn_first
+    (case "map function-first" (input) (expect 6)))
+
+
+  (fn test_head -> int (ret (head [10 20 30])))
+  (test-spec test_head
+    (case "head == first" (input) (expect 10)))
+
+  (fn test_car -> int (ret (car [10 20 30])))
+  (test-spec test_car
+    (case "car == first" (input) (expect 10)))
+
+
+  (fn test_tail -> int
+    (ret (len (tail [10 20 30]))))
+  (test-spec test_tail
+    (case "tail == rest" (input) (expect 2)))
+
+  (fn test_cdr -> int
+    (ret (array_get (cdr [10 20 30]) 0)))
+  (test-spec test_cdr
+    (case "cdr == rest first-of-tail" (input) (expect 20)))
+
+
+  (fn test_contains_arr -> bool
+    (ret (contains [1 2 3] 2)))
+  (test-spec test_contains_arr
+    (case "contains array" (input) (expect true)))
+
+  (fn test_contains_str -> bool
+    (ret (contains "hello world" "world")))
+  (test-spec test_contains_str
+    (case "contains substring" (input) (expect true)))
+
+
+  (fn test_size -> int (ret (size [1 2 3 4])))
+  (test-spec test_size
+    (case "size == len" (input) (expect 4)))
+
+  (fn test_length -> int (ret (length "hello")))
+  (test-spec test_length
+    (case "length == len" (input) (expect 5)))
+
+
+  (fn test_upcase -> string (ret (upcase "hello")))
+  (test-spec test_upcase
+    (case "upcase == upper" (input) (expect "HELLO")))
+
+
+  (fn test_reduce_fn_first -> int
+    (ret (reduce (\(a x) (add a x)) 0 [1 2 3 4 5])))
+  (test-spec test_reduce_fn_first
+    (case "reduce fn-init-arr order" (input) (expect 15)))
+
+
+  (fn test_filter_fn_first -> int
+    (ret (len (filter (\x (gt x 2)) [1 2 3 4 5]))))
+  (test-spec test_filter_fn_first
+    (case "filter fn-first" (input) (expect 3)))
+
+
+
+
+  (fn test_plus -> int (ret (+ 3 4)))
+  (test-spec test_plus
+    (case "+ is add" (input) (expect 7)))
+
+  (fn test_minus -> int (ret (- 10 3)))
+  (test-spec test_minus
+    (case "- is sub" (input) (expect 7)))
+
+  (fn test_mul_op -> int (ret (* 6 7)))
+  (test-spec test_mul_op
+    (case "* is mul" (input) (expect 42)))
+
+  (fn test_div_op -> int (ret (/ 20 4)))
+  (test-spec test_div_op
+    (case "/ is div" (input) (expect 5)))
+
+  (fn test_mod_op -> int (ret (% 17 5)))
+  (test-spec test_mod_op
+    (case "% is mod" (input) (expect 2)))
+
+  (fn test_lt_op -> bool (ret (< 3 5)))
+  (test-spec test_lt_op
+    (case "< is lt" (input) (expect true)))
+
+  (fn test_eq_op -> bool (ret (= 7 7)))
+  (test-spec test_eq_op
+    (case "= is eq" (input) (expect true)))
+
+  (fn test_hof_plus -> int
+    (ret (reduce + 0 [1 2 3 4 5])))
+  (test-spec test_hof_plus
+    (case "+ as first-class in reduce" (input) (expect 15)))
+
+  (fn test_hof_int -> int
+    (ret (array_get (map_arr ["1" "2" "3"] int) 2)))
+  (test-spec test_hof_int
+    (case "int as first-class in map_arr" (input) (expect 3)))
+
+  (fn test_hof_float -> float
+    (ret (array_get (map_arr ["1.5" "2.5"] float) 1)))
+  (test-spec test_hof_float
+    (case "float as first-class in map_arr" (input) (expect 2.5)))
+
+  (meta-note "Tests model-friendly aliases: let/def, map/head/car/tail/cdr/contains/size/length/upcase/downcase, HOF fn-first order, +/-/*/%/<>=, and builtins-as-first-class-refs"))

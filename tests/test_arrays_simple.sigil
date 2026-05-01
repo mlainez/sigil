@@ -1,10 +1,10 @@
 (module test
   (fn new_array_length -> int
-    (ret (len (array_new))))
+    (ret (len [])))
   
   (test-spec new_array_length
     (case "create array returns length 0"
       (input)
       (expect 0)))
   
-  (meta-note "Tests array_new creates empty arrays with array_length returning 0"))
+  (meta-note "Tests empty array literal [] has length 0"))

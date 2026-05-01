@@ -1,6 +1,6 @@
 (module test_reassign
   (fn test_set_reassign x int -> int
-    (set x int (add x 1))
+    (set x (add x 1))
     (ret x))
   
   (test-spec test_set_reassign

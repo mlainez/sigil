@@ -2,7 +2,7 @@
   (fn count_to_five -> int
     (set n 0)
     (while (lt n 5)
-      (set n int (add n 1)))
+      (set n (add n 1)))
     (ret n))
   
   (test-spec count_to_five
@@ -13,7 +13,7 @@
   (fn count_to_target target int -> int
     (set n 0)
     (while (lt n target)
-      (set n int (add n 1)))
+      (set n (add n 1)))
     (ret n))
   
   (test-spec count_to_target

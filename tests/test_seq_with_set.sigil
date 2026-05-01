@@ -1,6 +1,6 @@
 (module test
   (fn increment_and_return counter int -> int
-    (set new_counter int (add counter 1))
+    (set new_counter (add counter 1))
     (ret new_counter))
   
   (test-spec increment_and_return

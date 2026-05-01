@@ -1,25 +1,25 @@
 (module test_string_format
 
   (fn format_simple name string -> string
-    (ret (string_format "Hello, {}!" name)))
+    (ret (fmt "Hello, {}!" name)))
 
   (fn format_two name string age int -> string
-    (ret (string_format "{} is {} years old" name age)))
+    (ret (fmt "{} is {} years old" name age)))
 
   (fn format_numbers a int b int -> string
-    (ret (string_format "{} + {} = {}" a b (add a b))))
+    (ret (fmt "{} + {} = {}" a b (add a b))))
 
   (fn format_no_placeholders -> string
-    (ret (string_format "no placeholders here")))
+    (ret (fmt "no placeholders here")))
 
   (fn format_empty_args -> string
-    (ret (string_format "missing {} placeholder")))
+    (ret (fmt "missing {} placeholder")))
 
   (fn format_bool_val flag bool -> string
-    (ret (string_format "flag is {}" flag)))
+    (ret (fmt "flag is {}" flag)))
 
   (fn format_float_val pi float -> string
-    (ret (string_format "pi is approximately {}" pi)))
+    (ret (fmt "pi is approximately {}" pi)))
 
   (test-spec format_simple
     (case "formats single string placeholder"
@@ -56,4 +56,4 @@
       (input 3.14)
       (expect "pi is approximately 3.14")))
 
-  (meta-note "Tests string_format builtin with various types and edge cases"))
+  (meta-note "Tests fmt builtin with various types and edge cases"))

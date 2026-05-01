@@ -2,25 +2,25 @@
   (import validation)
   
   (fn test_in_range_true -> int
-    (set in_range_result bool (in_range 5 1 10))
+    (set in_range_result (in_range 5 1 10))
     (if in_range_result
       (ret 1))
     (ret 0))
   
   (fn test_in_range_false -> int
-    (set out_of_range bool (in_range 15 1 10))
+    (set out_of_range (in_range 15 1 10))
     (if (not out_of_range)
       (ret 1))
     (ret 0))
   
   (fn test_is_divisible_true -> int
-    (set is_div bool (is_divisible_by 10 5))
+    (set is_div (is_divisible_by 10 5))
     (if is_div
       (ret 1))
     (ret 0))
   
   (fn test_is_divisible_false -> int
-    (set not_div bool (is_divisible_by 10 3))
+    (set not_div (is_divisible_by 10 3))
     (if (not not_div)
       (ret 1))
     (ret 0))

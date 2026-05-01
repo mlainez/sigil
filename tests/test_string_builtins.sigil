@@ -10,7 +10,7 @@
     (ret (string_contains haystack needle)))
 
   (fn test_trim text string -> string
-    (ret (string_trim text)))
+    (ret (trim text)))
 
   (fn test_replace text string old_str string new_str string -> string
     (ret (string_replace text old_str new_str)))
@@ -85,4 +85,4 @@
       (input "hello world" " world" "")
       (expect "hello")))
 
-  (meta-note "Tests string_starts_with, string_ends_with, string_contains, string_trim, string_replace builtins"))
+  (meta-note "Tests string_starts_with, string_ends_with, string_contains, trim, string_replace builtins"))

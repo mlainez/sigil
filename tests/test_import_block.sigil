@@ -3,7 +3,7 @@
   
   (fn get_string_length -> int
     (set text "hello")
-    (set len int (len text))
+    (set len (len text))
     (ret len))
   
   (test-spec get_string_length
@@ -11,4 +11,4 @@
       (input)
       (expect 5)))
   
-  (meta-note "Tests that string_length is a built-in operation (no string_utils import needed)"))
+  (meta-note "Tests that len is a built-in operation (no string_utils import needed)"))

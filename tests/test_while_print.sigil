@@ -1,11 +1,11 @@
 (module test
   (fn increment_five_times start int -> int
-    (set i int start)
-    (set i int (add i 1))
-    (set i int (add i 1))
-    (set i int (add i 1))
-    (set i int (add i 1))
-    (set i int (add i 1))
+    (set i start)
+    (set i (add i 1))
+    (set i (add i 1))
+    (set i (add i 1))
+    (set i (add i 1))
+    (set i (add i 1))
     (ret i))
   
   (test-spec increment_five_times

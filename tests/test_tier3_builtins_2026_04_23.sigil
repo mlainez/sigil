@@ -10,7 +10,7 @@
 
   (fn counter_missing -> bool
     (set c (counter ["x" "y"]))
-    (ret (map_has c "z")))
+    (ret (in "z" c)))
 
   (test-spec counter_missing
     (case "missing key is false"

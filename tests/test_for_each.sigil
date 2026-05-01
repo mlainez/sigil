@@ -3,19 +3,19 @@
   (fn sum_array nums array -> int
     (set total 0)
     (for-each n int nums
-      (set total int (add total n)))
+      (set total (add total n)))
     (ret total))
 
   (fn count_elements items array -> int
     (set count 0)
     (for-each item string items
-      (set count int (add count 1)))
+      (set count (add count 1)))
     (ret count))
 
   (fn concat_strings items array -> string
     (set result "")
     (for-each item string items
-      (set result string (string_concat result item)))
+      (set result (add result item)))
     (ret result))
 
   (fn sum_with_break nums array -> int
@@ -23,7 +23,7 @@
     (for-each n int nums
       (if (eq n 99)
         (break))
-      (set total int (add total n)))
+      (set total (add total n)))
     (ret total))
 
   (fn skip_negatives nums array -> int
@@ -31,67 +31,67 @@
     (for-each n int nums
       (if (lt n 0)
         (continue))
-      (set total int (add total n)))
+      (set total (add total n)))
     (ret total))
 
   (fn count_map_keys data map -> int
     (set count 0)
     (for-each k string data
-      (set count int (add count 1)))
+      (set count (add count 1)))
     (ret count))
 
   (fn collect_map_keys data map -> string
     (set result "")
     (for-each k string data
       (if (gt (len result) 0)
-        (set result string (string_concat result ",")))
-      (set result string (string_concat result k)))
+        (set result (add result ",")))
+      (set result (add result k)))
     (ret result))
 
   (fn empty_array_sum nums array -> int
     (set total 0)
     (for-each n int nums
-      (set total int (add total n)))
+      (set total (add total n)))
     (ret total))
 
   (test-spec sum_array
     (case "sums integers in array"
-      (input (array_push (array_push (array_push (array_new) 10) 20) 30))
+      (input (push (push (push [] 10) 20) 30))
       (expect 60)))
 
   (test-spec count_elements
     (case "counts string elements"
-      (input (array_push (array_push (array_new) "hello") "world"))
+      (input (push (push [] "hello") "world"))
       (expect 2)))
 
   (test-spec concat_strings
     (case "concatenates all strings"
-      (input (array_push (array_push (array_push (array_new) "a") "b") "c"))
+      (input (push (push (push [] "a") "b") "c"))
       (expect "abc")))
 
   (test-spec sum_with_break
     (case "breaks out of loop when 99 encountered"
-      (input (array_push (array_push (array_push (array_push (array_new) 1) 2) 99) 100))
+      (input (push (push (push (push [] 1) 2) 99) 100))
       (expect 3)))
 
   (test-spec skip_negatives
     (case "continues past negatives"
-      (input (array_push (array_push (array_push (array_push (array_new) 5) -3) 10) -1))
+      (input (push (push (push (push [] 5) -3) 10) -1))
       (expect 15)))
 
   (test-spec count_map_keys
     (case "counts keys in map"
-      (input (map_set (map_set (map_set (map_new) "a" 1) "b" 2) "c" 3))
+      (input (map_set (map_set (map_set {} "a" 1) "b" 2) "c" 3))
       (expect 3)))
 
   (test-spec collect_map_keys
     (case "collects map keys in order"
-      (input (map_set (map_set (map_new) "x" 1) "y" 2))
+      (input (map_set (map_set {} "x" 1) "y" 2))
       (expect "x,y")))
 
   (test-spec empty_array_sum
     (case "handles empty array"
-      (input (array_new))
+      (input [])
       (expect 0)))
 
   (meta-note "Tests for-each loop over arrays and maps with break/continue support"))

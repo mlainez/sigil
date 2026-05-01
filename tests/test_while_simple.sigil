@@ -2,15 +2,15 @@
   (fn count_up_to limit int -> int
     (set counter 0)
     (if (lt counter limit)
-      (set counter int (add counter 1)))
+      (set counter (add counter 1)))
     (if (lt counter limit)
-      (set counter int (add counter 1)))
+      (set counter (add counter 1)))
     (if (lt counter limit)
-      (set counter int (add counter 1)))
+      (set counter (add counter 1)))
     (if (lt counter limit)
-      (set counter int (add counter 1)))
+      (set counter (add counter 1)))
     (if (lt counter limit)
-      (set counter int (add counter 1)))
+      (set counter (add counter 1)))
     (ret counter))
   
   (test-spec count_up_to

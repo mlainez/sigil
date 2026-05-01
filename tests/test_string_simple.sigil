@@ -16,4 +16,4 @@
       (input -10)
       (expect "-10")))
   
-  (meta-note "Tests string_from_int conversion"))
+  (meta-note "Tests str conversion"))

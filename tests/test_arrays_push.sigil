@@ -1,6 +1,6 @@
 (module test
   (fn push_two_length val1 int val2 int -> int
-    (ret (len (array_push (array_push (array_new) val1) val2))))
+    (ret (len (push (push [] val1) val2))))
   
   (test-spec push_two_length
     (case "push two elements"
@@ -13,4 +13,4 @@
       (input 10 10)
       (expect 2)))
   
-  (meta-note "Tests array_push adds elements and increases array_length"))
+  (meta-note "Tests push adds elements and increases len"))
