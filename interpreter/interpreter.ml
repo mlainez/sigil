@@ -19,6 +19,9 @@ type value =
   | VFunction of string * param list * type_kind * expr list
   | VClosure of string list * expr list * (string * value) list
       (* params, body, captured-env snapshot (var name + value pairs) *)
+  | VBuiltin of string
+      (* Reference to a builtin function by name — used when a builtin is
+         passed as a first-class value to a higher-order function. *)
   | VSocket of Unix.file_descr
   | VTlsSocket of Ssl.socket
   | VWsSocket of ws_transport
@@ -56,6 +59,8 @@ let type_matches (tk : type_kind) (v : value) : bool =
   | TSocket, VWsSocket _ -> true
   | TSocket, VChannel _ -> true
   | TFunction _, VFunction _ -> true
+  | TFunction _, VClosure _ -> true
+  | TFunction _, VBuiltin _ -> true
   | _ -> false
 
 let string_of_type_kind = function
@@ -69,8 +74,16 @@ let string_of_value_type = function
   | VInt _ -> "int" | VFloat _ -> "float" | VDecimal _ -> "decimal"
   | VString _ -> "string" | VBool _ -> "bool" | VUnit -> "unit"
   | VArray _ -> "array" | VMap _ -> "map" | VFunction _ -> "function"
+  | VClosure _ -> "function" | VBuiltin _ -> "function"
   | VSocket _ -> "socket" | VTlsSocket _ -> "socket" | VWsSocket _ -> "socket"
   | VChannel _ -> "socket" | VProcess _ -> "process"
+
+(* Build a "(t1 t2 t3)" type-tuple string from a list of values. Used inside
+   builtin error messages so a model that misuses an op gets the actual shape
+   it passed alongside the expected shape — the prior generic
+   "Invalid arguments to X" surfaced no signal a retry could correct on. *)
+let fmt_arg_types vs =
+  "(" ^ String.concat " " (List.map string_of_value_type vs) ^ ")"
 
 (* Environment for variable bindings *)
 type env = (string, value) Hashtbl.t
@@ -89,6 +102,189 @@ let vmap_set m keys k v =
 let vmap_delete m keys k =
   Hashtbl.remove m k;
   keys := List.filter (fun x -> x <> k) !keys
+
+(* OCaml's Str library doesn't support brace quantifiers ({n}, {n,}, {n,m}).
+   Expand them inline against the preceding atom (single char, escape sequence,
+   character class, or capture group):
+     X{n}    → XXX...X    (n copies)
+     X{n,}   → XX...X X*   (n copies + greedy any-more)
+     X{n,m}  → XX...X X?...X?  (n copies + (m-n) optional copies)
+   This keeps Str-only regexes valid and handles the common LLM pattern. *)
+let regex_translate_braces s =
+  let n = String.length s in
+  (* Find the start index of the atom ending at index `end_excl` (exclusive),
+     scanning backward from the position of the opening `{`. *)
+  let find_atom_start end_excl =
+    if end_excl <= 0 then None
+    else
+      let last = end_excl - 1 in
+      let c = s.[last] in
+      if c = ']' then begin
+        let depth = ref 1 in
+        let j = ref (last - 1) in
+        let found = ref None in
+        while !j >= 0 && !found = None do
+          let cj = s.[!j] in
+          if cj = '\\' && !j > 0 then j := !j - 2
+          else if cj = ']' then begin decr depth; decr j end
+          else if cj = '[' then begin
+            incr depth;
+            if !depth = 0 then found := Some !j
+            else decr j
+          end else decr j
+        done;
+        if !found = None && !depth = 1 then None else !found
+      end
+      else if c = ')' then begin
+        let depth = ref 1 in
+        let j = ref (last - 1) in
+        let found = ref None in
+        while !j >= 0 && !found = None do
+          let cj = s.[!j] in
+          if cj = '\\' && !j + 1 < n then begin
+            let next = s.[!j + 1] in
+            if next = '(' then begin
+              decr depth;
+              if !depth = 0 then found := Some !j
+              else j := !j - 1
+            end else if next = ')' then begin
+              incr depth;
+              j := !j - 1
+            end else j := !j - 1
+          end else decr j
+        done;
+        !found
+      end
+      else if last > 0 && s.[last - 1] = '\\' then Some (last - 1)
+      else Some last
+  in
+  let buf = Buffer.create (n + 8) in
+  let i = ref 0 in
+  let last_atom_start = ref (-1) in
+  let last_atom_end = ref (-1) in
+  while !i < n do
+    let c = s.[!i] in
+    if c = '\\' && !i + 1 < n then begin
+      Buffer.add_char buf c;
+      Buffer.add_char buf s.[!i + 1];
+      last_atom_start := Buffer.length buf - 2;
+      last_atom_end := Buffer.length buf;
+      i := !i + 2
+    end
+    else if c = '{' then begin
+      let j = ref (!i + 1) in
+      let valid = ref true in
+      while !j < n && s.[!j] <> '}' && !valid do
+        let cc = s.[!j] in
+        if (cc >= '0' && cc <= '9') || cc = ',' then incr j
+        else valid := false
+      done;
+      if !valid && !j < n && s.[!j] = '}' && !j > !i + 1
+         && !last_atom_start >= 0 then begin
+        let spec = String.sub s (!i + 1) (!j - !i - 1) in
+        let parts = String.split_on_char ',' spec in
+        let lo, hi =
+          match parts with
+          | [a] when a <> "" -> (int_of_string a, Some (int_of_string a))
+          | [a; ""] when a <> "" -> (int_of_string a, None)
+          | [a; b] when a <> "" && b <> "" ->
+              (int_of_string a, Some (int_of_string b))
+          | _ -> (-1, None)
+        in
+        if lo < 0 then begin
+          Buffer.add_char buf c;
+          incr i
+        end else begin
+          let atom = Buffer.sub buf !last_atom_start (!last_atom_end - !last_atom_start) in
+          (* Drop the originally-emitted atom; we re-emit n copies below. *)
+          let prefix = Buffer.sub buf 0 !last_atom_start in
+          Buffer.clear buf;
+          Buffer.add_string buf prefix;
+          for _ = 1 to lo do Buffer.add_string buf atom done;
+          (match hi with
+           | None -> Buffer.add_string buf atom; Buffer.add_char buf '*'
+           | Some hi ->
+               for _ = 1 to hi - lo do
+                 Buffer.add_string buf atom;
+                 Buffer.add_char buf '?'
+               done);
+          last_atom_end := Buffer.length buf;
+          last_atom_start := !last_atom_end - String.length atom;
+          i := !j + 1
+        end
+      end else begin
+        Buffer.add_char buf c;
+        incr i
+      end
+    end
+    else begin
+      let atom_start_in_src = !i in
+      (match find_atom_start (!i + 1) with
+       | Some _ when c = '[' ->
+           let depth = ref 1 in
+           let j = ref (!i + 1) in
+           while !j < n && !depth > 0 do
+             let cj = s.[!j] in
+             if cj = '\\' && !j + 1 < n then j := !j + 2
+             else if cj = '[' then begin incr depth; incr j end
+             else if cj = ']' then begin decr depth; incr j end
+             else incr j
+           done;
+           Buffer.add_substring buf s atom_start_in_src (!j - atom_start_in_src);
+           last_atom_start := Buffer.length buf - (!j - atom_start_in_src);
+           last_atom_end := Buffer.length buf;
+           i := !j
+       | _ ->
+           Buffer.add_char buf c;
+           last_atom_start := Buffer.length buf - 1;
+           last_atom_end := Buffer.length buf;
+           incr i)
+    end
+  done;
+  Buffer.contents buf
+
+(* JSON array-of-keys helpers (Clojure get-in / Ruby dig style).
+   Each segment is a typed value: VString → map key, VInt → array index.
+   For arrays, VString segments that parse as int are accepted (this lets
+   `(json_get j (split path "."))` work without manual int conversion).
+   This avoids dot-path ambiguity (keys-with-dots, "0" vs 0). *)
+let seg_label = function
+  | VString s -> "\"" ^ s ^ "\""
+  | VInt n -> Int64.to_string n
+  | _ -> "<non-string-non-int>"
+
+let json_step_into node seg =
+  match node, seg with
+  | VMap (m, _), VString k ->
+      (try Hashtbl.find m k
+       with Not_found -> raise (RuntimeError ("Key not found in JSON object: " ^ k)))
+  | VMap _, VInt _ ->
+      raise (RuntimeError ("Cannot index map with int segment " ^ seg_label seg))
+  | VArray arr, VInt idx ->
+      let i = Int64.to_int idx in
+      if i >= 0 && i < Array.length !arr then !arr.(i)
+      else raise (RuntimeError ("JSON array index out of bounds: " ^ Int64.to_string idx))
+  | VArray arr, VString s ->
+      (try
+        let i = int_of_string s in
+        if i >= 0 && i < Array.length !arr then !arr.(i)
+        else raise (RuntimeError ("JSON array index out of bounds: " ^ s))
+      with Failure _ ->
+        raise (RuntimeError ("Cannot index array with non-integer segment: " ^ s)))
+  | _ ->
+      raise (RuntimeError ("Cannot descend into scalar at segment " ^ seg_label seg))
+
+let json_walk_keys start keys =
+  Array.fold_left json_step_into start keys
+
+(* For set/delete: walk all but the final segment, return (parent, last_seg). *)
+let json_walk_parent start keys =
+  let n = Array.length keys in
+  if n = 0 then (start, VUnit)
+  else
+    let init = Array.sub keys 0 (n - 1) in
+    let last = keys.(n - 1) in
+    (Array.fold_left json_step_into start init, last)
 
 (* ===== BigDecimal: String-based arbitrary precision arithmetic ===== *)
 
@@ -671,7 +867,7 @@ let ws_send_close transport ~masked =
 (* String representation of values *)
 let rec string_of_value = function
   | VInt n -> Int64.to_string n
-  | VFloat f -> string_of_float f
+  | VFloat f -> format_float_string f
   | VDecimal s -> s
   | VString s -> s
   | VBool b -> string_of_bool b
@@ -736,11 +932,21 @@ let rec eval env expr =
    | LitBool b -> VBool b
    | LitUnit -> VUnit
 
-   | Var name -> env_get env name
+   | Var name ->
+       (try env_get env name
+        with RuntimeError _ ->
+          (* Name isn't in scope — treat as a first-class reference to a
+             builtin. Wrapping is lazy; errors surface only if it's actually
+             called. This lets `(reduce + 0 xs)` or `(map_arr xs int)` work. *)
+          VBuiltin name)
 
   | Call ("fmt", fmt_args) when (match fmt_args with LitString _ :: _ -> true | _ -> false) ->
       (* Special form: scan template for {var} (scope lookup) and {} (positional from args).
-         First arg is the template, remaining args fill {} placeholders in order. *)
+         First arg is the template, remaining args fill {} placeholders in order.
+         Also accepts Python-style format specs: {:.3f} {:>5} {:0>5} {:<10} {:^6}
+         {:b} {:x} — alignment, width, precision, type. The full grammar:
+            [name][:[fill][align][0][width][.precision][type]]
+         Examples: {:.3f}, {x:>5}, {:0>4d}, {name}, {}. *)
       let (template, extra_args) = match fmt_args with
         | LitString t :: rest -> (t, List.map (eval env) rest)
         | _ -> assert false
@@ -749,6 +955,72 @@ let rec eval env expr =
       let len = String.length template in
       let i = ref 0 in
       let positional = ref extra_args in
+      (* Parse a Python-shaped format spec (the part after the colon). *)
+      let parse_spec spec =
+        let n = String.length spec in
+        let p = ref 0 in
+        let fill = ref ' ' and align = ref ' ' in
+        if n >= 2 && (spec.[1] = '<' || spec.[1] = '>' || spec.[1] = '^') then begin
+          fill := spec.[0]; align := spec.[1]; p := 2
+        end else if n >= 1 && (spec.[0] = '<' || spec.[0] = '>' || spec.[0] = '^') then begin
+          align := spec.[0]; p := 1
+        end;
+        if !p < n && spec.[!p] = '0' && !align = ' ' then begin
+          fill := '0'; align := '>'; incr p
+        end;
+        let ws = !p in
+        while !p < n && spec.[!p] >= '0' && spec.[!p] <= '9' do incr p done;
+        let width = if !p > ws then int_of_string (String.sub spec ws (!p - ws)) else 0 in
+        let precision = ref (-1) in
+        if !p < n && spec.[!p] = '.' then begin
+          incr p;
+          let ps = !p in
+          while !p < n && spec.[!p] >= '0' && spec.[!p] <= '9' do incr p done;
+          if !p > ps then precision := int_of_string (String.sub spec ps (!p - ps))
+        end;
+        let ty = if !p < n then spec.[!p] else ' ' in
+        (!fill, !align, width, !precision, ty)
+      in
+      let pad_to fill align width s =
+        let l = String.length s in
+        if l >= width then s
+        else
+          let pad = String.make (width - l) fill in
+          (match align with
+           | '<' -> s ^ pad
+           | '^' ->
+               let left = (width - l) / 2 in
+               let right = (width - l) - left in
+               String.make left fill ^ s ^ String.make right fill
+           | _ (* '>' default *) -> pad ^ s)
+      in
+      let format_with_spec v spec =
+        let (fill, align, width, precision, ty) = parse_spec spec in
+        let body = match ty, v with
+          | 'f', VFloat f -> Printf.sprintf "%.*f" (max 0 (if precision >= 0 then precision else 6)) f
+          | 'f', VInt n  -> Printf.sprintf "%.*f" (max 0 (if precision >= 0 then precision else 6)) (Int64.to_float n)
+          | 'd', VInt n  -> Int64.to_string n
+          | 'd', VFloat f -> Int64.to_string (Int64.of_float f)
+          | 'x', VInt n  -> Printf.sprintf "%Lx" n
+          | 'X', VInt n  -> Printf.sprintf "%LX" n
+          | 'o', VInt n  -> Printf.sprintf "%Lo" n
+          | 'b', VInt n  -> let rec b acc x = if x = 0L then (if acc = "" then "0" else acc) else b ((if Int64.rem x 2L = 0L then "0" else "1") ^ acc) (Int64.div x 2L) in b "" n
+          | 's', _ -> string_of_value v
+          | ' ', VFloat f when precision >= 0 -> Printf.sprintf "%.*f" precision f
+          | ' ', VInt n when precision >= 0 -> Printf.sprintf "%.*f" precision (Int64.to_float n)
+          | _, _ -> string_of_value v
+        in
+        let align' = if align = ' ' then '>' else align in
+        pad_to fill align' width body
+      in
+      let consume_positional ?(spec="") () =
+        match !positional with
+        | v :: rest ->
+            Buffer.add_string buf (if spec = "" then string_of_value v else format_with_spec v spec);
+            positional := rest
+        | [] -> Buffer.add_string buf "{}"  (* lenient: leave a marker *)
+      in
+      let _ = consume_positional in  (* suppress unused warning if any branch doesn't use *)
       while !i < len do
         let c = template.[!i] in
         if c = '{' && !i + 1 < len && template.[!i + 1] = '{' then begin
@@ -757,24 +1029,40 @@ let rec eval env expr =
         end else if c = '}' && !i + 1 < len && template.[!i + 1] = '}' then begin
           Buffer.add_char buf '}';
           i := !i + 2
+        end else if c = '%' && !i + 1 < len && template.[!i + 1] = '%' then begin
+          (* Escaped literal percent: %% → % *)
+          Buffer.add_char buf '%';
+          i := !i + 2
+        end else if c = '%' && !i + 1 < len &&
+                    (let n = template.[!i + 1] in
+                     n = 's' || n = 'd' || n = 'i' || n = 'f' || n = 'g' ||
+                     n = 'x' || n = 'o' || n = 'b' || n = 'v') then begin
+          (* Printf-style positional placeholder: %s %d %f ... — all behave
+             the same in Sigil (string-of-value of the next arg). Accepted as
+             a Python/C ergonomics alias since LLMs trained on those reach
+             for printf style by default. *)
+          consume_positional ();
+          i := !i + 2
         end else if c = '{' then begin
           let close = try String.index_from template (!i + 1) '}' with Not_found -> -1 in
           if close = -1 then begin
             Buffer.add_char buf c;
             incr i
           end else begin
-            let name = String.sub template (!i + 1) (close - !i - 1) in
-            if name = "" then begin
-              (* Positional: consume from extra args *)
-              (match !positional with
-               | v :: rest ->
-                   Buffer.add_string buf (string_of_value v);
-                   positional := rest
-               | [] -> raise (RuntimeError "fmt: not enough positional args for {} placeholder"))
-            end else begin
-              (* Named: look up in scope *)
+            let body = String.sub template (!i + 1) (close - !i - 1) in
+            (* Split on first ':' to separate name from format spec *)
+            let (name, spec) =
+              try
+                let colon = String.index body ':' in
+                (String.sub body 0 colon,
+                 String.sub body (colon + 1) (String.length body - colon - 1))
+              with Not_found -> (body, "")
+            in
+            if name = "" then consume_positional ~spec ()
+            else begin
               let v = env_get env name in
-              Buffer.add_string buf (string_of_value v)
+              Buffer.add_string buf
+                (if spec = "" then string_of_value v else format_with_spec v spec)
             end;
             i := close + 1
           end
@@ -794,7 +1082,7 @@ let rec eval env expr =
         | VInt _ -> TInt | VFloat _ -> TFloat | VDecimal _ -> TDecimal
         | VString _ -> TString | VBool _ -> TBool | VUnit -> TUnit
         | VArray _ -> TArray TUnit | VMap _ -> TMap (TUnit, TUnit)
-        | VFunction _ -> TFunction ([], TUnit)
+        | VFunction _ | VClosure _ | VBuiltin _ -> TFunction ([], TUnit)
         | VSocket _ | VTlsSocket _ | VWsSocket _ -> TSocket
         | VChannel _ -> TSocket | VProcess _ -> TProcess
       in
@@ -809,11 +1097,27 @@ let rec eval env expr =
               (* New declaration: infer from the value itself *)
               type_of_value value)
       in
-      if not (type_matches var_type value) then
-        raise (RuntimeError (
-          "Type mismatch: variable '" ^ var_name ^
-          "' declared as " ^ string_of_type_kind var_type ^
-          " but got " ^ string_of_value_type value))
+      if not (type_matches var_type value) then begin
+        (* Numeric widening: int → float → decimal is automatic on rebind.
+           This addresses the common "declared as int but got float" trip
+           where a model accumulates numeric updates. Non-numeric types
+           keep their lock. *)
+        let widened = match var_type, value with
+          | TFloat, VInt n -> Some (VFloat (Int64.to_float n))
+          | TDecimal, VInt n -> Some (VDecimal (Int64.to_string n))
+          | TDecimal, VFloat f -> Some (VDecimal (format_float_string f))
+          | _ -> None
+        in
+        match widened with
+        | Some v ->
+            env_set env var_name v;
+            VUnit
+        | None ->
+            raise (RuntimeError (
+              "Type mismatch: variable '" ^ var_name ^
+              "' declared as " ^ string_of_type_kind var_type ^
+              " but got " ^ string_of_value_type value))
+      end
       else begin
         env_set env var_name value;
         VUnit
@@ -979,7 +1283,30 @@ let rec eval env expr =
              ) !keys;
              VUnit
            with Break -> VUnit)
-       | _ -> raise (RuntimeError "for-each requires an array or map"))
+       | VString s ->
+           (* for-each on a string iterates per-character (each as a 1-char
+              string). Same convention as map_arr/filter polymorphism — the
+              alternative is a less-friendly error and a forced (chars s)
+              wrap that the model often forgets. *)
+           let n = String.length s in
+           let i = ref 0 in
+           (try
+             while !i < n do
+               let elem = VString (String.make 1 s.[!i]) in
+               if (not skip_check) && not (type_matches var_type elem) then
+                 raise (RuntimeError (
+                   "Type mismatch in for-each: variable '" ^ var_name ^
+                   "' declared as " ^ string_of_type_kind var_type ^
+                   " but got string (per-char iteration)"));
+               env_set env var_name elem;
+               (try
+                 let _ = eval_block env body in ()
+               with Continue -> ());
+               i := !i + 1
+             done;
+             VUnit
+           with Break -> VUnit)
+       | _ -> raise (RuntimeError "for-each requires an array, map, or string"))
 
   | Try (try_body, catch_var, _catch_type, catch_body) ->
       (try
@@ -1027,52 +1354,234 @@ and invoke_callable env callable args caller =
   | VClosure (params, body, snapshot) ->
       let n_expected = List.length params in
       let n_given = List.length args in
-      if n_given <> n_expected then
+      (* Auto-destructuring: when an N-param lambda is invoked with exactly
+         one VArray of length N, bind each element to its corresponding
+         parameter. Lets `(\(k v) ...)` work on `(entries m)` pairs. *)
+      let final_args =
+        if n_given = 1 && n_expected >= 2 then
+          match args with
+          | [VArray arr] when Array.length !arr = n_expected ->
+              Array.to_list !arr
+          | _ -> args
+        else args
+      in
+      let n_final = List.length final_args in
+      if n_final <> n_expected then
         raise (RuntimeError (caller ^ ": closure expects " ^ string_of_int n_expected ^ " args, got " ^ string_of_int n_given));
       let func_env = env_create () in
-      (* Functions from current env *)
       Hashtbl.iter (fun k v -> match v with VFunction _ -> env_set func_env k v | _ -> ()) env;
-      (* Captured snapshot bindings *)
       List.iter (fun (k, v) -> env_set func_env k v) snapshot;
-      (* Lambda parameters *)
-      List.iter2 (fun pname a -> env_set func_env pname a) params args;
+      List.iter2 (fun pname a -> env_set func_env pname a) params final_args;
       (try eval_block func_env body with Return v -> v)
+  | VBuiltin name ->
+      (* Reference to a builtin — bind args to temporary names, then
+         re-dispatch through eval_call. *)
+      let tmp_env = env_create () in
+      Hashtbl.iter (fun k v -> env_set tmp_env k v) env;
+      let tmp_names = List.mapi (fun i _ -> "__hof_arg_" ^ string_of_int i) args in
+      List.iter2 (fun n v -> env_set tmp_env n v) tmp_names args;
+      let var_args = List.map (fun n -> Var n) tmp_names in
+      eval_call tmp_env name var_args
   | _ ->
       raise (RuntimeError (caller ^ ": expected function or closure, got " ^ string_of_value_type callable))
 
 and eval_call env func_name args =
   let arg_vals = List.map (eval env) args in
 
+  (* Alias normalization — accept common Lisp/Clojure/Python synonyms so
+     models don't need to memorize Sigil-specific names. Canonical names are
+     what the rest of the interpreter implements; aliases map to them here. *)
+  let func_name = match func_name with
+    | "map"      -> "map_arr"      (* Clojure/Python *)
+    | "head"     -> "first"        (* Haskell *)
+    | "car"      -> "first"        (* Lisp *)
+    | "tail"     -> "rest"         (* Haskell *)
+    | "cdr"      -> "rest"         (* Lisp *)
+    | "string_length" -> "len"     (* Python str-len reach *)
+    | "contains" -> "has"          (* Python 'x in y' semantics *)
+    | "size"     -> "len"          (* Ruby/JS *)
+    | "length"   -> "len"
+    | "count_el" -> "count"        (* disambiguate *)
+    | "concat"   -> "add"          (* string/array concatenation *)
+    | "upcase"   -> "upper"        (* Ruby *)
+    | "downcase" -> "lower"        (* Ruby *)
+    | "swap"     -> "swapcase"
+    | "abs_val"  -> "abs"
+    | "keys"     -> "map_keys"     (* Python/Ruby/JS *)
+    | "values"   -> "map_values"   (* Python/Ruby/JS *)
+    (* Bit-op aliases — covers names the model reaches for *)
+    | "band" | "bitand" | "bit_and_op" -> "bit_and"
+    | "bor"  | "bitor"  | "bit_or_op"  -> "bit_or"
+    | "bxor" | "bitxor" | "xor" | "bit_xor_op" -> "bit_xor"
+    | "bnot" | "bitnot" -> "bit_not"
+    | "shl"  | "lsh" | "lshift" | "bit_shl" -> "bit_shift_left"
+    | "shr"  | "rsh" | "rshift" | "bit_shr" -> "bit_shift_right"
+    (* Arithmetic operator aliases — common in Lisp/Clojure/Scheme *)
+    | "+"        -> "add"
+    | "-"        -> "sub"
+    | "*"        -> "mul"
+    | "/"        -> "div"
+    | "%"        -> "mod"
+    | "<"        -> "lt"
+    | ">"        -> "gt"
+    | "<="       -> "le"
+    | ">="       -> "ge"
+    | "="        -> "eq"
+    | "=="       -> "eq"
+    | "!="       -> "ne"
+    | n -> n
+  in
+
   match func_name with
-  (* Arithmetic - int *)
+  (* Arithmetic / concat — N-ary, dispatches on first arg type.
+     - int/float/decimal: sum
+     - string: concat (each arg coerced)
+     - array: concatenate elements
+     - map: shallow merge (later wins) *)
    | "add" ->
+       let coerce_str v = match v with
+         | VInt n -> Int64.to_string n
+         | VFloat f -> format_float_string f
+         | VBool b -> if b then "true" else "false"
+         | VDecimal s -> s
+         | VString s -> s
+         | other -> string_of_value other
+       in
        (match arg_vals with
-        | [VInt a; VInt b] -> VInt (Int64.add a b)
-        | [VFloat a; VFloat b] -> VFloat (a +. b)
-        | [VDecimal a; VDecimal b] ->
-             VDecimal (bigdecimal_add a b)
-        | [VString a; VString b] -> VString (a ^ b)
-         | _ -> raise (RuntimeError ("Invalid arguments to add")))
+        | [] -> raise (RuntimeError "add: requires at least 2 arguments")
+        | [_] -> raise (RuntimeError "add: requires at least 2 arguments")
+        | first :: _ ->
+            (match first with
+             | VInt _ ->
+                 List.fold_left (fun acc v -> match acc, v with
+                   | VInt a, VInt b -> VInt (Int64.add a b)
+                   | VInt a, VFloat b -> VFloat (Int64.to_float a +. b)
+                   | VFloat a, VInt b -> VFloat (a +. Int64.to_float b)
+                   | VFloat a, VFloat b -> VFloat (a +. b)
+                   | _ -> raise (RuntimeError "add: numeric/numeric expected"))
+                   first (List.tl arg_vals)
+             | VFloat _ ->
+                 List.fold_left (fun acc v -> match acc, v with
+                   | VFloat a, VFloat b -> VFloat (a +. b)
+                   | VFloat a, VInt b -> VFloat (a +. Int64.to_float b)
+                   | VInt a, VFloat b -> VFloat (Int64.to_float a +. b)
+                   | _ -> raise (RuntimeError "add: numeric/numeric expected"))
+                   first (List.tl arg_vals)
+             | VDecimal _ ->
+                 List.fold_left (fun acc v -> match acc, v with
+                   | VDecimal a, VDecimal b -> VDecimal (bigdecimal_add a b)
+                   | _ -> raise (RuntimeError "add: decimal/decimal expected"))
+                   first (List.tl arg_vals)
+             | VString _ ->
+                 (* Any-typed string concat: coerce non-string args. *)
+                 VString (String.concat "" (List.map coerce_str arg_vals))
+             | VArray _ ->
+                 let buf = ref [||] in
+                 List.iter (fun v -> match v with
+                   | VArray a -> buf := Array.append !buf !a
+                   | other -> buf := Array.append !buf [|other|]
+                 ) arg_vals;
+                 VArray (ref !buf)
+             | VMap _ ->
+                 (* Shallow merge; later values win on collision. Insertion order
+                    preserved: keys from the first map come first, then any new
+                    keys from later maps in order. *)
+                 let merged = Hashtbl.create 16 in
+                 let order = ref [] in
+                 List.iter (fun v -> match v with
+                   | VMap (m, keys) ->
+                       List.iter (fun k ->
+                         if not (Hashtbl.mem merged k) then order := k :: !order;
+                         Hashtbl.replace merged k (Hashtbl.find m k)
+                       ) !keys
+                   | _ -> raise (RuntimeError "add: cannot mix map with non-map")
+                 ) arg_vals;
+                 VMap (merged, ref (List.rev !order))
+             | _ -> raise (RuntimeError "Invalid arguments to add")))
 
    | "sub" ->
+       (* Variadic left-fold like add: `(- a b c d)` = a - b - c - d.
+          Unary form `(- x)` = negation (standard Lisp/Scheme convention).
+          Models writing `(sub len_a i 1)` expecting "len_a - i - 1" used
+          to crash with an arity error — now it works. *)
        (match arg_vals with
-        | [VInt a; VInt b] -> VInt (Int64.sub a b)
-        | [VFloat a; VFloat b] -> VFloat (a -. b)
-        | [VDecimal a; VDecimal b] ->
-             VDecimal (bigdecimal_sub a b)
-         | _ -> raise (RuntimeError "Invalid arguments to sub"))
+        | [] -> raise (RuntimeError "sub: requires at least 1 argument")
+        | [VInt a] -> VInt (Int64.neg a)
+        | [VFloat a] -> VFloat (-. a)
+        | [VDecimal a] -> VDecimal (bigdecimal_neg a)
+        | [_] -> raise (RuntimeError
+            ("sub: unary negation requires int/float/decimal, got "
+             ^ fmt_arg_types arg_vals))
+        | first :: _ ->
+            (match first with
+             | VInt _ ->
+                 List.fold_left (fun acc v -> match acc, v with
+                   | VInt a, VInt b -> VInt (Int64.sub a b)
+                   | VInt a, VFloat b -> VFloat (Int64.to_float a -. b)
+                   | VFloat a, VInt b -> VFloat (a -. Int64.to_float b)
+                   | VFloat a, VFloat b -> VFloat (a -. b)
+                   | _ -> raise (RuntimeError
+                       ("sub: numeric/numeric expected, got "
+                        ^ fmt_arg_types arg_vals)))
+                   first (List.tl arg_vals)
+             | VFloat _ ->
+                 List.fold_left (fun acc v -> match acc, v with
+                   | VFloat a, VFloat b -> VFloat (a -. b)
+                   | VFloat a, VInt b -> VFloat (a -. Int64.to_float b)
+                   | VInt a, VFloat b -> VFloat (Int64.to_float a -. b)
+                   | _ -> raise (RuntimeError
+                       ("sub: numeric/numeric expected, got "
+                        ^ fmt_arg_types arg_vals)))
+                   first (List.tl arg_vals)
+             | VDecimal _ ->
+                 List.fold_left (fun acc v -> match acc, v with
+                   | VDecimal a, VDecimal b -> VDecimal (bigdecimal_sub a b)
+                   | _ -> raise (RuntimeError
+                       ("sub: decimal/decimal expected, got "
+                        ^ fmt_arg_types arg_vals)))
+                   first (List.tl arg_vals)
+             | _ -> raise (RuntimeError
+                 ("sub: numeric expected, got " ^ fmt_arg_types arg_vals))))
 
    | "mul" ->
+       (* Variadic left-fold like add/sub: a*b*c... *)
        (match arg_vals with
-        | [VInt a; VInt b] -> VInt (Int64.mul a b)
-        | [VFloat a; VFloat b] -> VFloat (a *. b)
-        | [VDecimal a; VDecimal b] ->
-             VDecimal (bigdecimal_mul a b)
+        | [] | [_] -> raise (RuntimeError
+            ("mul: requires at least 2 arguments, got " ^ fmt_arg_types arg_vals))
         | [VString s; VInt n] | [VInt n; VString s] ->
             let n = Int64.to_int n in
             if n <= 0 then VString ""
             else VString (String.concat "" (List.init n (fun _ -> s)))
-         | _ -> raise (RuntimeError "Invalid arguments to mul"))
+        | first :: _ ->
+            (match first with
+             | VInt _ ->
+                 List.fold_left (fun acc v -> match acc, v with
+                   | VInt a, VInt b -> VInt (Int64.mul a b)
+                   | VInt a, VFloat b -> VFloat (Int64.to_float a *. b)
+                   | VFloat a, VInt b -> VFloat (a *. Int64.to_float b)
+                   | VFloat a, VFloat b -> VFloat (a *. b)
+                   | _ -> raise (RuntimeError
+                       ("mul: numeric/numeric expected, got "
+                        ^ fmt_arg_types arg_vals)))
+                   first (List.tl arg_vals)
+             | VFloat _ ->
+                 List.fold_left (fun acc v -> match acc, v with
+                   | VFloat a, VFloat b -> VFloat (a *. b)
+                   | VFloat a, VInt b -> VFloat (a *. Int64.to_float b)
+                   | VInt a, VFloat b -> VFloat (Int64.to_float a *. b)
+                   | _ -> raise (RuntimeError
+                       ("mul: numeric/numeric expected, got "
+                        ^ fmt_arg_types arg_vals)))
+                   first (List.tl arg_vals)
+             | VDecimal _ ->
+                 List.fold_left (fun acc v -> match acc, v with
+                   | VDecimal a, VDecimal b -> VDecimal (bigdecimal_mul a b)
+                   | _ -> raise (RuntimeError
+                       ("mul: decimal/decimal expected, got "
+                        ^ fmt_arg_types arg_vals)))
+                   first (List.tl arg_vals)
+             | _ -> raise (RuntimeError
+                 ("mul: numeric expected, got " ^ fmt_arg_types arg_vals))))
 
    | "div" ->
        (match arg_vals with
@@ -1084,14 +1593,17 @@ and eval_call env func_name args =
              else VFloat (a /. b)
         | [VDecimal a; VDecimal b] ->
              VDecimal (bigdecimal_div a b ~precision:20 ())
-         | _ -> raise (RuntimeError "Invalid arguments to div"))
-  
+         | _ -> raise (RuntimeError
+             ("div takes (int int), (float float), or (decimal decimal); got "
+              ^ fmt_arg_types arg_vals)))
+
   | "mod" ->
       (match arg_vals with
        | [VInt a; VInt b] ->
            if b = 0L then raise (RuntimeError "Division by zero")
            else VInt (Int64.rem a b)
-       | _ -> raise (RuntimeError "Invalid arguments to mod"))
+       | _ -> raise (RuntimeError
+           ("mod takes (int int), got " ^ fmt_arg_types arg_vals)))
   
    (* Bitwise operations - int only *)
    | "bit_and" ->
@@ -1138,7 +1650,8 @@ and eval_call env func_name args =
        | [VFloat a] -> VFloat (abs_float a)
        | [VDecimal a] ->
             VDecimal (bigdecimal_abs a)
-        | _ -> raise (RuntimeError "Invalid arguments to abs"))
+       | _ -> raise (RuntimeError
+           ("abs takes (int), (float), or (decimal); got " ^ fmt_arg_types arg_vals)))
 
   | "min" ->
       (match arg_vals with
@@ -1146,7 +1659,9 @@ and eval_call env func_name args =
        | [VFloat a; VFloat b] -> VFloat (min a b)
        | [VDecimal a; VDecimal b] ->
             if bigdecimal_compare a b <= 0 then VDecimal (decimal_normalize a) else VDecimal (decimal_normalize b)
-        | _ -> raise (RuntimeError "Invalid arguments to min"))
+       | _ -> raise (RuntimeError
+           ("min takes (int int), (float float), or (decimal decimal); for arrays use min_of; got "
+            ^ fmt_arg_types arg_vals)))
 
   | "max" ->
       (match arg_vals with
@@ -1154,17 +1669,33 @@ and eval_call env func_name args =
        | [VFloat a; VFloat b] -> VFloat (max a b)
        | [VDecimal a; VDecimal b] ->
             if bigdecimal_compare a b >= 0 then VDecimal (decimal_normalize a) else VDecimal (decimal_normalize b)
-        | _ -> raise (RuntimeError "Invalid arguments to max"))
+       | _ -> raise (RuntimeError
+           ("max takes (int int), (float float), or (decimal decimal); for arrays use max_of; got "
+            ^ fmt_arg_types arg_vals)))
 
   | "sqrt" ->
       (match arg_vals with
        | [VFloat a] -> VFloat (sqrt a)
-       | _ -> raise (RuntimeError "Invalid arguments to sqrt"))
+       | [VInt a] -> VFloat (sqrt (Int64.to_float a))
+       | _ -> raise (RuntimeError "sqrt takes (int) or (float)"))
 
    | "pow" ->
+      (* Polymorphic on int/float to match what models reach for: (pow 2 16),
+         (pow 2.0 0.5). Returns int when both args are int, else float. *)
       (match arg_vals with
+       | [VInt a; VInt b] ->
+           let bf = Int64.to_int b in
+           if bf < 0 then VFloat ((Int64.to_float a) ** (Int64.to_float b))
+           else
+             let rec ipow base exp acc =
+               if exp = 0 then acc
+               else if exp mod 2 = 1 then ipow (Int64.mul base base) (exp / 2) (Int64.mul acc base)
+               else ipow (Int64.mul base base) (exp / 2) acc
+             in VInt (ipow a bf 1L)
        | [VFloat a; VFloat b] -> VFloat (a ** b)
-       | _ -> raise (RuntimeError "Invalid arguments to pow"))
+       | [VInt a; VFloat b] -> VFloat ((Int64.to_float a) ** b)
+       | [VFloat a; VInt b] -> VFloat (a ** (Int64.to_float b))
+       | _ -> raise (RuntimeError "pow takes (int, int) or (float, float)"))
 
   | "floor" ->
       (match arg_vals with
@@ -1193,7 +1724,8 @@ and eval_call env func_name args =
           | [VArray _ as a; VArray _ as b] -> VBool (values_equal a b)
          | [VMap _ as a; VMap _ as b] -> VBool (values_equal a b)
          | [a; b] -> raise (RuntimeError ("eq requires arguments of the same type, got " ^ string_of_value_type a ^ " and " ^ string_of_value_type b))
-         | _ -> raise (RuntimeError "Invalid arguments to eq"))
+         | _ -> raise (RuntimeError
+             ("eq takes 2 args of the same type, got " ^ fmt_arg_types arg_vals)))
   
    | "ne" ->
        (match arg_vals with
@@ -1206,41 +1738,51 @@ and eval_call env func_name args =
          | [VArray _ as a; VArray _ as b] -> VBool (not (values_equal a b))
          | [VMap _ as a; VMap _ as b] -> VBool (not (values_equal a b))
          | [a; b] -> raise (RuntimeError ("ne requires arguments of the same type, got " ^ string_of_value_type a ^ " and " ^ string_of_value_type b))
-         | _ -> raise (RuntimeError "Invalid arguments to ne"))
+         | _ -> raise (RuntimeError
+             ("ne takes 2 args of the same type, got " ^ fmt_arg_types arg_vals)))
   
   | "lt" ->
       (match arg_vals with
        | [VInt a; VInt b] -> VBool (a < b)
        | [VFloat a; VFloat b] -> VBool (a < b)
+       | [VString a; VString b] -> VBool (a < b)
        | [VDecimal a; VDecimal b] -> VBool (bigdecimal_compare a b < 0)
-       | _ -> raise (RuntimeError "Invalid arguments to lt"))
-  
+       | _ -> raise (RuntimeError
+           ("lt takes 2 numeric or 2 string args, got " ^ fmt_arg_types arg_vals)))
+
   | "gt" ->
       (match arg_vals with
        | [VInt a; VInt b] -> VBool (a > b)
        | [VFloat a; VFloat b] -> VBool (a > b)
+       | [VString a; VString b] -> VBool (a > b)
        | [VDecimal a; VDecimal b] -> VBool (bigdecimal_compare a b > 0)
-       | _ -> raise (RuntimeError "Invalid arguments to gt"))
-  
+       | _ -> raise (RuntimeError
+           ("gt takes 2 numeric or 2 string args, got " ^ fmt_arg_types arg_vals)))
+
   | "le" ->
       (match arg_vals with
        | [VInt a; VInt b] -> VBool (a <= b)
        | [VFloat a; VFloat b] -> VBool (a <= b)
+       | [VString a; VString b] -> VBool (a <= b)
        | [VDecimal a; VDecimal b] -> VBool (bigdecimal_compare a b <= 0)
-       | _ -> raise (RuntimeError "Invalid arguments to le"))
-  
+       | _ -> raise (RuntimeError
+           ("le takes 2 numeric or 2 string args, got " ^ fmt_arg_types arg_vals)))
+
   | "ge" ->
       (match arg_vals with
        | [VInt a; VInt b] -> VBool (a >= b)
        | [VFloat a; VFloat b] -> VBool (a >= b)
+       | [VString a; VString b] -> VBool (a >= b)
        | [VDecimal a; VDecimal b] -> VBool (bigdecimal_compare a b >= 0)
-       | _ -> raise (RuntimeError "Invalid arguments to ge"))
+       | _ -> raise (RuntimeError
+           ("ge takes 2 numeric or 2 string args, got " ^ fmt_arg_types arg_vals)))
 
   (* Logical operations *)
   | "not" ->
       (match arg_vals with
        | [VBool a] -> VBool (not a)
-       | _ -> raise (RuntimeError "Invalid arguments to not"))
+       | _ -> raise (RuntimeError
+           ("not takes 1 bool, got " ^ fmt_arg_types arg_vals)))
 
   (* Type conversions *)
   | "cast_int_float" ->
@@ -1500,6 +2042,30 @@ and eval_call env func_name args =
             VBool (Hashtbl.mem m key)
         | _ -> raise (RuntimeError "in: expects (string, string) for substring, (value, array) for element, or (key, map)"))
 
+   | "has" ->
+       (* Reverse-arg synonym for `in`: (has coll x) == (in x coll).
+          Models often reach for "collection.has(x)" shape. *)
+       (match arg_vals with
+        | [VString haystack; VString needle] ->
+            let hlen = String.length haystack in
+            let nlen = String.length needle in
+            if nlen = 0 then VBool true
+            else if nlen > hlen then VBool false
+            else begin
+              let found = ref false in
+              let i = ref 0 in
+              while not !found && !i <= hlen - nlen do
+                if String.sub haystack !i nlen = needle then found := true
+                else i := !i + 1
+              done;
+              VBool !found
+            end
+        | [VArray arr; v] ->
+            VBool (Array.exists (fun x -> values_equal x v) !arr)
+        | [VMap (m, _); VString key] ->
+            VBool (Hashtbl.mem m key)
+        | _ -> raise (RuntimeError "has: expects (coll, element) — reverse of `in`"))
+
    | "string_trim" ->
        (match arg_vals with
         | [VString s] ->
@@ -1562,6 +2128,30 @@ and eval_call env func_name args =
              raise (RuntimeError ("Array index out of bounds: " ^ Int64.to_string idx))
        | _ -> raise (RuntimeError "Invalid arguments to array_get"))
 
+  (* Polymorphic strict access — same concept across collection types:
+     "give me the element at this position/key, raise if absent."
+     - get_or stays the explicit safe form (default on miss)
+     - json_get stays the explicit deep-traversal form
+     This fills the same-concept gap matching Clojure/Python `dict[k]`. *)
+  | "get" ->
+      (match arg_vals with
+       | [VArray arr; VInt idx] ->
+           let n = Array.length !arr in
+           let i = Int64.to_int idx in
+           let actual = if i < 0 then n + i else i in
+           if actual >= 0 && actual < n then !arr.(actual)
+           else raise (RuntimeError ("get: array index out of bounds: " ^ Int64.to_string idx))
+       | [VString s; VInt idx] ->
+           let n = String.length s in
+           let i = Int64.to_int idx in
+           let actual = if i < 0 then n + i else i in
+           if actual >= 0 && actual < n then VString (String.make 1 s.[actual])
+           else raise (RuntimeError ("get: string index out of bounds: " ^ Int64.to_string idx))
+       | [VMap (m, _); VString k] ->
+           (try Hashtbl.find m k
+            with Not_found -> raise (RuntimeError ("get: key not found in map: " ^ k)))
+       | _ -> raise (RuntimeError "get takes (array|string, int) or (map, string) — for JSON deep traversal use json_get; for default-on-miss use get_or"))
+
   | "first" ->
       (match arg_vals with
        | [VArray arr] ->
@@ -1573,6 +2163,33 @@ and eval_call env func_name args =
              raise (RuntimeError "first: empty string")
            else VString (String.make 1 s.[0])
        | _ -> raise (RuntimeError "first takes (array) or (string)"))
+
+  | "second" ->
+      (* Common LLM reach (Clojure/Lisp); equivalent to (get x 1). Returns the
+         second element of an array or 1-char string at index 1. *)
+      (match arg_vals with
+       | [VArray arr] ->
+           if Array.length !arr < 2 then
+             raise (RuntimeError "second: array has fewer than 2 elements")
+           else !arr.(1)
+       | [VString s] ->
+           if String.length s < 2 then
+             raise (RuntimeError "second: string has fewer than 2 characters")
+           else VString (String.make 1 s.[1])
+       | _ -> raise (RuntimeError "second takes (array) or (string)"))
+
+  | "third" ->
+      (* Common LLM reach (Clojure/Lisp); equivalent to (get x 2). *)
+      (match arg_vals with
+       | [VArray arr] ->
+           if Array.length !arr < 3 then
+             raise (RuntimeError "third: array has fewer than 3 elements")
+           else !arr.(2)
+       | [VString s] ->
+           if String.length s < 3 then
+             raise (RuntimeError "third: string has fewer than 3 characters")
+           else VString (String.make 1 s.[2])
+       | _ -> raise (RuntimeError "third takes (array) or (string)"))
 
   | "last" ->
       (match arg_vals with
@@ -1587,6 +2204,20 @@ and eval_call env func_name args =
              raise (RuntimeError "last: empty string")
            else VString (String.make 1 s.[n - 1])
        | _ -> raise (RuntimeError "last takes (array) or (string)"))
+
+  | "rest" ->
+      (* Haskell/Lisp tail: everything except the first element.
+         Empty input returns empty. *)
+      (match arg_vals with
+       | [VArray arr] ->
+           let n = Array.length !arr in
+           if n <= 1 then VArray (ref [||])
+           else VArray (ref (Array.sub !arr 1 (n - 1)))
+       | [VString s] ->
+           let n = String.length s in
+           if n <= 1 then VString ""
+           else VString (String.sub s 1 (n - 1))
+       | _ -> raise (RuntimeError "rest takes (array) or (string)"))
 
   | "array_set" ->
       (match arg_vals with
@@ -1661,6 +2292,48 @@ and eval_call env func_name args =
             done;
             VInt (Int64.of_int !found)
         | _ -> raise (RuntimeError "Invalid arguments to array_index_of"))
+
+   (* Polymorphic alias used by most LLMs — dispatches by first arg type *)
+   | "index_of" ->
+       (match arg_vals with
+        | [VString haystack; VString needle] ->
+            let h_len = String.length haystack in
+            let n_len = String.length needle in
+            if n_len = 0 then VInt 0L
+            else if n_len > h_len then VInt (-1L)
+            else begin
+              let found = ref (-1) in
+              let i = ref 0 in
+              while !i <= h_len - n_len && !found = -1 do
+                if String.sub haystack !i n_len = needle then found := !i
+                else i := !i + 1
+              done;
+              VInt (Int64.of_int !found)
+            end
+        | [VArray arr; v] ->
+            let len = Array.length !arr in
+            let found = ref (-1) in
+            let i = ref 0 in
+            while !i < len && !found = -1 do
+              if values_equal !arr.(!i) v then found := !i;
+              i := !i + 1
+            done;
+            VInt (Int64.of_int !found)
+        | _ -> raise (RuntimeError
+            ("index_of takes (string, string) or (array, value), got "
+             ^ fmt_arg_types arg_vals)))
+
+   | "pop" ->
+       (match arg_vals with
+        | [VArray arr] ->
+            let n = Array.length !arr in
+            if n = 0 then raise (RuntimeError "pop on empty array")
+            else begin
+              let last = !arr.(n - 1) in
+              arr := Array.sub !arr 0 (n - 1);
+              last
+            end
+        | _ -> raise (RuntimeError "pop takes (array)"))
 
    (* Map operations *)
   | "map_new" ->
@@ -1799,7 +2472,12 @@ and eval_call env func_name args =
        let count = max 0 (Array.length Sys.argv - 2) in
        VInt (Int64.of_int count)
 
-   | "arg_int" ->
+   | "arg_int" | "argv_int" ->
+       (* argv_int is the canonical name (matches argv/argv_count/arg_str family).
+          arg_int is kept as legacy alias because the model frequently reaches for
+          it. NOTE: this fetches CLI argv[i] parsed as int. To parse a STRING into
+          int, use parse_int — they're different operations. The model has
+          historically confused them on tasks like find_max_in_log. *)
        (match arg_vals with
         | [VInt n] ->
             let i = Int64.to_int n in
@@ -1807,9 +2485,13 @@ and eval_call env func_name args =
             let script_args = (match args with _ :: _ :: rest -> rest | _ -> []) in
             let arr = Array.of_list script_args in
             if i < 0 || i >= Array.length arr then
-              raise (RuntimeError ("arg_int: index " ^ string_of_int i ^ " out of bounds"))
+              raise (RuntimeError (func_name ^ ": index " ^ string_of_int i ^ " out of bounds"))
             else VInt (Int64.of_string arr.(i))
-        | _ -> raise (RuntimeError "arg_int takes 1 int argument"))
+        | [VString _] ->
+            raise (RuntimeError
+              (func_name ^ ": takes an int CLI-arg index, not a string. " ^
+               "To parse a string into int, use parse_int instead."))
+        | _ -> raise (RuntimeError (func_name ^ " takes 1 int argument (CLI arg index)")))
 
    | "arg_str" ->
        (match arg_vals with
@@ -1836,13 +2518,19 @@ and eval_call env func_name args =
         | _ -> raise (RuntimeError "arg_float takes 1 int argument"))
 
    | "str" ->
+       (* 1-arg: coerce to string. 2+ args: coerce each and concatenate.
+          Matches the Python str()/JS String() + concat muscle memory. *)
+       let coerce v = match v with
+         | VInt n -> Int64.to_string n
+         | VFloat f -> format_float_string f
+         | VBool b -> if b then "true" else "false"
+         | VDecimal s -> s
+         | VString s -> s
+         | other -> string_of_value other
+       in
        (match arg_vals with
-        | [VInt n] -> VString (Int64.to_string n)
-        | [VFloat f] -> VString (format_float_string f)
-        | [VBool b] -> VString (if b then "true" else "false")
-        | [VDecimal s] -> VString s
-        | [VString s] -> VString s
-        | _ -> raise (RuntimeError "str takes 1 argument (int, float, bool, decimal, or string)"))
+        | [] -> raise (RuntimeError "str requires at least 1 argument")
+        | _ -> VString (String.concat "" (List.map coerce arg_vals)))
 
    | "len" ->
        (match arg_vals with
@@ -1945,13 +2633,21 @@ and eval_call env func_name args =
             VUnit)
 
   | "println" ->
-      (* Variadic: multiple args joined with space, trailing newline *)
+      (* Variadic: multiple args joined with space, trailing newline.
+         Tolerant of a trailing \n in the string (common model habit):
+         if the last arg already ends with \n, use print_string instead to
+         avoid doubling. *)
+      let print_tolerant s =
+        let n = String.length s in
+        if n > 0 && s.[n-1] = '\n' then print_string s
+        else print_endline s
+      in
       (match arg_vals with
        | [] -> print_newline (); VUnit
-       | [v] -> print_endline (string_of_value v); VUnit
+       | [v] -> print_tolerant (string_of_value v); VUnit
        | vs ->
            let strs = List.map string_of_value vs in
-           print_endline (String.concat " " strs);
+           print_tolerant (String.concat " " strs);
            VUnit)
 
   | "read_line" ->
@@ -1971,35 +2667,42 @@ and eval_call env func_name args =
 
   (* ===== Short aliases for verbose builtins ===== *)
   | "split" ->
-      (* Multi-char separator split, matching stdlib/core/string_utils.sigil behavior *)
+      (* Multi-char separator split. Accepts either (str, sep) or (sep, str)
+         since LLMs frequently swap the order. *)
+      let do_split s sep =
+        if sep = "" then VArray (ref [|VString s|])
+        else begin
+          let slen = String.length s in
+          let seplen = String.length sep in
+          let parts = ref [] in
+          let start = ref 0 in
+          let i = ref 0 in
+          while !i <= slen - seplen do
+            if String.sub s !i seplen = sep then begin
+              parts := String.sub s !start (!i - !start) :: !parts;
+              i := !i + seplen;
+              start := !i
+            end else
+              i := !i + 1
+          done;
+          parts := String.sub s !start (slen - !start) :: !parts;
+          VArray (ref (Array.of_list (List.rev_map (fun p -> VString p) !parts)))
+        end
+      in
       (match arg_vals with
-       | [VString s; VString sep] ->
-           if sep = "" then VArray (ref [|VString s|])
-           else begin
-             let slen = String.length s in
-             let seplen = String.length sep in
-             let parts = ref [] in
-             let start = ref 0 in
-             let i = ref 0 in
-             while !i <= slen - seplen do
-               if String.sub s !i seplen = sep then begin
-                 parts := String.sub s !start (!i - !start) :: !parts;
-                 i := !i + seplen;
-                 start := !i
-               end else
-                 i := !i + 1
-             done;
-             parts := String.sub s !start (slen - !start) :: !parts;
-             VArray (ref (Array.of_list (List.rev_map (fun p -> VString p) !parts)))
-           end
+       | [VString s; VString sep] -> do_split s sep
        | _ -> raise (RuntimeError "split takes (string, string)"))
 
   | "join" ->
+      (* Accept (array, sep) or (sep, array) — LLMs often swap. *)
+      let do_join arr sep =
+        let strs = Array.to_list arr |> List.map (fun v ->
+          match v with VString s -> s | _ -> string_of_value v) in
+        VString (String.concat sep strs)
+      in
       (match arg_vals with
-       | [VArray arr; VString sep] ->
-           let strs = Array.to_list !arr |> List.map (fun v ->
-             match v with VString s -> s | _ -> string_of_value v) in
-           VString (String.concat sep strs)
+       | [VArray arr; VString sep] -> do_join !arr sep
+       | [VString sep; VArray arr] -> do_join !arr sep
        | _ -> raise (RuntimeError "join takes (array, string)"))
 
   | "push" ->
@@ -2046,6 +2749,235 @@ and eval_call env func_name args =
       (match arg_vals with
        | [VString s] -> VString (String.trim s)
        | _ -> raise (RuntimeError "trim takes 1 string"))
+
+  | "string_repeat" | "repeat" ->
+      (* (string_repeat s n) -> s concatenated n times. (repeat s n) is the
+         short alias. n must be a non-negative int. *)
+      (match arg_vals with
+       | [VString s; VInt n] ->
+           let n = Int64.to_int n in
+           if n < 0 then raise (RuntimeError "string_repeat: count must be >= 0")
+           else if n = 0 || s = "" then VString ""
+           else
+             let buf = Buffer.create (String.length s * n) in
+             for _ = 1 to n do Buffer.add_string buf s done;
+             VString (Buffer.contents buf)
+       | _ -> raise (RuntimeError "string_repeat takes (string, int)"))
+
+  | "string_at" | "char_at" ->
+      (* (string_at s i) -> the 1-character string at index i. Distinct from
+         string_get which returns the int char code. Models reach for "get me
+         the i-th character as a string I can compare to other strings"; this
+         is the meeting-halfway builtin for that intent. *)
+      (match arg_vals with
+       | [VString s; VInt i] ->
+           let i = Int64.to_int i in
+           let n = String.length s in
+           if i < 0 || i >= n then
+             raise (RuntimeError (Printf.sprintf
+               "string_at: index %d out of bounds (length %d)" i n))
+           else VString (String.make 1 s.[i])
+       | _ -> raise (RuntimeError "string_at takes (string, int)"))
+
+  | "repeat_each" ->
+      (* (repeat_each coll n) -> each element of coll repeated n times in
+         place. (repeat_each "abc" 3) -> "aaabbbccc".
+         (repeat_each [1 2 3] 2) -> [1 1 2 2 3 3]. Saves the model from
+         (join (map_arr coll (\x (repeat x n))) "") gymnastics. *)
+      (match arg_vals with
+       | [VString s; VInt n] ->
+           let n = Int64.to_int n in
+           if n <= 0 then VString ""
+           else
+             let buf = Buffer.create (String.length s * n) in
+             String.iter (fun c ->
+               for _ = 1 to n do Buffer.add_char buf c done) s;
+             VString (Buffer.contents buf)
+       | [VArray arr; VInt n] ->
+           let n = Int64.to_int n in
+           if n <= 0 then VArray (ref [||])
+           else
+             let src = !arr in
+             let out = Array.make (Array.length src * n) VUnit in
+             Array.iteri (fun i v ->
+               for j = 0 to n - 1 do out.(i * n + j) <- v done) src;
+             VArray (ref out)
+       | _ -> raise (RuntimeError "repeat_each takes (string|array, int)"))
+
+  | "zip" ->
+      (* (zip a b) -> position-wise interleave of two collections. The
+         tail of the longer one is appended after the interleaved prefix.
+         Output is an array of strings (string args) or array of values
+         (array args). Models reach for explicit index-walks and get
+         off-by-one; this absorbs that. *)
+      let interleave_strs sa sb =
+        let na = String.length sa and nb = String.length sb in
+        let buf = Buffer.create (na + nb) in
+        let mn = min na nb in
+        for i = 0 to mn - 1 do
+          Buffer.add_char buf sa.[i];
+          Buffer.add_char buf sb.[i]
+        done;
+        if na > nb then Buffer.add_substring buf sa mn (na - mn)
+        else if nb > na then Buffer.add_substring buf sb mn (nb - mn);
+        Buffer.contents buf
+      in
+      (match arg_vals with
+       | [VString sa; VString sb] -> VString (interleave_strs sa sb)
+       | [VArray a; VArray b] ->
+           let la = Array.length !a and lb = Array.length !b in
+           let mn = min la lb in
+           let out = Array.make (la + lb) VUnit in
+           let pos = ref 0 in
+           for i = 0 to mn - 1 do
+             out.(!pos) <- !a.(i); incr pos;
+             out.(!pos) <- !b.(i); incr pos
+           done;
+           if la > lb then
+             for i = mn to la - 1 do out.(!pos) <- !a.(i); incr pos done
+           else
+             for i = mn to lb - 1 do out.(!pos) <- !b.(i); incr pos done;
+           VArray (ref out)
+       | _ -> raise (RuntimeError "zip takes (string,string) or (array,array)"))
+
+  | "common_prefix" ->
+      (* Longest common prefix of two strings. Returns the prefix as a string.
+         Saves the model from manual char-walk loops with off-by-one bugs. *)
+      (match arg_vals with
+       | [VString a; VString b] ->
+           let n = min (String.length a) (String.length b) in
+           let i = ref 0 in
+           while !i < n && a.[!i] = b.[!i] do incr i done;
+           VString (String.sub a 0 !i)
+       | _ -> raise (RuntimeError
+           ("common_prefix takes (string, string), got " ^ fmt_arg_types arg_vals)))
+
+  | "common_suffix" ->
+      (* Longest common suffix of two strings. Returns the suffix as a string.
+         The reverse-index loop is exactly where the model trips on
+         (sub len_a i 1) arity confusion — this absorbs the failure shape. *)
+      (match arg_vals with
+       | [VString a; VString b] ->
+           let na = String.length a and nb = String.length b in
+           let n = min na nb in
+           let i = ref 0 in
+           while !i < n && a.[na - 1 - !i] = b.[nb - 1 - !i] do incr i done;
+           VString (String.sub a (na - !i) !i)
+       | _ -> raise (RuntimeError
+           ("common_suffix takes (string, string), got " ^ fmt_arg_types arg_vals)))
+
+  | "is_subseq" ->
+      (* (is_subseq haystack needle) -> bool. True if needle's characters
+         appear in haystack in the same order (not necessarily contiguous).
+         Two-pointer walk; the model kept failing this in synthesis because
+         it lacks `break`. *)
+      (match arg_vals with
+       | [VString haystack; VString needle] ->
+           let nh = String.length haystack and nn = String.length needle in
+           if nn = 0 then VBool true
+           else begin
+             let i = ref 0 and j = ref 0 in
+             while !i < nh && !j < nn do
+               if haystack.[!i] = needle.[!j] then incr j;
+               incr i
+             done;
+             VBool (!j = nn)
+           end
+       | [VArray haystack; VArray needle] ->
+           let nh = Array.length !haystack and nn = Array.length !needle in
+           if nn = 0 then VBool true
+           else begin
+             let i = ref 0 and j = ref 0 in
+             let value_eq a b = match a, b with
+               | VInt x, VInt y -> x = y
+               | VFloat x, VFloat y -> x = y
+               | VString x, VString y -> x = y
+               | VBool x, VBool y -> x = y
+               | _ -> a = b
+             in
+             while !i < nh && !j < nn do
+               if value_eq (!haystack).(!i) (!needle).(!j) then incr j;
+               incr i
+             done;
+             VBool (!j = nn)
+           end
+       | _ -> raise (RuntimeError
+           ("is_subseq takes (string, string) or (array, array), got "
+            ^ fmt_arg_types arg_vals)))
+
+  | "is_rotation" ->
+      (* (is_rotation a b) -> bool. True if b is a rotation of a (same
+         length, b is a substring of a ++ a). Standard trick — the model
+         knows it but reaches for it inconsistently. *)
+      (match arg_vals with
+       | [VString a; VString b] ->
+           if String.length a <> String.length b then VBool false
+           else if String.length a = 0 then VBool true
+           else
+             let doubled = a ^ a in
+             let nb = String.length b in
+             let nd = String.length doubled in
+             let found = ref false in
+             let i = ref 0 in
+             while not !found && !i <= nd - nb do
+               if String.sub doubled !i nb = b then found := true;
+               incr i
+             done;
+             VBool !found
+       | _ -> raise (RuntimeError
+           ("is_rotation takes (string, string), got " ^ fmt_arg_types arg_vals)))
+
+  | "edit_distance" | "levenshtein" ->
+      (* (edit_distance a b) -> int Levenshtein distance. Insertions,
+         deletions, substitutions all cost 1. Two-row DP, O(min(na,nb))
+         memory. Frequently needed; manual synthesis is fragile. *)
+      (match arg_vals with
+       | [VString a; VString b] ->
+           let na = String.length a and nb = String.length b in
+           if na = 0 then VInt (Int64.of_int nb)
+           else if nb = 0 then VInt (Int64.of_int na)
+           else begin
+             let prev = Array.make (nb + 1) 0 in
+             let curr = Array.make (nb + 1) 0 in
+             for j = 0 to nb do prev.(j) <- j done;
+             for i = 1 to na do
+               curr.(0) <- i;
+               for j = 1 to nb do
+                 let cost = if a.[i-1] = b.[j-1] then 0 else 1 in
+                 let del = prev.(j) + 1 in
+                 let ins = curr.(j-1) + 1 in
+                 let sub = prev.(j-1) + cost in
+                 curr.(j) <- min del (min ins sub)
+               done;
+               Array.blit curr 0 prev 0 (nb + 1)
+             done;
+             VInt (Int64.of_int prev.(nb))
+           end
+       | _ -> raise (RuntimeError
+           ("edit_distance takes (string, string), got " ^ fmt_arg_types arg_vals)))
+
+  | "common_chars" ->
+      (* (common_chars a b) -> string containing the multiset intersection
+         of characters from a and b, in the order they appear in a (each
+         char emitted at most as many times as it occurs in b).
+         (common_chars "abca" "ac") -> "ac".  (common_chars "hello" "world")
+         -> "lo". Use (len (common_chars a b)) for the count form. *)
+      (match arg_vals with
+       | [VString a; VString b] ->
+           (* Build a count-table of b's chars *)
+           let counts = Array.make 256 0 in
+           String.iter (fun c -> counts.(Char.code c) <- counts.(Char.code c) + 1) b;
+           let buf = Buffer.create (String.length a) in
+           String.iter (fun c ->
+             let i = Char.code c in
+             if counts.(i) > 0 then begin
+               Buffer.add_char buf c;
+               counts.(i) <- counts.(i) - 1
+             end
+           ) a;
+           VString (Buffer.contents buf)
+       | _ -> raise (RuntimeError
+           ("common_chars takes (string, string), got " ^ fmt_arg_types arg_vals)))
 
   | "swapcase" ->
       (match arg_vals with
@@ -2159,6 +3091,16 @@ and eval_call env func_name args =
            VArray (ref (Array.of_list ints))
        | _ -> raise (RuntimeError "parse_ints takes (string) or (string, separator)"))
 
+  | "parse_int" | "str->int" ->
+      (* Singular form. Accepts string or numeric value. Trims whitespace. *)
+      (match arg_vals with
+       | [VString s] ->
+           (try VInt (Int64.of_string (String.trim s))
+            with Failure _ -> raise (RuntimeError ("parse_int: cannot parse: " ^ s)))
+       | [VInt n] -> VInt n
+       | [VFloat f] -> VInt (Int64.of_float f)
+       | _ -> raise (RuntimeError "parse_int takes (string) or numeric value"))
+
   | "count" ->
       (* (count haystack needle) — Python str.count / list.count semantics. *)
       (match arg_vals with
@@ -2207,14 +3149,18 @@ and eval_call env func_name args =
   | "map_kv" ->
       (* (map_kv m fn) — Python [fn(k, v) for k, v in m.items()].
          fn is called with (key, value) as two positional args, so a
-         2-arg closure (\\(k v) body) destructures naturally without array_get. *)
+         2-arg closure (\\(k v) body) destructures naturally without array_get.
+         Accepts (fn, m) order too — the model often writes that shape. *)
+      let do_map_kv m keys fn =
+        let out = List.map (fun k ->
+          invoke_callable env fn [VString k; Hashtbl.find m k] "map_kv"
+        ) !keys in
+        VArray (ref (Array.of_list out))
+      in
       (match arg_vals with
-       | [VMap (m, keys); fn] ->
-           let out = List.map (fun k ->
-             invoke_callable env fn [VString k; Hashtbl.find m k] "map_kv"
-           ) !keys in
-           VArray (ref (Array.of_list out))
-       | _ -> raise (RuntimeError "map_kv takes (map, function)"))
+       | [VMap (m, keys); fn] -> do_map_kv m keys fn
+       | [fn; VMap (m, keys)] -> do_map_kv m keys fn
+       | _ -> raise (RuntimeError ("map_kv takes (map, function) or (function, map), got " ^ fmt_arg_types arg_vals)))
 
   | "map_pairs" ->
       (* (map_pairs arr fn) — map over array of 2-element pair arrays,
@@ -2307,7 +3253,9 @@ and eval_call env func_name args =
            let len = String.length str in
            let (s, _) = resolve_bounds len (Int64.to_int s) len in
            if len <= s then VString "" else VString (String.sub str s (len - s))
-       | _ -> raise (RuntimeError "slice takes (string|array, start, end?)"))
+       | _ -> raise (RuntimeError
+           ("slice takes (string|array, int-start) or (string|array, int-start, int-end), got "
+            ^ fmt_arg_types arg_vals)))
 
   | "merge" ->
       (* (merge m1 m2 ...) — rightmost key wins; order = keys of m1 then new
@@ -2358,26 +3306,69 @@ and eval_call env func_name args =
        | _ -> raise (RuntimeError "counter takes 1 array"))
 
   | "sort_by" ->
-      (* (sort_by arr fn) — stable sort of arr by key fn, ascending.
-         For descending, negate the key: (sort_by arr (\x (neg (fn x)))). *)
+      (* (sort_by arr fn) — stable sort of arr.
+         If fn takes 1 arg: it's a key function; sort ascending by key.
+           For descending, negate the key: (sort_by arr (\x (neg (fn x)))).
+         If fn takes 2 args: it's a comparator returning bool (true = a<b)
+           or int (<0 = a<b). Matches the most common LLM expectation.
+         Mutates the input ref AND returns it (same shape as `sort`), so
+         both `(sort_by arr fn)` and `(set sorted (sort_by arr fn))` work. *)
+      let arity_of v = match v with
+        | VFunction (_, params, _, _) -> Some (List.length params)
+        | VClosure (params, _, _) -> Some (List.length params)
+        | _ -> None
+      in
       (match arg_vals with
        | [VArray arr; fn] ->
            let n = Array.length !arr in
-           let keyed = Array.init n (fun i ->
-             (i, !arr.(i), invoke_callable env fn [!arr.(i)] "sort_by")
-           ) in
-           let cmp a b = match a, b with
-             | VInt x, VInt y -> Int64.compare x y
-             | VFloat x, VFloat y -> compare x y
-             | VString x, VString y -> compare x y
-             | VArray ax, VArray ay ->
-                 let la = Array.to_list !ax and lb = Array.to_list !ay in
-                 compare la lb
-             | _ -> compare a b in
-           Array.sort (fun (ia, _, ka) (ib, _, kb) ->
-             let c = cmp ka kb in if c <> 0 then c else compare ia ib) keyed;
-           let sorted = Array.map (fun (_, v, _) -> v) keyed in
-           VArray (ref sorted)
+           (* Pair detection: if every array element is itself a 2-array
+              and the lambda has 2 params, treat as a key function over
+              pairs (auto-destructured) rather than a comparator. This is
+              the dominant `(\(k v) ...)` intent over `(entries m)`. *)
+           let all_pairs () =
+             n > 0 &&
+             Array.for_all (function VArray a -> Array.length !a = 2 | _ -> false) !arr
+           in
+           let effective_arity = match arity_of fn with
+             | Some 2 when all_pairs () -> Some 1  (* treat as key fn over pairs *)
+             | a -> a
+           in
+           let sorted = match effective_arity with
+            | Some 2 ->
+                let indexed = Array.init n (fun i -> (i, !arr.(i))) in
+                Array.sort (fun (ia, va) (ib, vb) ->
+                  let r = invoke_callable env fn [va; vb] "sort_by" in
+                  let c = match r with
+                    | VBool true -> -1
+                    | VBool false ->
+                        (match invoke_callable env fn [vb; va] "sort_by" with
+                         | VBool true -> 1
+                         | _ -> 0)
+                    | VInt n -> Int64.compare n 0L
+                    | VFloat f -> compare f 0.0
+                    | _ -> raise (RuntimeError "sort_by comparator must return bool or int")
+                  in
+                  if c <> 0 then c else compare ia ib
+                ) indexed;
+                Array.map snd indexed
+            | _ ->
+                let keyed = Array.init n (fun i ->
+                  (i, !arr.(i), invoke_callable env fn [!arr.(i)] "sort_by")
+                ) in
+                let cmp a b = match a, b with
+                  | VInt x, VInt y -> Int64.compare x y
+                  | VFloat x, VFloat y -> compare x y
+                  | VString x, VString y -> compare x y
+                  | VArray ax, VArray ay ->
+                      let la = Array.to_list !ax and lb = Array.to_list !ay in
+                      compare la lb
+                  | _ -> compare a b in
+                Array.sort (fun (ia, _, ka) (ib, _, kb) ->
+                  let c = cmp ka kb in if c <> 0 then c else compare ia ib) keyed;
+                Array.map (fun (_, v, _) -> v) keyed
+           in
+           arr := sorted;
+           VArray arr
        | _ -> raise (RuntimeError "sort_by takes (array, function)"))
 
   | "group_by" ->
@@ -2486,9 +3477,11 @@ and eval_call env func_name args =
        | _ -> raise (RuntimeError "sum takes 1 array"))
 
   | "filter" ->
-      (* (filter arr fn-or-closure) -- keep elements where pred returns true *)
+      (* (filter arr fn-or-closure) OR (filter fn-or-closure arr). Array-first
+         is canonical Sigil; function-first is what Clojure/Python models reach
+         for. Accept both. *)
       (match arg_vals with
-       | [VArray arr; pred] ->
+       | [VArray arr; pred] | [pred; VArray arr] ->
            let kept = ref [] in
            Array.iter (fun elem ->
              let result = invoke_callable env pred [elem] "filter" in
@@ -2497,26 +3490,32 @@ and eval_call env func_name args =
              | _ -> ()
            ) !arr;
            VArray (ref (Array.of_list (List.rev !kept)))
-       | _ -> raise (RuntimeError "filter takes (array, function or closure)"))
+       | _ -> raise (RuntimeError "filter takes (array, function) or (function, array)"))
 
   | "map_arr" ->
-      (* (map_arr arr fn-or-closure) -- apply to each element, return new array *)
+      (* (map_arr arr fn) OR (map_arr fn arr) — array-first canonical,
+         function-first accepted for model ergonomics. *)
       (match arg_vals with
-       | [VArray arr; fn] ->
+       | [VArray arr; fn] | [fn; VArray arr] ->
            let mapped = Array.map (fun elem ->
              invoke_callable env fn [elem] "map_arr"
            ) !arr in
            VArray (ref mapped)
-       | _ -> raise (RuntimeError "map_arr takes (array, function or closure)"))
+       | _ -> raise (RuntimeError "map_arr takes (array, function) or (function, array)"))
 
   | "reduce" ->
-      (* (reduce arr fn init) -- left fold *)
+      (* (reduce arr fn init) OR (reduce fn init arr) — both orders accepted.
+         The latter is Clojure/Haskell style. *)
       (match arg_vals with
        | [VArray arr; fn; init] ->
            Array.fold_left (fun acc elem ->
              invoke_callable env fn [acc; elem] "reduce"
            ) init !arr
-       | _ -> raise (RuntimeError "reduce takes (array, function or closure, init)"))
+       | [fn; init; VArray arr] ->
+           Array.fold_left (fun acc elem ->
+             invoke_callable env fn [acc; elem] "reduce"
+           ) init !arr
+       | _ -> raise (RuntimeError "reduce takes (array, function, init) or (function, init, array)"))
 
   | "count_in" ->
       (* Count chars in string s that appear in string charset, or elements of array1 in array2 *)
@@ -2820,7 +3819,7 @@ and eval_call env func_name args =
       (match arg_vals with
        | [VString pattern; VString text] ->
            (try
-             let re = Str.regexp pattern in
+             let re = Str.regexp (regex_translate_braces pattern) in
              let _ = Str.search_forward re text 0 in
              VBool true
            with Not_found -> VBool false
@@ -2831,7 +3830,7 @@ and eval_call env func_name args =
       (match arg_vals with
        | [VString pattern; VString text] ->
            (try
-             let re = Str.regexp pattern in
+             let re = Str.regexp (regex_translate_braces pattern) in
              let _ = Str.search_forward re text 0 in
              VString (Str.matched_string text)
            with Not_found -> VString ""
@@ -2842,7 +3841,7 @@ and eval_call env func_name args =
       (match arg_vals with
        | [VString pattern; VString text] ->
            (try
-             let re = Str.regexp pattern in
+             let re = Str.regexp (regex_translate_braces pattern) in
              let results = ref [] in
              let pos = ref 0 in
              (try
@@ -2863,7 +3862,7 @@ and eval_call env func_name args =
        (match arg_vals with
         | [VString pattern; VString text; VString replacement] ->
             (try
-              let re = Str.regexp pattern in
+              let re = Str.regexp (regex_translate_braces pattern) in
               VString (Str.global_replace re replacement text)
             with _ -> raise (RuntimeError ("Invalid regex pattern: " ^ pattern)))
         | _ -> raise (RuntimeError "Invalid arguments to regex_replace"))
@@ -3031,7 +4030,13 @@ and eval_call env func_name args =
         | _ -> raise (RuntimeError "Invalid arguments to json_stringify"))
 
     | "json_get" ->
+        (* Array-of-keys (Clojure get-in style): (json_get j ["users" 0 "name"]).
+           Each key is a string (map lookup) or int (array index). String keys
+           that parse as int also work for arrays so `(json_get j (split p "."))`
+           on a path-from-string works without manual int conversion.
+           Empty array returns the node unchanged. *)
         (match arg_vals with
+         | [node; VArray keys] -> json_walk_keys node !keys
          | [VMap (m, _); VString k] ->
              (try Hashtbl.find m k
               with Not_found -> raise (RuntimeError ("Key not found in JSON object: " ^ k)))
@@ -3042,7 +4047,31 @@ and eval_call env func_name args =
          | _ -> raise (RuntimeError "Invalid arguments to json_get"))
 
     | "json_set" ->
+        (* Array-of-keys: (json_set j ["users" 0 "name"] v) walks to parent then
+           sets the final segment. Mutates in place; returns the root node. *)
         (match arg_vals with
+         | [root; VArray keys; v] ->
+             let ks = !keys in
+             if Array.length ks = 0 then
+               raise (RuntimeError "json_set: empty key array")
+             else begin
+               let (parent, last) = json_walk_parent root ks in
+               (match parent, last with
+                | VMap (m, ks_ref), VString k -> vmap_set m ks_ref k v
+                | VArray arr, VInt idx ->
+                    let i = Int64.to_int idx in
+                    if i >= 0 && i < Array.length !arr then (!arr).(i) <- v
+                    else raise (RuntimeError ("JSON array index out of bounds: " ^ Int64.to_string idx))
+                | VArray arr, VString s ->
+                    (try
+                      let i = int_of_string s in
+                      if i >= 0 && i < Array.length !arr then (!arr).(i) <- v
+                      else raise (RuntimeError ("JSON array index out of bounds: " ^ s))
+                    with Failure _ ->
+                      raise (RuntimeError ("Cannot set array with non-integer segment: " ^ s)))
+                | _ -> raise (RuntimeError "json_set: invalid parent / segment combination"));
+               root
+             end
          | [VMap (m, keys); VString k; v] ->
              vmap_set m keys k v;
              VMap (m, keys)
@@ -3056,12 +4085,31 @@ and eval_call env func_name args =
          | _ -> raise (RuntimeError "Invalid arguments to json_set"))
 
    | "json_has" ->
+       (* (json_has node key) — single key membership.
+          (json_has node ["a" 0 "b"]) — array-of-keys; safe walk, returns false
+          on any missing segment instead of raising. *)
        (match arg_vals with
+        | [node; VArray keys] ->
+            (try let _ = json_walk_keys node !keys in VBool true
+             with RuntimeError _ -> VBool false)
         | [VMap (m, _); VString k] -> VBool (Hashtbl.mem m k)
         | _ -> raise (RuntimeError "Invalid arguments to json_has"))
 
    | "json_delete" ->
+       (* (json_delete node ["a" "b"]) walks to parent then removes leaf key.
+          Map parents only — array element deletion would shift indices. *)
        (match arg_vals with
+        | [root; VArray keys] ->
+            let ks = !keys in
+            if Array.length ks = 0 then
+              raise (RuntimeError "json_delete: empty key array")
+            else begin
+              let (parent, last) = json_walk_parent root ks in
+              (match parent, last with
+               | VMap (m, ks_ref), VString k -> vmap_delete m ks_ref k
+               | _ -> raise (RuntimeError "json_delete: parent must be map and final segment a string"));
+              root
+            end
         | [VMap (m, keys); VString k] ->
             vmap_delete m keys k;
             VMap (m, keys)
@@ -3477,6 +4525,18 @@ let rec load_imports env imports =
 (* Execute module *)
 let rec execute_module module_def =
    let global_env = env_create () in
+
+   (* Auto-load the core prelude so its functions (tokens, squeeze,
+      split_blocks, find_all, ...) are available with zero import.
+      The prelude is the layer for pure compositions over primitive
+      builtins — anything that COULD be written in Sigil belongs there
+      rather than in OCaml. User imports and user functions can still
+      shadow prelude names. *)
+   (match load_module "prelude" with
+    | Some prelude_def ->
+        register_module global_env prelude_def;
+        load_imports global_env prelude_def.module_imports
+    | None -> ());
 
    (* Load and register imported modules first *)
    load_imports global_env module_def.module_imports;

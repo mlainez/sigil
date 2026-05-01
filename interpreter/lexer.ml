@@ -30,7 +30,7 @@ let is_alpha = function
   | _ -> false
 
 let is_symbol_char = function
-  | 'a'..'z' | 'A'..'Z' | '0'..'9' | '_' | '-' | '+' | '*' | '/' | '<' | '>' | '=' | '!' | '?' -> true
+  | 'a'..'z' | 'A'..'Z' | '0'..'9' | '_' | '-' | '+' | '*' | '/' | '<' | '>' | '=' | '!' | '?' | '%' -> true
   | _ -> false
 
 let rec skip_whitespace input pos =
@@ -38,7 +38,7 @@ let rec skip_whitespace input pos =
   else if is_whitespace input.[pos] then skip_whitespace input (pos + 1)
   else pos
 
-let read_string input start_pos =
+let read_string ?(quote='"') input start_pos =
   let rec loop pos escaped acc =
     if pos >= String.length input then
       raise (LexError "Unterminated string")
@@ -51,12 +51,13 @@ let read_string input start_pos =
           | 'r' -> '\r'
           | '\\' -> '\\'
           | '"' -> '"'
+          | '\'' -> '\''
           | _ -> c
         in
         loop (pos + 1) false (acc ^ String.make 1 c')
       else if c = '\\' then
         loop (pos + 1) true acc
-      else if c = '"' then
+      else if c = quote then
         (acc, pos + 1)
       else
         loop (pos + 1) false (acc ^ String.make 1 c)
@@ -103,6 +104,11 @@ let tokenize input =
       | '}' -> loop (pos + 1) (RBrace :: acc)
       | '"' ->
           let (str, next_pos) = read_string input (pos + 1) in
+          loop next_pos (StringLit str :: acc)
+      | '\'' ->
+          (* Single-quoted strings: Python/JS-style alternative. Pragmatic
+             for models that reach for 'x' instead of "x". *)
+          let (str, next_pos) = read_string ~quote:'\'' input (pos + 1) in
           loop next_pos (StringLit str :: acc)
       | '$' when pos + 1 < String.length input && is_digit input.[pos + 1] ->
           (* $N -> (arg_str N) *)

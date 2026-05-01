@@ -31,26 +31,36 @@ let expect_symbol state =
 (* Parse type annotations *)
 let parse_type state =
   match peek state with
+  (* Canonical names *)
   | Symbol "int" -> (TInt, advance state)
   | Symbol "float" -> (TFloat, advance state)
   | Symbol "decimal" -> (TDecimal, advance state)
   | Symbol "string" -> (TString, advance state)
   | Symbol "bool" -> (TBool, advance state)
   | Symbol "unit" -> (TUnit, advance state)
-  | Symbol "array" -> (TArray TUnit, advance state)  (* Simplified - no type params yet *)
-  | Symbol "map" -> (TMap (TUnit, TUnit), advance state)  (* Simplified *)
+  | Symbol "array" -> (TArray TUnit, advance state)
+  | Symbol "map" -> (TMap (TUnit, TUnit), advance state)
   | Symbol "json" -> (TJson, advance state)
   | Symbol "regex" -> (TRegex, advance state)
   | Symbol "process" -> (TProcess, advance state)
   | Symbol "socket" -> (TSocket, advance state)
-  | Symbol "channel" -> (TSocket, advance state)  (* channel maps to TSocket for now *)
+  | Symbol "channel" -> (TSocket, advance state)
+  (* Cross-language type aliases — added only when an LLM-failure log
+     shows a model wrote it. No speculative aliases. *)
+  | Symbol "str" -> (TString, advance state)         (* Rust, Python — observed *)
+  | Symbol "char" -> (TString, advance state)        (* alias for single-char string *)
   | tok -> raise (ParseError ("Expected type but got " ^ string_of_token tok))
 
-(* Reserved type keywords that cannot be used as variable names *)
+(* Reserved type keywords that cannot be used as variable names.
+   Includes the canonical Sigil types and distinctive aliases that are
+   unlikely to ever be variable names (e.g. "i32", "HashMap"). Common short
+   identifiers like "arr", "num", "obj" are deliberately omitted — they
+   work as types in type position via parse_type but are still allowed as
+   variable names since the parser disambiguates by context. *)
 let type_keywords = [
   "int"; "float"; "decimal"; "string"; "bool"; "unit";
-  "array"; "map"; "json"; "regex"; "process"; "socket";
-  "channel"
+  "array"; "map"; "json"; "regex"; "process"; "socket"; "channel";
+  "str"; "char"  (* `char` is an alias for `string` (single-char string) *)
 ]
 
 let is_type_keyword name = List.mem name type_keywords
@@ -79,12 +89,13 @@ and parse_sexpr state =
   let state = expect_token LParen state in
   let (sym, state) = expect_symbol state in
   match sym with
-  | "set" -> parse_set state
+  | "set" | "let" -> parse_set state
   | "ret" | "return" -> parse_return state
   | "if" -> parse_if state
   | "while" -> parse_while state
   | "loop" -> parse_loop state
   | "for" -> parse_for state
+  | "for-step" | "for*" -> parse_for_step state
   | "for-each" -> parse_foreach state
   | "and" -> parse_and state
   | "or" -> parse_or state
@@ -96,6 +107,13 @@ and parse_sexpr state =
   | "try" -> parse_try state
   | "cond" -> parse_cond state
   | "\\" -> parse_lambda state
+  | "do" | "begin" | "progn" ->
+      (* Sequential block — evaluates each sub-expression in order, returns
+         the last. Standard Lisp/Scheme/Clojure idiom that Coder models
+         reach for inside if/while bodies. We synthesize this via an
+         (if true ...) wrapper, which is already a sequential block. *)
+      let (body, state) = parse_body_until_rparen state [] in
+      (If (LitBool true, body, None), state)
   | _ -> parse_call sym state
 
 and parse_lambda state =
@@ -149,22 +167,37 @@ and parse_if state =
   let (cond, state) = parse_expr state in
   (* Collect all body expressions *)
   let (all_body, state) = parse_body_until_rparen state [] in
-  (* Re-parse: we need to detect (else ...) during body parsing.
-     The trick: if any body expr is a Call("else", args), it's actually
-     the else branch. But "else" gets parsed as a function call.
-     We split: everything before the else-call is then-body,
-     the else-call's args are the else-body. *)
-  let rec split_else acc = function
-    | [] -> (List.rev acc, None)
-    | Call ("else", else_args) :: rest ->
-        (* Everything after else should be empty since else is last *)
-        if rest <> [] then
-          raise (ParseError "else block must be the last item in an if expression");
-        (List.rev acc, Some else_args)
-    | expr :: rest -> split_else (expr :: acc) rest
+  (* Two valid shapes:
+     - (if cond then-stmt... (else else-stmt...))   — Sigil-native form
+     - (if cond then-expr else-expr)                — standard Lisp/Scheme
+                                                       form (exactly 2 body
+                                                       exprs, no `(else ...)`)
+     We detect the standard form first to give Coder models a forgiving
+     surface; otherwise fall through to the (else ...) splitter. *)
+  let is_else_call = function
+    | Call ("else", _) -> true
+    | _ -> false
   in
-  let (then_body, else_body) = split_else [] all_body in
-  (If (cond, then_body, else_body), state)
+  let standard_form_else =
+    match all_body with
+    | [_; second] when not (is_else_call second) -> Some second
+    | _ -> None
+  in
+  match standard_form_else with
+  | Some else_expr ->
+      let then_expr = List.hd all_body in
+      (If (cond, [then_expr], Some [else_expr]), state)
+  | None ->
+      let rec split_else acc = function
+        | [] -> (List.rev acc, None)
+        | Call ("else", else_args) :: rest ->
+            if rest <> [] then
+              raise (ParseError "else block must be the last item in an if expression");
+            (List.rev acc, Some else_args)
+        | expr :: rest -> split_else (expr :: acc) rest
+      in
+      let (then_body, else_body) = split_else [] all_body in
+      (If (cond, then_body, else_body), state)
 
 and parse_while state =
   let (cond, state) = parse_expr state in
@@ -182,6 +215,22 @@ and parse_for state =
   let (end_expr, state) = parse_expr state in
   let (body, state) = parse_body_until_rparen state [] in
   (For (var_name, start_expr, end_expr, body), state)
+
+and parse_for_step state =
+  (* (for-step var start end step body...) — explicit 5-arg form for
+     looping with a stride. Separate from `for` because (for var start end
+     body...) has multi-statement body that's ambiguous with step+body. *)
+  let (var_name, state) = expect_symbol state in
+  check_not_type_keyword var_name "for-step loop variable name";
+  let (start_expr, state) = parse_expr state in
+  let (end_expr, state) = parse_expr state in
+  let (step_expr, state) = parse_expr state in
+  let (body, state) = parse_body_until_rparen state [] in
+  let var_set = Set (var_name, Some TInt, start_expr) in
+  let cond = Call ("lt", [Var var_name; end_expr]) in
+  let increment = Set (var_name, None, Call ("add", [Var var_name; step_expr])) in
+  let while_body = body @ [increment] in
+  (If (LitBool true, [var_set; While (cond, while_body)], None), state)
 
 and parse_foreach state =
   let (var_name, state) = expect_symbol state in
@@ -338,7 +387,12 @@ let rec parse_params state acc =
 (* Parse function definition *)
 let parse_function state =
   let state = expect_token LParen state in
-  let state = expect_token (Symbol "fn") state in
+  let state =
+    match peek state with
+    | Symbol "fn" -> expect_token (Symbol "fn") state
+    | Symbol "def" -> expect_token (Symbol "def") state
+    | tok -> raise (ParseError ("Expected 'fn' or 'def' but got " ^ string_of_token tok))
+  in
   let (func_name, state) = expect_symbol state in
   
   (* Parse parameters *)
@@ -470,7 +524,7 @@ let parse_module state =
          | Some (Symbol "import") ->
              let (imp, state) = parse_import state in
              parse_items state (imp :: imports) functions tests note
-         | Some (Symbol "fn") ->
+         | Some (Symbol "fn") | Some (Symbol "def") ->
              let (func, state) = parse_function state in
              parse_items state imports (func :: functions) tests note
          | Some (Symbol "test-spec") ->
@@ -503,7 +557,7 @@ let parse_script tokens =
                    then Some (List.nth state.tokens (state.pos + 1))
                    else None in
         (match tok2 with
-         | Some (Symbol "fn") ->
+         | Some (Symbol "fn") | Some (Symbol "def") ->
              let (fn_def, state) = parse_function state in
              parse_items state (fn_def :: funcs) body
          | _ ->
@@ -514,6 +568,18 @@ let parse_script tokens =
         parse_items state funcs (expr :: body)
   in
   let (funcs, body) = parse_items state [] [] in
+  (* Reject top-level bare identifier references like
+        println (foo)
+     which would parse as two top-level forms (the symbol `println`,
+     evaluated and discarded, then `(foo)` evaluated and discarded) and
+     produce a silently no-op program. Almost always a missing-paren typo. *)
+  List.iter (function
+    | Var name -> raise (ParseError (
+        "top-level bare identifier `" ^ name ^
+        "` — did you mean `(" ^ name ^ " ...)`? "
+        ^ "Bare references at the top level are no-ops and almost always a missing paren."))
+    | _ -> ()
+  ) body;
   let main_fn = {
     func_name = "main";
     func_params = [];

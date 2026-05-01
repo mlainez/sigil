@@ -1,0 +1,79 @@
+(module prelude
+
+  (fn tokens s string -> array
+    (set result [])
+    (set n (len s))
+    (set buf "")
+    (set i 0)
+    (while (lt i n)
+      (set c (string_slice s i 1))
+      (if (is_whitespace c)
+        (if (gt (len buf) 0)
+          (push result buf))
+        (set buf "")
+        (else
+          (set buf (add buf c))))
+      (set i (add i 1)))
+    (if (gt (len buf) 0)
+      (push result buf))
+    (ret result))
+
+  (fn squeeze s string -> string
+    (set result "")
+    (set n (len s))
+    (set i 0)
+    (set prev_ws false)
+    (while (lt i n)
+      (set c (string_slice s i 1))
+      (set is_ws (or (eq c " ") (eq c "\t")))
+      (if is_ws
+        (if (not prev_ws)
+          (set result (add result " ")))
+        (else
+          (set result (add result c))))
+      (set prev_ws is_ws)
+      (set i (add i 1)))
+    (ret result))
+
+  (fn split_blocks s string -> array
+    (set lines (split s "\n"))
+    (set blocks [])
+    (set cur "")
+    (set in_block false)
+    (set n (len lines))
+    (set i 0)
+    (while (lt i n)
+      (set line (get lines i))
+      (set is_blank (eq (trim line) ""))
+      (if is_blank
+        (if in_block
+          (push blocks cur))
+        (set cur "")
+        (set in_block false)
+        (else
+          (if in_block
+            (set cur (add cur "\n")))
+          (set cur (add cur line))
+          (set in_block true)))
+      (set i (add i 1)))
+    (if in_block
+      (push blocks cur))
+    (ret blocks))
+
+  (fn find_all pattern string text string -> array
+    (ret (regex_find_all pattern text)))
+
+  (fn line_count s string -> int
+    (set n (len s))
+    (if (eq n 0)
+      (ret 0)
+      (else))
+    (set last (string_slice s (sub n 1) 1))
+    (set parts (split s "\n"))
+    (set k (len parts))
+    (if (eq last "\n")
+      (ret (sub k 1))
+      (else))
+    (ret k))
+
+  (meta-note "Auto-loaded prelude: zero-import convenience functions written in Sigil. Add only pure compositions over primitive builtins. Primitives (regex/IO/syscall/operators) stay in OCaml; convenience functions belong here."))
