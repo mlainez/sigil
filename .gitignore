@@ -39,3 +39,10 @@ benchmark/runtime_check_log.txt
 
 # Claude Code agent state (local-only)
 .claude/
+
+# Pre-corpus-update snapshot backups
+benchmark/training_corpus.jsonl.*.bak
+
+# Python bytecode
+__pycache__/
+*.pyc
