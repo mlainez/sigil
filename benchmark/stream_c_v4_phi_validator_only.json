@@ -1,0 +1,1069 @@
+{
+  "sigil_model": "qwen-sigil-v4:7b",
+  "python_local_model": "qwen2.5-coder:7b",
+  "cloud_model": null,
+  "n_tasks": 30,
+  "aggregates": {
+    "local_sigil": {
+      "pass": 27,
+      "sec": 262.83,
+      "wh": 13.141099999999998,
+      "cost": 0.0
+    },
+    "local_python": {
+      "pass": 14,
+      "sec": 82.78000000000002,
+      "wh": 4.139399999999999,
+      "cost": 0.0
+    }
+  },
+  "tasks": [
+    {
+      "id": "cut_passwd_usernames",
+      "category": "common shell pattern (cut -d: -f1 < /etc/passwd)",
+      "sigil": {
+        "path": "local_sigil",
+        "pass": true,
+        "attempts": 1,
+        "code": "(set lines array (split $0 \"\\n\"))\n(for-each line string lines\n  (println (first (split line \":\"))))",
+        "seconds": 5.55,
+        "chars": 99,
+        "wh": 0.2775,
+        "cost_usd": 0.0,
+        "stdout": "root\ndaemon\nuser\n",
+        "stderr": "",
+        "model_used": "qwen-sigil-v4:7b",
+        "fallback_used": false,
+        "paren_balanced": ""
+      },
+      "python_local": {
+        "path": "local_python",
+        "pass": true,
+        "code": "import sys\n\nfor line in sys.argv[1].split('\\n'):\n    if line:\n        print(line.split(':')[0])",
+        "seconds": 2.06,
+        "chars": 95,
+        "wh": 0.103,
+        "cost_usd": 0.0,
+        "stdout": "root\ndaemon\nuser\n",
+        "stderr": "",
+        "tokens": {
+          "prompt_tokens": 186,
+          "completion_tokens": 31
+        }
+      },
+      "cloud": null
+    },
+    {
+      "id": "grep_count_pattern",
+      "category": "common shell pattern (grep -c)",
+      "sigil": {
+        "path": "local_sigil",
+        "pass": true,
+        "attempts": 1,
+        "code": "(set text string $0)\n(set needle string $1)\n(set lines array (split text \"\\n\"))\n(set count int 0)\n(for-each line string lines\n  (if (in needle line)\n    (set count (add count 1))))\n(println count)",
+        "seconds": 6.86,
+        "chars": 196,
+        "wh": 0.3429,
+        "cost_usd": 0.0,
+        "stdout": "3\n",
+        "stderr": "",
+        "model_used": "qwen-sigil-v4:7b",
+        "fallback_used": false,
+        "paren_balanced": ""
+      },
+      "python_local": {
+        "path": "local_python",
+        "pass": false,
+        "code": "import sys\n\ntext = sys.argv[1]\nsubstring = sys.argv[2]\n\ncount = sum(1 for line in text.split('\\n') if substring in line)\n\nprint(f'{count}\\n')",
+        "seconds": 2.25,
+        "chars": 141,
+        "wh": 0.1126,
+        "cost_usd": 0.0,
+        "stdout": "3\n\n",
+        "stderr": "",
+        "tokens": {
+          "prompt_tokens": 137,
+          "completion_tokens": 47
+        }
+      },
+      "cloud": null
+    },
+    {
+      "id": "tail_n_lines",
+      "category": "common shell pattern (tail -n)",
+      "sigil": {
+        "path": "local_sigil",
+        "pass": true,
+        "attempts": 1,
+        "code": "(set lines array (split $0 \"\\n\"))\n(set n int #1)\n(set m int (len lines))\n(set start int (if (gt m n) (sub m n) 0))\n(for i start m\n  (println (array_get lines i)))",
+        "seconds": 6.57,
+        "chars": 162,
+        "wh": 0.3285,
+        "cost_usd": 0.0,
+        "stdout": "c\nd\ne\n",
+        "stderr": "",
+        "model_used": "qwen-sigil-v4:7b",
+        "fallback_used": false,
+        "paren_balanced": ""
+      },
+      "python_local": {
+        "path": "local_python",
+        "pass": false,
+        "code": "import sys\n\ndef main():\n    text = sys.argv[1]\n    n = int(sys.argv[2])\n    lines = text.split('\\n')\n    last_n_lines = '\\n'.join(lines[-n:]) + '\\n'\n    print(last_n_lines)\n\nif __name__ == \"__main__\":\n    main()",
+        "seconds": 2.55,
+        "chars": 211,
+        "wh": 0.1276,
+        "cost_usd": 0.0,
+        "stdout": "c\nd\ne\n\n",
+        "stderr": "",
+        "tokens": {
+          "prompt_tokens": 127,
+          "completion_tokens": 70
+        }
+      },
+      "cloud": null
+    },
+    {
+      "id": "head_n_lines",
+      "category": "common shell pattern (head -n)",
+      "sigil": {
+        "path": "local_sigil",
+        "pass": true,
+        "attempts": 1,
+        "code": "(set lines array (split $0 \"\\n\"))\n(println (join (slice lines 0 #1) \"\\n\"))",
+        "seconds": 6.02,
+        "chars": 74,
+        "wh": 0.3009,
+        "cost_usd": 0.0,
+        "stdout": "a\nb\n",
+        "stderr": "",
+        "model_used": "qwen-sigil-v4:7b",
+        "fallback_used": false,
+        "paren_balanced": ""
+      },
+      "python_local": {
+        "path": "local_python",
+        "pass": false,
+        "code": "import sys\n\ntext = sys.argv[1]\nn = int(sys.argv[2])\nprint(text.split('\\n')[:n])",
+        "seconds": 2.06,
+        "chars": 79,
+        "wh": 0.103,
+        "cost_usd": 0.0,
+        "stdout": "['a', 'b']\n",
+        "stderr": "",
+        "tokens": {
+          "prompt_tokens": 120,
+          "completion_tokens": 32
+        }
+      },
+      "cloud": null
+    },
+    {
+      "id": "sort_uniq_count_top",
+      "category": "common shell pattern (sort | uniq -c | sort -rn | head)",
+      "sigil": {
+        "path": "local_sigil",
+        "pass": true,
+        "attempts": 1,
+        "code": "(set lines array (split $0 \"\\n\"))\n(set counts map {})\n(for-each line string lines\n  (set counts (map_set counts line (add 1 (get_or counts line 0)))))\n(let pairs (sort_by (entries counts) (\\p (neg (get p 1)))))\n(for-each pair array pairs\n  (println (fmt \"   {} {}\" (get pair 1) (first pair))))",
+        "seconds": 7.53,
+        "chars": 293,
+        "wh": 0.3766,
+        "cost_usd": 0.0,
+        "stdout": "   3 apple\n   2 banana\n   1 cherry\n",
+        "stderr": "",
+        "model_used": "qwen-sigil-v4:7b",
+        "fallback_used": false,
+        "paren_balanced": ""
+      },
+      "python_local": {
+        "path": "local_python",
+        "pass": false,
+        "code": "import sys\n\nlines = sys.argv[1].split('\\n')\nline_counts = {}\n\nfor line in lines:\n    if line in line_counts:\n        line_counts[line] += 1\n    else:\n        line_counts[line] = 1\n\nsorted_lines = sorted(line_counts.items(), key=lambda x: (-x[1], lines.index(x[0])))\n\noutput = '\\n'.join(f'   {count} {line}' for line, count in sorted_lines) + '\\n'\nprint(output)",
+        "seconds": 3.06,
+        "chars": 360,
+        "wh": 0.1531,
+        "cost_usd": 0.0,
+        "stdout": "   3 apple\n   2 banana\n   1 cherry\n\n",
+        "stderr": "",
+        "tokens": {
+          "prompt_tokens": 152,
+          "completion_tokens": 110
+        }
+      },
+      "cloud": null
+    },
+    {
+      "id": "wc_l",
+      "category": "common shell pattern (wc -l)",
+      "sigil": {
+        "path": "local_sigil",
+        "pass": true,
+        "attempts": 1,
+        "code": "(println (count $0 \"\\n\"))",
+        "seconds": 5.64,
+        "chars": 25,
+        "wh": 0.2822,
+        "cost_usd": 0.0,
+        "stdout": "2\n",
+        "stderr": "",
+        "model_used": "qwen-sigil-v4:7b",
+        "fallback_used": false,
+        "paren_balanced": ""
+      },
+      "python_local": {
+        "path": "local_python",
+        "pass": true,
+        "code": "import sys\n\nif len(sys.argv) > 1:\n    text = sys.argv[1]\n    newline_count = text.count('\\n')\n    print(newline_count)\nelse:\n    print('0')",
+        "seconds": 2.26,
+        "chars": 139,
+        "wh": 0.113,
+        "cost_usd": 0.0,
+        "stdout": "2\n",
+        "stderr": "",
+        "tokens": {
+          "prompt_tokens": 119,
+          "completion_tokens": 47
+        }
+      },
+      "cloud": null
+    },
+    {
+      "id": "wc_w",
+      "category": "common shell pattern (wc -w)",
+      "sigil": {
+        "path": "local_sigil",
+        "pass": true,
+        "attempts": 3,
+        "code": "(println (len (tokens $0)))",
+        "seconds": 13.39,
+        "chars": 27,
+        "wh": 0.6696,
+        "cost_usd": 0.0,
+        "stdout": "4\n",
+        "stderr": "",
+        "model_used": "phi-sigil-v1:14b",
+        "fallback_used": true,
+        "paren_balanced": ""
+      },
+      "python_local": {
+        "path": "local_python",
+        "pass": true,
+        "code": "import sys\n\nif len(sys.argv) > 1:\n    tokens = sys.argv[1].split()\n    print(len(tokens))\nelse:\n    print(0)",
+        "seconds": 2.11,
+        "chars": 108,
+        "wh": 0.1056,
+        "cost_usd": 0.0,
+        "stdout": "4\n",
+        "stderr": "",
+        "tokens": {
+          "prompt_tokens": 112,
+          "completion_tokens": 39
+        }
+      },
+      "cloud": null
+    },
+    {
+      "id": "find_with_extension",
+      "category": "common shell pattern (find . -name '*.ext')",
+      "sigil": {
+        "path": "local_sigil",
+        "pass": true,
+        "attempts": 1,
+        "code": "(set lines array (split $0 \"\\n\"))\n(for-each line string lines\n  (set parts array (split line \".\"))\n  (if (eq (last parts) $1)\n    (println line)))",
+        "seconds": 6.96,
+        "chars": 146,
+        "wh": 0.3479,
+        "cost_usd": 0.0,
+        "stdout": "main.py\nutils.py\ntest_a.py\n",
+        "stderr": "",
+        "model_used": "qwen-sigil-v4:7b",
+        "fallback_used": false,
+        "paren_balanced": ""
+      },
+      "python_local": {
+        "path": "local_python",
+        "pass": false,
+        "code": "import sys\n\ndef filter_filenames(filenames, extension):\n    return '\\n'.join([filename for filename in filenames.split('\\n') if filename.endswith('.' + extension)]) + '\\n'\n\nif __name__ == \"__main__\":\n    input_data = sys.argv[1]\n    target_extension = sys.argv[2]\n    result = filter_filenames(input_data, target_extension)\n    print(result)",
+        "seconds": 2.74,
+        "chars": 341,
+        "wh": 0.137,
+        "cost_usd": 0.0,
+        "stdout": "main.py\nutils.py\ntest_a.py\n\n",
+        "stderr": "",
+        "tokens": {
+          "prompt_tokens": 148,
+          "completion_tokens": 84
+        }
+      },
+      "cloud": null
+    },
+    {
+      "id": "awk_filter_field_gt",
+      "category": "common shell pattern (awk -F, '$3>100')",
+      "sigil": {
+        "path": "local_sigil",
+        "pass": true,
+        "attempts": 1,
+        "code": "(set rows (split $0 \"\\n\"))\n(for-each row rows\n  (set fields (split row \",\"))\n  (if (gt (first (parse_ints (array_get fields #1))) #2)\n    (println row)))",
+        "seconds": 6.92,
+        "chars": 153,
+        "wh": 0.3461,
+        "cost_usd": 0.0,
+        "stdout": "b,2,150\nd,4,200\n",
+        "stderr": "",
+        "model_used": "qwen-sigil-v4:7b",
+        "fallback_used": false,
+        "paren_balanced": ""
+      },
+      "python_local": {
+        "path": "local_python",
+        "pass": true,
+        "code": "import sys\n\ndef filter_csv_rows(csv_string, column_index, threshold):\n    rows = csv_string.strip().split('\\n')\n    filtered_rows = [row for row in rows if int(row.split(',')[int(column_index)]) > int(threshold)]\n    return '\\n'.join(filtered_rows)\n\nif __name__ == \"__main__\":\n    csv_input = sys.argv[1]\n    column_index = sys.argv[2]\n    threshold = sys.argv[3]\n    result = filter_csv_rows(csv_input, column_index, threshold)\n    print(result)",
+        "seconds": 3.14,
+        "chars": 446,
+        "wh": 0.1571,
+        "cost_usd": 0.0,
+        "stdout": "b,2,150\nd,4,200\n",
+        "stderr": "",
+        "tokens": {
+          "prompt_tokens": 186,
+          "completion_tokens": 116
+        }
+      },
+      "cloud": null
+    },
+    {
+      "id": "cut_first_n_chars",
+      "category": "common shell pattern (cut -c1-N)",
+      "sigil": {
+        "path": "local_sigil",
+        "pass": true,
+        "attempts": 1,
+        "code": "(set s $0)\n(set n #1)\n(for-each line (split s \"\\n\")\n  (println (slice line 0 n)))",
+        "seconds": 6.19,
+        "chars": 81,
+        "wh": 0.3093,
+        "cost_usd": 0.0,
+        "stdout": "abc\nhel\n123\n",
+        "stderr": "",
+        "model_used": "qwen-sigil-v4:7b",
+        "fallback_used": false,
+        "paren_balanced": ""
+      },
+      "python_local": {
+        "path": "local_python",
+        "pass": false,
+        "code": "import sys\n\ntext = sys.argv[0]\nn = int(sys.argv[1])\n\noutput = ''.join(line[:n] for line in text.split('\\n'))\nprint(output)",
+        "seconds": 2.21,
+        "chars": 122,
+        "wh": 0.1103,
+        "cost_usd": 0.0,
+        "stdout": "",
+        "stderr": "",
+        "tokens": {
+          "prompt_tokens": 136,
+          "completion_tokens": 42
+        }
+      },
+      "cloud": null
+    },
+    {
+      "id": "grep_invert",
+      "category": "common shell pattern (grep -v)",
+      "sigil": {
+        "path": "local_sigil",
+        "pass": true,
+        "attempts": 1,
+        "code": "(set logs string $0)\n(set pattern string $1)\n(for-each line string (split logs \"\\n\")\n  (if (not (in pattern line))\n    (println line)))",
+        "seconds": 6.26,
+        "chars": 135,
+        "wh": 0.313,
+        "cost_usd": 0.0,
+        "stdout": "info: b\nwarn: d\n",
+        "stderr": "",
+        "model_used": "qwen-sigil-v4:7b",
+        "fallback_used": false,
+        "paren_balanced": ""
+      },
+      "python_local": {
+        "path": "local_python",
+        "pass": false,
+        "code": "import sys\n\nif len(sys.argv) != 3:\n    print(\"Usage: python script.py <text> <substring>\")\n    sys.exit(1)\n\ntext = sys.argv[1]\nsubstring = sys.argv[2]\n\nlines = text.split('\\n')\nfiltered_lines = [line for line in lines if substring not in line]\noutput = '\\n'.join(filtered_lines) + '\\n'\n\nprint(output)",
+        "seconds": 2.8,
+        "chars": 300,
+        "wh": 0.14,
+        "cost_usd": 0.0,
+        "stdout": "info: b\nwarn: d\n\n",
+        "stderr": "",
+        "tokens": {
+          "prompt_tokens": 130,
+          "completion_tokens": 89
+        }
+      },
+      "cloud": null
+    },
+    {
+      "id": "grep_only_matching",
+      "category": "common shell pattern (grep -o)",
+      "sigil": {
+        "path": "local_sigil",
+        "pass": true,
+        "attempts": 3,
+        "code": "(set text string $0)\n(set pattern string $1)\n(for-each line string (split text \"\\n\")\n  (for-each m (find_all pattern line) (println m)))",
+        "seconds": 16.12,
+        "chars": 136,
+        "wh": 0.8059,
+        "cost_usd": 0.0,
+        "stdout": "foo\nfoo\nfoo\nfoo\n",
+        "stderr": "",
+        "model_used": "phi-sigil-v1:14b",
+        "fallback_used": true,
+        "paren_balanced": ""
+      },
+      "python_local": {
+        "path": "local_python",
+        "pass": true,
+        "code": "import sys\n\ndef find_substring_occurrences(text, substring):\n    occurrences = []\n    lines = text.split('\\n')\n    for line in lines:\n        start = 0\n        while True:\n            start = line.find(substring, start)\n            if start == -1:\n                break\n            occurrences.append(line[start:start+len(substring)])\n            start += len(substring)\n    return '\\n'.join(occurrences)\n\nif __name__ == \"__main__\":\n    text = sys.argv[1]\n    substring = sys.argv[2]\n    result = find_substring_occurrences(text, substring)\n    print(result)",
+        "seconds": 3.32,
+        "chars": 558,
+        "wh": 0.1662,
+        "cost_usd": 0.0,
+        "stdout": "foo\nfoo\nfoo\nfoo\n",
+        "stderr": "",
+        "tokens": {
+          "prompt_tokens": 136,
+          "completion_tokens": 133
+        }
+      },
+      "cloud": null
+    },
+    {
+      "id": "extract_emails",
+      "category": "common shell pattern (grep -oE 'email-regex')",
+      "sigil": {
+        "path": "local_sigil",
+        "pass": false,
+        "attempts": 3,
+        "code": "(for-each e (find_all \"[a-zA-Z0-9._+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,6}\" $0)\n  (println e))",
+        "seconds": 17.33,
+        "chars": 89,
+        "wh": 0.8664,
+        "cost_usd": 0.0,
+        "stdout": "",
+        "stderr": "got 'alice@example.com or\\nbob.smith@foo.bar.io for\\ntest@x.co\\n' expected 'alice@example.com\\nbob.smith@foo.bar.io\\ntest@x.co\\n'",
+        "model_used": "phi-sigil-v1:14b",
+        "fallback_used": true
+      },
+      "python_local": {
+        "path": "local_python",
+        "pass": true,
+        "code": "import sys\nimport re\n\ndef extract_emails(input_string):\n    email_pattern = r'\\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Z|a-z]{2,6}\\b'\n    emails = re.findall(email_pattern, input_string)\n    for email in emails:\n        print(email)\n\nif __name__ == \"__main__\":\n    if len(sys.argv) > 1:\n        extract_emails(' '.join(sys.argv[1:]))",
+        "seconds": 3.0,
+        "chars": 331,
+        "wh": 0.1499,
+        "cost_usd": 0.0,
+        "stdout": "alice@example.com\nbob.smith@foo.bar.io\ntest@x.co\n",
+        "stderr": "",
+        "tokens": {
+          "prompt_tokens": 178,
+          "completion_tokens": 107
+        }
+      },
+      "cloud": null
+    },
+    {
+      "id": "find_max_in_log",
+      "category": "log analysis (find peak number)",
+      "sigil": {
+        "path": "local_sigil",
+        "pass": true,
+        "attempts": 1,
+        "code": "(println (reduce (map_arr (find_all \"[0-9]+\" $0) parse_int) (\\(a b) (if (gt a b) a b)) 0))",
+        "seconds": 6.51,
+        "chars": 90,
+        "wh": 0.3254,
+        "cost_usd": 0.0,
+        "stdout": "150\n",
+        "stderr": "",
+        "model_used": "qwen-sigil-v4:7b",
+        "fallback_used": false,
+        "paren_balanced": ""
+      },
+      "python_local": {
+        "path": "local_python",
+        "pass": false,
+        "code": "import sys\n\nif __name__ == \"__main__\":\n    log = sys.argv[1]\n    max_time = 0\n    for line in log.split('\\n'):\n        if 'took' in line and 'ms' in line:\n            time_str = line.split('took ')[1].split('ms')[0]\n            time = int(time_str)\n            if time > max_time:\n                max_time = time\n    print(f'{max_time}\\n')",
+        "seconds": 2.92,
+        "chars": 339,
+        "wh": 0.1462,
+        "cost_usd": 0.0,
+        "stdout": "150\n\n",
+        "stderr": "",
+        "tokens": {
+          "prompt_tokens": 163,
+          "completion_tokens": 100
+        }
+      },
+      "cloud": null
+    },
+    {
+      "id": "duplicate_remover",
+      "category": "common shell pattern (sort -u or awk '!seen[$0]++')",
+      "sigil": {
+        "path": "local_sigil",
+        "pass": true,
+        "attempts": 1,
+        "code": "(set lines array (split $0 \"\\n\"))\n(set seen {})\n(for-each line string lines\n  (set already (has seen line))\n  (set seen (json_set seen [line] true))\n  (if (not already)\n    (println line)))",
+        "seconds": 6.72,
+        "chars": 189,
+        "wh": 0.3362,
+        "cost_usd": 0.0,
+        "stdout": "a\nb\nc\nd\n",
+        "stderr": "",
+        "model_used": "qwen-sigil-v4:7b",
+        "fallback_used": false,
+        "paren_balanced": ""
+      },
+      "python_local": {
+        "path": "local_python",
+        "pass": true,
+        "code": "import sys\n\nlines = sys.argv[1].split('\\n')\nseen = set()\nresult = []\n\nfor line in lines:\n    if line not in seen:\n        result.append(line)\n        seen.add(line)\n\nprint('\\n'.join(result))",
+        "seconds": 2.35,
+        "chars": 190,
+        "wh": 0.1175,
+        "cost_usd": 0.0,
+        "stdout": "a\nb\nc\nd\n",
+        "stderr": "",
+        "tokens": {
+          "prompt_tokens": 125,
+          "completion_tokens": 55
+        }
+      },
+      "cloud": null
+    },
+    {
+      "id": "sed_replace_global",
+      "category": "common shell pattern (sed 's/X/Y/g')",
+      "sigil": {
+        "path": "local_sigil",
+        "pass": true,
+        "attempts": 1,
+        "code": "(println (string_replace $0 $1 $2))",
+        "seconds": 5.84,
+        "chars": 35,
+        "wh": 0.292,
+        "cost_usd": 0.0,
+        "stdout": "hi world hi\n",
+        "stderr": "",
+        "model_used": "qwen-sigil-v4:7b",
+        "fallback_used": false,
+        "paren_balanced": ""
+      },
+      "python_local": {
+        "path": "local_python",
+        "pass": false,
+        "code": "import sys\n\nif len(sys.argv) != 4:\n    print(\"Usage: python script.py <text> <target_string> <replacement_string>\")\nelse:\n    text = sys.argv[1]\n    target_string = sys.argv[2]\n    replacement_string = sys.argv[3]\n    result = text.replace(target_string, replacement_string)\n    print(result + '\\n')",
+        "seconds": 2.68,
+        "chars": 299,
+        "wh": 0.1339,
+        "cost_usd": 0.0,
+        "stdout": "hi world hi\n\n",
+        "stderr": "",
+        "tokens": {
+          "prompt_tokens": 124,
+          "completion_tokens": 82
+        }
+      },
+      "cloud": null
+    },
+    {
+      "id": "tr_squeeze_spaces",
+      "category": "common shell pattern (tr -s ' ')",
+      "sigil": {
+        "path": "local_sigil",
+        "pass": true,
+        "attempts": 1,
+        "code": "(println (squeeze $0))",
+        "seconds": 5.57,
+        "chars": 22,
+        "wh": 0.2787,
+        "cost_usd": 0.0,
+        "stdout": " hello world foo \n",
+        "stderr": "",
+        "model_used": "qwen-sigil-v4:7b",
+        "fallback_used": false,
+        "paren_balanced": ""
+      },
+      "python_local": {
+        "path": "local_python",
+        "pass": false,
+        "code": "import sys\n\ninput_string = ' '.join(sys.argv[1:])\nprint(input_string + '\\n')",
+        "seconds": 1.98,
+        "chars": 76,
+        "wh": 0.0988,
+        "cost_usd": 0.0,
+        "stdout": "  hello   world  foo \n\n",
+        "stderr": "",
+        "tokens": {
+          "prompt_tokens": 124,
+          "completion_tokens": 26
+        }
+      },
+      "cloud": null
+    },
+    {
+      "id": "df_human_readable",
+      "category": "df-style output formatting",
+      "sigil": {
+        "path": "local_sigil",
+        "pass": true,
+        "attempts": 1,
+        "code": "(set n int #0)\n(if (le n 1024)\n  (println (fmt \"{} B\" n))\n  (else\n    (set units array [\"KB\" \"MB\" \"GB\" \"TB\"])\n    (set i int 0)\n    (set val float (/ (cast_int_float n) 1024.0))\n    (while (and (ge val 1024.0) (lt i 3))\n      (set val (div val 1024.0))\n      (set i (add i 1)))\n    (println (fmt \"{:.2f} {}\" val (array_get units i)))))",
+        "seconds": 8.71,
+        "chars": 335,
+        "wh": 0.4357,
+        "cost_usd": 0.0,
+        "stdout": "5.00 MB\n",
+        "stderr": "",
+        "model_used": "qwen-sigil-v4:7b",
+        "fallback_used": false,
+        "paren_balanced": ""
+      },
+      "python_local": {
+        "path": "local_python",
+        "pass": false,
+        "code": "import sys\n\ndef format_size(size):\n    units = ['B', 'KB', 'MB', 'GB', 'TB']\n    for unit in units:\n        if size < 1024:\n            return f\"{size:.2f} {unit}\\n\"\n        size /= 1024\n\nif __name__ == \"__main__\":\n    if len(sys.argv) != 2:\n        print(\"Usage: python script.py <non-negative integer>\")\n        sys.exit(1)\n    \n    try:\n        byte_count = int(sys.argv[1])\n        if byte_count < 0:\n            raise ValueError\n    except ValueError:\n        print(\"Error: Input must be a non-negative integer.\")\n        sys.exit(1)\n    \n    print(format_size(byte_count))",
+        "seconds": 3.74,
+        "chars": 578,
+        "wh": 0.1872,
+        "cost_usd": 0.0,
+        "stdout": "5.00 MB\n\n",
+        "stderr": "",
+        "tokens": {
+          "prompt_tokens": 142,
+          "completion_tokens": 164
+        }
+      },
+      "cloud": null
+    },
+    {
+      "id": "process_grep",
+      "category": "ps aux | grep pattern | grep -v grep",
+      "sigil": {
+        "path": "local_sigil",
+        "pass": true,
+        "attempts": 1,
+        "code": "(set lines array (split $0 \"\\n\"))\n(for-each line string lines\n  (if (and (string_contains line $1) (not (in \"grep\" line)))\n    (println line)))",
+        "seconds": 6.56,
+        "chars": 143,
+        "wh": 0.3278,
+        "cost_usd": 0.0,
+        "stdout": "user 890 python script.py\n",
+        "stderr": "",
+        "model_used": "qwen-sigil-v4:7b",
+        "fallback_used": false,
+        "paren_balanced": ""
+      },
+      "python_local": {
+        "path": "local_python",
+        "pass": true,
+        "code": "import sys\n\ndef filter_lines(lines, pattern):\n    return [line for line in lines if pattern in line and 'grep' not in line]\n\nif __name__ == \"__main__\":\n    input_data = sys.argv[1]\n    pattern = sys.argv[2]\n    lines = input_data.split('\\n')\n    filtered_lines = filter_lines(lines, pattern)\n    print('\\n'.join(filtered_lines))",
+        "seconds": 2.79,
+        "chars": 328,
+        "wh": 0.1394,
+        "cost_usd": 0.0,
+        "stdout": "user 890 python script.py\n",
+        "stderr": "",
+        "tokens": {
+          "prompt_tokens": 161,
+          "completion_tokens": 88
+        }
+      },
+      "cloud": null
+    },
+    {
+      "id": "git_log_format",
+      "category": "git log --pretty=format formatting",
+      "sigil": {
+        "path": "local_sigil",
+        "pass": true,
+        "attempts": 1,
+        "code": "(set lines array (split $0 \"\\n\"))\n(for-each line string lines\n  (set parts array (split line \" \"))\n  (let author (get parts 1))\n  (let msg (join (slice parts 2 (len parts)) \" \"))\n  (println (fmt \"{}: {}\" author msg)))",
+        "seconds": 7.36,
+        "chars": 217,
+        "wh": 0.3679,
+        "cost_usd": 0.0,
+        "stdout": "alice: fix: typo\nbob: feat: new feature\ncarol: refactor: simplify\n",
+        "stderr": "",
+        "model_used": "qwen-sigil-v4:7b",
+        "fallback_used": false,
+        "paren_balanced": ""
+      },
+      "python_local": {
+        "path": "local_python",
+        "pass": true,
+        "code": "import sys\n\ninput_data = sys.argv[1]\nlines = input_data.split('\\n')\noutput = ''\n\nfor line in lines:\n    if line:\n        parts = line.split(' ', 2)\n        if len(parts) > 2:\n            author = parts[1]\n            message = ' '.join(parts[2:])\n            output += f'{author}: {message}\\n'\n\nprint(output.strip())",
+        "seconds": 2.77,
+        "chars": 316,
+        "wh": 0.1386,
+        "cost_usd": 0.0,
+        "stdout": "alice: fix: typo\nbob: feat: new feature\ncarol: refactor: simplify\n",
+        "stderr": "",
+        "tokens": {
+          "prompt_tokens": 174,
+          "completion_tokens": 88
+        }
+      },
+      "cloud": null
+    },
+    {
+      "id": "json_path_extract",
+      "category": "jq '.field' style extraction",
+      "sigil": {
+        "path": "local_sigil",
+        "pass": true,
+        "attempts": 1,
+        "code": "(set j json (json_parse $0))\n(println (json_get j [$1]))",
+        "seconds": 5.62,
+        "chars": 56,
+        "wh": 0.2808,
+        "cost_usd": 0.0,
+        "stdout": "alice\n",
+        "stderr": "",
+        "model_used": "qwen-sigil-v4:7b",
+        "fallback_used": false,
+        "paren_balanced": ""
+      },
+      "python_local": {
+        "path": "local_python",
+        "pass": true,
+        "code": "import sys\nimport json\n\ndef print_json_value(json_str, key):\n    try:\n        data = json.loads(json_str)\n        value = data.get(key, None)\n        if isinstance(value, str):\n            print(value)\n        elif isinstance(value, (int, float)):\n            print(value)\n        else:\n            print('null')\n    except json.JSONDecodeError:\n        print('null')\n\nif __name__ == \"__main__\":\n    if len(sys.argv) != 3:\n        print('Usage: python script.py <json_string> <key>')\n        sys.exit(1)\n\n    json_str = sys.argv[1]\n    key = sys.argv[2]\n\n    print_json_value(json_str, key)",
+        "seconds": 3.55,
+        "chars": 590,
+        "wh": 0.1777,
+        "cost_usd": 0.0,
+        "stdout": "alice\n",
+        "stderr": "",
+        "tokens": {
+          "prompt_tokens": 166,
+          "completion_tokens": 150
+        }
+      },
+      "cloud": null
+    },
+    {
+      "id": "csv_to_tsv",
+      "category": "common shell pattern (tr ',' '\\t')",
+      "sigil": {
+        "path": "local_sigil",
+        "pass": true,
+        "attempts": 1,
+        "code": "(println (string_replace $0 \",\" \"\\t\"))",
+        "seconds": 5.67,
+        "chars": 38,
+        "wh": 0.2835,
+        "cost_usd": 0.0,
+        "stdout": "a\tb\tc\n1\t2\t3\n",
+        "stderr": "",
+        "model_used": "qwen-sigil-v4:7b",
+        "fallback_used": false,
+        "paren_balanced": ""
+      },
+      "python_local": {
+        "path": "local_python",
+        "pass": true,
+        "code": "import sys\n\ncsv_string = sys.argv[1]\ntabbed_string = csv_string.replace(',', '\\t')\nprint(tabbed_string)",
+        "seconds": 2.06,
+        "chars": 103,
+        "wh": 0.103,
+        "cost_usd": 0.0,
+        "stdout": "a\tb\tc\n1\t2\t3\n",
+        "stderr": "",
+        "tokens": {
+          "prompt_tokens": 139,
+          "completion_tokens": 32
+        }
+      },
+      "cloud": null
+    },
+    {
+      "id": "extract_urls",
+      "category": "grep -oE 'http[s]?://...'",
+      "sigil": {
+        "path": "local_sigil",
+        "pass": true,
+        "attempts": 1,
+        "code": "(set s string $0)\n(for-each u (find_all \"https?://[^ \\n]+\" s)\n  (println u))",
+        "seconds": 6.04,
+        "chars": 76,
+        "wh": 0.3022,
+        "cost_usd": 0.0,
+        "stdout": "https://example.com\nhttp://foo.io\nhttps://x.y/path\n",
+        "stderr": "",
+        "model_used": "qwen-sigil-v4:7b",
+        "fallback_used": false,
+        "paren_balanced": ""
+      },
+      "python_local": {
+        "path": "local_python",
+        "pass": true,
+        "code": "import sys\n\ndef extract_urls(text):\n    urls = []\n    i = 0\n    while i < len(text):\n        if text[i:i+7] == \"http://\" or text[i:i+8] == \"https://\":\n            start = i\n            while i < len(text) and not text[i].isspace():\n                i += 1\n            urls.append(text[start:i])\n        else:\n            i += 1\n    return urls\n\nif __name__ == \"__main__\":\n    if len(sys.argv) > 1:\n        input_text = sys.argv[1]\n        urls = extract_urls(input_text)\n        for url in urls:\n            print(url)",
+        "seconds": 3.48,
+        "chars": 517,
+        "wh": 0.1742,
+        "cost_usd": 0.0,
+        "stdout": "https://example.com\nhttp://foo.io\nhttps://x.y/path\n",
+        "stderr": "",
+        "tokens": {
+          "prompt_tokens": 159,
+          "completion_tokens": 144
+        }
+      },
+      "cloud": null
+    },
+    {
+      "id": "uniq_c_simple",
+      "category": "uniq -c (consecutive duplicates count)",
+      "sigil": {
+        "path": "local_sigil",
+        "pass": true,
+        "attempts": 1,
+        "code": "(set lines array (split $0 \"\\n\"))\n(set prev string \"\")\n(set count int 0)\n(for-each line string lines\n  (if (eq line prev)\n    (set count (add count 1))\n    (else\n      (if (gt count 0)\n        (println (fmt \"{:>4} {}\" count prev)))\n      (set prev line)\n      (set count 1))))\n(println (fmt \"{:>4} {}\" count prev))",
+        "seconds": 7.34,
+        "chars": 314,
+        "wh": 0.3671,
+        "cost_usd": 0.0,
+        "stdout": "   2 apple\n   1 banana\n   3 apple\n",
+        "stderr": "",
+        "model_used": "qwen-sigil-v4:7b",
+        "fallback_used": false,
+        "paren_balanced": ""
+      },
+      "python_local": {
+        "path": "local_python",
+        "pass": true,
+        "code": "import sys\n\ntext = sys.argv[1]\nlines = text.split('\\n')\nresult = []\n\ni = 0\nwhile i < len(lines):\n    count = 1\n    while i + 1 < len(lines) and lines[i] == lines[i + 1]:\n        i += 1\n        count += 1\n    result.append(f'{count:4} {lines[i]}')\n    i += 1\n\nprint('\\n'.join(result))",
+        "seconds": 2.96,
+        "chars": 283,
+        "wh": 0.1478,
+        "cost_usd": 0.0,
+        "stdout": "   2 apple\n   1 banana\n   3 apple\n",
+        "stderr": "",
+        "tokens": {
+          "prompt_tokens": 148,
+          "completion_tokens": 102
+        }
+      },
+      "cloud": null
+    },
+    {
+      "id": "split_at_blank_lines",
+      "category": "common parsing pattern (paragraph splitting)",
+      "sigil": {
+        "path": "local_sigil",
+        "pass": true,
+        "attempts": 2,
+        "code": "(set blocks array (split $0 \"\\n\\n\"))\n(for-each block string blocks\n  (println (join (split block \"\\n\") \" \"))\n  (if (ne block (last blocks))\n    (println \"---\")))",
+        "seconds": 7.56,
+        "chars": 161,
+        "wh": 0.3779,
+        "cost_usd": 0.0,
+        "stdout": "hello world\n---\nfoo bar baz\n---\nlast\n",
+        "stderr": "",
+        "model_used": "qwen-sigil-v4:7b",
+        "fallback_used": false,
+        "paren_balanced": ""
+      },
+      "python_local": {
+        "path": "local_python",
+        "pass": false,
+        "code": "import sys\n\ndef process_paragraphs(text):\n    paragraphs = text.strip().split('\\n\\n')\n    processed_paragraphs = [' '.join(p.splitlines()) for p in paragraphs]\n    return '\\n'.join(processed_paragraphs + ['---'])\n\nif __name__ == \"__main__\":\n    input_text = sys.argv[1]\n    output = process_paragraphs(input_text)\n    print(output)",
+        "seconds": 2.78,
+        "chars": 331,
+        "wh": 0.139,
+        "cost_usd": 0.0,
+        "stdout": "hello world\nfoo bar baz\nlast\n---\n",
+        "stderr": "",
+        "tokens": {
+          "prompt_tokens": 165,
+          "completion_tokens": 86
+        }
+      },
+      "cloud": null
+    },
+    {
+      "id": "permission_octal_to_symbolic",
+      "category": "common admin task (translate file permissions)",
+      "sigil": {
+        "path": "local_sigil",
+        "pass": true,
+        "attempts": 1,
+        "code": "(set table [\"---\" \"--x\" \"-w-\" \"-wx\" \"r--\" \"r-x\" \"rw-\" \"rwx\"])\n(set buf \"\")\n(for i 0 3\n  (set d (sub (string_get $0 i) 48))\n  (set buf (add buf (get table d))))\n(println buf)",
+        "seconds": 7.17,
+        "chars": 173,
+        "wh": 0.3583,
+        "cost_usd": 0.0,
+        "stdout": "rwxr-xr-x\n",
+        "stderr": "",
+        "model_used": "qwen-sigil-v4:7b",
+        "fallback_used": false,
+        "paren_balanced": ""
+      },
+      "python_local": {
+        "path": "local_python",
+        "pass": false,
+        "code": "import sys\n\ndef octal_to_symbolic(octal):\n    permissions = 'rwx'\n    symbolic = ''\n    for digit in octal:\n        for i in range(3):\n            if int(digit) & (1 << (2 - i)):\n                symbolic += permissions[i]\n            else:\n                symbolic += '-'\n        symbolic += ' '\n    return symbolic.strip() + '\\n'\n\nif __name__ == \"__main__\":\n    if len(sys.argv) != 2 or not sys.argv[1].isdigit() or len(sys.argv[1]) != 3:\n        print(\"Usage: python script.py <3-digit octal permission>\")\n    else:\n        print(octal_to_symbolic(sys.argv[1]))",
+        "seconds": 3.59,
+        "chars": 563,
+        "wh": 0.1797,
+        "cost_usd": 0.0,
+        "stdout": "rwx r-x r-x\n\n",
+        "stderr": "",
+        "tokens": {
+          "prompt_tokens": 133,
+          "completion_tokens": 153
+        }
+      },
+      "cloud": null
+    },
+    {
+      "id": "ipv4_validate",
+      "category": "config validation (ip address check)",
+      "sigil": {
+        "path": "local_sigil",
+        "pass": false,
+        "attempts": 3,
+        "code": "(let parts array (split $0 \".\"))\n(if (ne (len parts) 4)\n  (println \"no\")\n  (else))\n(set ok bool true)\n(for-each p string parts\n  (if (or (eq (len p) 0) (and (gt (len p) 1) (eq (string_get p 0) \"0\")))\n    (set ok false)))\n(if ok\n  (for-each p string parts\n    (let n int (parse_int p))\n    (if (or (lt n 0) (gt n 255)) (set ok false))))\n(if ok\n  (println \"yes\")\n  (else (println \"no\")))",
+        "seconds": 22.85,
+        "chars": 385,
+        "wh": 1.1423,
+        "cost_usd": 0.0,
+        "stdout": "",
+        "stderr": "Runtime error: eq requires arguments of the same type, got int and string",
+        "model_used": "phi-sigil-v1:14b",
+        "fallback_used": true
+      },
+      "python_local": {
+        "path": "local_python",
+        "pass": false,
+        "code": "import sys\n\ndef is_valid_ipv4(ip):\n    parts = ip.split('.')\n    if len(parts) != 4:\n        return False\n    for part in parts:\n        if not part.isdigit():\n            return False\n        num = int(part)\n        if num < 0 or num > 255 or (len(part) > 1 and part[0] == '0'):\n            return False\n    return True\n\nif __name__ == \"__main__\":\n    ip = sys.argv[1]\n    print('yes\\n' if is_valid_ipv4(ip) else 'no\\n')",
+        "seconds": 3.25,
+        "chars": 421,
+        "wh": 0.1625,
+        "cost_usd": 0.0,
+        "stdout": "yes\n\n",
+        "stderr": "",
+        "tokens": {
+          "prompt_tokens": 149,
+          "completion_tokens": 128
+        }
+      },
+      "cloud": null
+    },
+    {
+      "id": "iso_date_extract",
+      "category": "log parsing (extract dates)",
+      "sigil": {
+        "path": "local_sigil",
+        "pass": true,
+        "attempts": 3,
+        "code": "(for-each d (find_all \"[0-9]{4}-[0-9]{2}-[0-9]{2}\" $0)\n  (println d))",
+        "seconds": 17.65,
+        "chars": 69,
+        "wh": 0.8825,
+        "cost_usd": 0.0,
+        "stdout": "2024-01-15\n2024-02-30\n2025-12-01\n",
+        "stderr": "",
+        "model_used": "phi-sigil-v1:14b",
+        "fallback_used": true,
+        "paren_balanced": ""
+      },
+      "python_local": {
+        "path": "local_python",
+        "pass": true,
+        "code": "import sys\nimport re\n\ndef extract_dates(text):\n    date_pattern = r'\\b\\d{4}-\\d{2}-\\d{2}\\b'\n    dates = re.findall(date_pattern, text)\n    return '\\n'.join(dates)\n\nif __name__ == \"__main__\":\n    input_text = ' '.join(sys.argv[1:])\n    print(extract_dates(input_text))",
+        "seconds": 2.75,
+        "chars": 266,
+        "wh": 0.1374,
+        "cost_usd": 0.0,
+        "stdout": "2024-01-15\n2024-02-30\n2025-12-01\n",
+        "stderr": "",
+        "tokens": {
+          "prompt_tokens": 193,
+          "completion_tokens": 86
+        }
+      },
+      "cloud": null
+    },
+    {
+      "id": "shell_argv_count",
+      "category": "shell scripting (process argv)",
+      "sigil": {
+        "path": "local_sigil",
+        "pass": false,
+        "attempts": 3,
+        "code": "(set counts {})\n(for-each a (argv)\n  (set counts (map_set counts a (add 1 (get_or counts a 0)))))\n(println (join (map_arr (sort_by (entries counts) (\\p (get p 0))) (\\p (fmt \"{}={}\" (get p 0) (get p 1)))) \" \"))",
+        "seconds": 17.27,
+        "chars": 209,
+        "wh": 0.8636,
+        "cost_usd": 0.0,
+        "stdout": "",
+        "stderr": "got '--verbose --quiet --verbose -f file.txt -f other.txt=1\\n' expected '--quiet=1 --verbose=2 -f=2 file.txt=1 other.txt=1\\n'",
+        "model_used": "phi-sigil-v1:14b",
+        "fallback_used": true
+      },
+      "python_local": {
+        "path": "local_python",
+        "pass": false,
+        "code": "import sys\n\ndef count_tokens(args):\n    token_count = {}\n    for arg in args[1:]:\n        if arg in token_count:\n            token_count[arg] += 1\n        else:\n            token_count[arg] = 1\n    sorted_tokens = sorted(token_count.items())\n    result = ' '.join(f'{name}={count}' for name, count in sorted_tokens)\n    print(result)\n\nif __name__ == \"__main__\":\n    count_tokens(sys.argv)",
+        "seconds": 2.93,
+        "chars": 388,
+        "wh": 0.1463,
+        "cost_usd": 0.0,
+        "stdout": "--verbose --quiet --verbose -f file.txt -f other.txt=1\n",
+        "stderr": "",
+        "tokens": {
+          "prompt_tokens": 170,
+          "completion_tokens": 102
+        }
+      },
+      "cloud": null
+    },
+    {
+      "id": "extract_function_names_py",
+      "category": "code analysis (extract Python function names)",
+      "sigil": {
+        "path": "local_sigil",
+        "pass": true,
+        "attempts": 1,
+        "code": "(for-each m (find_all \"^def [a-zA-Z_][a-zA-Z0-9_]*\\(\" $0)\n  (println (string_slice m 4 (sub (len m) 5))))",
+        "seconds": 7.05,
+        "chars": 105,
+        "wh": 0.3524,
+        "cost_usd": 0.0,
+        "stdout": "foo\nmain\n",
+        "stderr": "",
+        "model_used": "qwen-sigil-v4:7b",
+        "fallback_used": false,
+        "paren_balanced": ""
+      },
+      "python_local": {
+        "path": "local_python",
+        "pass": false,
+        "code": "import sys\n\nsource_code = sys.argv[1]\nlines = source_code.split('\\n')\nfunction_names = []\n\nfor line in lines:\n    if line.strip().startswith('def ') and '(' in line:\n        function_name = line.split('(')[0].split(' ')[1]\n        function_names.append(function_name)\n\nprint('\\n'.join(function_names))",
+        "seconds": 2.64,
+        "chars": 301,
+        "wh": 0.1318,
+        "cost_usd": 0.0,
+        "stdout": "foo\n\nmain\n",
+        "stderr": "",
+        "tokens": {
+          "prompt_tokens": 157,
+          "completion_tokens": 77
+        }
+      },
+      "cloud": null
+    }
+  ]
+}

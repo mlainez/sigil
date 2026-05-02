@@ -23,6 +23,7 @@ import argparse, json, os, subprocess, sys, time, urllib.request
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parent.parent
+SIGIL_BIN = str(REPO / "interpreter" / "_build" / "default" / "vm.exe")
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import rag
 from corpus_extender import (
@@ -157,68 +158,254 @@ def wh_local(seconds: float) -> float:
     return (seconds * POWER_LOCAL_INFERENCE) / 3600.0
 
 
-def validator_hint(got_stdout: str, expected: str, got_stderr: str) -> str:
-    """Synthesize a structured diff hint from (got_stdout, expected, stderr).
+def _paren_depth_ignoring_strings(s: str) -> int:
+    """Count net paren depth in s, ignoring parens inside double-quoted strings.
+    Sigil has no comments so no need to handle those. Backslash-escapes inside
+    strings are honored."""
+    depth = 0
+    in_string = False
+    i = 0
+    while i < len(s):
+        c = s[i]
+        if in_string:
+            if c == "\\" and i + 1 < len(s):
+                i += 2
+                continue
+            if c == '"':
+                in_string = False
+        else:
+            if c == '"':
+                in_string = True
+            elif c == "(":
+                depth += 1
+            elif c == ")":
+                depth -= 1
+        i += 1
+    return depth
 
-    The default 'hint' the retry prompt sees is just last_err[:200] — fine for
-    runtime errors but useless for output-shape mismatches where the program
-    ran successfully but produced the wrong text. This builds a short, specific
-    diagnostic the model can act on:
-      - byte/char/line counts
-      - first-difference position
-      - trailing-newline mismatch flag
-      - extra/missing lines
+
+PAREN_BALANCE_TOOL = str(REPO / "tools" / "balance_parens.sigil")
+
+
+def auto_balance_parens(code: str, lint_fn) -> tuple[str, str]:
+    """Delegate to the Sigil-implemented balancer at tools/balance_parens.sigil.
+
+    The actual balancing logic is in the Sigil prelude (`balance_parens`).
+    Per the project principle: if it CAN be written in Sigil, it MUST be.
+    Python here is just an orchestrator: invoke vm.exe on the tool, capture
+    stdout. The Sigil tool returns the input unchanged when balanced or off
+    by more than 2; otherwise returns the appended/trimmed variant.
+
+    This function then lints the result via the supplied lint_fn — only
+    accepts the fix if it actually parses clean. Returns (code, note).
     """
+    depth = _paren_depth_ignoring_strings(code)
+    if depth == 0:
+        return code, ""
+    if abs(depth) > 2:
+        return code, ""
+
+    # Call the Sigil tool. Single arg = the code. Stdout = balanced version.
+    try:
+        r = subprocess.run(
+            [SIGIL_BIN, PAREN_BALANCE_TOOL, code],
+            capture_output=True, text=True, timeout=5,
+        )
+        if r.returncode != 0:
+            return code, ""
+        # The tool calls (println ...) which adds a trailing \n we strip.
+        candidate = r.stdout.rstrip("\n")
+    except (subprocess.TimeoutExpired, FileNotFoundError):
+        return code, ""
+
+    if candidate == code:
+        return code, ""
+    ok, _ = lint_fn(candidate)
+    if ok:
+        action = "appended" if depth > 0 else "trimmed"
+        return candidate, f"auto-balancer (Sigil): {action} {abs(depth)} ')'"
+    return code, ""
+
+
+def lint_sigil(code: str) -> tuple[bool, str]:
+    """Lint Sigil code via vm.exe --lint. Returns (ok, first_error_line)."""
+    import tempfile
+    f = tempfile.NamedTemporaryFile(mode="w", suffix=".sigil", delete=False)
+    f.write(code); f.close()
+    try:
+        r = subprocess.run([SIGIL_BIN, "--lint", f.name],
+                          capture_output=True, text=True, timeout=5)
+        if r.returncode == 0:
+            return True, ""
+        msg = (r.stderr.strip() or r.stdout.strip()).splitlines()
+        return False, msg[0] if msg else ""
+    except subprocess.TimeoutExpired:
+        return False, "lint timeout"
+    finally:
+        os.unlink(f.name)
+
+
+# =====================================================================
+# Surgical-hint validator — replaces the generic structural-diff hint
+# with shape-specific diagnostics that tell the model exactly which
+# pattern is wrong, plus the canonical fix.
+# =====================================================================
+
+def _format_lines_diff(got_lines: list[str], exp_lines: list[str], maxn: int = 6) -> str:
+    """Show a side-by-side line diff truncated to maxn lines."""
+    n = max(len(got_lines), len(exp_lines))
+    rows = []
+    for i in range(min(n, maxn)):
+        g = got_lines[i] if i < len(got_lines) else "(none)"
+        e = exp_lines[i] if i < len(exp_lines) else "(none)"
+        marker = " " if g == e else "*"
+        rows.append(f"  {marker} L{i+1}: got {g!r:30s}  expected {e!r}")
+    if n > maxn:
+        rows.append(f"  ... ({n - maxn} more lines)")
+    return "\n".join(rows)
+
+
+def validator_hint(got_stdout: str, expected: str, got_stderr: str) -> str:
+    """Surgical-hint validator. Detects the FAILURE SHAPE and emits a
+    targeted, actionable hint with the canonical fix. Replaces the earlier
+    generic structural-diff which gave the model context but no direction.
+    """
+    # ---- Runtime errors first: did-you-mean for undefined names ----
     if got_stderr:
-        # Real runtime error — short error message is the most actionable thing.
-        return got_stderr.strip().splitlines()[0][:200]
+        first = got_stderr.strip().splitlines()[0][:200]
+        # Structural anti-patterns that point to a different control-flow shape
+        if "for-loop iterator" in first and "was mutated" in first:
+            return (f"{first}  HINT: (for i 0 n ...) is fixed-stride. "
+                    "For skip-loops / variable-stride iteration, use "
+                    "(set i 0) (while (lt i n) ...body... (set i (add i k))). "
+                    "Pattern for consecutive runs:\n"
+                    "  (set i 0) (while (lt i n)\n"
+                    "    (set j i) (while (and (lt j n) (eq xs[j] xs[i])) (set j (add j 1)))\n"
+                    "    (println ...)\n"
+                    "    (set i j))")
+        # Common reach corrections
+        suggestions = {
+            "string_length": "use (len s) — Sigil string length is just len",
+            "arg_int": "if you want to parse a STRING into int, use parse_int instead — arg_int takes a CLI arg INDEX, not the string itself",
+            "first_index_of": "use index_of",
+            "list_": "Sigil arrays use array_* prefix, e.g. (array_get arr i), not list_*",
+            "to_int": "use parse_int s for string→int; to_int doesn't exist",
+            "regex_replace_all": "use regex_replace (it already replaces all matches by default)",
+            "string_split": "use split (no string_ prefix)",
+            "string_join": "use join (no string_ prefix)",
+        }
+        for bad, hint in suggestions.items():
+            if bad in first:
+                return f"{first}  HINT: {hint}"
+        return first
+
     if got_stdout == expected:
-        # Shouldn't happen — caller would have passed already.
         return "No diff."
 
-    notes = []
+    # ---- Pure-numeric off-by-one detection (single int output) ----
+    g_strip = got_stdout.rstrip("\n")
+    e_strip = expected.rstrip("\n")
+    try:
+        gi = int(g_strip)
+        ei = int(e_strip)
+        diff = gi - ei
+        if abs(diff) <= 2:
+            sign = "MORE" if diff > 0 else "LESS"
+            cause = ""
+            if diff == 1:
+                cause = (" Common cause: (split s \"\\n\") returns N+1 parts when "
+                         "s contains N newlines — for wc -l style counting use "
+                         "(count s \"\\n\") instead of (len (split s \"\\n\")).")
+            elif diff == -1:
+                cause = (" Common cause: missing the final element in a loop "
+                         "(off-by-one in (for i 0 n) — n is exclusive). Or "
+                         "you're counting newlines not lines: try (line_count s).")
+            return f"Got {gi}, expected {ei} — off by {abs(diff)} {sign}.{cause}"
+    except ValueError:
+        pass
 
-    # Trailing-newline mismatch is the single highest-frequency wrong-output
-    # shape (wc_l, every count-of-X task). Call it out explicitly.
+    # ---- Line-by-line shape analysis ----
+    g_lines = got_stdout.splitlines(keepends=False)
+    e_lines = expected.splitlines(keepends=False)
     g_tail = got_stdout.endswith("\n")
     e_tail = expected.endswith("\n")
+
+    notes: list[str] = []
+
+    # Trailing newline
     if g_tail and not e_tail:
-        notes.append("Your output has a TRAILING NEWLINE that should not be there.")
+        notes.append("Output has a TRAILING newline that shouldn't be there. (println adds \\n; use (print) without newline, or trim.)")
     elif e_tail and not g_tail:
-        notes.append("Your output is MISSING the final newline. The expected output ends with '\\n'.")
+        notes.append("Output is MISSING the final \\n. End with (println last) or add \\n explicitly.")
 
-    # Line-count mismatch — second highest frequency (off-by-one wc_l, missed
-    # log lines, extra paragraph separator).
-    g_lines = got_stdout.split("\n")
-    e_lines = expected.split("\n")
+    # Line count mismatch — surgical analysis
     if len(g_lines) != len(e_lines):
-        notes.append(
-            f"Your output had {len(g_lines)} lines (split on \\n), expected {len(e_lines)}."
-        )
+        if len(g_lines) > len(e_lines):
+            extra = g_lines[len(e_lines):]
+            notes.append(
+                f"Output has {len(g_lines)} lines, expected {len(e_lines)}. "
+                f"Extra lines at end: {extra[:3]}. "
+                "Likely cause: a final separator/extra println after the loop."
+            )
+        else:
+            missing = e_lines[len(g_lines):]
+            notes.append(
+                f"Output has {len(g_lines)} lines, expected {len(e_lines)}. "
+                f"Missing lines: {missing[:3]}. "
+                "Likely cause: loop bound off-by-one, or filtering out a row that should pass."
+            )
 
-    # First-difference char position — pinpoints exactly where the divergence
-    # starts. Useful for off-by-one on a single numeric output.
-    common = 0
-    for i in range(min(len(got_stdout), len(expected))):
-        if got_stdout[i] != expected[i]:
-            break
-        common += 1
-    if common < min(len(got_stdout), len(expected)):
-        ctx_g = repr(got_stdout[max(0, common - 5):common + 10])
-        ctx_e = repr(expected[max(0, common - 5):common + 10])
-        notes.append(
-            f"Outputs match for {common} chars, then diverge: yours has {ctx_g}, expected {ctx_e}."
-        )
-    elif len(got_stdout) > len(expected):
-        notes.append(
-            f"Your output is LONGER than expected by {len(got_stdout) - len(expected)} chars: extra trailing {got_stdout[len(expected):]!r}."
-        )
-    elif len(expected) > len(got_stdout):
-        notes.append(
-            f"Your output is SHORTER than expected by {len(expected) - len(got_stdout)} chars: missing trailing {expected[len(got_stdout):]!r}."
-        )
+    # Per-line content checks — detect over-match (line in got is a SUPERSTRING
+    # of the corresponding line in expected). Common in regex extraction tasks.
+    if len(g_lines) >= 1 and len(e_lines) >= 1:
+        over_matches = []
+        under_matches = []
+        for gl, el in zip(g_lines, e_lines):
+            if gl != el:
+                if el in gl and len(gl) > len(el):
+                    over_matches.append((el, gl))
+                elif gl in el and len(el) > len(gl):
+                    under_matches.append((gl, el))
+        if over_matches:
+            sample = over_matches[0]
+            notes.append(
+                f"Output line OVER-matched: extracted {sample[1]!r} but expected exactly {sample[0]!r}. "
+                "Likely cause: regex too greedy. Tighten the pattern boundaries: "
+                "use \\b word-anchors, bound character classes (e.g. {2,6} not {2,}), "
+                "or use a more specific class like [^ ] instead of .* "
+            )
+        if under_matches:
+            sample = under_matches[0]
+            notes.append(
+                f"Output line UNDER-matched: extracted {sample[0]!r} but expected {sample[1]!r}. "
+                "Pattern was too restrictive — broaden the character class."
+            )
 
-    return " ".join(notes) if notes else f"got {got_stdout!r} expected {expected!r}"
+    # Output-too-short / first-line-only diagnostic
+    if not notes:
+        # Fall back to first-difference position with surgical formatting
+        common = 0
+        for i in range(min(len(got_stdout), len(expected))):
+            if got_stdout[i] != expected[i]:
+                break
+            common += 1
+        if common == 0:
+            notes.append(
+                f"Output diverges immediately. Got {got_stdout[:60]!r}, expected {expected[:60]!r}."
+            )
+        else:
+            ctx_g = got_stdout[max(0, common - 8):common + 12]
+            ctx_e = expected[max(0, common - 8):common + 12]
+            notes.append(
+                f"Output matches first {common} chars, then diverges: "
+                f"got ...{ctx_g!r}... expected ...{ctx_e!r}..."
+            )
+
+    # Always include a compact lines-diff block when both have multiple lines
+    if len(g_lines) > 1 or len(e_lines) > 1:
+        notes.append("Lines diff:\n" + _format_lines_diff(g_lines, e_lines))
+
+    return " ".join(notes)
 
 
 def wh_cloud_estimate(in_tok: int, out_tok: int, upper: bool = False) -> float:
@@ -236,7 +423,8 @@ def eval_task_local_sigil(task: dict, model: str, index: dict, max_attempts: int
                           fallback_fresh: bool = False,
                           fallback_temp: float = -1.0,
                           validator: bool = False,
-                          no_rag: bool = False) -> dict:
+                          no_rag: bool = False,
+                          paren_balance: bool = False) -> dict:
     """Fine-tuned Sigil model with RAG and retry. The ensemble routing knobs:
     - fallback_model: model name to swap to when the primary's retries are exhausted
     - fallback_start: attempt index (0-based) at which to swap; -1 = swap on the final
@@ -289,13 +477,26 @@ def eval_task_local_sigil(task: dict, model: str, index: dict, max_attempts: int
                 rag_block=block)
         total_seconds += time.time() - t0
         if not code: continue
+
+        # Paren auto-balancer: cheap try at fixing ±1-2 paren-count slips
+        # before submitting to the interpreter. Only kicks in if the code
+        # would otherwise fail to lint AND has a small balance offset.
+        balance_note = ""
+        if paren_balance:
+            ok_lint, _ = lint_sigil(code)
+            if not ok_lint:
+                fixed, balance_note = auto_balance_parens(code, lint_sigil)
+                if balance_note:
+                    code = fixed
+
         ok, out, err = run_sigil(code, task["args"])
         if ok and out == task["expected"]:
             return {"path": "local_sigil", "pass": True, "attempts": attempt+1,
                     "code": code, "seconds": round(total_seconds, 2),
                     "chars": len(code), "wh": round(wh_local(total_seconds), 4),
                     "cost_usd": 0.0, "stdout": out, "stderr": "",
-                    "model_used": active_model, "fallback_used": fallback_used}
+                    "model_used": active_model, "fallback_used": fallback_used,
+                    "paren_balanced": balance_note}
         last_code = code
         last_stdout = out if ok else ""
         last_err = err.strip().splitlines()[0] if err else f"got {out!r} expected {task['expected']!r}"
@@ -377,6 +578,11 @@ def main():
                     help="Skip RAG entirely; the prompt only contains "
                          "SLIM_HEADER + the task. Useful for diagnosing what the "
                          "fine-tuned model knows on its own before adding seeds.")
+    ap.add_argument("--paren-balance", action="store_true",
+                    help="Before each interpreter submission, run the paren "
+                         "auto-balancer: if the code is unbalanced by ±1-2 closing "
+                         "parens, try the balanced variant. Cheap fix for the "
+                         "model's recurring nesting-count slips.")
     ap.add_argument("--python-local", default="qwen2.5-coder:7b")
     ap.add_argument("--cloud-model", default="claude-sonnet-4-6")
     ap.add_argument("--out", default=str(REPO / "benchmark" / "stream_c_results.json"))
@@ -409,7 +615,8 @@ def main():
                                   fallback_fresh=args.fallback_fresh,
                                   fallback_temp=args.fallback_temp,
                                   validator=args.validator,
-                                  no_rag=args.no_rag)
+                                  no_rag=args.no_rag,
+                                  paren_balance=args.paren_balance)
         b = eval_task_local_python(t, args.python_local)
         c = None
         if not args.skip_cloud:
