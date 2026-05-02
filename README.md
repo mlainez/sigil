@@ -627,9 +627,20 @@ Sigil is currently in active development. All changes must:
 
 ## About the Name
 
-**Sigil** - A symbolic language for AI code generation
+**Sigil** — A symbolic language for AI code generation.
 
 Also: Sigil: a symbolic mark with power.
+
+The project's working name through early February 2026 was **AISL**
+("AI-Optimized Systems Language", pronounced "aisle"). It was renamed
+to Sigil on 2026-02-11, the same evening the project pivoted from a
+pure language-design effort (with a C compiler and a self-hosting
+attempt) to a training-corpus and local-LLM benchmark effort. The
+[`papers/JOURNEY.md`](papers/JOURNEY.md) document opens with
+**"Phase -1: Pre-corpus genesis"**, which reconstructs the rename, the
+V2→V3 syntax cleanup that preceded it, and the C-compiler-to-OCaml-
+interpreter transition that triggered it — sourced from the local
+opencode session logs of that week.
 
 ---
 

@@ -10,6 +10,272 @@ chronology even where with hindsight a more direct path would have
 been chosen. Dead ends are flagged so reviewers can see what was
 ruled out and on what evidence.
 
+## Phase -1: Pre-corpus genesis (2026-02-05 to 2026-02-11)
+
+This section was reconstructed after the fact from local opencode
+session logs on the development host (28 sessions between 2026-02-05
+22:32 UTC and 2026-02-11 21:12 UTC). It exists because Phase 0 below
+opens with "the starting corpus was approximately 300 programs"
+without explaining where the language those programs are written in
+came from. The opencode log fills in that week. Quotations below are
+verbatim from user prompts in the recovered sessions; everything
+else is either a session timestamp, a git commit visible in `git
+log`, or — where flagged — inference from the surviving codebase.
+
+### The starting point: AISL with a C compiler
+
+When the first session opens at 2026-02-05 22:32 UTC the project is
+already named **AISL — "AI-Optimized Systems Language"** (the README
+of the time noted it was pronounced "aisle"). It already has a
+working **C compiler** under `compiler/c/` (`ast.h`, `parser.h`,
+`compiler.c`, `desugar.c`, `vm.c`, runtime binary `aisl-run`), a
+grammar in `grammar.md` and `.aisl.grammar`, examples, and a basic
+AISL-written compiler intended as a self-hosting target.
+
+The user's first prompt, verbatim:
+
+> *"I have created an AI optimized language called AISL, I have a
+> compiler written in C for it. There are examples in the examples
+> folder and the grammar is described in the grammar.md file. There
+> is a very basic AISL compiler written in AISL but I need it to be
+> a full featured compiler like the one written in C."*
+
+The follow-up adds: *"Any reference of code related to the V2 syntax
+should be removed."* So at the pre-Phase-0 state two things are
+already in motion: a self-hosting effort, and a syntax migration
+from V2 to V3.
+
+### The V2 → V3 syntax cleanup (token-cost-driven)
+
+V2 syntax wrapped function calls in an explicit `(call ...)` form
+with a bracketed argument list:
+
+```
+(call func [arg1 arg2 arg3])
+```
+
+The 2026-02-09 06:34 UTC session opens by quoting an external
+suggestion and turning it into a redesign brief:
+
+> *"I have a few observations from another model: minor extensions
+> could include BigDecimal type, flattened call arguments (token
+> efficiency), s-expression-only representations for intent
+> graphs … The argument list is wrapped in a separate array node or
+> bracketed list. This is redundant from the AI's perspective; the
+> model still has to generate the wrapper. Flattened form: `(call
+> func arg1 arg2 arg3)` … Token savings per call: 2–3 tokens. If the
+> model is generating hundreds of calls per task, this is
+> cumulative: potentially 10–30% token reduction for long
+> sequences."*
+
+The same session also pushes back on `array_new` requiring a fixed
+size: *"There seems to be a regular confusion with array_new that
+takes a parameter, can't the vm dynamically allocate memory to the
+array instead of specifying a fixed size at the beginning? Wouldn't
+that be easier for LLMs?"*
+
+A few turns later in the same session the user pushes the principle
+to its conclusion:
+
+> *"What about requiring the 'call' statement to call a function,
+> can it be removed? I want the best, lowest token usage with this
+> language, so anything that can remove tokens is welcome."*
+
+The decision in that session is what the current spec records:
+function invocation is implicit when the first element of a form is
+neither a keyword nor a Core statement. `(func arg1 arg2)` replaces
+`(call func arg1 arg2)`. The same session also adopts BigDecimal as
+a third numeric type alongside int and float (it survives unchanged
+into the present language as `decimal`).
+
+**Net effect of V3:** one fewer keyword (`call` removed), one
+bracket pair removed per call, dynamically sized arrays, BigDecimal
+added. The token-saving rationale was explicit and quantitative.
+
+### Core IR: from 6 statements to 5
+
+A direct consequence of removing `call` is that Sigil-Core shrinks.
+An audit session on 2026-02-07 07:55 UTC opens by asking the
+explore subagent to verify *"all 6 core statements (set, call,
+label, goto, ifnot, ret) implemented exactly as documented"*. The
+current `SIGIL-CORE.md` lists **5** (`set`, `label`, `goto`,
+`ifnot`, `ret`) and notes explicitly that *"function invocation uses
+implicit syntax `(func arg1 arg2 ...)` and is not a separate
+statement type."* The freezing of the IR at 5 happens in this same
+week. It has not changed since.
+
+### Why OCaml: the C VM perf crisis (and what the log does and does not say)
+
+On 2026-02-10 06:24 UTC the user pastes a `top` snapshot:
+
+```
+7816 marc  20 0  9462192   8,8g   3296 R  99,7  14,5   1:31.72 aisl-run
+7804 marc  20 0  7683516   7,1g   2948 R  96,3  11,7   1:43.70 aisl-run
+```
+
+Two `aisl-run` (C VM) processes pinned at ~100% CPU and consuming
+~8 GB of RAM each, running the WebSocket `chat_client` example. The
+prompt: *"My virtual machine for my AI optimized language takes a
+lot of resources when running the chat_client application using
+websockets. I want you to optimize my vm to be more memory efficient
+and take up less CPU resources."*
+
+The session does ship optimisations to the C VM — the model
+identifies the actual bugs (a hard-coded 16 MB stack constant
+`STACK_SIZE 16777216`; zero-timeout `socket_select` and
+`tcp_receive` busy-spinning the CPU on `struct timeval tv = {0, 0}`;
+arrays starting at capacity 16 and doubling; redundant string copies
+in chat_client) and patches them.
+
+By **2026-02-10 23:24 UTC**, however — the same day, ~17 hours later
+— a string-naming audit session is already inspecting *both*
+`compiler/ocaml/interpreter.ml` and `compiler/c/src/vm.c` side by
+side for parity. From that point on every audit session in the
+recovered logs treats the OCaml tree-walking interpreter as the new
+primary implementation (sessions are titled "Check C VM string ops",
+"Find C VM TLS implementation" — the C path is now the *reference*
+being checked against, not the production target).
+
+**Important caveat about the rationale.** The opencode log does
+*not* preserve an explicit "we are switching to OCaml because X"
+conversation. The rewrite itself appears to have been initiated
+outside the opencode harness (no opencode session contains the
+initial OCaml `interpreter.ml` skeleton). What the log establishes
+firmly is the *trigger* (a C-level resource crisis on a real
+WebSocket workload) and the *timing* (parallel OCaml implementation
+within hours, primary status by end of day, C compiler deleted
+shortly after). The OCaml-specific rationale below is therefore
+inferred from the surviving codebase, not quoted from the log:
+
+- **Garbage collection eliminates the bug class.** The 8.8 GB
+  chat_client process was a manual-memory-management failure on a
+  long-running WebSocket loop. OCaml's runtime removes that class of
+  bug.
+- **Pattern matching fits AST evaluation.** The interpreter's hot
+  path is `match expr with | Set _ -> ... | Goto _ -> ...` —
+  algebraic data types and exhaustive `match` are the natural shape
+  for a tree walker.
+- **Tree-walking, not bytecode.** Removing the desugar + compile +
+  bytecode-VM pipeline of the C path and replacing it with `eval`
+  directly on the AST cut the implementation to ~2 500 lines in a
+  single file (`interpreter/interpreter.ml`).
+- **No build pipeline complexity.** `dune build` produces a single
+  `vm.exe` that reads, parses and evaluates a `.sigil` file in one
+  step.
+
+The C compiler tree was removed shortly after. A continuation-prompt
+note from a slightly later session reads: *"The old C compiler
+(`compiler/c/`) was deleted but the LSP still shows ghost errors
+from those files — ignore all `compiler/c/src/*.c` errors
+entirely."*
+
+### The self-hosting attempt that did not survive the pivot
+
+The original goal of the very first prompt was to grow the basic
+AISL-written compiler to feature parity with the C compiler. Todos
+recorded against `ses_3d010675c` confirm that work was started:
+*implement lexer in AISL for v3.0 syntax, implement parser, implement
+AST data structures, implement bytecode generator, implement bytecode
+output writer, test the AISL compiler with example programs.*
+
+None of this survived the OCaml pivot. With hindsight the
+abandonment is rational: the language's surface was being aggressively
+redesigned during the same week (V2 → V3 → no-`call` → flat args →
+dynamic arrays → BigDecimal); re-targeting a self-hosted parser to
+each new V3 increment would have outrun the C reference, and the
+OCaml rewrite landed faster.
+
+### Cleanup rounds: the 8-Item Plan, the 14 Findings, Round 2
+
+Once the OCaml interpreter was primary, three back-to-back cleanup
+passes (visible in `git log` as commits `ef492c0` through `bbfb84f`)
+brought docs and implementation into agreement:
+
+**8-Item Improvement Plan** (token efficiency, ergonomics):
+
+1. Rewrote `.aisl.grammar` to ~196 lines with accurate builtin signatures.
+2. Added `(cond)` flat multi-branch conditional.
+3. Added `argv` / `argv_count` builtins.
+4. Promoted commonly-needed string ops (`starts_with`, `ends_with`,
+   `contains`, `trim`, `replace`) from stdlib to builtins.
+5. Added `floor` / `ceil` / `round`.
+6. Fixed `string_slice` bugs in `http.aisl`.
+7. Added array literal `[1 2 3]` and map literal `{"k" "v"}` syntax.
+8. Removed ~50 old aliases from `eval_call`.
+
+**First Audit — 14 fixes** (commit `f8a5ea7`): the most consequential
+finding was that `LANGUAGE_SPEC.md` still used the V2 `(call ...)`
+syntax in 168 places — anyone following the spec would produce code
+that failed at runtime. The audit also revealed 6 phantom stdlib
+modules (documented but not implemented) and 7 real but undocumented
+modules; the fix brought the documented count from a fictional 13 to
+a truthful 14. Several builtin signatures were corrected
+(`process_kill`, `socket_select`, `file_write`/`append`,
+`dir_create`/`delete`, `process_exec`).
+
+**Round 2 audit** (commits `bbfb84f` and adjacent): deeper fixes
+including `AGENTS.md` still containing 48 `(call ...)` occurrences
+and stale "if/else not yet supported" claims for features that had
+been fully implemented.
+
+The pattern across all three rounds is consistent: docs lagged the
+implementation; the audits reconciled them.
+
+### The AISL → Sigil rename (2026-02-11, between 18:41 and 20:17 UTC)
+
+Two timestamps bracket the rename precisely. The last session whose
+user prompt still says *"AISL"* and references paths under
+`/var/home/marc/Projects/aisl/` is the audit started at **18:41
+UTC**. The next session, started at **20:17 UTC**, opens with: *"you
+have access to codellama running in ollama on 192.168.0.30, I want
+you to benchmark some token consumption on code generation of the
+same use case both with python bash and **sigil**"*. From that point
+on every session uses the new name and references
+`/var/home/marc/Projects/sigil/`.
+
+The rename mechanics survive in the log: a single sed-driven sweep
+over every `.md` file in the repo (over 50 substitutions in two
+`find … -exec sed -i …` invocations), preserving content while
+swapping the name. Notably the script replaced the old "About the
+Name" block:
+
+- Old: *"AISL = AI-Optimized Systems Language … AISL sounds like
+  'aisle' — a clear path forward for AI code generation."*
+- New: *"Sigil — A symbolic language for AI code generation. Also:
+  Sigil: a symbolic mark with power."*
+
+Two things are worth saying about *why* the rename happened when it
+did. **First**, the rename coincides with a project pivot visible in
+the same evening's session titles: the immediately following sessions
+are *"Inventory Sigil training data"*, *"Survey all .sigil files"*,
+and four parallel *"Write synthetic batch N"* sessions run by general
+subagents. The project stopped being primarily a language-design
+project and started being a corpus + benchmark project for
+fine-tuning local LLMs. The rename and the pivot happened together.
+**Second**, the recovered log does *not* contain an explicit "I want
+to call it Sigil because …" conversation — the choice of name was
+made outside opencode, and only the rename mechanics survive.
+
+The git log captures the same transition in two commits: `091cbc4`
+("Rename language from AISL to Sigil") and `16181b8` ("Complete
+AISL→Sigil rename: update dune build config and rename opam file").
+The opam-package rename (`aisl.opam` → `sigil.opam`) is recorded as
+a todo on `ses_3b9c72439`: *"Rename `interpreter/aisl.opam` →
+`interpreter/sigil.opam` and update content."*
+
+### Bridge to Phase 0
+
+Phase 0 below opens with *"the starting corpus was approximately 300
+programs … generated by Claude Opus from a hand-curated set of task
+descriptions, validated against the Sigil interpreter, and retained
+only when output matched expected."* The recovered logs let us name
+where that corpus came from: the four parallel *"Write synthetic
+batch N"* sessions on 2026-02-11 21:06–21:07 UTC, the *"Inventory
+Sigil training data"* session that immediately preceded them, and
+the *"Read failed attempts, create corrections"* session at 21:12
+UTC. Those six sessions are the boundary between pre-corpus genesis
+and the JOURNEY narrative proper.
+
 ## Phase 0: The starting point — why Sigil?
 
 Sigil exists as a designed-for-LLM language. The argument: a human

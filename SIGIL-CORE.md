@@ -221,3 +221,17 @@ The interpreter handles Agent constructs (while, loop, for, break, continue, if,
   - 5 core statements: set, label, goto, ifnot, ret
   - Type-directed dispatch for built-ins
   - Function-scoped labels with jump patching
+
+### Pre-v1.0 history
+
+The frozen 5-statement Core is the result of a deliberate
+simplification during the V2 → V3 syntax migration in early February
+2026. An audit prompt on 2026-02-07 still referenced *"6 core
+statements (set, call, label, goto, ifnot, ret)"* — `call` was a
+standalone Core statement and function calls were written as
+`(call func arg1 arg2)`. During the same week the user pushed for
+token-cost reductions (see `papers/JOURNEY.md` Phase -1: V3 → no
+`call` keyword), and `call` was removed: function invocation became
+implicit when the first element of a form is neither a Core
+statement nor a special form. The 5-statement count above is the
+result. The IR has not changed since.
