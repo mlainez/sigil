@@ -116,6 +116,134 @@ What *is* recovered starts the moment the project's first chat tool
 opens, ~5 days later than the typical "blank-page" start of a
 language project.
 
+### Day zero, afternoon: the philosophical foundations (mammouth.ai, 2026-02-05 16:11–21:06 UTC)
+
+Before any editor opened, the user spent ~5 hours in two
+mammouth.ai chat sessions establishing what the language was *for*.
+Both sessions are in
+[`papers/early_design_sessions/mammouth/`](./early_design_sessions/mammouth/);
+the substantive philosophical content is in the second one (Claude
+Sonnet 4.5, 32 messages, 16:34→21:06 UTC).
+
+Three design directives, given verbatim, define the project:
+
+**Directive 1 — humans don't read this code (Mistral session, U02, 16:14 UTC):**
+
+> *"make it 100% AI optimized and don't care about human usage,
+> they are not meant to read this language's code"*
+
+This is the foundational constraint. Every later "meet halfway"
+move (Phases 14, 15, 18) is a softening of this directive when it
+collided with what models actually generate. But the *intent* —
+optimise for AI, accept human-unreadability as a cost — is
+unbroken in the codebase: Sigil today is still S-expression,
+prefix-only, no infix operators, no human-ergonomic sugar.
+
+**Directive 2 — ambiguity reduction is the value prop (Sonnet session, U01, 16:35 UTC):**
+
+> *"This is supposed to be an AI optimized language, so AI can
+> write programs reducing the risk of ambiguity that human
+> readable languages cause"*
+
+The mechanism named: explicit type annotations, canonical
+representation (one way to write each thing), formal grammar.
+The current codebase keeps the canonical-representation property
+(via aggressive ONE WAY ONLY refactors in the AISL week — see
+"The design directive" subsection below). It dropped
+mandatory-explicit types when v3 syntax landed type inference for
+`(set ...)` on Apr 22; only `(fn ...)` parameters still require
+explicit types. The compromise: still less ambiguous than Python,
+not as type-strict as the original sketch.
+
+**Directive 3 — Sigil as the verified IR layer between AI and humans
+(Sonnet session, U10, 17:10 UTC):**
+
+> *"so aisl would be the main code generation layer of the AI
+> Agent which would then translate this code into human readable
+> one if necessary"*
+
+This is *the* architectural thesis. Sonnet replied with an
+explicit pipeline diagram:
+
+```
+Human Intent (NL)
+        ↓
+LLM (fine-tuned for AISL generation)
+        ↓
+AISL Code (canonical, type-safe, effect-tracked, formally verified)
+        ↓                            ↓
+   AISL Runtime              Human-readable view
+   (direct exec)             (Python/JS/English, on demand)
+```
+
+This thesis is **half-built** in the current codebase. The
+left-hand path — fine-tune LLMs to emit Sigil, run it directly via
+the OCaml interpreter — is the entire Phase 3-19 story; that's the
+half that worked. The right-hand path — Sigil → Python/JS/English
+translation for human review — was never implemented. We didn't
+need it because the agent harness (Phase 18) returns stdout, not
+code; cloud orchestrators consume the *result* of Sigil execution,
+not the source.
+
+**What was sketched in U09 and never built — the safety / verifier
+layer:**
+
+The Sonnet response to U09 ("can you develop on AI agent safety?")
+proposed a *type-system-enforced* effect system: every function
+type carries `Pure | IORead | IOWrite | Network` annotations;
+capability-restricted IO (`IORead "/home/user/*"` rejected at
+compile time if the path is outside the whitelist); structural
+recursion guarantees termination. None of this is in the language.
+
+Sigil today has the same surface as a normal scripting language:
+`(file_read path)` works regardless of who's calling and from
+where. The "safety" we have is sandboxing the `vm.exe` subprocess
+plus a wall-clock timeout. Effective for the bench harness, but
+**not** the formal-verification story the original mammouth thesis
+laid out.
+
+This is the load-bearing **gap between the original thesis and the
+current artefact**. It is recoverable — a runtime-enforced
+declare-effects + whitelist mechanism would close most of the gap
+without requiring full formal verification — and it is the most
+direct lever for differentiating Sigil from "yet another scripting
+language" if/when the agent-harness story gets pushed harder. See
+Phase 18 for the agent-harness ambitions; Phase 19 for the
+practical "meet halfway" methodology that, in retrospect, has
+been retreating from this thesis ever since the first commit.
+
+**What survived intact from the mammouth sessions:**
+
+- S-expression syntax (still load-bearing; never went infix).
+- Canonical representation (ONE WAY ONLY).
+- Statically-typed function signatures (params + return).
+- Polymorphic builtins on collections (defined as the design
+  goal in U03's concurrency reply, retained).
+- The `Result` type was *removed* on 2026-02-09 (`dd6c4e6`,
+  rationale: "for LLM simplicity"). The mammouth sessions had it
+  prominently; the audit decided LLMs prefer try/catch.
+
+**What was sketched and dropped:**
+
+| Original (mammouth, Feb 5 PM) | Current (May 2) | What happened |
+|---|---|---|
+| Effect annotations on function types | Not in language | Never implemented; would close the agent-harness safety gap |
+| Capability-restricted IO (`IORead "/path/*"`) | Not in language | Never implemented |
+| Structural recursion → guaranteed termination | Plain `while`/`for`/recursion | Drifted to general computation |
+| AISL → Python/JS/English translation | Not in language | The agent harness made it unnecessary for execution; could be revived for trust UX |
+| AISL → Coq/SMT-LIB export | Not in language | Wrong scope; would have been a 6-month side-quest |
+| AISL → Mermaid view of control flow | Not in language | Low priority; humans rarely need this with the agent harness |
+| Module system with explicit imports/exports | Module system retained | Survived |
+| `Future` / `Channel` for concurrency | Process-spawn IPC + non-blocking sockets | Concurrency primitives went pragmatic, not actor-style |
+
+The drift is a real-world version of the safety-vs-utility
+trade-off every AI-language project faces: the formally-verified
+small-scope option (Coq, Dafny, lean) loses to the practically-
+useful broad-scope option (Python, JavaScript, today's Sigil) in
+adoption every time. We took the second path. Whether to walk
+some of the first path back is the open question for the next
+phase.
+
 ### Day zero: 2026-02-05 evening (VSCode Copilot Chat record)
 
 The earliest traceable activity on this host is a **VSCode + GitHub
