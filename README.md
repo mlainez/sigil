@@ -56,6 +56,7 @@ If you only have time for one document, pick from this list by your goal.
 | Document | What it is |
 |---|---|
 | [`agent_workflow/README.md`](agent_workflow/README.md) | Patterns for using Sigil from inside an agentic-AI workflow. |
+| [`tools/agent_harness/README.md`](tools/agent_harness/README.md) | **MCP server** that exposes the local Sigil ensemble as a tool any MCP-aware agent can call (Claude Code, opencode, others). Setup instructions for both, plus the A/B harness measuring cloud-token savings. |
 | [`examples/README.md`](examples/README.md) | Example programs index. Real working programs. |
 | [`examples/chat_app/README.md`](examples/chat_app/README.md) | WebSocket chat application walkthrough. |
 | [`examples/todo_app/README.md`](examples/todo_app/README.md) | TODO app with SQLite backend walkthrough. |

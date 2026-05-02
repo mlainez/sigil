@@ -1,6 +1,18 @@
 # Agentic harness + comparison test suite — plan
 
-**Status:** plan, awaiting confirmation before implementation.
+**Status:** Phase A and B implemented (2026-05-02). Phase C run on a
+seeded 8-task suite; the headline finding is that the local Sigil
+ensemble's strong Stream C tooling accuracy (93%) does NOT translate
+to multi-step agentic composition tasks (12%) — Path B was worse than
+Path A on every axis on this suite. See `papers/JOURNEY.md` Phase 15.1
+and `tools/agent_harness/README.md` for the actual numbers and the
+implications for the value claim.
+
+The plan below is preserved as the original design document. Concrete
+implementation lives in `tools/agent_harness/` (MCP server + A/B
+harness + 8-task seed suite + setup docs for Claude Code and opencode).
+
+---
 **Goal:** quantify whether delegating tooling-style code generation from a cloud LLM to the local Sigil ensemble saves meaningful cost (tokens, $, Wh) without hurting task success rate, on **multi-step agentic tasks** that mirror real tool-use workloads.
 
 This plan is the next phase after Phase 14 (philosophy retrospective). The Phase 13 result — local Sigil ensemble at 92% of Sonnet on isolated tooling tasks — does not directly imply a cost win when those tasks are embedded in an agentic flow. The agentic question is different: in a multi-step "plan → tool → inspect → tool → synthesize" loop, **which tool calls are economical to delegate and which are not?**
