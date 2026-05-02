@@ -48,12 +48,12 @@ All Qwen-Sigil-* models below are QLoRA fine-tunes of `Qwen/Qwen2.5-Coder-7B-Ins
 ### qwen-sigil:3b (proof of concept)
 - **Why**: Validate the local-QLoRA path on a small model before committing to 7B.
 - **Base**: `Qwen/Qwen2.5-Coder-3B-Instruct`.
-- **Recipe**: bf16 + nf4 4-bit, fp16 compute path (NaN'd briefly on RDNA3 numerics; resolved by switching to bf16 compute for QLoRA, see Phase 5.1).
+- **Recipe**: bf16 + nf4 4-bit, fp16 compute path (NaN'd briefly on RDNA3 numerics; resolved by switching to bf16 compute for QLoRA, see Phase 7.1).
 - **Corpus**: ~1977-example `training_corpus.jsonl` v1.
 - **Result**: 240 MB safetensors / 120 MB GGUF.
   - **Synthetic 100-task A/B (10 iter × 10 tasks): A=43/100 (43%), B=48/100 (48%)** — vs baseline (un-tuned 3B) **A=10/100, B=29/100**. Net **+33 pp on A, +19 pp on B** from fine-tuning. Result files: `benchmark/rag_loop_3b_baseline.json`, `benchmark/rag_loop_3b_finetuned.json`.
   - End-to-end workflow proven: local fine-tune → GGUF → ollama serve.
-- **Lesson**: 3B was too small to absorb the full Sigil pattern set (final score still 43-48% on the synthetic suite vs the eventual 80%+ of the 7B). Informed the move to 7B. The numerics gotcha (RDNA3 + bf16 + bnb) became Phase 5.1 documentation.
+- **Lesson**: 3B was too small to absorb the full Sigil pattern set (final score still 43-48% on the synthetic suite vs the eventual 80%+ of the 7B). Informed the move to 7B. The numerics gotcha (RDNA3 + bf16 + bnb) became Phase 7.1 documentation.
 
 ### qwen-sigil:7b (v1)
 - **Why**: Scale up from 3B once 3B confirmed the workflow.
@@ -68,7 +68,7 @@ All Qwen-Sigil-* models below are QLoRA fine-tunes of `Qwen/Qwen2.5-Coder-7B-Ins
 - **Why**: Deeper retrain than v1 with prompt-format and corpus refinements.
 - **Recipe**: lr=1e-4, max_seq=2048 (the v1 settings — they happened to work on the v2 corpus because no example exceeded 1500 tokens *in the early-shuffled batches*).
 - **Corpus**: refined v2 corpus. Final loss 0.17.
-- **Result**: 76% pass on synthetic 100-task; 85% with retry. **20/30 (67%) on Stream C deployment study.** Held as deployment default through Phase 12.
+- **Result**: 76% pass on synthetic 100-task; 85% with retry. **20/30 (67%) on Stream C deployment study.** Held as deployment default through Phase 15.
 - **Lesson**: v2's success at lr=1e-4 was data-dependent (no long-token examples). When v3's corpus added longer Python refs, the same lr regimen NaN'd — the bf16 + Navi31 stability finding documented in `feedback_navi31_qlora.md`.
 
 ### qwen-sigil-v3:7b (failed retrain — bf16 forward overflow)
@@ -83,7 +83,7 @@ All Qwen-Sigil-* models below are QLoRA fine-tunes of `Qwen/Qwen2.5-Coder-7B-Ins
 - **Recipe**: the v3.1-stable recipe documented in `feedback_navi31_qlora.md`.
 - **Corpus**: v3 corpus, filtered to ≤1500-token examples (drops about 1% of entries).
 - **Result**: Trained successfully with no NaN. Final loss 0.13 (deeper than v2's 0.17). **84% on synthetic with retry. But 16/30 (53%) on Stream C — −4 vs v2.**
-- **Lesson**: This is the **failure-mass-redistribution finding** (Phase 9). Three retrains on the same corpus shape converged on a ~22/30 ceiling. Retraining shifts which tasks fail, but doesn't expand the budget. v3.1 lost 5 tasks v2 had memorised (`cut_first_n_chars`, `grep_only_matching`, `process_grep`, `json_path_extract`, `extract_urls`) and gained one (`ipv4_validate`). v2 stayed deployment default.
+- **Lesson**: This is the **failure-mass-redistribution finding** (Phase 12). Three retrains on the same corpus shape converged on a ~22/30 ceiling. Retraining shifts which tasks fail, but doesn't expand the budget. v3.1 lost 5 tasks v2 had memorised (`cut_first_n_chars`, `grep_only_matching`, `process_grep`, `json_path_extract`, `extract_urls`) and gained one (`ipv4_validate`). v2 stayed deployment default.
 
 ### qwen-sigil-v4:7b (corpus + prelude seeds)
 - **Why**: Test whether adding the new prelude functions (tokens, squeeze, split_blocks, find_all, line_count) and 14 seed examples to the corpus would let a v4 retrain combine v2's broad coverage with new-pattern coverage.
@@ -122,7 +122,7 @@ All Qwen-Sigil-* models below are QLoRA fine-tunes of `Qwen/Qwen2.5-Coder-7B-Ins
 ## Phi-4 lineage (failure-shape diversity for ensemble)
 
 ### phi-sigil-v1:14b (introduced for ensemble diversity)
-- **Why**: After v3.1 confirmed three rounds of single-model retraining produced no further gain, the next move was failure-shape diversity (Phase 13). Phi-4 was chosen because it's the most architecturally distinct from Qwen on the ollama.com catalog that fits 16 GB QLoRA: dense 14B, Microsoft's textbook+synthetic training data, completely different prior from Qwen's Alibaba web-code mix.
+- **Why**: After v3.1 confirmed three rounds of single-model retraining produced no further gain, the next move was failure-shape diversity (Phase 16). Phi-4 was chosen because it's the most architecturally distinct from Qwen on the ollama.com catalog that fits 16 GB QLoRA: dense 14B, Microsoft's textbook+synthetic training data, completely different prior from Qwen's Alibaba web-code mix.
 - **Recipe**: v3.1-stable recipe, with two Phi-3-arch-specific tweaks:
   - LoRA target modules: `[qkv_proj, o_proj, gate_up_proj, down_proj]` (Phi-3/4 uses fused projections, not Qwen's split `q_proj`/`k_proj`/`v_proj`).
   - Auto-detection added in `finetune_local.py`.

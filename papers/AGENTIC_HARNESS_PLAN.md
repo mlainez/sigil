@@ -4,7 +4,7 @@
 seeded 8-task suite; the headline finding is that the local Sigil
 ensemble's strong Stream C tooling accuracy (93%) does NOT translate
 to multi-step agentic composition tasks (12%) — Path B was worse than
-Path A on every axis on this suite. See `papers/JOURNEY.md` Phase 15.1
+Path A on every axis on this suite. See `papers/JOURNEY.md` Phase 18.1
 and `tools/agent_harness/README.md` for the actual numbers and the
 implications for the value claim.
 
@@ -15,7 +15,7 @@ harness + 8-task seed suite + setup docs for Claude Code and opencode).
 ---
 **Goal:** quantify whether delegating tooling-style code generation from a cloud LLM to the local Sigil ensemble saves meaningful cost (tokens, $, Wh) without hurting task success rate, on **multi-step agentic tasks** that mirror real tool-use workloads.
 
-This plan is the next phase after Phase 14 (philosophy retrospective). The Phase 13 result — local Sigil ensemble at 92% of Sonnet on isolated tooling tasks — does not directly imply a cost win when those tasks are embedded in an agentic flow. The agentic question is different: in a multi-step "plan → tool → inspect → tool → synthesize" loop, **which tool calls are economical to delegate and which are not?**
+This plan is the next phase after Phase 17 (philosophy retrospective). The Phase 16 result — local Sigil ensemble at 92% of Sonnet on isolated tooling tasks — does not directly imply a cost win when those tasks are embedded in an agentic flow. The agentic question is different: in a multi-step "plan → tool → inspect → tool → synthesize" loop, **which tool calls are economical to delegate and which are not?**
 
 ---
 
@@ -50,7 +50,7 @@ Four configurations, each measured on the same task suite with the same input da
 - **Tool generation**: same local Sigil ensemble
 - **Tool execution**: local `vm.exe`
 - **Synthesizer**: local model
-- **Cost dominator**: zero $ marginal cost; Wh dominator. The accuracy upper-bound here is what we measured in Phase 13 (~83% on isolated tasks), so we expect this to be the lowest-accuracy path.
+- **Cost dominator**: zero $ marginal cost; Wh dominator. The accuracy upper-bound here is what we measured in Phase 16 (~83% on isolated tasks), so we expect this to be the lowest-accuracy path.
 
 ### Path D (optional, if budget allows): Sonnet-only-tools
 - Like Path A, but Sonnet writes Sigil instead of Python.
@@ -245,7 +245,7 @@ If the suite is dominated by reasoning-heavy tasks where the model could plausib
 ### Risk 2: Local tool failures cascade
 If the local Sigil ensemble fails on a tool call, the orchestrator needs to retry, which costs cloud tokens. If failures are common, Path B could end up *more* expensive than Path A.
 
-**Mitigation:** Track tool failure rate per path. If Path B's tool failure rate > 15%, the saving claim is moot until we improve generation reliability. The Phase 13 result of 25/30 on isolated tasks (83%) is below the 85% threshold this would need; the agentic suite may show similar.
+**Mitigation:** Track tool failure rate per path. If Path B's tool failure rate > 15%, the saving claim is moot until we improve generation reliability. The Phase 16 result of 25/30 on isolated tasks (83%) is below the 85% threshold this would need; the agentic suite may show similar.
 
 ### Risk 3: Caching makes Path A look cheaper than it is
 Sonnet's prompt caching can dramatically reduce repeated-prompt costs. The "true" comparison should be cache-aware: same caching strategy for both paths.

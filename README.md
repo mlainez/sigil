@@ -70,7 +70,7 @@ If you came to this repository fresh and want to understand both **what Sigil is
 3. **[`papers/JOURNEY.md`](papers/JOURNEY.md)** — Phases 4–7 (un-tuned 32B + RAG, then 3B and 7B local QLoRA fine-tunes). The Sigil-vs-Python head-to-head lands here.
 4. **[`papers/MEETING_HALFWAY.md`](papers/MEETING_HALFWAY.md)** — the design philosophy that emerged from the failure analysis. Read alongside JOURNEY phase 11 ("language additions earned by failures").
 5. **[`papers/JOURNEY.md`](papers/JOURNEY.md)** — Phases 8–13 (Sonnet comparison; deployment study; ensemble fallback hypothesis; routing variants). The local-vs-frontier comparison is here, with the 25/30 ensemble result.
-6. **[`papers/JOURNEY.md`](papers/JOURNEY.md)** — **Phase 14 retrospective.** Per-principle grade against the original README claims. The most opinionated section.
+6. **[`papers/JOURNEY.md`](papers/JOURNEY.md)** — **Phase 17 retrospective.** Per-principle grade against the original README claims. The most opinionated section.
 7. **[`papers/CONFIDENTIALITY_AND_LOCAL_LLMS.md`](papers/CONFIDENTIALITY_AND_LOCAL_LLMS.md)** — why this work matters beyond accuracy: data residency and compliance.
 8. **[`benchmark/RESULTS.md`](benchmark/RESULTS.md)** + the JSON files in `benchmark/` — every numerical claim in the narrative cites a result file. They're all here, reproducible.
 9. **[`stdlib/README.md`](stdlib/README.md)** — the **builtin-vs-stdlib boundary principle** and the **if-Lisp-form trap**. The clearest statement of what we learned about language-design pitfalls.
@@ -178,9 +178,9 @@ These design decisions survived months of iteration with real models on real ben
 
 5. **No comments.** Models don't write comments; corpus stays clean; no token waste on cruft.
 
-6. **Pure-Sigil stdlib.** All stdlib in Sigil itself. Phase 12 *strengthened* this principle by moving convenience functions from OCaml to an auto-loaded prelude written in Sigil. The reason: clean Sigil stdlib doubles as documentation the model can read at retrieval time.
+6. **Pure-Sigil stdlib.** All stdlib in Sigil itself. Phase 15 *strengthened* this principle by moving convenience functions from OCaml to an auto-loaded prelude written in Sigil. The reason: clean Sigil stdlib doubles as documentation the model can read at retrieval time.
 
-7. **Panic-based errors with contextual messages.** Hard panics, but the messages tell the model what to fix (`"sub takes (int int) or (float float), got (string int)"`). Phase 11 added type-tuple hints across the high-frequency ops; +3pp on synthetic benchmark.
+7. **Panic-based errors with contextual messages.** Hard panics, but the messages tell the model what to fix (`"sub takes (int int) or (float float), got (string int)"`). Phase 14 added type-tuple hints across the high-frequency ops; +3pp on synthetic benchmark.
 
 8. **Machine-readable docs first.** `.sigil.grammar` (~800 tokens) is what models consume; prose docs are secondary.
 
@@ -638,7 +638,7 @@ to Sigil on 2026-02-11, the same evening the project pivoted from a
 pure language-design effort (with a C compiler and a self-hosting
 attempt) to a training-corpus and local-LLM benchmark effort. The
 [`papers/JOURNEY.md`](papers/JOURNEY.md) document opens with
-**"Phase -1: Pre-corpus genesis"**, which reconstructs the rename, the
+**"Phase 0: Pre-corpus genesis"**, which reconstructs the rename, the
 V2→V3 syntax cleanup that preceded it, and the C-compiler-to-OCaml-
 interpreter transition that triggered it — sourced from the local
 opencode session logs of that week.

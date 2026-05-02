@@ -1,6 +1,6 @@
 # Meeting the Model Halfway: Language Design as Reasoning Aid
 
-**Status:** working draft, 2026-04-30; promoted to *operational design philosophy* on 2026-05-01 after Phase 14 retrospective.
+**Status:** working draft, 2026-04-30; promoted to *operational design philosophy* on 2026-05-01 after Phase 17 retrospective.
 **Position:** what started as one design principle among many has become **the** design philosophy that emerged from working with pre-trained models. The original "ONE WAY ONLY" principle from the README turned out to be aspirational — the practical Sigil has ~30 aliases, each earned by a benchmark win where a model reached for a name from its training distribution.
 
 Meeting halfway is not a workaround for the original design; it is what the design *became* when subjected to months of empirical testing against pre-trained Coder models.
