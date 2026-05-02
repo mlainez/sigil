@@ -12,50 +12,197 @@ ruled out and on what evidence.
 
 ## Phase -1: Pre-corpus genesis (2026-02-05 to 2026-02-11)
 
-This section was reconstructed after the fact from local opencode
-session logs on the development host (28 sessions between 2026-02-05
-22:32 UTC and 2026-02-11 21:12 UTC). It exists because Phase 0 below
-opens with "the starting corpus was approximately 300 programs"
-without explaining where the language those programs are written in
-came from. The opencode log fills in that week. Quotations below are
-verbatim from user prompts in the recovered sessions; everything
+This section was reconstructed after the fact from two local
+session-log sources on the development host:
+
+- **VSCode + GitHub Copilot Chat** sessions in the
+  `Projects/aisl` and (later) `Projects/sigil` workspaces — five
+  saved chats, the substantive ones being two on the evening of
+  2026-02-05 (35 + 16 requests, ~16 MB combined). These are where
+  the project was born and where the foundational AI-design
+  directives were given.
+- **opencode** sessions on the same host — 28 sessions between
+  2026-02-05 22:32 UTC and 2026-02-11 21:12 UTC. These are where the
+  iterative audits, the V3 syntax refinement, the chat_client perf
+  crisis, and the AISL→Sigil rename took place.
+
+Phase 0 below opens with "the starting corpus was approximately 300
+programs" without explaining where the language those programs are
+written in came from. This phase fills in that week. Quotations
+below are verbatim user prompts from the recovered sessions; the
+prefix `[VSCode]` or `[opencode]` indicates which source. Everything
 else is either a session timestamp, a git commit visible in `git
 log`, or — where flagged — inference from the surviving codebase.
 
-### The starting point: AISL with a C compiler
+### Day zero: 2026-02-05 evening (VSCode Copilot Chat record)
 
-When the first session opens at 2026-02-05 22:32 UTC the project is
-already named **AISL — "AI-Optimized Systems Language"** (the README
-of the time noted it was pronounced "aisle"). It already has a
-working **C compiler** under `compiler/c/` (`ast.h`, `parser.h`,
-`compiler.c`, `desugar.c`, `vm.c`, runtime binary `aisl-run`), a
-grammar in `grammar.md` and `.aisl.grammar`, examples, and a basic
-AISL-written compiler intended as a self-hosting target.
+The earliest traceable activity on this host is a **VSCode + GitHub
+Copilot Chat** session that opens at **2026-02-05 20:49 UTC** in the
+`Projects/aisl` workspace, with the first real prompt arriving at
+21:03 UTC — about 1.5 hours before the first opencode session. The
+project is already named **AISL — "AI-Optimized Systems Language"**
+(the README of the time noted it was pronounced "aisle") and it
+already has a "stage 0" **C compiler** under `compiler/c/` whose
+existence pre-dates any session log on this host. The opening prompt
+is therefore a *fix-my-existing-thing* request, not a *let's-design-a-language*
+request:
 
-The user's first prompt, verbatim:
+> *[VSCode] "I'm creating an AI first language that is optimized for
+> AI and not for humans, I am building a compiler for it. The syntax
+> is used to define the rules and the representation is as an ast as
+> seen in examples, can you fix the issues with the code so the stage
+> 0 compiler compiles and can be used? Check the Makefile."* —
+> 2026-02-05 21:03 UTC
 
-> *"I have created an AI optimized language called AISL, I have a
-> compiler written in C for it. There are examples in the examples
-> folder and the grammar is described in the grammar.md file. There
-> is a very basic AISL compiler written in AISL but I need it to be
-> a full featured compiler like the one written in C."*
+Over the next two hours of the same VSCode session (35 requests
+total, ending 22:57 UTC) the project crosses several milestones that
+later sessions take for granted: the stage 0 C compiler is fixed and
+brought to a state where `aisl-run examples/test_io.aislc` runs
+(req[5]); `compiler/c/` is restructured to common C conventions
+(req[6]); and the user articulates the self-hosting goal explicitly:
 
-The follow-up adds: *"Any reference of code related to the V2 syntax
-should be removed."* So at the pre-Phase-0 state two things are
-already in motion: a self-hosting effort, and a syntax migration
-from V2 to V3.
+> *[VSCode] "Now, I want to have a second stage compiler to bytecode
+> and vm that is written in aisl itself, so that I can compile the
+> compiler only with aisl."* — 2026-02-05 21:22 UTC
 
-### The V2 → V3 syntax cleanup (token-cost-driven)
+A second VSCode session starts ~2 minutes after the first closes
+(22:59 → 23:29 UTC, 16 requests) and continues the self-hosting
+attempt. Its final prompt is *"cleanup the files and verify that all
+compilers are still working and that example files are on v3, also,
+rename GRAMMAR_V3 to GRAMMAR"* — confirming V3 was already a draft
+on disk by Feb 5 night (the Feb 9 session further down refines V3,
+it does not introduce it).
 
-V2 syntax wrapped function calls in an explicit `(call ...)` form
-with a bracketed argument list:
+The first **opencode** session on the same project opens at **22:32
+UTC** of the same day — one minute before the second VSCode session
+starts. Its prompt is the post-VSCode summary of state:
+
+> *[opencode] "I have created an AI optimized language called AISL,
+> I have a compiler written in C for it. There are examples in the
+> examples folder and the grammar is described in the grammar.md
+> file. There is a very basic AISL compiler written in AISL but I
+> need it to be a full featured compiler like the one written in C.
+> Any reference of code related to the V2 syntax should be
+> removed."* — 2026-02-05 22:33 UTC
+
+So at the pre-Phase-0 state two things are already in motion: a
+self-hosting effort (started ~21:22 UTC), and a syntax migration
+from V2 to V3 (V3 grammar drafted in `GRAMMAR_V3.md` by ~23:29
+UTC, with V2 traces being removed in parallel).
+
+### The design directive: "optimized for AI, not for humans"
+
+The clearest articulation of the project's design philosophy lives
+in those two VSCode sessions, not in any later doc. The user gives
+the directive twice in the first VSCode session and reinforces it
+five times in the second:
+
+> *[VSCode A, 22:30 UTC] "It's supposed to be an AI optimized
+> language, built by an AI, so if you think changes should be made
+> to it so it's easier for you, you should also iterate on the
+> grammar and make that language as easy for you as possible to
+> generate correct code."*
+
+> *[VSCode A, 22:55 UTC] "If there is anything in the language
+> syntax that is getting in your way, you are obliged to improve the
+> syntax so it becomes easy for you, you shouldn't care that a human
+> can read the syntax, it's only for use by AI agents."*
+
+> *[VSCode A, 22:57 UTC] "You must build a real aisl compiler in
+> aisl itself that can compile the programs in /examples and if
+> along the way the language syntax makes it complicated for you to
+> create correct code, you should simplify the syntax or adapt it
+> for you only, you shouldn't care that humans can read it, it is
+> not a language that should be designed for human readability, but
+> for AI code generation."*
+
+> *[VSCode B, 23:06 UTC] "If the let syntax and nesting is an issue,
+> fix it in the syntax, make your life easier!"*
+
+> *[VSCode B, 23:11 UTC] "You are fighting again the language
+> syntax, change it so it becomes easier for you."*
+
+> *[VSCode B, 23:13 UTC] "I need you to change the language syntax
+> as you go as soon as you are fighting the language itself, it
+> should become a language where you don't need to retry to have
+> correct code."*
+
+> *[VSCode B, 23:16 UTC] "No, you shouldn't try to support old
+> syntax, you are allowed to make drastic changes to the language
+> syntax, but you ought to make changes in GRAMMAR.md and to the
+> existing c compiler, don't forget to also change the examples and
+> stdlib."*
+
+The repetition is not accidental — Copilot kept defaulting to
+human-language conventions, and the user kept correcting it back. The
+operational pattern this set up — *the language admits whatever shape
+the model finds easiest, then maps to canonical implementations* — is
+the one Phase 14 retrospectively names "meeting halfway" and which
+`papers/MEETING_HALFWAY.md` documents in full. The seed of that
+pattern is here, on day zero.
+
+### Self-hosting in AISL: pushed hard, did not deliver
+
+The original goal of the very first prompt was to grow the basic
+AISL-written compiler to feature parity with the C compiler. Todos
+recorded against opencode session `ses_3d010675c` confirm this was
+still being pursued days later: *implement lexer in AISL for v3.0
+syntax, implement parser, implement AST data structures, implement
+bytecode generator, implement bytecode output writer.*
+
+The VSCode log makes the failure mode visible. Across the second Feb
+5 session and parts of the first, the user's prompts escalate as
+Copilot keeps producing scaffolds that don't actually run:
+
+> *[VSCode A, 22:49 UTC] "But it does nothing, there is no lexer, no
+> codegen etc... are these not needed?"*
+
+> *[VSCode A, 22:56 UTC] "But there is nothing, please stop saying
+> you're done when you can't even compile a basic aisl program."*
+
+> *[VSCode B, 23:23 UTC] "Ok, but this compiler is useless, I need a
+> real one that can compile a real program and not hardcode stuff,
+> I also need you to stop creating additional md files."*
+
+> *[VSCode A, 22:46 UTC] "Stop creating additional documents, don't
+> create any md files anymore and focus on making the aisl compiler
+> work like the C compiler."*
+
+By the end of the second VSCode session the self-hosted compiler is
+stub-grade. The opencode logs of the next several days continue to
+list self-hosting as an active todo, but no surviving artefact in the
+current repo implements a self-hosted compiler — what remains under
+`interpreter/` is OCaml. The OCaml pivot on Feb 10 (next subsection)
+made the self-hosting goal moot, but in retrospect it had already
+failed on day zero: the directive to "build a real compiler in aisl
+itself" outran what Copilot could deliver against a syntax that was
+itself being redesigned in the same conversation.
+
+The directive to *stop creating .md files* survives into the present
+codebase: it is restated in CLAUDE-style instructions and is the
+reason this `papers/JOURNEY.md` (and the audits in
+`papers/MEETING_HALFWAY.md`, `papers/MODEL_VERSIONS.md`, etc.) lives
+under `papers/` rather than being scattered across the repo root.
+
+### V3 syntax: drafted Feb 5 night, refined Feb 9 (token-cost-driven)
+
+A V3 grammar already existed in draft form by the end of the second
+VSCode session on Feb 5 night (the final prompt was *"rename
+GRAMMAR_V3 to GRAMMAR"*). The Feb 9 opencode session below didn't
+introduce V3 — it *refined* V3 with three changes that survive into
+the current language: flat call arguments, no `call` keyword, and
+BigDecimal as a third numeric type.
+
+V2 syntax (the one being phased out at the start of the genesis
+window) wrapped function calls in an explicit `(call ...)` form with
+a bracketed argument list:
 
 ```
 (call func [arg1 arg2 arg3])
 ```
 
-The 2026-02-09 06:34 UTC session opens by quoting an external
-suggestion and turning it into a redesign brief:
+The 2026-02-09 06:34 UTC opencode session opens by quoting an
+external suggestion and turning it into a redesign brief:
 
 > *"I have a few observations from another model: minor extensions
 > could include BigDecimal type, flattened call arguments (token
@@ -168,22 +315,6 @@ note from a slightly later session reads: *"The old C compiler
 (`compiler/c/`) was deleted but the LSP still shows ghost errors
 from those files — ignore all `compiler/c/src/*.c` errors
 entirely."*
-
-### The self-hosting attempt that did not survive the pivot
-
-The original goal of the very first prompt was to grow the basic
-AISL-written compiler to feature parity with the C compiler. Todos
-recorded against `ses_3d010675c` confirm that work was started:
-*implement lexer in AISL for v3.0 syntax, implement parser, implement
-AST data structures, implement bytecode generator, implement bytecode
-output writer, test the AISL compiler with example programs.*
-
-None of this survived the OCaml pivot. With hindsight the
-abandonment is rational: the language's surface was being aggressively
-redesigned during the same week (V2 → V3 → no-`call` → flat args →
-dynamic arrays → BigDecimal); re-targeting a self-hosted parser to
-each new V3 increment would have outrun the C reference, and the
-OCaml rewrite landed faster.
 
 ### Cleanup rounds: the 8-Item Plan, the 14 Findings, Round 2
 
