@@ -46,17 +46,64 @@ prefix `[VSCode]` or `[opencode]` indicates which source. Everything
 else is either a session timestamp, a git commit visible in `git
 log`, or — where flagged — inference from the surviving codebase.
 
+### Naming lineage: CANON → AISL → Sigil
+
+The project went through three names. The lineage is documented in
+two distinct artefact sets:
+
+- **CANON** is the working name proposed by ChatGPT in the recovered
+  design session
+  [`69f5e905_ultimate_programming_language_design.md`](./early_chatgpt_sessions/69f5e905_ultimate_programming_language_design.md)
+  (line 2877: *"I'll call it **CANON** … Canonical AI-Optimized
+  Language"*). The user engaged with it through that conversation —
+  some passages explicitly compare *"AISL / Canon-style s-expr"* (line
+  12874) and *"Canon / AISL"* (line 12997), treating the two as
+  variants of the same idea. CANON never made it into the codebase; it
+  is the conversational design-name only.
+- **AISL** ("AI-Optimized Systems Language", pronounced "aisle") is
+  the codebase name from the very first commit
+  (`486b51e Initial commit`, 2026-02-06 19:40 UTC) and from the
+  earliest log on this host (the VSCode session at 2026-02-05
+  19:49 UTC opens against an already-AISL-named tree). This is what
+  shipped publicly to `github.com/mlainez/aisl` and what every
+  pre-rename audit and tool refers to.
+- **Sigil** is the current name, in effect since the AISL→Sigil sed
+  rename on 2026-02-11 between 18:41 and 20:17 UTC (see the dedicated
+  subsection below). The repo at `github.com/mlainez/sigil` was
+  renamed in place; old AISL-named files were either renamed
+  (`aisl.opam → sigil.opam`) or content-swept (`(call …)` → flat
+  syntax).
+
+### What this phase does *not* recover
+
+The C compiler under `compiler/c/` already exists when the first
+session log on this host opens — its creation pre-dates every
+recoverable artefact. The project directory itself was created on
+the filesystem at **2026-02-05 19:49:06 UTC** (CET 20:49:06) and the
+first VSCode Copilot Chat session opened **within the same second**.
+Either the C compiler was brought to the host from another machine
+just before, or it was typed/pasted in the minutes immediately before
+the VSCode session opened with no chat tool involved. The
+`compiler/c/` source itself does not survive in the current tree —
+the OCaml pivot a week later removed it (commit `30761c5`, "Remove C
+bytecode compiler") and the chronicle of its creation is therefore
+the one true gap in this Phase 0.
+
+What *is* recovered starts the moment the project's first chat tool
+opens, ~5 days later than the typical "blank-page" start of a
+language project.
+
 ### Day zero: 2026-02-05 evening (VSCode Copilot Chat record)
 
 The earliest traceable activity on this host is a **VSCode + GitHub
-Copilot Chat** session that opens at **2026-02-05 20:49 UTC** in the
+Copilot Chat** session that opens at **2026-02-05 19:49 UTC** in the
 `Projects/aisl` workspace, with the first real prompt arriving at
-21:03 UTC — about 1.5 hours before the first opencode session. The
+20:03 UTC — about 2.5 hours before the first opencode session. The
 project is already named **AISL — "AI-Optimized Systems Language"**
 (the README of the time noted it was pronounced "aisle") and it
-already has a "stage 0" **C compiler** under `compiler/c/` whose
-existence pre-dates any session log on this host. The opening prompt
-is therefore a *fix-my-existing-thing* request, not a *let's-design-a-language*
+already has a "stage 0" **C compiler** under `compiler/c/` (see "What
+this phase does not recover" above). The opening prompt is therefore
+a *fix-my-existing-thing* request, not a *let's-design-a-language*
 request:
 
 > *[VSCode] "I'm creating an AI first language that is optimized for
@@ -64,10 +111,10 @@ request:
 > is used to define the rules and the representation is as an ast as
 > seen in examples, can you fix the issues with the code so the stage
 > 0 compiler compiles and can be used? Check the Makefile."* —
-> 2026-02-05 21:03 UTC
+> 2026-02-05 20:03 UTC
 
 Over the next two hours of the same VSCode session (35 requests
-total, ending 22:57 UTC) the project crosses several milestones that
+total, ending 21:57 UTC) the project crosses several milestones that
 later sessions take for granted: the stage 0 C compiler is fixed and
 brought to a state where `aisl-run examples/test_io.aislc` runs
 (req[5]); `compiler/c/` is restructured to common C conventions
@@ -75,10 +122,10 @@ brought to a state where `aisl-run examples/test_io.aislc` runs
 
 > *[VSCode] "Now, I want to have a second stage compiler to bytecode
 > and vm that is written in aisl itself, so that I can compile the
-> compiler only with aisl."* — 2026-02-05 21:22 UTC
+> compiler only with aisl."* — 2026-02-05 20:22 UTC
 
 A second VSCode session starts ~2 minutes after the first closes
-(22:59 → 23:29 UTC, 16 requests) and continues the self-hosting
+(21:59 → 22:29 UTC, 16 requests) and continues the self-hosting
 attempt. Its final prompt is *"cleanup the files and verify that all
 compilers are still working and that example files are on v3, also,
 rename GRAMMAR_V3 to GRAMMAR"* — confirming V3 was already a draft
@@ -86,8 +133,8 @@ on disk by Feb 5 night (the Feb 9 session further down refines V3,
 it does not introduce it).
 
 The first **opencode** session on the same project opens at **22:32
-UTC** of the same day — one minute before the second VSCode session
-starts. Its prompt is the post-VSCode summary of state:
+UTC** of the same day — three minutes after the second VSCode session
+ends. Its prompt is the post-VSCode summary of state:
 
 > *[opencode] "I have created an AI optimized language called AISL,
 > I have a compiler written in C for it. There are examples in the
@@ -97,10 +144,16 @@ starts. Its prompt is the post-VSCode summary of state:
 > Any reference of code related to the V2 syntax should be
 > removed."* — 2026-02-05 22:33 UTC
 
-So at the pre-Phase-0 state two things are already in motion: a
-self-hosting effort (started ~21:22 UTC), and a syntax migration
-from V2 to V3 (V3 grammar drafted in `GRAMMAR_V3.md` by ~23:29
+So by the end of day zero two things are already in motion: a
+self-hosting effort (started ~20:22 UTC), and a syntax migration
+from V2 to V3 (V3 grammar drafted in `GRAMMAR_V3.md` by ~22:29
 UTC, with V2 traces being removed in parallel).
+
+(Timezone note: VSCode Copilot Chat stores `creationDate` and
+per-request `timestamp` as Unix epoch ms — UTC at the wire level. The
+host clock is CET/+0100, so the local-time stamps shown in the VSCode
+UI are 1 hour ahead of the values quoted here. All times in this
+section are normalised to UTC.)
 
 ### The design directive: "optimized for AI, not for humans"
 
@@ -109,18 +162,18 @@ in those two VSCode sessions, not in any later doc. The user gives
 the directive twice in the first VSCode session and reinforces it
 five times in the second:
 
-> *[VSCode A, 22:30 UTC] "It's supposed to be an AI optimized
+> *[VSCode A, 21:30 UTC] "It's supposed to be an AI optimized
 > language, built by an AI, so if you think changes should be made
 > to it so it's easier for you, you should also iterate on the
 > grammar and make that language as easy for you as possible to
 > generate correct code."*
 
-> *[VSCode A, 22:55 UTC] "If there is anything in the language
+> *[VSCode A, 21:55 UTC] "If there is anything in the language
 > syntax that is getting in your way, you are obliged to improve the
 > syntax so it becomes easy for you, you shouldn't care that a human
 > can read the syntax, it's only for use by AI agents."*
 
-> *[VSCode A, 22:57 UTC] "You must build a real aisl compiler in
+> *[VSCode A, 21:57 UTC] "You must build a real aisl compiler in
 > aisl itself that can compile the programs in /examples and if
 > along the way the language syntax makes it complicated for you to
 > create correct code, you should simplify the syntax or adapt it
@@ -128,18 +181,18 @@ five times in the second:
 > not a language that should be designed for human readability, but
 > for AI code generation."*
 
-> *[VSCode B, 23:06 UTC] "If the let syntax and nesting is an issue,
+> *[VSCode B, 22:06 UTC] "If the let syntax and nesting is an issue,
 > fix it in the syntax, make your life easier!"*
 
-> *[VSCode B, 23:11 UTC] "You are fighting again the language
+> *[VSCode B, 22:11 UTC] "You are fighting again the language
 > syntax, change it so it becomes easier for you."*
 
-> *[VSCode B, 23:13 UTC] "I need you to change the language syntax
+> *[VSCode B, 22:13 UTC] "I need you to change the language syntax
 > as you go as soon as you are fighting the language itself, it
 > should become a language where you don't need to retry to have
 > correct code."*
 
-> *[VSCode B, 23:16 UTC] "No, you shouldn't try to support old
+> *[VSCode B, 22:16 UTC] "No, you shouldn't try to support old
 > syntax, you are allowed to make drastic changes to the language
 > syntax, but you ought to make changes in GRAMMAR.md and to the
 > existing c compiler, don't forget to also change the examples and
@@ -166,17 +219,17 @@ The VSCode log makes the failure mode visible. Across the second Feb
 5 session and parts of the first, the user's prompts escalate as
 Copilot keeps producing scaffolds that don't actually run:
 
-> *[VSCode A, 22:49 UTC] "But it does nothing, there is no lexer, no
+> *[VSCode A, 21:49 UTC] "But it does nothing, there is no lexer, no
 > codegen etc... are these not needed?"*
 
-> *[VSCode A, 22:56 UTC] "But there is nothing, please stop saying
+> *[VSCode A, 21:56 UTC] "But there is nothing, please stop saying
 > you're done when you can't even compile a basic aisl program."*
 
-> *[VSCode B, 23:23 UTC] "Ok, but this compiler is useless, I need a
+> *[VSCode B, 22:23 UTC] "Ok, but this compiler is useless, I need a
 > real one that can compile a real program and not hardcode stuff,
 > I also need you to stop creating additional md files."*
 
-> *[VSCode A, 22:46 UTC] "Stop creating additional documents, don't
+> *[VSCode A, 21:46 UTC] "Stop creating additional documents, don't
 > create any md files anymore and focus on making the aisl compiler
 > work like the C compiler."*
 
@@ -263,9 +316,14 @@ implicit syntax `(func arg1 arg2 ...)` and is not a separate
 statement type."* The freezing of the IR at 5 happens in this same
 week. It has not changed since.
 
-### Why OCaml: the C VM perf crisis (and what the log does and does not say)
+### Why OCaml: trigger from the C VM, rationale from the ChatGPT design session
 
-On 2026-02-10 06:24 UTC the user pastes a `top` snapshot:
+The OCaml pivot has two distinct sources in the recovered record:
+the **trigger** lives in opencode, the **rationale** lives in the
+ChatGPT design session.
+
+**Trigger (opencode, 2026-02-10 06:24 UTC).** The user pastes a
+`top` snapshot:
 
 ```
 7816 marc  20 0  9462192   8,8g   3296 R  99,7  14,5   1:31.72 aisl-run
@@ -277,43 +335,68 @@ Two `aisl-run` (C VM) processes pinned at ~100% CPU and consuming
 prompt: *"My virtual machine for my AI optimized language takes a
 lot of resources when running the chat_client application using
 websockets. I want you to optimize my vm to be more memory efficient
-and take up less CPU resources."*
-
-The session does ship optimisations to the C VM — the model
-identifies the actual bugs (a hard-coded 16 MB stack constant
+and take up less CPU resources."* The session does ship optimisations
+to the C VM (it identifies a hard-coded 16 MB stack constant
 `STACK_SIZE 16777216`; zero-timeout `socket_select` and
 `tcp_receive` busy-spinning the CPU on `struct timeval tv = {0, 0}`;
 arrays starting at capacity 16 and doubling; redundant string copies
-in chat_client) and patches them.
+in chat_client) but the patches treat symptoms — the deeper question
+("is C the right host language at all?") was already answered
+elsewhere.
 
-By **2026-02-10 23:24 UTC**, however — the same day, ~17 hours later
-— a string-naming audit session is already inspecting *both*
-`compiler/ocaml/interpreter.ml` and `compiler/c/src/vm.c` side by
-side for parity. From that point on every audit session in the
-recovered logs treats the OCaml tree-walking interpreter as the new
-primary implementation (sessions are titled "Check C VM string ops",
-"Find C VM TLS implementation" — the C path is now the *reference*
-being checked against, not the production target).
+**Rationale (ChatGPT design session, file
+[`69f5e905_…`](./early_chatgpt_sessions/69f5e905_ultimate_programming_language_design.md)).**
+The user opened a long ChatGPT conversation between the project
+going public on GitHub (2026-02-06) and the OCaml rewrite
+(2026-02-10), pointing the model at the existing `mlainez/aisl`
+spec and asking for a host-language evaluation. The conversation
+ranks Rust, OCaml, Nim and C against the AISL workload (an
+interpreter of an s-expression IR, not a high-throughput numeric
+runtime). The verdict is explicit (line 16785):
 
-**Important caveat about the rationale.** The opencode log does
-*not* preserve an explicit "we are switching to OCaml because X"
-conversation. The rewrite itself appears to have been initiated
-outside the opencode harness (no opencode session contains the
-initial OCaml `interpreter.ml` skeleton). What the log establishes
-firmly is the *trigger* (a C-level resource crisis on a real
-WebSocket workload) and the *timing* (parallel OCaml implementation
-within hours, primary status by end of day, C compiler deleted
-shortly after). The OCaml-specific rationale below is therefore
-inferred from the surviving codebase, not quoted from the log:
+> *[ChatGPT] "For an AISL compiler/VM not targeting max performance,
+> OCaml is the best long-term choice; Nim is the best pragmatic
+> alternative; Rust is safe but slower to evolve; C should only
+> remain as a minimal execution core."*
+
+The supporting argument is that an interpreter for a typed
+s-expression IR is essentially a giant `match` over an algebraic
+data type — exactly OCaml's shape. The ranking summary (lines
+16729–16734) credits OCaml with the best balance of *correctness, IR
+modeling power, execution performance, compiler ergonomics*, and the
+migration path proposed in the same conversation (lines 16770-16776)
+is the literal one the codebase took:
+
+> *[ChatGPT] "Rewrite compiler / lowering / validation in OCaml or
+> Nim … Gradually shrink C to a pure VM core, move all semantics
+> out."*
+
+**Convergence (opencode, 2026-02-10 23:24 UTC).** ~17 hours after
+the perf-crisis prompt, a string-naming audit session is already
+inspecting *both* `compiler/ocaml/interpreter.ml` and
+`compiler/c/src/vm.c` side by side for parity. From that point on
+every audit session in the recovered logs treats the OCaml
+tree-walking interpreter as the new primary implementation (sessions
+are titled "Check C VM string ops", "Find C VM TLS implementation" —
+the C path is now the *reference* being checked against, not the
+production target). The C compiler tree (`compiler/c/`) was removed
+shortly after — git shows commits `e1ba0aa` ("Add OCaml tree-walking
+interpreter") and `30761c5` ("Remove C bytecode compiler") for the
+two ends of the swap. A continuation-prompt note from a slightly
+later session reads: *"The old C compiler (`compiler/c/`) was deleted
+but the LSP still shows ghost errors from those files — ignore all
+`compiler/c/src/*.c` errors entirely."*
+
+The OCaml-specific properties the rewrite delivered (and the surviving
+codebase reflects):
 
 - **Garbage collection eliminates the bug class.** The 8.8 GB
   chat_client process was a manual-memory-management failure on a
-  long-running WebSocket loop. OCaml's runtime removes that class of
-  bug.
+  long-running WebSocket loop. OCaml's runtime removes it.
 - **Pattern matching fits AST evaluation.** The interpreter's hot
   path is `match expr with | Set _ -> ... | Goto _ -> ...` —
   algebraic data types and exhaustive `match` are the natural shape
-  for a tree walker.
+  for a tree walker, exactly as the ChatGPT evaluation predicted.
 - **Tree-walking, not bytecode.** Removing the desugar + compile +
   bytecode-VM pipeline of the C path and replacing it with `eval`
   directly on the AST cut the implementation to ~2 500 lines in a
@@ -321,12 +404,6 @@ inferred from the surviving codebase, not quoted from the log:
 - **No build pipeline complexity.** `dune build` produces a single
   `vm.exe` that reads, parses and evaluates a `.sigil` file in one
   step.
-
-The C compiler tree was removed shortly after. A continuation-prompt
-note from a slightly later session reads: *"The old C compiler
-(`compiler/c/`) was deleted but the LSP still shows ghost errors
-from those files — ignore all `compiler/c/src/*.c` errors
-entirely."*
 
 ### Cleanup rounds: the 8-Item Plan, the 14 Findings, Round 2
 
