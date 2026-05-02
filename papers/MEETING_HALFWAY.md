@@ -138,6 +138,62 @@ three now resolve to the same Sigil construct. Adding the alias
 costs nothing; not adding it forced gymnastic rewrites on every
 retry.
 
+### 4.7 PCRE-compatible regex via the Re library (canonical structural example)
+
+This is the largest single meet-halfway change in the project's
+history and the clearest illustration of the principle.
+
+**Observation.** Across thousands of model-generated regexes during
+the benchmark work, the model overwhelmingly writes Perl-compatible
+regex syntax: `\b` for word boundaries, `\d`/`\w`/`\s` for character
+classes, `*?`/`+?` for non-greedy quantifiers, `|` for alternation
+without escape. This is uniformly the case across all trained Coder
+models — Python `re`, JavaScript, Java, Perl, C#, and PHP all use
+PCRE or compatible flavours. The model's training distribution is
+overwhelmingly PCRE.
+
+**Mismatch.** Sigil's interpreter originally backed regex with
+OCaml's `Str` library, a POSIX-style flavour that requires escaped
+alternation (`\|`), has no `\b`/`\d`/`\w`/`\s` shorthands, no
+non-greedy quantifiers, treats `(` as a literal rather than a group
+opener, and rejects `{n,m}` without explicit translation (we
+maintained a `regex_translate_braces` helper for this).
+
+The cost was a long tail of "regex matched nothing" failures across
+the benchmark — `extract_emails`, `extract_dotted_ipv4`,
+`extract_phone_numbers`, etc. — where the model wrote a syntactically
+sensible Perl regex that `Str` silently rejected or misinterpreted.
+
+**Fix.** Replaced `Str` with the [`re`](https://github.com/ocaml/ocaml-re)
+library (Markus Mottl, well-maintained, packaged via opam). Single
+helper: `Re.Perl.compile_pat` parses Perl-flavoured patterns natively.
+Roughly 60 lines of `interpreter.ml` change across `regex_compile`,
+`regex_match`, `regex_find`, `regex_find_all`, `regex_replace`. Kept
+`regex_translate_braces` as dead code for now in case any external
+caller depends on it; can be removed later.
+
+**Cost.** ~30 minutes to swap; ~10 minutes to update the 4 alternation
+tests in `test_regex.sigil` that used Str-style escaped pipes.
+156/156 tests pass.
+
+**Caveat / next step.** The 2186-entry training corpus contains
+older examples using Str-style regex (literal `(`, escaped `\|`).
+Under PCRE these patterns now error rather than silently matching
+the wrong thing. Stream C dropped 2 tasks immediately after the
+swap (`extract_function_names_py`, plus an unrelated generation
+variance on `shell_argv_count`). The full payoff of the PCRE swap
+requires a corpus refresh sweep + a Qwen v6 retrain; that work is
+pending.
+
+**Why this is the canonical example.** Every other meet-halfway
+change in this section absorbs a model reach for a *single name* or
+a *single shape*. The PCRE swap absorbs an entire **flavour** —
+hundreds of distinct patterns the model knows how to write. It's
+the largest leverage-per-line-of-code change in the project, and
+the cleanest illustration that the right scope of "meet halfway"
+is sometimes "pick the same regex flavour the model's training
+distribution uses" rather than "add an alias."
+
 ### 4.7 Bit-op aliases
 
 `band`, `bitand`, `xor`, `rsh`, `shl` — the canonical names are
