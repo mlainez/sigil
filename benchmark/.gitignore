@@ -10,5 +10,9 @@ models/
 !prelude_seeds.jsonl
 !v4_targeted_seeds.jsonl
 !refresh_seeds.jsonl
+!v6_targeted_seeds.jsonl
+!v6_loop_argv_seeds.jsonl
+!regex_corpus.jsonl
+!pcre_seeds.jsonl
 
 tier*_results.json
