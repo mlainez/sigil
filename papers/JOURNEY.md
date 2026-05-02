@@ -12,30 +12,48 @@ ruled out and on what evidence.
 
 ## Phase 0: Pre-corpus genesis (2026-02-05 to 2026-02-11)
 
-This section was reconstructed after the fact from three local
-session-log sources on the development host:
+This section was reconstructed after the fact from four
+session-log sources, all consolidated under
+[`papers/early_design_sessions/`](./early_design_sessions/) plus the
+local Claude Code logs on this host:
 
+- **mammouth.ai shared sessions** — two shared chat sessions from
+  the afternoon of 2026-02-05 (16:11 → 21:06 UTC), 30 + 32 messages
+  using `mistral-large-latest` and `anthropic-claude-sonnet-4-5`
+  respectively. **These are the earliest known activity on the
+  project on any recoverable artefact** — ~3.5 hours before the
+  first VSCode Copilot session opens on the dev host. The earlier
+  session is literally titled **"CANON Grammar (AI-Focused)"** in
+  the data — primary-source confirmation that CANON was the working
+  name before AISL. Mistral drove the initial typed-AST sketch
+  (Int / Float / Bool / String / Array / Result, FunctionNode
+  contract, Pure / IORead / IOWrite / Network effect annotations);
+  Claude Sonnet 4.5 took over for the EBNF refinement (BigDecimal,
+  Future, Channel, spawn/await/send, lambda, path-restricted IO).
 - **VSCode + GitHub Copilot Chat** sessions in the
-  `Projects/aisl` and (later) `Projects/sigil` workspaces — five
-  saved chats, the substantive ones being two on the evening of
-  2026-02-05 (35 + 16 requests, ~16 MB combined). These are where
-  the project was born and where the foundational AI-design
-  directives were given.
+  `Projects/aisl` and (later) `Projects/sigil` workspaces on the
+  development host — five saved chats, the substantive ones being
+  two on the evening of 2026-02-05 (35 + 16 requests, ~16 MB
+  combined). These are where the language acquired its codebase
+  scaffolding and where the foundational AI-design directives were
+  given. By the time these open, the typed-AST sketched in
+  mammouth.ai earlier the same afternoon has already turned into a
+  partially-working "stage 0" C compiler under `compiler/c/`.
 - **opencode** sessions on the same host — 28 sessions between
-  2026-02-05 22:32 UTC and 2026-02-11 21:12 UTC. These are where the
-  iterative audits, the V3 syntax refinement, the chat_client perf
-  crisis, and the AISL→Sigil rename took place.
+  2026-02-05 22:32 UTC and 2026-02-11 21:12 UTC. These are where
+  the iterative audits, the V3 syntax refinement, the chat_client
+  perf crisis, and the AISL→Sigil rename took place.
 - **Public ChatGPT share links** for four pre-AISL design
   conversations the user opened to brainstorm the language shape
-  *before* opening any editor. These are stored verbatim in
-  [`papers/early_chatgpt_sessions/`](./early_chatgpt_sessions/) (4
-  files, ~520 KB total). They contain the OCaml-vs-alternatives
+  *before* opening any editor. Stored verbatim in
+  [`early_design_sessions/chatgpt/`](./early_design_sessions/chatgpt/)
+  (4 files, ~520 KB total). They contain the OCaml-vs-alternatives
   evaluation that landed on *"OCaml is the best long-term choice;
   … C should only remain as a minimal execution core"* — the exact
   pivot that shows up in the codebase as commit `e1ba0aa` on
   2026-02-11 ("Add OCaml tree-walking interpreter") plus `30761c5`
-  ("Remove C bytecode compiler"). The conversations also still
-  refer to the project as "AISL," confirming they predate the
+  ("Remove C bytecode compiler"). The conversations refer to the
+  project as either "AISL" or "CANON," confirming they predate the
   2026-02-11 21:05 rename.
 
 Phase 1 below opens with "the starting corpus was approximately 300
@@ -48,18 +66,23 @@ log`, or — where flagged — inference from the surviving codebase.
 
 ### Naming lineage: CANON → AISL → Sigil
 
-The project went through three names. The lineage is documented in
-two distinct artefact sets:
+The project went through three names. The lineage is documented
+across the recovered chat-share artefacts:
 
-- **CANON** is the working name proposed by ChatGPT in the recovered
-  design session
-  [`69f5e905_ultimate_programming_language_design.md`](./early_chatgpt_sessions/69f5e905_ultimate_programming_language_design.md)
+- **CANON** was the original working name. The mammouth.ai session
+  on 2026-02-05 16:11 UTC
+  ([`mammouth/228580f7-…`](./early_design_sessions/mammouth/228580f7-52a4-4fec-9b8a-89ab298d37ac.json))
+  literally opens with the verbatim title **"CANON Grammar
+  (AI-Focused)"** as its first message — that is the primary-source
+  emergence of the name, hours before any other recoverable
+  artefact. CANON is also picked up in the ChatGPT design session
+  [`69f5e905_…`](./early_design_sessions/chatgpt/69f5e905_ultimate_programming_language_design.md)
   (line 2877: *"I'll call it **CANON** … Canonical AI-Optimized
   Language"*). The user engaged with it through that conversation —
-  some passages explicitly compare *"AISL / Canon-style s-expr"* (line
-  12874) and *"Canon / AISL"* (line 12997), treating the two as
-  variants of the same idea. CANON never made it into the codebase; it
-  is the conversational design-name only.
+  some passages explicitly compare *"AISL / Canon-style s-expr"*
+  (line 12874) and *"Canon / AISL"* (line 12997), treating the two
+  as variants of the same idea. CANON never made it into the
+  codebase; it is the conversational design-name only.
 - **AISL** ("AI-Optimized Systems Language", pronounced "aisle") is
   the codebase name from the very first commit
   (`486b51e Initial commit`, 2026-02-06 19:40 UTC) and from the
@@ -345,7 +368,7 @@ in chat_client) but the patches treat symptoms — the deeper question
 elsewhere.
 
 **Rationale (ChatGPT design session, file
-[`69f5e905_…`](./early_chatgpt_sessions/69f5e905_ultimate_programming_language_design.md)).**
+[`69f5e905_…`](./early_design_sessions/chatgpt/69f5e905_ultimate_programming_language_design.md)).**
 The user opened a long ChatGPT conversation between the project
 going public on GitHub (2026-02-06) and the OCaml rewrite
 (2026-02-10), pointing the model at the existing `mlainez/aisl`
@@ -1957,9 +1980,12 @@ join is wrong.
   `benchmark/stream_c_v6_phi_ensemble_rag.json`,
   `benchmark/stream_c_v6_phi_rag_loopfix.json` — the five raw
   results files quoted in the table above.
-- `papers/early_chatgpt_sessions/` — primary-source backing for
-  Phase 0 / 1 (recovered in this same window via React Router
-  RSC stream parsing of public ChatGPT shares).
+- `papers/early_design_sessions/` — primary-source backing for
+  Phase 0 / 1: 4 ChatGPT shares recovered via React Router RSC
+  stream parsing, plus 2 mammouth.ai shared sessions (Mistral-large
+  + Claude Sonnet 4.5) from 2026-02-05 16:11 UTC that establish
+  CANON as the project's original working name and predate every
+  other recoverable artefact by ~3.5 hours.
 
 ## Reproducibility
 
