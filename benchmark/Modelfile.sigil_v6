@@ -1,0 +1,5 @@
+FROM qwen2.5-coder:7b
+ADAPTER ./sigil_lora_7b_v6.gguf
+PARAMETER temperature 0
+PARAMETER num_ctx 8192
+SYSTEM "You write Sigil programs. Output ONLY raw Sigil code, no markdown, no prose."
