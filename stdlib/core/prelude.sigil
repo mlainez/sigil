@@ -76,4 +76,44 @@
       (else))
     (ret k))
 
-  (meta-note "Auto-loaded prelude: zero-import convenience functions written in Sigil. Add only pure compositions over primitive builtins. Primitives (regex/IO/syscall/operators) stay in OCaml; convenience functions belong here."))
+  (fn paren_depth code string -> int
+    (set depth 0)
+    (set in_string false)
+    (set escape_next false)
+    (set i 0)
+    (set n (len code))
+    (while (lt i n)
+      (set c (string_at code i))
+      (if escape_next
+        (set escape_next false)
+        (else
+          (if in_string
+            (cond
+              ((eq c "\\") (set escape_next true))
+              ((eq c "\"") (set in_string false)))
+            (else
+              (cond
+                ((eq c "\"") (set in_string true))
+                ((eq c "(") (set depth (add depth 1)))
+                ((eq c ")") (set depth (sub depth 1))))))))
+      (set i (add i 1)))
+    (ret depth))
+
+  (fn balance_parens code string -> string
+    (set d (paren_depth code))
+    (cond
+      ((eq d 0) (ret code))
+      ((and (gt d 0) (le d 2))
+       (ret (add code (repeat ")" d))))
+      ((and (lt d 0) (ge d -2))
+       (set strip_count (neg d))
+       (set trimmed (trim code))
+       (set t_len (len trimmed))
+       (set tail (string_slice trimmed (sub t_len strip_count) strip_count))
+       (set wanted (repeat ")" strip_count))
+       (if (eq tail wanted)
+         (ret (string_slice trimmed 0 (sub t_len strip_count)))
+         (else (ret code))))
+      (true (ret code))))
+
+  (meta-note "Auto-loaded prelude: zero-import convenience functions written in Sigil. Add only pure compositions over primitive builtins. Primitives (regex/IO/syscall/operators) stay in OCaml; convenience functions belong here. Includes (balance_parens code) — recovery for AI-generated code that's off by ±1-2 closing parens. Sigil tooling can self-correct AI output without escaping to Python."))

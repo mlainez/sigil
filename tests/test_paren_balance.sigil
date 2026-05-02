@@ -1,0 +1,46 @@
+(module test_paren_balance
+
+  (fn depth_of code string -> int
+    (ret (paren_depth code)))
+
+  (fn balance_of code string -> string
+    (ret (balance_parens code)))
+
+  (test-spec depth_of
+    (case "balanced single pair"
+      (input "()")
+      (expect 0))
+    (case "balanced nested"
+      (input "(println (add 1 2))")
+      (expect 0))
+    (case "missing 1 close"
+      (input "(println (add 1 2)")
+      (expect 1))
+    (case "missing 2 closes"
+      (input "(println (add 1 (mul 2 3)")
+      (expect 2))
+    (case "extra 1 close"
+      (input "(println (add 1 2)))")
+      (expect -1))
+    (case "parens in string ignored"
+      (input "(println \"(test)\")")
+      (expect 0))
+    (case "escape inside string"
+      (input "(println \"\\\"hi\\\"\")")
+      (expect 0)))
+
+  (test-spec balance_of
+    (case "balanced no-op"
+      (input "(println (add 1 2))")
+      (expect "(println (add 1 2))"))
+    (case "missing 1 close — append"
+      (input "(println (add 1 2)")
+      (expect "(println (add 1 2))"))
+    (case "missing 2 closes — append two"
+      (input "(println (add 1 (mul 2 3)")
+      (expect "(println (add 1 (mul 2 3)))"))
+    (case "extra 1 close — trim"
+      (input "(println (add 1 2)))")
+      (expect "(println (add 1 2))")))
+
+  (meta-note "Tests the Sigil prelude implementation of paren auto-balance — same logic as the Python wrapper, but written in pure Sigil per the project principle."))
