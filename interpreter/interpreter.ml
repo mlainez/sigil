@@ -1237,6 +1237,20 @@ let rec eval env expr =
                (try
                  let _ = eval_block env body in ()
                with Continue -> ());
+               (* Detect in-body mutation of the iterator. Silent rebinding
+                  surprises models from C/Python where (set i ...) inside
+                  for would alter iteration. We raise a clear error so the
+                  validator-in-loop can hint toward (while) for variable-
+                  stride / skip loops. *)
+               (match env_get env var_name with
+                | VInt v when Int64.compare v !i <> 0 ->
+                    raise (RuntimeError
+                      ("for-loop iterator '" ^ var_name ^
+                       "' was mutated inside the body (set to " ^
+                       Int64.to_string v ^ ", expected " ^
+                       Int64.to_string !i ^
+                       "). Use (while) for variable-stride or skip loops."))
+                | _ -> ());
                i := Int64.add !i 1L
              done;
              VUnit
@@ -3809,62 +3823,60 @@ and eval_call env func_name args =
              VUnit
        | _ -> raise (RuntimeError "Invalid arguments to channel_recv"))
 
-  (* Regex operations - using OCaml Str library *)
+  (* Regex operations — backed by the Re library (Perl-compatible).
+     Re.Perl.compile_pat handles \b, \d, \w, \s, non-greedy *? +?, named
+     groups, anchors, character classes, alternation — i.e. the syntax
+     models actually write. The earlier Str backend rejected most of these,
+     causing a long tail of "regex matched nothing" failures. The
+     regex_translate_braces helper above is no longer needed (Re supports
+     {n,m} natively) but is kept for backward-compat callers if any. *)
   | "regex_compile" ->
       (match arg_vals with
-       | [VString pattern] -> VString pattern  (* Store pattern as string for Str *)
+       | [VString pattern] -> VString pattern  (* Store pattern as string; compiled at use site *)
        | _ -> raise (RuntimeError "Invalid arguments to regex_compile"))
 
   | "regex_match" ->
       (match arg_vals with
        | [VString pattern; VString text] ->
            (try
-             let re = Str.regexp (regex_translate_braces pattern) in
-             let _ = Str.search_forward re text 0 in
-             VBool true
-           with Not_found -> VBool false
-              | _ -> raise (RuntimeError ("Invalid regex pattern: " ^ pattern)))
+             let re = Re.Perl.compile_pat pattern in
+             VBool (Re.execp re text)
+           with Re.Perl.Parse_error -> raise (RuntimeError ("Invalid regex pattern: " ^ pattern))
+              | Re.Perl.Not_supported -> raise (RuntimeError ("Regex feature not supported: " ^ pattern)))
        | _ -> raise (RuntimeError "Invalid arguments to regex_match"))
 
   | "regex_find" ->
       (match arg_vals with
        | [VString pattern; VString text] ->
            (try
-             let re = Str.regexp (regex_translate_braces pattern) in
-             let _ = Str.search_forward re text 0 in
-             VString (Str.matched_string text)
-           with Not_found -> VString ""
-              | _ -> raise (RuntimeError ("Invalid regex pattern: " ^ pattern)))
+             let re = Re.Perl.compile_pat pattern in
+             match Re.exec_opt re text with
+             | Some g -> VString (Re.Group.get g 0)
+             | None -> VString ""
+           with Re.Perl.Parse_error -> raise (RuntimeError ("Invalid regex pattern: " ^ pattern))
+              | Re.Perl.Not_supported -> raise (RuntimeError ("Regex feature not supported: " ^ pattern)))
        | _ -> raise (RuntimeError "Invalid arguments to regex_find"))
 
   | "regex_find_all" ->
       (match arg_vals with
        | [VString pattern; VString text] ->
            (try
-             let re = Str.regexp (regex_translate_braces pattern) in
-             let results = ref [] in
-             let pos = ref 0 in
-             (try
-               while true do
-                 let _ = Str.search_forward re text !pos in
-                 let matched = Str.matched_string text in
-                 results := VString matched :: !results;
-                 pos := Str.match_end ();
-                 if !pos >= String.length text then raise Not_found
-               done
-             with Not_found -> ());
-             VArray (ref (Array.of_list (List.rev !results)))
-           with Failure msg -> raise (RuntimeError ("Invalid regex pattern: " ^ msg))
-              | Invalid_argument msg -> raise (RuntimeError ("regex_find_all error: " ^ msg)))
+             let re = Re.Perl.compile_pat pattern in
+             let matches = Re.all re text in
+             let results = List.map (fun g -> VString (Re.Group.get g 0)) matches in
+             VArray (ref (Array.of_list results))
+           with Re.Perl.Parse_error -> raise (RuntimeError ("Invalid regex pattern: " ^ pattern))
+              | Re.Perl.Not_supported -> raise (RuntimeError ("Regex feature not supported: " ^ pattern)))
        | _ -> raise (RuntimeError "Invalid arguments to regex_find_all"))
 
    | "regex_replace" ->
        (match arg_vals with
         | [VString pattern; VString text; VString replacement] ->
             (try
-              let re = Str.regexp (regex_translate_braces pattern) in
-              VString (Str.global_replace re replacement text)
-            with _ -> raise (RuntimeError ("Invalid regex pattern: " ^ pattern)))
+              let re = Re.Perl.compile_pat pattern in
+              VString (Re.replace re ~f:(fun _ -> replacement) text)
+            with Re.Perl.Parse_error -> raise (RuntimeError ("Invalid regex pattern: " ^ pattern))
+               | Re.Perl.Not_supported -> raise (RuntimeError ("Regex feature not supported: " ^ pattern)))
         | _ -> raise (RuntimeError "Invalid arguments to regex_replace"))
 
   (* Directory operations *)

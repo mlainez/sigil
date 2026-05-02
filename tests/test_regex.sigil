@@ -62,11 +62,11 @@
     (case "dot does not match across missing"
       (input "h.llo" "hllo")
       (expect false))
-    (case "alternation with escaped pipe"
-      (input "cat\\|dog" "I have a dog")
+    (case "alternation"
+      (input "cat|dog" "I have a dog")
       (expect true))
     (case "alternation no match"
-      (input "cat\\|dog" "I have a fish")
+      (input "cat|dog" "I have a fish")
       (expect false))
     (case "star quantifier zero occurrences"
       (input "ab*c" "ac")
@@ -119,10 +119,10 @@
       (input "h.llo" "say hello world")
       (expect "hello"))
     (case "finds alternation first branch"
-      (input "cat\\|dog" "the cat sat")
+      (input "cat|dog" "the cat sat")
       (expect "cat"))
     (case "finds alternation second branch"
-      (input "cat\\|dog" "the dog ran")
+      (input "cat|dog" "the dog ran")
       (expect "dog"))
     (case "finds repeated characters"
       (input "a+" "baaab")
@@ -180,7 +180,7 @@
       (input "[aeiou]" "hello world")
       (expect 3))
     (case "finds alternation matches"
-      (input "cat\\|dog" "cat and dog and cat")
+      (input "cat|dog" "cat and dog and cat")
       (expect 3)))
 
   (test-spec test_find_all_first
@@ -205,4 +205,4 @@
       (input "[0-9]+" "abcdef")
       (expect "")))
 
-  (meta-note "Comprehensive tests for regex_compile, regex_match, regex_find, regex_find_all, and regex_replace using OCaml Str library (POSIX regex syntax: escaped pipe for alternation, no PCRE features)"))
+  (meta-note "Comprehensive tests for regex_compile, regex_match, regex_find, regex_find_all, and regex_replace using PCRE-compatible regex via the Re library (Perl-style: |, \d, \w, \s, \b, non-greedy, etc)"))

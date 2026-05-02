@@ -1,5 +1,5 @@
 (executable
   (name vm)
   (public_name sigil-run)
-  (libraries unix str ssl)
+  (libraries unix str ssl re)
   (flags :standard -w -8 -w -27 -w -33))

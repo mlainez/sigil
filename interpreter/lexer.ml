@@ -45,16 +45,17 @@ let read_string ?(quote='"') input start_pos =
     else
       let c = input.[pos] in
       if escaped then
-        let c' = match c with
-          | 'n' -> '\n'
-          | 't' -> '\t'
-          | 'r' -> '\r'
-          | '\\' -> '\\'
-          | '"' -> '"'
-          | '\'' -> '\''
-          | _ -> c
+        let escaped_str = match c with
+          | 'n' -> "\n"
+          | 't' -> "\t"
+          | 'r' -> "\r"
+          | '\\' -> "\\"
+          | '"' -> "\""
+          | '\'' -> "'"
+          | '0' -> "\x00"
+          | _ -> "\\" ^ String.make 1 c
         in
-        loop (pos + 1) false (acc ^ String.make 1 c')
+        loop (pos + 1) false (acc ^ escaped_str)
       else if c = '\\' then
         loop (pos + 1) true acc
       else if c = quote then
