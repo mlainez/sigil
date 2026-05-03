@@ -1,0 +1,329 @@
+{
+  "aggregate": {
+    "n_tasks": 8,
+    "A_cloud_only": {
+      "pass": 6,
+      "input_tokens": 24,
+      "output_tokens": 1651,
+      "cost_usd": 0.0248
+    },
+    "B_hybrid": {
+      "pass": 2,
+      "input_tokens": 48.0,
+      "output_tokens": 1824,
+      "cost_usd": 0.0275
+    },
+    "savings": {
+      "input_tokens_saved_pct": -100.0,
+      "output_tokens_saved_pct": -10.5,
+      "cost_saved_pct": -10.7,
+      "accuracy_delta_pp": -4
+    }
+  },
+  "tasks": [
+    {
+      "id": "log_top_4xx_ip",
+      "shape": "log_analysis",
+      "A": {
+        "path": "A_cloud_only",
+        "ok": true,
+        "stdout": "192.168.1.42\t6\n",
+        "code": "import sys\nimport re\nfrom collections import defaultdict\n\nlog = sys.argv[1]\ncounts = defaultdict(int)\nfor line in log.splitlines():\n    m = re.match(r'(\\S+) \\S+ \\S+ \\[.*?\\] \".*?\" (\\d{3})', line)\n    if m:\n        ip, status = m.group(1), int(m.group(2))\n        if 400 <= status <= 499:\n            counts[ip] += 1\nbest = max(counts, key=lambda k: counts[k])\nsys.stdout.write(f\"{best}\\t{counts[best]}\\n\")",
+        "tokens_in": 3,
+        "tokens_out": 364,
+        "cost_usd": 0.005469,
+        "wall_seconds": 6.39
+      },
+      "B": {
+        "path": "B_hybrid",
+        "ok": false,
+        "stdout": "",
+        "code": "(set lines (split $0 \"\\n\"))\n(set counts {})\n(for-each line lines\n  (set parts (split line \" \"))\n  (if (and (gt (len parts) 8) (ge (int (last parts)) 400))\n    (set ip (first parts))\n    (map_set counts ip (add (get_or counts ip 0) 1))))\n(println (join (sort_by (entries counts) (\\p (neg (last p)))) \"\\t\") \"\\n\")",
+        "tokens_in": 6.0,
+        "tokens_out": 498,
+        "cost_usd": 0.007488,
+        "wall_seconds": 34.4,
+        "sigil_attempts": 3,
+        "sigil_model": "phi-sigil-v2:14b",
+        "stages": [
+          {
+            "stage": "decide",
+            "in": 3,
+            "out": 479
+          },
+          {
+            "stage": "report",
+            "in": 3,
+            "out": 19
+          }
+        ]
+      }
+    },
+    {
+      "id": "csv_top3_categories",
+      "shape": "csv_aggregation",
+      "A": {
+        "path": "A_cloud_only",
+        "ok": false,
+        "stdout": "utility: $200.00\nfood: $149.20\nentertainment: $30.00\n",
+        "code": "import sys\nimport csv\nimport io\nfrom collections import defaultdict\n\ndata = sys.argv[1]\nreader = csv.DictReader(io.StringIO(data))\ntotals = defaultdict(float)\nfor row in reader:\n    totals[row['category']] += float(row['amount'])\n\ntop3 = sorted(totals.items(), key=lambda x: x[1], reverse=True)[:3]\nfor cat, total in top3:\n    sys.stdout.write(f\"{cat}: ${total:.2f}\\n\")",
+        "tokens_in": 3,
+        "tokens_out": 363,
+        "cost_usd": 0.005454,
+        "wall_seconds": 7.36
+      },
+      "B": {
+        "path": "B_hybrid",
+        "ok": false,
+        "stdout": "",
+        "code": "(set rows (split $0 \"\\n\"))\n(set data (map_arr (slice rows 1 (len rows)) (\\r (split r \",\"))))\n(set sums {})\n(for-each row data\n  (set category (last row))\n  (if (has sums category)\n    (set sums (json_set sums [category] (add (json_get sums [category]) (cast_float_int (string_to_float (first row))))))\n    (else (set sums (json_set sums [category] (cast_float_int (string_to_float (first row)))))))\n(set sorted (sort_by (entries sums) (\\p (neg (last p)))))\n(for-each pair (slice sorted 0 3)\n  (println (fmt \"{}: ${:.2f}\" (first pair) (div (last pair) 100.0)))))",
+        "tokens_in": 6.0,
+        "tokens_out": 256,
+        "cost_usd": 0.003858,
+        "wall_seconds": 33.45,
+        "sigil_attempts": 3,
+        "sigil_model": "phi-sigil-v2:14b",
+        "stages": [
+          {
+            "stage": "decide",
+            "in": 3,
+            "out": 236
+          },
+          {
+            "stage": "report",
+            "in": 3,
+            "out": 20
+          }
+        ]
+      }
+    },
+    {
+      "id": "extract_python_def_lines",
+      "shape": "code_mining",
+      "A": {
+        "path": "A_cloud_only",
+        "ok": true,
+        "stdout": "alpha\nbeta\ngamma\n",
+        "code": "import sys\nimport re\n\nsource = sys.argv[1]\nfor line in source.split('\\n'):\n    m = re.match(r'def ([A-Za-z_][A-Za-z0-9_]*)\\(', line)\n    if m:\n        sys.stdout.write(m.group(1) + '\\n')",
+        "tokens_in": 3,
+        "tokens_out": 221,
+        "cost_usd": 0.003324,
+        "wall_seconds": 5.66
+      },
+      "B": {
+        "path": "B_hybrid",
+        "ok": false,
+        "stdout": "alpha\n",
+        "code": "(println (join (map_arr (find_all \"^def \\w+\" $0) (\\m (last (split m \" \")))) \"\\n\"))",
+        "tokens_in": 6.0,
+        "tokens_out": 187,
+        "cost_usd": 0.002823,
+        "wall_seconds": 23.91,
+        "sigil_attempts": 3,
+        "sigil_model": "phi-sigil-v2:14b",
+        "stages": [
+          {
+            "stage": "decide",
+            "in": 3,
+            "out": 127
+          },
+          {
+            "stage": "report",
+            "in": 3,
+            "out": 60
+          }
+        ]
+      }
+    },
+    {
+      "id": "json_extract_paths",
+      "shape": "json_wrangling",
+      "A": {
+        "path": "A_cloud_only",
+        "ok": true,
+        "stdout": "bob\ncarol\n",
+        "code": "import sys\nimport json\n\ndata = json.loads(sys.argv[1])\nfor user in data[\"users\"]:\n    if user[\"role\"] == \"admin\":\n        sys.stdout.write(user[\"name\"] + \"\\n\")",
+        "tokens_in": 3,
+        "tokens_out": 102,
+        "cost_usd": 0.001539,
+        "wall_seconds": 3.12
+      },
+      "B": {
+        "path": "B_hybrid",
+        "ok": true,
+        "stdout": "bob\ncarol\n",
+        "code": "(set users (json_get (json_parse $0) [\"users\"]))\n(for-each u users\n  (if (eq (json_get u [\"role\"]) \"admin\")\n    (println (json_get u [\"name\"]))))",
+        "tokens_in": 6.0,
+        "tokens_out": 130,
+        "cost_usd": 0.001968,
+        "wall_seconds": 10.18,
+        "sigil_attempts": 1,
+        "sigil_model": "qwen-sigil-v6:7b",
+        "stages": [
+          {
+            "stage": "decide",
+            "in": 3,
+            "out": 115
+          },
+          {
+            "stage": "report",
+            "in": 3,
+            "out": 15
+          }
+        ]
+      }
+    },
+    {
+      "id": "tsv_to_markdown",
+      "shape": "format_conversion",
+      "A": {
+        "path": "A_cloud_only",
+        "ok": true,
+        "stdout": "| name | age | city |\n| --- | --- | --- |\n| alice | 30 | paris |\n| bob | 25 | nyc |\n",
+        "code": "import sys\n\ndata = sys.argv[1]\nlines = data.strip().split('\\n')\nrows = [line.split('\\t') for line in lines]\nheader = rows[0]\ndivider = ['---'] * len(header)\noutput = ''\nfor i, row in enumerate([header, divider] + rows[1:]):\n    output += '| ' + ' | '.join(row) + ' |\\n'\nsys.stdout.write(output)",
+        "tokens_in": 3,
+        "tokens_out": 164,
+        "cost_usd": 0.002469,
+        "wall_seconds": 3.91
+      },
+      "B": {
+        "path": "B_hybrid",
+        "ok": true,
+        "stdout": "| name | age | city |\n| --- | --- | --- |\n| alice | 30 | paris |\n| bob | 25 | nyc |\n",
+        "code": "(println \"| name | age | city |\")\n(println \"| --- | --- | --- |\")\n(for-each row string (rest (split $0 \"\\n\"))\n  (println (fmt \"| {} | {} | {} |\" (array_get (split row \"\\t\") 0) (array_get (split row \"\\t\") 1) (array_get (split row \"\\t\") 2))))",
+        "tokens_in": 6.0,
+        "tokens_out": 169,
+        "cost_usd": 0.002553,
+        "wall_seconds": 23.14,
+        "sigil_attempts": 3,
+        "sigil_model": "phi-sigil-v2:14b",
+        "stages": [
+          {
+            "stage": "decide",
+            "in": 3,
+            "out": 124
+          },
+          {
+            "stage": "report",
+            "in": 3,
+            "out": 45
+          }
+        ]
+      }
+    },
+    {
+      "id": "log_peak_error_hour",
+      "shape": "multi_step",
+      "A": {
+        "path": "A_cloud_only",
+        "ok": true,
+        "stdout": "09\n",
+        "code": "import sys\nfrom collections import defaultdict\n\ndata = sys.argv[1]\ncounts = defaultdict(int)\nfor line in data.splitlines():\n    parts = line.split(' ', 2)\n    if len(parts) >= 2 and parts[1] == 'ERROR':\n        hour = parts[0].split('T')[1][:2]\n        counts[hour] += 1\nbest = max(counts, key=lambda h: counts[h])\nsys.stdout.write(best + '\\n')",
+        "tokens_in": 3,
+        "tokens_out": 185,
+        "cost_usd": 0.002784,
+        "wall_seconds": 4.72
+      },
+      "B": {
+        "path": "B_hybrid",
+        "ok": false,
+        "stdout": "",
+        "code": "(set lines (split $0 \"\\n\"))\n(set counts {})\n(for-each line lines\n  (if (eq (first (last (split line \" \"))) \"ERROR\")\n    (set ts (first (split (first (split (last (split line \" \")) \":\")) \"T\")))\n    (map_arr counts (\\v (add v (get_or counts (slice ts 11 13) 0))))))\n(let best_key string \"\")\n(let best_count int 0)\n(for-each kv (entries counts)\n  (let k string (first kv))\n  (let count int (second kv))\n  (if (gt count best_count)\n    (set best_key k)\n    (set best_count count)))\n(println (fmt \"{}\\n\" best_key))",
+        "tokens_in": 6.0,
+        "tokens_out": 250,
+        "cost_usd": 0.003768,
+        "wall_seconds": 33.42,
+        "sigil_attempts": 3,
+        "sigil_model": "phi-sigil-v2:14b",
+        "stages": [
+          {
+            "stage": "decide",
+            "in": 3,
+            "out": 231
+          },
+          {
+            "stage": "report",
+            "in": 3,
+            "out": 19
+          }
+        ]
+      }
+    },
+    {
+      "id": "extract_dotted_ipv4",
+      "shape": "regex_extract",
+      "A": {
+        "path": "A_cloud_only",
+        "ok": false,
+        "stdout": "10.0.0.1\n192.168.1.1\n999.999.999.999\n10.0.0.1\n",
+        "code": "import sys\nimport re\n\ntext = sys.argv[1]\nmatches = re.findall(r'\\b(?:\\d{1,3}\\.){3}\\d{1,3}\\b', text)\nsys.stdout.write('\\n'.join(matches) + '\\n' if matches else '')",
+        "tokens_in": 3,
+        "tokens_out": 71,
+        "cost_usd": 0.001074,
+        "wall_seconds": 2.91
+      },
+      "B": {
+        "path": "B_hybrid",
+        "ok": false,
+        "stdout": "",
+        "code": "(set s string $0)\n(set pat regex (regex_compile \"\\b([0-9]{1,3}\\.){3}[0-9]{1,3}\\b\"))\n(while true\n  (set m (regex_match pat s))\n  (if (not m) (break))\n  (println (string_slice s (get_or m \"start\" 0) (sub (len s) (add (get_or m \"end\" 0) 1))))\n  (set s (string_slice s (add (get_or m \"end\" 0) 1) (sub (len s) (add (get_or m \"end\" 0) 1)))))",
+        "tokens_in": 6.0,
+        "tokens_out": 160,
+        "cost_usd": 0.002418,
+        "wall_seconds": 29.84,
+        "sigil_attempts": 3,
+        "sigil_model": "phi-sigil-v2:14b",
+        "stages": [
+          {
+            "stage": "decide",
+            "in": 3,
+            "out": 141
+          },
+          {
+            "stage": "report",
+            "in": 3,
+            "out": 19
+          }
+        ]
+      }
+    },
+    {
+      "id": "url_status_pairs",
+      "shape": "log_parse_format",
+      "A": {
+        "path": "A_cloud_only",
+        "ok": true,
+        "stdout": "/home 200\n/api/login 401\n/docs 200\n/resource/5 404\n",
+        "code": "import sys\nfor line in sys.argv[1].splitlines():\n    parts = line.split()\n    sys.stdout.write(parts[1] + ' ' + parts[2] + '\\n')",
+        "tokens_in": 3,
+        "tokens_out": 181,
+        "cost_usd": 0.002724,
+        "wall_seconds": 4.2
+      },
+      "B": {
+        "path": "B_hybrid",
+        "ok": false,
+        "stdout": "/home\n/api/login\n/docs\n/resource/5\n",
+        "code": "(set lines array (split $0 \"\\n\"))\n(for-each line string lines\n  (set parts array (split line \" \"))\n  (println (join (slice parts 1 2) \" \")))",
+        "tokens_in": 6.0,
+        "tokens_out": 174,
+        "cost_usd": 0.002628,
+        "wall_seconds": 25.78,
+        "sigil_attempts": 3,
+        "sigil_model": "phi-sigil-v2:14b",
+        "stages": [
+          {
+            "stage": "decide",
+            "in": 3,
+            "out": 118
+          },
+          {
+            "stage": "report",
+            "in": 3,
+            "out": 56
+          }
+        ]
+      }
+    }
+  ]
+}

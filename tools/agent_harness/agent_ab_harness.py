@@ -248,6 +248,137 @@ def path_b_hybrid(task: dict) -> dict:
 
 
 # ============================================================================
+# Path C: chained hybrid (Sonnet decomposes → multiple single-step Sigil calls)
+# ============================================================================
+#
+# Premise (Phase 21 / 22.6): the local Sigil ensemble solves single-step
+# Stream-C-shaped tasks at 29/30 but multi-step composition (one program
+# does filter + aggregate + format + sort) at 1-2/8. The bottleneck is
+# composition complexity within one program, not Sigil grammar fluency.
+#
+# Path C tests the architectural fix: ask Sonnet to DECOMPOSE the task
+# into N single-step Sigil snippets, run each one, thread stdout → stdin
+# between steps. Each step is then a Stream-C-shaped task.
+
+CHAIN_DELEGATE_SYSTEM = (
+    "You decide how to delegate a tooling task to the local Sigil ensemble. "
+    "The local ensemble is excellent at SINGLE-STEP data transforms (parse, "
+    "filter, count, sort, format) but struggles when one program has to do "
+    "many steps in sequence. Decompose the task into 1-3 SINGLE-PURPOSE "
+    "steps. Each step's input is the previous step's stdout (the first "
+    "step's input is the user-supplied data). Output JSON of the form: \n"
+    "  {\"steps\": [{\"description\": \"<one-sentence Sigil task>\"}, ...]}\n"
+    "Each description should be one sentence, present tense, focused on a "
+    "single transform. Examples of good steps: 'Skip the header and print "
+    "category,amount comma-separated for each row', 'Sum the second column "
+    "by the first column key, print key total each line', 'Sort lines "
+    "descending by the second whitespace-separated number, print top 3 "
+    "formatted as KEY: $TOTAL'. Output ONLY the JSON, no markdown."
+)
+CHAIN_DELEGATE_PROMPT = (
+    "Task: {goal}\n\n"
+    "Sample input string (passed as $0 to the FIRST step):\n"
+    "{input!r}\n\n"
+    "Final expected output:\n"
+    "{expected!r}\n\n"
+    "Decompose into 1-3 single-purpose steps. Output the JSON."
+)
+
+
+def path_c_chained_hybrid(task: dict) -> dict:
+    """Sonnet decomposes the task into a pipeline of single-step Sigil calls;
+    we run them sequentially, threading stdout → next step's stdin.
+
+    Single-step Stream-C is where the local ensemble lives at 29/30. Chained
+    composition is the bet: each individual step is the shape the model
+    handles well, and the orchestrator owns the cross-step plumbing.
+    """
+    t0 = time.time()
+    total_in = total_out = total_cost = 0.0
+    stage_records = []
+
+    # 1. Sonnet decomposes
+    decomp_prompt = CHAIN_DELEGATE_PROMPT.format(
+        goal=task["goal"], input=task["input"], expected=task["expected"])
+    r1 = claude_call(decomp_prompt, CHAIN_DELEGATE_SYSTEM)
+    if not r1["ok"]:
+        return {"path": "C_chained", "ok": False, "stdout": "",
+                "tokens_in": 0, "tokens_out": 0, "cost_usd": 0.0,
+                "wall_seconds": round(time.time() - t0, 2),
+                "error": r1.get("raw_err", "")}
+    total_in += r1["prompt_tokens"]; total_out += r1["completion_tokens"]
+    total_cost += r1["cost_usd"]
+    stage_records.append({"stage": "decompose", "in": r1["prompt_tokens"],
+                          "out": r1["completion_tokens"]})
+
+    text = r1["text"].strip()
+    for fence in ["```json", "```"]:
+        if text.startswith(fence): text = text[len(fence):].lstrip(); break
+    if text.endswith("```"): text = text[:-3].rstrip()
+    try:
+        plan = json.loads(text)
+        steps = plan.get("steps", [])
+        if not steps or not isinstance(steps, list):
+            raise ValueError("no steps")
+    except (json.JSONDecodeError, ValueError):
+        # Fallback: collapse to a single-step delegation
+        steps = [{"description": task["goal"]}]
+
+    # 2. Run pipeline; thread stdout → stdin
+    cur_input = task["input"]
+    step_results = []
+    last_step_idx = len(steps) - 1
+    for idx, step in enumerate(steps):
+        is_final = idx == last_step_idx
+        # Validate only the final step against the task's expected output;
+        # intermediate step shapes are Sonnet's guess and we don't validate
+        # them, just run-once and pipe.
+        expected_shape = task["expected"] if is_final else ""
+        result = generate_and_run(step.get("description", ""), cur_input, expected_shape)
+        step_results.append({
+            "idx": idx,
+            "description": step.get("description", "")[:120],
+            "ok": result["ok"],
+            "stdout": result["stdout"][:400],
+            "attempts": result["attempts"],
+            "model_used": result["model_used"],
+            "fallback_used": result["fallback_used"],
+            "wall_seconds": result["wall_seconds"],
+        })
+        if is_final:
+            final_stdout = result["stdout"]
+            final_ok = result["ok"] and result["stdout"] == task["expected"]
+        cur_input = result["stdout"]
+
+    # 3. Sonnet reports
+    summary = {
+        "n_steps": len(steps),
+        "final_stdout": final_stdout[:500],
+        "ok": final_ok,
+    }
+    report_prompt = REPORT_PROMPT.format(
+        result=json.dumps(summary, ensure_ascii=False), goal=task["goal"])
+    r3 = claude_call(report_prompt, REPORT_SYSTEM)
+    total_in += r3["prompt_tokens"]; total_out += r3["completion_tokens"]
+    total_cost += r3["cost_usd"]
+    stage_records.append({"stage": "report", "in": r3["prompt_tokens"],
+                          "out": r3["completion_tokens"]})
+
+    return {
+        "path": "C_chained",
+        "ok": final_ok,
+        "stdout": final_stdout,
+        "n_steps": len(steps),
+        "step_results": step_results,
+        "tokens_in": total_in,
+        "tokens_out": int(total_out),
+        "cost_usd": round(total_cost, 6),
+        "wall_seconds": round(time.time() - t0, 2),
+        "stages": stage_records,
+    }
+
+
+# ============================================================================
 # Main
 # ============================================================================
 
@@ -258,11 +389,17 @@ def main():
     ap.add_argument("--skip-cloud", action="store_true",
                     help="Skip cloud calls (Path A and Sonnet stages of Path B); "
                          "only run the local Sigil portion. For dry runs.")
+    ap.add_argument("--with-chained", action="store_true",
+                    help="Also run Path C: chained sub-agent. Sonnet "
+                         "decomposes the task into 1-3 single-step Sigil "
+                         "calls, results pipe through. Tests whether "
+                         "single-step delegation lifts multi-step accuracy.")
     args = ap.parse_args()
 
     tasks = json.loads(Path(args.tasks).read_text())
     print(f"Loaded {len(tasks)} agentic tasks\n")
 
+    enable_c = args.with_chained
     rows = []
     for i, t in enumerate(tasks, 1):
         print(f"[{i:2}/{len(tasks)}] {t['id']}")
@@ -276,12 +413,19 @@ def main():
                  "tokens_in": 0, "tokens_out": 0, "cost_usd": 0.0,
                  "wall_seconds": b_local["wall_seconds"],
                  "sigil_attempts": b_local["attempts"], "sigil_model": b_local["model_used"]}
+            c = None
         else:
             a = path_a_cloud_only(t)
             b = path_b_hybrid(t)
-        print(f"   A cloud:  {'P' if a['ok'] else 'F'} (in={a['tokens_in']} out={a['tokens_out']} ${a['cost_usd']:.4f}, {a['wall_seconds']:.1f}s)")
-        print(f"   B hybrid: {'P' if b['ok'] else 'F'} (in={b['tokens_in']} out={b['tokens_out']} ${b['cost_usd']:.4f}, {b['wall_seconds']:.1f}s)")
-        rows.append({"id": t["id"], "shape": t["shape"], "A": a, "B": b})
+            c = path_c_chained_hybrid(t) if enable_c else None
+        print(f"   A cloud:    {'P' if a['ok'] else 'F'} (in={a['tokens_in']} out={a['tokens_out']} ${a['cost_usd']:.4f}, {a['wall_seconds']:.1f}s)")
+        print(f"   B hybrid:   {'P' if b['ok'] else 'F'} (in={b['tokens_in']} out={b['tokens_out']} ${b['cost_usd']:.4f}, {b['wall_seconds']:.1f}s)")
+        if c is not None:
+            print(f"   C chained:  {'P' if c['ok'] else 'F'} (in={c['tokens_in']} out={c['tokens_out']} ${c['cost_usd']:.4f}, {c['wall_seconds']:.1f}s, {c.get('n_steps', '?')} steps)")
+        row = {"id": t["id"], "shape": t["shape"], "A": a, "B": b}
+        if c is not None:
+            row["C"] = c
+        rows.append(row)
 
     # Aggregate
     total_a_in = sum(r["A"]["tokens_in"] for r in rows)
@@ -310,12 +454,25 @@ def main():
             "accuracy_delta_pp": total_b_pass - total_a_pass,
         },
     }
+    if enable_c:
+        total_c_in = sum(r["C"]["tokens_in"] for r in rows if "C" in r)
+        total_c_out = sum(r["C"]["tokens_out"] for r in rows if "C" in r)
+        total_c_cost = sum(r["C"]["cost_usd"] for r in rows if "C" in r)
+        total_c_pass = sum(1 for r in rows if "C" in r and r["C"]["ok"])
+        aggregate["C_chained"] = {
+            "pass": total_c_pass, "input_tokens": total_c_in,
+            "output_tokens": total_c_out, "cost_usd": round(total_c_cost, 4),
+            "vs_A_accuracy_pp": total_c_pass - total_a_pass,
+            "vs_B_accuracy_pp": total_c_pass - total_b_pass,
+        }
 
     print()
     print(f"=== AGGREGATE ({len(rows)} tasks) ===")
     print(f"  Cloud-only (A): pass {total_a_pass}/{len(rows)}  in={total_a_in:>6} out={total_a_out:>5} ${total_a_cost:.4f}")
     print(f"  Hybrid     (B): pass {total_b_pass}/{len(rows)}  in={total_b_in:>6} out={total_b_out:>5} ${total_b_cost:.4f}")
-    print(f"  Savings:        input −{aggregate['savings']['input_tokens_saved_pct']}%  output −{aggregate['savings']['output_tokens_saved_pct']}%  cost −{aggregate['savings']['cost_saved_pct']}%  accuracy {aggregate['savings']['accuracy_delta_pp']:+d} pp")
+    if enable_c:
+        print(f"  Chained    (C): pass {aggregate['C_chained']['pass']}/{len(rows)}  in={total_c_in:>6} out={total_c_out:>5} ${total_c_cost:.4f}  vs B {aggregate['C_chained']['vs_B_accuracy_pp']:+d}pp")
+    print(f"  Savings B vs A: input −{aggregate['savings']['input_tokens_saved_pct']}%  output −{aggregate['savings']['output_tokens_saved_pct']}%  cost −{aggregate['savings']['cost_saved_pct']}%  accuracy {aggregate['savings']['accuracy_delta_pp']:+d} pp")
 
     out_data = {"aggregate": aggregate, "tasks": rows}
     Path(args.out).write_text(json.dumps(out_data, indent=2, ensure_ascii=False))

@@ -2643,6 +2643,95 @@ mismatch from Phase 18.6. Lesson: any prompt rule that asserts
 a runtime contract should be cross-checked against the actual
 interpreter implementation before shipping.
 
+### 22.3b Tier 1b retest with the corrected find_all rule
+
+Same harness config, only difference: the SLIM_HEADER find_all
+rule was rewritten from "with one capturing group, returns the
+group per hit" to "always returns the FULL match per hit".
+Result file: `tools/agent_harness/ab_results_v6_phi_v2_tier1b.json`.
+
+| Configuration | Path B | Path A | Notes |
+|---|---:|---:|---|
+| Tier 1a | 2/8 | 5/8 | url_status_pairs WIN |
+| **Tier 1b (corrected find_all)** | **2/8** | 6/8 | tsv_to_markdown WIN, url_status_pairs LOSS — net same count, different tasks |
+
+The headline B-count didn't move. What did move:
+
+- **`tsv_to_markdown` flipped to WIN.** This was the cosmetic
+  one-character bug (extra space) from Tier 1a. On retry sampling
+  this run, the model produced exact-match output. Pure noise
+  recovery; the new SLIM_HEADER rule didn't apply to this task.
+- **`url_status_pairs` flipped to LOSS.** Same task that won on
+  Tier 1a. This run the model wrote `(int (array_get parts 2))`
+  — `int` doesn't exist as an integer cast in our Sigil; the
+  builtin is `parse_int`. Phi-v2 reached for `int` instead. Pure
+  noise loss; would have passed if the retry had hit `parse_int`.
+- **`extract_python_def_lines` got closer.** The model used
+  `(find_all "^def \w+" $0)` (no capturing group, correctly
+  per the new rule) and `(\m (last (split m " ")))` to extract
+  the name from "def NAME". Algorithm is right. **stdout was
+  `'alpha\n'`** — only the first match. The bug is that
+  `Re.Perl.compile_pat` does not enable `(?m)` multiline mode by
+  default, so `^` anchors at start-of-input only, not at every
+  line boundary.
+
+This last one is a real interpreter-level finding worth
+flagging: the model wrote the correct PCRE pattern for what it
+*thought* the engine would do (line-anchored matching). The
+engine ran it as input-anchored. The split between intent and
+behaviour is invisible at the surface — the same pattern would
+work in Python's `re` with the right flag, in Perl with `m`, in
+Bash's `grep`. We don't have multiline mode on by default. The
+fix options:
+
+1. **Enable multiline mode by default in the regex backend**.
+   Test impact: any existing Sigil program that uses `^`/`$` and
+   relies on input-anchoring would change behaviour. Stream C and
+   the test suite would need a check. Probably safe but invasive.
+2. **Add SLIM_HEADER tip + corpus seed**: "use `(?m)` prefix for
+   line-level `^`/`$` anchors". Lower-risk; relies on the model
+   reaching for the prefix.
+3. **Surface a runtime warning** when `^` or `$` is used in a
+   regex pattern AND the input contains newlines AND fewer
+   matches were found than newlines suggest. Heuristic, complex.
+
+Option 2 is the right Tier 1.5 move (cheap, opt-in). Option 1
+is a Phase 23 candidate with explicit migration. Both are
+deferred — the chained sub-agent of Tier 2 likely sidesteps this
+class of failure (each step iterates lines explicitly with
+`(split $0 "\n")` and uses regex per-line, no anchors needed).
+
+### 22.3c What Tier 1 actually moved
+
+Honest framing across both retests:
+
+- **The (argv)-misuse instinct is gone** from the model's
+  reaching distribution. Every Path B failure now uses
+  `(split $0 "\n")` instead of `(argv)`. This is a real
+  systematic shift, validated by the diagnostic warning text
+  appearing in stderr of the failures and the retry hint
+  rewriting working as designed (`url_status_pairs` Tier 1a
+  recovered via this exact mechanism).
+- **The B-pass count moved 1 → 2** but the *identity* of the
+  passing pair drifts with retry sampling — `tsv_to_markdown`
+  and `url_status_pairs` each won once and lost once across
+  the two retests. So the +1 lift is real but at the noise
+  floor; the suite is too small to claim more than "a marginal
+  improvement at the dominant failure mode".
+- **The remaining 6 failures share no common shape** that an
+  additional Tier-1-style intervention can address. They're
+  task-specific: column-swap (csv_top3_categories), regex
+  multiline (extract_python_def_lines), regex octet bounds
+  (extract_dotted_ipv4), wrong byte index (log_top_4xx_ip),
+  multi-statement-in-if (log_peak_error_hour). None of these
+  are silent failures the interpreter could surface
+  generically.
+
+This is the "what does the diagnostic mechanism cover, and where
+does it stop" answer to Marc's question. Diagnostics carried us
+from 1/8 to 2/8 by closing the dominant silent-failure mode.
+The remaining 6 are not silent-failure-mode-shaped.
+
 ### 22.3a Did the validator hints help when output was empty? (the actual answer)
 
 **Yes, but only by 1 task on this 8-task suite.** The Tier 1
