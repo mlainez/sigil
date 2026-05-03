@@ -1745,1790 +1745,235 @@ or backwards-compatibility forced exceptions."*
 These updates have been made to `README.md` to match the project's
 actual state.
 
-## Phase 18: Agentic harness, paren-balancer, PCRE swap, top-3 strategic recommendations
-
-After Phase 17 closed with the philosophy retrospective and v5 retrain
-producing no further accuracy gain, the next phase split into four
-parallel tracks: shipping the agent integration, hardening the language
-boundary tolerance, fixing the regex flavour, and identifying the
-top-3 highest-leverage moves remaining.
-
-### 18.1 The agentic harness (MCP server)
-
-Built `tools/agent_harness/sigil_mcp_server.py` — a Model Context
-Protocol server exposing three tools (`sigil_run_task`,
-`sigil_run_code`, `sigil_capabilities`) over JSON-RPC stdio. Configurable
-into both Claude Code and opencode via standard MCP config blocks
-(setup docs in `tools/agent_harness/README.md`). The server orchestrates
-the local Qwen-Sigil-v4 → Phi-Sigil-v1 ensemble: generates Sigil for a
-described task, applies the auto-balancer, runs via vm.exe, retries
-on failure, returns validated stdout. Cloud orchestrator never sees
-the program — only the result.
-
-Built `tools/agent_harness/agent_ab_harness.py` — A/B comparison
-harness comparing cloud-only-Python (Path A) vs hybrid-cloud-plans-
-local-Sigil-runs (Path B) on multi-step agentic tasks. Result on 8
-seeded tasks:
-
-| | Path A (cloud Python) | Path B (hybrid local Sigil) |
-|---|---|---|
-| Pass rate | **6/8** | **1/8** |
-| Cost | $0.023 | $0.027 |
-| Time/task | ~5s | ~25s |
-
-**The hybrid was worse on every axis on this multi-step suite.** Honest
-finding: the local ensemble that hits 93% on Stream C tooling tasks
-(short, single-step, ~51 output tokens) collapses to 12% on multi-step
-agentic composition tasks. The Stream C wins do *not* directly translate
-to "delegation always saves cloud tokens" — they translate to
-"delegation works for the SHORT-TOOLING piece of an agentic workflow,
-not for multi-step planning."
-
-This is exactly the right finding for the harness to surface. The MCP
-server itself is correct and reusable. The value claim it tests is
-narrower than originally framed.
-
-### 18.2 Paren auto-balancer (in Sigil itself)
-
-Two-step refinement of the Phase-12-era idea. First implementation
-was Python in `eval_real_tooling.py`. Per the project's "if it CAN be
-written in Sigil it MUST be written in Sigil" principle, the logic
-moved to the auto-loaded prelude as `(paren_depth code)` and
-`(balance_parens code)`. The Python wrapper now subprocess-calls
-`tools/balance_parens.sigil` which is a 2-line Sigil program. 156/156
-tests pass including 11 new unit tests for the balancer.
-
-Stream C impact: zero on the persistent failures (the failing code
-isn't paren-imbalanced — failures are semantic). The balancer is
-defensive infrastructure that's free if not needed.
-
-The architectural win is bigger than the score change: any future
-Sigil program (including the agentic harness) can call
-`(balance_parens raw_model_output)` natively without escaping to
-Python. One step closer to a self-hosted toolchain.
-
-### 18.3 Surgical-hint validator-in-loop
-
-Replaced the Phase-11 generic structural diff with shape-specific
-hints: off-by-one numeric detection (with the canonical fix:
-`(count s "\n")` not `(len (split s "\n"))`), regex over-match
-detection (with the canonical fix: bound character classes,
-add `\b` word-anchors), missing/extra-line shape detection,
-trailing-newline mismatch, and runtime-error did-you-mean for the
-common name reaches (`string_length` → `len`, `arg_int "x"` →
-`parse_int`, etc.).
-
-Result: zero net score change on Stream C. The new hints are *more*
-specific but on at least one task pushed the model in a worse
-direction (`shell_argv_count` model switched from a working
-`(split $0 " ")` to a non-working `(argv)`). Same regression v5+phi
-already had. The mechanism is correct; the surgical-hint specificity
-needs more targeted rollout (hint per failure class, not per task).
-
-### 18.4 PCRE regex swap (the largest meet-halfway change)
-
-Swapped OCaml's `Str` regex backend for the [`re`](https://github.com/ocaml/ocaml-re)
-library (Perl-compatible). Roughly 60 lines of `interpreter.ml`
-change across the regex builtins. 156/156 tests still pass after
-updating 4 alternation tests in `test_regex.sigil` from Str-style
-escaped pipes (`cat\\|dog`) to PCRE-style (`cat|dog`).
-
-What this enables that was blocked before: `\b`, `\d`, `\w`, `\s`,
-non-greedy `*?`/`+?`, named groups, character class shorthands. The
-regex flavour the model overwhelmingly writes is now the regex
-flavour the language accepts.
-
-**Trade-off surfaced.** Stream C regressed 28→26 immediately after
-the swap. Two losses:
-
-* `extract_function_names_py`: the v4 corpus had taught the model
-  to write `def [a-z]+(` (no escape) — under Str, `(` was literal;
-  under PCRE, `(` is a group-opener and the pattern is invalid.
-* `shell_argv_count`: unrelated generation variance (same task v5+phi
-  loses).
-
-The full payoff requires a corpus refresh sweep + Qwen v6 retrain.
-Step plan documented in this phase's writeup. Estimated ~3 hours
-of work + 2.5 hours retrain. Expected payoff: regex floor failures
-(`extract_emails`, `extract_dotted_ipv4`, `extract_phone_numbers`)
-plausibly become solvable; possibly 28→30 on Stream C, 0→2 on the
-agentic regex tasks.
-
-The PCRE swap is the canonical structural meet-halfway example —
-documented as Section 4.7 in `papers/MEETING_HALFWAY.md`. It's the
-largest leverage-per-line change in the project: ~60 lines of OCaml
-absorbs an entire flavour of regex syntax (hundreds of distinct
-patterns).
-
-### 18.5 Top-3 highest-leverage moves remaining
-
-Based on what we now know about where local Sigil delivers value
-(Stream C tooling: 93%) versus where it doesn't (multi-step agentic:
-12%), and where the actual user-visible gap sits (multi-step
-composition + reasoning), the three highest-impact next moves are:
-
-**(1) Sub-agent loop where Sigil tool calls are CHAINED by a local
-planner.** Current agent_harness runs ONE Sigil program per call. If
-a multi-step task needs filter→count→sort, the model has to write
-all three steps in one program — the failure mode that collapses
-multi-step accuracy to 12%. Better architecture: a tiny local planner
-(qwen2.5-coder:7b base or similar — needs general reasoning, not
-Sigil specialisation) decomposes into individual Sigil programs
-chained through stdout→stdin or named-temp-files. Each step is
-single-purpose, exactly the Stream C shape the local model handles
-at 93%. Plausible lift: agentic 1/8 → 5-7/8.
-
-**(2) Real-world task suite from actual user history.** Synthetic
-benchmarks have hit diminishing returns — we've tuned to them. The
-ungrounded value claim (token saving in real workflows) needs real
-tasks: pull 30-50 from the user's actual `~/.bash_history` and
-recent shell scripts, compare cloud-only vs hybrid via the
-agent_harness MCP. Without this the value claim is "interesting on
-synthetic tasks." With this the value claim is "saves N tokens per
-session on the user's own work." Cost: data collection is the only
-hard part (~2-4 hours). Output is concrete and shareable.
-
-**(3) Validator-in-loop driven by the Sigil interpreter, not a
-text hint.** Currently retry hints are stale text representations
-of the previous run's stdout/stderr. A better loop: model writes
-code → Sigil runs it on a sample → `(diff_against_expected got
-expected)` returns a structured comparison the model sees as a
-real value, not a hint string → model fixes → repeat. Implemented
-as a Sigil stdlib function callable inside a single Sigil program
-(no extra cloud round-trips). Fits the Sigil-self-hosted direction.
-Plausible lift on hard composition tasks where the model currently
-gives up after 3 stale-hint retries.
-
-Done together these would close the gap from "local ensemble works
-on tooling tasks" to "local ensemble works on agentic tooling
-workflows." Without them, the value claim stays narrowly scoped.
-
-## Phase 19: Stream C 29/30 — corpus + validator hint, no language redesign (2026-05-02)
-
-Phase 18 left the local stack at 26-28/30 on Stream C with the
-ensemble. The remaining failures fell into two diagnostic buckets:
-**regex-shape tasks** (model didn't reach for `find_all`, or used
-`regex_match` for extraction, or had patterns silently destroyed by
-the lexer) and **non-regex composition tasks** (`uniq_c_simple`,
-`shell_argv_count`). This phase resolves both — without changing the
-Sigil grammar — by combining four small targeted moves.
-
-### 19.1 Lexer fix: unknown escapes preserve the backslash
-
-A diagnostic on `iso_date_extract` revealed that `"\d{4}-\d{2}-\d{2}"`
-in a Sigil source string was being parsed as `"d{4}-d{2}-d{2}"`. The
-old escape table at `interpreter/lexer.ml:48-56` had the wildcard
-clause `| _ -> c` — meaning any unknown `\X` collapsed to just `X`,
-silently. The model's regex was correct; the lexer was destroying it
-before it ever reached the regex engine. This is *the* friction point
-for regex tasks, and it is bigger than any API surface choice.
-
-The fix is five lines in `lexer.ml`: change the wildcard to
-`| _ -> "\\" ^ String.make 1 c`. Known escapes (`\n`, `\t`, `\r`,
-`\\`, `\"`, `\'`, `\0`) still translate; everything else round-trips
-verbatim. The full test suite (160/161 — the one failure is an
-unrelated TCP loopback timeout) confirms no regression.
-
-This change is canonically a **structural meet-halfway**: the model
-writes what models naturally write, and the language stops eating
-what it doesn't recognise. The same pattern as the PCRE swap (Phase
-18.6) — eliminate a silent failure class rather than train the model
-to avoid it.
-
-### 19.2 Regex corpus expansion (58 verified examples + 12 hand seeds)
-
-The lexer fix landed but moved Stream C from 15/30 to 14/30 (within
-noise). This was the diagnostic moment: **the model wasn't *failing*
-at regex; it wasn't *reaching* for regex.** On `extract_urls` it
-hand-rolled a character loop. On `ipv4_validate` it called a
-non-existent `is_digit`. On `extract_function_names_py` it used
-`string_starts_with`. The training corpus had only ~30 regex-shaped
-entries out of 2206 — well below the threshold where the model would
-default to a `(find_all "..." $0)` shape.
-
-The fix was a systematic generator + verifier in
-`benchmark/build_regex_corpus.py`. It defines six failure-shape
-families:
-
-- **20 extract-all** examples (URLs, dates, emails, integers, hex
-  colors, hashtags, mentions, IPs, UUIDs, words, decimals, dollars,
-  percentages, times, -ing words, acronyms, semvers, sums, counts).
-- **14 validate** with both pass-and-fail args (phone, email, digits,
-  date, hex, semver, IPv4-octet-by-octet).
-- **8 filter** (ERROR lines, leading-digit lines, year-containing
-  lines, negative match, comment lines, blank-line counts, TODO
-  counts).
-- **8 replace** (whitespace collapse, digit removal, email redaction,
-  year redaction, ANSI strip, dash collapse, leading-whitespace
-  strip).
-- **4 line-extract** (Python def names, first int per line,
-  KEY=VALUE keys, bracketed log levels).
-- **4 count** (substring count, digit count, vowel count, word
-  count).
-
-Each example has canonical args, expected stdout, and a Sigil
-program that is **executed against the args and only kept if its
-stdout matches expected verbatim**. 58/58 verified. Plus 12 hand
-seeds in `benchmark/v6_targeted_seeds.jsonl` covering the exact
-Stream C failure shapes. Total: 70 entries appended to
-`training_corpus.jsonl` (2206 → 2276), RAG index rebuilt, Stream C
-re-run with retrieval enabled.
-
-Result: **27/30** with v6 + RAG, +12 net wins. The 5 originally-
-failing regex tasks all pass. Eight unrelated tasks (`head_n_lines`,
-`sort_uniq_count_top`, `wc_l`, `wc_w`, `find_max_in_log`,
-`duplicate_remover`, `tr_squeeze_spaces`, `df_human_readable`) also
-flipped from F to P — the new examples surfaced functional-pipeline
-idioms (`find_all` + `map_arr` + `sum`) that helped non-regex
-shapes too.
-
-### 19.3 For-iterator mutation guard + validator hint
-
-After the regex push, two failures remained: `uniq_c_simple` and
-`shell_argv_count`. Neither is a regex shape. The first is the
-interesting one: the model writes
-
-```
-(for i 0 n
-  ...
-  (set i (add i count)))    ; expects next iter at i+count
-```
-
-— a C/Python intuition. Sigil's `for` rebinds `i` from its internal
-ref each iteration, so the mutation is silently ignored and the loop
-runs to `n` regardless. The model's algorithm is right; only the
-control-flow shape is wrong.
-
-Three options were on the table — corpus-only, **runtime guard**,
-and full semantic change. We picked the first two.
-
-The runtime guard is six lines in the For evaluator: at the end of
-each iteration check `env_get var_name` against `!i`; if they
-differ, raise a clear runtime error naming the variable, both
-values, and the canonical fix:
-
-```
-Runtime error: for-loop iterator 'i' was mutated inside the body
-(set to 2, expected 0). Use (while) for variable-stride or skip
-loops.
-```
-
-Then `validator_hint()` in `eval_real_tooling.py` matches that
-substring and rewrites the retry prompt with a worked while-loop
-template:
-
-```
-HINT: (for i 0 n ...) is fixed-stride. For skip-loops, use:
-  (set i 0) (while (lt i n)
-    (set j i)
-    (while (and (lt j n) (eq xs[j] xs[i])) (set j (add j 1)))
-    (println ...)
-    (set i j))
-```
-
-This is the deliberate design choice we settled on: instead of
-making the language semantically richer (option 3) or weaker (option
-1 alone), we made the **failure loud and the fix concrete**. The
-model still has to write the right code, but now it gets pointed at
-a working pattern when it fails. This is the methodology Phase 17
-named retrospectively, applied prospectively.
-
-### 19.4 The seven loop/argv seeds
-
-In parallel with the runtime guard, seven new corpus seeds covering
-the underlying patterns: 3 while-skip-loop shapes (consecutive-run
-counting, run-length encoding, every-Nth iteration) + 4 split-arg0
-shapes (count-by-token, distinct-words, sum-of-tokens, distinct
-count). All seven verified end-to-end. Appended to
-`training_corpus.jsonl` (2276 → 2283), RAG rebuilt.
-
-### 19.5 Final result and what closed it
-
-Stream C re-run with v6 + phi fallback + the augmented RAG and the
-new for-guard:
-
-| Configuration | Stream C |
-|---|---|
-| v6 no-RAG | 15/30 |
-| v6 + lexer-fix no-RAG | 14/30 |
-| v6 + RAG (regex corpus) | **27/30** |
-| v6 + phi fallback + RAG | **28/30** |
-| **v6 + phi + RAG + for-guard + loop/argv seeds** | **29/30** |
-
-`uniq_c_simple` passed on first attempt — RAG retrieved the
-while-skip seed and v6 produced the canonical pattern. The validator
-hint never even fired. `shell_argv_count` is the last holdout, now
-failing on a cosmetic format-string difference (`[k, v]` vs `k=v`)
-rather than any structural issue. The algorithm is right; only the
-join is wrong.
-
-### 19.6 What this proves and doesn't prove
-
-- **Proves:** corpus shape coverage + a runtime guard with a
-  concrete validator hint can close failure classes that look like
-  language deficiencies. Three of the four interventions in this
-  phase (the lexer fix is the exception) are pure additive
-  augmentations — no breaking changes, no semantic drift, no
-  retrain forced.
-- **Proves:** the meet-halfway methodology is *prescriptive*, not
-  just descriptive. When a real-world failure shows up, the
-  decision tree is: (a) is the language silently doing the wrong
-  thing? fix that. (b) is the model reaching for the wrong tool?
-  add corpus. (c) is the model writing the right algorithm with
-  the wrong control flow? add a runtime guard that hints toward
-  the right shape.
-- **Does not prove** that v6's *weights* know any of this. The +12
-  came from RAG retrieval, not from training. A v7 retrain on the
-  2283-entry corpus is now in flight (alongside a phi-sigil-v2
-  retrain on the same corpus) and will tell us how much RAG-only
-  knowledge bakes into weights.
-- **Does not prove** the harness handles agentic compose-multi-step
-  shapes. Stream C is single-step tooling. The earlier A/B agent
-  harness result (Phase 18) — local 1/8 on multi-step tasks vs
-  cloud 6/8 — is unchanged by anything in this phase.
-
-### 19.7 Files touched in Phase 19
-
-- `interpreter/lexer.ml` — unknown-escape preservation (5-line change).
-- `interpreter/interpreter.ml` — for-iterator mutation guard
-  (6-line addition in the For evaluator).
-- `benchmark/eval_real_tooling.py` — new for-mutation hint in
-  `validator_hint()` with a worked while-loop pattern.
-- `benchmark/build_regex_corpus.py` — generator + verifier for the
-  58 regex examples.
-- `benchmark/v6_targeted_seeds.jsonl` — 12 hand seeds for the
-  specific Stream C regex failure shapes.
-- `benchmark/v6_loop_argv_seeds.jsonl` — 7 hand seeds for the
-  while-skip / split-arg0 shapes.
-- `benchmark/training_corpus.jsonl` — 2206 → 2283 entries; index
-  in `benchmark/rag_index.json` rebuilt to match.
-- `benchmark/stream_c_v6_norag.json`,
-  `benchmark/stream_c_v6_norag_lexerfix.json`,
-  `benchmark/stream_c_v6_rag_regex.json`,
-  `benchmark/stream_c_v6_phi_ensemble_rag.json`,
-  `benchmark/stream_c_v6_phi_rag_loopfix.json` — the five raw
-  results files quoted in the table above.
-- `papers/early_design_sessions/` — primary-source backing for
-  Phase 0 / 1: 4 ChatGPT shares recovered via React Router RSC
-  stream parsing, plus 2 mammouth.ai shared sessions (Mistral-large
-  + Claude Sonnet 4.5) from 2026-02-05 16:11 UTC that establish
-  CANON as the project's original working name and predate every
-  other recoverable artefact by ~3.5 hours.
-
-## Phase 20: Phi-Sigil-v2 deployment, the Q4_K_M drift, and matching cloud at 29/30 (2026-05-03)
-
-Phase 19 closed at 29/30 with `qwen-sigil-v6 + phi-sigil-v1
-fallback`. Phi-v1 was trained against the *pre-PCRE* corpus
-(2206 entries, before the regex backend swap and the +77 verified
-seeds). To keep both ensemble members on the same vocabulary of
-patterns, we retrained Phi-Sigil-v2 on the full 2283-entry corpus
-that v6 saw. This phase is the deployment story for that retrain
-plus the Stream C consolidation.
-
-### 20.1 The four deployment problems
-
-The QLoRA training itself was unremarkable — same recipe as v1
-(rank 64, lr 2e-5, max_seq 1024, eager → sdpa attention for the
-~2.5× per-step speedup committed in `0f1a75e`). Getting the
-adapter into ollama was four chained problems.
-
-**Problem 1 — ollama llama-runner segfaults on Phi-4 + adapter
-overlay.** The same adapter-on-quantised-base pattern that works
-for our Qwen2.5-Coder builds (split q/k/v projections) crashes for
-Phi-4 (fused `qkv_proj` and `gate_up_proj`). All 30 Stream C tasks
-returned in exactly 5.2 seconds with empty output — the runner
-exits with status 2 before producing a token.
-
-The workaround is to merge the LoRA into the base offline and ship
-a single GGUF. `benchmark/merge_phi_v2.py` loads Phi-4 in fp16 on
-CPU (it doesn't fit our 16 GiB VRAM), calls `peft`'s
-`merge_and_unload`, saves with `safe_serialization=True` and
-`max_shard_size="4GB"`, plus the tokenizer. This sidesteps the
-runner's adapter path entirely.
-
-**Problem 2 — `convert_hf_to_gguf.py` "Missing tokenizer.model".**
-Phi-4 uses GPT2Tokenizer (BPE), not SentencePiece. The convert
-script's `set_vocab` path checks
-`tokenizer_config.json['tokenizer_class']`; transformers' newer
-versions rewrite that field from `GPT2Tokenizer` to
-`TokenizersBackend` on save. Fix: copy the original
-`tokenizer_config.json` from the HF cache plus the BPE files
-(`vocab.json`, `added_tokens.json`, `special_tokens_map.json`)
-into the merged-model directory so the convert script picks up the
-right vocab branch.
-
-**Problem 3 — fp16 GGUF doesn't fit in 16 GiB VRAM.** The merged
-fp16 GGUF weighs 29.3 GB; ollama needs ~15.8 GiB for inference and
-the card has 15.5 GiB usable. Fix: let ollama auto-quantise to
-Q4_K_M at registration time:
-
-```
-ollama create phi-sigil-v2:14b --quantize q4_K_M -f Modelfile.sigil_phi_v2
-```
-
-The resulting file is 9.1 GB and fits.
-
-**Problem 4 — the Q4_K_M drift, which is the interesting one.**
-Solo Stream C (no-RAG) for `phi-sigil-v2:14b` came back at **14/30**.
-Phi-v1 solo on the same suite was 19/30. The model regressed five
-tasks from a strictly larger and cleaner training corpus. Diagnosis:
-the deployment chain `peft.merge_and_unload (fp16)` →
-`convert_hf_to_gguf.py (fp16)` → `ollama --quantize q4_K_M (Q4_K_M)`
-introduces measurable accuracy loss on Phi-4's fused projections
-that Q4_K_M's per-block dynamic quantisation does not handle as
-gracefully as it does on the split-projection Qwen architecture.
-
-We did not chase this — the ensemble outcome is the figure of merit,
-not the solo number. Phi-v2's role in the ensemble is "rescuer for
-the one task qwen-v6 fails", and on that task
-(`split_at_blank_lines`) v2 still rescues. So the regression in
-solo accuracy does not propagate to the ensemble result.
-
-### 20.2 Stream C — local matches cloud at 29/30
-
-`stream_c_v6_phi_v2_ensemble.json`: **29/30**, 220.2 s, 11.0 Wh,
-$0.00. Single failure: `shell_argv_count`. Distribution: 27/30 first
-attempt, 1 task (`awk_filter_field_gt`) on retry 2, 1 task
-(`split_at_blank_lines`) rescued by phi-v2 on retry 3.
-`shell_argv_count` failed all 3 attempts (qwen-v6 ×2, phi-v2 ×1).
-
-The Sonnet 4.6 baseline (`stream_c_results.json`, single-pass) is
-also **29/30**, 157 s, $0.085. Single failure:
-`split_at_blank_lines` (Sonnet returns a trailing `---` separator
-that the spec disallows).
-
-The two configurations' single failures are *complementary* —
-different tasks, zero overlap:
-
-```
-                    split_at_blank_lines     shell_argv_count
-Local 29/30                ✅                       ❌
-Sonnet 29/30               ❌                       ✅
-```
-
-A two-tier cascade trivially hits 30/30, but Stream C reports the
-*standalone* numbers because the deployment claim is about the
-local stack solo.
-
-### 20.3 What `shell_argv_count` actually told us
-
-The model's algorithm is right; the bug is upstream. Final
-attempt:
-
-```
-(set args array (argv))
-(set counts map {})
-(for-each arg string args
-  (set counts (map_set counts arg (add 1 (get_or counts arg 0)))))
-(set pairs array (sort_by (entries counts) (\p (get p 0))))
-(println (join (map_arr pairs (\p (fmt "{}={}" (get p 0) (get p 1)))) " "))
-```
-
-The task's input convention is "argv[1] is one space-separated
-string; you split it inside the program". The model called `(argv)`
-and treated the result as already tokenised, so the whole string
-became one key with count 1. Both qwen-v6 and phi-v2 made the same
-mistake on this task.
-
-The fix is more corpus seeds covering the "split arg0 then process"
-shape — Phase 19.4 added three; evidently three is below the
-retrieval threshold for this idiom to dominate the dozens of
-"for arg in argv" examples already present. We are not adding more
-seeds in this phase because (a) the surrounding methodology is what
-matters for the writeup and (b) each new seed risks displacing
-correctly-retrieved patterns elsewhere. We are flagging the failure
-class and moving on.
-
-### 20.4 STREAM_C_RESULT.md
-
-The consolidating short report is now written:
-`benchmark/STREAM_C_RESULT.md`. It contains the full progression
-table, per-task pass/fail across the three stacks, energy and cost
-numbers, the failure analysis above, an explicit "what this proves"
-and "what this does not prove" pair, and the reproduction command
-line. It closes the §2.5 status table's highest-leverage missing
-artefact.
-
-### 20.5 What this phase proves
-
-- **Local 29/30 = Cloud 29/30** on the 30-task tooling suite, with
-  zero API cost and consumer-GPU inference. This is the headline
-  result the project has been pointed at for months; it lands here.
-- **Phi-fallback ensembling earns its keep on exactly the right
-  margin.** The fallback fires once across 30 tasks (3.3% of the
-  workload) and converts a 28/30 into a 29/30. It is not the
-  bulk of the work — qwen-v6 + RAG + for-guard does 28/30 alone —
-  but the marginal task is the one neither bigger qwen seeds nor
-  another retry would have closed.
-- **The deployment chain matters as much as the training run.**
-  Five tasks regressed between phi-v1 and phi-v2 solo because of
-  Q4_K_M quantisation drift on fused projections, not because of
-  anything the QLoRA trainer did. Future training-run claims need
-  to report numbers from the *deployed* model, not the offline-merged
-  fp16 checkpoint, or the regression hides until benchmark time.
-- **Failure complementarity at 29/30 is real.** Local and Sonnet
-  miss disjoint tasks, both for cosmetic reasons (one spec
-  adherence, one corpus thinness). A cascade gets 30/30 trivially.
-  This makes the "local stack as a Sonnet-class peer for shell
-  tooling" framing concrete — they are interchangeable on this
-  suite, and combinable when you want belt-and-braces.
-
-### 20.6 What this phase does NOT prove
-
-- **The phi-v2 retrain was net-positive vs phi-v1 on solo
-  accuracy.** It was a net regression (14/30 vs 19/30). It only
-  matters that ensemble outcome is unchanged.
-- **Q4_K_M is fine for all Phi-4 fine-tunes.** It clearly isn't on
-  this one. Q5_K_M or Q6_K might recover the 5 lost tasks; we did
-  not test. Future phi training should bake quantisation choice
-  into the deployment plan, not treat it as a deployment afterthought.
-- **The 30-task suite is the right benchmark.** It's a synthetic
-  representative sample of common shell patterns; bash-history
-  sourcing would produce a more credible deployment proof and is
-  still pending.
-
-### 20.7 Files touched in Phase 20
-
-- `benchmark/merge_phi_v2.py` — offline LoRA merge for Phi-4 to
-  sidestep ollama's adapter overlay segfault.
-- `benchmark/Modelfile.sigil_phi_v2` — final Modelfile pointing at
-  `phi_sigil_v2_f16.gguf`, ChatML template, ollama-side
-  Q4_K_M quantisation.
-- `benchmark/finetune_local.py` — `attn_implementation="eager"` →
-  `"sdpa"` (commit `0f1a75e`); ~2.5× per-step speedup on Phi-4.
-- `benchmark/stream_c_phi_v2_norag.json` — phi-v2 solo diagnostic
-  (14/30, the regression).
-- `benchmark/stream_c_v6_phi_v2_ensemble.json` — production
-  configuration result (29/30, the headline).
-- `benchmark/STREAM_C_RESULT.md` — consolidating short report
-  for Stream C.
-
-## Phase 21: The agent harness retest — Stream C wins do not propagate (2026-05-03)
-
-Stream C closed at 29/30 = Sonnet 29/30 single-step. The natural
-next question, raised explicitly: *does the new ensemble make a
-difference on the multi-step agentic harness?* Phase 18.1 ran
-that harness with the v4 + phi-v1 ensemble and got 1/8 vs Sonnet
-6/8, plus 19.8% more expensive. The v6 + phi-v2 retest is the
-honest update.
-
-### 21.1 The retest
-
-`tools/agent_harness/agent_ab_harness.py` re-run with
-`SIGIL_PRIMARY_MODEL=qwen-sigil-v6:7b
-SIGIL_FALLBACK_MODEL=phi-sigil-v2:14b` against the same 8-task
-suite. Path A is Sonnet writing Python inline; Path B is Sonnet
-orchestrating, delegating each tooling step to the local Sigil
-ensemble via the MCP server's `sigil_run_task` tool.
-
-| | v4 + phi-v1 (Phase 18) | v6 + phi-v2 (this phase) | Sonnet (Path A, this run) |
-|---|---:|---:|---:|
-| Pass rate | 1/8 | **1/8** | 6/8 |
-| Cost (USD) | 0.0273 | 0.0273 | 0.0245 |
-| Wall time | ~213 s | ~207 s | ~39 s |
-| Cost penalty vs Path A | +19.8% | +11.5% | — |
-
-The pass rate did not move. The cost penalty narrowed slightly —
-Sonnet wrote ~11% fewer orchestrating tokens this run, possibly
-just sampling variance. The single B-success
-(`json_extract_paths`) is the same task that succeeded with
-v4+phi-v1.
-
-`tools/agent_harness/ab_results_v6_phi_v2.json` is the raw
-result file; the prior `ab_results.json` is preserved unchanged
-as the v4+phi-v1 baseline.
-
-### 21.2 Why the failures are structural, not model-quality
-
-I inspected the seven Path B failures. They split into two
-shapes, both of which qwen-sigil-v6 and phi-sigil-v2 *can* solve
-on Stream C single-step, but neither solves when the orchestrator
-shapes the call as a single tooling delegation:
-
-**Shape comprehension miss** — `csv_top3_categories`. The CSV is
-`date,category,amount`; the spec asks for top-3 by *category*.
-Phi-sigil-v2 wrote:
-
-```
-(set category (first row))   ; this is the DATE, not the category
-(set amount (float (last row)))
-```
-
-It read the wrong column. Output was per-date totals. The model
-had no way to verify which column it was supposed to use because
-the orchestrator's delegation prompt didn't include the column
-roles — only the goal "top 3 categories by total amount".
-On Stream C the same shape passes 30/30 because the task spec
-(via the harness) is more concrete.
-
-**Input-shape miss** — `log_top_4xx_ip` and others. Phi-v2 again
-called `(argv)` and walked the result as lines, instead of
-`(split $0 "\n")`. This is the same `(argv)` failure mode we saw
-on Stream C's `shell_argv_count` (which is *also* the one Stream C
-task that 29/30 leaves unsolved). Three corpus seeds for "split
-arg0 then process" did not displace the model's `(argv)` instinct
-on either harness.
-
-So the 1/8 multi-step result is not because Sigil can't express
-these shapes (it can — they're 4-line programs in the success
-case). It's because the multi-step harness gives the local model
-*one* prompt with a goal and an example, and the local model
-sometimes misreads either the input shape or the column roles in
-ways the Stream C harness's tighter spec prevents.
-
-### 21.3 What this confirms vs what it disproves
-
-**Confirms** (predicted in Phase 18.5):
-
-> The Stream C wins do not directly translate to "delegation
-> always saves cloud tokens" — they translate to "delegation
-> works for the SHORT-TOOLING piece of an agentic workflow, not
-> for multi-step planning."
-
-The v6+phi-v2 retest is the experimental evidence for that
-prediction. We tuned the ensemble on Stream C until 29/30, and
-the multi-step harness moved nowhere.
-
-**Disproves** (a plausible-but-wrong hypothesis we could have
-held):
-
-> If we just train a better Sigil model, the agent harness
-> numbers will track Stream C numbers.
-
-They don't. The bottleneck on multi-step composition is not the
-model's Sigil grammar fluency — it is the model's ability to
-hold the *task spec* + *input shape* + *output shape* + *column
-semantics* in working memory across a single delegation call.
-v6 doesn't have more working memory than v4; phi-v2 doesn't have
-more than phi-v1. The architecture of the call is what's
-limiting, not the model's training.
-
-### 21.4 What would actually move the needle
-
-Phase 18.5 listed three top moves; this retest validates which
-one matters most for agentic workflows:
-
-1. **Sub-agent loop where Sigil calls are CHAINED, not packed
-   into one program.** This is now the highest-leverage move for
-   the agent harness story. Each step in a multi-step workflow
-   becomes a single Stream C-shaped call. Plausible lift:
-   1/8 → 5-7/8.
-
-2. **Real-world task suite from `~/.bash_history`.** Still
-   pending. The current 8-task suite is synthetic and has been
-   over-tuned to. A bash-history-sourced suite would show
-   whether real-workflow shapes are more local-tractable than
-   the synthetic harness or even harder.
-
-3. **Validator-in-loop driven by Sigil structured comparison
-   instead of text hints.** Less critical now — the bottleneck
-   isn't retry quality, it's first-shot comprehension.
-
-### 21.5 The honest framing for the agent harness story
-
-The local Sigil ensemble:
-- **Solves single-step tooling tasks at parity with Sonnet**
-  (Stream C: 29/30 = 29/30, complementary failures).
-- **Does NOT solve multi-step composition delegation** at any
-  competitive rate (A/B harness: 1/8 vs 6/8). This is unchanged
-  from the v4+phi-v1 baseline; training a stronger Sigil model
-  did not move it.
-
-The deployment claim to make is therefore narrowly scoped:
-*delegate the tooling piece of an agent workflow to the local
-ensemble; keep the orchestration on the cloud frontier model.*
-The Stream C result is the load-bearing evidence. The agent
-harness 1/8 is the *negative* result that bounds the claim — it
-tells us the local stack is not yet a multi-step substitute, and
-it tells us the corpus / fine-tune lever is not the one that
-flips that.
-
-The next experimental move that *could* flip it is the chained-
-sub-agent architecture (21.4 #1). That is its own engineering
-project, not an extension of the v6→v7 retrain track.
-
-### 21.6 Files touched in Phase 21
-
-- `tools/agent_harness/ab_results_v6_phi_v2.json` — raw result
-  for the v6 + phi-v2 A/B retest (1/8 vs 6/8 vs 6/8).
-- `tools/agent_harness/ab_results.json` — preserved as the
-  v4 + phi-v1 baseline.
-- `agent_workflow/sigil_subagent.md` — Stream D deliverable:
-  Claude Code subagent definition for the local Sigil tooling
-  delegation.
-- `agent_workflow/router.py` — Stream D deliverable:
-  parent-agent routing logic with self-test that passes on 13
-  routing cases.
-- `agent_workflow/example_walkthrough.md` — Stream D deliverable:
-  worked end-to-end transcript showing one success
-  (`json_extract_paths`) and one honest failure
-  (`csv_top3_categories`) from the v6+phi-v2 A/B run.
-
-## Phase 22: Tier 1 — interpreter loudness, empty-output validator hints, agent-shape corpus (2026-05-03)
-
-Phase 21 closed at 1/8 on the multi-step agent harness with the
-v6+phi-v2 ensemble — same as v4+phi-v1, training-free. The
-diagnostic dive into the 7 failures showed three failure patterns
-that *aren't* about model capacity — they're about silent failure
-modes the interpreter wasn't surfacing:
-
-- **`(argv)` vs `(split $0 "\n")`** (failures 1, 2): the model
-  reaches for `(argv)` when input is one multi-line string in `$0`.
-  The interpreter happily returns a 1-element list; the for-each
-  loop runs once over the whole blob; nothing gets printed in the
-  expected positions; stdout ends up empty or wrong. **No error.**
-- **Wrong column index in tabular data** (failure 3): the model
-  picks `(first row)` regardless of header schema.
-- **Made-up syntax / undefined names** (failures 5, 7): `let`,
-  `argv_str`, `slice line 5 -1`. Some of these already raise
-  runtime errors; some get silently swallowed because they're
-  inside an always-false `(if cond ...)` body.
-
-The user's framing was sharp: *"if there is anything we can add to
-the interpreter to notify when there is a misusage of a sigil
-construct so the model can know what to retry in case the output
-is empty, then we should do it."* This phase is the answer.
-
-### 22.1 Two new interpreter diagnostics, on by default
-
-Two small, additive changes in `interpreter/interpreter.ml` and
-`interpreter/vm.ml`:
-
-**Diagnostic 1 — `(argv)` misuse warning.** The `argv` builtin now
-inspects its result. If length=1 AND that element contains `\n`,
-emit a one-line warning to stderr:
-
-```
-Warning: (argv) returned a 1-element list whose element contains
-newlines. If you wanted to iterate input lines, use
-(split $0 "\n") instead — $0 is the first CLI argument as a
-string; (argv) is the list of separate CLI arguments.
-```
-
-The program continues running; the diagnostic just adds to stderr.
-
-**Diagnostic 2 — no-output-produced warning.** Track whether any
-`print`/`println` call fires during execution via a module-level
-`output_emitted` flag. After `execute_module` returns with exit
-code 0, if the flag is still false, vm.ml emits:
-
-```
-Warning: program completed without writing any output. Common
-causes: (a) (argv) returned a 1-element list when you expected
-lines — use (split $0 "\n"); (b) an (if cond ...) guard was
-always false; (c) you iterated over an empty array. Add
-(println intermediate) to debug.
-```
-
-Both are gated behind `SIGIL_DIAGNOSE` env var, **on by default**;
-silence with `SIGIL_DIAGNOSE=0`. The original implementation had
-the polarity flipped — opt-in via `SIGIL_DIAGNOSE=1` — but Marc
-flagged this is the wrong default: human users debugging a Sigil
-program also benefit from the warnings, and the test runner
-already redirects stderr to `/dev/null` so it's unaffected.
-
-The full Sigil test suite (`tests/test_*.sigil`) still passes
-160/161 with the new defaults — the one persistent failure is the
-unrelated TCP loopback timeout that's been failing since Phase 19.
-
-### 22.2 validator_hint pattern-matching on the new diagnostics
-
-`benchmark/eval_real_tooling.py:validator_hint()` gains two early
-branches that match the new warning strings before any other
-analysis. When the argv-misuse warning is detected, the retry
-prompt is rewritten with a worked fix:
-
-```
-Your program called (argv) with a 1-element list whose element
-contains newlines — that means the harness passed the input as
-ONE argument and you treated it as if it were already split.
-FIX: replace (argv) with (split $0 "\n") for line-by-line input.
-$0 is the first CLI argument as a single string; (argv) is the
-list of SEPARATE CLI arguments. Example:
-  (set lines (split $0 "\n"))
-  (for-each line lines (println line))
-```
-
-When the no-output warning is detected, the prompt enumerates the
-common causes and tells the model to add `(println intermediate)`
-debugging.
-
-The MCP server (`tools/agent_harness/sigil_mcp_server.py`) now
-imports `validator_hint` and uses it to rewrite retry prompts in
-the agent harness too — not just the eval harness. There was a
-flow bug in the MCP server's `generate_and_run`: when the
-program ran cleanly but produced wrong output, it discarded the
-stderr diagnostic and built a generic "got X expected Y" hint.
-Fixed: stderr is now preferred over the generic diff when the
-interpreter has emitted a diagnostic.
-
-### 22.3 Did the validator hints help when output was empty?
-
-This is the question Marc asked specifically. The honest answer
-needs a before/after comparison.
-
-**Before this phase.** The v6+phi-v2 A/B harness rerun in Phase
-21 went 1/8. Of the 7 failures, three had empty stdout and three
-had wrong-but-non-empty stdout, plus one regex syntax garble.
-For the four runtime-error-free failures, validator_hint's
-existing logic emitted only one of:
-- "Output has 0 lines, expected N. Missing lines: [...]" (the
-  generic line-count diff), OR
-- "Output diverges immediately. Got '', expected '...'" (the
-  generic first-difference fallback)
-
-Neither hint pointed at `(argv)` misuse. Neither suggested
-`(split $0 "\n")`. The model retried with the same instinct three
-times and the run hit MAX_ATTEMPTS = 3 with the same shape.
-
-So the answer to *"do validator hints help when stdout is empty?"*
-**before Phase 22 was: not in any actionable way for the dominant
-failure shape.**
-
-**After this phase.** With diagnostics on by default, the same
-empty-stdout failure now carries a stderr warning that
-validator_hint pattern-matches, and the retry prompt now contains
-the canonical `(split $0 "\n")` fix.
-
-**Result of the A/B retest with v6+phi-v2 + Tier 1 changes:**
-
-| Configuration | Path B (hybrid) | Path A (Sonnet) | Notes |
-|---|---:|---:|---|
-| v4 + phi-v1 (Phase 18) | 1/8 | 6/8 | original baseline |
-| v6 + phi-v2 (Phase 21) | 1/8 | 6/8 | retrain alone moved nothing |
-| **v6 + phi-v2 + Tier 1 (this phase)** | **2/8** | 5/8 | **+1 task on Path B**; Sonnet -1 is sampling noise |
-
-Raw data: `tools/agent_harness/ab_results_v6_phi_v2_tier1.json`.
-
-**Newly passing on Path B**: `url_status_pairs`. The model
-correctly used `(split $0 "\n")` instead of `(argv)`, which is
-the canonical Tier 1 fix. The validator-hint plumbing fired on
-retry 2 (qwen-sigil-v6 first attempted `(set text string (join
-argv " "))`; the no-output diagnostic fired; the rewritten retry
-prompt suggested `(split $0 "\n")`; phi-sigil-v2 on retry 3
-landed it).
-
-**Still failing on Path B (6 tasks)**, and what the diagnostic
-dive shows about the *new* failure shapes — they are NOT
-`(argv)` misuse anymore:
-
-| Task | Failure shape | What changed |
-|---|---|---|
-| `tsv_to_markdown` | One-character cosmetic bug (extra space before `\| alice`) | Was `(argv)` misuse → now uses split-$0 correctly; produces *almost* the right output |
-| `csv_top3_categories` | Column swap (`(last row)` for category, `(first row)` for amount) — header-aware seeds didn't displace it | Same shape as before; this is the residual hardest task |
-| `log_peak_error_hour` | Multi-statement `if`-body packing + `let` aliasing rendered as runtime no-ops | Now uses split-$0; structural shape miss remains |
-| `log_top_4xx_ip` | Wrong byte index in status-code slice (`(string_slice line 9 3)` is off) | Now uses split-$0; specific index fault |
-| `extract_python_def_lines` | `find_all` with capturing-group + `(last m)` post-process, but our `find_all` always returns full match (group 0) — the capturing-group hint in the SLIM_HEADER addendum was *factually wrong* | Tier 1 itself introduced this miscoding via incorrect prompt guidance |
-| `extract_dotted_ipv4` | Capturing-group regex + no octet-bound validation — Sonnet also fails this task | Now uses join-$0; pattern is wrong |
-
-**The most informative finding is task 5**:
-`extract_python_def_lines` regressed because my Tier 1 SLIM_HEADER
-addendum claimed `(find_all "pat (group)" text)` returns the
-group per hit. That's wrong. Sigil's `find_all` is implemented
-via `Re.Group.get g 0` — it always returns group 0, regardless
-of capturing structure. The corrected rule has been pushed back
-to SLIM_HEADER:
-
-```
-REGEX find_all RULE: (find_all pat text) returns the FULL match
-for each hit — ALWAYS group 0, regardless of capturing groups
-in the pattern. To extract just a sub-pattern, write a regex
-that matches ONLY that sub-pattern, OR post-process the full
-match with split.
-```
-
-This is the second time in this project that an incorrect
-prompt rule has cost a task — same shape as the `Str` → `re`
-mismatch from Phase 18.6. Lesson: any prompt rule that asserts
-a runtime contract should be cross-checked against the actual
-interpreter implementation before shipping.
-
-### 22.3b Tier 1b retest with the corrected find_all rule
-
-Same harness config, only difference: the SLIM_HEADER find_all
-rule was rewritten from "with one capturing group, returns the
-group per hit" to "always returns the FULL match per hit".
-Result file: `tools/agent_harness/ab_results_v6_phi_v2_tier1b.json`.
-
-| Configuration | Path B | Path A | Notes |
-|---|---:|---:|---|
-| Tier 1a | 2/8 | 5/8 | url_status_pairs WIN |
-| **Tier 1b (corrected find_all)** | **2/8** | 6/8 | tsv_to_markdown WIN, url_status_pairs LOSS — net same count, different tasks |
-
-The headline B-count didn't move. What did move:
-
-- **`tsv_to_markdown` flipped to WIN.** This was the cosmetic
-  one-character bug (extra space) from Tier 1a. On retry sampling
-  this run, the model produced exact-match output. Pure noise
-  recovery; the new SLIM_HEADER rule didn't apply to this task.
-- **`url_status_pairs` flipped to LOSS.** Same task that won on
-  Tier 1a. This run the model wrote `(int (array_get parts 2))`
-  — `int` doesn't exist as an integer cast in our Sigil; the
-  builtin is `parse_int`. Phi-v2 reached for `int` instead. Pure
-  noise loss; would have passed if the retry had hit `parse_int`.
-- **`extract_python_def_lines` got closer.** The model used
-  `(find_all "^def \w+" $0)` (no capturing group, correctly
-  per the new rule) and `(\m (last (split m " ")))` to extract
-  the name from "def NAME". Algorithm is right. **stdout was
-  `'alpha\n'`** — only the first match. The bug is that
-  `Re.Perl.compile_pat` does not enable `(?m)` multiline mode by
-  default, so `^` anchors at start-of-input only, not at every
-  line boundary.
-
-This last one is a real interpreter-level finding worth
-flagging: the model wrote the correct PCRE pattern for what it
-*thought* the engine would do (line-anchored matching). The
-engine ran it as input-anchored. The split between intent and
-behaviour is invisible at the surface — the same pattern would
-work in Python's `re` with the right flag, in Perl with `m`, in
-Bash's `grep`. We don't have multiline mode on by default. The
-fix options:
-
-1. **Enable multiline mode by default in the regex backend**.
-   Test impact: any existing Sigil program that uses `^`/`$` and
-   relies on input-anchoring would change behaviour. Stream C and
-   the test suite would need a check. Probably safe but invasive.
-2. **Add SLIM_HEADER tip + corpus seed**: "use `(?m)` prefix for
-   line-level `^`/`$` anchors". Lower-risk; relies on the model
-   reaching for the prefix.
-3. **Surface a runtime warning** when `^` or `$` is used in a
-   regex pattern AND the input contains newlines AND fewer
-   matches were found than newlines suggest. Heuristic, complex.
-
-Option 2 is the right Tier 1.5 move (cheap, opt-in). Option 1
-is a Phase 23 candidate with explicit migration. Both are
-deferred — the chained sub-agent of Tier 2 likely sidesteps this
-class of failure (each step iterates lines explicitly with
-`(split $0 "\n")` and uses regex per-line, no anchors needed).
-
-### 22.3c What Tier 1 actually moved
-
-Honest framing across both retests:
-
-- **The (argv)-misuse instinct is gone** from the model's
-  reaching distribution. Every Path B failure now uses
-  `(split $0 "\n")` instead of `(argv)`. This is a real
-  systematic shift, validated by the diagnostic warning text
-  appearing in stderr of the failures and the retry hint
-  rewriting working as designed (`url_status_pairs` Tier 1a
-  recovered via this exact mechanism).
-- **The B-pass count moved 1 → 2** but the *identity* of the
-  passing pair drifts with retry sampling — `tsv_to_markdown`
-  and `url_status_pairs` each won once and lost once across
-  the two retests. So the +1 lift is real but at the noise
-  floor; the suite is too small to claim more than "a marginal
-  improvement at the dominant failure mode".
-- **The remaining 6 failures share no common shape** that an
-  additional Tier-1-style intervention can address. They're
-  task-specific: column-swap (csv_top3_categories), regex
-  multiline (extract_python_def_lines), regex octet bounds
-  (extract_dotted_ipv4), wrong byte index (log_top_4xx_ip),
-  multi-statement-in-if (log_peak_error_hour). None of these
-  are silent failures the interpreter could surface
-  generically.
-
-This is the "what does the diagnostic mechanism cover, and where
-does it stop" answer to Marc's question. Diagnostics carried us
-from 1/8 to 2/8 by closing the dominant silent-failure mode.
-The remaining 6 are not silent-failure-mode-shaped.
-
-## Phase 23: Tier 2 — chained sub-agent + the TCP test we never actually had a real problem with (2026-05-03)
-
-Phase 22 closed Tier 1 at 2/8 — diagnostics + corpus + system
-prompt + RAG retrieval delivered a real but small lift. The
-remaining 6 failures shared no common silent-failure shape; they
-were composition-bound, not surface-bound. Phase 18.5 had named
-this exact bottleneck and prescribed the architectural fix:
-chained sub-agent.
-
-### 23.1 Path C: the chained-pipeline harness
-
-`tools/agent_harness/agent_ab_harness.py` gains a third path:
-
-```
-Path A: Sonnet writes Python inline → execute → done
-Path B: Sonnet → one delegation prompt → local writes one Sigil program → done
-Path C: Sonnet → DECOMPOSITION into 1-3 single-step Sigil tasks
-        → each step generated and run independently, stdout → next step's stdin
-        → final step validated against task expected
-```
-
-The CHAIN_DELEGATE_SYSTEM prompt explicitly tells Sonnet:
-
-> The local ensemble is excellent at SINGLE-STEP data transforms
-> (parse, filter, count, sort, format) but struggles when one
-> program has to do many steps in sequence. Decompose the task
-> into 1-3 SINGLE-PURPOSE steps. Each step's input is the
-> previous step's stdout (the first step's input is the
-> user-supplied data).
-
-Sonnet returns:
-
-```json
-{"steps": [
-  {"description": "<one-sentence Sigil task>"},
-  {"description": "<one-sentence Sigil task>"},
-  {"description": "<one-sentence Sigil task>"}
-]}
-```
-
-Path C executes each step via `generate_and_run`. Intermediate
-steps are not validated against an explicit expected_shape —
-Sonnet's guess at intermediate shapes might be wrong, and the
-local model only needs to produce *something* the next step can
-consume. Only the final step is validated against the task
-expected output.
-
-### 23.2 Result
-
-| Path | Pass | Cost (USD) | Notes |
-|---|---:|---:|---|
-| A: Sonnet writes Python | 5/8 | 0.0275 | sampling band ~5-6/8 |
-| B: hybrid single-step | 1/8 | 0.0269 | drifted back to baseline |
-| **C: chained sub-agent** | **3/8** | **0.0149** | +2 vs B; **−45% cost vs B** |
-
-`tools/agent_harness/abc_chained_results.json` is the raw data.
-
-Two findings worth pulling out:
-
-**(a) Chained sub-agent works.** Path C is +2 tasks over Path B
-on absolute count, on the same suite, with the same models. The
-+2 lift is structural — `extract_dotted_ipv4` newly passed (Sonnet
-also fails this task, so C beat A on this one), and
-`url_status_pairs` returned to passing after the noise-loss it
-took on Tier 1b.
-
-**(b) Path C is cheaper than Path B.** $0.0149 vs $0.0269 —
-roughly half the orchestrator cost. This is the surprising
-finding. The decomposition prompt is shorter than the full
-delegation prompt because Sonnet writes 1-3 short step
-descriptions instead of one long task spec with full input data.
-And many of the per-step calls run to completion in qwen-v6
-without phi-v2 fallback because the steps are simpler. So Path
-C is *both* more accurate AND cheaper than Path B at this
-suite size. The per-stage detail in the result JSON shows the
-cost breakdown.
-
-### 23.3 What Path C still gets wrong
-
-Three of the five remaining failures are intermediate-step shape
-mismatches:
-
-- `log_top_4xx_ip` — 3-step plan, step 1 passes, step 2 fails.
-  Sonnet assumed step 1 produced "IP STATUS" pairs but the local
-  model produced something subtly different.
-- `csv_top3_categories` — same shape: 3-step plan, step 2 fails.
-  The category column was indexed correctly this time (Tier 1's
-  header-aware seeds helped), but Sonnet's intermediate format
-  guess was off.
-- `log_peak_error_hour` — 3-step plan, steps 1 and 2 pass,
-  step 3 fails. Closest to passing of all the failures.
-
-Two failures are 1-step plans where Sonnet didn't decompose:
-- `extract_python_def_lines` — same `(?m)` regex multiline issue
-  from Tier 1b.
-- `tsv_to_markdown` — Sonnet didn't decompose; the local model
-  hit the same one-character format glitch.
-
-The intermediate-step mismatch class is now the *new* highest-
-leverage failure shape. It's addressable by:
-1. Letting Sonnet validate each step's output against its own
-   intermediate-shape expectation and replan if mismatched
-   (would push cost up but accuracy too).
-2. Including a small "schema check" between steps (e.g. is the
-   first line a header? does it have the expected separator?).
-3. Asking Sonnet to plan with explicit example
-   intermediate-output shapes so the local model has more to
-   align against.
-
-These are Phase 24 territory — not closing them this phase.
-
-### 23.4 The TCP test "failure" was a real bug we kept ignoring
-
-While Tier 2 was running, Marc asked the right question: *if
-the TCP loopback test can never succeed, why not remove it?*
-Investigation showed the test wasn't fundamentally broken —
-individual TCP flows worked fine. The aggregate hung in
-`test_tcp_large_message`:
-
-```
-(while (lt total_len expected_len)
-  (set chunk (tcp_receive accepted 4096))
-  (set chunk_len (len chunk))
-  (if (eq chunk_len 0)
-    (set total_len expected_len))      ; break-out path
-  (if (gt chunk_len 0)
-    (set received (add received chunk)) ; THEN: append data
-    (set total_len (len received))))    ; ELSE: update count
-```
-
-The bug: `total_len` update is in the *else* branch of the
-`(gt chunk_len 0)` if. When chunks ARRIVED (chunk_len > 0):
-`received` grew, but `total_len` stayed at 0. The while
-condition `(lt total_len expected_len)` stayed true forever.
-TCP buffer drained, kernel had no more data, `tcp_receive`
-blocked indefinitely waiting for the client to send more.
-
-Fix: collapse the two ifs into one with the explicit
-`(else ...)` Sigil-form so both append and count happen on the
-data branch:
-
-```
-(if (eq chunk_len 0)
-  (set total_len expected_len)
-  (else
-    (set received (add received chunk))
-    (set total_len (len received))))
-```
-
-After the fix: 6/6 tests in test_tcp_loopback.sigil pass.
-
-The "test was always failing" status from Phase 19 onward was
-**a real test bug**, not an environmental issue — and we'd been
-ignoring it as background noise for ~10 days. Lesson: when a
-test is flagged as "persistent failure", investigate the cause
-once before excluding from the count. The fix here was
-six characters (`(else` and a closing paren wrap).
-
-While running the WebSocket test directly I discovered another
-non-bug: `test_websocket_loopback.sigil` shells out to
-`./interpreter/_build/default/vm.exe` — a relative path that
-only resolves when cwd=repo-root. Running tests with absolute
-paths from elsewhere makes it fail. The test was never broken,
-just cwd-sensitive. The full test suite is now **161/161** when
-run via the canonical loop in `tests/README.md` (which runs
-from the repo root).
-
-### 23.5 No-output diagnostic false-positive in test mode
-
-Phase 22's no-output-produced warning (default-on) fired on
-every test-spec run, because the test framework writes its
-"Test: ..." headers via `Printf.printf` directly, not through
-the print/println builtins. This was a false positive — the
-fix is two lines in `execute_module`: when `module_def.module_tests`
-is non-empty, set `output_emitted := true` unconditionally. Tests
-that exercise printing still print; the framework's headers
-suppress the spurious diagnostic. No behavioural change for
-non-test modules.
-
-### 23.6 Files touched in Phase 23
-
-- `tools/agent_harness/agent_ab_harness.py` — `path_c_chained_hybrid`,
-  `CHAIN_DELEGATE_SYSTEM`/`PROMPT`, `--with-chained` flag,
-  aggregate reporting for path C (vs A, vs B accuracy/cost).
-- `tools/agent_harness/abc_chained_results.json` — A/B/C raw data.
-- `tests/test_tcp_loopback.sigil` — fixed `if`-then/else mix-up
-  in `test_tcp_large_message`. 6/6 pass. Test suite now 161/161.
-- `interpreter/interpreter.ml` — `output_emitted := true` set in
-  `execute_module` when tests are present, suppressing
-  Phase 22's false-positive no-output warning during test runs.
-
-## Phase 24: Tier 2.5 — RAG plateau, the assessment, and the case for v7 retrain (2026-05-03)
-
-Phase 23 closed Tier 2 at 3/8 on Path C — chained sub-agent +2
-over Path B at 45% lower cost. The Phase 23.3 failure analysis
-sketched five additional moves (A-E). Marc instructed: *"Do A to
-E then assess whether retraining is needed or if RAG is enough."*
-
-This phase lands all five and answers the assessment.
-
-### 24.1 Five moves landed
-
-- **Move A — aggregation seed pack.** 12 verified seeds for
-  count-by-key, sum-by-key, top-N by sum, distinct count,
-  group sum. All hand-verified end-to-end via
-  `benchmark/build_tier25_seeds.py` against the live interpreter.
-- **Move B — intermediate-step validation in `path_c`.** Empty
-  stdout from a non-final step now triggers up to 2 extra
-  retries with a no-output hint. Prior step's actual output
-  excerpt (~200 chars) is appended to the next step's
-  description so the local model sees what its real input
-  looks like, not Sonnet's guess.
-- **Move C — tighter decomposition prompt.**
-  `CHAIN_DELEGATE_SYSTEM` now requires 2-3 step plans unless
-  the task is a literal pass-through.
-- **Move D — PCRE multiline default.** All four
-  `Re.Perl.compile_pat` sites now pass `~opts:[`Multiline]`. The
-  model's `^def \w+` pattern on multi-line input now matches
-  every line, not just the first. The 161/161 test suite is
-  unaffected — every `^`/`$` test uses single-line inputs.
-- **Move E — TSV/CSV → Markdown table seeds.** Two seeds
-  covering the canonical pipe-padded edges and divider-row
-  shape.
-
-Corpus 2309 → 2323. RAG index rebuilt.
-
-### 24.2 Tier 2.5 result
-
-| Run | A | B | C | C cost |
-|---|---:|---:|---:|---:|
-| Tier 2 baseline (Phase 23) | 5/8 | 1/8 | **3/8** | $0.0149 |
-| **Tier 2.5 (this phase)** | 6/8 | 1/8 | **1/8** | $0.0171 |
-
-**Path C regressed from 3/8 to 1/8.** Two task losses, one task
-got further-but-not-passing:
-
-| Task | Tier 2 C | Tier 2.5 C | What changed |
-|---|---|---|---|
-| `extract_dotted_ipv4` | PASS | FAIL | RAG-shift artifact: 14 new aggregation seeds displaced previously-helpful seeds in top-K |
-| `url_status_pairs` | PASS | FAIL | Same RAG-shift; output truncated to first line only |
-| `csv_top3_categories` | step 2 FAIL | step 2 "PASS" but bogus | Move B's non-empty heuristic was too lax; let nonsense through |
-
-`tools/agent_harness/abc_tier25_results.json` is the raw data.
-
-### 24.3 What the regression actually told us
-
-The detail that matters: `csv_top3_categories` showed **false-
-positive intermediate passes**. Step 1 and step 2 both produced
-`42.50 42.50\n18.00 18.00\n...` (amount duplicated, no category).
-Move B marked them PASS because output was non-empty. The
-aggregation seeds *didn't actually help here* — the model wrote
-something completely wrong and Move B let it through. Step 3
-saw bogus data and emitted nothing.
-
-The two flat regressions (`extract_dotted_ipv4`,
-`url_status_pairs`) are 1-step plans where Move B's
-augmentation didn't apply. Their failure is **purely RAG
-displacement**: adding 14 aggregation-shaped seeds pushed
-previously-helpful regex/log-format seeds out of the top-K
-retrieval window for these tasks. The model wrote a different
-program than it had been writing in Tier 2, and the new
-program is wrong.
-
-This is a textbook RAG plateau pattern: adding more seeds is
-non-monotonic. Each new seed addition shifts retrievals for
-*every* task, sometimes helping sometimes hurting. The net
-effect on a small (8-task) suite is dominated by sampling
-noise once you're past the obvious wins.
-
-### 24.4 The assessment: RAG is not enough; v7 retrain is the right next move
-
-**Three pure-RAG runs sit in the 1-3/8 band on Path C:**
-
-| Run | Path C | What we changed |
-|---|---:|---|
-| Phase 21 baseline | 1/8 | retrain alone (no RAG/architecture) |
-| Phase 23 Tier 2 | 3/8 | architectural (chained sub-agent) |
-| Phase 24 Tier 2.5 | 1/8 | more seeds + prompt tightening + intermediate validation |
-
-Pattern: **the architectural intervention (Tier 2) moved the
-floor by +2; pure-RAG iterations move the ceiling-and-floor
-randomly within the noise band.** Adding more corpus or tighter
-prompts isn't producing systematic gains anymore. The remaining
-failures are "model reaches for wrong shape" — even with the
-right RAG context, the model writes something else.
-
-This is exactly what fine-tuning addresses. RAG shows the model
-patterns at inference time; retraining bakes them into the
-weights. The relevant distinction:
-
-- **Stream C (single-step)**: 29/30 = Sonnet 29/30. RAG
-  + Tier 1 diagnostics + architectural fixes were sufficient
-  here.
-- **Multi-step agent harness**: stuck at 1-3/8 vs Sonnet's
-  5-6/8. Even with the chained architecture (Tier 2's win), the
-  per-step quality of the local model matters — and that's a
-  weights problem, not a retrieval problem.
-
-**Conclusion: train qwen-sigil-v7 on the 2323-entry corpus.**
-Specific plan:
-
-1. **Train qwen-sigil-v7:7b** on the full 2323-entry corpus
-   (Tier 1 + Tier 2.5 seeds baked into weights). Same QLoRA
-   recipe as v6 (rank 64, lr 2e-5, max_seq 1024, 3 epochs).
-   Estimated wall time: ~5 hours on the 7800 XT.
-2. **Deploy carefully**: convert via the same
-   `convert_lora_to_gguf` chain that worked for v6; quantize to
-   Q4_K_M (qwen split-projection architecture handles Q4_K_M
-   without the Phi-4 drift seen in Phase 20).
-3. **Sanity-test against Stream C single-step BEFORE running
-   the agent harness.** If solo regresses below 27/30, halt
-   and diagnose deployment chain (don't iterate on the agent
-   harness with a degraded primary).
-4. **Re-run Path C with qwen-sigil-v7 + phi-sigil-v2 fallback.**
-   Expected: 4-6/8 if RAG-baking worked; if still 1-3/8, the
-   chained architecture is at its real ceiling and the next
-   move is more inputs (real bash-history tasks, not synthetic
-   harness).
-
-**Risk to flag**: the Phase 20 phi-sigil-v2 retrain regressed
-solo accuracy 19/30 → 14/30 due to Q4_K_M drift on Phi-4 fused
-projections. Qwen2.5-Coder is split-projection so this specific
-risk doesn't apply, but the principle is the same — the deployed
-model can be worse than the merged checkpoint, and it has to be
-tested in the actually-deployed configuration. Phase 22 lesson:
-"any prompt rule that asserts a runtime contract should be
-cross-checked against the actual interpreter implementation
-before shipping" — we now extend that to "any retrain claim
-should be validated against the actually-deployed model".
-
-### 24.5 What to revert vs. keep
-
-The Tier 2.5 changes split into clean wins, mixed-results, and
-regressions:
-
-**Keep (clean wins, no observed regression)**:
-- Move A (aggregation seeds in corpus)
-- Move D (multiline regex default)
-- Move E (TSV/CSV markdown seeds)
-
-These help the corpus distribution and the regex engine. They
-will improve v7's training signal too. No reason to revert.
-
-**Refine before keeping**:
-- Move B (intermediate validation) — the non-empty heuristic is
-  too lax (csv_top3 false positives). A v7-aware version would
-  validate against an *expected shape sketch* (e.g. expected
-  number of lines, or expected separator pattern) provided by
-  Sonnet in the decomposition step.
-- Move C (forced 2-3 step decomposition) — pushed
-  `tsv_to_markdown` from 1-step (close to passing) to 2-step
-  (failing); over-eager. Revisit after v7 with empirical
-  decomposition-quality data.
-
-**Defer**:
-- Move B's "pass prior step output excerpt" augmentation —
-  arguably hurt more than helped on simple 1-step tasks; gating
-  it on `idx > 0` was the right call but the augmentation text
-  could still confuse retrieval. Instrument before re-enabling.
-
-The cleanest pre-v7 reset: keep Moves A, D, E. Drop Move B's
-augmentation but keep its retry-on-empty (still better than
-silent empty propagation). Drop Move C (revert
-`CHAIN_DELEGATE_SYSTEM` to 1-3 steps with no minimum). Re-run
-Path C as a clean baseline before the v7 retrain so we know the
-"what RAG alone can do" number is precise.
-
-### 24.6 Files touched in Phase 24
-
-- `benchmark/build_tier25_seeds.py` — generator + verifier for
-  the 14 Tier 2.5 seeds.
-- `benchmark/tier25_agent_seeds.jsonl` — verified seed file.
-- `benchmark/training_corpus.jsonl` — 2309 → 2323 entries.
-- `benchmark/rag_index.json` — rebuilt.
-- `benchmark/.gitignore` — `tier25_agent_seeds.jsonl` allowlisted.
-- `interpreter/interpreter.ml` — `Multiline` opt added to all
-  four `Re.Perl.compile_pat` call sites.
-- `tools/agent_harness/agent_ab_harness.py` — Move B + Move C
-  changes in `path_c_chained_hybrid` and
-  `CHAIN_DELEGATE_SYSTEM`.
-- `tools/agent_harness/abc_tier25_results.json` — Tier 2.5
-  result (1/8 regression).
-
-## Phase 25: Smart-argv — meeting the model halfway on its strongest pre-training instinct (2026-05-03)
-
-Phase 24 closed with the assessment that retraining was the next
-move. Marc asked the question that framed Phase 25:
-
-> *"If argv is pretraining data, why don't we meet the model
-> halfway with it, would that hurt us?"*
-
-The answer is no, and it shouldn't have taken 7 phases to land.
-
-### 25.1 The instinct vs the implementation
-
-Across Phases 18-24, the dominant agent-harness failure shape was
-**the model writes `(argv)` when input is multi-line in `$0`**.
-The model's pre-training is saturated with patterns like:
-
-```python
-for arg in sys.argv[1:]: process(arg)
-```
-
-```bash
-for line in "$@"; do process "$line"; done
-```
-
-When the harness passes a single multi-line argument (the entire
-log, the entire CSV), the model writes:
-
-```
-(for-each line (argv) (println (process line)))
-```
-
-— expecting `(argv)` to give it the *content* of the input. Our
-literal `(argv)` returns a 1-element list, the for-each loop
-runs once over the whole blob, and stdout comes out empty or
-wrong.
-
-Phase 22 added a runtime warning when this happened. Phase 22
-also added 12 corpus seeds explicitly using `(split $0 "\n")`.
-Phase 24 added more aggregation seeds. The model still kept
-reaching for `(argv)`. Why? Because **pre-training bias is
-stronger than 7.6% corpus weighting on a fine-tune** — the
-model has seen millions of `for arg in sys.argv` examples and a
-few hundred `(split $0 "\n")` examples won't overwrite that
-distribution.
-
-### 25.2 The structural meet-halfway
-
-The fix that should have come at Phase 18 instead of Phase 25:
-**make `(argv)` smart**. When called with exactly 1 CLI arg AND
-that arg contains newlines, return the lines split. Otherwise
-return the literal CLI argv vector.
-
-Implementation in `interpreter/interpreter.ml`: ~10 lines.
-
-```ocaml
-| "argv" ->
-    let args = Array.to_list Sys.argv in
-    let script_args = match args with
-      | _ :: _ :: rest -> rest
-      | _ -> [] in
-    let result_strs = match script_args with
-      | [single] when String.contains single '\n' ->
-          let parts = String.split_on_char '\n' single in
-          (match List.rev parts with
-           | "" :: rest -> List.rev rest
-           | _ -> parts)
-      | _ -> script_args
-    in
-    VArray (ref (Array.of_list (List.map (fun s -> VString s) result_strs)))
-
-| "argv_raw" ->
-    (* Literal CLI argv vector, no auto-splitting. *)
-    let args = Array.to_list Sys.argv in
-    let script_args = match args with
-      | _ :: _ :: rest -> rest
-      | _ -> [] in
-    VArray (ref (Array.of_list (List.map (fun s -> VString s) script_args)))
-```
-
-The `(argv_raw)` builtin is the escape hatch for the rare case
-where someone genuinely needs the literal argv vector
-(e.g., "did the user pass exactly N args?"). The corpus has
-zero `(argv)` entries; the test suite uses `(argv)` only with no
-args (length=0 case, unaffected); Stream C uses `$0` directly.
-**Blast radius is essentially zero in our codebase.**
-
-### 25.3 The reality test: smart-argv alone moves +1 task
-
-Re-ran the agent harness with only Phase 25 changes on top of
-Tier 2.5 (no other reverts). Path B and Path C both lifted +1
-task:
-
-| Run | B | C |
-|---|---:|---:|
-| Tier 2.5 (Phase 24) | 1/8 | 1/8 |
-| Tier 2.5 + smart-argv (this phase) | **2/8** | **2/8** |
-
-**`url_status_pairs` Path B win** is the canonical
-demonstration. The model wrote:
-
-```
-(println (join (map (argv) (\line (join (slice (split line " ") 1 3) " ")))) "\n"))
-```
-
-— exactly the Python `for line in argv` instinct, expressed in
-Sigil. Pre-Phase-25, this produced empty output (1-element list
-with embedded `\n`s; the for-each ran once over the whole blob).
-Post-Phase-25, `(argv)` auto-splits and the model's instinct
-produces correct output silently. **No retraining, no prompt
-engineering, no validator hint.** The engine just worked.
-
-`extract_python_def_lines` Path C win came from Move D (multiline
-regex default), separate contribution. Both Phase 25 mechanisms
-are landing.
-
-### 25.4 The other meet-halfway changes in this phase
-
-Three additional aliases added to the `eval_call` symbol-rewrite
-table at line ~1432 — covering the "real-looking name that
-doesn't exist" reaches that came up in past failures:
-
-- `parse_float` → `float` (parallels `parse_int`)
-- `to_int` → `parse_int` (Python `int()` reach for string→int)
-- `first_index_of` → `index_of`
-- `regex_replace_all` → `regex_replace` (already replaces all)
-
-Plus the corpus pristineness auditor in
-`benchmark/audit_corpus.py`. Initial run flagged 35 entries on
-the deprecated-names check, but the names list was over-eager —
-`cast_int_float`, `cast_float_int`, `string_length` all DO
-exist as builtins (verified against `interpreter.ml`). After
-correcting the bad-names list, the full corpus is **pristine**:
-
-- 0 parse failures (all 2323 entries parse cleanly via vm.exe --lint)
-- 0 argv-misuse heuristic flags
-- 0 deprecated-name reaches
-
-This was a useful diagnostic by itself: the "the corpus might
-have garbage" worry that motivates manual review every couple
-of phases turned out to be unfounded. The corpus is in good
-shape; the failures are upstream of the corpus.
-
-### 25.5 What this phase tells us about the project's methodology
-
-The fix that should have come at Phase 18 instead of Phase 25
-is the **canonical structural meet-halfway** — same pattern as
-Phase 18.6's PCRE swap (~60 lines absorbing an entire flavor of
-regex syntax). The lesson is the same as Phase 18.6's: when a
-failure mode is dominant AND tied to model pre-training, fix it
-at the language layer, not via prompts or corpus or training.
-Each of those costs ongoing engineering; the language change
-costs once.
-
-**The general principle**: when you find yourself fighting the
-model's instinct across multiple phases (validator hints, more
-seeds, system-prompt reminders), STOP. The model's instinct is
-informationally a strong signal: "this is what programs in my
-training distribution look like". Either the language design
-should align with that distribution, or you're paying ongoing
-cost to maintain a divergence.
-
-We paid that ongoing cost across Phases 18, 19, 22, 24. Phase
-25 closes the loop. v7 (in flight at the time of this writeup)
-will inherit smart-argv at the engine level. v7 trained on a
-corpus that uses split-$0 + smart-argv runtime will mean: model
-weights bias toward split-$0; engine handles `(argv)` reach
-correctly when it slips through.
-
-### 25.6 Files touched in Phase 25
-
-- `interpreter/interpreter.ml` — smart-argv (~10 lines);
-  `argv_raw` escape hatch; 4 alias entries (`parse_float`,
-  `to_int`, `first_index_of`, `regex_replace_all`); argv-misuse
-  warning removed (no longer applicable).
-- `benchmark/corpus_extender.py:SLIM_HEADER` — updated to
-  reflect that `(argv)` and `(split $0 "\n")` are both correct
-  for line iteration on this harness.
-- `benchmark/eval_real_tooling.py:validator_hint()` — dead
-  argv-misuse pattern removed (no warning to match).
-- `benchmark/audit_corpus.py` — corpus pristineness auditor.
-  Initial false-positives on `cast_*` / `string_length`
-  (those exist) fixed; final report is clean.
-- `tools/agent_harness/abc_smart_argv_results.json` — A/B/C
-  result with Phase 25 on Tier 2.5 base (B 2/8, C 2/8).
-
-## Phase 26: qwen-sigil-v7 retrain on hardened corpus + smart-argv runtime (in flight)
-
-Phase 25 closed Tier 2.5 + smart-argv at B 2/8, C 2/8. The
-remaining residual is "model writes wrong shape for harder
-single-step problems" — column-swap on csv aggregation, format
-glitches on tsv-to-markdown, off-by-one indexing on log-status
-extraction. These aren't reachable by RAG/prompts (Phase 24
-plateau) and aren't reachable by language layer fixes (the
-shapes are task-specific). They need to be in weights.
-
-### 26.1 v7 training plan
-
-Same QLoRA recipe as v6 (verified by reading
-`benchmark/lora_out_qwen_v6/adapter_config.json`):
-
-- Base: `Qwen/Qwen2.5-Coder-7B-Instruct`
-- LoRA r=16, alpha=32, all 7 attention/MLP modules
-- 3 epochs, lr=2e-5, max_seq=1024, warmup_ratio=0.2
-- 4-bit NF4 with bf16 compute (QLoRA on RX 7800 XT)
-- micro_batch=1, grad_accum=8, effective batch=8
-
-Corpus: 2323 entries, full Tier 1 + Tier 2.5 seed coverage.
-Output: `benchmark/lora_out_qwen_v7/`.
-
-ETA: ~2h 42m wall (873 steps × ~11s/step), ~half my original
-5h estimate. The smaller estimate matches the `attn_implementation
-sdpa` change from commit `0f1a75e` that improved Phi-4 step time
-~2.5×; same speedup applies to Qwen.
-
-### 26.2 Deployment plan
-
-- Convert v7 LoRA → GGUF via llama.cpp's
-  `convert_lora_to_gguf.py` (same chain that worked for v6).
-- Register with ollama: `ollama create qwen-sigil-v7:7b`.
-  Qwen is split-projection so Q4_K_M doesn't have the Phi-4
-  quantization-drift risk Phase 20 hit.
-- **Sanity-check Stream C single-step BEFORE the agent harness.**
-  If solo regresses below 27/30, halt and diagnose deployment
-  chain. Phase 20 lesson: deployed-model verification is
-  mandatory.
-
-### 26.3 What the retest will tell us
-
-After v7 lands, re-run A/B/C with v7 primary + phi-v2 fallback
-(reverted Tier 2.5 prompts). Three outcome bands:
-
-- **5+/8** on Path C: retraining moved the floor; the chained
-  architecture + weights-baked corpus is the deployment-ready
-  story. Match or beat Sonnet noise band.
-- **3-4/8** on Path C: matches Tier 2 best (3/8) plus marginal
-  weights gain. Tells us the chained architecture is the real
-  ceiling and the next move is bash-history task suite refresh,
-  not more model work.
-- **1-2/8** on Path C: regression. Diagnose deployment chain
-  and Q4_K_M behaviour on Qwen split-projection (unlikely but
-  possible).
-
-### 26.4 What's deferred
-
-- Bash-history task suite refresh (Stream C #116) — independent
-  of v7; will inform whether real-workflow shapes are easier or
-  harder than synthetic harness shapes.
-- STREAM_A_RESULT.md / STREAM_B_RESULT.md — corpus +
-  diagnostics writeups; can pull from JOURNEY phases 8/11/16/18/19/20/22/25.
-- agent_workflow Stream D deliverables landed in Phase 22;
-  Stream D is now ✅ done.
-
-### 26.5 Files touched in Phase 26 (in flight)
-
-- `benchmark/lora_out_qwen_v7/` — adapter weights + tokenizer.
-- `tools/agent_harness/agent_ab_harness.py` — reverted Tier 2.5
-  Move B prior-step augmentation (kept retry-on-empty); reverted
-  Move C forced 2-3 step decomposition (back to "1-3 as needed").
-- Eventually: `benchmark/Modelfile.sigil_v7`,
-  `tools/agent_harness/abc_v7_results.json`,
-  `benchmark/stream_c_v7_*.json`.
-
-### 22.3a Did the validator hints help when output was empty? (the actual answer)
-
-**Yes, but only by 1 task on this 8-task suite.** The Tier 1
-intervention did the things it claimed to do — it changed the
-*shape* of model output across all six remaining failures. Every
-Path B failure now uses `(split $0 "\n")` instead of `(argv)`.
-The (argv)-misuse instinct is gone from the failures we still
-see. But the new failure shapes — column-swap, format-glitch,
-regex-octet-bounds, find_all-with-groups, multi-statement-in-if
-— are not addressable by the same diagnostic mechanism. They're
-either (a) too specific to the task to be caught generically by
-a runtime warning, or (b) a *correct* program shape that the
-model just gets one detail wrong on.
-
-So the honest framing of Marc's question:
-
-> "Do validator hints help when sigil script output is empty?"
-
-is yes and no:
-- **Yes** — the new diagnostics + validator_hint flow turned one
-  systematic failure mode (`(argv)` instinct on multi-line input)
-  into a one-shot retry win. That's worth +1 on this suite and
-  presumably more on a larger one.
-- **No** — they don't address residual failure shapes that are
-  not silent-no-op-style. A program that produces *almost* the
-  right output (`tsv_to_markdown`'s extra space) doesn't
-  trigger any of the new diagnostic warnings; the existing
-  generic line-by-line diff handles it (and the existing diff
-  did not generate a hint specific enough to fix the one-char
-  bug in 3 retries).
-
-Conclusion for the reader: silent-failure diagnostics are a real
-mechanism, but the leverage diminishes once you've closed the
-biggest silent failure. The next mechanism to try is *not* more
-diagnostics — it's the chained sub-agent of Tier 2, which
-attacks the structural problem (multi-step composition packed
-into one Sigil program) rather than a behavioural symptom.
-
-### 22.4 The 26 Tier 1 corpus seeds
-
-Three groups, all verified end-to-end against the live
-interpreter via `benchmark/build_tier1_seeds.py`:
-
-- **Group A (12) — `$0` + `(split $0 "\n")` shapes.** Every seed
-  uses `(split $0 "\n")` for line iteration; none use `(argv)`.
-  Covers log filtering, KEY=VAL extraction, longest-line, distinct
-  words in order, line-numbered output, etc. The intent is to push
-  the retrieval distribution toward `(split $0 "\n")` so RAG
-  surfaces those examples on agent-harness-shaped queries.
-- **Group B (8) — header-aware tabular.** Each task description
-  names the header schema explicitly ("CSV with columns
-  date,category,amount") and the program uses `(array_get row N)`
-  with N matching the column position. None default to
-  `(first row)`. Covers grouped sum, top-N by score, filter by
-  column predicate, sort by column.
-- **Group C (6) — find_all with/without capturing groups.**
-  Demonstrates the contract: no groups → full match per hit;
-  one group → group per hit. Covers Python def names, IPv4 with
-  octet bounds, dates, semvers, emails (full and local-part-only).
-
-Appended to `training_corpus.jsonl` (2283 → 2309); RAG index
-rebuilt. The seeds are reproducible from `build_tier1_seeds.py`
-via `python3 build_tier1_seeds.py` (no model calls; pure
-interpreter verification).
-
-### 22.5 SLIM_HEADER addendum
-
-Three new rules added to `corpus_extender.py:SLIM_HEADER`, in the
-order of leverage from §22.4:
-
-```
-CRITICAL INPUT SHAPE RULE: this harness passes the WHOLE input
-(all lines, the entire CSV, the full log) as a single string in
-$0. To iterate lines, use (split $0 "\n") — NOT (argv). (argv)
-is the list of SEPARATE CLI arguments; on this harness it is a
-1-element list whose single element is your data. If your
-program reads (argv) and produces empty output, that is the bug.
-
-TABULAR DATA RULE: if the task names columns ("CSV with columns
-date,category,amount"), SKIP the header row and index by POSITION
-matching the column you want, not always 0. For "sum by category"
-with header "date,category,amount", the category field is
-(array_get row 1) — NOT (first row). Read the header description
-carefully before indexing.
-
-REGEX find_all RULE: (find_all pat text) returns the FULL match
-for each hit when the pattern has no capturing groups. With one
-capturing group, it returns the GROUP for each hit. So
-(find_all "def (\\w+)\\(" src) returns the names directly;
-(find_all "def \\w+\\(" src) returns "def NAME(" for each.
-```
-
-This is a deliberately punchy addendum — the existing header
-mentioned `$0` and `(argv)` separately but didn't co-locate the
-"input is in $0, not (argv)" rule with the failure-mode framing
-the model now sees on retry.
-
-### 22.6 What this phase does and doesn't prove
-
-- **Proves** (with the result table filled in) that
-  interpreter-level diagnostics + validator_hint pattern-matching
-  + RAG retrieval shifts can move multi-step accuracy at no cost
-  beyond a half-day of engineering. Or doesn't, in which case the
-  bottleneck is structural and only Tier 2 (chained sub-agent)
-  will move it.
-- **Proves** the meet-halfway methodology generalises beyond
-  Stream C: silent failure shapes are the highest-leverage
-  intervention point regardless of which harness exposes them.
-  The for-iterator mutation guard (Phase 19.3) and the
-  argv-misuse warning (this phase) are the same shape of move.
-- **Does not prove** the local stack handles arbitrary multi-step
-  composition — even at the upper bound, the 8-task agent suite
-  is small and the failures we're flipping are specific shapes
-  the corpus and prompt now cover. Tier 2 (chained sub-agent) is
-  still the architectural move that has a chance of pushing
-  past 5/8.
-- **Does not prove** these diagnostics don't have false
-  positives. The argv-misuse heuristic ("length=1 with newline")
-  triggers correctly on every observed misuse and doesn't fire on
-  legitimate `(argv)` uses in our test suite, but a real-world
-  corpus of programs would tell us the precision/recall.
-
-### 22.7 Files touched in Phase 22
-
-- `interpreter/interpreter.ml` — `output_emitted` ref;
-  `diagnose_enabled()` gate (default-on, opt-out via
-  `SIGIL_DIAGNOSE=0`); `(argv)`-misuse warning in the argv
-  builtin; `output_emitted := true` in `print` and `println`.
-- `interpreter/vm.ml` — no-output-produced warning at end of
-  `run_file` when exit_code=0 and `output_emitted` is false.
-- `benchmark/eval_real_tooling.py:validator_hint()` — two new
-  early branches matching the argv-misuse warning string and
-  the no-output-produced warning string with worked-fix
-  retry prompts.
-- `benchmark/corpus_extender.py:SLIM_HEADER` — three-rule
-  addendum (input shape, tabular column index, find_all
-  capturing groups). `run_sigil` signature updated:
-  `diagnose=True` default; opt-out by `diagnose=False`.
-- `tools/agent_harness/sigil_mcp_server.py` — imports
-  `validator_hint` from the eval harness; retry prompt builder
-  uses it instead of raw stderr; flow bug fixed where stderr
-  was being discarded when the program "succeeded" with wrong
-  output.
-- `benchmark/build_tier1_seeds.py` — generator + verifier for
-  the 26 Tier 1 seeds (12 Group A + 8 Group B + 6 Group C).
-- `benchmark/tier1_agent_seeds.jsonl` — verified seed file.
-- `benchmark/training_corpus.jsonl` — appended (2283 → 2309).
-- `benchmark/rag_index.json` — rebuilt.
-- `benchmark/.gitignore` — `tier1_agent_seeds.jsonl` allowlisted.
-- `tools/agent_harness/ab_results_v6_phi_v2_tier1.json` — A/B
-  result with all Tier 1 changes; raw data for §22.3.
-
+## Phase 18: Agent harness ships, PCRE swap as canonical meet-halfway (2026-05-01)
+
+Three concurrent tracks landed: (a) `tools/agent_harness/sigil_mcp_server.py`
+exposes the local Sigil ensemble as an MCP tool a cloud orchestrator
+can delegate to without sending input data over the wire.
+(b) `tools/agent_harness/agent_ab_harness.py` runs an A/B comparison
+on multi-step tasks. (c) The Sigil regex backend swaps from OCaml's
+`Str` to `Re` (Perl-compatible) — `\b`, `\d`, `\w`, `\s`, named groups,
+non-greedy quantifiers all become available. ~60 lines of OCaml absorb
+an entire flavor of regex syntax.
+
+The A/B harness result splits the project's value claim cleanly:
+**6/8 cloud-Python vs 1/8 hybrid-local-Sigil** on multi-step tasks.
+The 29/30 single-step Stream C win does not transfer. Delegation
+works for the tooling-shape piece, not for multi-step composition.
+
+The PCRE swap is the canonical structural meet-halfway. The pattern
+this phase names: when a failure mode is dominant AND tied to model
+pre-training, fix at the language layer rather than via prompts /
+corpus / training. Each non-language intervention costs ongoing
+engineering; the language change costs once. Documented as Section
+4.7 in `papers/MEETING_HALFWAY.md`.
+
+Commits: [16c42c3](https://github.com/mlainez/sigil/commit/16c42c3) (MCP server),
+[c5d5203](https://github.com/mlainez/sigil/commit/c5d5203) (paren-balancer in Sigil itself),
+[2be44f5](https://github.com/mlainez/sigil/commit/2be44f5) (validator-in-loop surgical hints),
+[7a9fca4](https://github.com/mlainez/sigil/commit/7a9fca4) +
+[ff7d68d](https://github.com/mlainez/sigil/commit/ff7d68d) (PCRE corpus seeds).
+
+## Phase 19: Stream C 29/30 — corpus and validator hint, no language redesign (2026-05-02)
+
+Three small additive moves take Stream C from 26 to 29:
+
+1. **Lexer fix**: unknown escapes preserve the backslash so `"\d{4}"`
+   in Sigil source survives to the regex engine intact.
+2. **Regex corpus expansion**: 70 verified examples (58 generated +
+   12 hand seeds). Stream C jumps to 27/30.
+3. **For-iterator mutation guard**: runtime error when
+   `(for i 0 n ... (set i ...))` mutates the iterator (a C/Python
+   instinct that Sigil's for silently ignores). Validator hint
+   rewrites the retry prompt with a worked while-loop pattern.
+
+Final: **29/30 with v6 + phi-v1 ensemble + RAG + for-guard.** Single
+failure (`shell_argv_count`) is a cosmetic format-string miss. See
+`benchmark/STREAM_C_RESULT.md` for the full report.
+
+The methodology this phase names prospectively: when a real-world
+failure shows up, decision tree is (a) is the language silently doing
+the wrong thing? fix that. (b) is the model reaching for the wrong
+tool? add corpus. (c) is the model writing the right algorithm with
+the wrong control flow? add a runtime guard hinting toward the right
+shape.
+
+Commit: [d7bc1ce](https://github.com/mlainez/sigil/commit/d7bc1ce).
+
+## Phase 20: Phi-Sigil-v2 deployment + matching cloud at 29/30 (2026-05-03)
+
+Phi-Sigil-v2 retrains on the augmented corpus to keep both ensemble
+members on the same vocabulary. Deployment is the entire story —
+training itself is unremarkable.
+
+Four chained problems: (1) ollama llama-runner segfaults on Phi-4 +
+adapter overlay (workaround: merge offline). (2)
+`convert_hf_to_gguf.py` "missing tokenizer.model" because Phi-4 uses
+GPT2Tokenizer/BPE not SentencePiece, and transformers had rewritten
+the tokenizer-class field. (3) 29 GB fp16 GGUF doesn't fit in 16 GiB
+VRAM. (4) **Q4_K_M drift**: phi-v2 solo Stream C is 14/30 vs phi-v1's
+19/30. Q4_K_M's per-block dynamic quantization handles Phi-4's fused
+`qkv_proj` / `gate_up_proj` worse than the split-projection Qwen
+architecture. Doesn't affect ensemble outcome (phi-v2 still rescues
+the one task qwen-v6 fails).
+
+The headline: **local 29/30 = Sonnet 29/30** with complementary
+failures (`shell_argv_count` for local, `split_at_blank_lines` for
+Sonnet). A combined cascade trivially hits 30/30.
+
+Lesson recorded: the deployed model can be measurably worse than the
+merged-checkpoint reference, so retrain claims have to be validated
+in the actually-deployed configuration, not the offline fp16 weights.
+
+Commit: [97983f7](https://github.com/mlainez/sigil/commit/97983f7).
+
+## Phase 21: Stream C wins don't propagate to multi-step (2026-05-03)
+
+Re-run the A/B harness with v6+phi-v2. Result: **1/8 hybrid, 6/8
+cloud** — *unchanged* from the Phase 18 v4+phi-v1 baseline. Training
+a stronger Sigil model didn't move the multi-step number.
+
+Failure-mode dive shows three patterns: (a) `(argv)` reach on
+multi-line input (3 of 7 failures); (b) wrong column index in
+tabular data; (c) made-up syntax / undefined names. None addressable
+by "more corpus" or "stronger model" — the bottleneck is composition
+complexity, not Sigil grammar fluency. Phase 18.5 had predicted this
+exact finding.
+
+## Phase 22: Tier 1 — interpreter loudness, validator hints (2026-05-03)
+
+Phase 19's prescription applied to the multi-step failures: surface
+silent failure modes at the language layer.
+
+- **(argv) misuse warning** in the argv builtin (default-on stderr)
+  when length=1 element contains newlines.
+- **No-output-produced warning** at program exit if no
+  print/println was called.
+- **validator_hint** pattern-matches both warnings and rewrites the
+  retry prompt with worked fixes.
+- **26 corpus seeds** (12 multi-line $0, 8 header-aware tabular,
+  6 find_all) appended to the corpus.
+- **System prompt addendum** with the input-shape rules.
+
+Result: B 1/8 → 2/8. One systematic win (`url_status_pairs`
+recovered via the new diagnostic flow). Each Tier 1.5 retest sat in
+the same 1-2/8 band; the diagnostic mechanism is real but covers a
+narrow failure shape. The Stream D agent_workflow deliverables
+(`router.py`, `sigil_subagent.md`, `example_walkthrough.md`) shipped
+in the same commit, closing Stream D.
+
+Commit: [dafdec9](https://github.com/mlainez/sigil/commit/dafdec9).
+
+## Phase 23: Tier 2 — chained sub-agent (2026-05-03)
+
+The architectural fix Phase 18.5 named: replace single-program
+delegation with a pipeline of single-step calls. Each step is
+Stream-C-shaped (the regime where the local ensemble lives at
+29/30); the orchestrator owns the cross-step plumbing.
+
+Path C added to the harness. Result: **C 3/8** vs B 1/8, at **45%
+lower cost** ($0.0149 vs $0.0269). Most remaining failures are
+*intermediate-step shape mismatches*: Sonnet's guess at step 2's
+input shape doesn't match what step 1 actually produced.
+
+Side discovery: the long-standing "TCP loopback test fails" status
+was a real test bug (off-by-one if-branch in
+`test_tcp_large_message`), not environmental. Six-character fix;
+suite goes from 160/161 to 161/161.
+
+Commit: [fe3cedd](https://github.com/mlainez/sigil/commit/fe3cedd).
+
+## Phase 24: Tier 2.5 — RAG plateau, the case for v7 retrain (2026-05-03)
+
+Five more moves on Tier 2: aggregation seed pack, intermediate
+validation in path_c, forced 2-3 step decomposition, multiline regex
+default, TSV/CSV markdown seeds. Result: **C regresses from 3/8 to
+1/8.**
+
+The aggregation seeds DID help (csv_top3 reaches step 2 with the
+right shape) but Move B's "non-empty = pass" heuristic was too lax
+and let bogus output propagate. Two clean regressions
+(`extract_dotted_ipv4`, `url_status_pairs`) are pure RAG-displacement
+artifacts: 14 new aggregation seeds shifted top-K retrievals away
+from previously-helpful regex/log seeds.
+
+**Textbook RAG plateau.** Three pure-RAG runs (Phase 21 baseline,
+Tier 2, Tier 2.5) all sit in the 1-3/8 band on Path C. The +2
+architectural lift in Phase 23 was the only systematic gain.
+
+**Conclusion**: train qwen-sigil-v7 on the 2323-entry corpus. RAG
+shows patterns at inference time; weights bake them in. The
+remaining failures are "model reaches for wrong shape" with the
+right RAG context already in the prompt — exactly what fine-tuning
+addresses.
+
+A separate experiment confirmed model-role choice isn't the
+bottleneck: phi-primary + qwen-fallback hits the same band (B 2/8,
+C 2/8) at lower cost but no accuracy lift.
+
+Commits: [719114c](https://github.com/mlainez/sigil/commit/719114c) (Tier 2.5),
+[ff7268a](https://github.com/mlainez/sigil/commit/ff7268a) (assessment),
+[2735045](https://github.com/mlainez/sigil/commit/2735045) (inverted experiment).
+
+## Phase 25: Smart-argv — the canonical meet-halfway, applied at last (2026-05-03)
+
+Marc's question framed it: *"If argv is pretraining data, why don't
+we meet the model halfway with it?"*
+
+The (argv) misuse pattern dominated multi-step failures across
+Phases 18-24 because the model's pre-training is saturated with
+`for arg in sys.argv` (Python) and `for line in "$@"` (Bash)
+patterns. Our literal `(argv)` returned a 1-element list when input
+was a single multi-line string — the model's for-each ran once over
+the whole blob. We tried fixing this via diagnostics, prompts, and
+corpus seeds; pre-training bias proved stronger than 7.6% corpus
+weighting on a fine-tune.
+
+The fix: **make `(argv)` smart**. When called with exactly 1 CLI arg
+AND it contains newlines, return the lines split. Otherwise the
+literal CLI argv vector. Add `(argv_raw)` as escape hatch. ~10 lines
+of OCaml. Blast radius in our codebase is essentially zero (corpus
+has 0 `(argv)` entries; only test_argv.sigil uses `(argv)` and only
+with no args).
+
+A/B/C retest with only smart-argv changed: **B 1/8 → 2/8, C 1/8 →
+2/8**. `url_status_pairs` Path B is the canonical demonstration —
+the model wrote `(map (argv) (\line ...))` expecting line iteration,
+and it just worked. No retraining, no prompt change, no validator
+hint.
+
+Same phase added 4 builtin aliases (`parse_float`, `to_int`,
+`first_index_of`, `regex_replace_all`) for common "real-looking name
+that doesn't exist" reaches, and a corpus pristineness auditor that
+came back clean: 0/2323 entries flagged.
+
+The fix that should have come at Phase 18 instead of Phase 25 is the
+canonical structural meet-halfway. The lesson generalizes: when
+you're fighting model instinct across multiple phases, fix at the
+language layer.
+
+Commits: [398032f](https://github.com/mlainez/sigil/commit/398032f) (smart-argv + aliases),
+[1c98563](https://github.com/mlainez/sigil/commit/1c98563) (smart-argv A/B/C result),
+[fd15459](https://github.com/mlainez/sigil/commit/fd15459) (revert Tier 2.5 prompt overreach).
+
+## Phase 26: qwen-sigil-v7 retrain on hardened corpus (in flight)
+
+Same QLoRA recipe as v6 (r=16, alpha=32, lr=2e-5, 3 epochs). 2323
+training entries with full Tier 1 + Tier 2.5 seed coverage,
+smart-argv runtime semantics in place. ETA ~2h 42m wall (873 steps
+× ~11s/step on the 7800 XT — ~half my original 5h estimate, the
+attn_implementation sdpa change at
+[0f1a75e](https://github.com/mlainez/sigil/commit/0f1a75e) is paying off).
+
+Three outcome bands defined for the post-train retest:
+- **5+/8 on Path C**: weights-baking moved the floor; match cloud
+  noise band. Deployment-ready story.
+- **3-4/8**: chained architecture is the real ceiling; next move
+  is bash-history task suite refresh, not more model work.
+- **1-2/8**: deployment chain regression — diagnose Q4_K_M
+  behavior on Qwen split-projection (unlikely but possible).
+
+[Result section to be filled in after training + deploy + retest.]
 ## Reproducibility
 
 Every claim in this narrative cites either a JSON results file in
