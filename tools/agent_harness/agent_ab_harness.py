@@ -264,16 +264,19 @@ CHAIN_DELEGATE_SYSTEM = (
     "You decide how to delegate a tooling task to the local Sigil ensemble. "
     "The local ensemble is excellent at SINGLE-STEP data transforms (parse, "
     "filter, count, sort, format) but struggles when one program has to do "
-    "many steps in sequence. Decompose the task into 1-3 SINGLE-PURPOSE "
-    "steps. Each step's input is the previous step's stdout (the first "
-    "step's input is the user-supplied data). Output JSON of the form: \n"
+    "many steps in sequence. Decompose the task into 2-3 SINGLE-PURPOSE "
+    "steps. Use 1 step ONLY if the task is a literal pass-through (e.g. "
+    "'extract every email' is one step; 'parse CSV, sum by category, sort "
+    "top 3' is THREE steps: parse → aggregate → format). Each step's input "
+    "is the previous step's stdout (the first step's input is the "
+    "user-supplied data). Output JSON of the form:\n"
     "  {\"steps\": [{\"description\": \"<one-sentence Sigil task>\"}, ...]}\n"
     "Each description should be one sentence, present tense, focused on a "
     "single transform. Examples of good steps: 'Skip the header and print "
-    "category,amount comma-separated for each row', 'Sum the second column "
-    "by the first column key, print key total each line', 'Sort lines "
-    "descending by the second whitespace-separated number, print top 3 "
-    "formatted as KEY: $TOTAL'. Output ONLY the JSON, no markdown."
+    "category,amount comma-separated for each row', 'Sum the amount column "
+    "by the first column key (the category), print KEY TOTAL each line', "
+    "'Sort lines descending by the second whitespace-separated number, "
+    "print top 3 formatted as KEY: $TOTAL'. Output ONLY the JSON, no markdown."
 )
 CHAIN_DELEGATE_PROMPT = (
     "Task: {goal}\n\n"
@@ -324,23 +327,56 @@ def path_c_chained_hybrid(task: dict) -> dict:
         # Fallback: collapse to a single-step delegation
         steps = [{"description": task["goal"]}]
 
-    # 2. Run pipeline; thread stdout → stdin
+    # 2. Run pipeline; thread stdout → stdin.
+    # Move B (Tier 2.5): validate intermediate steps. Empty stdout from an
+    # intermediate step is almost always a pipeline bug — retry up to 2
+    # additional times before giving up. Pass the prior step's actual
+    # output excerpt into the next step's description so the local model
+    # knows what its real input looks like (not Sonnet's guess).
     cur_input = task["input"]
     step_results = []
     last_step_idx = len(steps) - 1
+    final_stdout = ""
+    final_ok = False
     for idx, step in enumerate(steps):
         is_final = idx == last_step_idx
-        # Validate only the final step against the task's expected output;
-        # intermediate step shapes are Sonnet's guess and we don't validate
-        # them, just run-once and pipe.
         expected_shape = task["expected"] if is_final else ""
-        result = generate_and_run(step.get("description", ""), cur_input, expected_shape)
+        # Augment description with prior step's actual output excerpt so
+        # the local model sees what it's really consuming.
+        base_desc = step.get("description", "")
+        if idx > 0 and cur_input:
+            excerpt = cur_input[:200]
+            if len(cur_input) > 200:
+                excerpt += "..."
+            desc = (f"{base_desc} The input you receive in $0 will look "
+                    f"like this (first ~200 chars from the prior step): "
+                    f"{excerpt!r}. Use that exact shape.")
+        else:
+            desc = base_desc
+
+        result = generate_and_run(desc, cur_input, expected_shape)
+        intermediate_retry_attempts = 0
+        # Intermediate-step empty-output retry: up to 2 extra attempts
+        # if stdout is empty. Skip retry on the final step (its retries
+        # are already handled via expected_shape inside generate_and_run).
+        while (not is_final
+               and intermediate_retry_attempts < 2
+               and result["ok"]
+               and not result["stdout"].strip()):
+            intermediate_retry_attempts += 1
+            retry_desc = (f"{desc} Your previous attempt produced no output; "
+                          f"that's almost certainly a pipeline bug. Make sure "
+                          f"to (split $0 \"\\n\") and emit (println ...) for "
+                          f"each computed value.")
+            result = generate_and_run(retry_desc, cur_input, expected_shape)
+
         step_results.append({
             "idx": idx,
-            "description": step.get("description", "")[:120],
-            "ok": result["ok"],
+            "description": base_desc[:120],
+            "ok": result["ok"] and (is_final or bool(result["stdout"].strip())),
             "stdout": result["stdout"][:400],
             "attempts": result["attempts"],
+            "intermediate_retries": intermediate_retry_attempts,
             "model_used": result["model_used"],
             "fallback_used": result["fallback_used"],
             "wall_seconds": result["wall_seconds"],
@@ -349,6 +385,11 @@ def path_c_chained_hybrid(task: dict) -> dict:
             final_stdout = result["stdout"]
             final_ok = result["ok"] and result["stdout"] == task["expected"]
         cur_input = result["stdout"]
+        # Hard-stop the pipeline if an intermediate step still failed
+        # (empty stdout after retries) — running subsequent steps on empty
+        # input wastes cycles and produces noisy step_results.
+        if not is_final and not cur_input.strip():
+            break
 
     # 3. Sonnet reports
     summary = {

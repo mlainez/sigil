@@ -15,6 +15,7 @@ models/
 !regex_corpus.jsonl
 !pcre_seeds.jsonl
 !tier1_agent_seeds.jsonl
+!tier25_agent_seeds.jsonl
 
 tier*_results.json
 

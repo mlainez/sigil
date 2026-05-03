@@ -3858,10 +3858,16 @@ and eval_call env func_name args =
   (* Regex operations — backed by the Re library (Perl-compatible).
      Re.Perl.compile_pat handles \b, \d, \w, \s, non-greedy *? +?, named
      groups, anchors, character classes, alternation — i.e. the syntax
-     models actually write. The earlier Str backend rejected most of these,
-     causing a long tail of "regex matched nothing" failures. The
-     regex_translate_braces helper above is no longer needed (Re supports
-     {n,m} natively) but is kept for backward-compat callers if any. *)
+     models actually write.
+
+     `Multiline is enabled by default (Phase 23.4 fix): ^ and $ match at
+     line boundaries, not just start/end of the input string. This matches
+     model expectations from Python `re` (with re.MULTILINE), Perl `m//m`,
+     and grep — every "find_all '^def \w+' src" pattern the model writes
+     assumes line-anchoring. Without this flag, find_all would only return
+     the first match in a multi-line input. The few existing tests that use
+     ^ and $ all run on single-line strings, so multiline-on doesn't change
+     their behavior. *)
   | "regex_compile" ->
       (match arg_vals with
        | [VString pattern] -> VString pattern  (* Store pattern as string; compiled at use site *)
@@ -3871,7 +3877,7 @@ and eval_call env func_name args =
       (match arg_vals with
        | [VString pattern; VString text] ->
            (try
-             let re = Re.Perl.compile_pat pattern in
+             let re = Re.Perl.compile_pat ~opts:[`Multiline] pattern in
              VBool (Re.execp re text)
            with Re.Perl.Parse_error -> raise (RuntimeError ("Invalid regex pattern: " ^ pattern))
               | Re.Perl.Not_supported -> raise (RuntimeError ("Regex feature not supported: " ^ pattern)))
@@ -3881,7 +3887,7 @@ and eval_call env func_name args =
       (match arg_vals with
        | [VString pattern; VString text] ->
            (try
-             let re = Re.Perl.compile_pat pattern in
+             let re = Re.Perl.compile_pat ~opts:[`Multiline] pattern in
              match Re.exec_opt re text with
              | Some g -> VString (Re.Group.get g 0)
              | None -> VString ""
@@ -3893,7 +3899,7 @@ and eval_call env func_name args =
       (match arg_vals with
        | [VString pattern; VString text] ->
            (try
-             let re = Re.Perl.compile_pat pattern in
+             let re = Re.Perl.compile_pat ~opts:[`Multiline] pattern in
              let matches = Re.all re text in
              let results = List.map (fun g -> VString (Re.Group.get g 0)) matches in
              VArray (ref (Array.of_list results))
@@ -3905,7 +3911,7 @@ and eval_call env func_name args =
        (match arg_vals with
         | [VString pattern; VString text; VString replacement] ->
             (try
-              let re = Re.Perl.compile_pat pattern in
+              let re = Re.Perl.compile_pat ~opts:[`Multiline] pattern in
               VString (Re.replace re ~f:(fun _ -> replacement) text)
             with Re.Perl.Parse_error -> raise (RuntimeError ("Invalid regex pattern: " ^ pattern))
                | Re.Perl.Not_supported -> raise (RuntimeError ("Regex feature not supported: " ^ pattern)))
