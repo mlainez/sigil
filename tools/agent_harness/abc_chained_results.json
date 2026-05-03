@@ -1,0 +1,669 @@
+{
+  "aggregate": {
+    "n_tasks": 8,
+    "A_cloud_only": {
+      "pass": 5,
+      "input_tokens": 24,
+      "output_tokens": 1829,
+      "cost_usd": 0.0275
+    },
+    "B_hybrid": {
+      "pass": 1,
+      "input_tokens": 48.0,
+      "output_tokens": 1784,
+      "cost_usd": 0.0269
+    },
+    "savings": {
+      "input_tokens_saved_pct": -100.0,
+      "output_tokens_saved_pct": 2.5,
+      "cost_saved_pct": 2.2,
+      "accuracy_delta_pp": -4
+    },
+    "C_chained": {
+      "pass": 3,
+      "input_tokens": 48.0,
+      "output_tokens": 984,
+      "cost_usd": 0.0149,
+      "vs_A_accuracy_pp": -2,
+      "vs_B_accuracy_pp": 2
+    }
+  },
+  "tasks": [
+    {
+      "id": "log_top_4xx_ip",
+      "shape": "log_analysis",
+      "A": {
+        "path": "A_cloud_only",
+        "ok": false,
+        "stdout": "",
+        "code": "import sys\nimport re\nfrom collections import defaultdict\n\nlog = sys.argv[1]\ncounts = defaultdict(int)\nfor line in log.splitlines():\n    m = re.match(r'(\\S+) \\S+ \\S+ \\[.*?\\] \"\\S+ \\S+ \\S+\" (\\d+)', line)\n    if m:\n        ip, status = m.group(1), int(m.group(2))\n        if 400 <= status < 500:\n            counts[ip] += 1\nbest = max(counts, key=lambda k: counts[k])\nsys.stdout.write(f\"{best}\\t{counts[best]}\\n\")",
+        "tokens_in": 3,
+        "tokens_out": 381,
+        "cost_usd": 0.005724,
+        "wall_seconds": 7.42
+      },
+      "B": {
+        "path": "B_hybrid",
+        "ok": false,
+        "stdout": "\t0\n",
+        "code": "(set lines (split $0 \"\\n\"))\n(set counts {})\n(for-each line lines\n  (set parts (split line \" \"))\n  (if (gt (len parts) 7)\n    (set status (int (last parts)))\n    (if (ge status 400)\n      (set ip (first parts))\n      (set count (get_or counts ip 0))\n      (set counts (map_set counts ip (add count 1))))))\n(set max_ip \"\")\n(set max_count 0)\n(for-each k (keys counts)\n  (set c (map_get counts k))\n  (if (gt c max_count)\n    (set max_ip k)\n    (set max_count c)))\n(println (fmt \"{}\\t{}\\n\" max_ip max_count))",
+        "tokens_in": 6.0,
+        "tokens_out": 508,
+        "cost_usd": 0.007638,
+        "wall_seconds": 37.87,
+        "sigil_attempts": 3,
+        "sigil_model": "phi-sigil-v2:14b",
+        "stages": [
+          {
+            "stage": "decide",
+            "in": 3,
+            "out": 479
+          },
+          {
+            "stage": "report",
+            "in": 3,
+            "out": 29
+          }
+        ]
+      },
+      "C": {
+        "path": "C_chained",
+        "ok": false,
+        "stdout": "",
+        "n_steps": 3,
+        "step_results": [
+          {
+            "idx": 0,
+            "description": "Parse each line of the nginx log, extract the first field (IP) and the 9th field (status code), and print IP and status ",
+            "ok": true,
+            "stdout": "192.168.1.10\t100\n192.168.1.42\t12\n192.168.1.42\t12\n192.168.1.10\t100\n192.168.1.42\t12\n10.0.0.5\t12\n192.168.1.42\t12\n",
+            "attempts": 1,
+            "model_used": "qwen-sigil-v6:7b",
+            "fallback_used": false,
+            "wall_seconds": 5.03
+          },
+          {
+            "idx": 1,
+            "description": "Count occurrences of each unique IP, printing IP and count space-separated on each line.",
+            "ok": false,
+            "stdout": "",
+            "attempts": 3,
+            "model_used": "phi-sigil-v2:14b",
+            "fallback_used": true,
+            "wall_seconds": 15.28
+          },
+          {
+            "idx": 2,
+            "description": "Sort lines descending by the count, take the top line, and print it as 'IP\\tCOUNT'.",
+            "ok": false,
+            "stdout": "",
+            "attempts": 3,
+            "model_used": "phi-sigil-v2:14b",
+            "fallback_used": true,
+            "wall_seconds": 19.3
+          }
+        ],
+        "tokens_in": 6.0,
+        "tokens_out": 137,
+        "cost_usd": 0.002073,
+        "wall_seconds": 46.89,
+        "stages": [
+          {
+            "stage": "decompose",
+            "in": 3,
+            "out": 122
+          },
+          {
+            "stage": "report",
+            "in": 3,
+            "out": 15
+          }
+        ]
+      }
+    },
+    {
+      "id": "csv_top3_categories",
+      "shape": "csv_aggregation",
+      "A": {
+        "path": "A_cloud_only",
+        "ok": false,
+        "stdout": "utility: $200.00\nfood: $149.20\nentertainment: $30.00\n",
+        "code": "import sys\nimport csv\nfrom io import StringIO\nfrom collections import defaultdict\n\ndata = sys.argv[1]\ntotals = defaultdict(float)\n\nreader = csv.DictReader(StringIO(data))\nfor row in reader:\n    totals[row['category']] += float(row['amount'])\n\ntop3 = sorted(totals.items(), key=lambda x: x[1], reverse=True)[:3]\n\nfor cat, total in top3:\n    sys.stdout.write(f\"{cat}: ${total:.2f}\\n\")",
+        "tokens_in": 3,
+        "tokens_out": 304,
+        "cost_usd": 0.004569,
+        "wall_seconds": 5.61
+      },
+      "B": {
+        "path": "B_hybrid",
+        "ok": false,
+        "stdout": "",
+        "code": "(set rows (split $0 \"\\n\"))\n(set data (map_arr (slice rows 1 (len rows)) (\\r (split r \",\"))))\n(set sums {})\n(for-each row data\n  (set category (last row))\n  (if (has sums category)\n    (set sums (json_set sums [category] (add (json_get sums [category]) (cast_float_decimal (array_get row 2)))))\n    (else (set sums (json_set sums [category] (cast_float_decimal (array_get row 2)))))))\n(set sorted (sort_by (entries sums) (\\e (- (last e)))))\n(for-each entry (slice sorted 0 3)\n  (println (fmt \"{}: ${:.2f}\" (first entry) (last entry))))",
+        "tokens_in": 6.0,
+        "tokens_out": 258,
+        "cost_usd": 0.003888,
+        "wall_seconds": 34.01,
+        "sigil_attempts": 3,
+        "sigil_model": "phi-sigil-v2:14b",
+        "stages": [
+          {
+            "stage": "decide",
+            "in": 3,
+            "out": 238
+          },
+          {
+            "stage": "report",
+            "in": 3,
+            "out": 20
+          }
+        ]
+      },
+      "C": {
+        "path": "C_chained",
+        "ok": false,
+        "stdout": "",
+        "n_steps": 3,
+        "step_results": [
+          {
+            "idx": 0,
+            "description": "Skip the header line and print category,amount comma-separated for each row.",
+            "ok": true,
+            "stdout": "food,42.50\ntransit,18.00\nfood,33.20\nutility,120.00\nfood,18.50\ntransit,7.50\nutility,80.00\nfood,55.00\nentertainment,30.00\n",
+            "attempts": 1,
+            "model_used": "qwen-sigil-v6:7b",
+            "fallback_used": false,
+            "wall_seconds": 4.08
+          },
+          {
+            "idx": 1,
+            "description": "Sum the amount column by category key, print each as 'key total' on its own line.",
+            "ok": false,
+            "stdout": "",
+            "attempts": 3,
+            "model_used": "phi-sigil-v2:14b",
+            "fallback_used": true,
+            "wall_seconds": 19.46
+          },
+          {
+            "idx": 2,
+            "description": "Sort lines descending by the numeric second field, take the top 3, and print each formatted as 'KEY: $TOTAL' with two de",
+            "ok": false,
+            "stdout": "",
+            "attempts": 3,
+            "model_used": "phi-sigil-v2:14b",
+            "fallback_used": true,
+            "wall_seconds": 19.66
+          }
+        ],
+        "tokens_in": 6.0,
+        "tokens_out": 119,
+        "cost_usd": 0.001803,
+        "wall_seconds": 51.29,
+        "stages": [
+          {
+            "stage": "decompose",
+            "in": 3,
+            "out": 99
+          },
+          {
+            "stage": "report",
+            "in": 3,
+            "out": 20
+          }
+        ]
+      }
+    },
+    {
+      "id": "extract_python_def_lines",
+      "shape": "code_mining",
+      "A": {
+        "path": "A_cloud_only",
+        "ok": true,
+        "stdout": "alpha\nbeta\ngamma\n",
+        "code": "import sys\nimport re\n\nsource = sys.argv[1]\nfor line in source.split('\\n'):\n    m = re.match(r'^def ([A-Za-z_][A-Za-z0-9_]*)\\(', line)\n    if m:\n        sys.stdout.write(m.group(1) + '\\n')",
+        "tokens_in": 3,
+        "tokens_out": 231,
+        "cost_usd": 0.003474,
+        "wall_seconds": 6.34
+      },
+      "B": {
+        "path": "B_hybrid",
+        "ok": false,
+        "stdout": "alpha\n",
+        "code": "(println (join (map_arr (find_all \"^def \\w+\" $0) (\\m (last (split m \" \")))) \"\\n\"))",
+        "tokens_in": 6.0,
+        "tokens_out": 213,
+        "cost_usd": 0.003213,
+        "wall_seconds": 25.16,
+        "sigil_attempts": 3,
+        "sigil_model": "phi-sigil-v2:14b",
+        "stages": [
+          {
+            "stage": "decide",
+            "in": 3,
+            "out": 139
+          },
+          {
+            "stage": "report",
+            "in": 3,
+            "out": 74
+          }
+        ]
+      },
+      "C": {
+        "path": "C_chained",
+        "ok": false,
+        "stdout": "def alpha(\n",
+        "n_steps": 1,
+        "step_results": [
+          {
+            "idx": 0,
+            "description": "Print the second whitespace-separated token (function name) for each line that matches the pattern '^def \\w+(' (top-leve",
+            "ok": false,
+            "stdout": "def alpha(\n",
+            "attempts": 3,
+            "model_used": "phi-sigil-v2:14b",
+            "fallback_used": true,
+            "wall_seconds": 16.4
+          }
+        ],
+        "tokens_in": 6.0,
+        "tokens_out": 120,
+        "cost_usd": 0.001818,
+        "wall_seconds": 26.02,
+        "stages": [
+          {
+            "stage": "decompose",
+            "in": 3,
+            "out": 73
+          },
+          {
+            "stage": "report",
+            "in": 3,
+            "out": 47
+          }
+        ]
+      }
+    },
+    {
+      "id": "json_extract_paths",
+      "shape": "json_wrangling",
+      "A": {
+        "path": "A_cloud_only",
+        "ok": true,
+        "stdout": "bob\ncarol\n",
+        "code": "import sys\nimport json\n\ndata = json.loads(sys.argv[1])\nfor user in data[\"users\"]:\n    if user[\"role\"] == \"admin\":\n        sys.stdout.write(user[\"name\"] + \"\\n\")",
+        "tokens_in": 3,
+        "tokens_out": 97,
+        "cost_usd": 0.001464,
+        "wall_seconds": 5.07
+      },
+      "B": {
+        "path": "B_hybrid",
+        "ok": true,
+        "stdout": "bob\ncarol\n",
+        "code": "(set users (json_get (json_parse $0) [\"users\"]))\n(for-each u users\n  (if (eq (json_get u [\"role\"]) \"admin\")\n    (println (json_get u [\"name\"]))))",
+        "tokens_in": 6.0,
+        "tokens_out": 125,
+        "cost_usd": 0.001893,
+        "wall_seconds": 15.79,
+        "sigil_attempts": 1,
+        "sigil_model": "qwen-sigil-v6:7b",
+        "stages": [
+          {
+            "stage": "decide",
+            "in": 3,
+            "out": 115
+          },
+          {
+            "stage": "report",
+            "in": 3,
+            "out": 10
+          }
+        ]
+      },
+      "C": {
+        "path": "C_chained",
+        "ok": true,
+        "stdout": "bob\ncarol\n",
+        "n_steps": 1,
+        "step_results": [
+          {
+            "idx": 0,
+            "description": "Parse the JSON from $0, filter users whose role equals 'admin', and print each name on its own line in input order.",
+            "ok": true,
+            "stdout": "bob\ncarol\n",
+            "attempts": 2,
+            "model_used": "qwen-sigil-v6:7b",
+            "fallback_used": false,
+            "wall_seconds": 6.16
+          }
+        ],
+        "tokens_in": 6.0,
+        "tokens_out": 111,
+        "cost_usd": 0.001683,
+        "wall_seconds": 14.05,
+        "stages": [
+          {
+            "stage": "decompose",
+            "in": 3,
+            "out": 41
+          },
+          {
+            "stage": "report",
+            "in": 3,
+            "out": 70
+          }
+        ]
+      }
+    },
+    {
+      "id": "tsv_to_markdown",
+      "shape": "format_conversion",
+      "A": {
+        "path": "A_cloud_only",
+        "ok": true,
+        "stdout": "| name | age | city |\n| --- | --- | --- |\n| alice | 30 | paris |\n| bob | 25 | nyc |\n",
+        "code": "import sys\n\ndef tsv_to_md(tsv):\n    lines = tsv.strip().split('\\n')\n    rows = [line.split('\\t') for line in lines]\n    header = rows[0]\n    divider = ['---'] * len(header)\n    result = ''\n    for row in [header, divider] + rows[1:]:\n        result += '| ' + ' | '.join(row) + ' |\\n'\n    return result\n\nsys.stdout.write(tsv_to_md(sys.argv[1]))",
+        "tokens_in": 3,
+        "tokens_out": 182,
+        "cost_usd": 0.002739,
+        "wall_seconds": 5.08
+      },
+      "B": {
+        "path": "B_hybrid",
+        "ok": false,
+        "stdout": "",
+        "code": "(set lines array (split $0 \"\\n\"))\n(println \"| name | age | city |\\n| --- | --- | --- |\\n\" (join (rest lines) (\\row (fmt \"| {} | {} | {}\\n\" (array_get (split row \"\\t\") 0) (array_get (split row \"\\t\") 1) (array_get (split row \"\\t\") 2)))))",
+        "tokens_in": 6.0,
+        "tokens_out": 150,
+        "cost_usd": 0.002268,
+        "wall_seconds": 25.52,
+        "sigil_attempts": 3,
+        "sigil_model": "phi-sigil-v2:14b",
+        "stages": [
+          {
+            "stage": "decide",
+            "in": 3,
+            "out": 125
+          },
+          {
+            "stage": "report",
+            "in": 3,
+            "out": 25
+          }
+        ]
+      },
+      "C": {
+        "path": "C_chained",
+        "ok": false,
+        "stdout": "| name | age | city |\n| --- | --- | --- |\n | alice | 30 | paris\n | bob | 25 | nyc\n",
+        "n_steps": 1,
+        "step_results": [
+          {
+            "idx": 0,
+            "description": "Parse the TSV input line by line, splitting each row on tabs, and print each row as a pipe-padded Markdown table row wit",
+            "ok": false,
+            "stdout": "| name | age | city |\n| --- | --- | --- |\n | alice | 30 | paris\n | bob | 25 | nyc\n",
+            "attempts": 3,
+            "model_used": "phi-sigil-v2:14b",
+            "fallback_used": true,
+            "wall_seconds": 19.27
+          }
+        ],
+        "tokens_in": 6.0,
+        "tokens_out": 143,
+        "cost_usd": 0.002163,
+        "wall_seconds": 28.66,
+        "stages": [
+          {
+            "stage": "decompose",
+            "in": 3,
+            "out": 96
+          },
+          {
+            "stage": "report",
+            "in": 3,
+            "out": 47
+          }
+        ]
+      }
+    },
+    {
+      "id": "log_peak_error_hour",
+      "shape": "multi_step",
+      "A": {
+        "path": "A_cloud_only",
+        "ok": true,
+        "stdout": "09\n",
+        "code": "import sys\nfrom collections import Counter\n\nlog = sys.argv[1]\ncounts = Counter()\nfor line in log.splitlines():\n    parts = line.split()\n    if len(parts) >= 2 and parts[1] == 'ERROR':\n        hour = parts[0].split('T')[1].split(':')[0]\n        counts[hour] += 1\nsys.stdout.write(counts.most_common(1)[0][0] + '\\n')",
+        "tokens_in": 3,
+        "tokens_out": 238,
+        "cost_usd": 0.003579,
+        "wall_seconds": 6.3
+      },
+      "B": {
+        "path": "B_hybrid",
+        "ok": false,
+        "stdout": "",
+        "code": "(set lines array (split $0 \"\\n\"))\n(set counts map {})\n(for-each line string lines\n  (set parts array (split line \" \"))\n  (if (eq (first parts) \"ERROR\")\n    (let ts string (first (split (last parts) \"T\")))\n    (set hour string (string_slice ts 0 2))\n    (map_set counts hour (add (get_or counts hour 0) 1))))\n(set sorted_hours array (sort_by (entries counts) (\\p (neg (last p)))))\n(println (join (array (first (first sorted_hours))) \"\\n\"))",
+        "tokens_in": 6.0,
+        "tokens_out": 245,
+        "cost_usd": 0.003693,
+        "wall_seconds": 33.47,
+        "sigil_attempts": 3,
+        "sigil_model": "phi-sigil-v2:14b",
+        "stages": [
+          {
+            "stage": "decide",
+            "in": 3,
+            "out": 226
+          },
+          {
+            "stage": "report",
+            "in": 3,
+            "out": 19
+          }
+        ]
+      },
+      "C": {
+        "path": "C_chained",
+        "ok": false,
+        "stdout": "",
+        "n_steps": 3,
+        "step_results": [
+          {
+            "idx": 0,
+            "description": "Filter lines where the second field is ERROR, then print the hour portion (characters 12-13) of the timestamp field.",
+            "ok": true,
+            "stdout": "",
+            "attempts": 1,
+            "model_used": "qwen-sigil-v6:7b",
+            "fallback_used": false,
+            "wall_seconds": 4.23
+          },
+          {
+            "idx": 1,
+            "description": "Count occurrences of each hour value, printing each hour followed by its count.",
+            "ok": true,
+            "stdout": "\n",
+            "attempts": 1,
+            "model_used": "qwen-sigil-v6:7b",
+            "fallback_used": false,
+            "wall_seconds": 0.78
+          },
+          {
+            "idx": 2,
+            "description": "Sort lines descending by the count (second field) and print only the hour from the first line.",
+            "ok": false,
+            "stdout": "",
+            "attempts": 3,
+            "model_used": "phi-sigil-v2:14b",
+            "fallback_used": true,
+            "wall_seconds": 13.4
+          }
+        ],
+        "tokens_in": 6.0,
+        "tokens_out": 137,
+        "cost_usd": 0.002073,
+        "wall_seconds": 34.82,
+        "stages": [
+          {
+            "stage": "decompose",
+            "in": 3,
+            "out": 92
+          },
+          {
+            "stage": "report",
+            "in": 3,
+            "out": 45
+          }
+        ]
+      }
+    },
+    {
+      "id": "extract_dotted_ipv4",
+      "shape": "regex_extract",
+      "A": {
+        "path": "A_cloud_only",
+        "ok": false,
+        "stdout": "10.0.0.1\n192.168.1.1\n999.999.999.999\n10.0.0.1\n",
+        "code": "import sys\nimport re\n\nmatches = re.findall(r'\\b(?:\\d{1,3}\\.){3}\\d{1,3}\\b', sys.argv[1])\nsys.stdout.write('\\n'.join(matches) + '\\n' if matches else '')",
+        "tokens_in": 3,
+        "tokens_out": 111,
+        "cost_usd": 0.001674,
+        "wall_seconds": 4.87
+      },
+      "B": {
+        "path": "B_hybrid",
+        "ok": false,
+        "stdout": "",
+        "code": "(set pattern regex (regex_compile \"^([0-9]{1,3})\\.([0-9]{1,3})\\.([0-9]{1,3})\\.([0-9]{1,3})$\"))\n(for-each m string (find_all pattern $0)\n  (set a int (cast_int_float (array_get (regex_find_all pattern m) 0)))\n  (set b int (cast_int_float (array_get (regex_find_all pattern m) 1)))\n  (set c int (cast_int_float (array_get (regex_find_all pattern m) 2)))\n  (set d int (cast_int_float (array_get (regex_find_all pattern m) 3)))\n  (if (and (le a 255) (le b 255) (le c 255) (le d 255))\n    (println (join [a b c d] \".\"))))",
+        "tokens_in": 6.0,
+        "tokens_out": 156,
+        "cost_usd": 0.002358,
+        "wall_seconds": 28.6,
+        "sigil_attempts": 3,
+        "sigil_model": "phi-sigil-v2:14b",
+        "stages": [
+          {
+            "stage": "decide",
+            "in": 3,
+            "out": 137
+          },
+          {
+            "stage": "report",
+            "in": 3,
+            "out": 19
+          }
+        ]
+      },
+      "C": {
+        "path": "C_chained",
+        "ok": true,
+        "stdout": "10.0.0.1\n192.168.1.1\n10.0.0.1\n",
+        "n_steps": 1,
+        "step_results": [
+          {
+            "idx": 0,
+            "description": "Extract all dotted-quad IPv4 addresses from arg0 using a regex that matches four 0-255 octets separated by dots, printin",
+            "ok": true,
+            "stdout": "10.0.0.1\n192.168.1.1\n10.0.0.1\n",
+            "attempts": 3,
+            "model_used": "phi-sigil-v2:14b",
+            "fallback_used": true,
+            "wall_seconds": 18.1
+          }
+        ],
+        "tokens_in": 6.0,
+        "tokens_out": 153,
+        "cost_usd": 0.002313,
+        "wall_seconds": 24.76,
+        "stages": [
+          {
+            "stage": "decompose",
+            "in": 3,
+            "out": 60
+          },
+          {
+            "stage": "report",
+            "in": 3,
+            "out": 93
+          }
+        ]
+      }
+    },
+    {
+      "id": "url_status_pairs",
+      "shape": "log_parse_format",
+      "A": {
+        "path": "A_cloud_only",
+        "ok": true,
+        "stdout": "/home 200\n/api/login 401\n/docs 200\n/resource/5 404\n",
+        "code": "import sys\nlines = sys.argv[1].strip().split('\\n')\nout = ''\nfor line in lines:\n    parts = line.split()\n    out += parts[1] + ' ' + parts[2] + '\\n'\nsys.stdout.write(out)",
+        "tokens_in": 3,
+        "tokens_out": 285,
+        "cost_usd": 0.004284,
+        "wall_seconds": 7.39
+      },
+      "B": {
+        "path": "B_hybrid",
+        "ok": false,
+        "stdout": "/home\n/api/login\n/docs\n/resource/5\n",
+        "code": "(println (join (map (split $0 \"\\n\") (\\line (join (slice (split line \" \") 1 2) \" \"))) \"\\n\"))",
+        "tokens_in": 6.0,
+        "tokens_out": 129,
+        "cost_usd": 0.001953,
+        "wall_seconds": 25.91,
+        "sigil_attempts": 3,
+        "sigil_model": "phi-sigil-v2:14b",
+        "stages": [
+          {
+            "stage": "decide",
+            "in": 3,
+            "out": 118
+          },
+          {
+            "stage": "report",
+            "in": 3,
+            "out": 11
+          }
+        ]
+      },
+      "C": {
+        "path": "C_chained",
+        "ok": true,
+        "stdout": "/home 200\n/api/login 401\n/docs 200\n/resource/5 404\n",
+        "n_steps": 1,
+        "step_results": [
+          {
+            "idx": 0,
+            "description": "Print the second and third whitespace-separated fields for each line, separated by a space.",
+            "ok": true,
+            "stdout": "/home 200\n/api/login 401\n/docs 200\n/resource/5 404\n",
+            "attempts": 3,
+            "model_used": "phi-sigil-v2:14b",
+            "fallback_used": true,
+            "wall_seconds": 16.82
+          }
+        ],
+        "tokens_in": 6.0,
+        "tokens_out": 64,
+        "cost_usd": 0.000978,
+        "wall_seconds": 23.64,
+        "stages": [
+          {
+            "stage": "decompose",
+            "in": 3,
+            "out": 37
+          },
+          {
+            "stage": "report",
+            "in": 3,
+            "out": 27
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -4601,9 +4601,16 @@ let rec execute_module module_def =
      env_set global_env func.func_name func_val
    ) module_def.module_functions;
 
-   (* Execute tests if present, otherwise execute main *)
-   if List.length module_def.module_tests > 0 then
+   (* Execute tests if present, otherwise execute main.
+      In test mode we mark output_emitted=true unconditionally — the
+      test framework writes its own "Test: ..." headers via Printf.printf
+      which doesn't go through the print/println builtins. Without this,
+      the no-output-produced diagnostic would fire on every clean test
+      run, which is a false positive. *)
+   if List.length module_def.module_tests > 0 then begin
+     output_emitted := true;
      execute_tests global_env module_def.module_tests
+   end
    else
      execute_main global_env module_def.module_functions
 

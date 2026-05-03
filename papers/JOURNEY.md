@@ -2732,6 +2732,197 @@ does it stop" answer to Marc's question. Diagnostics carried us
 from 1/8 to 2/8 by closing the dominant silent-failure mode.
 The remaining 6 are not silent-failure-mode-shaped.
 
+## Phase 23: Tier 2 — chained sub-agent + the TCP test we never actually had a real problem with (2026-05-03)
+
+Phase 22 closed Tier 1 at 2/8 — diagnostics + corpus + system
+prompt + RAG retrieval delivered a real but small lift. The
+remaining 6 failures shared no common silent-failure shape; they
+were composition-bound, not surface-bound. Phase 18.5 had named
+this exact bottleneck and prescribed the architectural fix:
+chained sub-agent.
+
+### 23.1 Path C: the chained-pipeline harness
+
+`tools/agent_harness/agent_ab_harness.py` gains a third path:
+
+```
+Path A: Sonnet writes Python inline → execute → done
+Path B: Sonnet → one delegation prompt → local writes one Sigil program → done
+Path C: Sonnet → DECOMPOSITION into 1-3 single-step Sigil tasks
+        → each step generated and run independently, stdout → next step's stdin
+        → final step validated against task expected
+```
+
+The CHAIN_DELEGATE_SYSTEM prompt explicitly tells Sonnet:
+
+> The local ensemble is excellent at SINGLE-STEP data transforms
+> (parse, filter, count, sort, format) but struggles when one
+> program has to do many steps in sequence. Decompose the task
+> into 1-3 SINGLE-PURPOSE steps. Each step's input is the
+> previous step's stdout (the first step's input is the
+> user-supplied data).
+
+Sonnet returns:
+
+```json
+{"steps": [
+  {"description": "<one-sentence Sigil task>"},
+  {"description": "<one-sentence Sigil task>"},
+  {"description": "<one-sentence Sigil task>"}
+]}
+```
+
+Path C executes each step via `generate_and_run`. Intermediate
+steps are not validated against an explicit expected_shape —
+Sonnet's guess at intermediate shapes might be wrong, and the
+local model only needs to produce *something* the next step can
+consume. Only the final step is validated against the task
+expected output.
+
+### 23.2 Result
+
+| Path | Pass | Cost (USD) | Notes |
+|---|---:|---:|---|
+| A: Sonnet writes Python | 5/8 | 0.0275 | sampling band ~5-6/8 |
+| B: hybrid single-step | 1/8 | 0.0269 | drifted back to baseline |
+| **C: chained sub-agent** | **3/8** | **0.0149** | +2 vs B; **−45% cost vs B** |
+
+`tools/agent_harness/abc_chained_results.json` is the raw data.
+
+Two findings worth pulling out:
+
+**(a) Chained sub-agent works.** Path C is +2 tasks over Path B
+on absolute count, on the same suite, with the same models. The
++2 lift is structural — `extract_dotted_ipv4` newly passed (Sonnet
+also fails this task, so C beat A on this one), and
+`url_status_pairs` returned to passing after the noise-loss it
+took on Tier 1b.
+
+**(b) Path C is cheaper than Path B.** $0.0149 vs $0.0269 —
+roughly half the orchestrator cost. This is the surprising
+finding. The decomposition prompt is shorter than the full
+delegation prompt because Sonnet writes 1-3 short step
+descriptions instead of one long task spec with full input data.
+And many of the per-step calls run to completion in qwen-v6
+without phi-v2 fallback because the steps are simpler. So Path
+C is *both* more accurate AND cheaper than Path B at this
+suite size. The per-stage detail in the result JSON shows the
+cost breakdown.
+
+### 23.3 What Path C still gets wrong
+
+Three of the five remaining failures are intermediate-step shape
+mismatches:
+
+- `log_top_4xx_ip` — 3-step plan, step 1 passes, step 2 fails.
+  Sonnet assumed step 1 produced "IP STATUS" pairs but the local
+  model produced something subtly different.
+- `csv_top3_categories` — same shape: 3-step plan, step 2 fails.
+  The category column was indexed correctly this time (Tier 1's
+  header-aware seeds helped), but Sonnet's intermediate format
+  guess was off.
+- `log_peak_error_hour` — 3-step plan, steps 1 and 2 pass,
+  step 3 fails. Closest to passing of all the failures.
+
+Two failures are 1-step plans where Sonnet didn't decompose:
+- `extract_python_def_lines` — same `(?m)` regex multiline issue
+  from Tier 1b.
+- `tsv_to_markdown` — Sonnet didn't decompose; the local model
+  hit the same one-character format glitch.
+
+The intermediate-step mismatch class is now the *new* highest-
+leverage failure shape. It's addressable by:
+1. Letting Sonnet validate each step's output against its own
+   intermediate-shape expectation and replan if mismatched
+   (would push cost up but accuracy too).
+2. Including a small "schema check" between steps (e.g. is the
+   first line a header? does it have the expected separator?).
+3. Asking Sonnet to plan with explicit example
+   intermediate-output shapes so the local model has more to
+   align against.
+
+These are Phase 24 territory — not closing them this phase.
+
+### 23.4 The TCP test "failure" was a real bug we kept ignoring
+
+While Tier 2 was running, Marc asked the right question: *if
+the TCP loopback test can never succeed, why not remove it?*
+Investigation showed the test wasn't fundamentally broken —
+individual TCP flows worked fine. The aggregate hung in
+`test_tcp_large_message`:
+
+```
+(while (lt total_len expected_len)
+  (set chunk (tcp_receive accepted 4096))
+  (set chunk_len (len chunk))
+  (if (eq chunk_len 0)
+    (set total_len expected_len))      ; break-out path
+  (if (gt chunk_len 0)
+    (set received (add received chunk)) ; THEN: append data
+    (set total_len (len received))))    ; ELSE: update count
+```
+
+The bug: `total_len` update is in the *else* branch of the
+`(gt chunk_len 0)` if. When chunks ARRIVED (chunk_len > 0):
+`received` grew, but `total_len` stayed at 0. The while
+condition `(lt total_len expected_len)` stayed true forever.
+TCP buffer drained, kernel had no more data, `tcp_receive`
+blocked indefinitely waiting for the client to send more.
+
+Fix: collapse the two ifs into one with the explicit
+`(else ...)` Sigil-form so both append and count happen on the
+data branch:
+
+```
+(if (eq chunk_len 0)
+  (set total_len expected_len)
+  (else
+    (set received (add received chunk))
+    (set total_len (len received))))
+```
+
+After the fix: 6/6 tests in test_tcp_loopback.sigil pass.
+
+The "test was always failing" status from Phase 19 onward was
+**a real test bug**, not an environmental issue — and we'd been
+ignoring it as background noise for ~10 days. Lesson: when a
+test is flagged as "persistent failure", investigate the cause
+once before excluding from the count. The fix here was
+six characters (`(else` and a closing paren wrap).
+
+While running the WebSocket test directly I discovered another
+non-bug: `test_websocket_loopback.sigil` shells out to
+`./interpreter/_build/default/vm.exe` — a relative path that
+only resolves when cwd=repo-root. Running tests with absolute
+paths from elsewhere makes it fail. The test was never broken,
+just cwd-sensitive. The full test suite is now **161/161** when
+run via the canonical loop in `tests/README.md` (which runs
+from the repo root).
+
+### 23.5 No-output diagnostic false-positive in test mode
+
+Phase 22's no-output-produced warning (default-on) fired on
+every test-spec run, because the test framework writes its
+"Test: ..." headers via `Printf.printf` directly, not through
+the print/println builtins. This was a false positive — the
+fix is two lines in `execute_module`: when `module_def.module_tests`
+is non-empty, set `output_emitted := true` unconditionally. Tests
+that exercise printing still print; the framework's headers
+suppress the spurious diagnostic. No behavioural change for
+non-test modules.
+
+### 23.6 Files touched in Phase 23
+
+- `tools/agent_harness/agent_ab_harness.py` — `path_c_chained_hybrid`,
+  `CHAIN_DELEGATE_SYSTEM`/`PROMPT`, `--with-chained` flag,
+  aggregate reporting for path C (vs A, vs B accuracy/cost).
+- `tools/agent_harness/abc_chained_results.json` — A/B/C raw data.
+- `tests/test_tcp_loopback.sigil` — fixed `if`-then/else mix-up
+  in `test_tcp_large_message`. 6/6 pass. Test suite now 161/161.
+- `interpreter/interpreter.ml` — `output_emitted := true` set in
+  `execute_module` when tests are present, suppressing
+  Phase 22's false-positive no-output warning during test runs.
+
 ### 22.3a Did the validator hints help when output was empty? (the actual answer)
 
 **Yes, but only by 1 task on this 8-task suite.** The Tier 1
