@@ -1,0 +1,58 @@
+[
+  {
+    "id": "log_top_4xx_ip",
+    "shape": "log_analysis",
+    "goal": "From this nginx access log, find the IP that issued the most 4xx-status requests. Print 'IP\\tCOUNT'.",
+    "input": "192.168.1.10 - - [01/May/2026:10:00:01 +0000] \"GET /a\" 200 100\n192.168.1.42 - - [01/May/2026:10:00:02 +0000] \"GET /missing\" 404 12\n192.168.1.42 - - [01/May/2026:10:00:03 +0000] \"GET /missing\" 404 12\n192.168.1.10 - - [01/May/2026:10:00:04 +0000] \"GET /a\" 200 100\n192.168.1.42 - - [01/May/2026:10:00:05 +0000] \"GET /forbidden\" 403 50\n10.0.0.5 - - [01/May/2026:10:00:06 +0000] \"GET /b\" 200 200\n192.168.1.42 - - [01/May/2026:10:00:07 +0000] \"GET /missing\" 404 12\n10.0.0.5 - - [01/May/2026:10:00:08 +0000] \"GET /missing\" 404 12\n192.168.1.42 - - [01/May/2026:10:00:09 +0000] \"GET /forbidden\" 403 50\n192.168.1.42 - - [01/May/2026:10:00:10 +0000] \"GET /missing\" 404 12",
+    "expected": "192.168.1.42\t6\n"
+  },
+  {
+    "id": "csv_top3_categories",
+    "shape": "csv_aggregation",
+    "goal": "From this CSV (header 'date,category,amount'), output the top 3 categories by total amount, formatted as 'CATEGORY: $TOTAL', one per line, descending.",
+    "input": "date,category,amount\n2026-04-01,food,42.50\n2026-04-02,transit,18.00\n2026-04-03,food,33.20\n2026-04-04,utility,120.00\n2026-04-05,food,18.50\n2026-04-06,transit,7.50\n2026-04-07,utility,80.00\n2026-04-08,food,55.00\n2026-04-09,entertainment,30.00",
+    "expected": "utility: $200.00\nfood: $149.20\ntransit: $25.50\n"
+  },
+  {
+    "id": "extract_python_def_lines",
+    "shape": "code_mining",
+    "goal": "From this Python source (newline-separated), extract just the names of every top-level (no leading whitespace) `def NAME(`. Print the names, one per line, in order of appearance.",
+    "input": "def alpha():\n    pass\n\nclass C:\n    def method_inside(self):\n        pass\n\ndef beta(x, y):\n    return x + y\n\n    def nested(): pass\n\ndef gamma():\n    pass",
+    "expected": "alpha\nbeta\ngamma\n"
+  },
+  {
+    "id": "json_extract_paths",
+    "shape": "json_wrangling",
+    "goal": "Take a JSON object of the form {\"users\":[{\"name\":..., \"role\":...}, ...]}. Print the names of users whose role is 'admin', one per line, in input order.",
+    "input": "{\"users\":[{\"name\":\"alice\",\"role\":\"member\"},{\"name\":\"bob\",\"role\":\"admin\"},{\"name\":\"carol\",\"role\":\"admin\"},{\"name\":\"dave\",\"role\":\"member\"}]}",
+    "expected": "bob\ncarol\n"
+  },
+  {
+    "id": "tsv_to_markdown",
+    "shape": "format_conversion",
+    "goal": "Convert this 3-column TSV (with header) to a Markdown table with a header divider row. Use ' | ' as separator and pipe-padded edges.",
+    "input": "name\tage\tcity\nalice\t30\tparis\nbob\t25\tnyc",
+    "expected": "| name | age | city |\n| --- | --- | --- |\n| alice | 30 | paris |\n| bob | 25 | nyc |\n"
+  },
+  {
+    "id": "log_peak_error_hour",
+    "shape": "multi_step",
+    "goal": "From this log (lines like 'YYYY-MM-DDTHH:MM:SS LEVEL message'), find the HOUR (HH only) with the most ERROR-level entries. Print just that 2-digit hour.",
+    "input": "2026-05-01T08:14:01 INFO startup\n2026-05-01T09:22:05 ERROR connection refused\n2026-05-01T09:25:12 ERROR timeout\n2026-05-01T09:48:33 INFO user login\n2026-05-01T09:51:01 ERROR connection refused\n2026-05-01T10:01:11 WARN slow query\n2026-05-01T11:33:22 ERROR timeout\n2026-05-01T11:34:00 INFO restart",
+    "expected": "09\n"
+  },
+  {
+    "id": "extract_dotted_ipv4",
+    "shape": "regex_extract",
+    "goal": "Extract every dotted-quad IPv4 address from arg0 and print one per line in order of appearance.",
+    "input": "see 10.0.0.1 and 192.168.1.1, but not 999.999.999.999 or 1.2.3 (incomplete) or 10.0.0.1 again",
+    "expected": "10.0.0.1\n192.168.1.1\n10.0.0.1\n"
+  },
+  {
+    "id": "url_status_pairs",
+    "shape": "log_parse_format",
+    "goal": "From access-log lines like 'GET /path 200 142', print 'PATH STATUS' for each line.",
+    "input": "GET /home 200 142\nPOST /api/login 401 56\nGET /docs 200 891\nDELETE /resource/5 404 12",
+    "expected": "/home 200\n/api/login 401\n/docs 200\n/resource/5 404\n"
+  }
+]

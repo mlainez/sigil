@@ -54,5 +54,159 @@
     "goal": "From access-log lines like 'GET /path 200 142', print 'PATH STATUS' for each line.",
     "input": "GET /home 200 142\nPOST /api/login 401 56\nGET /docs 200 891\nDELETE /resource/5 404 12",
     "expected": "/home 200\n/api/login 401\n/docs 200\n/resource/5 404\n"
+  },
+  {
+    "id": "passwd_top_shells",
+    "shape": "shell_pipeline",
+    "goal": "From this /etc/passwd-style input, find the 2 most-used login shells (last colon-separated field). Print 'SHELL: COUNT' descending by count, ties broken by first appearance.",
+    "input": "root:x:0:0:root:/root:/bin/bash\nalice:x:1000:1000::/home/alice:/bin/bash\nbob:x:1001:1001::/home/bob:/bin/zsh\ncarol:x:1002:1002::/home/carol:/bin/bash\ndave:x:1003:1003::/home/dave:/usr/bin/fish\neve:x:1004:1004::/home/eve:/bin/zsh",
+    "expected": "/bin/bash: 3\n/bin/zsh: 2\n"
+  },
+  {
+    "id": "wc_top_words",
+    "shape": "shell_pipeline",
+    "goal": "From this multi-line text, find the 3 most-common words (case-insensitive, ignoring punctuation). Print 'word: count' descending by count.",
+    "input": "The quick brown fox jumps over the lazy dog.\nThe fox was very quick. The dog was lazy.\nA dog and a fox went on an adventure.",
+    "expected": "the: 4\nfox: 3\ndog: 3\n"
+  },
+  {
+    "id": "find_files_by_size",
+    "shape": "shell_pipeline",
+    "goal": "From this 'find -printf' output (each line 'SIZE PATH'), print the 3 largest files as 'PATH SIZE' descending.",
+    "input": "1024 /tmp/a.txt\n8192 /tmp/big.log\n512 /tmp/small.cfg\n4096 /tmp/medium.dat\n16384 /tmp/huge.bin\n2048 /tmp/notes.md",
+    "expected": "/tmp/huge.bin 16384\n/tmp/big.log 8192\n/tmp/medium.dat 4096\n"
+  },
+  {
+    "id": "env_filter_prefix",
+    "shape": "config_parsing",
+    "goal": "From this KEY=VALUE input (one per line), print only entries whose KEY starts with 'APP_'. Output 'KEY=VALUE' alphabetically sorted by KEY.",
+    "input": "PATH=/usr/bin\nAPP_PORT=8080\nHOME=/root\nAPP_DEBUG=1\nLANG=en_US\nAPP_HOST=localhost",
+    "expected": "APP_DEBUG=1\nAPP_HOST=localhost\nAPP_PORT=8080\n"
+  },
+  {
+    "id": "ini_section_keys",
+    "shape": "config_parsing",
+    "goal": "From this INI-style config, print all keys that appear under the [database] section. One key per line, in input order.",
+    "input": "[server]\nport=8080\nhost=localhost\n[database]\nuser=admin\npassword=secret\nhost=db.local\n[logging]\nlevel=INFO",
+    "expected": "user\npassword\nhost\n"
+  },
+  {
+    "id": "log_count_by_hour",
+    "shape": "timestamp_arithmetic",
+    "goal": "From timestamped log lines 'YYYY-MM-DDTHH:MM:SS message', count entries per hour (HH only). Print 'HH: COUNT' sorted by hour ascending.",
+    "input": "2026-05-01T08:14:01 startup\n2026-05-01T08:30:22 ready\n2026-05-01T09:01:11 request\n2026-05-01T09:45:55 request\n2026-05-01T09:50:12 request\n2026-05-01T10:01:33 request\n2026-05-01T10:15:00 shutdown",
+    "expected": "08: 2\n09: 3\n10: 2\n"
+  },
+  {
+    "id": "duration_total_minutes",
+    "shape": "timestamp_arithmetic",
+    "goal": "Each line is 'HH:MM-HH:MM' representing a time range. Print the total minutes across all ranges as a single integer.",
+    "input": "09:00-10:30\n14:15-15:45\n11:00-11:50",
+    "expected": "230\n"
+  },
+  {
+    "id": "syslog_grep_unique_processes",
+    "shape": "process_log_filter",
+    "goal": "From syslog-style lines 'TIMESTAMP HOST PROCESS[PID]: MESSAGE', print the distinct PROCESS names (no [PID]) alphabetically sorted, one per line.",
+    "input": "May 01 10:00:01 host kernel[0]: boot\nMay 01 10:00:02 host systemd[1]: ready\nMay 01 10:00:03 host sshd[123]: connection\nMay 01 10:00:04 host kernel[0]: tick\nMay 01 10:00:05 host cron[456]: job",
+    "expected": "cron\nkernel\nsshd\nsystemd\n"
+  },
+  {
+    "id": "errors_by_category",
+    "shape": "process_log_filter",
+    "goal": "Each line is 'LEVEL: MESSAGE'. Count ERROR-level lines by the first word of MESSAGE. Print 'WORD COUNT' descending by count.",
+    "input": "INFO: starting up\nERROR: timeout connecting\nERROR: timeout waiting\nWARN: slow query\nERROR: connection refused\nINFO: shutdown\nERROR: timeout reading",
+    "expected": "timeout 3\nconnection 1\n"
+  },
+  {
+    "id": "csv_filter_then_top",
+    "shape": "compose_sort",
+    "goal": "CSV with header 'name,score'. Filter rows where score > 70 (numeric), then print the names of the top 3 (highest score first).",
+    "input": "name,score\nalice,82\nbob,65\ncarol,91\ndave,77\neve,55\nfrank,88",
+    "expected": "carol\nfrank\nalice\n"
+  },
+  {
+    "id": "running_sum",
+    "shape": "cumulative_calc",
+    "goal": "Each line is one integer. Print the running sum (cumulative total) after each line, one per line.",
+    "input": "5\n3\n8\n2\n4",
+    "expected": "5\n8\n16\n18\n22\n"
+  },
+  {
+    "id": "csv_to_json_array",
+    "shape": "format_conversion",
+    "goal": "Convert CSV with header 'id,name,active' to a single-line compact JSON array of objects. id and active should be integers. Output exactly the JSON, no trailing newline.",
+    "input": "id,name,active\n1,alice,1\n2,bob,0\n3,carol,1",
+    "expected": "[{\"id\":1,\"name\":\"alice\",\"active\":1},{\"id\":2,\"name\":\"bob\",\"active\":0},{\"id\":3,\"name\":\"carol\",\"active\":1}]"
+  },
+  {
+    "id": "json_users_with_admin_role",
+    "shape": "nested_json_extract",
+    "goal": "From this JSON array of objects with 'name' and 'roles' (a list of strings), print names of users that include 'admin' in their roles. One per line in input order.",
+    "input": "[{\"name\":\"alice\",\"roles\":[\"user\",\"editor\"]},{\"name\":\"bob\",\"roles\":[\"admin\",\"user\"]},{\"name\":\"carol\",\"roles\":[\"user\"]},{\"name\":\"dave\",\"roles\":[\"admin\"]}]",
+    "expected": "bob\ndave\n"
+  },
+  {
+    "id": "json_path_max_value",
+    "shape": "nested_json_extract",
+    "goal": "From this JSON object {\"items\":[{\"name\":..., \"price\":...}, ...]}, print the name of the item with the highest price.",
+    "input": "{\"items\":[{\"name\":\"apple\",\"price\":1.50},{\"name\":\"banana\",\"price\":0.75},{\"name\":\"cherry\",\"price\":3.00},{\"name\":\"date\",\"price\":2.25}]}",
+    "expected": "cherry\n"
+  },
+  {
+    "id": "extract_versions_sorted",
+    "shape": "multi_regex_extract",
+    "goal": "Extract all semantic versions (vMAJOR.MINOR.PATCH) from arg0, deduplicate, and print them sorted ascending by version (semantic, not lexical). One per line.",
+    "input": "release v2.0.0 and v1.10.5 and v2.0.0 again, but also v1.2.3 and v10.0.0",
+    "expected": "v1.2.3\nv1.10.5\nv2.0.0\nv10.0.0\n"
+  },
+  {
+    "id": "extract_phone_then_format",
+    "shape": "multi_regex_extract",
+    "goal": "Extract all 10-digit phone numbers from arg0 (with or without dashes/spaces), then print each as '(XXX) XXX-XXXX' format, one per line in input order.",
+    "input": "Call 555-123-4567 or 555.987.6543 or 5551234567 anytime",
+    "expected": "(555) 123-4567\n(555) 987-6543\n(555) 123-4567\n"
+  },
+  {
+    "id": "histogram_buckets",
+    "shape": "range_filter",
+    "goal": "Each line is a single integer score 0-100. Bucket into 'A: 90-100', 'B: 80-89', 'C: 70-79', 'D: 60-69', 'F: 0-59'. Print 'BUCKET: COUNT' for each bucket that has at least one entry, in A\u2192F order.",
+    "input": "85\n92\n67\n78\n95\n55\n88\n72\n91\n45",
+    "expected": "A: 3\nB: 2\nC: 2\nD: 1\nF: 2\n"
+  },
+  {
+    "id": "filter_lines_in_range",
+    "shape": "range_filter",
+    "goal": "Each line has 'NAME VALUE' (space-separated; VALUE is a float). Print names of entries where VALUE is between 10.0 and 50.0 inclusive, alphabetically sorted.",
+    "input": "alpha 5.0\nbeta 25.5\ngamma 100.0\ndelta 12.3\nepsilon 50.0\nzeta 7.7\neta 35.1",
+    "expected": "beta\ndelta\nepsilon\neta\n"
+  },
+  {
+    "id": "uniq_c_with_threshold",
+    "shape": "dedupe_with_count",
+    "goal": "Each line is one word. Print 'WORD COUNT' for words that appear at least 2 times, sorted descending by count, ties broken alphabetically. No output if no word qualifies.",
+    "input": "apple\nbanana\napple\ncherry\nbanana\napple\ndate\nelderberry",
+    "expected": "apple 3\nbanana 2\n"
+  },
+  {
+    "id": "extract_python_imports",
+    "shape": "code_mining",
+    "goal": "From this Python source, extract all top-level module names imported (handle 'import X', 'import X as Y', 'from X import Y'). Print the module names alphabetically sorted, deduplicated, one per line.",
+    "input": "import os\nimport sys\nfrom typing import List, Dict\nfrom collections import defaultdict\nimport re\nfrom os import path\nimport json as js",
+    "expected": "collections\njson\nos\nre\nsys\ntyping\n"
+  },
+  {
+    "id": "csv_lookup_join",
+    "shape": "csv_join",
+    "goal": "arg0 contains two CSV blocks separated by a blank line. First block has 'id,name'; second has 'id,score'. Print 'NAME SCORE' for each id present in BOTH blocks, sorted alphabetically by name.",
+    "input": "id,name\n1,alice\n2,bob\n3,carol\n4,dave\n\nid,score\n2,90\n3,85\n5,70\n2,75",
+    "expected": "bob 75\nbob 90\ncarol 85\n"
+  },
+  {
+    "id": "lines_only_in_a",
+    "shape": "text_diff",
+    "goal": "arg0 contains two newline-separated blocks separated by '---' on its own line. Print lines that appear in the first block but NOT in the second block, in input order, deduplicated.",
+    "input": "alpha\nbeta\ngamma\ndelta\n---\nbeta\ngamma\nepsilon",
+    "expected": "alpha\ndelta\n"
   }
 ]
