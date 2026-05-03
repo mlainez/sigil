@@ -360,7 +360,7 @@ def path_c_chained_hybrid(task: dict) -> dict:
 
         step_results.append({
             "idx": idx,
-            "description": base_desc[:120],
+            "description": desc[:120],
             "ok": result["ok"] and (is_final or bool(result["stdout"].strip())),
             "stdout": result["stdout"][:400],
             "attempts": result["attempts"],
