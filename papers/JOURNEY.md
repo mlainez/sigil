@@ -1973,7 +1973,75 @@ Three outcome bands defined for the post-train retest:
 - **1-2/8**: deployment chain regression — diagnose Q4_K_M
   behavior on Qwen split-projection (unlikely but possible).
 
-[Result section to be filled in after training + deploy + retest.]
+### Result
+
+Training: 9884s wall (~2h 45m), final per-step loss ~0.21, no NaN.
+Adapter saved to `benchmark/lora_out_qwen_v7/`.
+
+**Stream C single-step**: v7 + phi-v2 = **28/30** (Sonnet 30/30). Down
+1 from v6+phi-v2's 29/30 — `awk_filter_field_gt` regressed (v7 fails
+2 attempts, phi-v2 also fails). v7 won `split_at_blank_lines` natively
+(was Sonnet's residual on v6 era; v6 needed phi rescue).
+
+**Agent A/B/C**: v7 + phi-v2 = **B 2/8, C 2/8** (Sonnet 6/8). The
+retrain did not lift the agent harness floor.
+
+| Run | A | B | C | C cost |
+|---|---:|---:|---:|---:|
+| Tier 2 (v6+phi-v1, Phase 23) | 5/8 | 1/8 | **3/8** | $0.0149 |
+| Tier 2.5 (v6, more RAG, Phase 24) | 6/8 | 1/8 | 1/8 | $0.0171 |
+| v6 + smart-argv (Phase 25) | 5/8 | 2/8 | 2/8 | $0.0252 |
+| **v7 + phi-v2 (this)** | **6/8** | **2/8** | **2/8** | **$0.0201** |
+
+**Three pure-training/RAG iterations all sit in the 1-3/8 band.** The
++2 lift from Phase 23's chained architecture remains the only
+systematic gain across all the model and corpus work since.
+
+The diagnostic value of the v7 retest: it answers the open question
+from Phase 24. Pure-RAG hit a plateau; pure-retraining hits the same
+plateau. The remaining failures are intermediate-step shape
+mismatches in Sonnet's decomposition plans, which neither RAG nor
+weights can address — they need the orchestrator to validate or
+adapt mid-pipeline.
+
+Per-task notable: v7 won `extract_dotted_ipv4` on both Path B and C
+— a task **Sonnet also fails**. This is the local stack producing
+a complementary failure, the same pattern Stream C established at
+the single-step level (Phase 20).
+
+### What this tells us about next moves
+
+The chained architecture (Phase 23) is the real ceiling on this
+8-task synthetic suite for the model + RAG + harness lever. To move
+past it requires one of:
+
+1. **Different benchmark** — bash-history task suite refresh (Stream
+   C #116 in `benchmark/RESEARCH_PLAN.md`). Real-workflow shapes
+   may be more local-tractable than the synthetic harness, or
+   harder; either answer is informative.
+2. **Different orchestration** — Sonnet validates each intermediate
+   step's output against an expected shape sketch, replans if
+   mismatched. Higher cost, plausibly higher accuracy. Phase 23's
+   "intermediate-step shape mismatch" failure mode is exactly what
+   this would address.
+3. **Accept the ceiling** — 3/8 chained at $0.0149 vs Sonnet 5-6/8
+   single-pass at $0.0245 is a real cost-confidentiality tradeoff
+   for tooling-shape work, even if it's not a Sonnet replacement.
+   The deployment-ready story is "delegate the tooling step; keep
+   orchestration on the cloud frontier model" (Phase 21's framing
+   carried through).
+
+The retrain spend was worth it: it confirmed the plateau is
+weights-deep, not just RAG-deep. Without v7 we'd have plausible
+deniability that "another retrain on the augmented corpus might
+help"; we now know it doesn't. That's the honest data point.
+
+Result files: `benchmark/stream_c_v7_phi_v2.json`,
+`tools/agent_harness/abc_v7_results.json`.
+
+Commits:
+[802bed2](https://github.com/mlainez/sigil/commit/802bed2) (Stream C v7),
+[11fbddd](https://github.com/mlainez/sigil/commit/11fbddd) (A/B/C v7).
 ## Reproducibility
 
 Every claim in this narrative cites either a JSON results file in
