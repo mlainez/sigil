@@ -91,6 +91,11 @@ def main():
                     help="Default raised from 0.1 to 0.2. Longer warmup keeps "
                          "early-step LR low enough that the first hard batch "
                          "lands while the model is still in a stable region.")
+    ap.add_argument("--resume", action="store_true",
+                    help="Resume from the latest checkpoint-* under --out. "
+                         "Restores weights, optimizer, LR schedule, and RNG. "
+                         "Used when training was interrupted (GPU thermal, "
+                         "system shutdown, etc.) — avoids redoing completed epochs.")
     args = ap.parse_args()
 
     print(f"Loading tokenizer/model: {args.model}")
@@ -213,7 +218,21 @@ def main():
     )
 
     print(f"Training: {args.epochs} epochs, batch {args.micro_batch}*{args.grad_accum}")
-    trainer.train()
+    # If --resume is passed, point Trainer at the latest checkpoint under
+    # args.out so we can pick up after a crash without re-doing completed
+    # epochs. The Trainer restores model weights, optimizer state, LR
+    # scheduler, and RNG state from the checkpoint dir.
+    resume_arg = None
+    if args.resume:
+        from pathlib import Path as _P
+        ckpts = sorted((_P(args.out)).glob("checkpoint-*"),
+                       key=lambda p: int(p.name.split("-")[1]))
+        if ckpts:
+            resume_arg = str(ckpts[-1])
+            print(f"Resuming from {resume_arg}")
+        else:
+            print(f"--resume given but no checkpoints in {args.out}; starting fresh")
+    trainer.train(resume_from_checkpoint=resume_arg)
     print(f"Saving adapter to {args.out}")
     model.save_pretrained(args.out)
     tok.save_pretrained(args.out)
