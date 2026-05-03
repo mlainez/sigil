@@ -3115,6 +3115,268 @@ Path C as a clean baseline before the v7 retrain so we know the
 - `tools/agent_harness/abc_tier25_results.json` — Tier 2.5
   result (1/8 regression).
 
+## Phase 25: Smart-argv — meeting the model halfway on its strongest pre-training instinct (2026-05-03)
+
+Phase 24 closed with the assessment that retraining was the next
+move. Marc asked the question that framed Phase 25:
+
+> *"If argv is pretraining data, why don't we meet the model
+> halfway with it, would that hurt us?"*
+
+The answer is no, and it shouldn't have taken 7 phases to land.
+
+### 25.1 The instinct vs the implementation
+
+Across Phases 18-24, the dominant agent-harness failure shape was
+**the model writes `(argv)` when input is multi-line in `$0`**.
+The model's pre-training is saturated with patterns like:
+
+```python
+for arg in sys.argv[1:]: process(arg)
+```
+
+```bash
+for line in "$@"; do process "$line"; done
+```
+
+When the harness passes a single multi-line argument (the entire
+log, the entire CSV), the model writes:
+
+```
+(for-each line (argv) (println (process line)))
+```
+
+— expecting `(argv)` to give it the *content* of the input. Our
+literal `(argv)` returns a 1-element list, the for-each loop
+runs once over the whole blob, and stdout comes out empty or
+wrong.
+
+Phase 22 added a runtime warning when this happened. Phase 22
+also added 12 corpus seeds explicitly using `(split $0 "\n")`.
+Phase 24 added more aggregation seeds. The model still kept
+reaching for `(argv)`. Why? Because **pre-training bias is
+stronger than 7.6% corpus weighting on a fine-tune** — the
+model has seen millions of `for arg in sys.argv` examples and a
+few hundred `(split $0 "\n")` examples won't overwrite that
+distribution.
+
+### 25.2 The structural meet-halfway
+
+The fix that should have come at Phase 18 instead of Phase 25:
+**make `(argv)` smart**. When called with exactly 1 CLI arg AND
+that arg contains newlines, return the lines split. Otherwise
+return the literal CLI argv vector.
+
+Implementation in `interpreter/interpreter.ml`: ~10 lines.
+
+```ocaml
+| "argv" ->
+    let args = Array.to_list Sys.argv in
+    let script_args = match args with
+      | _ :: _ :: rest -> rest
+      | _ -> [] in
+    let result_strs = match script_args with
+      | [single] when String.contains single '\n' ->
+          let parts = String.split_on_char '\n' single in
+          (match List.rev parts with
+           | "" :: rest -> List.rev rest
+           | _ -> parts)
+      | _ -> script_args
+    in
+    VArray (ref (Array.of_list (List.map (fun s -> VString s) result_strs)))
+
+| "argv_raw" ->
+    (* Literal CLI argv vector, no auto-splitting. *)
+    let args = Array.to_list Sys.argv in
+    let script_args = match args with
+      | _ :: _ :: rest -> rest
+      | _ -> [] in
+    VArray (ref (Array.of_list (List.map (fun s -> VString s) script_args)))
+```
+
+The `(argv_raw)` builtin is the escape hatch for the rare case
+where someone genuinely needs the literal argv vector
+(e.g., "did the user pass exactly N args?"). The corpus has
+zero `(argv)` entries; the test suite uses `(argv)` only with no
+args (length=0 case, unaffected); Stream C uses `$0` directly.
+**Blast radius is essentially zero in our codebase.**
+
+### 25.3 The reality test: smart-argv alone moves +1 task
+
+Re-ran the agent harness with only Phase 25 changes on top of
+Tier 2.5 (no other reverts). Path B and Path C both lifted +1
+task:
+
+| Run | B | C |
+|---|---:|---:|
+| Tier 2.5 (Phase 24) | 1/8 | 1/8 |
+| Tier 2.5 + smart-argv (this phase) | **2/8** | **2/8** |
+
+**`url_status_pairs` Path B win** is the canonical
+demonstration. The model wrote:
+
+```
+(println (join (map (argv) (\line (join (slice (split line " ") 1 3) " ")))) "\n"))
+```
+
+— exactly the Python `for line in argv` instinct, expressed in
+Sigil. Pre-Phase-25, this produced empty output (1-element list
+with embedded `\n`s; the for-each ran once over the whole blob).
+Post-Phase-25, `(argv)` auto-splits and the model's instinct
+produces correct output silently. **No retraining, no prompt
+engineering, no validator hint.** The engine just worked.
+
+`extract_python_def_lines` Path C win came from Move D (multiline
+regex default), separate contribution. Both Phase 25 mechanisms
+are landing.
+
+### 25.4 The other meet-halfway changes in this phase
+
+Three additional aliases added to the `eval_call` symbol-rewrite
+table at line ~1432 — covering the "real-looking name that
+doesn't exist" reaches that came up in past failures:
+
+- `parse_float` → `float` (parallels `parse_int`)
+- `to_int` → `parse_int` (Python `int()` reach for string→int)
+- `first_index_of` → `index_of`
+- `regex_replace_all` → `regex_replace` (already replaces all)
+
+Plus the corpus pristineness auditor in
+`benchmark/audit_corpus.py`. Initial run flagged 35 entries on
+the deprecated-names check, but the names list was over-eager —
+`cast_int_float`, `cast_float_int`, `string_length` all DO
+exist as builtins (verified against `interpreter.ml`). After
+correcting the bad-names list, the full corpus is **pristine**:
+
+- 0 parse failures (all 2323 entries parse cleanly via vm.exe --lint)
+- 0 argv-misuse heuristic flags
+- 0 deprecated-name reaches
+
+This was a useful diagnostic by itself: the "the corpus might
+have garbage" worry that motivates manual review every couple
+of phases turned out to be unfounded. The corpus is in good
+shape; the failures are upstream of the corpus.
+
+### 25.5 What this phase tells us about the project's methodology
+
+The fix that should have come at Phase 18 instead of Phase 25
+is the **canonical structural meet-halfway** — same pattern as
+Phase 18.6's PCRE swap (~60 lines absorbing an entire flavor of
+regex syntax). The lesson is the same as Phase 18.6's: when a
+failure mode is dominant AND tied to model pre-training, fix it
+at the language layer, not via prompts or corpus or training.
+Each of those costs ongoing engineering; the language change
+costs once.
+
+**The general principle**: when you find yourself fighting the
+model's instinct across multiple phases (validator hints, more
+seeds, system-prompt reminders), STOP. The model's instinct is
+informationally a strong signal: "this is what programs in my
+training distribution look like". Either the language design
+should align with that distribution, or you're paying ongoing
+cost to maintain a divergence.
+
+We paid that ongoing cost across Phases 18, 19, 22, 24. Phase
+25 closes the loop. v7 (in flight at the time of this writeup)
+will inherit smart-argv at the engine level. v7 trained on a
+corpus that uses split-$0 + smart-argv runtime will mean: model
+weights bias toward split-$0; engine handles `(argv)` reach
+correctly when it slips through.
+
+### 25.6 Files touched in Phase 25
+
+- `interpreter/interpreter.ml` — smart-argv (~10 lines);
+  `argv_raw` escape hatch; 4 alias entries (`parse_float`,
+  `to_int`, `first_index_of`, `regex_replace_all`); argv-misuse
+  warning removed (no longer applicable).
+- `benchmark/corpus_extender.py:SLIM_HEADER` — updated to
+  reflect that `(argv)` and `(split $0 "\n")` are both correct
+  for line iteration on this harness.
+- `benchmark/eval_real_tooling.py:validator_hint()` — dead
+  argv-misuse pattern removed (no warning to match).
+- `benchmark/audit_corpus.py` — corpus pristineness auditor.
+  Initial false-positives on `cast_*` / `string_length`
+  (those exist) fixed; final report is clean.
+- `tools/agent_harness/abc_smart_argv_results.json` — A/B/C
+  result with Phase 25 on Tier 2.5 base (B 2/8, C 2/8).
+
+## Phase 26: qwen-sigil-v7 retrain on hardened corpus + smart-argv runtime (in flight)
+
+Phase 25 closed Tier 2.5 + smart-argv at B 2/8, C 2/8. The
+remaining residual is "model writes wrong shape for harder
+single-step problems" — column-swap on csv aggregation, format
+glitches on tsv-to-markdown, off-by-one indexing on log-status
+extraction. These aren't reachable by RAG/prompts (Phase 24
+plateau) and aren't reachable by language layer fixes (the
+shapes are task-specific). They need to be in weights.
+
+### 26.1 v7 training plan
+
+Same QLoRA recipe as v6 (verified by reading
+`benchmark/lora_out_qwen_v6/adapter_config.json`):
+
+- Base: `Qwen/Qwen2.5-Coder-7B-Instruct`
+- LoRA r=16, alpha=32, all 7 attention/MLP modules
+- 3 epochs, lr=2e-5, max_seq=1024, warmup_ratio=0.2
+- 4-bit NF4 with bf16 compute (QLoRA on RX 7800 XT)
+- micro_batch=1, grad_accum=8, effective batch=8
+
+Corpus: 2323 entries, full Tier 1 + Tier 2.5 seed coverage.
+Output: `benchmark/lora_out_qwen_v7/`.
+
+ETA: ~2h 42m wall (873 steps × ~11s/step), ~half my original
+5h estimate. The smaller estimate matches the `attn_implementation
+sdpa` change from commit `0f1a75e` that improved Phi-4 step time
+~2.5×; same speedup applies to Qwen.
+
+### 26.2 Deployment plan
+
+- Convert v7 LoRA → GGUF via llama.cpp's
+  `convert_lora_to_gguf.py` (same chain that worked for v6).
+- Register with ollama: `ollama create qwen-sigil-v7:7b`.
+  Qwen is split-projection so Q4_K_M doesn't have the Phi-4
+  quantization-drift risk Phase 20 hit.
+- **Sanity-check Stream C single-step BEFORE the agent harness.**
+  If solo regresses below 27/30, halt and diagnose deployment
+  chain. Phase 20 lesson: deployed-model verification is
+  mandatory.
+
+### 26.3 What the retest will tell us
+
+After v7 lands, re-run A/B/C with v7 primary + phi-v2 fallback
+(reverted Tier 2.5 prompts). Three outcome bands:
+
+- **5+/8** on Path C: retraining moved the floor; the chained
+  architecture + weights-baked corpus is the deployment-ready
+  story. Match or beat Sonnet noise band.
+- **3-4/8** on Path C: matches Tier 2 best (3/8) plus marginal
+  weights gain. Tells us the chained architecture is the real
+  ceiling and the next move is bash-history task suite refresh,
+  not more model work.
+- **1-2/8** on Path C: regression. Diagnose deployment chain
+  and Q4_K_M behaviour on Qwen split-projection (unlikely but
+  possible).
+
+### 26.4 What's deferred
+
+- Bash-history task suite refresh (Stream C #116) — independent
+  of v7; will inform whether real-workflow shapes are easier or
+  harder than synthetic harness shapes.
+- STREAM_A_RESULT.md / STREAM_B_RESULT.md — corpus +
+  diagnostics writeups; can pull from JOURNEY phases 8/11/16/18/19/20/22/25.
+- agent_workflow Stream D deliverables landed in Phase 22;
+  Stream D is now ✅ done.
+
+### 26.5 Files touched in Phase 26 (in flight)
+
+- `benchmark/lora_out_qwen_v7/` — adapter weights + tokenizer.
+- `tools/agent_harness/agent_ab_harness.py` — reverted Tier 2.5
+  Move B prior-step augmentation (kept retry-on-empty); reverted
+  Move C forced 2-3 step decomposition (back to "1-3 as needed").
+- Eventually: `benchmark/Modelfile.sigil_v7`,
+  `tools/agent_harness/abc_v7_results.json`,
+  `benchmark/stream_c_v7_*.json`.
+
 ### 22.3a Did the validator hints help when output was empty? (the actual answer)
 
 **Yes, but only by 1 task on this 8-task suite.** The Tier 1
