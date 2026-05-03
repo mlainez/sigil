@@ -787,8 +787,8 @@ made the Phase 3 cloud fine-tunes possible at all:
    The pattern set in this phase — "let the model fail, observe the
    shape of the failure, change the language to remove the failure
    class" — is the same loop applied later to RAG seeding (Phase 7),
-   to corpus refresh (Phase 15), to the paren-balancer (Phase 18.4),
-   and to the PCRE swap (Phase 18.6). The methodology was forged
+   to corpus refresh (Phase 15), and to the paren-balancer + PCRE
+   swap (Phase 18). The methodology was forged
    here.
 
 What this phase is **not**: it is not yet a fine-tune. Sonnet is
@@ -1837,7 +1837,7 @@ Failure-mode dive shows three patterns: (a) `(argv)` reach on
 multi-line input (3 of 7 failures); (b) wrong column index in
 tabular data; (c) made-up syntax / undefined names. None addressable
 by "more corpus" or "stronger model" — the bottleneck is composition
-complexity, not Sigil grammar fluency. Phase 18.5 had predicted this
+complexity, not Sigil grammar fluency. Phase 18 had predicted this
 exact finding.
 
 ## Phase 22: Tier 1 — interpreter loudness, validator hints (2026-05-03)
@@ -1866,7 +1866,7 @@ Commit: [dafdec9](https://github.com/mlainez/sigil/commit/dafdec9).
 
 ## Phase 23: Tier 2 — chained sub-agent (2026-05-03)
 
-The architectural fix Phase 18.5 named: replace single-program
+The architectural fix Phase 18 named: replace single-program
 delegation with a pipeline of single-step calls. Each step is
 Stream-C-shaped (the regime where the local ensemble lives at
 29/30); the orchestrator owns the cross-step plumbing.
