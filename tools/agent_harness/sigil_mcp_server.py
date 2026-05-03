@@ -66,6 +66,7 @@ MAX_ATTEMPTS = int(os.environ.get("SIGIL_MAX_ATTEMPTS", "3"))
 sys.path.insert(0, str(REPO / "benchmark"))
 from corpus_extender import SLIM_HEADER, gen_sigil_ollama, gen_sigil_ollama_with_hint, strip_fences
 from eval_real_tooling import validator_hint  # surgical retry-hint rewriter
+from sigil_name_validator import validate as name_validate, format_validation_hint
 
 
 # ============================================================================
@@ -190,6 +191,17 @@ def generate_and_run(description: str, input_arg: str, expected_shape: str = "")
             if note:
                 code = fixed
                 balancer_applied = True
+
+        # NH2 Tier A pre-validator: catch wrong-language drift (Python emission
+        # under multi-step pressure — accounts for ~75% of NH5 30-task A/B/C
+        # failures) and hallucinated builtins. Skip the doomed run; let the
+        # retry loop hand back the targeted hint.
+        nv_result = name_validate(code)
+        if nv_result.wrong_language or nv_result.unknown_names:
+            last_code = code
+            last_stdout = ""
+            last_err = format_validation_hint(nv_result)
+            continue
 
         ok, out, err = run_sigil(code, input_arg)
         if ok:

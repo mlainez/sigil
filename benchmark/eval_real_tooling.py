@@ -506,6 +506,21 @@ def eval_task_local_sigil(task: dict, model: str, index: dict, max_attempts: int
                 if balance_note:
                     code = fixed
 
+        # NH2 Tier A: static name+language pre-validator. Catches Python-
+        # generation drift (model collapses to pre-training distribution
+        # under multi-step pressure — 19/25 of NH5 30-task failures were
+        # the model emitting Python instead of Sigil) and hallucinated
+        # builtins (json_incr, json_encode, etc.). On detection, skip the
+        # doomed run, set last_err to the targeted hint, and let the retry
+        # loop hand the model a clearer message than "Undefined variable".
+        from sigil_name_validator import validate as _v_validate, format_validation_hint as _v_hint
+        _vresult = _v_validate(code)
+        if _vresult.wrong_language or _vresult.unknown_names:
+            last_code = code
+            last_stdout = ""
+            last_err = _v_hint(_vresult)
+            continue
+
         # Diagnostics are on by default; argv-misuse and no-output-produced
         # surface to stderr so validator_hint can rewrite the retry prompt
         # with a worked fix.

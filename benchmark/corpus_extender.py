@@ -240,6 +240,15 @@ def strip_fences(code: str) -> str:
             break
     if s.endswith("```"):
         s = s[:-3].rstrip()
+    # Strip BARE language-name first lines. Models sometimes emit a chat-style
+    # "python\n<actual code>" preamble even without the markdown fences,
+    # especially under multi-step composition pressure (NH2 / Phase 27 finding:
+    # 19/25 NH5 30-task failures had a stray 'python' header at the top of
+    # otherwise-Sigil code that strip_fences was leaving in place).
+    first_line, _, rest = s.partition("\n")
+    if first_line.strip() in {"python", "lisp", "scheme", "clojure", "sigil",
+                              "javascript", "typescript", "rust", "go", "ruby"}:
+        s = rest.lstrip()
     # Some local LLMs double-escape backslashes (\\x → \\\\x). Halve runs of
     # 2+ backslashes back to one (Sigil never uses literal \\ in source).
     if "\\\\" in s:
