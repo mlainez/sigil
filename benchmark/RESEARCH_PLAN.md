@@ -1,7 +1,7 @@
 # Research Plan: Sigil as a Local LLM-Native DSL for Confidential Tooling
 
-**Status:** v2, 2026-05-02 (~3 weeks in; A/B/F substantially done, C/D
-partial, E delivered as a standalone doc). See §2.5 for per-stream status.
+**Status:** v2.1, 2026-05-03 (~3 weeks in; A/B/C/E/F substantially
+done, D partial). See §2.5 for per-stream status.
 **Scope:** ~3 weeks of focused work, six interconnected work streams.
 **Output:** a single coherent paper-style report plus replicable
 artifacts (corpus, model adapters, benchmarks, deployment guides).
@@ -121,7 +121,7 @@ genuinely shifted the model's "default language." It also opens the
 deployment question: a Sigil-specialised local 7B is more accurate
 than an off-the-shelf 7B writing Python, on tasks both can express.
 
-## 2.5 Status as of 2026-05-02
+## 2.5 Status as of 2026-05-03
 
 This section is the honest status snapshot ~3 weeks after the v1 plan
 was written. The original stream definitions in §3 are kept intact as
@@ -134,10 +134,10 @@ diverged, and what's still missing.
 |---|---|---|
 | **A** Corpus expansion + retrain | ✅ **Substantially exceeded.** v6 (PCRE-aligned corpus) trained; corpus 1884 → 2283 entries (+21%); 7B benchmark hit 27/30 (90%) with RAG, 28/30 with phi-fallback ensemble, 29/30 with for-iterator guard + while-loop seeds | Did 4 retrains (v3→v4→v5→v6) instead of 1; landed v6 not v2 |
 | **B** Lint + diagnostics | ⚠️ **Done differently.** No `--lint` mode; instead built (a) a paren-balancer in the Sigil prelude (`balance_parens` callable from any Sigil program, plus a Python preprocessor that subprocess-calls it), and (b) a surgical `validator_hint()` in the eval harness with did-you-mean for common reach-for-wrong-name slips, off-by-one detection, trailing-newline diff, and now (Phase 19) a worked while-loop pattern when the for-iterator-mutation guard fires | The intent (better diagnostics that the retry loop can act on) is met; the means (validator hint vs `--lint` flag) is different |
-| **C** Deployment proof | ⚠️ **Partial.** `eval_real_tooling.py` (659 lines) and 30 tasks are done; 5 result JSONs span the v6-progression; but the consolidated `STREAM_C_RESULT.md` short report is not written, and the 30 tasks are *common shell patterns*, not extracted from `~/.bash_history` as the plan called for | Synthetic-but-realistic shapes used instead of bash-history-sourced; the consolidating writeup is the missing piece |
+| **C** Deployment proof | ✅ **Substantially done.** `eval_real_tooling.py` (659 lines) and 30 tasks done; consolidated `benchmark/STREAM_C_RESULT.md` written; **local 29/30 = cloud Sonnet 29/30 with complementary failures** (combined cascade 30/30); phi-sigil-v2 deployed via offline merge + Q4_K_M and producing the 29/30 ensemble result. Remaining gap: bash-history-sourced task refresh | Synthetic-but-realistic shapes used instead of bash-history-sourced; STREAM_C_RESULT.md now covers methodology, complementarity, and energy/cost |
 | **D** Agent workflow integration | ⚠️ **Partial.** MCP server (`tools/agent_harness/sigil_mcp_server.py`) shipped with Claude Code + opencode setup docs; A/B harness (`agent_ab_harness.py`) ran 8 multi-step tasks honestly (Path A 6/8, Path B 1/8). `agent_workflow/README.md` covers the concept. | The three specific deliverables in the plan (`sigil_subagent.md`, `router.py`, `example_walkthrough.md`) are not written; an end-to-end "<30 s install" demo is not recorded |
 | **E** Confidentiality analysis | ✅ **Done.** `papers/CONFIDENTIALITY_AND_LOCAL_LLMS.md` exists with the threat-model + provider-side handling + regulatory mapping + documented incidents | Delivered as planned |
-| **F** Iteration narrative | ✅ **Done and ahead of plan.** `papers/JOURNEY.md` exists at 19 phases (Phase 0..19), restructured with clean integer numbering, Phase 0 backed by primary-source recovery from `papers/early_design_sessions/` (4 ChatGPT shares + 2 mammouth.ai sessions including the original "CANON Grammar (AI-Focused)" mammouth session that establishes the project's pre-AISL working name) | Pulled forward from "runs last" position because the document was load-bearing for several phase-decisions; Phase 19 covers post-plan work (lexer fix, regex corpus expansion, for-iterator guard, validator hint upgrade) |
+| **F** Iteration narrative | ✅ **Done and ahead of plan.** `papers/JOURNEY.md` exists at 20 phases (Phase 0..20), restructured with clean integer numbering, Phase 0 backed by primary-source recovery from `papers/early_design_sessions/` (4 ChatGPT shares + 2 mammouth.ai sessions including the original "CANON Grammar (AI-Focused)" mammouth session that establishes the project's pre-AISL working name) | Pulled forward from "runs last" position because the document was load-bearing for several phase-decisions; Phase 19 covers post-plan work (lexer fix, regex corpus expansion, for-iterator guard, validator hint upgrade); Phase 20 covers phi-sigil-v2 deployment and the local-matches-Sonnet 29/30 result |
 
 ### Per-stream details
 
@@ -180,26 +180,34 @@ diverged, and what's still missing.
   the lexer escape preservation that fixed the silent `\d` →
   literal `d` regex bug.
 
-**Stream C — deployment proof (⚠️ partial)**
+**Stream C — deployment proof (✅ substantially done)**
 
 Done:
 - `benchmark/real_tooling_tasks.json` (30 tasks; common shell
   patterns rather than bash-history extracts)
 - `benchmark/eval_real_tooling.py` (659 lines, three-path harness)
-- 5 result JSONs spanning the v6 progression:
+- Result JSONs spanning the full progression:
   `stream_c_v6_norag.json` (15/30), `stream_c_v6_norag_lexerfix.json`
   (14/30), `stream_c_v6_rag_regex.json` (27/30),
   `stream_c_v6_phi_ensemble_rag.json` (28/30),
-  `stream_c_v6_phi_rag_loopfix.json` (29/30)
+  `stream_c_v6_phi_rag_loopfix.json` (29/30 with phi-v1),
+  `stream_c_phi_v2_norag.json` (14/30 phi-v2 solo — see Phase 20
+  for the Q4_K_M drift diagnosis), and the production
+  `stream_c_v6_phi_v2_ensemble.json` (29/30)
+- Cloud baseline `stream_c_results.json`: Sonnet 4.6 single-pass
+  29/30 in 157 s at $0.085, single failure on
+  `split_at_blank_lines` (cosmetic spec-adherence). Local single
+  failure on `shell_argv_count` — *complementary*, zero overlap
+- `benchmark/STREAM_C_RESULT.md` — consolidating short report
+  with progression table, per-task pass/fail across the three
+  stacks, energy and cost, failure analysis, and reproduction
+  command line
 - Energy calibration via `benchmark/measure_gpu_power.py` using
-  `amdgpu_top -d -J --no-pc` at 1 Hz; results folded into
-  `benchmark/PLAN_local_vs_cloud_economics.md` with
-  workload-attributable 0.370 Wh/task on the 7800 XT
+  `amdgpu_top -d -J --no-pc` at 1 Hz; production-config
+  workload-attributable 0.367 Wh/task on the 7800 XT
 - Cost numbers tracked per-task in the JSONs (`cost_usd` field)
 
 Missing:
-- `benchmark/STREAM_C_RESULT.md` consolidating short report —
-  this is the single highest-leverage missing artefact
 - bash-history-sourced tasks (would refresh `real_tooling_tasks.json`
   with deployment-realistic shapes; the 30 synthetic tasks prove
   the language works but not that it deploys)
@@ -242,13 +250,17 @@ boundary argument.
 
 **Stream F — iteration narrative (✅ done, ahead of plan)**
 
-`papers/JOURNEY.md` is at 19 numbered phases (Phase 0..19), 1900+
+`papers/JOURNEY.md` is at 20 numbered phases (Phase 0..20), 2300+
 lines, restructured into a clean integer sequence. Phase 0 is
 backed by primary-source recovery in
 `papers/early_design_sessions/` (4 ChatGPT shares + 2 mammouth.ai
-sessions). Phase 19 covers post-plan-v1 work (lexer fix, regex
-corpus expansion, for-iterator guard, validator hint upgrade,
-Stream C 29/30).
+sessions). Phase 19 covers the lexer fix, regex corpus expansion,
+for-iterator guard, validator hint upgrade, and the first 29/30
+Stream C with phi-v1 fallback. Phase 20 covers the phi-sigil-v2
+retrain, the four-step deployment chain (offline merge → GGUF →
+Q4_K_M), the diagnosis of Q4_K_M drift on Phi-4 fused projections,
+and the local-matches-Sonnet 29/30 result with complementary
+failures.
 
 The narrative pulled forward from its "runs last" position because
 several phase decisions needed it as the synthesis document for
@@ -259,30 +271,27 @@ the final paper's narrative section.
 
 In priority order:
 
-1. **`benchmark/STREAM_C_RESULT.md`** — consolidating short report
-   for the deployment proof. We have all the data; this is purely
-   writing. ~half-day.
-2. **`agent_workflow/sigil_subagent.md` + `router.py` +
+1. **`agent_workflow/sigil_subagent.md` + `router.py` +
    `example_walkthrough.md`** — close out Stream D's three named
    deliverables. The substance is in
    `tools/agent_harness/sigil_mcp_server.py` and
    `agent_workflow/README.md`; we need to factor it into the
    plan's expected file shapes. ~1 day.
-3. **Refresh `real_tooling_tasks.json` with bash-history-sourced
+2. **Refresh `real_tooling_tasks.json` with bash-history-sourced
    tasks** — replace or augment the 30 synthetic shell patterns
    with shapes drawn from real workflows. The deployment claim
    strengthens with realistic provenance. ~half-day.
-4. **`benchmark/STREAM_A_RESULT.md` + `STREAM_B_RESULT.md`** —
+3. **`benchmark/STREAM_A_RESULT.md` + `STREAM_B_RESULT.md`** —
    short reports for the corpus retrain and the diagnostics.
-   Phase 8/11/16/18/19 of `JOURNEY.md` already contains the
+   Phase 8/11/16/18/19/20 of `JOURNEY.md` already contains the
    substance; these would be ~3-page extracts. ~half-day each.
-5. **End-to-end <30 s install demo** — could be an asciinema or
+4. **End-to-end <30 s install demo** — could be an asciinema or
    an `agent_workflow/example_walkthrough.md` with verbatim
    terminal output. ~half-day.
-6. **Final paper synthesis** (§10) — pulls Streams A-F into the
+5. **Final paper synthesis** (§10) — pulls Streams A-F into the
    single ~6000-9000-word document. ~2 days.
 
-Total ETA to publishable: ~5-6 working days from this status.
+Total ETA to publishable: ~4-5 working days from this status.
 
 ## 3. Six work streams
 

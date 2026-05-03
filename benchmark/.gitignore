@@ -16,3 +16,9 @@ models/
 !pcre_seeds.jsonl
 
 tier*_results.json
+
+# Phi-Sigil-v2 deployment artefacts: 29 GB merged fp16 GGUF and the
+# 28 GB peft-merged HF weights. Reproducible from lora_out_phi_v2/ via
+# merge_phi_v2.py + llama.cpp's convert_hf_to_gguf.py.
+phi_sigil_v2_f16.gguf
+phi_sigil_v2_merged/
