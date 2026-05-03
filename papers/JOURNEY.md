@@ -2923,6 +2923,198 @@ non-test modules.
   `execute_module` when tests are present, suppressing
   Phase 22's false-positive no-output warning during test runs.
 
+## Phase 24: Tier 2.5 — RAG plateau, the assessment, and the case for v7 retrain (2026-05-03)
+
+Phase 23 closed Tier 2 at 3/8 on Path C — chained sub-agent +2
+over Path B at 45% lower cost. The Phase 23.3 failure analysis
+sketched five additional moves (A-E). Marc instructed: *"Do A to
+E then assess whether retraining is needed or if RAG is enough."*
+
+This phase lands all five and answers the assessment.
+
+### 24.1 Five moves landed
+
+- **Move A — aggregation seed pack.** 12 verified seeds for
+  count-by-key, sum-by-key, top-N by sum, distinct count,
+  group sum. All hand-verified end-to-end via
+  `benchmark/build_tier25_seeds.py` against the live interpreter.
+- **Move B — intermediate-step validation in `path_c`.** Empty
+  stdout from a non-final step now triggers up to 2 extra
+  retries with a no-output hint. Prior step's actual output
+  excerpt (~200 chars) is appended to the next step's
+  description so the local model sees what its real input
+  looks like, not Sonnet's guess.
+- **Move C — tighter decomposition prompt.**
+  `CHAIN_DELEGATE_SYSTEM` now requires 2-3 step plans unless
+  the task is a literal pass-through.
+- **Move D — PCRE multiline default.** All four
+  `Re.Perl.compile_pat` sites now pass `~opts:[`Multiline]`. The
+  model's `^def \w+` pattern on multi-line input now matches
+  every line, not just the first. The 161/161 test suite is
+  unaffected — every `^`/`$` test uses single-line inputs.
+- **Move E — TSV/CSV → Markdown table seeds.** Two seeds
+  covering the canonical pipe-padded edges and divider-row
+  shape.
+
+Corpus 2309 → 2323. RAG index rebuilt.
+
+### 24.2 Tier 2.5 result
+
+| Run | A | B | C | C cost |
+|---|---:|---:|---:|---:|
+| Tier 2 baseline (Phase 23) | 5/8 | 1/8 | **3/8** | $0.0149 |
+| **Tier 2.5 (this phase)** | 6/8 | 1/8 | **1/8** | $0.0171 |
+
+**Path C regressed from 3/8 to 1/8.** Two task losses, one task
+got further-but-not-passing:
+
+| Task | Tier 2 C | Tier 2.5 C | What changed |
+|---|---|---|---|
+| `extract_dotted_ipv4` | PASS | FAIL | RAG-shift artifact: 14 new aggregation seeds displaced previously-helpful seeds in top-K |
+| `url_status_pairs` | PASS | FAIL | Same RAG-shift; output truncated to first line only |
+| `csv_top3_categories` | step 2 FAIL | step 2 "PASS" but bogus | Move B's non-empty heuristic was too lax; let nonsense through |
+
+`tools/agent_harness/abc_tier25_results.json` is the raw data.
+
+### 24.3 What the regression actually told us
+
+The detail that matters: `csv_top3_categories` showed **false-
+positive intermediate passes**. Step 1 and step 2 both produced
+`42.50 42.50\n18.00 18.00\n...` (amount duplicated, no category).
+Move B marked them PASS because output was non-empty. The
+aggregation seeds *didn't actually help here* — the model wrote
+something completely wrong and Move B let it through. Step 3
+saw bogus data and emitted nothing.
+
+The two flat regressions (`extract_dotted_ipv4`,
+`url_status_pairs`) are 1-step plans where Move B's
+augmentation didn't apply. Their failure is **purely RAG
+displacement**: adding 14 aggregation-shaped seeds pushed
+previously-helpful regex/log-format seeds out of the top-K
+retrieval window for these tasks. The model wrote a different
+program than it had been writing in Tier 2, and the new
+program is wrong.
+
+This is a textbook RAG plateau pattern: adding more seeds is
+non-monotonic. Each new seed addition shifts retrievals for
+*every* task, sometimes helping sometimes hurting. The net
+effect on a small (8-task) suite is dominated by sampling
+noise once you're past the obvious wins.
+
+### 24.4 The assessment: RAG is not enough; v7 retrain is the right next move
+
+**Three pure-RAG runs sit in the 1-3/8 band on Path C:**
+
+| Run | Path C | What we changed |
+|---|---:|---|
+| Phase 21 baseline | 1/8 | retrain alone (no RAG/architecture) |
+| Phase 23 Tier 2 | 3/8 | architectural (chained sub-agent) |
+| Phase 24 Tier 2.5 | 1/8 | more seeds + prompt tightening + intermediate validation |
+
+Pattern: **the architectural intervention (Tier 2) moved the
+floor by +2; pure-RAG iterations move the ceiling-and-floor
+randomly within the noise band.** Adding more corpus or tighter
+prompts isn't producing systematic gains anymore. The remaining
+failures are "model reaches for wrong shape" — even with the
+right RAG context, the model writes something else.
+
+This is exactly what fine-tuning addresses. RAG shows the model
+patterns at inference time; retraining bakes them into the
+weights. The relevant distinction:
+
+- **Stream C (single-step)**: 29/30 = Sonnet 29/30. RAG
+  + Tier 1 diagnostics + architectural fixes were sufficient
+  here.
+- **Multi-step agent harness**: stuck at 1-3/8 vs Sonnet's
+  5-6/8. Even with the chained architecture (Tier 2's win), the
+  per-step quality of the local model matters — and that's a
+  weights problem, not a retrieval problem.
+
+**Conclusion: train qwen-sigil-v7 on the 2323-entry corpus.**
+Specific plan:
+
+1. **Train qwen-sigil-v7:7b** on the full 2323-entry corpus
+   (Tier 1 + Tier 2.5 seeds baked into weights). Same QLoRA
+   recipe as v6 (rank 64, lr 2e-5, max_seq 1024, 3 epochs).
+   Estimated wall time: ~5 hours on the 7800 XT.
+2. **Deploy carefully**: convert via the same
+   `convert_lora_to_gguf` chain that worked for v6; quantize to
+   Q4_K_M (qwen split-projection architecture handles Q4_K_M
+   without the Phi-4 drift seen in Phase 20).
+3. **Sanity-test against Stream C single-step BEFORE running
+   the agent harness.** If solo regresses below 27/30, halt
+   and diagnose deployment chain (don't iterate on the agent
+   harness with a degraded primary).
+4. **Re-run Path C with qwen-sigil-v7 + phi-sigil-v2 fallback.**
+   Expected: 4-6/8 if RAG-baking worked; if still 1-3/8, the
+   chained architecture is at its real ceiling and the next
+   move is more inputs (real bash-history tasks, not synthetic
+   harness).
+
+**Risk to flag**: the Phase 20 phi-sigil-v2 retrain regressed
+solo accuracy 19/30 → 14/30 due to Q4_K_M drift on Phi-4 fused
+projections. Qwen2.5-Coder is split-projection so this specific
+risk doesn't apply, but the principle is the same — the deployed
+model can be worse than the merged checkpoint, and it has to be
+tested in the actually-deployed configuration. Phase 22 lesson:
+"any prompt rule that asserts a runtime contract should be
+cross-checked against the actual interpreter implementation
+before shipping" — we now extend that to "any retrain claim
+should be validated against the actually-deployed model".
+
+### 24.5 What to revert vs. keep
+
+The Tier 2.5 changes split into clean wins, mixed-results, and
+regressions:
+
+**Keep (clean wins, no observed regression)**:
+- Move A (aggregation seeds in corpus)
+- Move D (multiline regex default)
+- Move E (TSV/CSV markdown seeds)
+
+These help the corpus distribution and the regex engine. They
+will improve v7's training signal too. No reason to revert.
+
+**Refine before keeping**:
+- Move B (intermediate validation) — the non-empty heuristic is
+  too lax (csv_top3 false positives). A v7-aware version would
+  validate against an *expected shape sketch* (e.g. expected
+  number of lines, or expected separator pattern) provided by
+  Sonnet in the decomposition step.
+- Move C (forced 2-3 step decomposition) — pushed
+  `tsv_to_markdown` from 1-step (close to passing) to 2-step
+  (failing); over-eager. Revisit after v7 with empirical
+  decomposition-quality data.
+
+**Defer**:
+- Move B's "pass prior step output excerpt" augmentation —
+  arguably hurt more than helped on simple 1-step tasks; gating
+  it on `idx > 0` was the right call but the augmentation text
+  could still confuse retrieval. Instrument before re-enabling.
+
+The cleanest pre-v7 reset: keep Moves A, D, E. Drop Move B's
+augmentation but keep its retry-on-empty (still better than
+silent empty propagation). Drop Move C (revert
+`CHAIN_DELEGATE_SYSTEM` to 1-3 steps with no minimum). Re-run
+Path C as a clean baseline before the v7 retrain so we know the
+"what RAG alone can do" number is precise.
+
+### 24.6 Files touched in Phase 24
+
+- `benchmark/build_tier25_seeds.py` — generator + verifier for
+  the 14 Tier 2.5 seeds.
+- `benchmark/tier25_agent_seeds.jsonl` — verified seed file.
+- `benchmark/training_corpus.jsonl` — 2309 → 2323 entries.
+- `benchmark/rag_index.json` — rebuilt.
+- `benchmark/.gitignore` — `tier25_agent_seeds.jsonl` allowlisted.
+- `interpreter/interpreter.ml` — `Multiline` opt added to all
+  four `Re.Perl.compile_pat` call sites.
+- `tools/agent_harness/agent_ab_harness.py` — Move B + Move C
+  changes in `path_c_chained_hybrid` and
+  `CHAIN_DELEGATE_SYSTEM`.
+- `tools/agent_harness/abc_tier25_results.json` — Tier 2.5
+  result (1/8 regression).
+
 ### 22.3a Did the validator hints help when output was empty? (the actual answer)
 
 **Yes, but only by 1 task on this 8-task suite.** The Tier 1
