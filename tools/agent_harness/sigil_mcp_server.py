@@ -52,11 +52,12 @@ REPO = Path(__file__).resolve().parent.parent.parent
 SIGIL_BIN = str(REPO / "interpreter" / "_build" / "default" / "vm.exe")
 PAREN_BALANCE_TOOL = str(REPO / "tools" / "balance_parens.sigil")
 
-# Default models — overridable via env. The ensemble path used in the
-# Stream C study (28/30 on the 30-task suite, 23/25 on the fresh 25-task
-# suite) is qwen-sigil-v4 → phi-sigil-v1 fallback.
-PRIMARY_MODEL = os.environ.get("SIGIL_PRIMARY_MODEL", "qwen-sigil-v4:7b")
-FALLBACK_MODEL = os.environ.get("SIGIL_FALLBACK_MODEL", "phi-sigil-v1:14b")
+# Default models — overridable via env. NH3 (Phase 27) replaced the
+# Phi-4 fallback with DeepSeek-Coder-6.7B fine-tuned on the same Sigil
+# corpus. Smaller (3.9 GB vs 9.1 GB), faster, no Q4_K_M drift, and
+# catches shell_argv_count (the project's hardest persistent residual).
+PRIMARY_MODEL = os.environ.get("SIGIL_PRIMARY_MODEL", "qwen-sigil-v7:7b")
+FALLBACK_MODEL = os.environ.get("SIGIL_FALLBACK_MODEL", "deepseek-sigil:6.7b")
 OLLAMA_URL = os.environ.get("OLLAMA_URL", "http://localhost:11434")
 MAX_ATTEMPTS = int(os.environ.get("SIGIL_MAX_ATTEMPTS", "3"))
 
@@ -156,11 +157,19 @@ def generate_and_run(description: str, input_arg: str, expected_shape: str = "")
         if attempt == 0:
             code = gen_sigil_ollama(task, active_model, OLLAMA_URL,
                                     temperature=0.0, slim=True)
+        elif active_model == FALLBACK_MODEL:
+            # Cross-base ensemble fallback: call the fallback with a FRESH
+            # prompt at TEMPERATURE 0. The validator_hint rewrites + ramped
+            # temperature were calibrated for the primary's failure modes
+            # (qwen-shaped) and biased the fallback (deepseek-shaped) toward
+            # worse code. Stream C demonstrated 27/30 ramped vs 29/30 fresh
+            # at temp 0 for the v7 + deepseek-sigil pair (Phase 27 / NH3).
+            code = gen_sigil_ollama(task, active_model, OLLAMA_URL,
+                                    temperature=0.0, slim=True)
         else:
             ramp_temp = 0.3 + 0.2 * attempt
-            # Use the surgical validator_hint rewriter so SIGIL_DIAGNOSE
-            # warnings (argv misuse, no-output-produced) become worked fixes
-            # in the retry prompt instead of raw warning text.
+            # Surgical validator_hint rewriter: turn SIGIL_DIAGNOSE warnings
+            # into worked fixes in the retry prompt instead of raw text.
             hint = validator_hint(last_stdout, expected_shape or "", last_err) \
                    if (last_err or last_stdout) \
                    else f"got {last_stdout!r} expected {expected_shape!r}"
