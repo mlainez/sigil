@@ -123,11 +123,13 @@ CLI args: $0/#0 are LITERAL only. For variable index use (arg_str i)/(argv_int i
 and (argv) for the array, (argv_count) for length. (argv_int i) fetches CLI
 argv[i] parsed as int — to parse a STRING into int use (parse_int s). They are
 DIFFERENT operations.
-CRITICAL INPUT SHAPE RULE: this harness passes the WHOLE input (all lines, the
-entire CSV, the full log) as a single string in $0. To iterate lines, use
-(split $0 "\\n") — NOT (argv). (argv) is the list of SEPARATE CLI arguments;
-on this harness it is a 1-element list whose single element is your data.
-If your program reads (argv) and produces empty output, that is the bug.
+INPUT SHAPE: the harness passes the WHOLE input (all lines, the entire CSV,
+the full log) as a single string in $0. (argv) is "smart": when there's
+exactly 1 CLI arg AND it contains newlines, (argv) returns the lines —
+equivalent to (split $0 "\\n"). So both shapes work for line iteration:
+  (for-each line (argv) ...)         ; auto-splits
+  (for-each line (split $0 "\\n") ...) ; explicit
+For the literal CLI argv vector with no auto-splitting, use (argv_raw).
 TABULAR DATA RULE: if the task names columns ("CSV with columns date,category,amount"),
 SKIP the header row and index by POSITION matching the column you want, not
 always 0. For "sum by category" with header "date,category,amount", the

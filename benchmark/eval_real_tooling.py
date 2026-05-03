@@ -271,20 +271,11 @@ def validator_hint(got_stdout: str, expected: str, got_stderr: str) -> str:
     generic structural-diff which gave the model context but no direction.
     """
     # ---- Interpreter diagnostics (SIGIL_DIAGNOSE=1) come through stderr
-    # even when the program "succeeded" with returncode=0. These fire on
-    # the empty-output failure mode that dominates the agent harness:
-    # (argv) misuse, no-output-produced. Match before the runtime-error
-    # branch since they're warnings prefixed with "Warning: ". ----
-    if got_stderr and "Warning: (argv) returned a 1-element list" in got_stderr:
-        return ("Your program called (argv) with a 1-element list whose "
-                "element contains newlines — that means the harness passed "
-                "the input as ONE argument and you treated it as if it were "
-                "already split. "
-                "FIX: replace (argv) with (split $0 \"\\n\") for line-by-line "
-                "input. $0 is the first CLI argument as a single string; "
-                "(argv) is the list of SEPARATE CLI arguments. Example:\n"
-                "  (set lines (split $0 \"\\n\"))\n"
-                "  (for-each line lines (println line))")
+    # even when the program "succeeded" with returncode=0. The argv-misuse
+    # warning was removed in Phase 25 (argv is now smart and auto-splits a
+    # 1-element-with-newlines arg, so the misuse can no longer happen).
+    # The no-output-produced warning still fires for the empty-stdout case
+    # that's not specifically about argv. ----
     if got_stderr and "Warning: program completed without writing any output" in got_stderr:
         return ("Your program ran without errors but produced no output. "
                 "Most common causes on this harness: (a) you used (argv) "

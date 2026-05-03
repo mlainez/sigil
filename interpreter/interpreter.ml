@@ -1430,6 +1430,10 @@ and eval_call env func_name args =
     | "tail"     -> "rest"         (* Haskell *)
     | "cdr"      -> "rest"         (* Lisp *)
     | "string_length" -> "len"     (* Python str-len reach *)
+    | "parse_float"   -> "float"   (* parallels parse_int — Phase 25 meet-halfway *)
+    | "to_int"        -> "parse_int" (* Python `int()` reach for string→int *)
+    | "first_index_of" -> "index_of"
+    | "regex_replace_all" -> "regex_replace" (* already replaces all *)
     | "contains" -> "has"          (* Python 'x in y' semantics *)
     | "size"     -> "len"          (* Ruby/JS *)
     | "length"   -> "len"
@@ -2492,24 +2496,45 @@ and eval_call env func_name args =
               VBool false
          | _ -> raise (RuntimeError "Invalid arguments to file_delete"))
 
-   (* Command-line arguments *)
+   (* Command-line arguments.
+
+      Phase 25 meet-halfway: (argv) is "smart" — when called with exactly
+      one CLI arg AND that arg contains newlines, it returns the
+      newline-split lines instead of a 1-element list. This aligns the
+      builtin with the model's pre-training instinct that "iterate argv to
+      get input pieces" (Python `for arg in sys.argv`, Bash `"$@"`). The
+      old behaviour caused a persistent failure mode in Phases 18-24 where
+      the model wrote (for-each line (argv) ...) on multi-line input and
+      iterated once over the whole blob.
+
+      Use (argv_raw) when you genuinely need the literal CLI argv vector
+      with no auto-splitting. The blast radius for this change is small:
+      the corpus has 0 (argv) entries, the test suite uses (argv) only
+      with no args (length=0, unaffected), and Stream C uses $0 directly. *)
    | "argv" ->
        let args = Array.to_list Sys.argv in
        let script_args = match args with
-         | _ :: _ :: rest -> rest  (* skip executable and filename *)
+         | _ :: _ :: rest -> rest
          | _ -> [] in
-       (* Diagnostic: model frequently uses (argv) when input is in $0 as a
-          single multi-line string. Detectable: length=1 AND that element
-          contains a newline. ON by default; silence with SIGIL_DIAGNOSE=0. *)
-       (if diagnose_enabled () then
-         match script_args with
+       let result_strs = match script_args with
          | [single] when String.contains single '\n' ->
-             Printf.eprintf
-               "Warning: (argv) returned a 1-element list whose element contains \
-                newlines. If you wanted to iterate input lines, use \
-                (split $0 \"\\n\") instead — $0 is the first CLI argument as a \
-                string; (argv) is the list of separate CLI arguments.\n"
-         | _ -> ());
+             (* Strip trailing empty line if input ends with \n (common
+                tooling shape — mimics splitlines() not split("\n")). *)
+             let parts = String.split_on_char '\n' single in
+             (match List.rev parts with
+              | "" :: rest -> List.rev rest
+              | _ -> parts)
+         | _ -> script_args
+       in
+       VArray (ref (Array.of_list (List.map (fun s -> VString s) result_strs)))
+
+   | "argv_raw" ->
+       (* Literal CLI argv vector, no auto-splitting. Use this when you
+          need to know "did the user pass exactly N arguments". *)
+       let args = Array.to_list Sys.argv in
+       let script_args = match args with
+         | _ :: _ :: rest -> rest
+         | _ -> [] in
        VArray (ref (Array.of_list (List.map (fun s -> VString s) script_args)))
 
    | "argv_count" ->
@@ -3103,6 +3128,9 @@ and eval_call env func_name args =
        | _ -> raise (RuntimeError "int takes 1 string/float/int"))
 
   | "float" ->
+      (* Note: parse_float, to_int, etc. are aliased to canonical names in
+         the symbol-rewrite table at line ~1426 (eval_call). No separate
+         pattern needed here. *)
       (match arg_vals with
        | [VString s] ->
            (try VFloat (float_of_string (String.trim s))
