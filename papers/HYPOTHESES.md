@@ -262,20 +262,48 @@ Mistral-Small) writes Sigil with 5-15 percentage-point higher baseline
 accuracy than Qwen2.5-Coder at the *no-fine-tune, RAG-only* level. If
 true, every subsequent retrain inherits that advantage.
 
-**Test.** Build a 30-task held-out Sigil eval (subset of Stream C +
-fresh tasks). Run each candidate base unfine-tuned with the SLIM_HEADER
-+ RAG prompt. Compare to current qwen2.5-coder:7b baseline (~14-15/30
-no-RAG, ~22/30 with RAG).
+**Verdict (Phase 27, 2026-05-03) — partially falsified, but the
+diagnostic was load-bearing.**
 
-**Success criterion.** A candidate base is a clear winner if it
-achieves ≥3 task lift on the held-out set with the same prompt + RAG
-setup. Mixed results means current base is fine.
+Run on the 30-task Stream C suite, vanilla un-fine-tuned, RAG only:
 
-**Estimated cost.** 1 day. Pull each base via ollama, run the eval
-script, compare.
+| Base | Pass | Time | Energy | Unique catches vs qwen | qwen+X 2-way oracle |
+|---|---:|---:|---:|:---:|---:|
+| **qwen-coder:7b** | **23/30** | 199s | 9.9 Wh | (baseline) | — |
+| deepseek-coder:6.7b | 18/30 | 209s | 10.5 Wh | **3** | 26/30 |
+| deepseek-coder-v2:16b MoE | 17/30 | 2723s | 136 Wh | 1 | 24/30 |
+| codestral:22b | 19/30 | 1101s | 55 Wh | **4** | **27/30** |
 
-**Risk.** None — read-only experiment, doesn't affect current
-deployment.
+4-way oracle = 29/30 — nearly matches v6+phi-v2 fine-tuned at 29/30
+*without any Sigil fine-tuning*.
+
+**Two findings, only one of them was the original NH1 question:**
+
+1. **Qwen-coder IS the right primary base.** No alternative beats it
+   solo. The v3→v7 retrain trajectory was on the right model. The
+   "we never benchmarked this" worry from O1 turns out to have been
+   unfounded — the obvious choice was the obvious choice.
+
+2. **Phi-4 was the WRONG fallback** (this is the new finding). The
+   diagnostic that NH1 actually surfaced wasn't about the primary; it
+   was about the fallback. DeepSeek-Coder-6.7B vanilla picks up 3
+   tasks qwen misses, including `shell_argv_count` (the project's
+   hardest persistent residual, which survived 7 retrains plus
+   smart-argv) and `split_at_blank_lines` (Sonnet's residual on the
+   v6 era). At 3.8 GB and ~7s/task it's smaller and faster than
+   phi-v2 (9.1 GB, ~15s/task), with split-projection avoiding Phase
+   20's Q4_K_M drift. This rewrites NH3.
+
+3. **Codestral-22B has the best failure-shape diversity** (4 unique
+   catches including `awk_filter_field_gt`, the task v7 lost vs v6)
+   but 5× slower than the 6.7B for +1 oracle task. Optional
+   secondary fallback only.
+
+4. **DeepSeek-V2-16B MoE is dominated** on every axis — strictly
+   worse than the 6.7B. ROCm has poor MoE kernel support.
+
+**Result files**: `benchmark/stream_c_nh1_{qwen,deepseek,deepseek-v2,codestral}.json`.
+Commit: [901760d](https://github.com/mlainez/sigil/commit/901760d).
 
 ### NH2. A specialized 3B step-judge will close the chained-pipeline plateau
 
@@ -309,35 +337,57 @@ labeled data.
 which would lower Path C. Mitigation: validate judge accuracy on a
 held-out subset before wiring into pipeline.
 
-### NH3. Replacing Phi-4 with a split-projection code-specialized fallback (Codestral-22B or DeepSeek-Coder-V2-Lite) lifts Stream C solo AND ensemble diversity
+### NH3. Replace Phi-4 with DeepSeek-Coder-6.7B fine-tuned on the Sigil corpus
 
-**Builds on:** [O2](#o2-fallback-model-choice), [H3](#h3-ensemble-qwen-7b--phi-4-14b-with-failure-shape-diversity-outperforms-a-single-model)
+**Builds on:** [O2](#o2-fallback-model-choice), [H3](#h3-ensemble-qwen-7b--phi-4-14b-with-failure-shape-diversity-outperforms-a-single-model), [NH1](#nh1-base-model-choice-is-a-load-bearing-variable-we-should-benchmark-before-another-retrain)
 
-**Hypothesis.** A code-specialized 22B fallback with split-projection
-architecture (a) does not suffer Q4_K_M drift (recovers the 5-task
-Stream C solo regression Phase 20 ate), (b) provides better
-failure-shape diversity than Phi-4 (recovers the 1-2 ensemble lift
-Phi-v2 currently provides, plus 1-2 more), and (c) ensemble Stream C
-hits 30/30 with the right pair selection.
+**Refined after NH1's diagnostic.** The original NH3 sketch named
+Codestral-22B and DeepSeek-Coder-V2-Lite as candidates. NH1 measured
+both — DeepSeek-V2 is dominated, Codestral has slightly better
+failure diversity (+4 unique catches vs +3) but is 5× slower and 5×
+more energy than the 6.7B. **DeepSeek-Coder-6.7B is the practical
+winner** — same family of catches with much cleaner deployment.
+
+**Hypothesis.** Fine-tune DeepSeek-Coder-6.7B on the same 2323-entry
+Sigil corpus, deploy as `deepseek-sigil:6.7b`. Use as ensemble
+fallback in place of phi-sigil-v2:14b. The expected outcome:
+
+1. Stream C ensemble (qwen-sigil-v7 + deepseek-sigil) ≥ 30/30 — the
+   3 unique catches DeepSeek-Coder vanilla already provides
+   (`shell_argv_count`, `split_at_blank_lines`, `sort_uniq_count_top`)
+   should remain after fine-tune AND likely expand.
+2. Half the VRAM footprint vs phi-v2 (3.8 GB vs 9.1 GB).
+3. Roughly half the per-call latency (~7s vs ~15s).
+4. No Q4_K_M drift (split-projection architecture).
+5. No llama-runner segfault workaround (no offline merge needed).
 
 **Test.**
 
-1. Pull Codestral-22B and DeepSeek-Coder-V2-Lite via ollama.
-2. Train mini-Sigil adapters on the same 2323-entry corpus (or run
-   the no-fine-tune baseline first to compare against phi-sigil-v2's
-   solo number).
-3. Run Stream C ensemble (qwen-v6 primary + new fallback) against
-   the v6+phi-v2 baseline of 29/30.
+1. Train deepseek-sigil:6.7b. Same QLoRA recipe as v7 (r=16, alpha=32,
+   lr=2e-5, 3 epochs). Estimated wall: ~3-5h on the 7800 XT (similar
+   per-step cost as v7's 7B since DeepSeek-Coder-6.7B has roughly
+   matched parameter count).
+2. Convert via convert_lora_to_gguf, register with ollama as
+   `deepseek-sigil:6.7b`.
+3. Sanity-check Stream C solo. Threshold: ≥ 23/30 with RAG (matches
+   vanilla deepseek-coder; fine-tune should add, not subtract).
+4. Run Stream C ensemble: qwen-sigil-v7 primary + deepseek-sigil
+   fallback. Compare to v7+phi-v2's 28/30.
+5. Run agent A/B/C harness with new ensemble. Compare to v7+phi-v2's
+   B 2/8, C 2/8.
 
-**Success criterion.** Ensemble Stream C ≥ 30/30 with the new
-fallback, OR ≥ 29/30 at materially lower deployment friction (no
-quantization drift, no llama-runner segfault workaround).
+**Success criteria** (any one is a win):
+- Stream C ensemble ≥ 30/30
+- Stream C ensemble = 29/30 but at materially lower latency / energy
+- Agent harness Path C ≥ 4/8
 
-**Estimated cost.** 2-3 days (depends on whether we retrain the
-fallback or run un-tuned).
+**Estimated cost.** ~6-8 hours total: 3-5h training, 30 min deploy,
+30-60 min eval.
 
-**Risk.** Some bases may not fit in 16GB at the quantization we want;
-verify VRAM headroom before training.
+**Risk.** DeepSeek-Coder-6.7B's tokenizer differs from Qwen's
+(different vocab); the corpus chat template may need a small
+adjustment for the chat-format wrapper. Verify training loss
+trajectory mirrors v7's before committing the full 3 epochs.
 
 ### NH4. System-around-model interventions consistently outperform model-side iterations
 
