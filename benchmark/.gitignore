@@ -14,6 +14,7 @@ models/
 !v6_loop_argv_seeds.jsonl
 !regex_corpus.jsonl
 !pcre_seeds.jsonl
+!tier1_agent_seeds.jsonl
 
 tier*_results.json
 

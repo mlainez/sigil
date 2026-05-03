@@ -123,6 +123,23 @@ CLI args: $0/#0 are LITERAL only. For variable index use (arg_str i)/(argv_int i
 and (argv) for the array, (argv_count) for length. (argv_int i) fetches CLI
 argv[i] parsed as int — to parse a STRING into int use (parse_int s). They are
 DIFFERENT operations.
+CRITICAL INPUT SHAPE RULE: this harness passes the WHOLE input (all lines, the
+entire CSV, the full log) as a single string in $0. To iterate lines, use
+(split $0 "\\n") — NOT (argv). (argv) is the list of SEPARATE CLI arguments;
+on this harness it is a 1-element list whose single element is your data.
+If your program reads (argv) and produces empty output, that is the bug.
+TABULAR DATA RULE: if the task names columns ("CSV with columns date,category,amount"),
+SKIP the header row and index by POSITION matching the column you want, not
+always 0. For "sum by category" with header "date,category,amount", the
+category field is (array_get row 1) — NOT (first row). Read the header
+description carefully before indexing.
+REGEX find_all RULE: (find_all pat text) returns the FULL match for each hit
+— ALWAYS group 0, regardless of capturing groups in the pattern. To extract
+just a sub-pattern, write a regex that matches ONLY that sub-pattern, OR
+post-process the full match with split. Example: to extract names from
+"def NAME(" lines, do (find_all "def \\w+" src) then (last (split m " "))
+per hit, or per-line: (if (regex_match "^def \\w" line) (println
+(array_get (split line "(") 0))) and post-process.
 fn signatures REQUIRE per-param types and `-> rettype` (e.g. (fn add a int b int -> int ...)).
 reduce: (reduce arr fn init) OR (reduce fn init arr) — never (arr init fn).
 Aliases: map=map_arr, head=first, tail=rest, contains=in, size/length=len,
@@ -192,13 +209,20 @@ def run_python(code: str, args: list) -> tuple[bool, str]:
             os.unlink(f.name)
 
 
-def run_sigil(code: str, args: list) -> tuple[bool, str, str]:
+def run_sigil(code: str, args: list, diagnose: bool = True) -> tuple[bool, str, str]:
+    """Run a Sigil program. Diagnostics (argv-misuse, no-output-produced) are
+    ON by default — they help validator_hint rewrite retry prompts when
+    a program "succeeds" with empty/wrong output. Pass diagnose=False to
+    silence (rare; used when capturing stderr for non-diagnostic purposes)."""
     with tempfile.NamedTemporaryFile(mode="w", suffix=".sigil", delete=False) as f:
         f.write(code); f.flush()
         try:
+            env = os.environ.copy()
+            if not diagnose:
+                env["SIGIL_DIAGNOSE"] = "0"
             r = subprocess.run([SIGIL_BIN, f.name] + args,
                              capture_output=True, text=True, timeout=10,
-                             errors="replace")
+                             errors="replace", env=env)
             return r.returncode == 0, r.stdout, r.stderr
         except subprocess.TimeoutExpired:
             return False, "", "timed out after 10s"

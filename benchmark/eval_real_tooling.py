@@ -270,6 +270,32 @@ def validator_hint(got_stdout: str, expected: str, got_stderr: str) -> str:
     targeted, actionable hint with the canonical fix. Replaces the earlier
     generic structural-diff which gave the model context but no direction.
     """
+    # ---- Interpreter diagnostics (SIGIL_DIAGNOSE=1) come through stderr
+    # even when the program "succeeded" with returncode=0. These fire on
+    # the empty-output failure mode that dominates the agent harness:
+    # (argv) misuse, no-output-produced. Match before the runtime-error
+    # branch since they're warnings prefixed with "Warning: ". ----
+    if got_stderr and "Warning: (argv) returned a 1-element list" in got_stderr:
+        return ("Your program called (argv) with a 1-element list whose "
+                "element contains newlines — that means the harness passed "
+                "the input as ONE argument and you treated it as if it were "
+                "already split. "
+                "FIX: replace (argv) with (split $0 \"\\n\") for line-by-line "
+                "input. $0 is the first CLI argument as a single string; "
+                "(argv) is the list of SEPARATE CLI arguments. Example:\n"
+                "  (set lines (split $0 \"\\n\"))\n"
+                "  (for-each line lines (println line))")
+    if got_stderr and "Warning: program completed without writing any output" in got_stderr:
+        return ("Your program ran without errors but produced no output. "
+                "Most common causes on this harness: (a) you used (argv) "
+                "when you should have used (split $0 \"\\n\") — the input "
+                "is in $0 as a single multi-line string; (b) an (if cond ...) "
+                "guard was always false because you indexed the wrong field; "
+                "(c) the array you iterated was empty because (split ...) "
+                "returned a single string. Add (println intermediate) at the "
+                "first step to see what your variables actually contain, "
+                "then fix the reaching shape.")
+
     # ---- Runtime errors first: did-you-mean for undefined names ----
     if got_stderr:
         first = got_stderr.strip().splitlines()[0][:200]
@@ -489,6 +515,9 @@ def eval_task_local_sigil(task: dict, model: str, index: dict, max_attempts: int
                 if balance_note:
                     code = fixed
 
+        # Diagnostics are on by default; argv-misuse and no-output-produced
+        # surface to stderr so validator_hint can rewrite the retry prompt
+        # with a worked fix.
         ok, out, err = run_sigil(code, task["args"])
         if ok and out == task["expected"]:
             return {"path": "local_sigil", "pass": True, "attempts": attempt+1,

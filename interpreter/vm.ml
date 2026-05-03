@@ -117,6 +117,21 @@ let run_file filename =
 
     (* Execute *)
     let exit_code = execute_module module_def in
+    (* Diagnostic: program completed normally without writing any output.
+       Almost always a model-misuse symptom on the agent harness — the most
+       common cause is (for-each x ... (argv)) where (argv) returned a
+       1-element list and the iteration entered the body but the printed
+       branch was never reached. Gated behind SIGIL_DIAGNOSE=1 (set by
+       eval_real_tooling.py and the MCP server) to keep test runs quiet. *)
+    if exit_code = 0
+       && Interpreter.diagnose_enabled ()
+       && not !Interpreter.output_emitted then
+      Printf.eprintf
+        "Warning: program completed without writing any output. Common \
+         causes: (a) (argv) returned a 1-element list when you expected \
+         lines — use (split $0 \"\\n\"); (b) an (if cond ...) guard was \
+         always false; (c) you iterated over an empty array. Add (println \
+         intermediate) to debug.\n";
     exit_code
   with
   | Sys_error msg ->

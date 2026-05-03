@@ -6,6 +6,24 @@ open Lexer
 open Parser
 open Unix
 
+(* Diagnostic state — see definitions further down for the canonical comments.
+   Forward-declared here because print/println at line ~2640 set output_emitted
+   and (argv) at line ~2480 reads diagnose_enabled, both before the bulk of
+   interpreter helpers. The vm.ml entry checks output_emitted after
+   execute_module returns.
+
+   Diagnostics are ON by default — they help both human users and the
+   agent harness's retry loop catch silent misuse (model writes (argv)
+   when input is in $0; program runs without producing output). To
+   silence (e.g. in batch test runs that assert on stderr), set
+   SIGIL_DIAGNOSE=0. *)
+let output_emitted = ref false
+
+let diagnose_enabled () =
+  match Sys.getenv_opt "SIGIL_DIAGNOSE" with
+  | Some "0" | Some "off" | Some "false" -> false
+  | _ -> true
+
 (* Runtime values *)
 type value =
   | VInt of int64
@@ -2480,6 +2498,18 @@ and eval_call env func_name args =
        let script_args = match args with
          | _ :: _ :: rest -> rest  (* skip executable and filename *)
          | _ -> [] in
+       (* Diagnostic: model frequently uses (argv) when input is in $0 as a
+          single multi-line string. Detectable: length=1 AND that element
+          contains a newline. ON by default; silence with SIGIL_DIAGNOSE=0. *)
+       (if diagnose_enabled () then
+         match script_args with
+         | [single] when String.contains single '\n' ->
+             Printf.eprintf
+               "Warning: (argv) returned a 1-element list whose element contains \
+                newlines. If you wanted to iterate input lines, use \
+                (split $0 \"\\n\") instead — $0 is the first CLI argument as a \
+                string; (argv) is the list of separate CLI arguments.\n"
+         | _ -> ());
        VArray (ref (Array.of_list (List.map (fun s -> VString s) script_args)))
 
    | "argv_count" ->
@@ -2637,6 +2667,7 @@ and eval_call env func_name args =
 
    (* I/O *)
    | "print" ->
+       output_emitted := true;
        (* Variadic: multiple args joined with space *)
        (match arg_vals with
         | [] -> VUnit
@@ -2647,6 +2678,7 @@ and eval_call env func_name args =
             VUnit)
 
   | "println" ->
+      output_emitted := true;
       (* Variadic: multiple args joined with space, trailing newline.
          Tolerant of a trailing \n in the string (common model habit):
          if the last arg already ends with \n, use print_string instead to
@@ -4445,6 +4477,11 @@ let find_project_root start_dir =
 
 (* Mutable reference to the source file path, set by VM entry point *)
 let source_file_path = ref ""
+
+(* Diagnostic flags (output_emitted, diagnose_enabled) are forward-declared
+   at the top of this file so print/println and (argv) can reference them
+   before this point. Diagnostics are ON by default; set SIGIL_DIAGNOSE=0
+   to silence (used in batch test runs that assert on stderr). *)
 
 let compute_stdlib_paths () =
   let subdirs = ["stdlib/core/"; "stdlib/data/"; "stdlib/net/";

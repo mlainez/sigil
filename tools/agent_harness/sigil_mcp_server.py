@@ -64,6 +64,7 @@ MAX_ATTEMPTS = int(os.environ.get("SIGIL_MAX_ATTEMPTS", "3"))
 # the same generation behavior here as in eval_real_tooling.py.
 sys.path.insert(0, str(REPO / "benchmark"))
 from corpus_extender import SLIM_HEADER, gen_sigil_ollama, gen_sigil_ollama_with_hint, strip_fences
+from eval_real_tooling import validator_hint  # surgical retry-hint rewriter
 
 
 # ============================================================================
@@ -101,7 +102,10 @@ def balance_parens_sigil(code: str) -> tuple[str, str]:
 
 
 def run_sigil(code: str, input_arg: str, timeout: int = 15) -> tuple[bool, str, str]:
-    """Run Sigil code with one CLI arg. Returns (success, stdout, stderr)."""
+    """Run Sigil code with one CLI arg. Returns (success, stdout, stderr).
+    Diagnostics (argv-misuse, no-output-produced) are on by default in the
+    interpreter so the orchestrator's retry prompt builder can pattern-match
+    the warning strings with worked fixes."""
     f = tempfile.NamedTemporaryFile(mode="w", suffix=".sigil", delete=False)
     f.write(code); f.close()
     try:
@@ -154,7 +158,12 @@ def generate_and_run(description: str, input_arg: str, expected_shape: str = "")
                                     temperature=0.0, slim=True)
         else:
             ramp_temp = 0.3 + 0.2 * attempt
-            hint = last_err[:200] if last_err else f"got {last_stdout!r} expected {expected_shape!r}"
+            # Use the surgical validator_hint rewriter so SIGIL_DIAGNOSE
+            # warnings (argv misuse, no-output-produced) become worked fixes
+            # in the retry prompt instead of raw warning text.
+            hint = validator_hint(last_stdout, expected_shape or "", last_err) \
+                   if (last_err or last_stdout) \
+                   else f"got {last_stdout!r} expected {expected_shape!r}"
             code = gen_sigil_ollama_with_hint(
                 task, active_model, OLLAMA_URL,
                 prev_code=last_code, got_stdout=last_stdout, got_stderr=last_err,
@@ -190,9 +199,12 @@ def generate_and_run(description: str, input_arg: str, expected_shape: str = "")
                     "wall_seconds": round(time.time() - t0, 2),
                     "balancer_applied": balancer_applied,
                 }
-            # Ran but output differs from expected_shape
+            # Ran but output differs from expected_shape. Prefer the
+            # interpreter's diagnostic (argv-misuse, no-output-produced) over
+            # a generic "got X expected Y" so validator_hint can pattern-match
+            # the worked-fix prompt; fall back to the diff if stderr is empty.
             last_stdout = out
-            last_err = f"got {out!r} expected {expected_shape!r}"
+            last_err = err.strip() if err else f"got {out!r} expected {expected_shape!r}"
         else:
             last_stdout = ""
             last_err = err.strip().splitlines()[0] if err else "unknown error"
