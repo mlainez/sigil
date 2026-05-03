@@ -264,10 +264,8 @@ CHAIN_DELEGATE_SYSTEM = (
     "You decide how to delegate a tooling task to the local Sigil ensemble. "
     "The local ensemble is excellent at SINGLE-STEP data transforms (parse, "
     "filter, count, sort, format) but struggles when one program has to do "
-    "many steps in sequence. Decompose the task into 2-3 SINGLE-PURPOSE "
-    "steps. Use 1 step ONLY if the task is a literal pass-through (e.g. "
-    "'extract every email' is one step; 'parse CSV, sum by category, sort "
-    "top 3' is THREE steps: parse → aggregate → format). Each step's input "
+    "many steps in sequence. Decompose the task into 1-3 SINGLE-PURPOSE "
+    "steps — use however many the task actually needs. Each step's input "
     "is the previous step's stdout (the first step's input is the "
     "user-supplied data). Output JSON of the form:\n"
     "  {\"steps\": [{\"description\": \"<one-sentence Sigil task>\"}, ...]}\n"
@@ -328,11 +326,13 @@ def path_c_chained_hybrid(task: dict) -> dict:
         steps = [{"description": task["goal"]}]
 
     # 2. Run pipeline; thread stdout → stdin.
-    # Move B (Tier 2.5): validate intermediate steps. Empty stdout from an
-    # intermediate step is almost always a pipeline bug — retry up to 2
-    # additional times before giving up. Pass the prior step's actual
-    # output excerpt into the next step's description so the local model
-    # knows what its real input looks like (not Sonnet's guess).
+    # Move B (Tier 2.5, refined Phase 26): validate intermediate steps.
+    # Empty stdout from a non-final step is almost always a pipeline bug —
+    # retry up to 2 additional times before giving up. The prior version
+    # also augmented the next step's description with a 200-char excerpt
+    # of the prior step's output; that was reverted because (a) it
+    # polluted the prompt for simple tasks and (b) it caused regressions
+    # on tasks Sonnet's natural decomposition handled cleanly.
     cur_input = task["input"]
     step_results = []
     last_step_idx = len(steps) - 1
@@ -341,19 +341,7 @@ def path_c_chained_hybrid(task: dict) -> dict:
     for idx, step in enumerate(steps):
         is_final = idx == last_step_idx
         expected_shape = task["expected"] if is_final else ""
-        # Augment description with prior step's actual output excerpt so
-        # the local model sees what it's really consuming.
-        base_desc = step.get("description", "")
-        if idx > 0 and cur_input:
-            excerpt = cur_input[:200]
-            if len(cur_input) > 200:
-                excerpt += "..."
-            desc = (f"{base_desc} The input you receive in $0 will look "
-                    f"like this (first ~200 chars from the prior step): "
-                    f"{excerpt!r}. Use that exact shape.")
-        else:
-            desc = base_desc
-
+        desc = step.get("description", "")
         result = generate_and_run(desc, cur_input, expected_shape)
         intermediate_retry_attempts = 0
         # Intermediate-step empty-output retry: up to 2 extra attempts
