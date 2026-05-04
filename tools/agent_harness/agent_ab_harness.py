@@ -36,16 +36,27 @@ sys.path.insert(0, str(REPO / "benchmark"))
 from sigil_mcp_server import generate_and_run
 from sigil_step_judge import judge_step
 
-# Anthropic Sonnet pricing as of 2026-04 (per million tokens)
-SONNET_INPUT_PER_M = 3.0
+# Anthropic per-million-token pricing as of 2026-04. Adjust here if you
+# change models. The cost line in the aggregate uses these rates.
+MODEL_PRICING = {
+    "claude-sonnet-4-6": (3.0, 15.0),
+    "claude-opus-4-7":   (15.0, 75.0),
+}
+SONNET_INPUT_PER_M = 3.0   # legacy aliases retained for compatibility
 SONNET_OUTPUT_PER_M = 15.0
+
+# Module-level default; override via --cloud-model on the CLI.
+CLOUD_MODEL = "claude-sonnet-4-6"
 
 
 def claude_call(prompt: str, system: str = "") -> dict:
-    """Call Sonnet via the local `claude` CLI, return result + token usage.
+    """Call the configured cloud model via the local `claude` CLI, return
+    result + token usage.
     Returns: {text, prompt_tokens, completion_tokens, cost_usd, ok, raw_err}"""
+    in_per_m, out_per_m = MODEL_PRICING.get(
+        CLOUD_MODEL, (SONNET_INPUT_PER_M, SONNET_OUTPUT_PER_M))
     cmd = ["claude", "--print", "--output-format", "json",
-           "--model", "claude-sonnet-4-6"]
+           "--model", CLOUD_MODEL]
     full_prompt = (system + "\n\n" + prompt) if system else prompt
     cmd += ["-p", full_prompt]
     try:
@@ -63,7 +74,7 @@ def claude_call(prompt: str, system: str = "") -> dict:
             "text": text,
             "prompt_tokens": in_tok,
             "completion_tokens": out_tok,
-            "cost_usd": in_tok * SONNET_INPUT_PER_M / 1e6 + out_tok * SONNET_OUTPUT_PER_M / 1e6,
+            "cost_usd": in_tok * in_per_m / 1e6 + out_tok * out_per_m / 1e6,
             "ok": True,
             "raw_err": "",
         }
@@ -270,7 +281,9 @@ CHAIN_DELEGATE_SYSTEM = (
     "steps — use however many the task actually needs. Each step's input "
     "is the previous step's stdout (the first step's input is the "
     "user-supplied data). Output JSON of the form:\n"
-    "  {\"steps\": [{\"description\": \"<one-sentence Sigil task>\"}, ...]}\n"
+    "  {\"steps\": [{\"description\": \"<one-sentence Sigil task>\", "
+    "\"input_shape\": \"<concrete one-sentence description of what $0 looks "
+    "like for this step: line separator, field shape>\"}, ...]}\n"
     "Each description should be one sentence, present tense, focused on a "
     "single transform. Examples of good steps: 'Skip the header and print "
     "category,amount comma-separated for each row', 'Sum the amount column "
@@ -343,7 +356,17 @@ def path_c_chained_hybrid(task: dict) -> dict:
     for idx, step in enumerate(steps):
         is_final = idx == last_step_idx
         expected_shape = task["expected"] if is_final else ""
-        desc = step.get("description", "")
+        raw_desc = step.get("description", "")
+        # NH8: prepend Sonnet's input_shape annotation to the description.
+        # The local 7B otherwise guesses $0's structure from the description's
+        # verbs and frequently picks the wrong split delimiter (e.g. splits on
+        # space when $0 is line-separated). Sonnet sees the actual sample input
+        # at decompose-time and can predict the shape per step deterministically.
+        input_shape = (step.get("input_shape") or "").strip()
+        if input_shape:
+            desc = f"INPUT SHAPE: {input_shape}\n\n{raw_desc}"
+        else:
+            desc = raw_desc
         result = generate_and_run(desc, cur_input, expected_shape)
         intermediate_retry_attempts = 0
         # Intermediate-step empty-output retry: up to 2 extra attempts
@@ -354,7 +377,7 @@ def path_c_chained_hybrid(task: dict) -> dict:
                and result["ok"]
                and not result["stdout"].strip()):
             intermediate_retry_attempts += 1
-            retry_desc = (f"{desc} Your previous attempt produced no output; "
+            retry_desc = (f"{desc}\n\nYour previous attempt produced no output; "
                           f"that's almost certainly a pipeline bug. Make sure "
                           f"to (split $0 \"\\n\") and emit (println ...) for "
                           f"each computed value.")
@@ -382,9 +405,12 @@ def path_c_chained_hybrid(task: dict) -> dict:
 
         step_results.append({
             "idx": idx,
-            "description": desc[:120],
+            "description": raw_desc[:120],
+            "input_shape": input_shape[:200],
             "ok": result["ok"] and (is_final or bool(result["stdout"].strip())),
             "stdout": result["stdout"][:400],
+            "code": result.get("code", "")[:600],
+            "stderr": (result.get("stderr") or "")[:240],
             "attempts": result["attempts"],
             "intermediate_retries": intermediate_retry_attempts,
             "model_used": result["model_used"],
@@ -461,7 +487,15 @@ def main():
                          "Use only when neither the local Sigil model nor "
                          "the harness logic has changed — otherwise B "
                          "should be re-run.")
+    ap.add_argument("--cloud-model", default="claude-sonnet-4-6",
+                    help="Cloud model used by Path A and the orchestration "
+                         "stages of Paths B and C. Default claude-sonnet-4-6. "
+                         "Pass claude-opus-4-7 to test whether a stronger "
+                         "orchestrator/decomposer changes the chained-pipeline "
+                         "ceiling — at 5x the price.")
     args = ap.parse_args()
+    global CLOUD_MODEL
+    CLOUD_MODEL = args.cloud_model
     if args.no_step_judge:
         # Monkey-patch the judge to always pass (ablation).
         import sigil_step_judge as _sj

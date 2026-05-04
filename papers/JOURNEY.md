@@ -2042,6 +2042,102 @@ Result files: `benchmark/stream_c_v7_phi_v2.json`,
 Commits:
 [802bed2](https://github.com/mlainez/sigil/commit/802bed2) (Stream C v7),
 [11fbddd](https://github.com/mlainez/sigil/commit/11fbddd) (A/B/C v7).
+
+## Phase 27: NH2 Tier B (3B step-judge) and the empty-pipeline post-mortem (2026-05-04)
+
+After Phase 26 left Path C stuck at 6/30, the obvious next move was a
+semantic step-judge: a 3B model that looks at each chained intermediate's
+stdout and decides whether the shape matches what the step description
+asked for. Built `benchmark/sigil_step_judge.py` — a hybrid:
+deterministic Python pre-checks for counting and ordering, qwen2.5-coder:3b
+for the semantic cases, fail-open on any error so the pipeline can't hang.
+
+Validated against the entire harness result history (131 task-runs across
+9 result files): 37 NO verdicts, 0 false positives on passing tasks, 26%
+coverage of failures. Smoke-tested OOD on synthetic chemistry / finance /
+code-metrics / geocoding / genome shapes (14/14) to confirm the
+principles-based prompt generalizes beyond our specific corpus.
+
+Wired into `path_c_chained_hybrid` after the empty-stdout retry. Live
+isolation run (qwen-sigil-v7 primary, deepseek-sigil v1 fallback,
+Tier A static validator, judge added): Path C 6/30 → 7/30. Two of three
+judge-triggered retries converted (gained `running_sum`,
+`filter_lines_in_range`).
+
+The strict lift estimator (`benchmark/judge_lift_estimate.py`) had
+predicted +0.4 to +0.7 tasks; actual +1 was the upper end. This
+confirmed the judge addresses precisely its TAM (wrong-shape
+intermediates with non-empty stdout) but is structurally unable to fix
+the dominant ~80% of failures (empty pipelines + final-step shape
+mismatches).
+
+### NH3 epoch-3 retrain regression
+
+In parallel: redid the deepseek-sigil retrain at the full 3 epochs the
+GPU thermal shutdown of 2026-05-03 had cut short. Loss kept dropping
+(0.33 → 0.27 epoch 2→3) but Stream C *regressed* from 23/30 → 19/30 on
+the clean idle-GPU rerun. Inspecting the lost tasks revealed classic
+overfit signatures: the model regurgitated training-corpus headers like
+`@(grammar sigil) @(stat tests:173 examples:4 stdlib:20)` instead of
+emitting code. Concrete evidence that the corpus contains memorizable
+artefacts the model can latch onto when training pushes far enough.
+Production fallback stays on the 2-epoch v1. Future retrains either
+cap at 2 epochs or use early stopping on a held-out validation slice.
+
+Commits:
+[202024e](https://github.com/mlainez/sigil/commit/202024e) (judge prep),
+[d5c8f99](https://github.com/mlainez/sigil/commit/d5c8f99) (judge prompt
+hardening + replay),
+[692a047](https://github.com/mlainez/sigil/commit/692a047) (lift estimator),
+[624f9d3](https://github.com/mlainez/sigil/commit/624f9d3) (clean isolation
+6→7/30).
+
+## Phase 28: NH8 input-shape annotation — failure mode confirmed, fix harder than expected (2026-05-04)
+
+Diagnostic on the post-judge baseline showed empty-pipeline failures
+(19/23 of the Path C losses) cluster in two specific positions:
+
+  - 10 final-step empties where Sonnet's decomposition left a "compound
+    final" step combining sort + take + format
+  - 9 first-step empties where the model couldn't parse `$0`'s shape
+
+A targeted manual probe on `wc_top_words` step 2 confirmed the failure
+mechanic: the model emitted `(split $0 " ")` (split on space) when `$0`
+was actually line-separated. The model was inferring shape from the
+*description's verbs* rather than the actual upstream data — so the
+step description "count words" cued the wrong delimiter.
+
+NH8 hypothesis: have Sonnet declare an `input_shape` per step so the
+local model knows what `$0` looks like.
+
+Three iterations:
+
+  - **v1** added a long shape-prescriptive system prompt with examples
+    of good shape annotations + an instruction to prefer shorter atomic
+    steps. Result: avg n_steps 1.63 → 2.17 (over-decomposed simple
+    tasks); Path C 7/30 → 5/30. Three previously-passing 1-step tasks
+    broke when forced into 2 steps.
+  - **v2** kept the new schema but rolled back "prefer atomic" to "use
+    as few steps as the task naturally needs". Result: avg n_steps
+    swung the other way to 1.23 (under-decomposed); Path C 6/30,
+    empty-pipeline failures jumped 19 → 24.
+  - **v3** (in flight at time of writing) restored the original
+    CHAIN_DELEGATE_SYSTEM verbatim and added input_shape only as a
+    single optional field in the JSON schema, with no other prompt
+    changes.
+
+The lesson is structural and captured as CH11 in `post-sigil/
+CONCLUSIONS.md`: prompt-engineering shape annotation onto a free-text
+JSON entangles with Sonnet's planning behavior. Cleaner architecture
+for the next project would be a *typed* plan structure where input/
+output shapes are first-class fields, not free-text annotations on top
+of an existing schema.
+
+Side finding: when given a correct shape hint, the qwen-sigil-v7 model
+drifts to Clojure-style `(let [x v y v] body)` bracket syntax that
+Sigil's parser rejects. Saved as a candidate parser-level meet-halfway
+extension if it becomes the dominant residual failure mode.
+
 ## Reproducibility
 
 Every claim in this narrative cites either a JSON results file in

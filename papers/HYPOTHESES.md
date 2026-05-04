@@ -569,6 +569,69 @@ inject from the orchestrator without extra cloud calls.
 model not knowing what shape to emit. Telling it the downstream
 contract is free information.
 
+**Status (2026-05-04, partial).** Empty-pipeline post-mortem on the
+post-judge baseline (`abc_v7_deepseekV1_judge_30task.json`) found:
+
+  - 19/23 failed Path C tasks had at least one empty-stdout step
+  - These cluster in TWO positions:
+      * 10 final-step empties — all "compound final" (sort + take + format
+        in one step description, e.g. "Sort lines descending by count, take
+        top 3, reformat as 'word: count'")
+      * 9 first-step empties — model can't identify $0's shape correctly
+
+A targeted probe on `wc_top_words` step 2 confirmed the failure mechanic:
+the model emitted `(split $0 " ")` (split on space) when $0 was actually
+line-separated. With an explicit shape hint prepended ("$0 is 6 lines of
+'WORD COUNT'"), the model correctly switched to `(split $0 "\n")` — but
+then drifted into Clojure-style `(let [parts ...])` bracket syntax that
+Sigil's parser rejects.
+
+**Implementation attempts:**
+
+  - **v1**: Sonnet decomposes with `input_shape` field per step + system
+    prompt instruction "prefer shorter atomic steps". Result: avg n_steps
+    1.63 → 2.17 (over-decomposed simple tasks); Path C 7→5/30. Three
+    previously-passing 1-step tasks broke when over-decomposed
+    (env_filter_prefix, filter_lines_in_range, lines_only_in_a). The
+    "prefer atomic" instruction was the regression.
+  - **v2**: Same JSON schema but rolled back the "prefer atomic"
+    instruction to "use as few steps as the task naturally needs".
+    Result: avg n_steps swung the other way to 1.23 (under-decomposed),
+    Path C 6/30, empty-pipeline failures jumped 19→24. The shape-prompt
+    edits were over-rotating Sonnet's planning behavior, not just adding
+    annotation.
+  - **v3**: Restored the original CHAIN_DELEGATE_SYSTEM verbatim;
+    added input_shape only as a single optional field in the JSON
+    schema, no other prompt changes. Result: avg n_steps 1.70 (back
+    near baseline 1.63), Path C **7/30** (ties baseline). 3 gained, 3
+    lost. Empty-pipeline failures 19 → 21.
+
+**Verdict (2026-05-04, NH8 closed).** The shape-annotation mechanism
+is informationally correct — the 3 v3-gained tasks (`histogram_buckets`,
+`json_users_with_admin_role`, `uniq_c_with_threshold`) are exactly the
+Pattern B "cannot infer $0 shape from description" failures the
+hypothesis targeted. But the annotation also introduces noise on tasks
+that didn't need it (3 lost: `filter_lines_in_range`, `lines_only_in_a`,
+`running_sum`). Net-zero on this 30-task benchmark.
+
+**Refined hypothesis for follow-up (NH8b):** apply shape annotation
+*conditionally* — only when the step description has 2+ action verbs
+or contains words that the model is known to misinterpret (e.g. "count
+words" with line-separated input). The gain side appears real; the
+loss side comes from blanket application. Could be A/B-tested with a
+deterministic verb-counter on each step description.
+
+Result files:
+  - `abc_v7_judge_shapeann_30task.json` (v1)
+  - `abc_v7_judge_shapeann_v2_30task.json` (v2)
+  - `abc_v7_judge_shapeann_v3_30task.json` (v3, clean isolation)
+
+**Side finding (worth its own meet-halfway move):** when given a correct
+input-shape hint, the qwen-sigil-v7 model drifts to Clojure-style
+`(let [x v y v] body)` bracket syntax. Saved to memory as a candidate
+parser-level meet-halfway extension if it becomes the dominant residual
+failure shape.
+
 ### NH9. Soft-pass measurement closes the perceived gap
 
 **Premise.** Path A's 26/30 may partly be because Sonnet's Python
@@ -706,6 +769,55 @@ for codestral if we run a fresh fine-tune.
 22B was dominated). We never re-tested with the *Sigil-fine-tuned*
 14B as the primary in production after the harness fixes (Phase 25
 moves) landed.
+
+---
+
+### NH16. Orchestrator reasoning quality propagates through the chain
+
+**Premise.** Distinct from NH6 ("is the orchestration ceiling above the
+local executor's capability?") — this asks: with the same local executor,
+does a stronger *orchestrator* produce decompositions whose steps each
+land closer to the local model's competence distribution?
+
+The local executor's failure modes documented in NH8 (compound-final
+steps, $0-shape misperception) are downstream of *what the orchestrator
+decided to ask*. A stronger reasoning model may:
+  - Produce more atomic decompositions where each step is a clean
+    Stream-C-shape (which the local model handles at 29/30).
+  - Predict more accurate input_shape annotations (NH8's mechanism).
+  - Anticipate where the local model is likely to fail and adjust the
+    plan (e.g., split sort+take+format into 3 steps even when the task
+    description bundles them).
+
+**Test.** Re-run A/B/C harness with `--cloud-model claude-opus-4-7`,
+keeping the local stack identical (qwen-sigil-v7 + deepseek-sigil v1
+fallback + Tier A validator + 3B step-judge + NH8 shape annotation).
+Path A cached. Path B and Path C run fresh under Opus.
+
+**Decision rule.**
+  - If Path C lifts substantially (e.g. 7→11+/30) while Stream C single-
+    step is unchanged: bottleneck has been orchestrator prompt quality,
+    not local model capacity. The right next move is investing in better
+    orchestration recipes (planner-side fine-tunes, structured plan
+    schemas, or just paying for stronger orchestrators in production).
+  - If Path C lifts only marginally (e.g. +1): local model truly is
+    capped at this benchmark.
+
+**Cost.** Opus is ~5× the per-token cost of Sonnet. For 30 tasks at the
+current B+C orchestration cost (~$0.20 with Sonnet), Opus run is ~$1.00.
+One-shot diagnostic, not a production cost.
+
+**Why this is load-bearing.** It separates two confounded variables that
+have been entangled in every prior multi-step result. Every "the local
+ceiling is X" claim in Sigil's history was implicitly conditioned on
+"...given Sonnet-quality decomposition." If Opus changes Path C
+substantially, every prior multi-step verdict needs revisiting.
+
+This is also a generalizable principle for the next project (captured as
+CH13 in `post-sigil/CONCLUSIONS.md`): orchestrator-quality investment
+can pay back at the executor, which has implications for how local-
+deployment stacks are budgeted (cheaper executor + better orchestrator
+may dominate stronger executor + cheaper orchestrator).
 
 ---
 
