@@ -267,13 +267,18 @@ LOCAL_PYTHON_PROMPT = (
 
 
 def local_python_execute_step(desc: str, cur_input: str,
-                              expected_shape: str = "") -> dict:
+                              expected_shape: str = "",
+                              model: str | None = None) -> dict:
     """Local-model Python executor (NH10 — Python-as-control on Sigil's
-    chained harness). Same dict shape as generate_and_run."""
+    chained harness). Same dict shape as generate_and_run.
+
+    Optional `model` overrides the module-level LOCAL_PYTHON_MODEL for
+    this call (used by the python-ensemble executor)."""
     import urllib.request, urllib.error, tempfile
     t0 = time.time()
+    use_model = model or LOCAL_PYTHON_MODEL
     body = json.dumps({
-        "model": LOCAL_PYTHON_MODEL,
+        "model": use_model,
         "system": LOCAL_PYTHON_SYSTEM,
         "prompt": LOCAL_PYTHON_PROMPT.format(desc=desc),
         "stream": False,
@@ -318,10 +323,37 @@ def local_python_execute_step(desc: str, cur_input: str,
 
     return {
         "ok": ok, "stdout": stdout, "stderr": stderr[:240], "code": code,
-        "attempts": 1, "model_used": LOCAL_PYTHON_MODEL,
+        "attempts": 1, "model_used": use_model,
         "fallback_used": False, "wall_seconds": round(time.time()-t0, 2),
         "tokens_in": 0, "tokens_out": 0, "cost_usd": 0.0,
     }
+
+
+def python_ensemble_execute_step(desc: str, cur_input: str,
+                                 expected_shape: str = "") -> dict:
+    """Two-stage Python ensemble: codestral:22b primary, qwen2.5-coder:7b
+    fallback on clear failure (program errored or empty stdout). Each
+    model has different per-task strengths (NH10 vs NH10b showed
+    6 unique tasks each); union ceiling on the 30-task suite is 18/30.
+    Path C step-judge handles the wrong-shape band; this ensemble
+    handles the empty-output / runtime-error band that the judge
+    skips by design.
+    """
+    r = local_python_execute_step(desc, cur_input, expected_shape,
+                                  model="codestral:22b")
+    if r["ok"] and r["stdout"].strip():
+        return r
+    r2 = local_python_execute_step(desc, cur_input, expected_shape,
+                                   model="qwen2.5-coder:7b")
+    if r2["ok"] and r2["stdout"].strip():
+        r2["fallback_used"] = True
+        r2["primary_model"] = "codestral:22b"
+        r2["wall_seconds"] = round(r["wall_seconds"] + r2["wall_seconds"], 2)
+        return r2
+    # Both failed — return the primary's diagnostics
+    r["fallback_used"] = True
+    r["fallback_also_failed"] = True
+    return r
 
 
 # Module-level executor selector. Defaults to local Sigil ensemble.
@@ -678,13 +710,15 @@ def main():
                          "orchestrator/decomposer changes the chained-pipeline "
                          "ceiling — at 5x the price.")
     ap.add_argument("--executor", default="sigil",
-                    choices=("sigil", "sonnet", "python"),
+                    choices=("sigil", "sonnet", "python", "python-ensemble"),
                     help="Step executor for Path C. 'sigil' (default) uses "
                          "the local Sigil ensemble; 'sonnet' uses Sonnet "
                          "writing inline Python per step (NH6 diagnostic); "
                          "'python' uses a local coder model writing Python "
-                         "(NH10 control — tests whether the same local model "
-                         "with a Python target closes the executor gap).")
+                         "(NH10 control); 'python-ensemble' uses codestral:22b "
+                         "primary + qwen2.5-coder:7b fallback on clear failure "
+                         "(NH10c — tests whether per-task model specialization "
+                         "approaches the 18/30 oracle ceiling).")
     ap.add_argument("--python-model", default="qwen2.5-coder:7b",
                     help="ollama model name for --executor python. Default "
                          "qwen2.5-coder:7b (no Sigil fine-tune).")

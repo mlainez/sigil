@@ -796,6 +796,49 @@ like:
 Result file: `abc_NH10_local_python_30task.json`. Cost: $0 cloud
 (Path A and B cached, Path C purely local).
 
+### NH10b. Larger local Python executor (codestral:22b)
+
+**Result (2026-05-04, REFINES NH10's "scale closes the gap" story).**
+Same harness, same orchestration, same Path A/B cache. Per-step
+executor: codestral:22b (3× more parameters than qwen2.5-coder:7b)
+writing Python.
+
+**Outcome: 12/30 — identical to the 7B version.** Tasks shuffled but
+the count didn't move:
+
+  - 22B gained 6 tasks the 7B lost: `csv_lookup_join`,
+    `extract_phone_then_format`, `extract_versions_sorted`,
+    `filter_lines_in_range`, `ini_section_keys`,
+    `uniq_c_with_threshold` (more structural-parsing oriented)
+  - 22B lost 6 tasks the 7B had: `extract_dotted_ipv4`,
+    `extract_python_imports`, `find_files_by_size`,
+    `histogram_buckets`, `json_path_max_value`,
+    `syslog_grep_unique_processes` (more regex-extract oriented)
+
+The two open-weight Python coders specialize on different task families
+but neither closes meaningful ground on Sonnet (still 14 tasks behind).
+
+**Refined finding (REVISES NH10):** scale doesn't help monotonically
+in the 7B → 22B band on this benchmark. The 74% scale share from
+NH10's decomposition was misleading — that share requires a *much*
+bigger jump (likely 70B+ local, or cloud-scale) to materialize.
+There's a **capability cliff** between mid-size local Python and
+cloud Python that 22B does not bridge.
+
+**Project-level implication:** for deployment-ready multi-step
+composition, **there is no "mid-size local sweet spot."** Either you
+deploy with cloud-scale executors (or a hybrid that delegates only
+the easy single-step shapes locally and escalates the hard ones), or
+you accept ~12/30 on this kind of benchmark.
+
+Updated conclusion in `post-sigil/CONCLUSIONS.md` C1: the
+language-vs-scale attribution is reframed — language proximity gains
+~5 tasks at fixed 7B size, but scaling 7B → 22B locally gains zero on
+this benchmark. The scale axis is *non-monotonic in this band* and
+requires a much larger jump to manifest.
+
+Result file: `abc_NH10b_codestral_22b_30task.json`.
+
 ### NH11. Parameterized templates as a parallel architecture
 
 **Premise.** Inspecting our 30 tasks, 25+ decompose into 5-7
