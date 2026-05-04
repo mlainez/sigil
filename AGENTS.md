@@ -1,5 +1,17 @@
 # Sigil for AI Agents: A Complete Guide
 
+> **Status (2026-05-04): research project closed.** This document
+> is the LLM-optimized quick reference that was used during active
+> development to prime models writing Sigil code. It remains the most
+> compact accurate description of the production language surface.
+> The "two-layer design" section below describes an early
+> architectural idea that did not survive into the production
+> interpreter (single-layer S-expression with the meet-halfway
+> aliases); see
+> [`papers/MEETING_HALFWAY.md`](papers/MEETING_HALFWAY.md) for the
+> philosophy that prevailed and [`papers/PAPER.md`](papers/PAPER.md)
+> for the research-project synthesis.
+
 **Target Audience**: LLMs, AI Agents, Code Generation Systems
 
 ---

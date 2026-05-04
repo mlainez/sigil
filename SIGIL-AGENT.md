@@ -1,5 +1,18 @@
 # Sigil-Agent Specification v1.0
 
+> **Status (2026-05-04): research project closed; this document is
+> archaeological.** Sigil-Agent was the proposed "ergonomic surface
+> language" half of an early two-layer architecture (Sigil-Agent
+> compiling to Sigil-Core IR). That two-layer model did not survive
+> into the production interpreter, which is single-layer S-expression.
+> Many of the surface constructs documented below are implemented in
+> the working language directly, not as desugarings. See
+> [`papers/PAPER.md`](papers/PAPER.md) for the research synthesis,
+> [`papers/MEETING_HALFWAY.md`](papers/MEETING_HALFWAY.md) for the
+> design philosophy that pulled the surface back to direct
+> S-expression, and [`LANGUAGE_SPEC.md`](LANGUAGE_SPEC.md) for the
+> production grammar (which carries the same archaeological caveat).
+
 **Status**: STABLE  
 **Last Updated**: 2026-02-11
 

@@ -1,5 +1,16 @@
 # Sigil Language Specification
 
+> **Status (2026-05-04): research project closed. Historical caveat on
+> the two-layer framing below.** This specification was written during
+> the early design phase (2026-02) and pitches a two-layer architecture
+> (Sigil-Agent surface compiling to Sigil-Core IR). That two-layer model
+> **did not survive into the production interpreter**; the working
+> language is single-layer S-expression with the meet-halfway aliases
+> documented in [`papers/MEETING_HALFWAY.md`](papers/MEETING_HALFWAY.md).
+> The grammar and semantics described below are otherwise accurate for
+> the production interpreter. For the research-project synthesis see
+> [`papers/PAPER.md`](papers/PAPER.md).
+
 Sigil - A two-layer programming language designed for LLM code generation with explicit syntax, zero ambiguity, and stable IR.
 
 ## Architecture: Two Layers

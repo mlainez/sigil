@@ -1,5 +1,17 @@
 # Sigil-Core Specification v1.0
 
+> **Status (2026-05-04): research project closed; this document is
+> archaeological.** Sigil-Core was the proposed "frozen IR" half of an
+> early two-layer architecture (Sigil-Agent surface compiling to
+> Sigil-Core IR). That two-layer model did not survive into the
+> production interpreter, which is single-layer S-expression. The IR
+> primitives below are implemented but they are not the canonical
+> surface — the meet-halfway methodology pulled the surface back to
+> direct S-expression at the user layer. See
+> [`papers/PAPER.md`](papers/PAPER.md) for the research synthesis and
+> [`papers/JOURNEY.md`](papers/JOURNEY.md) for the chronological
+> account of how the architecture evolved.
+
 **Status**: FROZEN  
 **Last Updated**: 2026-02-06
 
