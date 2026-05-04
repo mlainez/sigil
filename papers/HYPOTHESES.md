@@ -743,6 +743,59 @@ Sigil load-bearing for this project's value claim?". Marc has already
 parked this question once (Python-subset counterfactual in memory);
 NH10 is the empirical answer.
 
+**Result (2026-05-04, partial confirmation with refined story).** Built
+`local_python_execute_step` as a third executor option (alongside
+sigil and sonnet), gated by `--executor python`. Same Sonnet
+decomposition, same shape annotation, same harness. Per-step executor
+swapped to qwen2.5-coder:7b writing Python — same model size as
+qwen-sigil-v7 but no Sigil fine-tune.
+
+Three-way Path C comparison (all on identical orchestration):
+
+| executor | passes | model |
+|---|---|---|
+| qwen-sigil-v7:7b (Sigil) | 7/30 | 7B fine-tuned |
+| **qwen2.5-coder:7b (Python)** | **12/30** | **7B base, no Sigil fine-tune** |
+| Sonnet (Python) | 26/30 | cloud |
+
+**Decomposition of the 19-task gap NH6 identified:**
+  - **+5 tasks** from removing the Sigil fine-tune (i.e. moving the
+    same 7B parameter count to its native Python distribution)
+  - **+14 tasks** from model scale (7B → Sonnet)
+
+So roughly **74% of the multi-step ceiling is model-scale-driven**,
+**~26% is language-proximity-driven**. Both axes matter; scale matters
+more.
+
+**Tasks gained moving from Sigil → Python on the same 7B body:**
+`extract_dotted_ipv4`, `extract_python_def_lines`,
+`extract_python_imports`, `find_files_by_size`, `running_sum`,
+`syslog_grep_unique_processes`. All heavy on regex / sort+take /
+cumulative arithmetic — exactly the patterns where Python's `re` and
+list/dict ergonomics are on-distribution and Sigil's API is friction.
+
+**Tasks still missed by local Python but solved by Sonnet's Python:**
+the harder composition cases (`csv_lookup_join`, `log_count_by_hour`,
+`wc_top_words`, `tsv_to_markdown`, etc.) — Sonnet's per-step Python is
+materially more sophisticated than a 7B can write.
+
+**Refined strategic conclusion (post-NH10):** the C1 thesis in
+`post-sigil/CONCLUSIONS.md` is empirically supported but more
+carefully: a Python-subset (Starlark-shape) executor closes ~26% of
+the cloud gap at zero additional model cost. To close the rest, you
+need executor scale. A deployment-ready hybrid stack therefore looks
+like:
+
+  - Cloud orchestrator (cheap once per task)
+  - Mid-size local executor (14B+ on a Python subset) for the
+    composition-heavy tasks the 7B can't reach
+  - Maybe a small executor for the Stream-C-shape easy steps the 7B
+    handles cleanly (29/30 single-step is real)
+  - Capability-aware orchestration that routes per step
+
+Result file: `abc_NH10_local_python_30task.json`. Cost: $0 cloud
+(Path A and B cached, Path C purely local).
+
 ### NH11. Parameterized templates as a parallel architecture
 
 **Premise.** Inspecting our 30 tasks, 25+ decompose into 5-7

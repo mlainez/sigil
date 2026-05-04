@@ -234,8 +234,99 @@ def sonnet_execute_step(desc: str, cur_input: str, expected_shape: str = "") -> 
     }
 
 
+# ============================================================================
+# NH10: Local-model-Python executor — same chain harness, Python instead of Sigil
+# ============================================================================
+# Tests CONCLUSIONS.md C1 directly: would the same local model writing
+# Python (its native pretraining distribution) close most of the
+# 19-task gap NH6 identified between qwen-sigil-v7 and Sonnet?
+#
+# Same orchestration. Same chained pipeline. Only the per-step
+# executor language target swapped: Python instead of Sigil.
+# Generator: a base coder model (qwen2.5-coder:7b by default), no
+# Sigil fine-tune. Output runs as a Python subprocess.
+
+LOCAL_PYTHON_MODEL = "qwen2.5-coder:7b"   # set via --python-model
+
+LOCAL_PYTHON_SYSTEM = (
+    "You are a step-executor in a chained data-processing pipeline. "
+    "For the given step description, write a Python 3 program that "
+    "reads sys.argv[1] (the previous step's stdout, or the user-supplied "
+    "input for the first step) and emits the result of THIS STEP ONLY "
+    "to stdout. Do NOT try to solve the whole task — only the step you "
+    "are given. Output ONLY raw Python code, no markdown, no prose. "
+    "Always `import sys` if you use sys.argv. Use sys.stdout.write(...) "
+    "for output (no extra trailing newline unless requested)."
+)
+LOCAL_PYTHON_PROMPT = (
+    "Step description: {desc}\n\n"
+    "When called with the input string as sys.argv[1], your program's "
+    "stdout will be passed to the next step (or returned to the user "
+    "if this is the final step). Write the Python."
+)
+
+
+def local_python_execute_step(desc: str, cur_input: str,
+                              expected_shape: str = "") -> dict:
+    """Local-model Python executor (NH10 — Python-as-control on Sigil's
+    chained harness). Same dict shape as generate_and_run."""
+    import urllib.request, urllib.error, tempfile
+    t0 = time.time()
+    body = json.dumps({
+        "model": LOCAL_PYTHON_MODEL,
+        "system": LOCAL_PYTHON_SYSTEM,
+        "prompt": LOCAL_PYTHON_PROMPT.format(desc=desc),
+        "stream": False,
+        "options": {"temperature": 0.0, "num_predict": 2048, "top_p": 0.9},
+    }).encode()
+    req = urllib.request.Request(
+        "http://localhost:11434/api/generate",
+        data=body, headers={"Content-Type": "application/json"},
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=120) as resp:
+            data = json.loads(resp.read())
+        raw = data.get("response", "")
+    except (urllib.error.URLError, TimeoutError, ConnectionError, OSError) as e:
+        return {"ok": False, "stdout": "", "stderr": f"ollama error: {e}",
+                "code": "", "attempts": 1, "model_used": LOCAL_PYTHON_MODEL,
+                "fallback_used": False, "wall_seconds": round(time.time()-t0, 2),
+                "tokens_in": 0, "tokens_out": 0, "cost_usd": 0.0}
+
+    code = raw.strip()
+    for fence in ("```python", "```py", "```"):
+        if code.startswith(fence):
+            code = code[len(fence):].lstrip(); break
+    if code.endswith("```"):
+        code = code[:-3].rstrip()
+    # Strip a bare language-name first line if the model emitted one
+    first, _, rest = code.partition("\n")
+    if first.strip().lower() in {"python", "py"}:
+        code = rest.lstrip()
+
+    f = tempfile.NamedTemporaryFile(mode="w", suffix=".py", delete=False)
+    f.write(code); f.close()
+    try:
+        run = subprocess.run(["python3", f.name, cur_input],
+                             capture_output=True, text=True, timeout=15)
+        stdout, stderr = run.stdout, run.stderr
+        ok = (run.returncode == 0)
+    except subprocess.TimeoutExpired:
+        stdout, stderr, ok = "", "TIMEOUT", False
+    finally:
+        os.unlink(f.name)
+
+    return {
+        "ok": ok, "stdout": stdout, "stderr": stderr[:240], "code": code,
+        "attempts": 1, "model_used": LOCAL_PYTHON_MODEL,
+        "fallback_used": False, "wall_seconds": round(time.time()-t0, 2),
+        "tokens_in": 0, "tokens_out": 0, "cost_usd": 0.0,
+    }
+
+
 # Module-level executor selector. Defaults to local Sigil ensemble.
 # --executor sonnet swaps in the cloud step-executor above for path_c.
+# --executor python  swaps in the local-Python executor (NH10).
 def _default_executor(desc, cur_input, expected_shape):
     return generate_and_run(desc, cur_input, expected_shape)
 STEP_EXECUTOR = _default_executor
@@ -586,19 +677,27 @@ def main():
                          "Pass claude-opus-4-7 to test whether a stronger "
                          "orchestrator/decomposer changes the chained-pipeline "
                          "ceiling — at 5x the price.")
-    ap.add_argument("--executor", default="sigil", choices=("sigil", "sonnet"),
+    ap.add_argument("--executor", default="sigil",
+                    choices=("sigil", "sonnet", "python"),
                     help="Step executor for Path C. 'sigil' (default) uses "
                          "the local Sigil ensemble; 'sonnet' uses Sonnet "
-                         "writing inline Python per step. The 'sonnet' option "
-                         "is the NH6 diagnostic — tests whether the multi-step "
-                         "ceiling is local-executor-bound or orchestration-bound. "
-                         "It costs cloud tokens per step; not for production.")
+                         "writing inline Python per step (NH6 diagnostic); "
+                         "'python' uses a local coder model writing Python "
+                         "(NH10 control — tests whether the same local model "
+                         "with a Python target closes the executor gap).")
+    ap.add_argument("--python-model", default="qwen2.5-coder:7b",
+                    help="ollama model name for --executor python. Default "
+                         "qwen2.5-coder:7b (no Sigil fine-tune).")
     args = ap.parse_args()
-    global CLOUD_MODEL, STEP_EXECUTOR
+    global CLOUD_MODEL, STEP_EXECUTOR, LOCAL_PYTHON_MODEL
     CLOUD_MODEL = args.cloud_model
+    LOCAL_PYTHON_MODEL = args.python_model
     if args.executor == "sonnet":
         STEP_EXECUTOR = sonnet_execute_step
         print(f"  [diagnostic] Path C executor: SONNET ({CLOUD_MODEL})")
+    elif args.executor == "python":
+        STEP_EXECUTOR = local_python_execute_step
+        print(f"  [control] Path C executor: LOCAL PYTHON ({LOCAL_PYTHON_MODEL})")
     if args.no_step_judge:
         # Monkey-patch the judge to always pass (ablation).
         import sigil_step_judge as _sj

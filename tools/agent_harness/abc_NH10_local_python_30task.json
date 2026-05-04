@@ -1,0 +1,2820 @@
+{
+  "aggregate": {
+    "n_tasks": 30,
+    "A_cloud_only": {
+      "pass": 26,
+      "input_tokens": 92,
+      "output_tokens": 6900,
+      "cost_usd": 0.1038
+    },
+    "B_hybrid": {
+      "pass": 5,
+      "input_tokens": 180.0,
+      "output_tokens": 5387,
+      "cost_usd": 0.0813
+    },
+    "savings": {
+      "input_tokens_saved_pct": -95.7,
+      "output_tokens_saved_pct": 21.9,
+      "cost_saved_pct": 21.6,
+      "accuracy_delta_pp": -21
+    },
+    "C_chained": {
+      "pass": 12,
+      "input_tokens": 180.0,
+      "output_tokens": 5193,
+      "cost_usd": 0.0784,
+      "vs_A_accuracy_pp": -14,
+      "vs_B_accuracy_pp": 7
+    }
+  },
+  "tasks": [
+    {
+      "id": "log_top_4xx_ip",
+      "shape": "log_analysis",
+      "A": {
+        "path": "A_cloud_only",
+        "ok": true,
+        "stdout": "192.168.1.42\t6\n",
+        "code": "import sys\nimport re\nfrom collections import defaultdict\n\nlog = sys.argv[1]\ncounts = defaultdict(int)\nfor line in log.splitlines():\n    m = re.match(r'(\\S+)\\s+\\S+\\s+\\S+\\s+\\[.*?\\]\\s+\".*?\"\\s+([0-9]+)', line)\n    if m:\n        ip, status = m.group(1), m.group(2)\n        if status.startswith('4'):\n            counts[ip] += 1\nbest = max(counts, key=lambda k: counts[k])\nsys.stdout.write(f\"{best}\\t{counts[best]}\\n\")",
+        "tokens_in": 3,
+        "tokens_out": 349,
+        "cost_usd": 0.005244,
+        "wall_seconds": 6.13,
+        "from_cache": "tools/agent_harness/abc_v7_judge_shapeann_v3_30task.json"
+      },
+      "B": {
+        "path": "B_hybrid",
+        "ok": false,
+        "stdout": "",
+        "code": "# Parse nginx access log lines, count 4xx-status requests per IP, and print the IP with the highest count as 'IP\\tCOUNT'.\n(set lines (split $0 \"\\n\"))\n(set counts {})\n(for-each line lines\n    (if (regex_match \"^[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\" line)\n        (let ip (slice (split line \"\\t\") 0 1))\n            (if (has counts ip)\n                (set counts (update_in counts [ip] add 1))\n                (set counts (assoc counts ip 1)))\n    )\n)\n(set max_count 0)\n(set max_ip \"\")\n(for-each kv (entries counts)\n    (let count (last kv))\n        (if (gt count max_count)\n            (do\n                (set max_count count)\n                (set max_ip (first kv)))\n        )\n)\n(println (fmt \"{}\\t{}\" max_ip max_count))",
+        "tokens_in": 6.0,
+        "tokens_out": 504,
+        "cost_usd": 0.007578,
+        "wall_seconds": 25.76,
+        "sigil_attempts": 3,
+        "sigil_model": "deepseek-sigil:6.7b",
+        "stages": [
+          {
+            "stage": "decide",
+            "in": 3,
+            "out": 479
+          },
+          {
+            "stage": "report",
+            "in": 3,
+            "out": 25
+          }
+        ],
+        "from_cache": "tools/agent_harness/abc_v7_judge_shapeann_v3_30task.json"
+      },
+      "C": {
+        "path": "C_chained",
+        "ok": false,
+        "stdout": "",
+        "n_steps": 3,
+        "step_results": [
+          {
+            "idx": 0,
+            "description": "Filter lines where the status code field (9th whitespace-separated field) starts with 4, then print only the first field",
+            "input_shape": "Each line is a nginx log entry with space-separated fields: IP - - [timestamp] \"METHOD /path\" STATUS bytes",
+            "ok": false,
+            "stdout": "",
+            "code": "import sys\n\ninput_data = sys.argv[1]\nlines = input_data.split('\\n')\n\nfor line in lines:\n    fields = line.split()\n    if len(fields) >= 9 and fields[8].startswith('4'):\n        print(fields[0])",
+            "stderr": "",
+            "attempts": 1,
+            "intermediate_retries": 2,
+            "model_used": "qwen2.5-coder:7b",
+            "fallback_used": false,
+            "wall_seconds": 0.81,
+            "judge_ok": null,
+            "judge_reason": null,
+            "judge_retry_used": false
+          }
+        ],
+        "tokens_in": 6.0,
+        "tokens_out": 206,
+        "cost_usd": 0.003108,
+        "wall_seconds": 11.58,
+        "stages": [
+          {
+            "stage": "decompose",
+            "in": 3,
+            "out": 186
+          },
+          {
+            "stage": "report",
+            "in": 3,
+            "out": 20
+          }
+        ]
+      }
+    },
+    {
+      "id": "csv_top3_categories",
+      "shape": "csv_aggregation",
+      "A": {
+        "path": "A_cloud_only",
+        "ok": false,
+        "stdout": "utility: $200.00\nfood: $149.20\nentertainment: $30.00\n",
+        "code": "import sys\nimport csv\nfrom collections import defaultdict\n\ndata = sys.argv[1]\ntotals = defaultdict(float)\nreader = csv.DictReader(data.splitlines())\nfor row in reader:\n    totals[row['category']] += float(row['amount'])\ntop3 = sorted(totals.items(), key=lambda x: x[1], reverse=True)[:3]\nfor cat, amt in top3:\n    sys.stdout.write(f\"{cat}: ${amt:.2f}\\n\")",
+        "tokens_in": 3,
+        "tokens_out": 215,
+        "cost_usd": 0.003234,
+        "wall_seconds": 4.76,
+        "from_cache": "tools/agent_harness/abc_v7_judge_shapeann_v3_30task.json"
+      },
+      "B": {
+        "path": "B_hybrid",
+        "ok": false,
+        "stdout": "",
+        "code": "# Parse a CSV string with header 'date,category,amount', sum amounts by category, and output the top 3 categories by total amount descending, formatted as 'CATEGORY: $TOTAL' (two decimal places), one per line.\n(set rows (split (arg_str 0) \"\\n\"))\n(set header (first rows))\n(set data (rest rows))\n(set category_amounts {})\n(for-each row data\n    (set fields (split row \",\"))\n    (set category (array_get fields 1))\n    (set amount (parse_float (array_get fields 2)))\n    (if (has category_amounts category)\n        (set category_amounts (map_set category_amounts category (+ (get category_amounts category) amount)))\n        (set category_amounts (map_set category_amounts category amount))))\n(set sorted_categories (sort_by (entries category_amounts) (\\x (last x)) true))\n(for-each i (range 3)\n    (println (fmt \"{}: ${:.2f}\" (first (array_get sorted_categories i)) (last (array_get sorted_categories i)))))",
+        "tokens_in": 6.0,
+        "tokens_out": 269,
+        "cost_usd": 0.004053,
+        "wall_seconds": 24.74,
+        "sigil_attempts": 3,
+        "sigil_model": "deepseek-sigil:6.7b",
+        "stages": [
+          {
+            "stage": "decide",
+            "in": 3,
+            "out": 243
+          },
+          {
+            "stage": "report",
+            "in": 3,
+            "out": 26
+          }
+        ],
+        "from_cache": "tools/agent_harness/abc_v7_judge_shapeann_v3_30task.json"
+      },
+      "C": {
+        "path": "C_chained",
+        "ok": false,
+        "stdout": "utility: $200.00\nfood: $149.20\nentertainment: $30.00\n",
+        "n_steps": 3,
+        "step_results": [
+          {
+            "idx": 0,
+            "description": "Skip the header line and print category,amount comma-separated for each row.",
+            "input_shape": "Newline-separated CSV rows with header 'date,category,amount'; each data row has three comma-separated fields.",
+            "ok": true,
+            "stdout": "food,42.50\ntransit,18.00\nfood,33.20\nutility,120.00\nfood,18.50\ntransit,7.50\nutility,80.00\nfood,55.00\nentertainment,30.00\n",
+            "code": "import sys\n\ninput_data = sys.argv[1].split('\\n')\nheader = input_data.pop(0)\n\nfor row in input_data:\n    if row:\n        date, category, amount = row.split(',')\n        print(f\"{category},{amount}\")",
+            "stderr": "",
+            "attempts": 1,
+            "intermediate_retries": 0,
+            "model_used": "qwen2.5-coder:7b",
+            "fallback_used": false,
+            "wall_seconds": 0.84,
+            "judge_ok": true,
+            "judge_reason": "The output matches the input shape and format as described in the step description.",
+            "judge_retry_used": false
+          },
+          {
+            "idx": 1,
+            "description": "Sum the amount column grouped by category, printing 'CATEGORY TOTAL' space-separated on each line.",
+            "input_shape": "Newline-separated lines, each with two comma-separated fields: category (string) and amount (decimal number).",
+            "ok": true,
+            "stdout": "food 149.2\ntransit 25.5\nutility 200.0\nentertainment 30.0\n",
+            "code": "import sys\n\ninput_data = sys.argv[1]\ndata = [line.strip().split(',') for line in input_data.split('\\n') if line]\n\ncategory_totals = {}\nfor category, amount in data:\n    if category not in category_totals:\n        category_totals[category] = 0.0\n    category_totals[category] += float(amount)\n\nfor category, total in category_totals.items():\n    sys.stdout.write(f\"{category} {total}\\n\")",
+            "stderr": "",
+            "attempts": 1,
+            "intermediate_retries": 0,
+            "model_used": "qwen2.5-coder:7b",
+            "fallback_used": false,
+            "wall_seconds": 1.38,
+            "judge_ok": true,
+            "judge_reason": "The output correctly sums the amount column grouped by category and prints 'CATEGORY TOTAL' space-separated on each line.",
+            "judge_retry_used": false
+          },
+          {
+            "idx": 2,
+            "description": "Sort lines descending by the second whitespace-separated numeric field, take the top 3, and print each as 'CATEGORY: $TO",
+            "input_shape": "Newline-separated lines, each with two whitespace-separated fields: category (string) and total amount (decimal number).",
+            "ok": true,
+            "stdout": "utility: $200.00\nfood: $149.20\nentertainment: $30.00\n",
+            "code": "import sys\n\n# Read input from command line argument\ninput_data = sys.argv[1]\n\n# Split input into lines and sort by the second field in descending order\nsorted_lines = sorted(input_data.splitlines(), key=lambda x: float(x.split()[1]), reverse=True)\n\n# Take the top 3 lines\ntop_3_lines = sorted_lines[:3]\n\n# Format and print each line as 'CATEGORY: $TOTAL'\nfor line in top_3_lines:\n    category, total = line.split()\n    formatted_total = f\"{float(total):.2f}\"\n    sys.stdout.write(f\"{category}: ${formatted_total}\\n\")",
+            "stderr": "",
+            "attempts": 1,
+            "intermediate_retries": 0,
+            "model_used": "qwen2.5-coder:7b",
+            "fallback_used": false,
+            "wall_seconds": 1.83,
+            "judge_ok": null,
+            "judge_reason": null,
+            "judge_retry_used": false
+          }
+        ],
+        "tokens_in": 6.0,
+        "tokens_out": 252,
+        "cost_usd": 0.003798,
+        "wall_seconds": 14.14,
+        "stages": [
+          {
+            "stage": "decompose",
+            "in": 3,
+            "out": 209
+          },
+          {
+            "stage": "report",
+            "in": 3,
+            "out": 43
+          }
+        ]
+      }
+    },
+    {
+      "id": "extract_python_def_lines",
+      "shape": "code_mining",
+      "A": {
+        "path": "A_cloud_only",
+        "ok": true,
+        "stdout": "alpha\nbeta\ngamma\n",
+        "code": "import sys\nimport re\n\nsource = sys.argv[1]\nfor line in source.split('\\n'):\n    m = re.match(r'^def ([A-Za-z_][A-Za-z0-9_]*)\\(', line)\n    if m:\n        sys.stdout.write(m.group(1) + '\\n')",
+        "tokens_in": 3,
+        "tokens_out": 127,
+        "cost_usd": 0.001914,
+        "wall_seconds": 5.16,
+        "from_cache": "tools/agent_harness/abc_v7_judge_shapeann_v3_30task.json"
+      },
+      "B": {
+        "path": "B_hybrid",
+        "ok": false,
+        "stdout": "",
+        "code": "# Extract function names from Python source string and print each name on its own line in order of appearance\nsource = \"def alpha():\\n    pass\\n\\nclass C:\\n    def method_inside(self):\\n        pass\\n\\ndef beta(x, y):\\n    return x + y\\n\\n    def nested(): pass\\n\\ndef gamma():\\n    pass\"\nlines = source.split(\"\\n\")\nfunctions = [line[4:].split(\"(\")[0] for line in lines if line.startswith(\"def \")]\nfor function in functions:\n    print(function)",
+        "tokens_in": 6.0,
+        "tokens_out": 150,
+        "cost_usd": 0.002268,
+        "wall_seconds": 15.43,
+        "sigil_attempts": 3,
+        "sigil_model": "deepseek-sigil:6.7b",
+        "stages": [
+          {
+            "stage": "decide",
+            "in": 3,
+            "out": 131
+          },
+          {
+            "stage": "report",
+            "in": 3,
+            "out": 19
+          }
+        ],
+        "from_cache": "tools/agent_harness/abc_v7_judge_shapeann_v3_30task.json"
+      },
+      "C": {
+        "path": "C_chained",
+        "ok": true,
+        "stdout": "alpha\nbeta\ngamma\n",
+        "n_steps": 1,
+        "step_results": [
+          {
+            "idx": 0,
+            "description": "Filter lines that match the pattern of a top-level def (starting with 'def ' at column 0), then extract and print just t",
+            "input_shape": "Newline-separated lines of Python source code; some lines start with 'def ', 'class ', spaces, or are blank.",
+            "ok": true,
+            "stdout": "alpha\nbeta\ngamma\n",
+            "code": "import sys\n\ninput_code = sys.argv[1]\nlines = input_code.split('\\n')\n\nfor line in lines:\n    if line.startswith('def '):\n        function_name = line.split(' ')[1].split('(')[0]\n        print(function_name)",
+            "stderr": "",
+            "attempts": 1,
+            "intermediate_retries": 0,
+            "model_used": "qwen2.5-coder:7b",
+            "fallback_used": false,
+            "wall_seconds": 0.86,
+            "judge_ok": null,
+            "judge_reason": null,
+            "judge_retry_used": false
+          }
+        ],
+        "tokens_in": 6.0,
+        "tokens_out": 112,
+        "cost_usd": 0.001698,
+        "wall_seconds": 9.07,
+        "stages": [
+          {
+            "stage": "decompose",
+            "in": 3,
+            "out": 104
+          },
+          {
+            "stage": "report",
+            "in": 3,
+            "out": 8
+          }
+        ]
+      }
+    },
+    {
+      "id": "json_extract_paths",
+      "shape": "json_wrangling",
+      "A": {
+        "path": "A_cloud_only",
+        "ok": true,
+        "stdout": "bob\ncarol\n",
+        "code": "import sys\nimport json\n\ndata = json.loads(sys.argv[1])\nfor user in data[\"users\"]:\n    if user[\"role\"] == \"admin\":\n        sys.stdout.write(user[\"name\"] + \"\\n\")",
+        "tokens_in": 3,
+        "tokens_out": 93,
+        "cost_usd": 0.001404,
+        "wall_seconds": 3.38,
+        "from_cache": "tools/agent_harness/abc_v7_judge_shapeann_v3_30task.json"
+      },
+      "B": {
+        "path": "B_hybrid",
+        "ok": true,
+        "stdout": "bob\ncarol\n",
+        "code": "(set users (json_get (json_parse $0) [\"users\"]))\n(for-each u users\n  (if (eq (json_get u [\"role\"]) \"admin\")\n    (println (json_get u [\"name\"]))))",
+        "tokens_in": 6.0,
+        "tokens_out": 130,
+        "cost_usd": 0.001968,
+        "wall_seconds": 9.79,
+        "sigil_attempts": 1,
+        "sigil_model": "qwen-sigil-v7:7b",
+        "stages": [
+          {
+            "stage": "decide",
+            "in": 3,
+            "out": 115
+          },
+          {
+            "stage": "report",
+            "in": 3,
+            "out": 15
+          }
+        ],
+        "from_cache": "tools/agent_harness/abc_v7_judge_shapeann_v3_30task.json"
+      },
+      "C": {
+        "path": "C_chained",
+        "ok": true,
+        "stdout": "bob\ncarol\n",
+        "n_steps": 1,
+        "step_results": [
+          {
+            "idx": 0,
+            "description": "Parse the JSON from $0, filter users whose role is 'admin', and print each name on its own line in input order.",
+            "input_shape": "$0 is a single JSON string, a serialized object with a 'users' array of objects each having 'name' and 'role' string fields.",
+            "ok": true,
+            "stdout": "bob\ncarol\n",
+            "code": "import json\nimport sys\n\ninput_json = sys.argv[1]\ndata = json.loads(input_json)\n\nadmin_users = [user['name'] for user in data['users'] if user['role'] == 'admin']\n\nfor name in admin_users:\n    sys.stdout.write(name + '\\n')",
+            "stderr": "",
+            "attempts": 1,
+            "intermediate_retries": 0,
+            "model_used": "qwen2.5-coder:7b",
+            "fallback_used": false,
+            "wall_seconds": 0.96,
+            "judge_ok": null,
+            "judge_reason": null,
+            "judge_retry_used": false
+          }
+        ],
+        "tokens_in": 6.0,
+        "tokens_out": 100,
+        "cost_usd": 0.001518,
+        "wall_seconds": 7.63,
+        "stages": [
+          {
+            "stage": "decompose",
+            "in": 3,
+            "out": 86
+          },
+          {
+            "stage": "report",
+            "in": 3,
+            "out": 14
+          }
+        ]
+      }
+    },
+    {
+      "id": "tsv_to_markdown",
+      "shape": "format_conversion",
+      "A": {
+        "path": "A_cloud_only",
+        "ok": true,
+        "stdout": "| name | age | city |\n| --- | --- | --- |\n| alice | 30 | paris |\n| bob | 25 | nyc |\n",
+        "code": "import sys\n\ndata = sys.argv[1]\nlines = data.strip().split('\\n')\nrows = [line.split('\\t') for line in lines]\nheader = rows[0]\ndivider = ['---'] * len(header)\noutput_rows = [header, divider] + rows[1:]\nresult = ''\nfor row in output_rows:\n    result += '| ' + ' | '.join(row) + ' |\\n'\nsys.stdout.write(result)",
+        "tokens_in": 3,
+        "tokens_out": 171,
+        "cost_usd": 0.002574,
+        "wall_seconds": 4.46,
+        "from_cache": "tools/agent_harness/abc_v7_judge_shapeann_v3_30task.json"
+      },
+      "B": {
+        "path": "B_hybrid",
+        "ok": false,
+        "stdout": "",
+        "code": "# Convert a 3-column TSV (with header) to a Markdown table with a header divider row, using ' | ' as separator and pipe-padded edges.\n\nset rows (split $0 \"\\n\")\nset headers (split (first rows) \"\\t\")\nprintln \"|\"\nfor i 0 (len headers)\n    println (fmt \"| {} \" (array_get headers i))\nprintln \"|\"\nfor i 1 (len rows)\n    set row (split (array_get rows i) \"\\t\")\n    for j 0 (len row)\n        if (eq j 0)\n            println (fmt \"| {} |\" (array_get row j))\n        else\n            println (fmt \"{} |\" (array_get row j))",
+        "tokens_in": 6.0,
+        "tokens_out": 155,
+        "cost_usd": 0.002343,
+        "wall_seconds": 17.9,
+        "sigil_attempts": 3,
+        "sigil_model": "deepseek-sigil:6.7b",
+        "stages": [
+          {
+            "stage": "decide",
+            "in": 3,
+            "out": 124
+          },
+          {
+            "stage": "report",
+            "in": 3,
+            "out": 31
+          }
+        ],
+        "from_cache": "tools/agent_harness/abc_v7_judge_shapeann_v3_30task.json"
+      },
+      "C": {
+        "path": "C_chained",
+        "ok": false,
+        "stdout": "| name | age | city |\n| --- | --- | --- |\n| alice | 30 | paris |\n| bob | 25 | nyc |",
+        "n_steps": 1,
+        "step_results": [
+          {
+            "idx": 0,
+            "description": "Convert a TSV string (with header) to a Markdown table: split lines by newline, split each line by tab, join fields with",
+            "input_shape": "A single string with newline-separated rows, each row containing tab-separated fields; first row is the header (e.g. 'name\\tage\\tcity\\nalice\\t30\\tparis\\nbob\\t25\\tnyc').",
+            "ok": true,
+            "stdout": "| name | age | city |\n| --- | --- | --- |\n| alice | 30 | paris |\n| bob | 25 | nyc |",
+            "code": "import sys\n\ninput_tsv = sys.argv[1]\nlines = input_tsv.strip().split('\\n')\nheader = lines[0].split('\\t')\ndata = [line.split('\\t') for line in lines[1:]]\n\nmarkdown_table = []\nmarkdown_table.append('| ' + ' | '.join(header) + ' |')\nmarkdown_table.append('| --- | --- | --- |')\n\nfor row in data:\n    markdown_table.append('| ' + ' | '.join(row) + ' |')\n\nsys.stdout.write('\\n'.join(markdown_table))",
+            "stderr": "",
+            "attempts": 1,
+            "intermediate_retries": 0,
+            "model_used": "qwen2.5-coder:7b",
+            "fallback_used": false,
+            "wall_seconds": 1.65,
+            "judge_ok": null,
+            "judge_reason": null,
+            "judge_retry_used": false
+          }
+        ],
+        "tokens_in": 6.0,
+        "tokens_out": 202,
+        "cost_usd": 0.003048,
+        "wall_seconds": 9.36,
+        "stages": [
+          {
+            "stage": "decompose",
+            "in": 3,
+            "out": 147
+          },
+          {
+            "stage": "report",
+            "in": 3,
+            "out": 55
+          }
+        ]
+      }
+    },
+    {
+      "id": "log_peak_error_hour",
+      "shape": "multi_step",
+      "A": {
+        "path": "A_cloud_only",
+        "ok": true,
+        "stdout": "09\n",
+        "code": "import sys\nfrom collections import defaultdict\n\ndata = sys.argv[1]\ncounts = defaultdict(int)\nfor line in data.splitlines():\n    parts = line.split(' ', 2)\n    if len(parts) >= 2 and parts[1] == 'ERROR':\n        hour = parts[0].split('T')[1][:2]\n        counts[hour] += 1\nbest = max(counts, key=lambda h: counts[h])\nsys.stdout.write(best + '\\n')",
+        "tokens_in": 3,
+        "tokens_out": 185,
+        "cost_usd": 0.002784,
+        "wall_seconds": 4.03,
+        "from_cache": "tools/agent_harness/abc_v7_judge_shapeann_v3_30task.json"
+      },
+      "B": {
+        "path": "B_hybrid",
+        "ok": false,
+        "stdout": "",
+        "code": "# Parse log lines in 'YYYY-MM-DDTHH:MM:SS LEVEL message' format, count ERROR-level entries by hour and print the 2-digit hour with the most ERROR entries.\n(set lines (split $0 \"\\n\"))\n(set counts {})\n(for-each line lines\n    (if (regex_match \"^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2} ERROR\" line)\n        (let [parts (split line \" \")]\n            (set hour (string_slice parts 10 13))\n            (if (has counts hour)\n                (set counts (map_set counts hour (add (get counts hour) 1)))\n                (set counts (map_set counts hour 1))))))\n(println (first (sort_by (entries counts) (\\x (last x)) -1)))",
+        "tokens_in": 6.0,
+        "tokens_out": 257,
+        "cost_usd": 0.003873,
+        "wall_seconds": 22.58,
+        "sigil_attempts": 3,
+        "sigil_model": "deepseek-sigil:6.7b",
+        "stages": [
+          {
+            "stage": "decide",
+            "in": 3,
+            "out": 231
+          },
+          {
+            "stage": "report",
+            "in": 3,
+            "out": 26
+          }
+        ],
+        "from_cache": "tools/agent_harness/abc_v7_judge_shapeann_v3_30task.json"
+      },
+      "C": {
+        "path": "C_chained",
+        "ok": false,
+        "stdout": "9:",
+        "n_steps": 3,
+        "step_results": [
+          {
+            "idx": 0,
+            "description": "Filter lines where the second field is ERROR, then print only the hour portion (characters 12-13) of the timestamp.",
+            "input_shape": "Newline-separated log lines, each like 'YYYY-MM-DDTHH:MM:SS LEVEL message'",
+            "ok": true,
+            "stdout": "9:\n9:\n9:\n1:",
+            "code": "import sys\n\ninput_lines = sys.argv[1].split('\\n')\nfiltered_hours = [line[12:14] for line in input_lines if 'ERROR' in line]\nsys.stdout.write('\\n'.join(filtered_hours))",
+            "stderr": "",
+            "attempts": 1,
+            "intermediate_retries": 0,
+            "model_used": "qwen2.5-coder:7b",
+            "fallback_used": false,
+            "wall_seconds": 0.81,
+            "judge_ok": true,
+            "judge_reason": "The output contains the hour portion of the timestamp for each error message, as requested by the step.",
+            "judge_retry_used": false
+          },
+          {
+            "idx": 1,
+            "description": "Count occurrences of each unique hour value, printing each as 'HH COUNT' on its own line.",
+            "input_shape": "Newline-separated 2-digit hour strings like '09'",
+            "ok": true,
+            "stdout": "9: 3\n1: 1\n",
+            "code": "import sys\n\nhours = sys.argv[1].splitlines()\nhour_counts = {}\n\nfor hour in hours:\n    if hour in hour_counts:\n        hour_counts[hour] += 1\n    else:\n        hour_counts[hour] = 1\n\nfor hour, count in hour_counts.items():\n    sys.stdout.write(f\"{hour} {count}\\n\")",
+            "stderr": "",
+            "attempts": 1,
+            "intermediate_retries": 0,
+            "model_used": "qwen2.5-coder:7b",
+            "fallback_used": false,
+            "wall_seconds": 1.11,
+            "judge_ok": true,
+            "judge_reason": "P3: output differs from input in a way consistent with counting occurrences",
+            "judge_retry_used": false
+          },
+          {
+            "idx": 2,
+            "description": "Sort lines descending by the second whitespace-separated number and print only the first field (the hour) of the top res",
+            "input_shape": "Newline-separated lines each containing 'HH COUNT' separated by a space",
+            "ok": true,
+            "stdout": "9:",
+            "code": "import sys\n\n# Read input from command line argument\ninput_data = sys.argv[1]\n\n# Split the input into lines and sort them by the second field in descending order\nsorted_lines = sorted(input_data.splitlines(), key=lambda x: int(x.split()[1]), reverse=True)\n\n# Extract the first field (hour) of the top result\ntop_hour = sorted_lines[0].split()[0]\n\n# Output the result\nsys.stdout.write(top_hour)",
+            "stderr": "",
+            "attempts": 1,
+            "intermediate_retries": 0,
+            "model_used": "qwen2.5-coder:7b",
+            "fallback_used": false,
+            "wall_seconds": 1.38,
+            "judge_ok": null,
+            "judge_reason": null,
+            "judge_retry_used": false
+          }
+        ],
+        "tokens_in": 6.0,
+        "tokens_out": 219,
+        "cost_usd": 0.003303,
+        "wall_seconds": 12.63,
+        "stages": [
+          {
+            "stage": "decompose",
+            "in": 3,
+            "out": 185
+          },
+          {
+            "stage": "report",
+            "in": 3,
+            "out": 34
+          }
+        ]
+      }
+    },
+    {
+      "id": "extract_dotted_ipv4",
+      "shape": "regex_extract",
+      "A": {
+        "path": "A_cloud_only",
+        "ok": false,
+        "stdout": "10.0.0.1\n192.168.1.1\n999.999.999.999\n10.0.0.1\n",
+        "code": "import sys\nimport re\n\ntext = sys.argv[1]\nmatches = re.findall(r'\\b(?:\\d{1,3}\\.){3}\\d{1,3}\\b', text)\nsys.stdout.write('\\n'.join(matches) + '\\n' if matches else '')",
+        "tokens_in": 3,
+        "tokens_out": 116,
+        "cost_usd": 0.001749,
+        "wall_seconds": 4.12,
+        "from_cache": "tools/agent_harness/abc_v7_judge_shapeann_v3_30task.json"
+      },
+      "B": {
+        "path": "B_hybrid",
+        "ok": true,
+        "stdout": "10.0.0.1\n192.168.1.1\n10.0.0.1\n",
+        "code": "(println (join (find_all \"\\b(?:25[0-5]|2[0-4]\\d|[01]?\\d\\d?)\\.(?:25[0-5]|2[0-4]\\d|[01]?\\d\\d?)\\.(?:25[0-5]|2[0-4]\\d|[01]?\\d\\d?)\\.(?:25[0-5]|2[0-4]\\d|[01]?\\d\\d?)\\b\" $0) \"\\n\"))",
+        "tokens_in": 6.0,
+        "tokens_out": 233,
+        "cost_usd": 0.003513,
+        "wall_seconds": 13.53,
+        "sigil_attempts": 1,
+        "sigil_model": "qwen-sigil-v7:7b",
+        "stages": [
+          {
+            "stage": "decide",
+            "in": 3,
+            "out": 137
+          },
+          {
+            "stage": "report",
+            "in": 3,
+            "out": 96
+          }
+        ],
+        "from_cache": "tools/agent_harness/abc_v7_judge_shapeann_v3_30task.json"
+      },
+      "C": {
+        "path": "C_chained",
+        "ok": true,
+        "stdout": "10.0.0.1\n192.168.1.1\n10.0.0.1\n",
+        "n_steps": 1,
+        "step_results": [
+          {
+            "idx": 0,
+            "description": "Extract all dotted-quad IPv4 addresses (four 0-255 octets separated by dots) from $0 using a regex, printing each match ",
+            "input_shape": "A single string of arbitrary text possibly containing IPv4 addresses, passed as $0.",
+            "ok": true,
+            "stdout": "10.0.0.1\n192.168.1.1\n10.0.0.1\n",
+            "code": "import re\nimport sys\n\ninput_string = sys.argv[1]\nipv4_pattern = r'\\b(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\b'\n\nmatches = re.findall(ipv4_pattern, input_string)\nfor match in matches:\n    sys.stdout.write(match + '\\n')",
+            "stderr": "",
+            "attempts": 1,
+            "intermediate_retries": 0,
+            "model_used": "qwen2.5-coder:7b",
+            "fallback_used": false,
+            "wall_seconds": 2.45,
+            "judge_ok": null,
+            "judge_reason": null,
+            "judge_retry_used": false
+          }
+        ],
+        "tokens_in": 6.0,
+        "tokens_out": 174,
+        "cost_usd": 0.002628,
+        "wall_seconds": 10.56,
+        "stages": [
+          {
+            "stage": "decompose",
+            "in": 3,
+            "out": 84
+          },
+          {
+            "stage": "report",
+            "in": 3,
+            "out": 90
+          }
+        ]
+      }
+    },
+    {
+      "id": "url_status_pairs",
+      "shape": "log_parse_format",
+      "A": {
+        "path": "A_cloud_only",
+        "ok": true,
+        "stdout": "/home 200\n/api/login 401\n/docs 200\n/resource/5 404\n",
+        "code": "import sys\nlines = sys.argv[1].strip().split('\\n')\nout = ''\nfor line in lines:\n    parts = line.split()\n    out += parts[1] + ' ' + parts[2] + '\\n'\nsys.stdout.write(out)",
+        "tokens_in": 3,
+        "tokens_out": 221,
+        "cost_usd": 0.003324,
+        "wall_seconds": 5.03,
+        "from_cache": "tools/agent_harness/abc_v7_judge_shapeann_v3_30task.json"
+      },
+      "B": {
+        "path": "B_hybrid",
+        "ok": true,
+        "stdout": "/home 200\n/api/login 401\n/docs 200\n/resource/5 404\n",
+        "code": "(println (join (map_arr (split $0 \"\\n\") (\\line (join (slice (split line \" \") 1 3) \" \"))) \"\\n\"))",
+        "tokens_in": 6.0,
+        "tokens_out": 145,
+        "cost_usd": 0.002193,
+        "wall_seconds": 10.75,
+        "sigil_attempts": 1,
+        "sigil_model": "qwen-sigil-v7:7b",
+        "stages": [
+          {
+            "stage": "decide",
+            "in": 3,
+            "out": 118
+          },
+          {
+            "stage": "report",
+            "in": 3,
+            "out": 27
+          }
+        ],
+        "from_cache": "tools/agent_harness/abc_v7_judge_shapeann_v3_30task.json"
+      },
+      "C": {
+        "path": "C_chained",
+        "ok": true,
+        "stdout": "/home 200\n/api/login 401\n/docs 200\n/resource/5 404\n",
+        "n_steps": 1,
+        "step_results": [
+          {
+            "idx": 0,
+            "description": "Print the second and third whitespace-separated fields for each line.",
+            "input_shape": "Newline-separated lines, each with 4 space-separated fields: METHOD PATH STATUS BYTES.",
+            "ok": true,
+            "stdout": "/home 200\n/api/login 401\n/docs 200\n/resource/5 404\n",
+            "code": "import sys\n\ninput_data = sys.argv[1]\nlines = input_data.strip().split('\\n')\n\nfor line in lines:\n    fields = line.split()\n    if len(fields) >= 3:\n        print(f\"{fields[1]} {fields[2]}\")",
+            "stderr": "",
+            "attempts": 1,
+            "intermediate_retries": 0,
+            "model_used": "qwen2.5-coder:7b",
+            "fallback_used": false,
+            "wall_seconds": 0.89,
+            "judge_ok": null,
+            "judge_reason": null,
+            "judge_retry_used": false
+          }
+        ],
+        "tokens_in": 6.0,
+        "tokens_out": 88,
+        "cost_usd": 0.001338,
+        "wall_seconds": 7.82,
+        "stages": [
+          {
+            "stage": "decompose",
+            "in": 3,
+            "out": 61
+          },
+          {
+            "stage": "report",
+            "in": 3,
+            "out": 27
+          }
+        ]
+      }
+    },
+    {
+      "id": "passwd_top_shells",
+      "shape": "shell_pipeline",
+      "A": {
+        "path": "A_cloud_only",
+        "ok": true,
+        "stdout": "/bin/bash: 3\n/bin/zsh: 2\n",
+        "code": "import sys\nfrom collections import Counter, OrderedDict\n\ndata = sys.argv[1]\nlines = data.strip().split('\\n')\nshells = []\norder = {}\nfor line in lines:\n    if line.strip():\n        shell = line.strip().split(':')[-1]\n        shells.append(shell)\n        if shell not in order:\n            order[shell] = len(order)\n\ncounts = Counter(shells)\ntop2 = sorted(counts.items(), key=lambda x: (-x[1], order[x[0]]))[:2]\nresult = ''.join(f'{shell}: {count}\\n' for shell, count in top2)\nsys.stdout.write(result)",
+        "tokens_in": 3,
+        "tokens_out": 212,
+        "cost_usd": 0.003189,
+        "wall_seconds": 4.8,
+        "from_cache": "tools/agent_harness/abc_v7_judge_shapeann_v3_30task.json"
+      },
+      "B": {
+        "path": "B_hybrid",
+        "ok": false,
+        "stdout": "",
+        "code": "(set lines (split $0 \"\\n\"))\n(set shells {})\n(for-each line lines\n    (let [parts (split line \":\")]\n        (if (and (gt (len parts) 1) (ne (array_get parts 6) \"\"))\n            (if (has shells (last parts))\n                (inc (map_get shells (last parts)))\n                (set shells (merge shells {(last parts) 1}))))))\n(set pairs (entries shells))\n(sort_by pairs (\\p (array_get p 1 -1)) true)\n(for-each pair pairs\n    (println (fmt \"{}: {}\" (first pair) (second pair))))",
+        "tokens_in": 6.0,
+        "tokens_out": 240,
+        "cost_usd": 0.003618,
+        "wall_seconds": 19.15,
+        "sigil_attempts": 3,
+        "sigil_model": "deepseek-sigil:6.7b",
+        "stages": [
+          {
+            "stage": "decide",
+            "in": 3,
+            "out": 214
+          },
+          {
+            "stage": "report",
+            "in": 3,
+            "out": 26
+          }
+        ],
+        "from_cache": "tools/agent_harness/abc_v7_judge_shapeann_v3_30task.json"
+      },
+      "C": {
+        "path": "C_chained",
+        "ok": false,
+        "stdout": "bash: 0\nzsh: 0\n",
+        "n_steps": 2,
+        "step_results": [
+          {
+            "idx": 0,
+            "description": "Extract the last colon-separated field from each line and print one shell per line.",
+            "input_shape": "Newline-separated lines each containing colon-separated fields, e.g. 'root:x:0:0:root:/root:/bin/bash'.",
+            "ok": true,
+            "stdout": "/bin/bash\n/bin/bash\n/bin/zsh\n/bin/bash\n/usr/bin/fish\n/bin/zsh\n",
+            "code": "import sys\n\ninput_data = sys.argv[1]\nlines = input_data.split('\\n')\n\nfor line in lines:\n    fields = line.split(':')\n    if len(fields) > 0:\n        sys.stdout.write(fields[-1] + '\\n')",
+            "stderr": "",
+            "attempts": 1,
+            "intermediate_retries": 0,
+            "model_used": "qwen2.5-coder:7b",
+            "fallback_used": false,
+            "wall_seconds": 0.85,
+            "judge_ok": true,
+            "judge_reason": "The output contains one shell per line, extracted from the last colon-separated field of each input line.",
+            "judge_retry_used": false
+          },
+          {
+            "idx": 1,
+            "description": "Count occurrences of each unique shell, tracking first-appearance order, then sort descending by count with ties broken ",
+            "input_shape": "Newline-separated shell paths, one per line, e.g. '/bin/bash', with duplicates present.",
+            "ok": true,
+            "stdout": "bash: 0\nzsh: 0\n",
+            "code": "import sys\n\n# Read input from command line argument\ninput_paths = sys.argv[1].split('\\n')\n\n# Dictionary to store shell counts and first appearance order\nshell_counts = {}\nfirst_appearance = {}\n\n# Process each path to count occurrences and track first appearance\nfor i, path in enumerate(input_paths):\n    if path:\n        shell_name = path.split('/')[-1]\n        if shell_name not in shell_counts:\n            shell_counts[shell_name] = 0\n            first_appearance[shell_name] = i\n\n# Sort shells by count (descending) and then by first appearance (ascending)\nsorted_shells = sorted(shell_counts.it",
+            "stderr": "",
+            "attempts": 1,
+            "intermediate_retries": 0,
+            "model_used": "qwen2.5-coder:7b",
+            "fallback_used": false,
+            "wall_seconds": 2.59,
+            "judge_ok": null,
+            "judge_reason": null,
+            "judge_retry_used": false
+          }
+        ],
+        "tokens_in": 6.0,
+        "tokens_out": 173,
+        "cost_usd": 0.002613,
+        "wall_seconds": 12.08,
+        "stages": [
+          {
+            "stage": "decompose",
+            "in": 3,
+            "out": 162
+          },
+          {
+            "stage": "report",
+            "in": 3,
+            "out": 11
+          }
+        ]
+      }
+    },
+    {
+      "id": "wc_top_words",
+      "shape": "shell_pipeline",
+      "A": {
+        "path": "A_cloud_only",
+        "ok": true,
+        "stdout": "the: 4\nfox: 3\ndog: 3\n",
+        "code": "import sys\nimport re\nfrom collections import Counter\n\ntext = sys.argv[1]\nwords = re.findall(r'[a-zA-Z]+', text.lower())\ncounts = Counter(words).most_common(3)\nsys.stdout.write(''.join(f'{w}: {c}\\n' for w, c in counts))",
+        "tokens_in": 3,
+        "tokens_out": 145,
+        "cost_usd": 0.002184,
+        "wall_seconds": 3.61,
+        "from_cache": "tools/agent_harness/abc_v7_judge_shapeann_v3_30task.json"
+      },
+      "B": {
+        "path": "B_hybrid",
+        "ok": false,
+        "stdout": "",
+        "code": "# Import required libraries\nfrom collections import Counter\nimport re\n\n# Clean and tokenize the input text\ntext = re.sub(r'[^\\w\\s]', '', $0).lower()\nwords = text.split()\n\n# Count word occurrences\nword_counts = Counter(words)\n\n# Get the 3 most common words and their counts\nmost_common_words = word_counts.most_common(3)\n\n# Print each word and its count, one per line\nfor word, count in most_common_words:\n    print(f'{word}: {count}')",
+        "tokens_in": 6.0,
+        "tokens_out": 135,
+        "cost_usd": 0.002043,
+        "wall_seconds": 20.46,
+        "sigil_attempts": 3,
+        "sigil_model": "deepseek-sigil:6.7b",
+        "stages": [
+          {
+            "stage": "decide",
+            "in": 3,
+            "out": 109
+          },
+          {
+            "stage": "report",
+            "in": 3,
+            "out": 26
+          }
+        ],
+        "from_cache": "tools/agent_harness/abc_v7_judge_shapeann_v3_30task.json"
+      },
+      "C": {
+        "path": "C_chained",
+        "ok": false,
+        "stdout": "the: 4\nfox: 3\ndog: 3",
+        "n_steps": 3,
+        "step_results": [
+          {
+            "idx": 0,
+            "description": "Lowercase all text, strip punctuation, and print one word per line.",
+            "input_shape": "$0 is a multi-line string with mixed-case words and punctuation marks.",
+            "ok": true,
+            "stdout": "the\nquick\nbrown\nfox\njumps\nover\nthe\nlazy\ndog\nthe\nfox\nwas\nvery\nquick\nthe\ndog\nwas\nlazy\na\ndog\nand\na\nfox\nwent\non\nan\nadventure\n",
+            "code": "import sys\nimport re\n\ninput_string = sys.argv[1]\nlowercased = input_string.lower()\nstripped = re.sub(r'[^\\w\\s]', '', lowercased)\nwords = stripped.split()\nfor word in words:\n    print(word)",
+            "stderr": "",
+            "attempts": 1,
+            "intermediate_retries": 0,
+            "model_used": "qwen2.5-coder:7b",
+            "fallback_used": false,
+            "wall_seconds": 0.82,
+            "judge_ok": true,
+            "judge_reason": "The output contains one word per line, is lowercase, and has no punctuation.",
+            "judge_retry_used": false
+          },
+          {
+            "idx": 1,
+            "description": "Count occurrences of each word and print 'word count' space-separated, one per line.",
+            "input_shape": "$0 is one lowercase word per line, no punctuation.",
+            "ok": true,
+            "stdout": "the 4\nquick 2\nbrown 1\nfox 3\njumps 1\nover 1\nlazy 2\ndog 3\nwas 2\nvery 1\na 2\nand 1\nwent 1\non 1\nan 1\nadventure 1\n",
+            "code": "import sys\n\n# Read input from command line argument\ninput_string = sys.argv[1]\n\n# Split the input string into words and count occurrences\nword_count = {}\nfor word in input_string.split():\n    if word in word_count:\n        word_count[word] += 1\n    else:\n        word_count[word] = 1\n\n# Print each word with its count\nfor word, count in word_count.items():\n    sys.stdout.write(f\"{word} {count}\\n\")",
+            "stderr": "",
+            "attempts": 1,
+            "intermediate_retries": 0,
+            "model_used": "qwen2.5-coder:7b",
+            "fallback_used": false,
+            "wall_seconds": 1.43,
+            "judge_ok": true,
+            "judge_reason": "the output matches the description by counting occurrences of each word and printing 'word count' space-separated, one per line.",
+            "judge_retry_used": false
+          },
+          {
+            "idx": 2,
+            "description": "Sort lines descending by the second whitespace-separated number, take the top 3, and reformat each line as 'word: count'",
+            "input_shape": "$0 is lines of 'word count' space-separated pairs, one per line.",
+            "ok": true,
+            "stdout": "the: 4\nfox: 3\ndog: 3",
+            "code": "import sys\n\n# Read input from sys.argv[1]\ninput_data = sys.argv[1]\n\n# Split input into lines and sort by the second number in descending order\nsorted_lines = sorted(input_data.splitlines(), key=lambda x: int(x.split()[1]), reverse=True)\n\n# Take the top 3 lines\ntop_3_lines = sorted_lines[:3]\n\n# Reformat each line as 'word: count'\nformatted_output = '\\n'.join([f\"{line.split()[0]}: {line.split()[1]}\" for line in top_3_lines])\n\n# Emit the result to stdout\nsys.stdout.write(formatted_output)",
+            "stderr": "",
+            "attempts": 1,
+            "intermediate_retries": 0,
+            "model_used": "qwen2.5-coder:7b",
+            "fallback_used": false,
+            "wall_seconds": 1.83,
+            "judge_ok": null,
+            "judge_reason": null,
+            "judge_retry_used": false
+          }
+        ],
+        "tokens_in": 6.0,
+        "tokens_out": 315,
+        "cost_usd": 0.004743,
+        "wall_seconds": 17.88,
+        "stages": [
+          {
+            "stage": "decompose",
+            "in": 3,
+            "out": 166
+          },
+          {
+            "stage": "report",
+            "in": 3,
+            "out": 149
+          }
+        ]
+      }
+    },
+    {
+      "id": "find_files_by_size",
+      "shape": "shell_pipeline",
+      "A": {
+        "path": "A_cloud_only",
+        "ok": true,
+        "stdout": "/tmp/huge.bin 16384\n/tmp/big.log 8192\n/tmp/medium.dat 4096\n",
+        "code": "import sys\n\nlines = sys.argv[1].strip().split('\\n')\nfiles = []\nfor line in lines:\n    parts = line.split(' ', 1)\n    size, path = int(parts[0]), parts[1]\n    files.append((size, path))\nfiles.sort(reverse=True)\nresult = ''\nfor size, path in files[:3]:\n    result += path + ' ' + str(size) + '\\n'\nsys.stdout.write(result)",
+        "tokens_in": 3,
+        "tokens_out": 178,
+        "cost_usd": 0.002679,
+        "wall_seconds": 5.29,
+        "from_cache": "tools/agent_harness/abc_v7_judge_shapeann_v3_30task.json"
+      },
+      "B": {
+        "path": "B_hybrid",
+        "ok": false,
+        "stdout": "",
+        "code": "(set lines (split $0 \"\\n\"))\n(set sizes (map_arr lines (\\line (array_get (split line \" \") 1))))\n(set paths (map_arr lines (\\line (array_get (split line \" \") 0))))\n(set pairs (zip sizes paths))\n(set sorted_pairs (sort_by pairs (\\pair (parse_int (first pair))) true))\n(for-each i (range 3)\n    (println (join (slice (array_get sorted_pairs (- (len sorted_pairs) i 1)) 0 2) \" \")))",
+        "tokens_in": 6.0,
+        "tokens_out": 159,
+        "cost_usd": 0.002403,
+        "wall_seconds": 20.6,
+        "sigil_attempts": 3,
+        "sigil_model": "deepseek-sigil:6.7b",
+        "stages": [
+          {
+            "stage": "decide",
+            "in": 3,
+            "out": 133
+          },
+          {
+            "stage": "report",
+            "in": 3,
+            "out": 26
+          }
+        ],
+        "from_cache": "tools/agent_harness/abc_v7_judge_shapeann_v3_30task.json"
+      },
+      "C": {
+        "path": "C_chained",
+        "ok": true,
+        "stdout": "/tmp/huge.bin 16384\n/tmp/big.log 8192\n/tmp/medium.dat 4096\n",
+        "n_steps": 2,
+        "step_results": [
+          {
+            "idx": 0,
+            "description": "Sort lines descending by the first whitespace-separated number (the size field).",
+            "input_shape": "Newline-separated lines, each line is SIZE PATH where SIZE is an integer and PATH is a file path, no header.",
+            "ok": true,
+            "stdout": "16384 /tmp/huge.bin\n8192 /tmp/big.log\n4096 /tmp/medium.dat\n2048 /tmp/notes.md\n1024 /tmp/a.txt\n512 /tmp/small.cfg",
+            "code": "import sys\n\n# Read input from command line argument\ninput_data = sys.argv[1]\n\n# Split input into lines and sort them by size in descending order\nsorted_lines = sorted(input_data.splitlines(), key=lambda x: int(x.split()[0]), reverse=True)\n\n# Emit the result to stdout\nsys.stdout.write('\\n'.join(sorted_lines))",
+            "stderr": "",
+            "attempts": 1,
+            "intermediate_retries": 0,
+            "model_used": "qwen2.5-coder:7b",
+            "fallback_used": false,
+            "wall_seconds": 1.1,
+            "judge_ok": true,
+            "judge_reason": "col-1 values are correctly sorted desc",
+            "judge_retry_used": false
+          },
+          {
+            "idx": 1,
+            "description": "Take the top 3 lines and print each as PATH SIZE (swap the two fields).",
+            "input_shape": "Newline-separated lines sorted descending by size, each line is SIZE PATH where SIZE is an integer and PATH is a file path.",
+            "ok": true,
+            "stdout": "/tmp/huge.bin 16384\n/tmp/big.log 8192\n/tmp/medium.dat 4096\n",
+            "code": "import sys\n\ninput_data = sys.argv[1].strip().split('\\n')\ntop_3_lines = input_data[:3]\n\nfor line in top_3_lines:\n    size, path = line.split()\n    print(f\"{path} {size}\")",
+            "stderr": "",
+            "attempts": 1,
+            "intermediate_retries": 0,
+            "model_used": "qwen2.5-coder:7b",
+            "fallback_used": false,
+            "wall_seconds": 0.85,
+            "judge_ok": null,
+            "judge_reason": null,
+            "judge_retry_used": false
+          }
+        ],
+        "tokens_in": 6.0,
+        "tokens_out": 162,
+        "cost_usd": 0.002448,
+        "wall_seconds": 9.32,
+        "stages": [
+          {
+            "stage": "decompose",
+            "in": 3,
+            "out": 129
+          },
+          {
+            "stage": "report",
+            "in": 3,
+            "out": 33
+          }
+        ]
+      }
+    },
+    {
+      "id": "env_filter_prefix",
+      "shape": "config_parsing",
+      "A": {
+        "path": "A_cloud_only",
+        "ok": true,
+        "stdout": "APP_DEBUG=1\nAPP_HOST=localhost\nAPP_PORT=8080\n",
+        "code": "import sys\n\nlines = sys.argv[1].split('\\n')\nresult = []\nfor line in lines:\n    if '=' in line:\n        key = line.split('=', 1)[0]\n        if key.startswith('APP_'):\n            result.append(line)\nresult.sort(key=lambda x: x.split('=', 1)[0])\nsys.stdout.write('\\n'.join(result) + '\\n')",
+        "tokens_in": 3,
+        "tokens_out": 157,
+        "cost_usd": 0.002364,
+        "wall_seconds": 3.81,
+        "from_cache": "tools/agent_harness/abc_v7_judge_shapeann_v3_30task.json"
+      },
+      "B": {
+        "path": "B_hybrid",
+        "ok": true,
+        "stdout": "APP_DEBUG=1\nAPP_HOST=localhost\nAPP_PORT=8080\n",
+        "code": "(println (join (sort (filter (split $0 \"\\n\") (\\line (regex_match \"^APP_\" line)))) \"\\n\"))",
+        "tokens_in": 6.0,
+        "tokens_out": 165,
+        "cost_usd": 0.002493,
+        "wall_seconds": 8.61,
+        "sigil_attempts": 1,
+        "sigil_model": "qwen-sigil-v7:7b",
+        "stages": [
+          {
+            "stage": "decide",
+            "in": 3,
+            "out": 129
+          },
+          {
+            "stage": "report",
+            "in": 3,
+            "out": 36
+          }
+        ],
+        "from_cache": "tools/agent_harness/abc_v7_judge_shapeann_v3_30task.json"
+      },
+      "C": {
+        "path": "C_chained",
+        "ok": true,
+        "stdout": "APP_DEBUG=1\nAPP_HOST=localhost\nAPP_PORT=8080\n",
+        "n_steps": 1,
+        "step_results": [
+          {
+            "idx": 0,
+            "description": "Filter lines where the KEY (part before '=') starts with 'APP_', then sort them alphabetically and print each as KEY=VAL",
+            "input_shape": "Newline-separated KEY=VALUE pairs, one per line, no header.",
+            "ok": true,
+            "stdout": "APP_DEBUG=1\nAPP_HOST=localhost\nAPP_PORT=8080\n",
+            "code": "import sys\n\ninput_data = sys.argv[1]\nlines = input_data.strip().split('\\n')\nfiltered_lines = [line for line in lines if line.startswith('APP_')]\nsorted_lines = sorted(filtered_lines)\nfor line in sorted_lines:\n    sys.stdout.write(line + '\\n')",
+            "stderr": "",
+            "attempts": 1,
+            "intermediate_retries": 0,
+            "model_used": "qwen2.5-coder:7b",
+            "fallback_used": false,
+            "wall_seconds": 0.93,
+            "judge_ok": null,
+            "judge_reason": null,
+            "judge_retry_used": false
+          }
+        ],
+        "tokens_in": 6.0,
+        "tokens_out": 97,
+        "cost_usd": 0.001473,
+        "wall_seconds": 9.11,
+        "stages": [
+          {
+            "stage": "decompose",
+            "in": 3,
+            "out": 72
+          },
+          {
+            "stage": "report",
+            "in": 3,
+            "out": 25
+          }
+        ]
+      }
+    },
+    {
+      "id": "ini_section_keys",
+      "shape": "config_parsing",
+      "A": {
+        "path": "A_cloud_only",
+        "ok": true,
+        "stdout": "user\npassword\nhost\n",
+        "code": "import sys\nimport configparser\nimport io\n\nconfig = configparser.ConfigParser()\nconfig.read_string(sys.argv[1])\nfor key in config['database']:\n    sys.stdout.write(key + '\\n')",
+        "tokens_in": 3,
+        "tokens_out": 177,
+        "cost_usd": 0.002664,
+        "wall_seconds": 5.2,
+        "from_cache": "tools/agent_harness/abc_v7_judge_shapeann_v3_30task.json"
+      },
+      "B": {
+        "path": "B_hybrid",
+        "ok": false,
+        "stdout": "",
+        "code": "(set config (argv))\n(set sections (split config \"\\n\"))\n(set current_section \"\")\n(for-each line sections\n    (if (starts_with line \"[\")\n        (set current_section (slice line 1 (- (len line) 1)))\n        (if (eq current_section \"database\")\n            (println (first (split line \"=\"))))))",
+        "tokens_in": 6.0,
+        "tokens_out": 127,
+        "cost_usd": 0.001923,
+        "wall_seconds": 14.36,
+        "sigil_attempts": 3,
+        "sigil_model": "deepseek-sigil:6.7b",
+        "stages": [
+          {
+            "stage": "decide",
+            "in": 3,
+            "out": 101
+          },
+          {
+            "stage": "report",
+            "in": 3,
+            "out": 26
+          }
+        ],
+        "from_cache": "tools/agent_harness/abc_v7_judge_shapeann_v3_30task.json"
+      },
+      "C": {
+        "path": "C_chained",
+        "ok": false,
+        "stdout": "port\nhost\nuser\npassword\nhost\nlevel\n",
+        "n_steps": 1,
+        "step_results": [
+          {
+            "idx": 0,
+            "description": "Parse the INI-style input (newline-separated), extract only the keys (left of '=') that appear under the [database] sect",
+            "input_shape": "Single string with literal \\n as line separators, each line is either a [section] header or key=value pair",
+            "ok": true,
+            "stdout": "port\nhost\nuser\npassword\nhost\nlevel\n",
+            "code": "import sys\n\ninput_data = sys.argv[1]\nlines = input_data.split('\\n')\ndatabase_keys = []\n\nfor line in lines:\n    if line.startswith('[') and line.endswith(']'):\n        section = line.strip('[]')\n        if section == 'database':\n            continue\n    elif '=' in line:\n        key, value = line.split('=', 1)\n        database_keys.append(key.strip())\n\nfor key in database_keys:\n    sys.stdout.write(f\"{key}\\n\")",
+            "stderr": "",
+            "attempts": 1,
+            "intermediate_retries": 0,
+            "model_used": "qwen2.5-coder:7b",
+            "fallback_used": false,
+            "wall_seconds": 1.45,
+            "judge_ok": null,
+            "judge_reason": null,
+            "judge_retry_used": false
+          }
+        ],
+        "tokens_in": 6.0,
+        "tokens_out": 162,
+        "cost_usd": 0.002448,
+        "wall_seconds": 10.13,
+        "stages": [
+          {
+            "stage": "decompose",
+            "in": 3,
+            "out": 94
+          },
+          {
+            "stage": "report",
+            "in": 3,
+            "out": 68
+          }
+        ]
+      }
+    },
+    {
+      "id": "log_count_by_hour",
+      "shape": "timestamp_arithmetic",
+      "A": {
+        "path": "A_cloud_only",
+        "ok": true,
+        "stdout": "08: 2\n09: 3\n10: 2\n",
+        "code": "import sys\nfrom collections import defaultdict\n\ncounts = defaultdict(int)\nfor line in sys.argv[1].splitlines():\n    line = line.strip()\n    if line:\n        hour = line[11:13]\n        counts[hour] += 1\n\nout = \"\"\nfor h in sorted(counts):\n    out += f\"{h}: {counts[h]}\\n\"\nsys.stdout.write(out)",
+        "tokens_in": 4,
+        "tokens_out": 312,
+        "cost_usd": 0.004692,
+        "wall_seconds": 7.92,
+        "from_cache": "tools/agent_harness/abc_v7_judge_shapeann_v3_30task.json"
+      },
+      "B": {
+        "path": "B_hybrid",
+        "ok": false,
+        "stdout": "",
+        "code": "# Parse timestamped log lines in 'YYYY-MM-DDTHH:MM:SS message' format, count entries per hour and print 'HH: COUNT' sorted by hour ascending.\n(set lines (split $0 \"\\n\"))\n(set counts {})\n(for-each line lines\n  (set timestamp (array_get (split line \" \") 0))\n  (set hh (string_slice timestamp 11 13))\n  (if (has counts hh)\n    (set counts (map_set counts hh (add (get counts hh) 1)))\n    (set counts (map_set counts hh 1))))\n(for-each k (sort (entries counts))\n  (println (fmt \"{}: {}\" k (get counts k))))",
+        "tokens_in": 6.0,
+        "tokens_out": 215,
+        "cost_usd": 0.003243,
+        "wall_seconds": 17.38,
+        "sigil_attempts": 3,
+        "sigil_model": "deepseek-sigil:6.7b",
+        "stages": [
+          {
+            "stage": "decide",
+            "in": 3,
+            "out": 196
+          },
+          {
+            "stage": "report",
+            "in": 3,
+            "out": 19
+          }
+        ],
+        "from_cache": "tools/agent_harness/abc_v7_judge_shapeann_v3_30task.json"
+      },
+      "C": {
+        "path": "C_chained",
+        "ok": false,
+        "stdout": "",
+        "n_steps": 3,
+        "step_results": [
+          {
+            "idx": 0,
+            "description": "Extract the hour field from each log line by splitting on 'T' and taking characters 11-12, printing one HH per line.",
+            "input_shape": "Newline-separated lines, each of the form 'YYYY-MM-DDTHH:MM:SS message'.",
+            "ok": true,
+            "stdout": "ar\nad\nqu\nqu\nqu\nqu\nut\n",
+            "code": "import sys\n\ninput_data = sys.argv[1]\nlines = input_data.split('\\n')\n\nfor line in lines:\n    if line:  # Ensure the line is not empty\n        hour = line.split('T')[1][11:13]\n        print(hour)",
+            "stderr": "",
+            "attempts": 1,
+            "intermediate_retries": 0,
+            "model_used": "qwen2.5-coder:7b",
+            "fallback_used": false,
+            "wall_seconds": 0.92,
+            "judge_ok": true,
+            "judge_reason": "The hour field is extracted correctly by splitting on 'T' and taking characters 11-12, resulting in one HH per line.",
+            "judge_retry_used": false
+          },
+          {
+            "idx": 1,
+            "description": "Count occurrences of each unique hour value, printing 'HH COUNT' (space-separated) per unique hour.",
+            "input_shape": "Newline-separated lines, each a two-digit hour string like '08'.",
+            "ok": true,
+            "stdout": "ar 1\nad 1\nqu 4\nut 1\n",
+            "code": "import sys\n\n# Read input from command line argument\ninput_string = sys.argv[1]\n\n# Split the input string into lines\nhours = input_string.splitlines()\n\n# Create a dictionary to count occurrences of each hour\nhour_count = {}\n\n# Count occurrences of each hour\nfor hour in hours:\n    if hour in hour_count:\n        hour_count[hour] += 1\n    else:\n        hour_count[hour] = 1\n\n# Print the result in 'HH COUNT' format\nfor hour, count in hour_count.items():\n    sys.stdout.write(f\"{hour} {count}\\n\")",
+            "stderr": "",
+            "attempts": 1,
+            "intermediate_retries": 0,
+            "model_used": "qwen2.5-coder:7b",
+            "fallback_used": false,
+            "wall_seconds": 1.74,
+            "judge_ok": true,
+            "judge_reason": "The output contains 'HH COUNT' for each unique hour value.",
+            "judge_retry_used": false
+          },
+          {
+            "idx": 2,
+            "description": "Sort lines ascending by the first field (HH) and print each as 'HH: COUNT'.",
+            "input_shape": "Newline-separated lines, each of the form 'HH COUNT' space-separated.",
+            "ok": false,
+            "stdout": "",
+            "code": "import sys\n\nlines = sys.argv[1].split('\\n')\nsorted_lines = sorted(lines, key=lambda x: x.split()[0])\nfor line in sorted_lines:\n    print(f\"{line.split()[0]}: {line.split()[1]}\")",
+            "stderr": "Traceback (most recent call last):\n  File \"/tmp/tmpnehltz0s.py\", line 4, in <module>\n    sorted_lines = sorted(lines, key=lambda x: x.split()[0])\n                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/tmpnehltz0s.py\", lin",
+            "attempts": 1,
+            "intermediate_retries": 0,
+            "model_used": "qwen2.5-coder:7b",
+            "fallback_used": false,
+            "wall_seconds": 0.84,
+            "judge_ok": null,
+            "judge_reason": null,
+            "judge_retry_used": false
+          }
+        ],
+        "tokens_in": 6.0,
+        "tokens_out": 209,
+        "cost_usd": 0.003153,
+        "wall_seconds": 11.84,
+        "stages": [
+          {
+            "stage": "decompose",
+            "in": 3,
+            "out": 194
+          },
+          {
+            "stage": "report",
+            "in": 3,
+            "out": 15
+          }
+        ]
+      }
+    },
+    {
+      "id": "duration_total_minutes",
+      "shape": "timestamp_arithmetic",
+      "A": {
+        "path": "A_cloud_only",
+        "ok": true,
+        "stdout": "230\n",
+        "code": "import sys\n\ndef time_to_minutes(t):\n    h, m = t.split(':')\n    return int(h) * 60 + int(m)\n\ntotal = 0\nfor line in sys.argv[1].strip().split('\\n'):\n    line = line.strip()\n    if line:\n        start, end = line.split('-')\n        total += time_to_minutes(end) - time_to_minutes(start)\n\nsys.stdout.write(str(total) + '\\n')",
+        "tokens_in": 3,
+        "tokens_out": 223,
+        "cost_usd": 0.003354,
+        "wall_seconds": 4.55,
+        "from_cache": "tools/agent_harness/abc_v7_judge_shapeann_v3_30task.json"
+      },
+      "B": {
+        "path": "B_hybrid",
+        "ok": false,
+        "stdout": "",
+        "code": "# Parse each line as a 'HH:MM-HH:MM' time range, compute the duration in minutes for each range, sum all durations, and print the total as a single integer followed by a newline.\n\n(set lines (split $0 \"\\n\"))\n(set total 0)\n(for-each line lines\n    (set parts (split line \"-\"))\n    (if (eq (len parts) 2)\n        (let ((start_parts (split (first parts) \":\"))\n              (end_parts (split (last parts) \":\")))\n            (if (and (eq (len start_parts) 2) (eq (len end_parts) 2))\n                (set total (+ total (* (- (parse_int (last start_parts)) (parse_int (first start_parts))) 60))\n                            (- (parse_int (last end_parts)) (parse_int (first end_parts))))))))\n(println (str total))",
+        "tokens_in": 6.0,
+        "tokens_out": 136,
+        "cost_usd": 0.002058,
+        "wall_seconds": 19.96,
+        "sigil_attempts": 3,
+        "sigil_model": "deepseek-sigil:6.7b",
+        "stages": [
+          {
+            "stage": "decide",
+            "in": 3,
+            "out": 117
+          },
+          {
+            "stage": "report",
+            "in": 3,
+            "out": 19
+          }
+        ],
+        "from_cache": "tools/agent_harness/abc_v7_judge_shapeann_v3_30task.json"
+      },
+      "C": {
+        "path": "C_chained",
+        "ok": false,
+        "stdout": "230",
+        "n_steps": 2,
+        "step_results": [
+          {
+            "idx": 0,
+            "description": "Parse each 'HH:MM-HH:MM' line into minutes duration and print one integer per line.",
+            "input_shape": "Newline-separated lines, each a time range string like '09:00-10:30'.",
+            "ok": true,
+            "stdout": "90\n90\n50\n",
+            "code": "import sys\n\ndef parse_time_range(time_range):\n    start, end = time_range.split('-')\n    start_hour, start_minute = map(int, start.split(':'))\n    end_hour, end_minute = map(int, end.split(':'))\n    return (end_hour * 60 + end_minute) - (start_hour * 60 + start_minute)\n\nfor line in sys.argv[1].splitlines():\n    if line:\n        duration = parse_time_range(line)\n        sys.stdout.write(f\"{duration}\\n\")",
+            "stderr": "",
+            "attempts": 1,
+            "intermediate_retries": 0,
+            "model_used": "qwen2.5-coder:7b",
+            "fallback_used": false,
+            "wall_seconds": 1.53,
+            "judge_ok": true,
+            "judge_reason": "The output contains the correct minutes duration for each time range string.",
+            "judge_retry_used": false
+          },
+          {
+            "idx": 1,
+            "description": "Sum all integers from stdin and print the total as a single integer.",
+            "input_shape": "Newline-separated integers, one per line, each representing minutes for a range.",
+            "ok": true,
+            "stdout": "230",
+            "code": "import sys\n\n# Read input from stdin\ninput_data = sys.argv[1]\n\n# Split the input into a list of integers\nintegers = [int(line) for line in input_data.splitlines()]\n\n# Sum all integers\ntotal_sum = sum(integers)\n\n# Print the total sum as a single integer\nsys.stdout.write(str(total_sum))",
+            "stderr": "",
+            "attempts": 1,
+            "intermediate_retries": 0,
+            "model_used": "qwen2.5-coder:7b",
+            "fallback_used": false,
+            "wall_seconds": 1.08,
+            "judge_ok": null,
+            "judge_reason": null,
+            "judge_retry_used": false
+          }
+        ],
+        "tokens_in": 6.0,
+        "tokens_out": 160,
+        "cost_usd": 0.002418,
+        "wall_seconds": 10.11,
+        "stages": [
+          {
+            "stage": "decompose",
+            "in": 3,
+            "out": 115
+          },
+          {
+            "stage": "report",
+            "in": 3,
+            "out": 45
+          }
+        ]
+      }
+    },
+    {
+      "id": "syslog_grep_unique_processes",
+      "shape": "process_log_filter",
+      "A": {
+        "path": "A_cloud_only",
+        "ok": true,
+        "stdout": "cron\nkernel\nsshd\nsystemd\n",
+        "code": "import sys\nimport re\n\nlines = sys.argv[1].split('\\n')\nprocesses = set()\nfor line in lines:\n    m = re.search(r'\\S+ \\S+ (\\w+)(?:\\[\\d+\\])?: ', line)\n    if m:\n        processes.add(m.group(1))\nsys.stdout.write('\\n'.join(sorted(processes)) + '\\n')",
+        "tokens_in": 3,
+        "tokens_out": 152,
+        "cost_usd": 0.002289,
+        "wall_seconds": 3.81,
+        "from_cache": "tools/agent_harness/abc_v7_judge_shapeann_v3_30task.json"
+      },
+      "B": {
+        "path": "B_hybrid",
+        "ok": false,
+        "stdout": "",
+        "code": "# Extract distinct PROCESS names from syslog-style lines formatted as 'TIMESTAMP HOST PROCESS[PID]: MESSAGE', then print them alphabetically sorted, one per line.\n\n(set lines (split $0 \"\\n\"))\n(set processes [])\n(for-each line lines\n  (let parts (split line \":\"))\n  (if (eq (len parts) 2)\n    (push processes (first (last (split (second parts) \"[\")))))))\n(println (join (sort_by (uniq processes) str) \"\\n\"))",
+        "tokens_in": 6.0,
+        "tokens_out": 224,
+        "cost_usd": 0.003378,
+        "wall_seconds": 17.32,
+        "sigil_attempts": 3,
+        "sigil_model": "deepseek-sigil:6.7b",
+        "stages": [
+          {
+            "stage": "decide",
+            "in": 3,
+            "out": 193
+          },
+          {
+            "stage": "report",
+            "in": 3,
+            "out": 31
+          }
+        ],
+        "from_cache": "tools/agent_harness/abc_v7_judge_shapeann_v3_30task.json"
+      },
+      "C": {
+        "path": "C_chained",
+        "ok": true,
+        "stdout": "cron\nkernel\nsshd\nsystemd\n",
+        "n_steps": 2,
+        "step_results": [
+          {
+            "idx": 0,
+            "description": "Extract the PROCESS name (fifth whitespace-separated field, stripping everything from '[' onward) from each line, printi",
+            "input_shape": "Newline-separated syslog lines, each with fields: MONTH DAY TIME HOST PROCESS[PID]: MESSAGE",
+            "ok": true,
+            "stdout": "kernel\nsystemd\nsshd\nkernel\ncron\n",
+            "code": "import sys\n\nfor line in sys.argv[1].split('\\n'):\n    fields = line.split()\n    if len(fields) >= 5:\n        process_name = fields[4].split('[')[0]\n        sys.stdout.write(process_name + '\\n')",
+            "stderr": "",
+            "attempts": 1,
+            "intermediate_retries": 0,
+            "model_used": "qwen2.5-coder:7b",
+            "fallback_used": false,
+            "wall_seconds": 0.89,
+            "judge_ok": true,
+            "judge_reason": "The output contains one PROCESS name per line, extracted from the fifth whitespace-separated field and stripped of everything after '['.",
+            "judge_retry_used": false
+          },
+          {
+            "idx": 1,
+            "description": "Deduplicate the process names and sort them alphabetically, printing one name per line.",
+            "input_shape": "Newline-separated process name strings, possibly with duplicates",
+            "ok": true,
+            "stdout": "cron\nkernel\nsshd\nsystemd\n",
+            "code": "import sys\n\n# Read input from command line argument\ninput_string = sys.argv[1]\n\n# Split the input string into a list of process names\nprocess_names = input_string.splitlines()\n\n# Deduplicate and sort the process names\nunique_sorted_processes = sorted(set(process_names))\n\n# Emit the result to stdout\nfor process in unique_sorted_processes:\n    sys.stdout.write(process + '\\n')",
+            "stderr": "",
+            "attempts": 1,
+            "intermediate_retries": 0,
+            "model_used": "qwen2.5-coder:7b",
+            "fallback_used": false,
+            "wall_seconds": 1.2,
+            "judge_ok": null,
+            "judge_reason": null,
+            "judge_retry_used": false
+          }
+        ],
+        "tokens_in": 6.0,
+        "tokens_out": 146,
+        "cost_usd": 0.002208,
+        "wall_seconds": 9.6,
+        "stages": [
+          {
+            "stage": "decompose",
+            "in": 3,
+            "out": 127
+          },
+          {
+            "stage": "report",
+            "in": 3,
+            "out": 19
+          }
+        ]
+      }
+    },
+    {
+      "id": "errors_by_category",
+      "shape": "process_log_filter",
+      "A": {
+        "path": "A_cloud_only",
+        "ok": true,
+        "stdout": "timeout 3\nconnection 1\n",
+        "code": "import sys\nfrom collections import defaultdict\n\ndata = sys.argv[1]\ncounts = defaultdict(int)\n\nfor line in data.splitlines():\n    if ': ' in line:\n        level, message = line.split(': ', 1)\n        if level.strip() == 'ERROR':\n            first_word = message.split()[0] if message.split() else ''\n            if first_word:\n                counts[first_word] += 1\n\nfor word, count in sorted(counts.items(), key=lambda x: -x[1]):\n    sys.stdout.write(f\"{word} {count}\\n\")",
+        "tokens_in": 3,
+        "tokens_out": 299,
+        "cost_usd": 0.004494,
+        "wall_seconds": 5.29,
+        "from_cache": "tools/agent_harness/abc_v7_judge_shapeann_v3_30task.json"
+      },
+      "B": {
+        "path": "B_hybrid",
+        "ok": false,
+        "stdout": "",
+        "code": "(set lines (split $0 \"\\n\"))\n(set counts {})\n(for-each line lines\n    (set parts (split line \":\"))\n    (if (eq (array_get parts 0) \"ERROR\")\n        (let level (string_trim (array_get parts 1))\n            (if (has counts level)\n                (set counts (json_set counts [level] (add (json_get counts level) 1)))\n                (set counts (json_set counts [level] 1))))))\n(for-each kv (entries counts)\n    (println (fmt \"{} {}\" (array_get kv 0) (array_get kv 1))))",
+        "tokens_in": 6.0,
+        "tokens_out": 134,
+        "cost_usd": 0.002028,
+        "wall_seconds": 15.45,
+        "sigil_attempts": 3,
+        "sigil_model": "deepseek-sigil:6.7b",
+        "stages": [
+          {
+            "stage": "decide",
+            "in": 3,
+            "out": 115
+          },
+          {
+            "stage": "report",
+            "in": 3,
+            "out": 19
+          }
+        ],
+        "from_cache": "tools/agent_harness/abc_v7_judge_shapeann_v3_30task.json"
+      },
+      "C": {
+        "path": "C_chained",
+        "ok": false,
+        "stdout": "",
+        "n_steps": 3,
+        "step_results": [
+          {
+            "idx": 0,
+            "description": "Filter lines where the level prefix is 'ERROR:', then print the first word of the message portion.",
+            "input_shape": "Each line is 'LEVEL: MESSAGE' with a colon-space separator between level and message; $0 is the full multi-line string.",
+            "ok": true,
+            "stdout": "timeout\ntimeout\nconnection\ntimeout\n",
+            "code": "import sys\n\ninput_string = sys.argv[1]\nlines = input_string.split('\\n')\n\nfor line in lines:\n    if line.startswith('ERROR:'):\n        message_parts = line.split(': ', 1)\n        if len(message_parts) > 1:\n            first_word = message_parts[1].split()[0]\n            print(first_word)",
+            "stderr": "",
+            "attempts": 1,
+            "intermediate_retries": 0,
+            "model_used": "qwen2.5-coder:7b",
+            "fallback_used": false,
+            "wall_seconds": 1.09,
+            "judge_ok": true,
+            "judge_reason": "The output contains the first word of each message that starts with \"ERROR:\" and is a valid single line.",
+            "judge_retry_used": false
+          },
+          {
+            "idx": 1,
+            "description": "Count occurrences of each unique word, printing 'WORD COUNT' per line.",
+            "input_shape": "Each line is a single word (the first word of an ERROR message); lines may repeat.",
+            "ok": true,
+            "stdout": "timeout 3\nconnection 1\n",
+            "code": "import sys\n\nword_count = {}\n\nfor word in sys.argv[1].splitlines():\n    if word in word_count:\n        word_count[word] += 1\n    else:\n        word_count[word] = 1\n\nfor word, count in word_count.items():\n    sys.stdout.write(f\"{word} {count}\\n\")",
+            "stderr": "",
+            "attempts": 1,
+            "intermediate_retries": 0,
+            "model_used": "qwen2.5-coder:7b",
+            "fallback_used": false,
+            "wall_seconds": 1.04,
+            "judge_ok": true,
+            "judge_reason": "P4: output is a strict subset of input that satisfies the predicate (only unique words are counted)",
+            "judge_retry_used": false
+          },
+          {
+            "idx": 2,
+            "description": "Sort lines descending by the second whitespace-separated field (the count).",
+            "input_shape": "Each line is 'WORD COUNT' with a single space separator.",
+            "ok": false,
+            "stdout": "",
+            "code": "import sys\n\nlines = sys.argv[1].split('\\n')\nsorted_lines = sorted(lines, key=lambda x: int(x.split()[1]), reverse=True)\nsys.stdout.write('\\n'.join(sorted_lines))",
+            "stderr": "Traceback (most recent call last):\n  File \"/tmp/tmp7_1u5o2n.py\", line 4, in <module>\n    sorted_lines = sorted(lines, key=lambda x: int(x.split()[1]), reverse=True)\n                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^",
+            "attempts": 1,
+            "intermediate_retries": 0,
+            "model_used": "qwen2.5-coder:7b",
+            "fallback_used": false,
+            "wall_seconds": 0.73,
+            "judge_ok": null,
+            "judge_reason": null,
+            "judge_retry_used": false
+          }
+        ],
+        "tokens_in": 6.0,
+        "tokens_out": 185,
+        "cost_usd": 0.002793,
+        "wall_seconds": 11.4,
+        "stages": [
+          {
+            "stage": "decompose",
+            "in": 3,
+            "out": 170
+          },
+          {
+            "stage": "report",
+            "in": 3,
+            "out": 15
+          }
+        ]
+      }
+    },
+    {
+      "id": "csv_filter_then_top",
+      "shape": "compose_sort",
+      "A": {
+        "path": "A_cloud_only",
+        "ok": true,
+        "stdout": "carol\nfrank\nalice\n",
+        "code": "import sys\nimport csv\nimport io\n\ndata = sys.argv[1]\nreader = csv.DictReader(io.StringIO(data))\nrows = [(row['name'], float(row['score'])) for row in reader if float(row['score']) > 70]\nrows.sort(key=lambda x: x[1], reverse=True)\nfor name, _ in rows[:3]:\n    sys.stdout.write(name + '\\n')",
+        "tokens_in": 3,
+        "tokens_out": 207,
+        "cost_usd": 0.003114,
+        "wall_seconds": 6.1,
+        "from_cache": "tools/agent_harness/abc_v7_judge_shapeann_v3_30task.json"
+      },
+      "B": {
+        "path": "B_hybrid",
+        "ok": false,
+        "stdout": "",
+        "code": "(set rows (split $0 \"\\n\"))\n(set header (first rows))\n(set data (rest rows))\n(set scores {})\n(for-each row data\n    (let [fields (split row \",\")]\n        (if (gt (parse_int (last fields)) 70)\n            (set scores (map_set scores (first fields) (parse_int (last fields)))))))\n(set sorted_scores (sort_by (entries scores) (\\x y (lt (second x) (second y)))))\n(for-each pair (slice sorted_scores 0 3)\n    (println (first pair)))",
+        "tokens_in": 6.0,
+        "tokens_out": 128,
+        "cost_usd": 0.001938,
+        "wall_seconds": 15.81,
+        "sigil_attempts": 3,
+        "sigil_model": "deepseek-sigil:6.7b",
+        "stages": [
+          {
+            "stage": "decide",
+            "in": 3,
+            "out": 102
+          },
+          {
+            "stage": "report",
+            "in": 3,
+            "out": 26
+          }
+        ],
+        "from_cache": "tools/agent_harness/abc_v7_judge_shapeann_v3_30task.json"
+      },
+      "C": {
+        "path": "C_chained",
+        "ok": false,
+        "stdout": "carol\nfrank\nalice",
+        "n_steps": 2,
+        "step_results": [
+          {
+            "idx": 0,
+            "description": "Skip the header line and print name,score for each row where the score (second comma-separated field) is greater than 70",
+            "input_shape": "Newline-separated lines; first line is the header 'name,score'; each subsequent line is two comma-separated fields: a name string and an integer score.",
+            "ok": true,
+            "stdout": "alice,82\ncarol,91\ndave,77\nfrank,88\n",
+            "code": "import sys\n\ninput_data = sys.argv[1].split('\\n')\nheader = input_data.pop(0)\n\nfor line in input_data:\n    name, score = line.split(',')\n    if int(score) > 70:\n        sys.stdout.write(f\"{name},{score}\\n\")",
+            "stderr": "",
+            "attempts": 1,
+            "intermediate_retries": 0,
+            "model_used": "qwen2.5-coder:7b",
+            "fallback_used": false,
+            "wall_seconds": 0.94,
+            "judge_ok": true,
+            "judge_reason": "The output matches the input shape and contains only rows where the score is greater than 70.",
+            "judge_retry_used": false
+          },
+          {
+            "idx": 1,
+            "description": "Sort lines descending by the second comma-separated field (numeric score) and print only the first field (name) for the ",
+            "input_shape": "Newline-separated lines with no header; each line is two comma-separated fields: a name string and an integer score; all scores are greater than 70.",
+            "ok": true,
+            "stdout": "carol\nfrank\nalice",
+            "code": "import sys\n\n# Read input from command line argument\ninput_data = sys.argv[1]\n\n# Split input into lines and sort by score in descending order\nsorted_lines = sorted(input_data.splitlines(), key=lambda x: int(x.split(',')[1]), reverse=True)\n\n# Extract the top 3 names\ntop_names = [line.split(',')[0] for line in sorted_lines[:3]]\n\n# Output the top 3 names separated by newlines\nsys.stdout.write('\\n'.join(top_names))",
+            "stderr": "",
+            "attempts": 1,
+            "intermediate_retries": 0,
+            "model_used": "qwen2.5-coder:7b",
+            "fallback_used": false,
+            "wall_seconds": 1.47,
+            "judge_ok": null,
+            "judge_reason": null,
+            "judge_retry_used": false
+          }
+        ],
+        "tokens_in": 6.0,
+        "tokens_out": 190,
+        "cost_usd": 0.002868,
+        "wall_seconds": 10.35,
+        "stages": [
+          {
+            "stage": "decompose",
+            "in": 3,
+            "out": 166
+          },
+          {
+            "stage": "report",
+            "in": 3,
+            "out": 24
+          }
+        ]
+      }
+    },
+    {
+      "id": "running_sum",
+      "shape": "cumulative_calc",
+      "A": {
+        "path": "A_cloud_only",
+        "ok": true,
+        "stdout": "5\n8\n16\n18\n22\n",
+        "code": "import sys\n\nlines = sys.argv[1].split('\\n')\ntotal = 0\nresult = []\nfor line in lines:\n    if line.strip():\n        total += int(line.strip())\n        result.append(str(total))\nsys.stdout.write('\\n'.join(result) + '\\n')",
+        "tokens_in": 3,
+        "tokens_out": 244,
+        "cost_usd": 0.003669,
+        "wall_seconds": 5.14,
+        "from_cache": "tools/agent_harness/abc_v7_judge_shapeann_v3_30task.json"
+      },
+      "B": {
+        "path": "B_hybrid",
+        "ok": false,
+        "stdout": "5\n8\n16\n18\n22\n",
+        "code": "(set total 0)\n(for-each line (split $0 \"\\n\")\n    (set num (parse_int line))\n    (set total (add total num))\n    (println total))",
+        "tokens_in": 6.0,
+        "tokens_out": 197,
+        "cost_usd": 0.002973,
+        "wall_seconds": 15.77,
+        "sigil_attempts": 3,
+        "sigil_model": "deepseek-sigil:6.7b",
+        "stages": [
+          {
+            "stage": "decide",
+            "in": 3,
+            "out": 95
+          },
+          {
+            "stage": "report",
+            "in": 3,
+            "out": 102
+          }
+        ],
+        "from_cache": "tools/agent_harness/abc_v7_judge_shapeann_v3_30task.json"
+      },
+      "C": {
+        "path": "C_chained",
+        "ok": true,
+        "stdout": "5\n8\n16\n18\n22\n",
+        "n_steps": 1,
+        "step_results": [
+          {
+            "idx": 0,
+            "description": "Read each integer line and print the running cumulative sum after each value, one per line.",
+            "input_shape": "Newline-separated integers, one integer per line, e.g. '5\\n3\\n8\\n2\\n4'",
+            "ok": true,
+            "stdout": "5\n8\n16\n18\n22\n",
+            "code": "import sys\n\ninput_data = sys.argv[1]\nlines = input_data.strip().split('\\n')\ncumulative_sum = 0\n\nfor line in lines:\n    number = int(line)\n    cumulative_sum += number\n    print(cumulative_sum, end='\\n')",
+            "stderr": "",
+            "attempts": 1,
+            "intermediate_retries": 0,
+            "model_used": "qwen2.5-coder:7b",
+            "fallback_used": false,
+            "wall_seconds": 0.9,
+            "judge_ok": null,
+            "judge_reason": null,
+            "judge_retry_used": false
+          }
+        ],
+        "tokens_in": 6.0,
+        "tokens_out": 135,
+        "cost_usd": 0.002043,
+        "wall_seconds": 8.0,
+        "stages": [
+          {
+            "stage": "decompose",
+            "in": 3,
+            "out": 74
+          },
+          {
+            "stage": "report",
+            "in": 3,
+            "out": 61
+          }
+        ]
+      }
+    },
+    {
+      "id": "csv_to_json_array",
+      "shape": "format_conversion",
+      "A": {
+        "path": "A_cloud_only",
+        "ok": true,
+        "stdout": "[{\"id\":1,\"name\":\"alice\",\"active\":1},{\"id\":2,\"name\":\"bob\",\"active\":0},{\"id\":3,\"name\":\"carol\",\"active\":1}]",
+        "code": "import sys\nimport csv\nimport json\nimport io\n\ndata = sys.argv[1]\nreader = csv.DictReader(io.StringIO(data))\nrows = []\nfor row in reader:\n    rows.append({\"id\": int(row[\"id\"]), \"name\": row[\"name\"], \"active\": int(row[\"active\"])})\nsys.stdout.write(json.dumps(rows, separators=(\",\", \":\")))",
+        "tokens_in": 4,
+        "tokens_out": 323,
+        "cost_usd": 0.004857,
+        "wall_seconds": 8.49,
+        "from_cache": "tools/agent_harness/abc_v7_judge_shapeann_v3_30task.json"
+      },
+      "B": {
+        "path": "B_hybrid",
+        "ok": false,
+        "stdout": "",
+        "code": "(set rows (split $0 \"\\n\"))\n(set header (first rows))\n(set data (rest rows))\n(set json_arr [])\n(for-each row data\n    (set fields (split row \",\"))\n    (set obj {})\n    (push obj {\"id\" (parse_int (array_get fields 0))})\n    (push obj {\"name\" (array_get fields 1)})\n    (push obj {\"active\" (parse_int (array_get fields 2))})\n    (push json_arr obj)\n)\n(println (json_encode json_arr))",
+        "tokens_in": 6.0,
+        "tokens_out": 160,
+        "cost_usd": 0.002418,
+        "wall_seconds": 17.87,
+        "sigil_attempts": 3,
+        "sigil_model": "deepseek-sigil:6.7b",
+        "stages": [
+          {
+            "stage": "decide",
+            "in": 3,
+            "out": 134
+          },
+          {
+            "stage": "report",
+            "in": 3,
+            "out": 26
+          }
+        ],
+        "from_cache": "tools/agent_harness/abc_v7_judge_shapeann_v3_30task.json"
+      },
+      "C": {
+        "path": "C_chained",
+        "ok": false,
+        "stdout": "[{\"id\": 1, \"name\": \"alice\", \"active\": 1}, {\"id\": 2, \"name\": \"bob\", \"active\": 0}, {\"id\": 3, \"name\": \"carol\", \"active\": 1}]",
+        "n_steps": 1,
+        "step_results": [
+          {
+            "idx": 0,
+            "description": "Parse CSV with header 'id,name,active', cast id and active to integers, and output a compact single-line JSON array of o",
+            "input_shape": "Newline-separated rows, first row is header 'id,name,active', subsequent rows are comma-separated values like '1,alice,1'",
+            "ok": true,
+            "stdout": "[{\"id\": 1, \"name\": \"alice\", \"active\": 1}, {\"id\": 2, \"name\": \"bob\", \"active\": 0}, {\"id\": 3, \"name\": \"carol\", \"active\": 1}]",
+            "code": "import sys\nimport json\n\ninput_data = sys.argv[1]\nlines = input_data.strip().split('\\n')\nheader = lines[0].split(',')\ndata = [line.split(',') for line in lines[1:]]\n\nresult = []\nfor row in data:\n    id_val = int(row[0])\n    name = row[1]\n    active = int(row[2])\n    result.append({'id': id_val, 'name': name, 'active': active})\n\nsys.stdout.write(json.dumps(result))",
+            "stderr": "",
+            "attempts": 1,
+            "intermediate_retries": 0,
+            "model_used": "qwen2.5-coder:7b",
+            "fallback_used": false,
+            "wall_seconds": 1.51,
+            "judge_ok": null,
+            "judge_reason": null,
+            "judge_retry_used": false
+          }
+        ],
+        "tokens_in": 6.0,
+        "tokens_out": 192,
+        "cost_usd": 0.002898,
+        "wall_seconds": 8.55,
+        "stages": [
+          {
+            "stage": "decompose",
+            "in": 3,
+            "out": 89
+          },
+          {
+            "stage": "report",
+            "in": 3,
+            "out": 103
+          }
+        ]
+      }
+    },
+    {
+      "id": "json_users_with_admin_role",
+      "shape": "nested_json_extract",
+      "A": {
+        "path": "A_cloud_only",
+        "ok": true,
+        "stdout": "bob\ndave\n",
+        "code": "import sys\nimport json\n\ndata = json.loads(sys.argv[1])\nfor user in data:\n    if 'admin' in user['roles']:\n        sys.stdout.write(user['name'] + '\\n')",
+        "tokens_in": 3,
+        "tokens_out": 93,
+        "cost_usd": 0.001404,
+        "wall_seconds": 3.5,
+        "from_cache": "tools/agent_harness/abc_v7_judge_shapeann_v3_30task.json"
+      },
+      "B": {
+        "path": "B_hybrid",
+        "ok": false,
+        "stdout": "",
+        "code": "(set data (json_parse $0))\n(for-each user (json_get data \"users\")\n    (if (in \"admin\" (json_get user \"roles\"))\n        (println (json_get user \"name\")))\n)",
+        "tokens_in": 6.0,
+        "tokens_out": 167,
+        "cost_usd": 0.002523,
+        "wall_seconds": 14.63,
+        "sigil_attempts": 3,
+        "sigil_model": "deepseek-sigil:6.7b",
+        "stages": [
+          {
+            "stage": "decide",
+            "in": 3,
+            "out": 142
+          },
+          {
+            "stage": "report",
+            "in": 3,
+            "out": 25
+          }
+        ],
+        "from_cache": "tools/agent_harness/abc_v7_judge_shapeann_v3_30task.json"
+      },
+      "C": {
+        "path": "C_chained",
+        "ok": true,
+        "stdout": "bob\ndave\n",
+        "n_steps": 1,
+        "step_results": [
+          {
+            "idx": 0,
+            "description": "Parse the JSON array and print the name of each object whose 'roles' array contains 'admin', one name per line in input ",
+            "input_shape": "A single JSON array string of objects each with 'name' (string) and 'roles' (array of strings), passed as $0.",
+            "ok": true,
+            "stdout": "bob\ndave\n",
+            "code": "import json\nimport sys\n\ninput_json = sys.argv[1]\ndata = json.loads(input_json)\n\nfor item in data:\n    if 'admin' in item['roles']:\n        sys.stdout.write(item['name'] + '\\n')",
+            "stderr": "",
+            "attempts": 1,
+            "intermediate_retries": 0,
+            "model_used": "qwen2.5-coder:7b",
+            "fallback_used": false,
+            "wall_seconds": 0.81,
+            "judge_ok": null,
+            "judge_reason": null,
+            "judge_retry_used": false
+          }
+        ],
+        "tokens_in": 6.0,
+        "tokens_out": 138,
+        "cost_usd": 0.002088,
+        "wall_seconds": 7.93,
+        "stages": [
+          {
+            "stage": "decompose",
+            "in": 3,
+            "out": 85
+          },
+          {
+            "stage": "report",
+            "in": 3,
+            "out": 53
+          }
+        ]
+      }
+    },
+    {
+      "id": "json_path_max_value",
+      "shape": "nested_json_extract",
+      "A": {
+        "path": "A_cloud_only",
+        "ok": true,
+        "stdout": "cherry\n",
+        "code": "import sys\nimport json\n\ndata = json.loads(sys.argv[1])\nitem = max(data[\"items\"], key=lambda x: x[\"price\"])\nsys.stdout.write(item[\"name\"] + \"\\n\")",
+        "tokens_in": 3,
+        "tokens_out": 107,
+        "cost_usd": 0.001614,
+        "wall_seconds": 4.3,
+        "from_cache": "tools/agent_harness/abc_v7_judge_shapeann_v3_30task.json"
+      },
+      "B": {
+        "path": "B_hybrid",
+        "ok": true,
+        "stdout": "cherry\n",
+        "code": "(set data (json_parse $0))\n(set items (json_get data [\"items\"]))\n(set max_price 0.0)\n(set max_name \"\")\n(for-each item items\n    (set price (json_get item [\"price\"]))\n    (if (gt price max_price)\n        (do\n            (set max_price price)\n            (set max_name (json_get item [\"name\"])))))\n(println max_name)",
+        "tokens_in": 6.0,
+        "tokens_out": 113,
+        "cost_usd": 0.001713,
+        "wall_seconds": 17.36,
+        "sigil_attempts": 3,
+        "sigil_model": "deepseek-sigil:6.7b",
+        "stages": [
+          {
+            "stage": "decide",
+            "in": 3,
+            "out": 100
+          },
+          {
+            "stage": "report",
+            "in": 3,
+            "out": 13
+          }
+        ],
+        "from_cache": "tools/agent_harness/abc_v7_judge_shapeann_v3_30task.json"
+      },
+      "C": {
+        "path": "C_chained",
+        "ok": true,
+        "stdout": "cherry\n",
+        "n_steps": 1,
+        "step_results": [
+          {
+            "idx": 0,
+            "description": "Parse the JSON from $0, find the item with the highest price, and print its name followed by a newline.",
+            "input_shape": "A single-line JSON string containing an object with an 'items' array, each element having 'name' (string) and 'price' (number) fields.",
+            "ok": true,
+            "stdout": "cherry\n",
+            "code": "import json\nimport sys\n\ninput_json = sys.argv[1]\ndata = json.loads(input_json)\nmax_price_item = max(data['items'], key=lambda x: x['price'])\nsys.stdout.write(max_price_item['name'] + '\\n')",
+            "stderr": "",
+            "attempts": 1,
+            "intermediate_retries": 0,
+            "model_used": "qwen2.5-coder:7b",
+            "fallback_used": false,
+            "wall_seconds": 0.85,
+            "judge_ok": null,
+            "judge_reason": null,
+            "judge_retry_used": false
+          }
+        ],
+        "tokens_in": 6.0,
+        "tokens_out": 148,
+        "cost_usd": 0.002238,
+        "wall_seconds": 7.4,
+        "stages": [
+          {
+            "stage": "decompose",
+            "in": 3,
+            "out": 84
+          },
+          {
+            "stage": "report",
+            "in": 3,
+            "out": 64
+          }
+        ]
+      }
+    },
+    {
+      "id": "extract_versions_sorted",
+      "shape": "multi_regex_extract",
+      "A": {
+        "path": "A_cloud_only",
+        "ok": true,
+        "stdout": "v1.2.3\nv1.10.5\nv2.0.0\nv10.0.0\n",
+        "code": "import sys\nimport re\n\ntext = sys.argv[1]\nmatches = re.findall(r'v(\\d+)\\.(\\d+)\\.(\\d+)', text)\nseen = {}\nfor m in matches:\n    key = (int(m[0]), int(m[1]), int(m[2]))\n    seen[key] = True\nfor k in sorted(seen.keys()):\n    sys.stdout.write(f'v{k[0]}.{k[1]}.{k[2]}\\n')",
+        "tokens_in": 3,
+        "tokens_out": 197,
+        "cost_usd": 0.002964,
+        "wall_seconds": 5.07,
+        "from_cache": "tools/agent_harness/abc_v7_judge_shapeann_v3_30task.json"
+      },
+      "B": {
+        "path": "B_hybrid",
+        "ok": false,
+        "stdout": "",
+        "code": "import re\nfrom typing import List\n\ndef extract_versions(text: str) -> List[str]:\n    pattern = r'v\\d+\\.\\d+\\.\\d+'\n    matches = re.findall(pattern, text)\n    return sorted(list(set(matches)))\n\nif __name__ == \"__main__\":\n    input_text = $0\n    versions = extract_versions(input_text)\n    for version in versions:\n        println version",
+        "tokens_in": 6.0,
+        "tokens_out": 151,
+        "cost_usd": 0.002283,
+        "wall_seconds": 18.66,
+        "sigil_attempts": 3,
+        "sigil_model": "deepseek-sigil:6.7b",
+        "stages": [
+          {
+            "stage": "decide",
+            "in": 3,
+            "out": 132
+          },
+          {
+            "stage": "report",
+            "in": 3,
+            "out": 19
+          }
+        ],
+        "from_cache": "tools/agent_harness/abc_v7_judge_shapeann_v3_30task.json"
+      },
+      "C": {
+        "path": "C_chained",
+        "ok": false,
+        "stdout": "",
+        "n_steps": 2,
+        "step_results": [
+          {
+            "idx": 0,
+            "description": "Extract all substrings matching the pattern vMAJOR.MINOR.PATCH (semantic versions) from $0, print each match on its own ",
+            "input_shape": "$0 is a single string containing embedded version tags like v2.0.0 mixed with prose text",
+            "ok": true,
+            "stdout": "v1.10.5\nv1.2.3\nv2.0.0\nv10.0.0\n",
+            "code": "import re\nimport sys\n\ninput_string = sys.argv[1]\nversion_pattern = r'v\\d+\\.\\d+\\.\\d+'\nversions = set(re.findall(version_pattern, input_string))\nfor version in versions:\n    print(version)",
+            "stderr": "",
+            "attempts": 1,
+            "intermediate_retries": 0,
+            "model_used": "qwen2.5-coder:7b",
+            "fallback_used": false,
+            "wall_seconds": 0.82,
+            "judge_ok": true,
+            "judge_reason": "extracted unique semantic version tags",
+            "judge_retry_used": false
+          },
+          {
+            "idx": 1,
+            "description": "Sort lines ascending by semantic version order, treating each line as vMAJOR.MINOR.PATCH where MAJOR, MINOR, PATCH are c",
+            "input_shape": "One version string per line in the form vMAJOR.MINOR.PATCH, possibly unordered, no duplicates",
+            "ok": false,
+            "stdout": "",
+            "code": "import sys\n\nversions = sys.argv[1].splitlines()\nsorted_versions = sorted(versions, key=lambda v: tuple(map(int, v.split('.'))))\nsys.stdout.write('\\n'.join(sorted_versions))",
+            "stderr": "Traceback (most recent call last):\n  File \"/tmp/tmpqr3gl829.py\", line 4, in <module>\n    sorted_versions = sorted(versions, key=lambda v: tuple(map(int, v.split('.'))))\n                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^",
+            "attempts": 1,
+            "intermediate_retries": 0,
+            "model_used": "qwen2.5-coder:7b",
+            "fallback_used": false,
+            "wall_seconds": 0.73,
+            "judge_ok": null,
+            "judge_reason": null,
+            "judge_retry_used": false
+          }
+        ],
+        "tokens_in": 6.0,
+        "tokens_out": 174,
+        "cost_usd": 0.002628,
+        "wall_seconds": 10.11,
+        "stages": [
+          {
+            "stage": "decompose",
+            "in": 3,
+            "out": 159
+          },
+          {
+            "stage": "report",
+            "in": 3,
+            "out": 15
+          }
+        ]
+      }
+    },
+    {
+      "id": "extract_phone_then_format",
+      "shape": "multi_regex_extract",
+      "A": {
+        "path": "A_cloud_only",
+        "ok": false,
+        "stdout": "(555) 123-4567\n(555) 123-4567\n",
+        "code": "import sys\nimport re\n\ntext = sys.argv[1]\nmatches = re.findall(r'\\b(\\d{3})[\\s-]?(\\d{3})[\\s-]?(\\d{4})\\b', text)\noutput = ''\nfor m in matches:\n    output += f'({m[0]}) {m[1]}-{m[2]}\\n'\nsys.stdout.write(output)",
+        "tokens_in": 3,
+        "tokens_out": 164,
+        "cost_usd": 0.002469,
+        "wall_seconds": 3.75,
+        "from_cache": "tools/agent_harness/abc_v7_judge_shapeann_v3_30task.json"
+      },
+      "B": {
+        "path": "B_hybrid",
+        "ok": false,
+        "stdout": "",
+        "code": "import re\nimport sys\n\ndef main():\n    text = sys.argv[1]\n    matches = re.findall(r'\\b\\d{3}-\\d{3}-\\d{4}\\b', text)\n    for match in matches:\n        print('({}) {}-{}'.format(match[:3], match[4:7], match[8:]))\n\nif __name__ == \"__main__\":\n    main()",
+        "tokens_in": 6.0,
+        "tokens_out": 152,
+        "cost_usd": 0.002298,
+        "wall_seconds": 15.72,
+        "sigil_attempts": 3,
+        "sigil_model": "deepseek-sigil:6.7b",
+        "stages": [
+          {
+            "stage": "decide",
+            "in": 3,
+            "out": 126
+          },
+          {
+            "stage": "report",
+            "in": 3,
+            "out": 26
+          }
+        ],
+        "from_cache": "tools/agent_harness/abc_v7_judge_shapeann_v3_30task.json"
+      },
+      "C": {
+        "path": "C_chained",
+        "ok": false,
+        "stdout": "(555) 123-4567\n(555) 987-6543\n(555) 123-4567",
+        "n_steps": 2,
+        "step_results": [
+          {
+            "idx": 0,
+            "description": "Extract all 10-digit phone numbers from $0 (stripping dashes, dots, and spaces between digits), print each raw 10-digit ",
+            "input_shape": "$0 is a plain text string containing phone numbers in mixed formats (dashes, dots, spaces, or plain digits).",
+            "ok": true,
+            "stdout": "5551234567\n5559876543\n5551234567\n",
+            "code": "import re\nimport sys\n\ninput_string = sys.argv[1]\nphone_numbers = re.findall(r'\\d{3}[-.\\s]?\\d{3}[-.\\s]?\\d{4}', input_string)\n\nfor number in phone_numbers:\n    cleaned_number = ''.join(filter(str.isdigit, number))\n    if len(cleaned_number) == 10:\n        sys.stdout.write(cleaned_number + '\\n')",
+            "stderr": "",
+            "attempts": 1,
+            "intermediate_retries": 0,
+            "model_used": "qwen2.5-coder:7b",
+            "fallback_used": false,
+            "wall_seconds": 1.3,
+            "judge_ok": true,
+            "judge_reason": "The output contains the raw 10-digit phone numbers extracted from the input string, in the same order as they appear.",
+            "judge_retry_used": false
+          },
+          {
+            "idx": 1,
+            "description": "Format each 10-digit number line as '(XXX) XXX-XXXX'.",
+            "input_shape": "$0 is newline-separated 10-digit strings, one per line, no separators.",
+            "ok": true,
+            "stdout": "(555) 123-4567\n(555) 987-6543\n(555) 123-4567",
+            "code": "import sys\n\ninput_string = sys.argv[1]\nlines = input_string.split('\\n')\n\nformatted_lines = ['({}) {}-{}'.format(line[:3], line[3:6], line[6:]) for line in lines if len(line) == 10]\n\noutput = '\\n'.join(formatted_lines)\nsys.stdout.write(output)",
+            "stderr": "",
+            "attempts": 1,
+            "intermediate_retries": 0,
+            "model_used": "qwen2.5-coder:7b",
+            "fallback_used": false,
+            "wall_seconds": 1.08,
+            "judge_ok": null,
+            "judge_reason": null,
+            "judge_retry_used": false
+          }
+        ],
+        "tokens_in": 6.0,
+        "tokens_out": 222,
+        "cost_usd": 0.003348,
+        "wall_seconds": 10.89,
+        "stages": [
+          {
+            "stage": "decompose",
+            "in": 3,
+            "out": 145
+          },
+          {
+            "stage": "report",
+            "in": 3,
+            "out": 77
+          }
+        ]
+      }
+    },
+    {
+      "id": "histogram_buckets",
+      "shape": "range_filter",
+      "A": {
+        "path": "A_cloud_only",
+        "ok": true,
+        "stdout": "A: 3\nB: 2\nC: 2\nD: 1\nF: 2\n",
+        "code": "import sys\n\nscores = [int(x) for x in sys.argv[1].strip().split('\\n') if x.strip()]\nbuckets = {'A': 0, 'B': 0, 'C': 0, 'D': 0, 'F': 0}\nfor s in scores:\n    if s >= 90:\n        buckets['A'] += 1\n    elif s >= 80:\n        buckets['B'] += 1\n    elif s >= 70:\n        buckets['C'] += 1\n    elif s >= 60:\n        buckets['D'] += 1\n    else:\n        buckets['F'] += 1\nfor k in ['A', 'B', 'C', 'D', 'F']:\n    if buckets[k] > 0:\n        sys.stdout.write(f'{k}: {buckets[k]}\\n')",
+        "tokens_in": 3,
+        "tokens_out": 442,
+        "cost_usd": 0.006639,
+        "wall_seconds": 6.23,
+        "from_cache": "tools/agent_harness/abc_v7_judge_shapeann_v3_30task.json"
+      },
+      "B": {
+        "path": "B_hybrid",
+        "ok": false,
+        "stdout": "",
+        "code": "# Read newline-separated integer scores from input string and bucket them into grades\nscores = (split $0 \"\\n\")\ncounts = {\"A\": 0, \"B\": 0, \"C\": 0, \"D\": 0, \"F\": 0}\nfor score in scores:\n    if int(score) >= 90:\n        counts[\"A\"] += 1\n    elif int(score) >= 80:\n        counts[\"B\"] += 1\n    elif int(score) >= 70:\n        counts[\"C\"] += 1\n    elif int(score) >= 60:\n        counts[\"D\"] += 1\n    else:\n        counts[\"F\"] += 1\nfor grade in [\"A\", \"B\", \"C\", \"D\", \"F\"]:\n    if counts[grade] > 0:\n        println (fmt \"{}: {}\" grade counts[grade])",
+        "tokens_in": 6.0,
+        "tokens_out": 183,
+        "cost_usd": 0.002763,
+        "wall_seconds": 23.4,
+        "sigil_attempts": 3,
+        "sigil_model": "deepseek-sigil:6.7b",
+        "stages": [
+          {
+            "stage": "decide",
+            "in": 3,
+            "out": 157
+          },
+          {
+            "stage": "report",
+            "in": 3,
+            "out": 26
+          }
+        ],
+        "from_cache": "tools/agent_harness/abc_v7_judge_shapeann_v3_30task.json"
+      },
+      "C": {
+        "path": "C_chained",
+        "ok": true,
+        "stdout": "A: 3\nB: 2\nC: 2\nD: 1\nF: 2\n",
+        "n_steps": 2,
+        "step_results": [
+          {
+            "idx": 0,
+            "description": "Read each line as an integer and map it to a bucket label (A for 90-100, B for 80-89, C for 70-79, D for 60-69, F for 0-",
+            "input_shape": "Newline-separated integers, one per line, each in range 0-100.",
+            "ok": true,
+            "stdout": "B\nA\nD\nC\nA\nF\nB\nC\nA\nF\n",
+            "code": "import sys\n\nfor line in sys.argv[1].splitlines():\n    number = int(line)\n    if 90 <= number <= 100:\n        bucket = 'A'\n    elif 80 <= number <= 89:\n        bucket = 'B'\n    elif 70 <= number <= 79:\n        bucket = 'C'\n    elif 60 <= number <= 69:\n        bucket = 'D'\n    else:\n        bucket = 'F'\n    sys.stdout.write(bucket + '\\n')",
+            "stderr": "",
+            "attempts": 1,
+            "intermediate_retries": 0,
+            "model_used": "qwen2.5-coder:7b",
+            "fallback_used": false,
+            "wall_seconds": 1.61,
+            "judge_ok": true,
+            "judge_reason": "The output correctly maps each integer to a bucket label based on the specified range and prints one label per line.",
+            "judge_retry_used": false
+          },
+          {
+            "idx": 1,
+            "description": "Count occurrences of each bucket label and print 'LABEL: COUNT' for each label that appears at least once, in the order ",
+            "input_shape": "Newline-separated single-character bucket labels (A, B, C, D, or F), one per line.",
+            "ok": true,
+            "stdout": "A: 3\nB: 2\nC: 2\nD: 1\nF: 2\n",
+            "code": "import sys\n\nbuckets = {'A': 0, 'B': 0, 'C': 0, 'D': 0, 'F': 0}\n\nfor line in sys.argv[1].splitlines():\n    bucket = line.strip()\n    if bucket in buckets:\n        buckets[bucket] += 1\n\nfor label, count in buckets.items():\n    if count > 0:\n        sys.stdout.write(f\"{label}: {count}\\n\")",
+            "stderr": "",
+            "attempts": 1,
+            "intermediate_retries": 0,
+            "model_used": "qwen2.5-coder:7b",
+            "fallback_used": false,
+            "wall_seconds": 1.4,
+            "judge_ok": null,
+            "judge_reason": null,
+            "judge_retry_used": false
+          }
+        ],
+        "tokens_in": 6.0,
+        "tokens_out": 201,
+        "cost_usd": 0.003033,
+        "wall_seconds": 10.77,
+        "stages": [
+          {
+            "stage": "decompose",
+            "in": 3,
+            "out": 174
+          },
+          {
+            "stage": "report",
+            "in": 3,
+            "out": 27
+          }
+        ]
+      }
+    },
+    {
+      "id": "filter_lines_in_range",
+      "shape": "range_filter",
+      "A": {
+        "path": "A_cloud_only",
+        "ok": true,
+        "stdout": "beta\ndelta\nepsilon\neta\n",
+        "code": "import sys\n\nlines = sys.argv[1].strip().split('\\n')\nnames = []\nfor line in lines:\n    parts = line.split()\n    name, value = parts[0], float(parts[1])\n    if 10.0 <= value <= 50.0:\n        names.append(name)\nnames.sort()\nsys.stdout.write('\\n'.join(names) + '\\n')",
+        "tokens_in": 3,
+        "tokens_out": 231,
+        "cost_usd": 0.003474,
+        "wall_seconds": 5.45,
+        "from_cache": "tools/agent_harness/abc_v7_judge_shapeann_v3_30task.json"
+      },
+      "B": {
+        "path": "B_hybrid",
+        "ok": false,
+        "stdout": "",
+        "code": "(set lines (split $0 \"\\n\"))\n(for-each line lines\n    (if (and (regex_match \"^\\w+ \\d+\\.\\d+$\" line) (ge (parse_float (last (split line \" \"))) 10.0) (le (parse_float (last (split line \" \"))) 50.0))\n        (println (first (split line \" \")))))\n(sort lines)",
+        "tokens_in": 6.0,
+        "tokens_out": 153,
+        "cost_usd": 0.002313,
+        "wall_seconds": 18.88,
+        "sigil_attempts": 3,
+        "sigil_model": "deepseek-sigil:6.7b",
+        "stages": [
+          {
+            "stage": "decide",
+            "in": 3,
+            "out": 127
+          },
+          {
+            "stage": "report",
+            "in": 3,
+            "out": 26
+          }
+        ],
+        "from_cache": "tools/agent_harness/abc_v7_judge_shapeann_v3_30task.json"
+      },
+      "C": {
+        "path": "C_chained",
+        "ok": false,
+        "stdout": "beta\ndelta\nepsilon\neta",
+        "n_steps": 2,
+        "step_results": [
+          {
+            "idx": 0,
+            "description": "Filter lines where the second space-separated field is between 10.0 and 50.0 inclusive, print only the first field (name",
+            "input_shape": "Newline-separated lines, each with two space-separated fields: a name string and a float value.",
+            "ok": true,
+            "stdout": "beta\ndelta\nepsilon\neta",
+            "code": "import sys\n\ninput_data = sys.argv[1]\nlines = input_data.strip().split('\\n')\n\nfiltered_names = [line.split()[0] for line in lines if 10.0 <= float(line.split()[1]) <= 50.0]\n\noutput = '\\n'.join(filtered_names)\nsys.stdout.write(output)",
+            "stderr": "",
+            "attempts": 1,
+            "intermediate_retries": 0,
+            "model_used": "qwen2.5-coder:7b",
+            "fallback_used": false,
+            "wall_seconds": 1.07,
+            "judge_ok": true,
+            "judge_reason": "The output contains only the first field (name) of lines where the second space-separated field is between 10.0 and 50.0 inclusive, matching the step description.",
+            "judge_retry_used": false
+          },
+          {
+            "idx": 1,
+            "description": "Sort the lines alphabetically ascending.",
+            "input_shape": "Newline-separated name strings, one per line.",
+            "ok": true,
+            "stdout": "beta\ndelta\nepsilon\neta",
+            "code": "import sys\n\nlines = sys.argv[1].split('\\n')\nsorted_lines = sorted(lines)\nsys.stdout.write('\\n'.join(sorted_lines))",
+            "stderr": "",
+            "attempts": 1,
+            "intermediate_retries": 0,
+            "model_used": "qwen2.5-coder:7b",
+            "fallback_used": false,
+            "wall_seconds": 0.6,
+            "judge_ok": null,
+            "judge_reason": null,
+            "judge_retry_used": false
+          }
+        ],
+        "tokens_in": 6.0,
+        "tokens_out": 136,
+        "cost_usd": 0.002058,
+        "wall_seconds": 8.61,
+        "stages": [
+          {
+            "stage": "decompose",
+            "in": 3,
+            "out": 110
+          },
+          {
+            "stage": "report",
+            "in": 3,
+            "out": 26
+          }
+        ]
+      }
+    },
+    {
+      "id": "uniq_c_with_threshold",
+      "shape": "dedupe_with_count",
+      "A": {
+        "path": "A_cloud_only",
+        "ok": true,
+        "stdout": "apple 3\nbanana 2\n",
+        "code": "import sys\nfrom collections import Counter\n\ntext = sys.argv[1]\nwords = text.splitlines()\ncounts = Counter(words)\nqualified = [(word, count) for word, count in counts.items() if count >= 2]\nqualified.sort(key=lambda x: (-x[1], x[0]))\nfor word, count in qualified:\n    sys.stdout.write(f\"{word} {count}\\n\")",
+        "tokens_in": 3,
+        "tokens_out": 224,
+        "cost_usd": 0.003369,
+        "wall_seconds": 4.42,
+        "from_cache": "tools/agent_harness/abc_v7_judge_shapeann_v3_30task.json"
+      },
+      "B": {
+        "path": "B_hybrid",
+        "ok": false,
+        "stdout": "",
+        "code": "# Count word frequencies from newline-separated input, then print each word and its count for words appearing at least 2 times, sorted descending by count with ties broken alphabetically.\n\n(set lines (split $0 \"\\n\"))\n(set counts {})\n(for-each line lines\n    (let words (split line \" \"))\n    (for-each word words\n        (if (has counts word)\n            (set counts (map_set counts word (add (get counts word) 1)))\n            (set counts (map_set counts word 1)))))\n(set pairs (entries counts))\n(set pairs (filter pairs (\\pair (ge (last pair) 2))))\n(set pairs (sort pairs (\\a b (gt (last a) (last b)))))\n(println \"Lines of 'WORD COUNT' for words with count >= 2, sorted by count desc then word asc, e.g. 'apple 3\\nbanana 2\\n'\")\n(for-each pair pairs\n    (println (fmt \"{} {}\" (first pair) (last pair))))",
+        "tokens_in": 6.0,
+        "tokens_out": 157,
+        "cost_usd": 0.002373,
+        "wall_seconds": 22.17,
+        "sigil_attempts": 3,
+        "sigil_model": "deepseek-sigil:6.7b",
+        "stages": [
+          {
+            "stage": "decide",
+            "in": 3,
+            "out": 131
+          },
+          {
+            "stage": "report",
+            "in": 3,
+            "out": 26
+          }
+        ],
+        "from_cache": "tools/agent_harness/abc_v7_judge_shapeann_v3_30task.json"
+      },
+      "C": {
+        "path": "C_chained",
+        "ok": false,
+        "stdout": "",
+        "n_steps": 1,
+        "step_results": [
+          {
+            "idx": 0,
+            "description": "Count occurrences of each word (one word per line), then print 'WORD COUNT' only for words with count >= 2, sorted desce",
+            "input_shape": "Plain text, one word per line, no header.",
+            "ok": false,
+            "stdout": "",
+            "code": "import sys\n\n# Read input from command line argument\ninput_string = sys.argv[1]\n\n# Split the input string into words and count occurrences\nword_count = {}\nfor word in input_string.split():\n    if word in word_count:\n        word_count[word] += 1\n    else:\n        word_count[word] = 1\n\n# Filter words with count >= 2 and sort them by count (descending) and then alphabetically\nfiltered_sorted_words = sorted((word, count) for word, count in word_count.items() if count >= 2), key=lambda x: (-x[1], x[0]))\n\n# Print the result\nfor word, count in filtered_sorted_words:\n    sys.stdout.write(f\"{word} {cou",
+            "stderr": "  File \"/tmp/tmp7o2u6v7n.py\", line 15\n    filtered_sorted_words = sorted((word, count) for word, count in word_count.items() if count >= 2), key=lambda x: (-x[1], x[0]))\n                                                                      ",
+            "attempts": 1,
+            "intermediate_retries": 0,
+            "model_used": "qwen2.5-coder:7b",
+            "fallback_used": false,
+            "wall_seconds": 2.14,
+            "judge_ok": null,
+            "judge_reason": null,
+            "judge_retry_used": false
+          }
+        ],
+        "tokens_in": 6.0,
+        "tokens_out": 93,
+        "cost_usd": 0.001413,
+        "wall_seconds": 8.85,
+        "stages": [
+          {
+            "stage": "decompose",
+            "in": 3,
+            "out": 76
+          },
+          {
+            "stage": "report",
+            "in": 3,
+            "out": 17
+          }
+        ]
+      }
+    },
+    {
+      "id": "extract_python_imports",
+      "shape": "code_mining",
+      "A": {
+        "path": "A_cloud_only",
+        "ok": true,
+        "stdout": "collections\njson\nos\nre\nsys\ntyping\n",
+        "code": "import sys\nimport ast\n\nsource = sys.argv[1]\ntree = ast.parse(source)\nmodules = set()\nfor node in ast.walk(tree):\n    if isinstance(node, ast.Import):\n        for alias in node.names:\n            modules.add(alias.name.split('.')[0])\n    elif isinstance(node, ast.ImportFrom):\n        if node.module:\n            modules.add(node.module.split('.')[0])\nsys.stdout.write('\\n'.join(sorted(modules)) + '\\n')",
+        "tokens_in": 3,
+        "tokens_out": 362,
+        "cost_usd": 0.005439,
+        "wall_seconds": 7.45,
+        "from_cache": "tools/agent_harness/abc_v7_judge_shapeann_v3_30task.json"
+      },
+      "B": {
+        "path": "B_hybrid",
+        "ok": false,
+        "stdout": "",
+        "code": "import re\nfrom collections import defaultdict\n\ndef extract_modules(code):\n    pattern = r'(?:^|\\n)(import |from )(\\w+)'\n    matches = re.findall(pattern, code)\n    return sorted(set([match[1] for match in matches]))\n\nif __name__ == \"__main__\":\n    modules = extract_modules($0)\n    print('\\n'.join(modules))",
+        "tokens_in": 6.0,
+        "tokens_out": 152,
+        "cost_usd": 0.002298,
+        "wall_seconds": 15.35,
+        "sigil_attempts": 3,
+        "sigil_model": "deepseek-sigil:6.7b",
+        "stages": [
+          {
+            "stage": "decide",
+            "in": 3,
+            "out": 121
+          },
+          {
+            "stage": "report",
+            "in": 3,
+            "out": 31
+          }
+        ],
+        "from_cache": "tools/agent_harness/abc_v7_judge_shapeann_v3_30task.json"
+      },
+      "C": {
+        "path": "C_chained",
+        "ok": true,
+        "stdout": "collections\njson\nos\nre\nsys\ntyping\n",
+        "n_steps": 2,
+        "step_results": [
+          {
+            "idx": 0,
+            "description": "Parse each line of Python source and extract the top-level module name: for 'import X' or 'import X as Y' lines emit X, ",
+            "input_shape": "A multi-line string of Python source code where lines may be 'import X', 'import X as Y', 'from X import Y', or other non-import lines; lines separated by newline characters.",
+            "ok": true,
+            "stdout": "os\nsys\ntyping\ncollections\nre\nos\njson\n",
+            "code": "import sys\n\ninput_code = sys.argv[1]\nlines = input_code.split('\\n')\n\nfor line in lines:\n    line = line.strip()\n    if line.startswith('import '):\n        parts = line.split()\n        module_name = parts[1].split('.')[0]\n        print(module_name)\n    elif line.startswith('from '):\n        parts = line.split()\n        module_name = parts[1].split('.')[0]\n        print(module_name)",
+            "stderr": "",
+            "attempts": 1,
+            "intermediate_retries": 0,
+            "model_used": "qwen2.5-coder:7b",
+            "fallback_used": false,
+            "wall_seconds": 1.39,
+            "judge_ok": true,
+            "judge_reason": "The output contains the top-level module names extracted from the input Python source code.",
+            "judge_retry_used": false
+          },
+          {
+            "idx": 1,
+            "description": "Sort the lines alphabetically, deduplicate them, and print each unique module name once per line.",
+            "input_shape": "One module name per line, possibly containing duplicates, unsorted.",
+            "ok": true,
+            "stdout": "collections\njson\nos\nre\nsys\ntyping\n",
+            "code": "import sys\n\n# Read input from command line argument\ninput_string = sys.argv[1]\n\n# Split the input string into a list of module names, sort them alphabetically, and remove duplicates\nsorted_unique_modules = sorted(set(input_string.splitlines()))\n\n# Print each unique module name once per line\nfor module in sorted_unique_modules:\n    sys.stdout.write(module + '\\n')",
+            "stderr": "",
+            "attempts": 1,
+            "intermediate_retries": 0,
+            "model_used": "qwen2.5-coder:7b",
+            "fallback_used": false,
+            "wall_seconds": 1.16,
+            "judge_ok": null,
+            "judge_reason": null,
+            "judge_retry_used": false
+          }
+        ],
+        "tokens_in": 6.0,
+        "tokens_out": 200,
+        "cost_usd": 0.003018,
+        "wall_seconds": 11.69,
+        "stages": [
+          {
+            "stage": "decompose",
+            "in": 3,
+            "out": 179
+          },
+          {
+            "stage": "report",
+            "in": 3,
+            "out": 21
+          }
+        ]
+      }
+    },
+    {
+      "id": "csv_lookup_join",
+      "shape": "csv_join",
+      "A": {
+        "path": "A_cloud_only",
+        "ok": false,
+        "stdout": "bob 90\nbob 75\ncarol 85\n",
+        "code": "import sys\n\ndata = sys.argv[1]\nblocks = data.split('\\n\\n')\nfirst_lines = blocks[0].strip().split('\\n')[1:]\nsecond_lines = blocks[1].strip().split('\\n')[1:]\n\nid_to_name = {}\nfor line in first_lines:\n    parts = line.split(',')\n    id_to_name[parts[0]] = parts[1]\n\nentries = []\nfor line in second_lines:\n    parts = line.split(',')\n    if parts[0] in id_to_name:\n        entries.append((id_to_name[parts[0]], parts[1]))\n\nentries.sort(key=lambda x: x[0])\nsys.stdout.write(''.join(f'{name} {score}\\n' for name, score in entries))",
+        "tokens_in": 3,
+        "tokens_out": 707,
+        "cost_usd": 0.010614,
+        "wall_seconds": 14.82,
+        "from_cache": "tools/agent_harness/abc_v7_judge_shapeann_v3_30task.json"
+      },
+      "B": {
+        "path": "B_hybrid",
+        "ok": false,
+        "stdout": "",
+        "code": "# Parse two CSV blocks separated by a blank line from the input string\nblocks = (split $0 \"\\n\\n\")\nnames_csv = (array_get blocks 0)\nscores_csv = (array_get blocks 1)\n\n# Convert CSVs to dictionaries: id -> name/score\nname_dict = {}\nfor row in (parse_csv names_csv)\n    id = (array_get row 0)\n    name = (array_get row 1)\n    set name_dict [id] name\n\nscore_dict = {}\nfor row in (parse_csv scores_csv)\n    id = (array_get row 0)\n    score = (array_get row 1)\n    set score_dict [id] score\n\n# Find common IDs and sort alphabetically by name\nids = []\nfor id in (keys name_dict)\n    if (has score_dict [id])\n        push ids id\n\nids = (sort ids)\n\n# Print NAME SCORE for each id present in BOTH blocks, sorted alphabetically by name\nfor id in ids\n    println (fmt \"{} {}\" (get name_dict [id]) (get score_dict [id]))",
+        "tokens_in": 6.0,
+        "tokens_out": 169,
+        "cost_usd": 0.002553,
+        "wall_seconds": 21.88,
+        "sigil_attempts": 3,
+        "sigil_model": "deepseek-sigil:6.7b",
+        "stages": [
+          {
+            "stage": "decide",
+            "in": 3,
+            "out": 143
+          },
+          {
+            "stage": "report",
+            "in": 3,
+            "out": 26
+          }
+        ],
+        "from_cache": "tools/agent_harness/abc_v7_judge_shapeann_v3_30task.json"
+      },
+      "C": {
+        "path": "C_chained",
+        "ok": false,
+        "stdout": "bob 75\ncarol 85",
+        "n_steps": 2,
+        "step_results": [
+          {
+            "idx": 0,
+            "description": "Parse the two CSV blocks from $0, join on id, and print 'name score' for each id present in both blocks.",
+            "input_shape": "$0 is a single string with two CSV sections (id,name and id,score) separated by a blank line, with \\n as line separator.",
+            "ok": true,
+            "stdout": "bob 75\ncarol 85",
+            "code": "import sys\n\ninput_data = sys.argv[1]\n\n# Split the input into two CSV blocks based on a blank line\ncsv_blocks = input_data.strip().split('\\n\\n')\n\n# Parse the first CSV block (id, name)\nname_dict = {}\nfor line in csv_blocks[0].strip().split('\\n')[1:]:\n    id, name = line.split(',')\n    name_dict[id] = name\n\n# Parse the second CSV block (id, score)\nscore_dict = {}\nfor line in csv_blocks[1].strip().split('\\n')[1:]:\n    id, score = line.split(',')\n    score_dict[id] = score\n\n# Join on id and print 'name score' for each id present in both blocks\noutput = []\nfor id in set(name_dict.keys()) & set(scor",
+            "stderr": "",
+            "attempts": 1,
+            "intermediate_retries": 0,
+            "model_used": "qwen2.5-coder:7b",
+            "fallback_used": false,
+            "wall_seconds": 2.59,
+            "judge_ok": true,
+            "judge_reason": "The output contains 'name score' pairs for each id present in both input blocks.",
+            "judge_retry_used": false
+          },
+          {
+            "idx": 1,
+            "description": "Sort lines alphabetically by the first whitespace-separated field (name).",
+            "input_shape": "Each line is 'name score' with a single space separator, one pair per line.",
+            "ok": true,
+            "stdout": "bob 75\ncarol 85",
+            "code": "import sys\n\ninput_data = sys.argv[1]\nlines = input_data.strip().split('\\n')\nsorted_lines = sorted(lines, key=lambda x: x.split()[0])\noutput = '\\n'.join(sorted_lines)\nsys.stdout.write(output)",
+            "stderr": "",
+            "attempts": 1,
+            "intermediate_retries": 0,
+            "model_used": "qwen2.5-coder:7b",
+            "fallback_used": false,
+            "wall_seconds": 0.82,
+            "judge_ok": null,
+            "judge_reason": null,
+            "judge_retry_used": false
+          }
+        ],
+        "tokens_in": 6.0,
+        "tokens_out": 258,
+        "cost_usd": 0.003888,
+        "wall_seconds": 12.98,
+        "stages": [
+          {
+            "stage": "decompose",
+            "in": 3,
+            "out": 131
+          },
+          {
+            "stage": "report",
+            "in": 3,
+            "out": 127
+          }
+        ]
+      }
+    },
+    {
+      "id": "lines_only_in_a",
+      "shape": "text_diff",
+      "A": {
+        "path": "A_cloud_only",
+        "ok": true,
+        "stdout": "alpha\ndelta\n",
+        "code": "import sys\n\ndata = sys.argv[1]\nparts = data.split('\\n---\\n')\nblock1 = parts[0].splitlines()\nblock2 = set(parts[1].splitlines())\nseen = set()\nresult = []\nfor line in block1:\n    if line not in block2 and line not in seen:\n        seen.add(line)\n        result.append(line)\nsys.stdout.write('\\n'.join(result) + '\\n')",
+        "tokens_in": 3,
+        "tokens_out": 267,
+        "cost_usd": 0.004014,
+        "wall_seconds": 5.13,
+        "from_cache": "tools/agent_harness/abc_v7_judge_shapeann_v3_30task.json"
+      },
+      "B": {
+        "path": "B_hybrid",
+        "ok": false,
+        "stdout": "",
+        "code": "# Split input on '---' line to get two blocks, then print lines that appear in the first block but NOT in the second block, in input order, deduplicated.\n(set blocks (split $0 \"---\"))\n(set block1 (first blocks))\n(set block2 (last blocks))\n(set lines1 (split block1 \"\\n\"))\n(set lines2 (split block2 \"\\n\"))\n(for-each line lines1\n  (if (not (contains line lines2))\n    (println line)))",
+        "tokens_in": 6.0,
+        "tokens_out": 127,
+        "cost_usd": 0.001923,
+        "wall_seconds": 16.34,
+        "sigil_attempts": 3,
+        "sigil_model": "deepseek-sigil:6.7b",
+        "stages": [
+          {
+            "stage": "decide",
+            "in": 3,
+            "out": 101
+          },
+          {
+            "stage": "report",
+            "in": 3,
+            "out": 26
+          }
+        ],
+        "from_cache": "tools/agent_harness/abc_v7_judge_shapeann_v3_30task.json"
+      },
+      "C": {
+        "path": "C_chained",
+        "ok": false,
+        "stdout": "alpha\ndelta",
+        "n_steps": 1,
+        "step_results": [
+          {
+            "idx": 0,
+            "description": "Split $0 on the '---' line separator, collect lines from the first block that do not appear in the second block, dedupli",
+            "input_shape": "A single string containing two newline-separated blocks of words divided by a line containing only '---'",
+            "ok": true,
+            "stdout": "alpha\ndelta",
+            "code": "import sys\n\ninput_str = sys.argv[1]\nblocks = input_str.split('---')\nfirst_block = blocks[0].split('\\n')\nsecond_block = blocks[1].split('\\n')\n\nresult = []\nfor line in first_block:\n    if line not in second_block and line not in result:\n        result.append(line)\n\nsys.stdout.write('\\n'.join(result))",
+            "stderr": "",
+            "attempts": 1,
+            "intermediate_retries": 0,
+            "model_used": "qwen2.5-coder:7b",
+            "fallback_used": false,
+            "wall_seconds": 1.17,
+            "judge_ok": null,
+            "judge_reason": null,
+            "judge_retry_used": false
+          }
+        ],
+        "tokens_in": 6.0,
+        "tokens_out": 144,
+        "cost_usd": 0.002178,
+        "wall_seconds": 8.32,
+        "stages": [
+          {
+            "stage": "decompose",
+            "in": 3,
+            "out": 87
+          },
+          {
+            "stage": "report",
+            "in": 3,
+            "out": 57
+          }
+        ]
+      }
+    }
+  ]
+}
