@@ -319,8 +319,30 @@ The harness measures four configurations on each task. We report
 
 ### 4.4 Models trained and evaluated
 
-The full catalog of fine-tunes is in `papers/MODEL_VERSIONS.md`. The
-production stack at close-out:
+The project ran two distinct fine-tuning eras. The full catalog of
+both is in `papers/MODEL_VERSIONS.md`.
+
+**Cloud era (sigil-v1 through sigil-v5, deprecated and removed).**
+The first 5+ fine-tunes used together.ai's hosted LoRA API on
+qwen3-8b, qwen3-coder-30b (MoE), and qwen2.5-coder-7b bases at
+n_epochs=3-4, lr=1e-5, with a hand-crafted ~145-example training
+set. The killing blow was sigil-v5: a small training corpus on a
+stock cloud-LoRA configuration produced a model that scored 13%
+on the early Stream C suite — vastly worse than untuned Sonnet at
+comparable inference cost. This is what empirically validated the
+pivot to local QLoRA: cloud LoRA had unfavorable unit economics
+*and* didn't actually beat the cloud frontier. The cloud-LoRA
+infrastructure (`benchmark/finetune.py`) was deleted in commit
+`f46d6a7`; together.ai access was retained for one-off Sonnet
+calls only. The exact lineage of which adapter became
+sigil-v1/v2/etc. is partially lost; only one cloud-era result file
+survives in-repo (`benchmark/eval_v5_qwen2.5-7b.json`). This era
+is the empirical foundation for the local-QLoRA-on-consumer-
+hardware approach the rest of the project took.
+
+**Local era (sigil-v3 through v7, deepseek-sigil, phi-sigil).**
+Local QLoRA on the AMD RX 7800 XT, recipe and rationale in §4.1.
+The production stack at close-out:
 
 - **Primary executor:** `qwen-sigil-v7:7b` — qwen2.5-coder-7b base,
   QLoRA-tuned on the v7 corpus (commit `f65e802` and antecedents).
@@ -344,7 +366,8 @@ Sigil ensemble's progression across versions
 
 | Configuration | Pass | Date | Notes |
 |---|---|---|---|
-| qwen-sigil-v3 base, no RAG | 13/30 | 2026-04 | Pre-PCRE, pre-corpus expansion |
+| sigil-v5 (together.ai cloud LoRA, qwen2.5-coder-7b base) | ~13% | 2026-03 | Killed the cloud-LoRA path; details in `papers/MODEL_VERSIONS.md` |
+| qwen-sigil-v3 base, no RAG | 13/30 | 2026-04 | Pre-PCRE, pre-corpus expansion (first local QLoRA) |
 | v6 + PCRE corpus + RAG | 27/30 | 2026-04 | After regex backend swap, +77 seeds |
 | v6 + phi-sigil-v1 fallback + RAG | 28/30 | 2026-04 | Cross-base ensemble pattern |
 | v6 + phi-sigil-v2 fallback + for-iterator-guard + RAG | 29/30 | 2026-05-03 | Production until 2026-05 |
@@ -821,7 +844,18 @@ QLoRA fine-tune just fits in 16 GB; a 32B model does not without
 multi-GPU splitting or CPU offload.
 
 These are accessible costs. QLoRA on consumer hardware is the
-path the project actually took.
+path the project actually took — but not the path it tried first.
+The early phases (sigil-v1 through v5) used together.ai's hosted
+LoRA fine-tune API at ~$10-20 per training run. The final cloud-era
+fine-tune (sigil-v5, on Qwen2.5-7B-Instruct) scored ~13% on the
+early Stream C suite at real per-token inference cost. That result
+killed the cloud-LoRA path: it cost real money to *run* (cloud
+inference is not free per-token like local) and didn't beat untuned
+cloud frontier models at comparable cost. Local QLoRA — slower per
+retrain in human wall-time but free at inference and fast enough at
+training time on consumer hardware — was the only fine-tuning path
+with viable unit economics at our scale. (Detail in
+`papers/MODEL_VERSIONS.md` "Cloud era" section.)
 
 ### 8.2 The cost of pre-training a foundation model from scratch
 
