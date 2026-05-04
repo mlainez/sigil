@@ -1,6 +1,17 @@
 # Agentic harness + comparison test suite — plan
 
-**Status:** Phase A and B implemented (2026-05-02). Phase C run on a
+> **Status (2026-05-04): Sigil project closed.** This document is the
+> *original design plan* (2026-05-02). The full implementation, complete
+> empirical results across the four-path harness (A cloud-only, B hybrid,
+> C chained, NH6 sonnet-executor diagnostic, NH10 python-as-control, NH16
+> Opus orchestrator), and the strategic close-out narrative all live in
+> [`SIGIL_RESULT.md`](./SIGIL_RESULT.md). This file is preserved for
+> archaeological context — what we *thought* we'd test before we started.
+>
+> The harness implementation in `tools/agent_harness/` is mature and
+> ports to the successor project verbatim.
+
+**Original status when written:** Phase A and B implemented (2026-05-02). Phase C run on a
 seeded 8-task suite; the headline finding is that the local Sigil
 ensemble's strong Stream C tooling accuracy (93%) does NOT translate
 to multi-step agentic composition tasks (12%) — Path B was worse than

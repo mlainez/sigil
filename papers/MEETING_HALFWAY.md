@@ -1,5 +1,12 @@
 # Meeting the Model Halfway: Language Design as Reasoning Aid
 
+> **Status (2026-05-04): Sigil project closed.** This methodology was
+> validated as the most durable transferable contribution. It ports
+> verbatim to the successor project (`post-sigil/`). See
+> [`SIGIL_RESULT.md`](./SIGIL_RESULT.md) for the close-out narrative;
+> the principles below remain the operational guide for any future
+> language-meets-pretrained-model design.
+
 **Status:** working draft, 2026-04-30; promoted to *operational design philosophy* on 2026-05-01 after Phase 17 retrospective.
 **Position:** what started as one design principle among many has become **the** design philosophy that emerged from working with pre-trained models. The original "ONE WAY ONLY" principle from the README turned out to be aspirational — the practical Sigil has ~30 aliases, each earned by a benchmark win where a model reached for a name from its training distribution.
 

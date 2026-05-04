@@ -595,14 +595,13 @@ implementation; the audits reconciled them.
 ### The AISL → Sigil rename (2026-02-11, between 18:41 and 20:17 UTC)
 
 Two timestamps bracket the rename precisely. The last session whose
-user prompt still says *"AISL"* and references paths under
-`/var/home/marc/Projects/aisl/` is the audit started at **18:41
-UTC**. The next session, started at **20:17 UTC**, opens with: *"you
-have access to codellama running in ollama on 192.168.0.30, I want
-you to benchmark some token consumption on code generation of the
-same use case both with python bash and **sigil**"*. From that point
-on every session uses the new name and references
-`/var/home/marc/Projects/sigil/`.
+user prompt still says *"AISL"* and references the old project name
+in path form is the audit started at **18:41 UTC**. The next session,
+started at **20:17 UTC**, opens with: *"you have access to codellama
+running in ollama on the local network, I want you to benchmark some
+token consumption on code generation of the same use case both with
+python bash and **sigil**"*. From that point on every session uses
+the new name.
 
 The rename mechanics survive in the log: a single sed-driven sweep
 over every `.md` file in the repo (over 50 substitutions in two
@@ -2150,3 +2149,17 @@ A reviewer can take any number cited above, find the exact JSON
 file or command, and reproduce the result on the same hardware.
 The training, evaluation, and corpus generation are all repeatable
 with the seeds and configurations recorded in the result files.
+
+---
+
+## Project closed (2026-05-04)
+
+This is the chronological narrative; the **strategic synthesis and
+close-out** lives in [`SIGIL_RESULT.md`](./SIGIL_RESULT.md). Read that
+first if you only have time for one document.
+
+The hypothesis-by-hypothesis empirical record is in
+[`HYPOTHESES.md`](./HYPOTHESES.md). The successor project on
+agent-safe local tooling (capability-typed Python subset, runtime
+verifier, declarative authorization policies) is planned in a sibling
+`post-sigil/` repo.

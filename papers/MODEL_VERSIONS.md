@@ -1,5 +1,13 @@
 # Sigil model versions — catalog and rationale
 
+> **Status (2026-05-04): Sigil project closed.** This catalog is the
+> definitive list of every fine-tune attempted. The final production
+> stack is qwen-sigil-v7:7b (primary) + deepseek-sigil:6.7b
+> (fallback, 2-epoch). The 3-epoch deepseek-sigil-v2 retrain
+> (2026-05-04) was overfit and rolled back — see
+> [`SIGIL_RESULT.md`](./SIGIL_RESULT.md) for the close-out and
+> [`HYPOTHESES.md`](./HYPOTHESES.md) NH3 for the overfit signature.
+
 This document is a flat index of every fine-tuned Sigil model produced in this project, with the **why behind each version**, the result it produced, and the lesson it taught (or didn't). Cross-references `papers/JOURNEY.md` for the narrative arc.
 
 Format: each entry has fixed fields so it can be diffed across versions.

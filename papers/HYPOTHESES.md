@@ -17,6 +17,17 @@ hypothesis should update the verdict here.
 
 ---
 
+> **Status (2026-05-04): all hypotheses closed; project closed.** This
+> document is the comprehensive empirical record. For the headline
+> close-out narrative and reader-ready synthesis, see
+> [`SIGIL_RESULT.md`](./SIGIL_RESULT.md). For the successor project
+> design built on these findings, see the sibling `post-sigil/` repo.
+>
+> Final hypothesis status:
+> - **Validated:** H1 (Sigil reach), H4 (RAG scales), H7 (meet-halfway), NH2-A & NH2-B (validators), NH6 (orchestration is fine; executor is the gap), partial NH10 (Python at fixed 7B = +5).
+> - **Refuted:** H6 (single→multi-step doesn't translate), H8 (chained sub-agent alone closes the gap), H9 (more retrains lift the floor), NH9 (soft-pass), NH16 (Opus orchestrator), NH10b (22B Python helps), NH10c (live primary→fallback ensemble).
+> - **Closed without testing:** NH7 (N-of-K), NH13 (corpus coverage gap), NH14 (self-critique), NH11/NH12 (templates / typed state). The strategic question was answered by the others; these refinements wouldn't change the verdict.
+
 ## Part I — Hypotheses we tested
 
 ### H1. Token-efficient AI-native language

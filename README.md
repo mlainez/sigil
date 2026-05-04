@@ -2,9 +2,31 @@
 
 **A programming language designed by AI, refined by observing AI failures, deployed for AI code generation.**
 
+> **Status (2026-05-04): the experiment is closed.** Read
+> [`papers/SIGIL_RESULT.md`](papers/SIGIL_RESULT.md) for the full project
+> retrospective: original premise, what the data validated, what it
+> refuted, and what we carry forward to the successor project on
+> agent-safe local tooling. Final headline numbers are below.
+
 Sigil is a Lisp-shaped scripting language whose design has been shaped by months of iteration with Large Language Models — first via collaborative AI/human design, then through a continuous feedback loop where every model failure on a benchmark fed back into the language surface. Each builtin alias, prelude function, and parser tolerance has a benchmark story behind it.
 
-The result: **the local Sigil ensemble (Qwen-Sigil-7B + Phi-Sigil-14B) hits 92% of Claude Sonnet's accuracy on real tooling tasks at $0 marginal cost** — without the model ever being trained on Sigil at scale. The trick is a deliberate "meeting halfway" pattern: the language admits any reasonable shape the model produces (multiple aliases, lenient parsing) and maps it to canonical implementations.
+**Final headline numbers (2026-05-04):**
+
+- **Single-step tooling delegation reaches cloud parity.** The local
+  Sigil ensemble (qwen-sigil-v7:7b + deepseek-sigil:6.7b) scores 29/30
+  on the Stream C benchmark vs Sonnet 29-30/30, at ~6× lower cost per
+  task. The single-step delegation story validated.
+- **Multi-step composition plateaus at the local executor's capability,
+  not the orchestration recipe.** Best Sigil Path C result: 7/30 on a
+  30-task multi-step suite. The orchestration-ceiling diagnostic (NH6)
+  showed that swapping only the per-step executor to Sonnet lifts
+  Path C to 26/30 on the same orchestration — the gap was executor
+  capability, not chain design.
+- **Pre-training proximity matters at fixed model size.** A baseline
+  qwen2.5-coder:7b (no fine-tune) writing Python on the same harness
+  scores 12/30 — a +5-task lift over Sigil at the same parameter count.
+  Scaling from 7B to 22B local Python doesn't help further on this
+  benchmark.
 
 > **Honest note on principles.** This README has been updated several times to reflect what the project actually became. The original "designed by AI, for AI" framing — and especially the "ONE WAY ONLY / zero ambiguity" claims — described an aspirational pure design. In practice, working with pre-trained models forced a more nuanced reality: the language inherits the AI's training distribution (Python/JS shapes, Lisp synonyms) and works best when it admits those shapes. See [`papers/MEETING_HALFWAY.md`](papers/MEETING_HALFWAY.md) and [`papers/JOURNEY.md`](papers/JOURNEY.md) for the full retrospective. The principles below are split into "**held**" (verified by benchmarks) and "**aspirational**" (stated but not enforced) accordingly.
 

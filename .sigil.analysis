@@ -1,5 +1,14 @@
 @(critical-directive-tooling)
 
+**STATUS (2026-05-04): Sigil project closed.** This file is preserved
+as it was during active development. The "all utility scripts in
+Sigil" directive below was the operating discipline of the experiment;
+it is no longer load-bearing. New work goes in the successor project
+on agent-safe local tooling. See `papers/SIGIL_RESULT.md` for the
+close-out narrative.
+
+---
+
 **ALL UTILITY SCRIPTS MUST BE WRITTEN IN Sigil**
 
 This is NON-NEGOTIABLE. Never use Python, Bash, or any other language.

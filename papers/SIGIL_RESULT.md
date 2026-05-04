@@ -5,6 +5,57 @@
 
 ---
 
+## TL;DR
+
+**Sigil was a 3-month bet** that a deliberately AI-shaped language —
+prefix-Lisp, canonical, type-light, deterministic — would let small local
+models (7B-class) do agentic tooling work at cloud-quality reliability and
+low cost, with effect-typed safety as the eventual differentiator.
+
+**What worked:**
+
+- **Single-step tooling delegation reaches cloud parity.** Stream C: 29/30
+  with the qwen-sigil-v7 + deepseek-sigil ensemble vs Sonnet 29-30/30, at
+  ~6× lower cost per task. The deployment story for which Sigil was
+  designed — delegate per-step tooling work to local, keep orchestration
+  on cloud — is real and validated.
+- **The methodology is durable.** Validator-in-loop, principle-based 3B
+  step-judges (14/14 on synthetic OOD), cross-base ensembles with
+  fresh-prompt-temp-0, sequential corpus generation, the "meet the model
+  halfway" pattern — all transferable to any future language target.
+
+**What didn't work:**
+
+- **Designing a syntactically novel surface language was expensive.** A
+  baseline 7B Python coder produces shape-correct Starlark on 37% of the
+  same task class with zero fine-tuning, just a system prompt. We paid
+  ~3 months to reach 29/30 on Sigil; pre-training proximity is the
+  cheapest form of capability.
+- **Multi-step composition is not a language problem.** The orchestration-
+  ceiling diagnostic (NH6) lifted Path C from 7/30 → 26/30 by swapping
+  *only* the per-step executor (Sigil → Sonnet). The 19-task gap was the
+  local model's per-step capability under Sonnet's decompositions. NH10
+  + NH10b decomposed it further: ~26% language-proximity, ~74% scale-bound.
+  No mid-size local model bridges the cloud gap on this benchmark.
+- **The safety thesis was the most valuable piece and we never built it.**
+  The original mammouth U09 sketch — type-system-enforced effects,
+  capability-restricted IO — is exactly where novel language design pays
+  off. We deferred it through every phase.
+
+**What's next:**
+
+The successor project (planned in a sibling repo, `post-sigil/PROJECT_PLAN.md`)
+takes the unbuilt safety thesis as its headline product, on a Python-subset
+host (Starlark) where the pre-training tax is paid down to nearly zero.
+The value claim sharpens from "AI-native language" to **"agents can't
+delete production databases by construction"** — declarative authorization
+policies enforced by the language itself, not by the agent runtime's
+interpretation of what the model emitted.
+
+The sections below give the full retrospective.
+
+---
+
 ## I. The original premise (2026-02-05, mammouth.ai sessions)
 
 Sigil started from three explicit design directives recorded in the
@@ -252,9 +303,9 @@ Why this is a stronger bet than Sigil's original framing:
   language work is reduced to *capability extension*, not invention.
 - The ~26% language-proximity lift NH10 measured is preserved.
 
-The new project's design plan lives in
-`/var/home/marc/Projects/post-sigil/CONCLUSIONS.md`, which closes Sigil's
-strategic notes and opens the next project's seed plan.
+The new project's design plan lives in a sibling repo (`post-sigil/`),
+under `CONCLUSIONS.md` and `PROJECT_PLAN.md`, which close Sigil's
+strategic notes and open the next project's seed plan.
 
 ---
 
