@@ -269,7 +269,7 @@ Final headline metrics across all 30-task multi-step Path C runs
 | qwen2.5-coder:7b (Python) | 12 | NH10 |
 | codestral:22b (Python) | 12 | NH10b |
 | 22B+7B Python ensemble (oracle ceiling) | 18 | post-hoc union |
-| 22B primary + 7B fallback live ensemble | (NH10c, in flight) | — |
+| 22B primary + 7B fallback live ensemble | 6 | NH10c — live regressed (VRAM swap thrash + wrong-shape bypass) |
 | Sonnet (Python) per-step | 26 | NH6 + Path A both |
 
 Stream C single-step:

@@ -839,6 +839,55 @@ requires a much larger jump to manifest.
 
 Result file: `abc_NH10b_codestral_22b_30task.json`.
 
+### NH10c. Live primary→fallback ensemble (codestral:22b + qwen2.5-coder:7b)
+
+**Premise.** The post-hoc oracle union of NH10 and NH10b is 18/30 (vs
+12/30 each alone) — the two models specialize on disjoint task families.
+A live ensemble that runs codestral first and falls back to qwen when
+codestral clearly fails should approach this oracle.
+
+**Test.** Wired `python_ensemble_execute_step`: run codestral; if
+`not ok or stdout empty`, fall back to qwen2.5-coder:7b.
+
+**Result (2026-05-04, REFUTED — live ensemble REGRESSED).**
+
+| | passes |
+|---|---|
+| qwen2.5-coder:7b alone | 12/30 |
+| codestral:22b alone | 12/30 |
+| **22B primary + 7B fallback (live)** | **6/30** |
+| oracle union (post-hoc) | 18/30 |
+
+The live ensemble scored worse than either model alone. Fallback fired
+29 times across the run, succeeded 6 times, also-failed 23 times. Live
+ensemble missed 12 of the 18 oracle wins.
+
+**Why simple primary→fallback doesn't capture the union:**
+
+1. **Wrong-shape output bypasses the fallback.** The fallback gates on
+   "codestral errored OR empty stdout". When codestral runs cleanly but
+   produces wrong-shape output (most common failure mode), no fallback
+   fires. Qwen never gets a turn on tasks where qwen would have been
+   right.
+
+2. **Ollama swap thrashing on a 16GB GPU.** codestral:22b (12GB) +
+   qwen-coder:7b (4.7GB) = 16.7GB > 16GB VRAM. Ollama unloads/reloads
+   between calls; generation quality degrades on the swapped-in model.
+
+**What an effective ensemble would need:** either (a) a task-shape
+classifier that routes per task to the right model up front, or (b)
+running both unconditionally and picking via deterministic checks (4×
+wall time + 2× VRAM). Both are architectural moves beyond simple
+stacking.
+
+**Strategic implication.** Reinforces the project's close-out narrative:
+simple model-stacking tricks do not pay back the multi-step ceiling
+gap. The real lifters are either capability-scale (cloud / 70B+ local)
+or architectural change (the safety / capability-typing project the
+post-sigil plan describes).
+
+Result file: `abc_NH10c_python_ensemble_30task.json`.
+
 ### NH11. Parameterized templates as a parallel architecture
 
 **Premise.** Inspecting our 30 tasks, 25+ decompose into 5-7
