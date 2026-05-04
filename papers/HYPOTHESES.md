@@ -649,6 +649,32 @@ ignore line ordering when no sort is asked). Report the gap.
 If "soft pass" is meaningfully higher than "exact pass" on Path C but
 not on Path A, our scoring is the bug, not the model.
 
+**Result (2026-05-04, REFUTED).** Built `benchmark/soft_pass_rescore.py`
+applying a graduated set of comparators (exact → trim → rstrip →
+collapse → unordered) to the 4 most recent A/B/C result files. Per
+task, the "qualified" comparator is the most permissive one that's
+*defensibly correct* (unordered allowed only when the task has no
+explicit sort/top-N requirement; otherwise capped at collapse).
+
+Across all 4 result files:
+  - Path A: 26/30 exact = 26/30 qualified (no change; A already uses
+    `.strip()` in its harness ok-check)
+  - Path B: 5-6/30 exact = 5-6/30 qualified (no change)
+  - Path C: 6-7/30 exact = 6-7/30 qualified (no change)
+
+Only one task (`filter_lines_in_range` on the OPUS run) flipped
+under any softer comparator (trim).
+
+**Conclusion.** The harness's strict scoring is *not* artificially
+deflating the local ensemble's accuracy. The Path A → Path C gap
+(26/30 → 7/30 on the v3 run) is the real capability gap, not a
+byte-pedantry artifact. Every prior "Path C is X/30" claim is now
+defended against the "scoring is too strict" objection.
+
+This is methodologically valuable but doesn't unlock any new lift.
+
+Result file: `benchmark/soft_pass_rescore.py` (one-shot script).
+
 ### NH10. Python-as-control on the same multi-step suite
 
 **Premise.** Strategically important: we've never directly measured
