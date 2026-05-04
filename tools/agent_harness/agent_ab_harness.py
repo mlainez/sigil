@@ -451,6 +451,16 @@ def main():
     ap.add_argument("--no-step-judge", action="store_true",
                     help="Disable the NH2 Tier B step-judge in path_c. "
                          "Use to ablate the judge's contribution.")
+    ap.add_argument("--cache-a", default=None,
+                    help="Reuse Path A results from a prior result JSON file "
+                         "(by task id). Path A is essentially deterministic "
+                         "for a given task+Sonnet model — re-running it on "
+                         "every harness invocation wastes cloud tokens.")
+    ap.add_argument("--cache-b", default=None,
+                    help="Reuse Path B results from a prior result JSON. "
+                         "Use only when neither the local Sigil model nor "
+                         "the harness logic has changed — otherwise B "
+                         "should be re-run.")
     args = ap.parse_args()
     if args.no_step_judge:
         # Monkey-patch the judge to always pass (ablation).
@@ -463,6 +473,17 @@ def main():
 
     tasks = json.loads(Path(args.tasks).read_text())
     print(f"Loaded {len(tasks)} agentic tasks\n")
+
+    cache_a = {}
+    if args.cache_a:
+        prior = json.loads(Path(args.cache_a).read_text())
+        cache_a = {t["id"]: t["A"] for t in prior.get("tasks", [])}
+        print(f"  Loaded Path A cache from {args.cache_a}: {len(cache_a)} entries\n")
+    cache_b = {}
+    if args.cache_b:
+        prior = json.loads(Path(args.cache_b).read_text())
+        cache_b = {t["id"]: t["B"] for t in prior.get("tasks", [])}
+        print(f"  Loaded Path B cache from {args.cache_b}: {len(cache_b)} entries\n")
 
     enable_c = args.with_chained
     rows = []
@@ -480,8 +501,16 @@ def main():
                  "sigil_attempts": b_local["attempts"], "sigil_model": b_local["model_used"]}
             c = None
         else:
-            a = path_a_cloud_only(t)
-            b = path_b_hybrid(t)
+            if t["id"] in cache_a:
+                a = dict(cache_a[t["id"]])
+                a["from_cache"] = args.cache_a
+            else:
+                a = path_a_cloud_only(t)
+            if t["id"] in cache_b:
+                b = dict(cache_b[t["id"]])
+                b["from_cache"] = args.cache_b
+            else:
+                b = path_b_hybrid(t)
             c = path_c_chained_hybrid(t) if enable_c else None
         print(f"   A cloud:    {'P' if a['ok'] else 'F'} (in={a['tokens_in']} out={a['tokens_out']} ${a['cost_usd']:.4f}, {a['wall_seconds']:.1f}s)")
         print(f"   B hybrid:   {'P' if b['ok'] else 'F'} (in={b['tokens_in']} out={b['tokens_out']} ${b['cost_usd']:.4f}, {b['wall_seconds']:.1f}s)")
