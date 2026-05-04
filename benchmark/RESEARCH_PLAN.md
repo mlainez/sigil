@@ -1,5 +1,40 @@
 # Research Plan: Sigil as a Local LLM-Native DSL for Confidential Tooling
 
+> **Status (2026-05-04): Sigil project closed; this plan is superseded.**
+>
+> This plan (v2.1, 2026-05-03) was the active research roadmap up to the
+> day before close-out. Its per-stream status (§2.5) was accurate as of
+> that date. The decisive findings that closed the project landed
+> 2026-05-04 and are NOT reflected in the body below:
+>
+> - **NH6 (orchestration ceiling diagnostic).** Path C with Sonnet-as-
+>   step-executor scored 26/30 — proving the chained orchestration is
+>   not lossy and the multi-step plateau (best Sigil 7/30) was purely
+>   the local executor's per-step capability gap.
+> - **NH10 / NH10b (Python-as-control).** Same harness, qwen2.5-coder:7b
+>   writing Python: 12/30 (+5 over Sigil at fixed 7B size). Scaling
+>   7B → 22B local Python: also 12/30 (no benefit). Pre-training
+>   proximity is real but minor; mid-size local scale doesn't bridge
+>   the cloud gap on this benchmark.
+> - **NH16 (Opus orchestrator).** Stronger orchestrator regressed both
+>   Path B (5→1) and Path C (7→4) at 6.6× cost. Limited executors
+>   need calibrated planners, not stronger ones.
+>
+> **Where the plan's deliverables actually landed:**
+>
+> | Plan §10 deliverable | Replaced by |
+> |---|---|
+> | "Single readable paper-style document, ~6000-9000 words" | [`papers/SIGIL_RESULT.md`](../papers/SIGIL_RESULT.md) (project retrospective with TL;DR) + a forthcoming research paper (writing pending) |
+> | Stream D's three named files (sigil_subagent.md, router.py, example_walkthrough.md) | Wired into `tools/agent_harness/`; never split into the planned file shapes. Closed without further work given the multi-step verdict. |
+> | Bash-history-sourced refresh of real_tooling_tasks.json | Out of scope after the close-out — strategic question was answered with the existing 30-task synthetic suite. |
+> | Bootstrap CIs on n=30 | Skipped per plan §2.5; sample size too small to be meaningful regardless. |
+>
+> The project's **strategic conclusions and successor-project plan** live
+> in [`papers/SIGIL_RESULT.md`](../papers/SIGIL_RESULT.md) and a sibling
+> `post-sigil/` repo. The body of this plan below is preserved as
+> archaeological context for what the research roadmap looked like at
+> v2.1 (one day before close).
+
 **Status:** v2.1, 2026-05-03 (~3 weeks in; A/B/C/E/F substantially
 done, D partial). See §2.5 for per-stream status.
 **Scope:** ~3 weeks of focused work, six interconnected work streams.
@@ -692,3 +727,36 @@ artifact in this repo, with the structure:
 8. The narrative (Stream F integrated as Section 9 or appendix)
 
 Plus the supporting code, data, and adapters in the repo.
+
+---
+
+## Status update (2026-05-04, project closed)
+
+The "single readable paper-style document" deliverable above was
+partially fulfilled and partially extended:
+
+- **`papers/JOURNEY.md`** — chronological narrative through Phase 28
+  (the original "Stream F" deliverable, scope-extended beyond the
+  v2.1 vision)
+- **`papers/SIGIL_RESULT.md`** — project retrospective with TL;DR,
+  premise → validated → refuted → forward, written for reader-cold
+  pickup. Closer to the §10 vision than JOURNEY but at ~3000 words
+  rather than 6000-9000.
+- **`papers/HYPOTHESES.md`** — comprehensive hypothesis-by-hypothesis
+  empirical record with all NH6-NH16 results.
+- **`papers/PAPER.md`** *(forthcoming)* — research-paper-style synthesis
+  Marc asked for on 2026-05-04: full story from initial assumptions
+  through hypothesis evolution, scope contraction, "AI-optimized
+  language" assessment, pre-training-from-scratch counterfactual,
+  and consumer-hardware limitations.
+
+Streams A/E/F are fully closed. Streams B/C are closed at "substantially
+done" (the §2.5 deltas remain accurate). Stream D's three named
+deliverables (`sigil_subagent.md`, `router.py`, `example_walkthrough.md`)
+are deliberately left unwritten — the multi-step verdict (NH6/NH10
+showed the local executor is the bottleneck, not the routing) made
+them no longer load-bearing for the project's value claim.
+
+The successor project (sibling `post-sigil/` repo) inherits the
+methodology and harness wholesale; the language-design work is
+deliberately not inherited.
