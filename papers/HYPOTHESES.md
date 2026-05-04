@@ -483,3 +483,242 @@ not the right benchmark for the local stack's value claim, and the
 project's deployment-ready story should refocus on Stream C-shaped
 single-step tooling delegation (where local already matches cloud at
 29-30/30) rather than multi-step composition.
+
+---
+
+## Part V — Additional hypotheses (post-NH2 Tier B retrospective)
+
+Added after NH2 Tier B prep + lift estimation (2026-05-04). The strict
+lift estimator showed the judge's TAM is only ~4 candidates per 30-task
+run (~+0.5 task lift), revealing that **80% of multi-step failures are
+not in the wrong-shape-with-content band the judge addresses**:
+
+  - 10/24 are "empty pipelines" (every step's stdout is empty)
+  - 10/24 are "final-step shape mismatch" (intermediates fine, final off)
+  - 4/24 are "wrong-shape intermediates" (judge's actual TAM)
+
+The rest of this section identifies hypotheses that would address the
+*other* 80% of failures, plus structural directions we haven't tested.
+**Constraint** (from project thesis): all interventions must be
+local-only at production time. Sonnet may be used as a one-shot
+*measurement instrument* but not as a per-task validator.
+
+### NH6. The orchestration ceiling is well below 30/30
+
+**Premise.** Path A (Sonnet writes Python) scores 26/30. Path C
+(Sonnet decomposes, local Sigil executes) scores 6/30. The 20-point
+gap is interpreted as a code-gen problem ("the local model writes bad
+Sigil"). It might mostly be an *orchestration* problem: the
+decomposition + cross-step plumbing leaks information that no executor
+can recover.
+
+**Test.** Have Sonnet decompose as today, but run each step with
+Sonnet itself as the executor instead of Sigil. This is a one-shot
+diagnostic (Sonnet only used to *measure*, not in production).
+
+**Decision rule.**
+  - If this scores ≥24/30: code-gen is the bottleneck; every
+    fine-tuning move and judge improvement is justified.
+  - If it scores ≤14/30: orchestration is leaking; no amount of
+    local-model improvement closes the gap. Priority shifts to
+    NH8 (longer pipelines), NH9 (typed contracts), NH11 (persistent
+    state).
+
+**Cost.** ~30 minutes for one A/C harness run with a swapped executor.
+
+**Why it's load-bearing.** Resolves a question we've been guessing at
+for weeks. Every other hypothesis depends on this answer.
+
+### NH7. N-of-K sampling lifts the small local model substantially
+
+**Premise.** We always generate one candidate at temp=0. The literature
+on small open-weight code models consistently shows that
+generate-K-pick-best is a major lift, especially at K=4-8. We've never
+tested it.
+
+**Test.** Generate K candidates at temp=0.5 per step, run all K, pick
+the candidate whose stdout passes the most deterministic structural
+checks (parses, non-empty, line count matches expected, format-string
+match). No retraining required.
+
+**Cost.** K× wall time per step (~1-2 min slowdown per task on the
+30-task suite). Pure-local. Easy to A/B with --n-samples flag.
+
+**Risk.** If the local model is *consistently* wrong (same failure mode
+across all K), N-of-K does not help. NH6's outcome predicts this —
+high orchestration ceiling means N-of-K helps; low ceiling means it
+doesn't.
+
+### NH8. Step-level context augmentation
+
+**Premise.** Each Sigil step today receives only its description and
+the prior stdout via `$0`. The model can't see the *overall* task goal
+(so it can't shape the output for the eventual aggregation) nor the
+*shape* of `$0` (so it has to infer from data). Both are cheap to
+inject from the orchestrator without extra cloud calls.
+
+**Test.** Two sub-experiments:
+  - Prepend "Overall goal: {task['goal']}" to each step's description.
+  - Compute `$0`'s shape annotation server-side from the previous
+    step's stdout ("$0 is 8 lines of `IP COUNT` space-separated") and
+    inject as a prompt prefix. Pure-local string manipulation.
+
+**Cost.** Minutes of wiring, no retrain.
+
+**Why valuable.** Many of the 10 "empty pipeline" failures may be the
+model not knowing what shape to emit. Telling it the downstream
+contract is free information.
+
+### NH9. Soft-pass measurement closes the perceived gap
+
+**Premise.** Path A's 26/30 may partly be because Sonnet's Python
+forgives whitespace/trailing-newline; our `expected_shape` check is
+byte-exact. The local ensemble's 6/30 might be 8-10/30 by a sane
+definition. We've never measured this.
+
+**Test.** Re-score the latest result file with normalized comparison
+(strip trailing whitespace, collapse internal whitespace, optionally
+ignore line ordering when no sort is asked). Report the gap.
+
+**Cost.** Trivial — one Python script over an existing JSON.
+
+**Why it matters.** Tells us if the harness is harder than the task.
+If "soft pass" is meaningfully higher than "exact pass" on Path C but
+not on Path A, our scoring is the bug, not the model.
+
+### NH10. Python-as-control on the same multi-step suite
+
+**Premise.** Strategically important: we've never directly measured
+"what does Sigil buy us at this scale?" If the local model does Python
+multi-step at 18/30 and Sigil at 6/30, the gap is Sigil-specific
+(corpus depth, language idiosyncrasy). If both score similarly, we're
+hitting compositional limits of small models that no language change
+fixes.
+
+**Test.** Same harness, same decomposition, same local model — produce
+Python instead of Sigil. Run with the standard Python interpreter as
+the executor.
+
+**Cost.** ~half day to write the Python-output prompt + executor
+plumbing. Reuses everything else.
+
+**Why this can't be skipped.** It's the only honest answer to "is
+Sigil load-bearing for this project's value claim?". Marc has already
+parked this question once (Python-subset counterfactual in memory);
+NH10 is the empirical answer.
+
+### NH11. Parameterized templates as a parallel architecture
+
+**Premise.** Inspecting our 30 tasks, 25+ decompose into 5-7
+recurring verbs: filter, sort, project, group, count, format,
+sort-take-N. Instead of code-gen per step, expose those as
+parameterized templates and have the local model fill slots.
+
+**Test.** Build a small DSL of templates (each one is a tested,
+working Sigil snippet with named slots). Sonnet (or a local 3B)
+classifies each step as "use template T with slots X" and we
+substitute. Code-gen replaced by structured slot-filling.
+
+**Cost.** 1-2 days. Significant architectural deviation.
+
+**Why interesting.** Specifically addresses the "10 empty pipelines"
+failure mode where the model can't generate any working code.
+Templates can never be empty — they are working code by construction.
+
+**Risk.** Reduces what the local stack does to "match a template,
+fill slots." Loses the agentic-code-generation story. Possibly the
+right outcome anyway: Stream C's strength (29/30 on single-step) plus
+templated multi-step plumbing might be the deployment-ready
+configuration the project is actually pointed at.
+
+### NH12. Persistent state across pipeline steps
+
+**Premise.** Each step today is stateless except for `$0`. Closer to a
+Unix pipe than a REPL. What if intermediate variables persist across
+steps with declared types?
+
+**Test.** Extend the harness with a step-level scope: each step
+declares output names and types, the next step asserts inputs by
+name+type. Reduces ambiguity in description-to-code mapping; makes
+cross-step contracts explicit instead of bytes-on-stdout.
+
+**Cost.** ~2 days, mostly harness wiring + a small Sigil-side
+extension.
+
+**Why valuable.** If NH6 reveals an orchestration ceiling, this is the
+direct fix.
+
+### NH13. Coverage gap analysis on the corpus
+
+**Premise.** We've been seeding the corpus reactively (failure
+appears → seed added). A structural gap analysis (what verb × data-shape
+combinations are under-represented relative to the failure set?) might
+reveal a class of patterns we've never trained on.
+
+**Test.** Tag each failed task by (verb_set, data_shape). Tag each
+corpus example similarly. Compute residual: which (verb_set, data_shape)
+cells have many failures and few training examples?
+
+**Cost.** Pure data work, no GPU. Half-day with the right tagging
+heuristic.
+
+**Why this might be in the residual.** It would explain why retraining
+keeps yielding small lifts: we keep adding the *examples* of failures
+we observe, not the *coverage classes* we lack.
+
+### NH14. Self-critique with the same local model (no new judge)
+
+**Premise.** The 3B step-judge runs on a *different* model than the
+generator. Self-critique is a known lift: same model, second pass,
+"grade your own output." Cheaper than a separate judge (no extra model
+loaded), might catch errors that match the model's own competence
+distribution.
+
+**Test.** After generation, re-prompt the *same* sigil model with
+"here is your output for this step; does it match the description?"
+If it self-flags NO, retry once. Compare lift to the 3B judge alone.
+
+**Cost.** Zero extra VRAM. Wall-time impact = 1 extra model call per
+step.
+
+**Why interesting.** If self-critique converges to similar lift as the
+3B judge, we eliminate the judge model entirely and simplify the
+deployment.
+
+**Risk.** Self-critique has the same blind spots that produced the
+wrong code. Empirically often weaker than cross-model critique.
+
+### NH15. Larger local judge or generator
+
+**Premise.** We picked qwen2.5-coder:3b for the judge based on
+"smallest plausible model that does shape comparison." Same logic for
+the generator picked 7B. We've never measured: does the
+qwen-sigil-v7:7b → 14B (codestral or similar fine-tune) jump matter
+on multi-step?
+
+**Test.** Drop-in swap to a 14B-tier fine-tuned base. Re-run A/B/C.
+Compare wall time, VRAM, lift.
+
+**Cost.** Already have phi-sigil-v2:14b sitting unused. Could repeat
+for codestral if we run a fresh fine-tune.
+
+**Why we under-tested.** NH1 measured *base* reach in 14B+ (codestral
+22B was dominated). We never re-tested with the *Sigil-fine-tuned*
+14B as the primary in production after the harness fixes (Phase 25
+moves) landed.
+
+---
+
+### Sequencing for Part V
+
+The diagnostic value of **NH6** is unique — it determines which of
+the others are even worth doing.
+
+  1. **NH9** (1 hour) — soft-pass instrument. Cheap baseline normalization.
+  2. **NH6** (30 min) — orientation test. Decides everything else.
+  3. **Branch A (NH6 says code-gen):** NH7 (N-of-K), NH8 (context aug),
+     NH13 (corpus gap analysis), NH14 (self-critique).
+  4. **Branch B (NH6 says orchestration):** NH8, NH11 (templates),
+     NH12 (persistent state). Stop fine-tuning.
+  5. **NH10 in parallel** with whichever branch — strategically
+     load-bearing for the project narrative regardless of outcome.
