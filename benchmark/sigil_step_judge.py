@@ -48,102 +48,129 @@ JUDGE_SYSTEM = """You judge whether a single data-transform step produced
 the right SHAPE of output. You are NOT checking grammar or syntax — only
 whether the OUTPUT matches what the STEP DESCRIPTION asks for.
 
-Before answering, mentally check these in order:
-  1. If the step says "top N" or "first N" or "N most" — COUNT the output lines.
-     If the count is greater than N, answer NO.
-  2. If the step says "sort descending" — check that the relevant column's
-     values go big -> small as you read down. If they go small -> big or are
-     unordered, answer NO.
-  3. If the step says "sort ascending" — values should go small -> big.
-  4. If the step asks for a computed value (sum, count, total, average, max,
-     min, cumulative) — the output must NOT equal the input. If it does,
-     answer NO.
-  5. If the step says "skip header" — the first line of the output should not
-     look like a header (column names like 'name', 'category', 'amount').
-  6. Otherwise, if the output plausibly matches: answer YES.
+Apply these GENERIC reasoning principles to whatever the step happens to
+be about. The principles are domain-agnostic; the examples below use
+abstract placeholder data so you don't anchor to a particular task.
 
-CRITICAL — do NOT invent constraints:
-  - DUPLICATES are fine unless the step explicitly says "unique",
-    "deduplicate", "distinct", or "remove duplicates". Repeated rows are NOT
-    a problem on their own.
-  - ORDERING is only required when the step says "sort", "order", "ascending",
-    or "descending". Do NOT mark unsorted output as NO if no sort was asked.
-  - Your reason must reference what the OUTPUT actually contains. Never say
-    "output is empty" if it has any non-whitespace characters.
+PRINCIPLES (check in order):
+
+  P1. NUMERIC LIMIT. If the step states a numeric limit (e.g. "top N",
+      "first N", "N most ...", "at most N"), COUNT the output lines.
+      Answer NO when the count exceeds the limit.
+
+  P2. ORDERING. If the step asks for a sort, ORDER, ascending, or
+      descending — verify the relevant column is monotonic in the right
+      direction. Answer NO when it isn't. If the step does NOT mention
+      ordering, never mark unsorted output as wrong.
+
+  P3. TRANSFORMATION HAPPENED. If the step asks for a COMPUTED value
+      (sum, count, total, average, max, min, cumulative, frequency,
+      duration, length, mean, median), the output must differ from the
+      input in a way consistent with that computation. Answer NO when
+      the output equals the input verbatim — that means the transform
+      was not applied.
+
+  P4. FILTERING APPLIED. If the step says "filter", "keep only", "where
+      ...", "matching ...", the output should be a strict subset of the
+      input that satisfies the predicate. Answer NO when output rows
+      visibly violate the predicate.
+
+  P5. STRUCTURAL CHANGE. If the step says "skip header", "drop first
+      line", "remove the header" — the first output line should not look
+      like a header (i.e. should not be the same as the input's first
+      line). If "extract X", "parse X", "select X", verify X is in the
+      output and unrelated material is gone.
+
+  P6. FORMAT MATCH. If the step prescribes a literal format (delimiter,
+      separator, prefix, wrapper, e.g. "comma-separated", "TAB-separated",
+      "as 'KEY VALUE'", "wrap each in <li>...</li>"), spot-check the
+      first row matches that format.
+
+  P7. DEFAULT YES. If none of P1–P6 raise a problem, the output
+      plausibly matches the description: answer YES.
+
+CRITICAL — do NOT invent constraints the description does not state:
+  - "Extract all X" / "Find all X" / "Print every X" means keep all
+    occurrences INCLUDING duplicates. Duplicates are NEVER a P4 violation.
+    Only flag duplicates if the step literally says "unique", "deduplicate",
+    "distinct", "no duplicates", or "remove duplicates".
+  - VALIDITY (e.g. "real" values, semantically valid IPs, well-formed
+    URLs) is fine unless the step says "valid", "well-formed", or gives
+    a constraint. The model is allowed to emit data that the upstream
+    contained.
+  - SUBSEQUENT STEPS are not your concern. Judge only this step against
+    its own description.
+  - Your reason MUST describe what the OUTPUT actually contains. Never
+    say "output is empty" if it has non-whitespace characters.
 
 Reply on ONE line, exactly:
 YES <one-clause reason>
 or
 NO <one-clause reason>
 
-Examples:
+EXAMPLES (synthetic, domain-agnostic):
 
-STEP: Extract all IPv4 dotted-quad addresses
-OUTPUT: 10.0.0.1
-192.168.1.1
-JUDGE: YES looks like dotted quads
+STEP: Extract all FOO tokens from the input
+OUTPUT: foo-1
+foo-2
+foo-1
+JUDGE: YES three FOO tokens; duplicates are fine since step did not ask for unique
 
-STEP: Extract all dotted-quad IPv4 addresses from arg0 using a regex
-OUTPUT: 10.0.0.1
-192.168.1.1
-10.0.0.1
-JUDGE: YES three valid dotted quads, duplicates are fine since step did not ask for unique
+STEP: Print only the top 3 entries
+OUTPUT: aa 100
+bb 80
+cc 60
+dd 40
+ee 20
+JUDGE: NO P1: 5 lines but step asked for top 3
 
-STEP: Print only the top 3 lines
-OUTPUT: a 100
-b 80
-c 60
-d 40
-JUDGE: NO 4 lines present but step asked for top 3
+STEP: Print the running running-total after each value
+INPUT (for context): 7
+2
+5
+OUTPUT: 7
+2
+5
+JUDGE: NO P3: output equals input, the running-total was not applied
 
-STEP: Print only the top 3 lines
-OUTPUT: a 100
-b 80
-c 60
-d 40
-e 20
-f 10
-JUDGE: NO 6 lines present but step asked for top 3
+STEP: Sort lines descending by the WIDGET column (column 2)
+OUTPUT: alpha 5
+beta 25
+gamma 12
+delta 50
+JUDGE: NO P2: column-2 values 5,25,12,50 are not descending
 
-STEP: Print the running cumulative sum after each value
-INPUT (for context, what the step received as $0): 5
-3
-8
-OUTPUT: 5
-3
-8
-JUDGE: NO output equals input, no cumulation applied
+STEP: Sort lines descending by score
+OUTPUT: alpha 50
+gamma 25
+beta 5
+JUDGE: YES P2: column-2 values 50,25,5 are descending
 
-STEP: Sort lines descending by the second whitespace-separated number
-OUTPUT: alpha 5.0
-beta 25.5
-delta 12.3
-epsilon 50.0
-JUDGE: NO column-2 values are 5.0, 25.5, 12.3, 50.0 — not descending
+STEP: Drop the header row and print KEY|VALUE pairs
+OUTPUT: KEY|VALUE
+red|1
+blue|2
+JUDGE: NO P5: first line "KEY|VALUE" is the header that should have been dropped
 
-STEP: Sort lines descending by count
-OUTPUT: spam 50
-ham 30
-foo 10
-JUDGE: YES 50, 30, 10 is descending
+STEP: Drop the header row and print KEY|VALUE pairs
+OUTPUT: red|1
+blue|2
+green|3
+JUDGE: YES P5/P6: header dropped, KEY|VALUE format consistent
 
-STEP: Sort lines descending by the second whitespace-separated number
-OUTPUT: epsilon 50.0
-beta 25.5
-delta 12.3
-alpha 5.0
-JUDGE: YES column-2 values 50.0, 25.5, 12.3, 5.0 are descending
+STEP: Filter lines where the second field is greater than 10
+OUTPUT: alpha 5
+beta 25
+gamma 12
+JUDGE: NO P4: "alpha 5" violates the predicate (5 is not greater than 10)
 
-STEP: Skip the header and print category,amount per row
-OUTPUT: food,12
-rent,800
-JUDGE: YES header removed, format correct
-
-STEP: Skip the header and print category,amount per row
-OUTPUT: category,amount
-food,12
-rent,800
-JUDGE: NO first line is the header, step said skip it"""
+STEP: Compute the sum grouped by the first column, print KEY TOTAL
+INPUT (for context): a 5
+a 3
+b 4
+OUTPUT: a 8
+b 4
+JUDGE: YES P3: per-key totals computed (a=5+3=8, b=4)"""
 
 
 JUDGE_PROMPT = """STEP: {desc}
@@ -211,6 +238,12 @@ def _sort_column_index(desc: str) -> int | None:
         return 3
     if "first" in d and "field" in d:
         return 1
+    m = _re.search(r"\bcolumn\s+(\d+)\b", d)
+    if m:
+        return int(m.group(1))
+    m = _re.search(r"\bcol\s*(\d+)\b", d)
+    if m:
+        return int(m.group(1))
     return None
 
 
@@ -392,9 +425,15 @@ def judge_step(
 # Standalone smoke test (run: python sigil_step_judge.py)
 # ============================================================================
 if __name__ == "__main__":
-    cases = [
+    # Smoke test cases. Two pools:
+    #   IN-DOMAIN: shapes that resemble our agent_tasks corpus (sanity: judge
+    #     still works on what we built it for).
+    #   OUT-OF-DOMAIN: shapes the harness has NEVER seen — different domains
+    #     (chemistry, finance, geocoding, code metrics, log shapes from other
+    #     ecosystems). If the judge generalizes, OOD performance should match
+    #     in-domain. If the judge is overfit to the corpus, OOD will degrade.
+    in_domain = [
         # (description, output, upstream, expected_ok, label)
-        # ---- True YES (legitimate intermediate outputs) ----
         ("Extract all IPv4 dotted-quad addresses",
          "10.0.0.1\n192.168.1.1\n",
          "garbage 10.0.0.1 more 192.168.1.1",
@@ -403,10 +442,6 @@ if __name__ == "__main__":
          "food,12\nrent,800\ntransit,45\n",
          "category,amount\nfood,12\nrent,800\ntransit,45\n",
          True, "header removed, format correct"),
-        ("Count occurrences of each unique IP, print IP and count space-separated",
-         "10.0.0.1 3\n192.168.1.42 5\n",
-         "10.0.0.1\n192.168.1.42\n10.0.0.1\n192.168.1.42\n192.168.1.42\n10.0.0.1\n192.168.1.42\n192.168.1.42\n",
-         True, "valid count output"),
         ("Print only the top 3 lines",
          "a 100\nb 80\nc 60\n",
          "a 100\nb 80\nc 60\nd 40\ne 20\n",
@@ -415,15 +450,6 @@ if __name__ == "__main__":
          "spam 50\nham 30\nfoo 10\n",
          "foo 10\nspam 50\nham 30\n",
          True, "correctly sorted descending"),
-        ("Compute the duration in minutes for each HH:MM-HH:MM range",
-         "60\n45\n30\n",
-         "10:00-11:00\n09:15-10:00\n14:00-14:30\n",
-         True, "looks like minutes per range"),
-        ("Print each row as a Markdown table row | name | value |",
-         "| alpha | 1 |\n| beta | 2 |\n",
-         "name\tvalue\nalpha\t1\nbeta\t2\n",
-         True, "valid markdown rows"),
-        # ---- True NO (caught failures) ----
         ("Print only the top 3 lines",
          "/tmp/a 16384\n/tmp/b 8192\n/tmp/c 4096\n/tmp/d 2048\n/tmp/e 1024\n/tmp/f 512\n",
          "",
@@ -440,22 +466,101 @@ if __name__ == "__main__":
          "category,amount\nfood,12\nrent,800\n",
          "category,amount\nfood,12\nrent,800\n",
          False, "header still present"),
-        ("Count occurrences of each unique IP, print IP and count space-separated",
-         "10.0.0.1\n192.168.1.42\n10.0.0.1\n",
-         "10.0.0.1\n192.168.1.42\n10.0.0.1\n",
-         False, "no count column emitted"),
     ]
+    ood = [
+        # ---- Generalization: shapes/domains not in our corpus ----
+        # Chemistry: extract atomic symbols from a formula
+        ("Extract each element symbol followed by its count from the formula",
+         "C 6\nH 12\nO 6\n",
+         "C6H12O6",
+         True, "OOD chemistry: element/count pairs"),
+        # Finance: filter trades above threshold
+        ("Filter trades with notional value greater than 1000000",
+         "AAPL 1500000\nGOOG 2300000\nMSFT 800000\n",
+         "AAPL 1500000\nGOOG 2300000\nMSFT 800000\nINTC 50000\n",
+         False, "OOD finance: 'MSFT 800000' violates predicate"),
+        # Code metrics: cyclomatic complexity per function, take top 5
+        ("Print the top 5 functions by cyclomatic complexity",
+         "parse 14\nrender 12\nvalidate 11\ndispatch 9\ncache 8\nlookup 6\n",
+         "",
+         False, "OOD code metrics: 6 lines but step asked for top 5"),
+        # Geocoding: latitude/longitude pairs sorted ascending by lat
+        ("Sort entries ascending by latitude (column 2)",
+         "Quito -0.18\nNairobi -1.28\nLima -12.04\nWellington -41.29\n",
+         "",
+         False, "OOD geocoding: not ascending: -0.18, -1.28, ... is descending"),
+        # Geocoding ascending properly
+        ("Sort entries ascending by latitude (column 2)",
+         "Wellington -41.29\nLima -12.04\nNairobi -1.28\nQuito -0.18\n",
+         "",
+         True, "OOD geocoding: correctly ascending"),
+        # Genome: count of each base
+        ("Count each nucleotide base and emit BASE COUNT per line",
+         "A 4\nC 3\nG 2\nT 4\n",
+         "ACGTACGTAACGTAATCGT",
+         True, "OOD genome: per-base counts"),
+        # Genome where transform NOT applied
+        ("Count each nucleotide base and emit BASE COUNT per line",
+         "ACGT\nACGT\nAACGTAATCGT\n",
+         "ACGT\nACGT\nAACGTAATCGT\n",
+         False, "OOD genome: output equals input, no count applied"),
+        # Heisting: emit the SHA hashes from a manifest, no order constraint
+        ("Extract every SHA-256 hash from the manifest",
+         "a3b1c4d5e6f78901234567890abcdef0123456789abcdef0123456789abcdef0\n"
+         "ffeeddccbbaa99887766554433221100ffeeddccbbaa9988776655443322110a\n",
+         "",
+         True, "OOD: 64-hex hashes, no order asked"),
+        # Order NOT asked, output is unsorted — should still be YES
+        ("Extract every SHA-256 hash from the manifest",
+         "ffeeddccbbaa99887766554433221100ffeeddccbbaa9988776655443322110a\n"
+         "a3b1c4d5e6f78901234567890abcdef0123456789abcdef0123456789abcdef0\n",
+         "",
+         True, "OOD: unsorted output where no sort was asked (P2 must not fire)"),
+        # Time-series: trim leading whitespace and parse epoch
+        ("Convert each ISO timestamp to a Unix epoch second integer",
+         "1714521600\n1714525200\n1714528800\n",
+         "2024-05-01T00:00:00Z\n2024-05-01T01:00:00Z\n2024-05-01T02:00:00Z\n",
+         True, "OOD time: epochs computed"),
+        # Time-series transform NOT applied
+        ("Convert each ISO timestamp to a Unix epoch second integer",
+         "2024-05-01T00:00:00Z\n2024-05-01T01:00:00Z\n",
+         "2024-05-01T00:00:00Z\n2024-05-01T01:00:00Z\n",
+         False, "OOD time: output equals input, no conversion"),
+        # Format wrap: wrap each line in <li>...</li>
+        ("Wrap each input line in <li>...</li> tags",
+         "<li>apple</li>\n<li>banana</li>\n<li>cherry</li>\n",
+         "apple\nbanana\ncherry\n",
+         True, "OOD format: HTML li wrap"),
+        # Format wrap NOT applied
+        ("Wrap each input line in <li>...</li> tags",
+         "apple\nbanana\ncherry\n",
+         "apple\nbanana\ncherry\n",
+         False, "OOD format: wrap not applied"),
+        # Empty handling — judge should not flag empty (handled upstream)
+        ("Extract all phone numbers",
+         "",
+         "no phones here",
+         True, "empty stdout passthrough"),
+    ]
+    cases = [(*c, "in-domain") for c in in_domain] + [(*c, "OOD") for c in ood]
     print(f"Running {len(cases)} judge cases against {JUDGE_MODEL}\n")
-    correct = 0
-    for desc, out, upstream, expected, label in cases:
+    correct_in = correct_ood = total_in = total_ood = 0
+    for desc, out, upstream, expected, label, bucket in cases:
         v = judge_step(desc, out, upstream)
-        ok_icon = "+" if (v.ok == expected) else "-"
-        if v.ok == expected:
-            correct += 1
-        print(f"[{ok_icon}] {label}")
+        match = v.ok == expected
+        ok_icon = "+" if match else "-"
+        if bucket == "in-domain":
+            total_in += 1
+            if match:
+                correct_in += 1
+        else:
+            total_ood += 1
+            if match:
+                correct_ood += 1
+        print(f"[{ok_icon}] {bucket:9s} {label}")
         print(f"    desc:    {desc[:80]}")
         print(f"    output:  {repr(out[:80])}")
         print(f"    expect:  {'YES' if expected else 'NO '}    got: {'YES' if v.ok else 'NO '}")
         print(f"    reason:  {v.reason}")
         print()
-    print(f"== {correct}/{len(cases)} judgments matched expectation ==")
+    print(f"== in-domain {correct_in}/{total_in}  |  OOD {correct_ood}/{total_ood} ==")
