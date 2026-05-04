@@ -18,6 +18,39 @@
 > parameters, consumer-GPU-hostable) do agentic-AI tooling work at
 > cloud-quality reliability and reduced cost.
 
+## In plain English
+
+**The problem.** When you ask an AI assistant to do everyday "tooling"
+work — filter a log, reshape a CSV, extract fields with a regex — the
+request usually goes to a cloud model (Claude, GPT, etc.). That's
+expensive at scale, and your data crosses a network boundary you don't
+control. Small AI models that run on your own laptop or desktop GPU
+exist, but at the start of this project they were 30-50% less reliable
+than the cloud ones on exactly this kind of work.
+
+**What we tried.** We hypothesized that the gap wasn't really about
+model size — it was about *language*. Small models trip over Python's
+flexibility (many ways to write the same thing, ambiguous syntax, huge
+standard library). So we designed a new minimal programming language
+called **Sigil**, deliberately shaped to be easy for a small AI to
+write correctly, then taught a 7-billion-parameter open-source model
+to write it by fine-tuning on ~2,300 examples.
+
+**What happened.** For *single-step* tasks ("here's a CSV, give me X"),
+it worked: the local Sigil model matched cloud-quality reliability at
+near-zero marginal cost. For *multi-step* tasks ("plan this, then do
+each step"), it didn't: the local model scored 7/30 vs the cloud's
+26/30 on the same chained pipeline, and the same local model writing
+plain Python instead of Sigil scored 12/30 — meaning most of the
+remaining gap is about *model size*, not *language design*. Inventing
+a brand-new language turned out to be the wrong lever to pull at this
+scale. The privacy argument and a separate "safety by language design"
+idea (capability-typed effects, never built here) survive as the
+genuinely valuable directions for follow-on work.
+
+This README is the project map. The 5,500-word writeup with all the
+numbers and citations is in [`papers/PAPER.md`](papers/PAPER.md).
+
 ## Read this first
 
 **→ [`papers/PAPER.md`](papers/PAPER.md)** — The peer-reviewer-ready
@@ -30,13 +63,13 @@ If you only have time for one document in this repository, read that one.
 
 ## TL;DR
 
-| claim | result |
-|---|---|
-| Single-step tooling delegation to a fine-tuned local 7B-class ensemble reaches cloud parity | **Validated.** Stream C 29/30 (qwen-sigil-v7 + deepseek-sigil ensemble) vs Sonnet 4.6 29-30/30, ~6× cheaper per task, complementary failures (combined cascade 30/30 at <1% cloud cost). |
-| Multi-step composition on the same local stack closes to cloud accuracy | **Refuted.** Best Sigil multi-step Path C: 7/30. The orchestration-ceiling diagnostic showed swapping only the per-step executor to Sonnet lifts the same chained pipeline to 26/30 — the gap is per-step executor capability, not chain design. |
-| A novel syntactic surface (prefix-Lisp) is justified at consumer fine-tuning scale | **Refuted on cost grounds.** Same orchestration with qwen2.5-coder:7b writing Python (no fine-tune): 12/30 (+5 over Sigil at fixed 7B). Scaling the local Python executor to codestral:22b: still 12/30 (no scale benefit in this band). The 19-task gap to cloud decomposes ≈26% language-proximity / ≈74% scale-bound. |
-| Pre-training a foundation model from scratch on a novel surface is feasible at consumer scale | **Refuted on hardware and corpus grounds.** Foundation pre-training requires trillions of tokens (we have 2,323) and ~$50K-5M of cloud GPU time (consumer hardware cannot reach this scale). |
-| Effect-typed safety with capability-restricted IO would be valuable | **Sketched (mammouth U09, 2026-02), never built.** Identified as the strongest unbuilt thesis and the natural direction for follow-on work. |
+| in plain English | technical claim | result |
+|---|---|---|
+| *Can a local 7B model do single-step tooling tasks as reliably as a cloud model?* | Single-step tooling delegation to a fine-tuned local 7B-class ensemble reaches cloud parity | **Validated.** Stream C 29/30 (qwen-sigil-v7 + deepseek-sigil ensemble) vs Sonnet 4.6 29-30/30, near-zero marginal cost on already-running hardware vs $0.0028/task on cloud, complementary failures (combined cascade 30/30 at <1% cloud cost). |
+| *Does that still hold when the task has to be planned and executed in multiple steps?* | Multi-step composition on the same local stack closes to cloud accuracy | **Refuted.** Best Sigil multi-step Path C: 7/30. The orchestration-ceiling diagnostic showed swapping only the per-step executor to Sonnet lifts the same chained pipeline to 26/30 — the gap is per-step executor capability, not chain design. |
+| *Was inventing a custom AI-friendly language worth it vs just using Python?* | A novel syntactic surface (prefix-Lisp) is justified at consumer fine-tuning scale | **Refuted on cost grounds.** Same orchestration with qwen2.5-coder:7b writing Python (no fine-tune): 12/30 (+5 over Sigil at fixed 7B). Scaling the local Python executor to codestral:22b: still 12/30 (no scale benefit in this band). The 19-task gap to cloud decomposes ≈26% language-proximity / ≈74% scale-bound. |
+| *Could a small team train an AI from scratch on a custom language?* | Pre-training a foundation model from scratch on a novel surface is feasible at consumer scale | **Refuted on hardware and corpus grounds.** Foundation pre-training requires trillions of tokens (we have 2,323) and ~$50K-5M of cloud GPU time (consumer hardware cannot reach this scale). |
+| *Would a language that prevents AI agents from doing dangerous things by design be valuable?* | Effect-typed safety with capability-restricted IO would be valuable | **Sketched (mammouth U09, 2026-02), never built.** Identified as the strongest unbuilt thesis and the natural direction for follow-on work. |
 
 ## What this repository contains
 

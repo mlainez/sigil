@@ -4,6 +4,75 @@
 
 ---
 
+## Plain-English summary
+
+*If you're already familiar with local-LLM tooling research, skip to
+the [Abstract](#abstract).*
+
+When you ask an AI assistant to do a small data-wrangling task — filter
+a log file, reshape a CSV, extract fields with a regex — the request
+usually goes to a cloud model. That's expensive at scale, and your
+data leaves your machine. Open-source models small enough to run on a
+consumer GPU exist, but they were noticeably less reliable than cloud
+models on this kind of work.
+
+We tested whether the *language* the small model was writing was the
+real bottleneck. We designed a minimal, deliberately AI-friendly
+programming language called **Sigil** — fewer ways to write the same
+thing, simple syntax, predictable runtime — and fine-tuned a 7-billion-
+parameter open-source model to write it.
+
+The headline findings:
+
+1. **For single-step tasks**, the local Sigil model matched cloud
+   reliability (29/30 vs 29-30/30) at near-zero marginal cost on
+   already-running hardware. *This is the durable result.*
+2. **For multi-step tasks** that need planning across steps, the local
+   model scored 7/30 vs 26/30 with a cloud model handling each step.
+   The same local model writing plain Python (no custom language)
+   scored 12/30. So most of the gap is *model size*, not *language
+   design* — inventing a custom language was not the right lever at
+   this scale.
+3. **The privacy story** (your data never leaves your machine) and a
+   separate **"safety by language design"** idea (preventing agents
+   from deleting files or making network calls *by construction*, not
+   by promise) survive as the genuinely valuable directions. Neither
+   requires a custom language; both port to a Python subset.
+
+The paper below makes all of this rigorous: 16 named hypotheses, 30-task
+benchmark suites, citations to result JSON files in the repo for every
+number quoted.
+
+### Mini-glossary
+
+- **Local LLM** — a language model that runs on your own computer (vs
+  a cloud API like Claude or GPT).
+- **Fine-tuning** — taking a pre-trained model and continuing to train
+  it on a small custom dataset to specialize it.
+- **QLoRA** — a memory-efficient fine-tuning technique that fits on
+  consumer GPUs by quantizing the base model and only training small
+  adapter weights.
+- **Sigil** — the custom language we designed. S-expression / Lisp-like
+  surface, ~5K-line OCaml interpreter, single-layer.
+- **Stream C** — our 30-task single-step tooling benchmark (one prompt,
+  one program, one output).
+- **A/B/C harness, Path A/B/C** — our 30-task multi-step benchmark.
+  Path A = cloud-only end-to-end. Path B = cloud plans, cloud executes
+  each step. Path C = cloud plans, *local* model executes each step.
+  Path C is the "can local replace cloud step-by-step?" question.
+- **NH-numbers (NH1-NH16)** — internal labels for follow-up
+  hypotheses tested after the original H1-H9. Cited by name throughout
+  this paper to anchor each claim to a specific experiment.
+- **Ensemble** — running two models in series (one falls back to the
+  other on failure) to combine their complementary strengths.
+- **Effect-typed safety** — a language design where every function
+  declares what kinds of side-effects it can have (read file, write
+  file, network), and the type checker rejects any program that uses
+  an effect it didn't declare. The unbuilt direction we recommend for
+  follow-on work.
+
+---
+
 ## Abstract
 
 We designed and implemented Sigil, a deliberately AI-shaped programming
