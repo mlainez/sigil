@@ -44,9 +44,9 @@ low cost, with effect-typed safety as the eventual differentiator.
 
 **What's next:**
 
-The successor project (planned in a sibling repo, `post-sigil/PROJECT_PLAN.md`)
-takes the unbuilt safety thesis as its headline product, on a Python-subset
-host (Starlark) where the pre-training tax is paid down to nearly zero.
+The follow-on project takes the unbuilt safety thesis as its headline
+product, on a Python-subset host (Starlark) where the pre-training tax
+is paid down to nearly zero.
 The value claim sharpens from "AI-native language" to **"agents can't
 delete production databases by construction"** — declarative authorization
 policies enforced by the language itself, not by the agent runtime's
@@ -161,8 +161,12 @@ to absorb the misuse. We did this for:
 - Bare language-header stripping (`python\n<code>`)
 - Paren auto-balancer for ±1-2 closing-paren slips
 
-This methodology has a discoverable trigger pattern (CONCLUSIONS.md CH12)
-and ports cleanly to any future language target.
+This methodology has a discoverable trigger pattern — when a fine-tuned
+model produces non-target-language idioms under composition pressure
+(e.g. drifting to Clojure-style `(let [x v] ...)` brackets once given a
+correct shape hint), the cheapest fix is parser-level absorption of the
+alternate form rather than fighting it at prompt or training time. It
+ports cleanly to any future language target.
 
 ---
 
@@ -266,10 +270,25 @@ Concrete things the next project inherits without redoing:
    - 3-epoch retrain on a corpus with synthesis-metadata artifacts overfit;
      cap retrains at 2 epochs or use early-stopping on held-out validation.
 4. **Architectural patterns**:
-   - Typed plan structure > free-text decomposition (CH11).
-   - Capability-aware orchestrator routing (CH14).
-   - Per-task model specialization is real — the python-coder ensemble
-     measures different competences across same-size open coders.
+   - **Typed plan structure beats free-text decomposition.** Prompt-
+     engineering shape annotation onto a free-text JSON entangles with
+     the orchestrator's planning behavior — the *form* of the
+     annotation changes how many steps Sonnet emits and at what
+     granularity. A typed plan with explicit input/output schemas per
+     step decouples shape information from planning behavior.
+   - **Capability-aware orchestrator-executor calibration is a
+     first-class design variable.** A weaker local executor can't keep
+     up with a strong orchestrator's decomposition (NH16: Opus
+     over-decomposed and broke the executor); with a strong executor
+     (NH6: Sonnet), the same orchestration runs cleanly. The
+     orchestrator must "know" how capable the executor is and shape
+     its plans accordingly (e.g. pass the executor's profile in the
+     system prompt, or use a bounded plan schema with capped step
+     count and length-bounded descriptions).
+   - **Per-task model specialization is real** — the python-coder
+     ensemble measures different competences across same-size open
+     coders (qwen-coder-7B and codestral-22B passed disjoint task
+     subsets despite the same total).
 
 Each of these was paid for once. The next project starts with them
 already validated.
@@ -303,9 +322,8 @@ Why this is a stronger bet than Sigil's original framing:
   language work is reduced to *capability extension*, not invention.
 - The ~26% language-proximity lift NH10 measured is preserved.
 
-The new project's design plan lives in a sibling repo (`post-sigil/`),
-under `CONCLUSIONS.md` and `PROJECT_PLAN.md`, which close Sigil's
-strategic notes and open the next project's seed plan.
+The follow-on project's design plan and strategic conclusions are
+maintained separately from this repository.
 
 ---
 
@@ -336,4 +354,4 @@ this approach plateau."
 
 ---
 
-*Closed 2026-05-04. Next project planning continues in `post-sigil/`.*
+*Closed 2026-05-04. Follow-on project planning continues separately.*

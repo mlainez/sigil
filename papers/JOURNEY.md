@@ -2125,12 +2125,13 @@ Three iterations:
     single optional field in the JSON schema, with no other prompt
     changes.
 
-The lesson is structural and captured as CH11 in `post-sigil/
-CONCLUSIONS.md`: prompt-engineering shape annotation onto a free-text
-JSON entangles with Sonnet's planning behavior. Cleaner architecture
-for the next project would be a *typed* plan structure where input/
-output shapes are first-class fields, not free-text annotations on top
-of an existing schema.
+The lesson is structural: prompt-engineering shape annotation onto a
+free-text JSON entangles with Sonnet's planning behavior — the *form*
+of the annotation changes how many steps Sonnet emits and at what
+granularity. Cleaner architecture for any future project would be a
+*typed* plan structure where input/output shapes are first-class
+fields, not free-text annotations on top of an existing schema. That
+decouples shape information from planning behavior.
 
 Side finding: when given a correct shape hint, the qwen-sigil-v7 model
 drifts to Clojure-style `(let [x v y v] body)` bracket syntax that
@@ -2161,5 +2162,5 @@ first if you only have time for one document.
 The hypothesis-by-hypothesis empirical record is in
 [`HYPOTHESES.md`](./HYPOTHESES.md). The successor project on
 agent-safe local tooling (capability-typed Python subset, runtime
-verifier, declarative authorization policies) is planned in a sibling
-`post-sigil/` repo.
+verifier, declarative authorization policies) is planned separately
+from this repository.

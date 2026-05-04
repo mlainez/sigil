@@ -31,7 +31,8 @@
 >
 > The project's **strategic conclusions and successor-project plan** live
 > in [`papers/SIGIL_RESULT.md`](../papers/SIGIL_RESULT.md) and a sibling
-> `post-sigil/` repo. The body of this plan below is preserved as
+> follow-on project (maintained separately). The body of this plan
+> below is preserved as
 > archaeological context for what the research roadmap looked like at
 > v2.1 (one day before close).
 
@@ -757,6 +758,6 @@ are deliberately left unwritten — the multi-step verdict (NH6/NH10
 showed the local executor is the bottleneck, not the routing) made
 them no longer load-bearing for the project's value claim.
 
-The successor project (sibling `post-sigil/` repo) inherits the
+The follow-on project (maintained separately) inherits the
 methodology and harness wholesale; the language-design work is
 deliberately not inherited.

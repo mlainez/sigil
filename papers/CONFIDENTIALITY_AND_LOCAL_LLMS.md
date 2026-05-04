@@ -4,11 +4,10 @@
 > motivating prose for the local-tooling thesis and remains correct on
 > the confidentiality-risk argument. The mitigation it proposed —
 > "local DSL with capability-restricted IO" — is exactly what the
-> successor project (`post-sigil/PROJECT_PLAN.md` in a sibling repo)
-> makes concrete with policy-enforced safety on a Starlark host. See
-> [`SIGIL_RESULT.md`](./SIGIL_RESULT.md) for what the Sigil empirical
-> work validated and refuted; this paper still holds as the
-> *why*-the-project-exists framing.
+> follow-on project plan makes concrete with policy-enforced safety on
+> a Starlark host. See [`SIGIL_RESULT.md`](./SIGIL_RESULT.md) for what
+> the Sigil empirical work validated and refuted; this paper still
+> holds as the *why*-the-project-exists framing.
 
 **Status:** working draft, 2026-04-30
 **Scope:** confidentiality risk specifically in *host-tooling-script

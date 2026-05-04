@@ -21,7 +21,8 @@ hypothesis should update the verdict here.
 > document is the comprehensive empirical record. For the headline
 > close-out narrative and reader-ready synthesis, see
 > [`SIGIL_RESULT.md`](./SIGIL_RESULT.md). For the successor project
-> design built on these findings, see the sibling `post-sigil/` repo.
+> design built on these findings, see the follow-on project plan
+> maintained separately.
 >
 > Final hypothesis status:
 > - **Validated:** H1 (Sigil reach), H4 (RAG scales), H7 (meet-halfway), NH2-A & NH2-B (validators), NH6 (orchestration is fine; executor is the gap), partial NH10 (Python at fixed 7B = +5).
@@ -578,10 +579,11 @@ distribution); the gap to Sonnet's executor performance shows up
 specifically on the *Sonnet-decomposed step shapes* — descriptions
 written by an orchestrator that assumes a Sonnet-quality executor.
 
-The right inference is the one already captured in `post-sigil/
-CONCLUSIONS.md` C1+CH13: pre-training proximity dominates, and a
-Python-subset executor (qwen2.5-coder:7b at Python, no Sigil
-fine-tuning) would close most of this gap by being on-distribution
+The right inference: **pre-training proximity dominates** at fixed
+local model scale. A Python-subset executor (qwen2.5-coder:7b writing
+Python, no Sigil fine-tuning) is closer to the model's native
+distribution than any AI-native language we can teach with finite
+fine-tuning, and would close most of this gap by being on-distribution
 for whatever step shape Sonnet writes.
 
 Result file: `abc_NH6_sonnet_executor_30task.json`. Cost: $0.086
@@ -790,12 +792,12 @@ the harder composition cases (`csv_lookup_join`, `log_count_by_hour`,
 `wc_top_words`, `tsv_to_markdown`, etc.) — Sonnet's per-step Python is
 materially more sophisticated than a 7B can write.
 
-**Refined strategic conclusion (post-NH10):** the C1 thesis in
-`post-sigil/CONCLUSIONS.md` is empirically supported but more
-carefully: a Python-subset (Starlark-shape) executor closes ~26% of
-the cloud gap at zero additional model cost. To close the rest, you
-need executor scale. A deployment-ready hybrid stack therefore looks
-like:
+**Refined strategic conclusion (post-NH10):** the pre-training-tax
+thesis is empirically supported but more carefully than the simple
+"language proximity dominates" framing. A Python-subset (Starlark-
+shape) executor closes ~26% of the cloud gap at zero additional model
+cost. To close the rest, you need executor scale. A deployment-ready
+hybrid stack therefore looks like:
 
   - Cloud orchestrator (cheap once per task)
   - Mid-size local executor (14B+ on a Python subset) for the
@@ -842,9 +844,8 @@ deploy with cloud-scale executors (or a hybrid that delegates only
 the easy single-step shapes locally and escalates the hard ones), or
 you accept ~12/30 on this kind of benchmark.
 
-Updated conclusion in `post-sigil/CONCLUSIONS.md` C1: the
-language-vs-scale attribution is reframed — language proximity gains
-~5 tasks at fixed 7B size, but scaling 7B → 22B locally gains zero on
+Updated language-vs-scale attribution: language proximity gains ~5
+tasks at fixed 7B size, but scaling 7B → 22B locally gains zero on
 this benchmark. The scale axis is *non-monotonic in this band* and
 requires a much larger jump to manifest.
 
@@ -894,8 +895,10 @@ stacking.
 **Strategic implication.** Reinforces the project's close-out narrative:
 simple model-stacking tricks do not pay back the multi-step ceiling
 gap. The real lifters are either capability-scale (cloud / 70B+ local)
-or architectural change (the safety / capability-typing project the
-post-sigil plan describes).
+or architectural change — pivoting from "AI-native language" to
+"agent-safe language" with capability-typed effects, runtime
+verifier, and policy-enforced authorization, on a Python-subset host
+where the pre-training tax is paid down to nearly zero.
 
 Result file: `abc_NH10c_python_ensemble_30task.json`.
 
@@ -1042,11 +1045,16 @@ ceiling is X" claim in Sigil's history was implicitly conditioned on
 "...given Sonnet-quality decomposition." If Opus changes Path C
 substantially, every prior multi-step verdict needs revisiting.
 
-This is also a generalizable principle for the next project (captured as
-CH13 in `post-sigil/CONCLUSIONS.md`): orchestrator-quality investment
-can pay back at the executor, which has implications for how local-
-deployment stacks are budgeted (cheaper executor + better orchestrator
-may dominate stronger executor + cheaper orchestrator).
+This is also a generalizable principle: **orchestrator-quality
+investment can pay back at the executor.** A weaker local executor
+struggles under a strong orchestrator's decomposition (NH16 below
+shows this directly: Opus over-decomposed and broke the limited
+executor); with a strong executor (NH6 above), the same orchestration
+runs cleanly. Implication for hybrid-stack budgeting: there's a
+capability-matching sweet spot — orchestrator and executor must be
+calibrated to each other, and beyond that point more orchestrator
+capability is wasted or counterproductive (the LLM analogue of the
+"teacher-student gap" in knowledge distillation).
 
 **Result (2026-05-04, REFUTED in this form).** Ran A/B/C with
 `--cloud-model claude-opus-4-7` on the v3 stack (judge + shape
