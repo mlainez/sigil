@@ -32,7 +32,9 @@ from pathlib import Path
 
 REPO = Path(__file__).resolve().parent.parent.parent
 sys.path.insert(0, str(REPO / "tools" / "agent_harness"))
+sys.path.insert(0, str(REPO / "benchmark"))
 from sigil_mcp_server import generate_and_run
+from sigil_step_judge import judge_step
 
 # Anthropic Sonnet pricing as of 2026-04 (per million tokens)
 SONNET_INPUT_PER_M = 3.0
@@ -358,6 +360,26 @@ def path_c_chained_hybrid(task: dict) -> dict:
                           f"each computed value.")
             result = generate_and_run(retry_desc, cur_input, expected_shape)
 
+        # NH2 Tier B: semantic step-judge. After we have a non-empty
+        # intermediate stdout, ask the 3B judge whether it matches the
+        # step's described shape. If NO, retry once with the reason as
+        # a hint. Final-step shape is already checked against expected,
+        # so we only judge intermediates. Skipped when the upstream
+        # retry already exhausted the budget (avoids stacking retries).
+        judge_verdict = None
+        judge_retry_used = False
+        if (not is_final
+                and result["ok"]
+                and result["stdout"].strip()
+                and intermediate_retry_attempts == 0):
+            judge_verdict = judge_step(desc, result["stdout"], cur_input)
+            if not judge_verdict.ok:
+                judge_retry_used = True
+                retry_desc = (f"{desc} Your previous output was rejected: "
+                              f"{judge_verdict.reason}. Re-emit a corrected "
+                              f"output that matches the step's shape exactly.")
+                result = generate_and_run(retry_desc, cur_input, expected_shape)
+
         step_results.append({
             "idx": idx,
             "description": desc[:120],
@@ -368,6 +390,9 @@ def path_c_chained_hybrid(task: dict) -> dict:
             "model_used": result["model_used"],
             "fallback_used": result["fallback_used"],
             "wall_seconds": result["wall_seconds"],
+            "judge_ok": (judge_verdict.ok if judge_verdict else None),
+            "judge_reason": (judge_verdict.reason if judge_verdict else None),
+            "judge_retry_used": judge_retry_used,
         })
         if is_final:
             final_stdout = result["stdout"]
@@ -423,7 +448,18 @@ def main():
                          "decomposes the task into 1-3 single-step Sigil "
                          "calls, results pipe through. Tests whether "
                          "single-step delegation lifts multi-step accuracy.")
+    ap.add_argument("--no-step-judge", action="store_true",
+                    help="Disable the NH2 Tier B step-judge in path_c. "
+                         "Use to ablate the judge's contribution.")
     args = ap.parse_args()
+    if args.no_step_judge:
+        # Monkey-patch the judge to always pass (ablation).
+        import sigil_step_judge as _sj
+        _sj.judge_step = lambda *a, **kw: _sj.JudgeVerdict(
+            ok=True, reason="judge disabled", raw="")
+        # Also rebind the symbol imported into this module.
+        global judge_step
+        judge_step = _sj.judge_step
 
     tasks = json.loads(Path(args.tasks).read_text())
     print(f"Loaded {len(tasks)} agentic tasks\n")
