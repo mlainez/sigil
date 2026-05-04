@@ -819,6 +819,46 @@ can pay back at the executor, which has implications for how local-
 deployment stacks are budgeted (cheaper executor + better orchestrator
 may dominate stronger executor + cheaper orchestrator).
 
+**Result (2026-05-04, REFUTED in this form).** Ran A/B/C with
+`--cloud-model claude-opus-4-7` on the v3 stack (judge + shape
+annotation), Path A cached.
+
+| metric | Sonnet (v3) | Opus | delta |
+|---|---|---|---|
+| Path A | 26/30 (cached) | 26/30 | — |
+| Path B hybrid | 5/30 | 1/30 | **−4** |
+| Path C chained | 7/30 | 4/30 | **−3** |
+| avg n_steps (C) | 1.70 | 2.03 | +0.33 |
+| empty pipeline fails | 21 | 23 | +2 |
+| B+C cloud cost | $0.16 | $1.07 | 6.6× |
+
+The hypothesis was that a stronger orchestrator would produce
+decompositions whose steps land closer to the local executor's
+competence distribution. The data says the opposite: Opus *over-
+decomposes* (avg n_steps 1.70 → 2.03, the same pattern that broke
+NH8 v1) and emits more verbose step descriptions that the 7B local
+model cannot track. Path B's collapse from 5 → 1 is especially
+striking — Opus reshaped the "decide + run + report" orchestration
+enough to break the executor on tasks Sonnet handled cleanly.
+
+**Refined conclusion.** Stronger orchestrators do not automatically
+help limited executors and can actively hurt them when the
+orchestrator's natural verbosity / decomposition density exceeds what
+the executor can track. There's a sweet spot in orchestrator-executor
+capability matching; beyond that, more orchestrator capability is
+wasted or counterproductive — analogous to the "teacher-student gap"
+problem in ML knowledge distillation.
+
+For the next project: budget orchestrator capability to *match* the
+executor, not exceed it. If you want to take advantage of a stronger
+orchestrator, also enforce a structural constraint on its output (e.g.
+a typed plan schema, capped step count, length-bounded descriptions).
+Free-text decompositions inherit the orchestrator's style — and Opus's
+style is more elaborate than the executor can handle.
+
+Result file: `abc_v7_judge_shapeann_OPUS_30task.json`. Cost (this
+single experiment): $1.07 incremental over the cached Path A.
+
 ---
 
 ### Sequencing for Part V
