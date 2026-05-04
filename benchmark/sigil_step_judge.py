@@ -62,6 +62,15 @@ Before answering, mentally check these in order:
      look like a header (column names like 'name', 'category', 'amount').
   6. Otherwise, if the output plausibly matches: answer YES.
 
+CRITICAL — do NOT invent constraints:
+  - DUPLICATES are fine unless the step explicitly says "unique",
+    "deduplicate", "distinct", or "remove duplicates". Repeated rows are NOT
+    a problem on their own.
+  - ORDERING is only required when the step says "sort", "order", "ascending",
+    or "descending". Do NOT mark unsorted output as NO if no sort was asked.
+  - Your reason must reference what the OUTPUT actually contains. Never say
+    "output is empty" if it has any non-whitespace characters.
+
 Reply on ONE line, exactly:
 YES <one-clause reason>
 or
@@ -73,6 +82,12 @@ STEP: Extract all IPv4 dotted-quad addresses
 OUTPUT: 10.0.0.1
 192.168.1.1
 JUDGE: YES looks like dotted quads
+
+STEP: Extract all dotted-quad IPv4 addresses from arg0 using a regex
+OUTPUT: 10.0.0.1
+192.168.1.1
+10.0.0.1
+JUDGE: YES three valid dotted quads, duplicates are fine since step did not ask for unique
 
 STEP: Print only the top 3 lines
 OUTPUT: a 100
