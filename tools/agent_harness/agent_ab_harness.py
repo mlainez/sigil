@@ -149,6 +149,99 @@ def path_a_cloud_only(task: dict) -> dict:
 
 
 # ============================================================================
+# NH6: Sonnet-as-step-executor — drop-in alternative to local Sigil for path_c
+# ============================================================================
+# This is a *diagnostic* path, not a deployment path. It tests whether the
+# multi-step ceiling is the local executor's capability (Path C currently
+# 7/30) or the orchestration recipe itself. Sonnet decomposes as today,
+# but each step's executor is Sonnet writing inline Python instead of
+# the local Sigil model.
+#
+#   - If Path C with Sonnet executor scores ~26/30 (Path A's level),
+#     the local executor is the bottleneck. Every fine-tuning move is
+#     justified.
+#   - If it scores significantly below Path A (~10-15/30), the chained
+#     decomposition itself adds friction even with a strong executor —
+#     the orchestration recipe is the limiting factor regardless of
+#     who executes.
+#
+# The Sonnet stage costs cloud tokens per step, so this is a measurement
+# tool only.
+
+STEP_PYTHON_SYSTEM = (
+    "You are a step-executor in a chained data-processing pipeline. For "
+    "the given step description, write a Python 3 program that reads "
+    "sys.argv[1] (the previous step's stdout, or the user-supplied input "
+    "for the first step) and emits the result of THIS STEP ONLY to stdout. "
+    "Do NOT try to solve the whole task — only the step you are given. "
+    "Output ONLY raw Python code, no markdown, no prose."
+)
+STEP_PYTHON_PROMPT = (
+    "Step description: {desc}\n\n"
+    "When called with the input string as sys.argv[1], your program's "
+    "stdout will be passed to the next step (or returned to the user "
+    "if this is the final step). Use sys.stdout.write(...) for output."
+)
+
+
+def sonnet_execute_step(desc: str, cur_input: str, expected_shape: str = "") -> dict:
+    """Drop-in alternative to generate_and_run (NH6 diagnostic).
+
+    Same dict shape as generate_and_run: {ok, stdout, stderr, code,
+    attempts, model_used, fallback_used, wall_seconds}. expected_shape is
+    accepted for signature compatibility but ignored (Sonnet doesn't get
+    a retry loop here — one-shot per step).
+    """
+    t0 = time.time()
+    prompt = STEP_PYTHON_PROMPT.format(desc=desc)
+    r = claude_call(prompt, STEP_PYTHON_SYSTEM)
+    if not r["ok"]:
+        return {"ok": False, "stdout": "", "stderr": r.get("raw_err", ""),
+                "code": "", "attempts": 1, "model_used": CLOUD_MODEL,
+                "fallback_used": False,
+                "wall_seconds": round(time.time() - t0, 2),
+                "tokens_in": 0, "tokens_out": 0, "cost_usd": 0.0}
+
+    code = r["text"].strip()
+    for fence in ["```python", "```py", "```"]:
+        if code.startswith(fence):
+            code = code[len(fence):].lstrip(); break
+    if code.endswith("```"):
+        code = code[:-3].rstrip()
+
+    import tempfile
+    f = tempfile.NamedTemporaryFile(mode="w", suffix=".py", delete=False)
+    f.write(code); f.close()
+    try:
+        run = subprocess.run(
+            ["python3", f.name, cur_input],
+            capture_output=True, text=True, timeout=15,
+        )
+        stdout, stderr = run.stdout, run.stderr
+        ok = (run.returncode == 0)
+    except subprocess.TimeoutExpired:
+        stdout, stderr, ok = "", "TIMEOUT", False
+    finally:
+        os.unlink(f.name)
+
+    return {
+        "ok": ok, "stdout": stdout, "stderr": stderr[:240], "code": code,
+        "attempts": 1, "model_used": CLOUD_MODEL, "fallback_used": False,
+        "wall_seconds": round(time.time() - t0, 2),
+        "tokens_in": r["prompt_tokens"],
+        "tokens_out": r["completion_tokens"],
+        "cost_usd": round(r["cost_usd"], 6),
+    }
+
+
+# Module-level executor selector. Defaults to local Sigil ensemble.
+# --executor sonnet swaps in the cloud step-executor above for path_c.
+def _default_executor(desc, cur_input, expected_shape):
+    return generate_and_run(desc, cur_input, expected_shape)
+STEP_EXECUTOR = _default_executor
+
+
+# ============================================================================
 # Path B: hybrid (Sonnet plans + delegates to local Sigil via MCP)
 # ============================================================================
 
@@ -367,7 +460,7 @@ def path_c_chained_hybrid(task: dict) -> dict:
             desc = f"INPUT SHAPE: {input_shape}\n\n{raw_desc}"
         else:
             desc = raw_desc
-        result = generate_and_run(desc, cur_input, expected_shape)
+        result = STEP_EXECUTOR(desc, cur_input, expected_shape)
         intermediate_retry_attempts = 0
         # Intermediate-step empty-output retry: up to 2 extra attempts
         # if stdout is empty. Skip retry on the final step (its retries
@@ -381,7 +474,7 @@ def path_c_chained_hybrid(task: dict) -> dict:
                           f"that's almost certainly a pipeline bug. Make sure "
                           f"to (split $0 \"\\n\") and emit (println ...) for "
                           f"each computed value.")
-            result = generate_and_run(retry_desc, cur_input, expected_shape)
+            result = STEP_EXECUTOR(retry_desc, cur_input, expected_shape)
 
         # NH2 Tier B: semantic step-judge. After we have a non-empty
         # intermediate stdout, ask the 3B judge whether it matches the
@@ -401,7 +494,7 @@ def path_c_chained_hybrid(task: dict) -> dict:
                 retry_desc = (f"{desc} Your previous output was rejected: "
                               f"{judge_verdict.reason}. Re-emit a corrected "
                               f"output that matches the step's shape exactly.")
-                result = generate_and_run(retry_desc, cur_input, expected_shape)
+                result = STEP_EXECUTOR(retry_desc, cur_input, expected_shape)
 
         step_results.append({
             "idx": idx,
@@ -493,9 +586,19 @@ def main():
                          "Pass claude-opus-4-7 to test whether a stronger "
                          "orchestrator/decomposer changes the chained-pipeline "
                          "ceiling — at 5x the price.")
+    ap.add_argument("--executor", default="sigil", choices=("sigil", "sonnet"),
+                    help="Step executor for Path C. 'sigil' (default) uses "
+                         "the local Sigil ensemble; 'sonnet' uses Sonnet "
+                         "writing inline Python per step. The 'sonnet' option "
+                         "is the NH6 diagnostic — tests whether the multi-step "
+                         "ceiling is local-executor-bound or orchestration-bound. "
+                         "It costs cloud tokens per step; not for production.")
     args = ap.parse_args()
-    global CLOUD_MODEL
+    global CLOUD_MODEL, STEP_EXECUTOR
     CLOUD_MODEL = args.cloud_model
+    if args.executor == "sonnet":
+        STEP_EXECUTOR = sonnet_execute_step
+        print(f"  [diagnostic] Path C executor: SONNET ({CLOUD_MODEL})")
     if args.no_step_judge:
         # Monkey-patch the judge to always pass (ablation).
         import sigil_step_judge as _sj

@@ -529,6 +529,53 @@ diagnostic (Sonnet only used to *measure*, not in production).
 **Why it's load-bearing.** Resolves a question we've been guessing at
 for weeks. Every other hypothesis depends on this answer.
 
+**Result (2026-05-04, CONFIRMED — orchestration is NOT the bottleneck;
+the local executor is).** Built `sonnet_execute_step` as a drop-in
+alternative to `generate_and_run` in `path_c_chained_hybrid` (gated by
+`--executor sonnet` flag). Same decomposition, same harness, same
+shape annotation, same judge — only the per-step executor swapped.
+
+| metric | sigil-executor (v3) | sonnet-executor (NH6) | delta |
+|---|---|---|---|
+| Path A (cached) | 26/30 | 26/30 | — |
+| Path B (cached) | 5/30 | 5/30 | — |
+| **Path C** | **7/30** | **26/30** | **+19** |
+| avg n_steps | 1.70 | 1.70 | — |
+
+The 19-task lift comes from swapping ONLY the executor. Same task
+descriptions reach each path; the orchestration is healthy. With a
+strong executor, the chained pipeline matches Path A's single-shot
+performance (26/30 ≡ 26/30) — the chained recipe is not lossy.
+
+Concretely: every prior "Path C = X/30" claim in Sigil's history was
+a *local-executor capability* statement, not an orchestration limit.
+The multi-step plateau is a 7B local Sigil model gap to Sonnet on
+per-step Sigil generation under the conditions Sonnet's decomposition
+creates. It is not a chained-pipeline artifact.
+
+**This also retroactively explains NH16:** Opus regressed because it
+over-decomposed (avg n_steps 2.03), forcing the executor through more
+steps where the gap manifests; even with the best orchestrator, the
+executor is what's bottlenecking the chain.
+
+**Decision-rule outcome (per the original NH6 spec):** Path C
+sonnet-executor is ≥24/30 (specifically 26/30), so "code-gen is the
+bottleneck; every fine-tuning move is justified" applies. But with a
+critical caveat: fine-tuning has been the wrong axis. The local model
+is at 23-29/30 on *Stream-C-shape* single-step tasks (its training
+distribution); the gap to Sonnet's executor performance shows up
+specifically on the *Sonnet-decomposed step shapes* — descriptions
+written by an orchestrator that assumes a Sonnet-quality executor.
+
+The right inference is the one already captured in `post-sigil/
+CONCLUSIONS.md` C1+CH13: pre-training proximity dominates, and a
+Python-subset executor (qwen2.5-coder:7b at Python, no Sigil
+fine-tuning) would close most of this gap by being on-distribution
+for whatever step shape Sonnet writes.
+
+Result file: `abc_NH6_sonnet_executor_30task.json`. Cost: $0.086
+incremental over the cached A/B (the per-step Sonnet calls).
+
 ### NH7. N-of-K sampling lifts the small local model substantially
 
 **Premise.** We always generate one candidate at temp=0. The literature
