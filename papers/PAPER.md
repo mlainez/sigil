@@ -20,8 +20,10 @@ multi-step suites, and tested 16 named hypotheses (H1-H9, NH1-NH16).
 
 The single-step delegation result is positive and load-bearing: the
 local Sigil ensemble reaches **29/30** on the Stream C single-step
-tooling benchmark, parity with Claude Sonnet 4.6 (29-30/30), at ≈6×
-lower per-task cost. The multi-step composition result is negative
+tooling benchmark, parity with Claude Sonnet 4.6 (29-30/30), with
+local inference at near-zero marginal cost on already-running
+hardware vs $0.0028/task on cloud. The multi-step composition result
+is negative
 and decisive: the best local Sigil configuration scored **7/30** on
 the chained 30-task suite (`abc_v7_deepseekV1_judge_30task.json`),
 and the orchestration-ceiling diagnostic — replacing only the
@@ -384,11 +386,24 @@ delegation story.
 
 Energy and cost (from `benchmark/measure_gpu_power.py` calibration on
 RX 7800 XT, 1 Hz `amdgpu_top` sampling): production-config
-workload-attributable 0.367 Wh/task; total wall ~218 s for 30 tasks;
-$0.000 per task vs $0.0028 (Sonnet) for the same suite. The savings
-claim — *delegate per-step tooling to local at near-zero marginal
-cost without sacrificing accuracy* — is empirically defensible at the
-single-step granularity.
+workload-attributable 0.367 Wh/task; total wall ~218 s for 30 tasks.
+At a flat $0.15/kWh electricity rate this is ~$0.000055/task in
+marginal energy cost (rounded to $0.000 at the 3-decimal precision
+the harness reports). For comparison, cloud Sonnet on the same suite
+costs $0.0028/task in API charges. We follow `papers/STREAM_C_RESULT.md`'s
+honest framing: local is reported as $0.00 on marginal-only
+accounting (the GPU is already running, electricity is already paid
+via a flat bill, and the hardware is sunk cost); cloud is real
+per-call API spend.
+
+The cost story is **not** by itself a strong economic argument: at
+10,000 tasks/year the local stack saves about $28/year vs cloud,
+amortized against several hundred dollars of GPU hardware. The
+deployment claim that *is* strong on this single-step suite is
+*delegate per-step tooling to local at near-zero marginal cost
+without sacrificing accuracy*, while the *confidentiality* argument
+(`papers/CONFIDENTIALITY_AND_LOCAL_LLMS.md`) is the more compelling
+one for users where data-residency matters.
 
 **The single-step delegation thesis is validated.**
 
